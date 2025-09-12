@@ -91,7 +91,12 @@ export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallSte
   return step.type === ConversationRoundStepType.toolCall;
 };
 
-// reasoning step
+export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
+  return {
+    type: ConversationRoundStepType.reasoning,
+    ...reasoningStepWithResult,
+  };
+};
 
 export interface ReasoningStepData {
   /** plain text reasoning content */
@@ -117,6 +122,8 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
  * related to this particular round.
  */
 export interface ConversationRound {
+  /** unique id for this round */
+  id: string;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */

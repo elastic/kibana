@@ -46,6 +46,8 @@ import {
   starterPromptTitle4,
   starterPromptIcon4,
   starterPromptPrompt4,
+  costSavingsInsightPart1,
+  costSavingsInsightPart2,
 } from './prompts';
 
 export const promptGroupId = {
@@ -61,6 +63,8 @@ export const promptGroupId = {
 export const promptDictionary = {
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
+  costSavingsInsightPart1: `costSavingsInsightPart1`,
+  costSavingsInsightPart2: `costSavingsInsightPart2`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -391,6 +395,20 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
       default: ALERT_SUMMARY_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart1,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart1,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart2,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart2,
     },
   },
   {
