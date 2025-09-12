@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
