@@ -457,5 +457,4 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       agentType: this.agentType,
     };
   }
-
 }

@@ -367,7 +367,12 @@ export function registerResponseActionRoutes(
  */
 function cancelActionHandler(
   endpointContext: EndpointAppContext
-): RequestHandler<unknown, unknown, CancelActionRequestBody, SecuritySolutionRequestHandlerContext> {
+): RequestHandler<
+  unknown,
+  unknown,
+  CancelActionRequestBody,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<unknown, unknown, CancelActionRequestBody>,

@@ -1872,17 +1872,18 @@ describe('MS Defender response actions client', () => {
             'Unable to cancel action [target-action-id-123]. Action has already been cancelled.'
           );
 
-          expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith({
-            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { action_id: ['target-action-id-123'] } },
-                ],
+          expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith(
+            {
+              index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+              query: {
+                bool: {
+                  filter: [{ terms: { action_id: ['target-action-id-123'] } }],
+                },
               },
+              size: 10000,
             },
-            size: 10000,
-          }, { ignore: [404] });
+            { ignore: [404] }
+          );
         });
 
         it('should allow cancel request when target action has no cancel records', async () => {

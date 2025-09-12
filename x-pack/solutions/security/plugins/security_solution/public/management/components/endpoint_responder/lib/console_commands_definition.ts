@@ -860,7 +860,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
-  const microsoftDefenderEndpointCancelEnabled = featureFlags.microsoftDefenderEndpointCancelEnabled;
+  const microsoftDefenderEndpointCancelEnabled =
+    featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (

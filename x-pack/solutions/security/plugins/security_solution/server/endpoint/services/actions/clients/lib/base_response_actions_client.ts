@@ -1053,7 +1053,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('cancel');
   }
 
-
   public async getCustomScripts(
     options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
   ): Promise<ResponseActionScriptsApiResponse> {
