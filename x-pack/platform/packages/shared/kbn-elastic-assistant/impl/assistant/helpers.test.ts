@@ -67,7 +67,7 @@ describe('helpers', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return the connector if there is only one connector available', () => {
+    it('should return the first connector if there is only one connector available', () => {
       const connectors: AIConnector[] = [defaultConnector];
       const result = getDefaultConnector(connectors, settings);
 
