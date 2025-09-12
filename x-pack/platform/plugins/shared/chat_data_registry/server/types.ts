@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from './services';
+import type { DataTypeDefinition } from './data_catalog';
 
 export interface ChatDataRegistryPluginSetup {
   register: (dataType: DataTypeDefinition) => void;

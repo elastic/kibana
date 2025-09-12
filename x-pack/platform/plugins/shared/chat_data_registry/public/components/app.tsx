@@ -5,56 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { EuiButton, EuiHorizontalRule, EuiPageTemplate, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME } from '../../common';
 
 interface ChatDataRegistryAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
 }
 
-export const ChatDataRegistryApp = ({
-  basename,
-  notifications,
-  http,
-  navigation,
-}: ChatDataRegistryAppDeps) => {
-  // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
-
-  const onClickHandler = () => {
-    // Use the core http service to make a response to the server API.
-    http.get('/api/chat_data_registry/example').then((res) => {
-      setTimestamp(res.time);
-      // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(
-        i18n.translate('chatDataRegistry.dataUpdated', {
-          defaultMessage: 'Data updated',
-        })
-      );
-    });
-  };
-
-  // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
+export const ChatDataRegistryApp = ({ basename, notifications, http }: ChatDataRegistryAppDeps) => {
   return (
     <Router basename={basename}>
       <I18nProvider>
         <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-          />
           <EuiPageTemplate restrictWidth="1000px">
             <EuiPageTemplate.Header>
               <EuiTitle size="l">
@@ -67,39 +36,7 @@ export const ChatDataRegistryApp = ({
                 </h1>
               </EuiTitle>
             </EuiPageTemplate.Header>
-            <EuiPageTemplate.Section>
-              <EuiTitle>
-                <h2>
-                  <FormattedMessage
-                    id="chatDataRegistry.congratulationsTitle"
-                    defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
-                  />
-                </h2>
-              </EuiTitle>
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="chatDataRegistry.content"
-                    defaultMessage="Look through the generated code and check out the plugin development documentation."
-                  />
-                </p>
-                <EuiHorizontalRule />
-                <p>
-                  <FormattedMessage
-                    id="chatDataRegistry.timestampText"
-                    defaultMessage="Last timestamp: {time}"
-                    values={{ time: timestamp ? timestamp : 'Unknown' }}
-                  />
-                </p>
-                <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                  <FormattedMessage
-                    id="chatDataRegistry.buttonText"
-                    defaultMessage="Get data"
-                    ignoreTag
-                  />
-                </EuiButton>
-              </EuiText>
-            </EuiPageTemplate.Section>
+            <EuiPageTemplate.Section />
           </EuiPageTemplate>
         </>
       </I18nProvider>
