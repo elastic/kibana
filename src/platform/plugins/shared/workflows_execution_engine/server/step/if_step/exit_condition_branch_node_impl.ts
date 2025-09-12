@@ -36,7 +36,7 @@ export class ExitConditionBranchNodeImpl implements StepImplementation {
 
     // After the branch finishes, we go to the end of If condition
     const exitIfNode = successors[0];
-    this.wfExecutionRuntimeManager.goToStep(exitIfNode.id);
+    this.wfExecutionRuntimeManager.navigateToNode(exitIfNode.id);
     this.wfExecutionRuntimeManager.exitScope();
   }
 }

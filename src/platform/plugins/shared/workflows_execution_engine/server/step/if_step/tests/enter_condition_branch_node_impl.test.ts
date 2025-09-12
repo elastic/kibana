@@ -28,7 +28,7 @@ describe('EnterConditionBranchNodeImpl', () => {
 
   it('should go to next step', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 
   it('should enter true scope for enter-then-branch', async () => {

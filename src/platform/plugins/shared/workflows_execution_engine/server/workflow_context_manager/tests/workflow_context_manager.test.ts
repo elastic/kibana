@@ -16,7 +16,7 @@ describe('WorkflowContextManager', () => {
   function createTestContainer(workflow: WorkflowYaml) {
     const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
     const workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
-    workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
+    workflowExecutionRuntime.getCurrentNode = jest.fn().mockReturnValue({
       id: 'testStep',
     });
     workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
@@ -136,7 +136,7 @@ describe('WorkflowContextManager', () => {
 
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionRuntime.getCurrentNode = jest.fn().mockReturnValue({
         id: 'testStep',
       });
       testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
@@ -191,7 +191,7 @@ describe('WorkflowContextManager', () => {
 
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
-      testContainer.workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionRuntime.getCurrentNode = jest.fn().mockReturnValue({
         id: 'testStep',
       });
       testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
@@ -282,7 +282,7 @@ describe('WorkflowContextManager', () => {
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
 
-      testContainer.workflowExecutionRuntime.getStepResult = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionRuntime.getCurrentStepResult = jest.fn().mockReturnValue({
         output: 'test output',
         error: null,
       });
@@ -293,10 +293,10 @@ describe('WorkflowContextManager', () => {
         workflowDefinition: workflow,
         stack: ['enterForeach_outerForeachStep', 'enterForeach_innerForeachStep'],
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionRuntime.getCurrentStep = jest
+      testContainer.workflowExecutionRuntime.getCurrentNode = jest
         .fn()
         .mockReturnValue({ id: 'innerLogStep' });
-      testContainer.workflowExecutionRuntime.getStepState = jest
+      testContainer.workflowExecutionRuntime.getCurrentStepState = jest
         .fn()
         .mockImplementation((nodeId) => {
           if (nodeId === 'enterForeach_outerForeachStep') {
@@ -332,10 +332,10 @@ describe('WorkflowContextManager', () => {
         workflowDefinition: workflow,
         stack: [] as string[],
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionRuntime.getCurrentStep = jest
+      testContainer.workflowExecutionRuntime.getCurrentNode = jest
         .fn()
         .mockReturnValue({ id: 'lastLogStep' });
-      testContainer.workflowExecutionRuntime.getStepState = jest.fn();
+      testContainer.workflowExecutionRuntime.getCurrentStepState = jest.fn();
 
       const context = testContainer.underTest.getContext();
       expect(context.foreach).toBeUndefined();
@@ -386,7 +386,7 @@ describe('WorkflowContextManager', () => {
     beforeEach(() => {
       testContainer = createTestContainer(workflow);
 
-      testContainer.workflowExecutionRuntime.getStepResult = jest.fn().mockReturnValue({
+      testContainer.workflowExecutionRuntime.getCurrentStepResult = jest.fn().mockReturnValue({
         output: 'test output',
         error: null,
       });
@@ -394,10 +394,10 @@ describe('WorkflowContextManager', () => {
         workflowDefinition: workflow,
         stack: [] as string[],
       } as EsWorkflowExecution);
-      testContainer.workflowExecutionRuntime.getCurrentStep = jest
+      testContainer.workflowExecutionRuntime.getCurrentNode = jest
         .fn()
         .mockReturnValue({ id: 'thirdLogStep' });
-      testContainer.workflowExecutionRuntime.getStepState = jest
+      testContainer.workflowExecutionRuntime.getCurrentStepState = jest
         .fn()
         .mockImplementation((nodeId) => {
           switch (nodeId) {
@@ -412,7 +412,7 @@ describe('WorkflowContextManager', () => {
           }
           return undefined;
         });
-      testContainer.workflowExecutionRuntime.getStepResult = jest
+      testContainer.workflowExecutionRuntime.getCurrentStepResult = jest
         .fn()
         .mockImplementation((nodeId) => {
           switch (nodeId) {

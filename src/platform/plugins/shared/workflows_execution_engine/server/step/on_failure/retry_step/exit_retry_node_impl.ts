@@ -22,11 +22,11 @@ export class ExitRetryNodeImpl implements StepImplementation {
   public async run(): Promise<void> {
     this.workflowRuntime.exitScope();
     await this.workflowRuntime.finishStep(this.step.startNodeId);
-    const retryState = this.workflowRuntime.getStepState(this.step.startNodeId)!;
+    const retryState = this.workflowRuntime.getCurrentStepState()!;
     this.workflowLogger.logDebug(
       `Exiting retry step ${this.step.startNodeId} after ${retryState.attempt} attempts.`
     );
-    await this.workflowRuntime.setStepState(this.step.startNodeId, undefined);
-    this.workflowRuntime.goToNextStep();
+    await this.workflowRuntime.setCurrentStepState(undefined);
+    this.workflowRuntime.navigateToNextNode();
   }
 }

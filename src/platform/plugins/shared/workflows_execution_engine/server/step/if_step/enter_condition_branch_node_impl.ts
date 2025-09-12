@@ -23,6 +23,6 @@ export class EnterConditionBranchNodeImpl implements StepImplementation {
     } else {
       this.wfExecutionRuntimeManager.enterScope('false');
     }
-    this.wfExecutionRuntimeManager.goToNextStep();
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

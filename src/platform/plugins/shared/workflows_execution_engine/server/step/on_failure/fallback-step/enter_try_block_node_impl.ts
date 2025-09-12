@@ -18,8 +18,8 @@ export class EnterTryBlockNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep(this.node.id);
+    await this.wfExecutionRuntimeManager.startStep();
     this.wfExecutionRuntimeManager.enterScope();
-    this.wfExecutionRuntimeManager.goToStep(this.node.enterNormalPathNodeId);
+    this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 }

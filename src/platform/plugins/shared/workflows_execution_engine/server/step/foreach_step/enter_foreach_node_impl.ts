@@ -15,14 +15,14 @@ import type { WorkflowContextManager } from '../../workflow_context_manager/work
 
 export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatcher {
   constructor(
-    private step: EnterForeachNode,
+    private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private contextManager: WorkflowContextManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    if (!this.wfExecutionRuntimeManager.getStepState(this.step.id)) {
+    if (!this.wfExecutionRuntimeManager.getCurrentStepState()) {
       await this.enterForeach();
     } else {
       await this.advanceIteration();
@@ -30,34 +30,34 @@ export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatche
   }
 
   async catchError(): Promise<void> {
-    await this.wfExecutionRuntimeManager.setStepState(this.step.id, undefined);
+    await this.wfExecutionRuntimeManager.setCurrentStepState(undefined);
   }
 
   private async enterForeach(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
-    await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
+    await this.wfExecutionRuntimeManager.startStep();
     const evaluatedItems = this.getItems();
 
     if (evaluatedItems.length === 0) {
       this.workflowLogger.logDebug(
-        `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`,
+        `Foreach step "${this.node.id}" has no items to iterate over. Skipping execution.`,
         {
-          workflow: { step_id: this.step.id },
+          workflow: { step_id: this.node.id },
         }
       );
-      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+      await this.wfExecutionRuntimeManager.setCurrentStepState({
         items: [],
         total: 0,
       });
-      await this.wfExecutionRuntimeManager.finishStep(this.step.id);
-      this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
+      await this.wfExecutionRuntimeManager.finishStep();
+      this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
       return;
     }
 
     this.workflowLogger.logDebug(
-      `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`,
+      `Foreach step "${this.node.id}" will iterate over ${evaluatedItems.length} items.`,
       {
-        workflow: { step_id: this.step.id },
+        workflow: { step_id: this.node.id },
       }
     );
 
@@ -73,12 +73,12 @@ export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatche
 
     // Enter a new scope for the first iteration
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
-    await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
-    this.wfExecutionRuntimeManager.goToNextStep();
+    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private async advanceIteration(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id)!;
+    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState()!;
     // Update items and index if they have changed
     const items = foreachState.items;
     const index = foreachState.index + 1;
@@ -92,27 +92,27 @@ export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatche
     };
     // Enter a new scope for the new iteration
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
-    await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
-    this.wfExecutionRuntimeManager.goToNextStep();
+    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private getItems(): any[] {
     let items: any[] = [];
 
-    if (!this.step.configuration.foreach) {
+    if (!this.node.configuration.foreach) {
       throw new Error('Foreach configuration is required');
     }
 
     try {
-      items = JSON.parse(this.step.configuration.foreach);
+      items = JSON.parse(this.node.configuration.foreach);
     } catch (error) {
       const { value, pathExists } = this.contextManager.readContextPath(
-        this.step.configuration.foreach
+        this.node.configuration.foreach
       );
 
       if (!pathExists) {
         throw new Error(
-          `Foreach configuration path "${this.step.configuration.foreach}" does not exist in the workflow context.`
+          `Foreach configuration path "${this.node.configuration.foreach}" does not exist in the workflow context.`
         );
       }
 

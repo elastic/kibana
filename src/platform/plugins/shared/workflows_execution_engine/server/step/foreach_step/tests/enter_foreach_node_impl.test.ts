@@ -105,8 +105,8 @@ describe('EnterForeachNodeImpl', () => {
         step.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
         await underTest.run();
 
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
           items: ['item1', 'item2', 'item3'],
           item: 'item1',
           index: 0,
@@ -123,8 +123,8 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
 
         expect(readContextPath).toHaveBeenCalledWith('steps.testStep.array');
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
           items: ['item1', 'item2', 'item3'],
           item: 'item1',
           index: 0,
@@ -141,8 +141,8 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
 
         expect(readContextPath).toHaveBeenCalledWith('steps.testStep.array');
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
           items: ['item1', 'item2', 'item3'],
           item: 'item1',
           index: 0,
@@ -167,7 +167,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should set empty items and total to 0', async () => {
         await underTest.run();
-        expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
           items: [],
           total: 0,
         });
@@ -180,7 +180,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should go to exit node', async () => {
         await underTest.run();
-        expect(workflowExecutionRuntimeManager.goToStep).toHaveBeenCalledWith('exitNode');
+        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitNode');
       });
 
       it('should log debug message', async () => {
@@ -196,7 +196,7 @@ describe('EnterForeachNodeImpl', () => {
       await underTest.run();
 
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionRuntimeManager.goToNextStep).toHaveBeenCalled();
+      expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
     });
 
     it('should throw an error if foreach configuration is not provided', async () => {
@@ -204,7 +204,7 @@ describe('EnterForeachNodeImpl', () => {
 
       await expect(underTest.run()).rejects.toThrowError('Foreach configuration is required');
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionRuntimeManager.goToNextStep).not.toHaveBeenCalled();
+      expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
     });
 
     it('should throw an error if foreach configuration is not an array', async () => {
@@ -212,7 +212,7 @@ describe('EnterForeachNodeImpl', () => {
 
       await expect(underTest.run()).rejects.toThrowError('Foreach configuration must be an array');
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionRuntimeManager.goToNextStep).not.toHaveBeenCalled();
+      expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
     });
   });
 
@@ -247,8 +247,8 @@ describe('EnterForeachNodeImpl', () => {
     it('should initialize foreach state', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(step.id, {
+      expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
         items: ['item1', 'item2', 'item3'],
         item: 'item2',
         index: 1,

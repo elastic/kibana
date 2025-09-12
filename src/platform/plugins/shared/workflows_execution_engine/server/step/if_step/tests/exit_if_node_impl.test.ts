@@ -43,6 +43,6 @@ describe('ExitIfNodeImpl', () => {
 
   it('should go to the next step', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 });

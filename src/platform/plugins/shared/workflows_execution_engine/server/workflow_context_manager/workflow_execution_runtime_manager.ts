@@ -43,7 +43,10 @@ interface WorkflowExecutionRuntimeManagerInit {
  * and uses topological sorting to determine execution order.
  */
 export class WorkflowExecutionRuntimeManager {
-  private currentStepIndex: number = -1;
+  private currentNodeIndex: number = -1;
+  private currentNodeIndexChange: number | null = null;
+  private stack: string[] = null;
+
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
@@ -90,49 +93,55 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentStepExecutionId(): string {
-    const currentStep = this.getCurrentStep();
-    return this.buildStepExecutionId(currentStep.id);
+    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+    const node = this.getCurrentNode();
+    const stepId = node.stepId;
+    const path: string[] = [];
+
+    for (const part of workflowExecution.stack) {
+      // If the provided stepId is part of the stack, use read path until its position and stop
+      if (part === stepId) {
+        break;
+      }
+
+      path.push(part);
+    }
+
+    return [workflowExecution.id, ...path, stepId].join('_');
   }
 
-  // TODO: To rename to getCurrentNode and use proper type
-  public getCurrentStep(): GraphNode {
-    const currentStepId = this.topologicalOrder[this.currentStepIndex];
+  public getCurrentNode(): GraphNode {
+    const currentStepId = this.topologicalOrder[this.currentNodeIndex];
     return this.workflowGraph.getNode(currentStepId);
   }
 
-  // TODO: To rename to goToNode
-  public goToStep(stepId: string): void {
-    this.currentStepIndex = this.topologicalOrder.findIndex((id) => id === stepId);
+  public navigateToNode(nodeId: string): void {
+    this.currentNodeIndexChange = this.topologicalOrder.findIndex((id) => id === nodeId);
   }
 
-  // TODO: To rename to goToNextNode
-  public goToNextStep(): void {
-    if (this.currentStepIndex < this.topologicalOrder.length - 1) {
-      this.currentStepIndex++;
+  public navigateToNextNode(): void {
+    if (this.currentNodeIndex < this.topologicalOrder.length - 1) {
+      this.currentNodeIndexChange = this.currentNodeIndex + 1;
       return;
     }
 
-    this.currentStepIndex = -1;
+    this.currentNodeIndexChange = -1;
+  }
+
+  public getCurrentNodeScope(): string[] {
+    return [...this.workflowExecution.stack];
   }
 
   public enterScope(scopeId?: string): void {
     if (!scopeId) {
-      scopeId = this.getCurrentStep().id;
+      scopeId = this.getCurrentNode().id;
     }
 
-    const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
-    stack.push(scopeId as string);
-    this.workflowExecutionState.updateWorkflowExecution({
-      stack,
-    });
+    this.stack.push(scopeId as string);
   }
 
   public exitScope(): void {
-    const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
-    stack.pop();
-    this.workflowExecutionState.updateWorkflowExecution({
-      stack,
-    });
+    this.stack.pop();
   }
 
   public setWorkflowError(error: Error | string | undefined): void {
@@ -141,8 +150,11 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public getStepResult(stepId: string): RunStepResult | undefined {
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+  public getCurrentStepResult(): RunStepResult | undefined {
+    const currentNode = this.getCurrentNode();
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
+      currentNode.stepId
+    );
 
     if (!latestStepExecution) {
       return undefined;
@@ -154,8 +166,8 @@ export class WorkflowExecutionRuntimeManager {
     };
   }
 
-  public async setStepResult(result: RunStepResult): Promise<void> {
-    const currentStep = this.getCurrentStep();
+  public async setCurrentStepResult(result: RunStepResult): Promise<void> {
+    const currentNode = this.getCurrentNode();
 
     if (result.error) {
       this.setWorkflowError(result.error);
@@ -163,29 +175,32 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
-      stepId: currentStep.id,
-      path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
+      stepId: currentNode.stepId,
+      path: this.getCurrentNodeScope(),
       input: result.input,
       output: result.output,
       error: result.error,
     });
   }
 
-  public getStepState(stepId: string): Record<string, any> | undefined {
-    return this.workflowExecutionState.getLatestStepExecution(stepId)?.state;
+  public getCurrentStepState(): Record<string, any> | undefined {
+    const stepId = this.getCurrentNode().stepId;
+    return this.workflowExecutionState.getLatestStepExecution(stepId)!.state;
   }
 
-  public async setStepState(stepId: string, state: Record<string, any> | undefined): Promise<void> {
+  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
+    const stepId = this.getCurrentNode().stepId;
     this.workflowExecutionState.upsertStep({
-      id: this.buildStepExecutionId(stepId),
-      path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
+      id: this.getCurrentStepExecutionId(),
       stepId,
+      path: this.getCurrentNodeScope(),
       state,
     });
   }
 
-  public async startStep(stepId: string): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+  public async startStep(): Promise<void> {
+    const currentNode = this.getCurrentNode();
+    const stepId = this.getCurrentNode().stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}`,
@@ -193,22 +208,20 @@ export class WorkflowExecutionRuntimeManager {
         subtype: 'step',
         labels: {
           workflow_step_id: stepId,
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
           trace_id: this.getTraceId(), // Ensure consistent traceId
           service_name: 'workflow-engine',
         },
       },
       async () => {
-        const nodeId = stepId;
-        const node = this.workflowGraph.getNode(nodeId);
         const stepStartedAt = new Date();
 
         const stepExecution = {
-          id: this.buildStepExecutionId(stepId),
-          stepId: nodeId,
-          stepType: node.stepType,
-          path: [...(workflowExecution.stack || [])],
+          id: this.getCurrentStepExecutionId(),
+          stepId: currentNode.stepId,
+          stepType: currentNode.stepType,
+          path: this.getCurrentNodeScope(),
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
           status: ExecutionStatus.RUNNING,
           startedAt: stepStartedAt.toISOString(),
@@ -221,8 +234,8 @@ export class WorkflowExecutionRuntimeManager {
     );
   }
 
-  public async finishStep(stepId: string): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+  public async finishStep(): Promise<void> {
+    const stepId = this.getCurrentNode().stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}.complete`,
@@ -230,8 +243,8 @@ export class WorkflowExecutionRuntimeManager {
         subtype: 'step_completion',
         labels: {
           workflow_step_id: stepId,
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
           trace_id: this.getTraceId(),
           service_name: 'workflow-engine',
         },
@@ -250,9 +263,7 @@ export class WorkflowExecutionRuntimeManager {
         const executionTimeMs =
           completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
         const stepExecutionUpdate = {
-          id: this.buildStepExecutionId(stepId),
-          path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
-          stepId: startedStepExecution.stepId,
+          id: this.getCurrentStepExecutionId(),
           status: stepStatus,
           completedAt: completedAt.toISOString(),
           executionTimeMs,
@@ -267,8 +278,8 @@ export class WorkflowExecutionRuntimeManager {
     );
   }
 
-  public async failStep(stepId: string, error: Error | string): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+  public async failStep(error: Error | string): Promise<void> {
+    const stepId = this.getCurrentNode().stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}.fail`,
@@ -276,8 +287,8 @@ export class WorkflowExecutionRuntimeManager {
         subtype: 'step_failure',
         labels: {
           workflow_step_id: stepId,
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
           trace_id: this.getTraceId(),
           service_name: 'workflow-engine',
         },
@@ -286,9 +297,7 @@ export class WorkflowExecutionRuntimeManager {
         // if there is a last step execution, fail it
         // if not, create a new step execution with fail
         const stepExecutionUpdate = {
-          id: this.buildStepExecutionId(stepId),
-          path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
-          stepId,
+          id: this.getCurrentStepExecutionId(),
           status: ExecutionStatus.FAILED,
           output: null,
           error: String(error),
@@ -300,9 +309,9 @@ export class WorkflowExecutionRuntimeManager {
     );
   }
 
-  public async setWaitStep(stepId: string): Promise<void> {
+  public async setWaitStep(x: string): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-
+    const stepId = this.getCurrentNode().stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}.delayed`,
@@ -318,9 +327,7 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         this.workflowExecutionState.upsertStep({
-          id: this.buildStepExecutionId(stepId),
-          path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
-          stepId,
+          id: this.getCurrentStepExecutionId(),
           status: ExecutionStatus.WAITING,
         });
 
@@ -470,16 +477,16 @@ export class WorkflowExecutionRuntimeManager {
       );
     }
 
-    this.currentStepIndex = 0;
+    this.currentNodeIndex = 0;
 
-    if (this.currentStepIndex >= this.topologicalOrder.length) {
+    if (this.currentNodeIndex >= this.topologicalOrder.length) {
       throw new Error('Workflow has no steps to execute');
     }
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       stack: [],
       status: ExecutionStatus.RUNNING,
-      currentNodeId: this.topologicalOrder[this.currentStepIndex],
+      currentNodeId: this.topologicalOrder[this.currentNodeIndex],
       startedAt: new Date().toISOString(),
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
@@ -489,7 +496,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public async resume(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    this.currentStepIndex = this.topologicalOrder.findIndex(
+    this.currentNodeIndex = this.topologicalOrder.findIndex(
       (nodeId) => nodeId === workflowExecution.currentNodeId
     );
     await this.workflowExecutionState.load();
@@ -500,11 +507,14 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async saveState(): Promise<void> {
+    this.currentNodeIndex = this.currentNodeIndexChange as number;
+    this.stack = this.buildStack();
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.getCurrentStep()?.id,
+      currentNodeId: this.getCurrentNode()?.id,
+      stack: this.stack,
     };
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const currentStep = this.getCurrentStep();
+    const currentStep = this.getCurrentNode();
 
     if (!currentStep) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
@@ -553,21 +563,14 @@ export class WorkflowExecutionRuntimeManager {
     await this.workflowExecutionState.flush();
   }
 
-  /** Since we have execution stack, we can build a unique execution ID for each step based on it */
-  public buildStepExecutionId(stepId: string): string {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const path: string[] = [];
-
-    for (const part of workflowExecution.stack) {
-      // If the provided stepId is part of the stack, use read path until its position and stop
-      if (part === stepId) {
-        break;
-      }
-
-      path.push(part);
+  private buildStack(): string[] {
+    const currentNode = this.getCurrentNode();
+    const stack = [...this.stack];
+    if (!stack.includes(currentNode.id)) {
+      stack.push(currentNode.id);
     }
 
-    return [workflowExecution.id, ...path, stepId].join('_');
+    return stack;
   }
 
   private logWorkflowStart(): void {

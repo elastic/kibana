@@ -23,12 +23,12 @@ describe('ExitTryBlockNodeImpl', () => {
       enterNodeId: 'onFailureZone1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowRuntime.getStepState = jest.fn();
+    workflowRuntime.getCurrentStepState = jest.fn();
     workflowRuntime.failStep = jest.fn();
     workflowRuntime.setWorkflowError = jest.fn();
     workflowRuntime.finishStep = jest.fn();
     workflowRuntime.exitScope = jest.fn();
-    workflowRuntime.goToNextStep = jest.fn();
+    workflowRuntime.navigateToNextNode = jest.fn();
 
     underTest = new ExitTryBlockNodeImpl(step, workflowRuntime);
   });
@@ -38,14 +38,14 @@ describe('ExitTryBlockNodeImpl', () => {
       const mockError = new Error('Test error');
 
       beforeEach(() => {
-        workflowRuntime.getStepState = jest.fn().mockReturnValue({
+        workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({
           error: mockError,
         });
       });
 
       it('should get step state for enter node', async () => {
         await underTest.run();
-        expect(workflowRuntime.getStepState).toHaveBeenCalledWith(step.enterNodeId);
+        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith(step.enterNodeId);
       });
 
       it('should fail the step with the stored error', async () => {
@@ -70,18 +70,18 @@ describe('ExitTryBlockNodeImpl', () => {
 
       it('should not go to next step when there is an error', async () => {
         await underTest.run();
-        expect(workflowRuntime.goToNextStep).not.toHaveBeenCalled();
+        expect(workflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
       });
     });
 
     describe('when there is no error in step state', () => {
       beforeEach(() => {
-        workflowRuntime.getStepState = jest.fn().mockReturnValue({});
+        workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({});
       });
 
       it('should get step state for enter node', async () => {
         await underTest.run();
-        expect(workflowRuntime.getStepState).toHaveBeenCalledWith(step.enterNodeId);
+        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith(step.enterNodeId);
       });
 
       it('should finish the step', async () => {
@@ -96,7 +96,7 @@ describe('ExitTryBlockNodeImpl', () => {
 
       it('should go to next step', async () => {
         await underTest.run();
-        expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+        expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
       });
 
       it('should not fail step when there is no error', async () => {
@@ -112,14 +112,14 @@ describe('ExitTryBlockNodeImpl', () => {
 
     describe('when step state is null/undefined', () => {
       beforeEach(() => {
-        workflowRuntime.getStepState = jest.fn().mockReturnValue(null);
+        workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue(null);
       });
 
       it('should handle null step state gracefully', async () => {
         await underTest.run();
         expect(workflowRuntime.finishStep).toHaveBeenCalledWith(step.enterNodeId);
         expect(workflowRuntime.exitScope).toHaveBeenCalled();
-        expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+        expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
       });
     });
   });

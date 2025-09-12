@@ -18,18 +18,18 @@ export class ExitTryBlockNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.enterNodeId) || {};
+    const stepState = this.wfExecutionRuntimeManager.getCurrentStepState() || {};
 
     if (stepState.error) {
       // if error is in state, that means failure path was executed
       // and we have to throw error
-      await this.wfExecutionRuntimeManager.failStep(this.node.enterNodeId, stepState.error);
+      await this.wfExecutionRuntimeManager.failStep(stepState.error);
       this.wfExecutionRuntimeManager.setWorkflowError(stepState.error);
       return;
     }
 
-    await this.wfExecutionRuntimeManager.finishStep(this.node.enterNodeId);
+    await this.wfExecutionRuntimeManager.finishStep();
     this.wfExecutionRuntimeManager.exitScope();
-    this.wfExecutionRuntimeManager.goToNextStep();
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

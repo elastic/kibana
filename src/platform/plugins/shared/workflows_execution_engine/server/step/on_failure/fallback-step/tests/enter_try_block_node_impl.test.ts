@@ -26,7 +26,7 @@ describe('EnterTryBlockNodeImpl', () => {
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowRuntime.startStep = jest.fn();
     workflowRuntime.enterScope = jest.fn();
-    workflowRuntime.goToStep = jest.fn();
+    workflowRuntime.navigateToNode = jest.fn();
 
     underTest = new EnterTryBlockNodeImpl(step, workflowRuntime);
   });
@@ -44,7 +44,7 @@ describe('EnterTryBlockNodeImpl', () => {
 
     it('should go to normal path entry node', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToStep).toHaveBeenCalledWith(step.enterNormalPathNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.enterNormalPathNodeId);
     });
 
     it('should execute steps in correct order', async () => {
@@ -56,7 +56,7 @@ describe('EnterTryBlockNodeImpl', () => {
       workflowRuntime.enterScope = jest.fn().mockImplementation(() => {
         calls.push('enterScope');
       });
-      workflowRuntime.goToStep = jest.fn().mockImplementation(() => {
+      workflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
         calls.push('goToStep');
       });
 

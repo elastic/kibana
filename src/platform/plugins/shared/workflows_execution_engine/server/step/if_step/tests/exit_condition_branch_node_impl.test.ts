@@ -78,7 +78,7 @@ describe('ExitConditionBranchNodeImpl', () => {
 
   it('should go to the exitIfNode after running', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
+    expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('exitIfNode');
   });
 
   it('should exit scope after running', async () => {

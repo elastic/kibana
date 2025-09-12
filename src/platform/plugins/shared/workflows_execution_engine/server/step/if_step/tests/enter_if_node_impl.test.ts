@@ -109,8 +109,8 @@ describe('EnterIfNodeImpl', () => {
     });
     it('should evaluate condition and go to thenNode if condition is true', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('thenNode');
+      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledTimes(1);
+      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('thenNode');
     });
 
     it('should log debug message for then branch', async () => {
@@ -137,8 +137,8 @@ describe('EnterIfNodeImpl', () => {
     });
     it('should evaluate condition and go to elseNode if condition is false', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('elseNode');
+      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledTimes(1);
+      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('elseNode');
     });
 
     it('should log debug message for else branch', async () => {
@@ -162,8 +162,8 @@ describe('EnterIfNodeImpl', () => {
 
     it('should evaluate condition and go to exit node if no else branch is defined', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
+      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledTimes(1);
+      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('exitIfNode');
     });
 
     it('should log debug message for no else branch defined', async () => {

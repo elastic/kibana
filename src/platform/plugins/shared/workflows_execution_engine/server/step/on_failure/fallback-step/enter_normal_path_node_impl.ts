@@ -21,21 +21,21 @@ export class EnterNormalPathNodeImpl implements StepImplementation, StepErrorCat
 
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.enterScope();
-    this.wfExecutionRuntimeManager.goToNextStep();
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   public async catchError(): Promise<void> {
     this.workflowLogger.logError(
       'Error caught by the OnFailure zone. Redirecting to the fallback path'
     );
-    const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.enterZoneNodeId) || {};
+    const stepState = this.wfExecutionRuntimeManager.getCurrentStepState() || {};
 
-    await this.wfExecutionRuntimeManager.setStepState(this.node.enterZoneNodeId, {
+    await this.wfExecutionRuntimeManager.setCurrentStepState({
       ...stepState,
       error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node
     });
     this.wfExecutionRuntimeManager.setWorkflowError(undefined); // clear workflow error to let run go
-    this.wfExecutionRuntimeManager.goToStep(this.node.enterFailurePathNodeId);
+    this.wfExecutionRuntimeManager.navigateToNode(this.node.enterFailurePathNodeId);
     return Promise.resolve();
   }
 }

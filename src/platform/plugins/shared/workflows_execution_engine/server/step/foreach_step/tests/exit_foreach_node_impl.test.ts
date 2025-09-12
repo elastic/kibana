@@ -81,14 +81,14 @@ describe('ExitForeachNodeImpl', () => {
     it('should go to the start node', async () => {
       await underTest.run();
 
-      expect(wfExecutionRuntimeManager.goToStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(step.startNodeId);
     });
 
     it('should not finish the foreach step and not set step result', async () => {
       await underTest.run();
 
       expect(wfExecutionRuntimeManager.finishStep).not.toHaveBeenCalled();
-      expect(wfExecutionRuntimeManager.setStepResult).not.toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.setCurrentStepResult).not.toHaveBeenCalled();
     });
 
     it('should exit iteration scope', async () => {
@@ -110,7 +110,7 @@ describe('ExitForeachNodeImpl', () => {
     it('should clear the foreach state', async () => {
       await underTest.run();
 
-      expect(wfExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(
+      expect(wfExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(
         step.startNodeId,
         undefined
       );
@@ -125,7 +125,7 @@ describe('ExitForeachNodeImpl', () => {
     it('should go to the next step', async () => {
       await underTest.run();
 
-      expect(wfExecutionRuntimeManager.goToNextStep).toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
     });
 
     it('should log debug message', async () => {

@@ -22,7 +22,7 @@ describe('ExitContinueNodeImpl', () => {
   describe('run', () => {
     beforeEach(() => {
       workflowRuntime.exitScope = jest.fn();
-      workflowRuntime.goToNextStep = jest.fn();
+      workflowRuntime.navigateToNextNode = jest.fn();
     });
 
     it('should exit scope', async () => {
@@ -32,7 +32,7 @@ describe('ExitContinueNodeImpl', () => {
 
     it('should go to next step', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
     it('should exit scope before going to next step', async () => {

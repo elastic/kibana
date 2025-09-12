@@ -65,14 +65,14 @@ async function runStep(
   workflowLogger: WorkflowEventLogger,
   workflowGraph: WorkflowGraph
 ): Promise<void> {
-  const currentNode = workflowRuntime.getCurrentStep();
+  const currentNode = workflowRuntime.getCurrentNode();
   const step = nodesFactory.create(currentNode as any);
 
   try {
     await step.run();
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
-    await workflowRuntime.failStep(currentNode.id, error);
+    await workflowRuntime.failStep(error);
   } finally {
     await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
     await workflowRuntime.saveState(); // Ensure state is updated after each step
@@ -150,7 +150,7 @@ async function catchError(
       }
 
       if (workflowRuntime.getWorkflowExecution().error) {
-        await workflowRuntime.failStep(nodeId, workflowRuntime.getWorkflowExecution().error!);
+        await workflowRuntime.failStep(workflowRuntime.getWorkflowExecution().error!);
       }
 
       workflowRuntime.exitScope();

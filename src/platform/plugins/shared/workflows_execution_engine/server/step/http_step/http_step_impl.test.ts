@@ -239,9 +239,9 @@ describe('HttpStepImpl', () => {
       await httpStep.run();
 
       expect(mockWorkflowRuntime.startStep).toHaveBeenCalledWith('test-http-step');
-      expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalled();
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith('test-http-step');
-      expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
   });
 
@@ -317,7 +317,7 @@ describe('HttpStepImpl', () => {
 
       // Should start the step, set the error result, finish the step, but not go to next step
       expect(mockWorkflowRuntime.startStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalledWith({
+      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalledWith({
         input: {
           url: 'https://malicious.com/test',
           method: 'GET',
@@ -330,7 +330,7 @@ describe('HttpStepImpl', () => {
           'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
       });
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
     it('should allow all hosts when wildcard is configured', async () => {

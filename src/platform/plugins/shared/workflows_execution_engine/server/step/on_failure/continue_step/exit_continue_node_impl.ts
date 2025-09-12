@@ -15,6 +15,6 @@ export class ExitContinueNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     this.workflowRuntime.exitScope();
-    this.workflowRuntime.goToNextStep();
+    this.workflowRuntime.navigateToNextNode();
   }
 }

@@ -25,7 +25,7 @@ describe('ExitFallbackPathNodeImpl', () => {
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowRuntime.exitScope = jest.fn();
-    workflowRuntime.goToStep = jest.fn();
+    workflowRuntime.navigateToNode = jest.fn();
 
     underTest = new ExitFallbackPathNodeImpl(step, workflowRuntime);
   });
@@ -38,7 +38,7 @@ describe('ExitFallbackPathNodeImpl', () => {
 
     it('should go to exit on failure zone node', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToStep).toHaveBeenCalledWith(step.exitOnFailureZoneNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.exitOnFailureZoneNodeId);
     });
 
     it('should execute steps in correct order', async () => {
@@ -46,7 +46,7 @@ describe('ExitFallbackPathNodeImpl', () => {
       workflowRuntime.exitScope = jest.fn().mockImplementation(() => {
         calls.push('exitScope');
       });
-      workflowRuntime.goToStep = jest.fn().mockImplementation(() => {
+      workflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
         calls.push('goToStep');
       });
 

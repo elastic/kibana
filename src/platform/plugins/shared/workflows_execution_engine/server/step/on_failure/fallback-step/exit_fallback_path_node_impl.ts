@@ -19,6 +19,6 @@ export class ExitFallbackPathNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.exitScope();
-    this.wfExecutionRuntimeManager.goToStep(this.node.exitOnFailureZoneNodeId);
+    this.wfExecutionRuntimeManager.navigateToNode(this.node.exitOnFailureZoneNodeId);
   }
 }

@@ -34,10 +34,10 @@ describe('ExitRetryNodeImpl', () => {
   describe('run', () => {
     beforeEach(() => {
       workflowRuntime.exitScope = jest.fn();
-      workflowRuntime.goToNextStep = jest.fn();
-      workflowRuntime.getStepState = jest.fn().mockReturnValue({ attempt: 2 });
+      workflowRuntime.navigateToNextNode = jest.fn();
+      workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({ attempt: 2 });
       workflowRuntime.finishStep = jest.fn();
-      workflowRuntime.setStepState = jest.fn();
+      workflowRuntime.setCurrentStepState = jest.fn();
     });
 
     it('should exit scope', async () => {
@@ -52,9 +52,9 @@ describe('ExitRetryNodeImpl', () => {
     });
 
     it('should reset the retry step state', async () => {
-      workflowRuntime.setStepState = jest.fn();
+      workflowRuntime.setCurrentStepState = jest.fn();
       await underTest.run();
-      expect(workflowRuntime.setStepState).toHaveBeenCalledWith(step.startNodeId, undefined);
+      expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.startNodeId, undefined);
     });
 
     it('should log debug message', async () => {
@@ -66,7 +66,7 @@ describe('ExitRetryNodeImpl', () => {
 
     it('should go to next step', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
   });
 });

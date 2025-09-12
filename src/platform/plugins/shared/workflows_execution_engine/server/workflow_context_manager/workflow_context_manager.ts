@@ -32,14 +32,14 @@ export class WorkflowContextManager {
       steps: {},
     };
 
-    const currentNode = this.workflowExecutionRuntime.getCurrentStep();
+    const currentNode = this.workflowExecutionRuntime.getCurrentNode();
     const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
     allPredecessors.forEach((node) => {
       const nodeId = node.id;
       stepContext.steps[nodeId] = {};
-      const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
+      const stepResult = this.workflowExecutionRuntime.getCurrentStepResult();
       if (stepResult) {
         stepContext.steps[nodeId] = {
           ...stepContext.steps[nodeId],
@@ -47,7 +47,7 @@ export class WorkflowContextManager {
         };
       }
 
-      const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
+      const stepState = this.workflowExecutionRuntime.getCurrentStepState(nodeId);
       if (stepState) {
         stepContext.steps[nodeId] = {
           ...stepContext.steps[nodeId],
@@ -102,7 +102,7 @@ export class WorkflowContextManager {
       const nodeType = node?.type;
       switch (nodeType) {
         case 'enter-foreach':
-          stepContext.foreach = this.workflowExecutionRuntime.getStepState(nodeId) as any;
+          stepContext.foreach = this.workflowExecutionRuntime.getCurrentStepState(nodeId) as any;
           break;
       }
     }

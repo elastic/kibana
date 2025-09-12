@@ -15,6 +15,6 @@ export class EnterFallbackPathNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.enterScope();
-    this.wfExecutionRuntimeManager.goToNextStep();
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

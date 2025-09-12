@@ -34,7 +34,7 @@ describe('EnterContinueNodeImpl', () => {
   describe('run', () => {
     beforeEach(() => {
       workflowRuntime.enterScope = jest.fn();
-      workflowRuntime.goToNextStep = jest.fn();
+      workflowRuntime.navigateToNextNode = jest.fn();
     });
 
     it('should enter scope', async () => {
@@ -44,13 +44,13 @@ describe('EnterContinueNodeImpl', () => {
 
     it('should go to next step', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
   });
 
   describe('catchError', () => {
     beforeEach(() => {
-      workflowRuntime.goToStep = jest.fn();
+      workflowRuntime.navigateToNode = jest.fn();
       workflowRuntime.setWorkflowError = jest.fn();
     });
 
@@ -61,7 +61,7 @@ describe('EnterContinueNodeImpl', () => {
 
     it('should go to exit continue node', async () => {
       await underTest.catchError();
-      expect(workflowRuntime.goToStep).toHaveBeenCalledWith(step.exitNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.exitNodeId);
     });
 
     it('should clear workflow error', async () => {

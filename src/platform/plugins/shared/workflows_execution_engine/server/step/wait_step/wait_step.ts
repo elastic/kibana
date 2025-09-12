@@ -42,17 +42,17 @@ export class WaitStepImpl implements StepImplementation {
   }
 
   public async handleShortDuration(): Promise<void> {
-    await this.workflowRuntime.startStep(this.node.id);
+    await this.workflowRuntime.startStep();
     this.logStartWait();
     const durationInMs = this.getDurationInMs();
     await new Promise((resolve) => setTimeout(resolve, durationInMs));
     this.logFinishWait();
-    await this.workflowRuntime.finishStep(this.node.id);
-    this.workflowRuntime.goToNextStep();
+    await this.workflowRuntime.finishStep();
+    this.workflowRuntime.navigateToNextNode();
   }
 
   public handleLongDuration(): Promise<void> {
-    const stepState = this.workflowRuntime.getStepState(this.node.id);
+    const stepState = this.workflowRuntime.getCurrentStepState();
 
     if (stepState?.resumeExecutionTaskId) {
       return this.exitLongWait();
@@ -63,7 +63,7 @@ export class WaitStepImpl implements StepImplementation {
 
   private async enterLongWait(): Promise<void> {
     const durationInMs = this.getDurationInMs();
-    await this.workflowRuntime.startStep(this.node.id);
+    await this.workflowRuntime.startStep();
     const workflowExecution = this.workflowRuntime.getWorkflowExecution();
     const runAt = new Date(new Date().getTime() + durationInMs);
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
@@ -76,7 +76,7 @@ export class WaitStepImpl implements StepImplementation {
         resumeExecutionTask.taskId
       }.\nExecution will resume at ${runAt.toISOString()}`
     );
-    await this.workflowRuntime.setStepState(this.node.id, {
+    await this.workflowRuntime.setCurrentStepState({
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });
     this.logStartWait();
@@ -84,13 +84,13 @@ export class WaitStepImpl implements StepImplementation {
   }
 
   private async exitLongWait(): Promise<void> {
-    await this.workflowRuntime.setStepState(this.node.id, undefined);
+    await this.workflowRuntime.setCurrentStepState(undefined);
     this.workflowLogger.logDebug(
       `Resuming execution of wait step "${this.node.id}" after long wait.`
     );
     this.logFinishWait();
-    await this.workflowRuntime.finishStep(this.node.id);
-    this.workflowRuntime.goToNextStep();
+    await this.workflowRuntime.finishStep();
+    this.workflowRuntime.navigateToNextNode();
   }
 
   private logStartWait(): void {

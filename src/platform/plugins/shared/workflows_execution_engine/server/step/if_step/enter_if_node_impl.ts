@@ -26,7 +26,7 @@ export class EnterIfNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    await this.wfExecutionRuntimeManager.startStep();
     this.wfExecutionRuntimeManager.enterScope();
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.step.id);
 
@@ -67,7 +67,7 @@ export class EnterIfNodeImpl implements StepImplementation {
     this.workflowContextLogger.logDebug(
       `Condition "${thenNode.condition}" evaluated to true for step ${this.step.id}. Going to then branch.`
     );
-    this.wfExecutionRuntimeManager.goToStep(thenNode.id);
+    this.wfExecutionRuntimeManager.navigateToNode(thenNode.id);
   }
 
   private goToElseBranch(
@@ -77,14 +77,14 @@ export class EnterIfNodeImpl implements StepImplementation {
     this.workflowContextLogger.logDebug(
       `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. Going to else branch.`
     );
-    this.wfExecutionRuntimeManager.goToStep(elseNode.id);
+    this.wfExecutionRuntimeManager.navigateToNode(elseNode.id);
   }
 
   private goToExitNode(thenNode: EnterConditionBranchNode): void {
     this.workflowContextLogger.logDebug(
       `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. No else branch defined. Exiting if condition.`
     );
-    this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
+    this.wfExecutionRuntimeManager.navigateToNode(this.step.exitNodeId);
   }
 
   private evaluateCondition(condition: string | boolean | undefined): boolean {
