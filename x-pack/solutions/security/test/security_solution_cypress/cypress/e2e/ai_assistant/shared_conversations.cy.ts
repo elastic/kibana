@@ -90,7 +90,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   };
   before(() => {
     loginSecondaryUser(isServerless, secondaryUser);
-    logout();
+    cy.clearCookies();
   });
   beforeEach(() => {
     deleteConnectors();
