@@ -76,10 +76,11 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
   evaluate.describe('with email connector', () => {
     let emailConnectorId: string;
 
-    evaluate.beforeAll(async ({ fetch, log }) => {
-      const res = await fetch<ActionConnector>('/api/actions/connector', {
+    evaluate.beforeAll(async ({ kbnClient, log }) => {
+      const { data } = await kbnClient.request<ActionConnector>({
         method: 'POST',
-        body: JSON.stringify({
+        path: '/api/actions/connector',
+        body: {
           name: 'email-connector-test',
           config: {
             from: 'test@example.com',
@@ -90,11 +91,11 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
             password: '123456',
           },
           connector_type_id: '.email',
-        }),
+        },
       });
       log.success('Email connector created successfully');
 
-      emailConnectorId = res.id;
+      emailConnectorId = data.id;
     });
 
     evaluate('sends an email (basic)', async ({ evaluateConnectorDataset }) => {
@@ -116,7 +117,7 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'sends an email using user instructions',
-      async ({ evaluateConnectorDataset, fetch }) => {
+      async ({ evaluateConnectorDataset, kbnClient }) => {
         const instructions = `<email_instructions>
       If the user's query requires sending an email:
       1. Use the email connector type ".email" with ID "${emailConnectorId}".
@@ -142,9 +143,10 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
       5. Check the response and confirm if the email was sent successfully.
   </email_instructions>`;
 
-        await fetch('/internal/observability_ai_assistant/kb/user_instructions', {
+        await kbnClient.request({
           method: 'PUT',
-          body: JSON.stringify({ id: 'send_email', text: instructions, public: false }),
+          path: '/internal/observability_ai_assistant/kb/user_instructions',
+          body: { id: 'send_email', text: instructions, public: false },
         });
 
         await evaluateConnectorDataset({
@@ -163,13 +165,17 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
       }
     );
 
-    evaluate.afterAll(async ({ fetch, log }) => {
+    evaluate.afterAll(async ({ kbnClient, log }) => {
       // Delete the email connector
-      await fetch(`/api/actions/connector/${emailConnectorId}`, { method: 'DELETE' });
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/api/actions/connector/${emailConnectorId}`,
+      });
       log.success('Email connector deleted');
       // Delete the user instructions
-      await fetch('/internal/observability_ai_assistant/kb/entries/send_email', {
+      await kbnClient.request({
         method: 'DELETE',
+        path: '/internal/observability_ai_assistant/kb/entries/send_email',
       });
       log.success('User instructions deleted');
     });
