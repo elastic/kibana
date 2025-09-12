@@ -2364,13 +2364,27 @@ export class CstToAstConverter {
       incomplete: Boolean(ctx.exception),
     };
 
-    const identifierOrParameter = functionName.identifierOrParameter();
+    const identifierOrParameterCtx = functionName.identifierOrParameter();
 
-    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.fromIdentifierOrParam(identifierOrParameter);
+    if (identifierOrParameterCtx instanceof cst.IdentifierOrParameterContext) {
+      const operator = this.fromIdentifierOrParam(identifierOrParameterCtx);
 
       if (operator) {
         node.operator = operator;
+      }
+    } else {
+      const lastCtx = functionName.LAST();
+
+      if (lastCtx) {
+        node.operator = this.fromNodeToIdentifier(lastCtx);
+        node.operator.name = node.operator.name.toLowerCase();
+      } else {
+        const firstCtx = functionName.FIRST();
+
+        if (firstCtx) {
+          node.operator = this.fromNodeToIdentifier(firstCtx);
+          node.operator.name = node.operator.name.toLowerCase();
+        }
       }
     }
 
