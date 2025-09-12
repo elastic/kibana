@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mime from 'mime';
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
@@ -18,8 +17,7 @@ interface Args {
 
 export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHeaders {
   return {
-    'content-type':
-      (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
+    'content-type': file.data.mimeType ?? 'application/octet-stream',
     'cache-control': 'max-age=31536000, immutable',
   };
 }

@@ -468,6 +468,7 @@ describe('File HTTP API', () => {
         .buffer()
         .expect(200);
 
+      // Content-type comes from stored file MIME type, not URL filename
       expect(header['content-type']).toEqual('text/plain');
       expect(buffer.toString('utf8')).toEqual('readme content');
     });
@@ -537,6 +538,7 @@ describe('File HTTP API', () => {
         .buffer()
         .expect(200);
 
+      // Content-type comes from stored file MIME type, not URL filename
       expect(header['content-type']).toEqual('text/plain');
       expect(buffer.toString('utf8')).toEqual('text content');
 
@@ -580,6 +582,42 @@ describe('File HTTP API', () => {
       expect(result.body.message).toBe('File extension does not match file type');
       expect(result.body.message).not.toContain('json');
       expect(result.body.message).not.toContain('application/json');
+    });
+
+    test('prevents MIME type manipulation through URL filename (security fix)', async () => {
+      const { id } = await createFile({
+        name: 'safe-document.pdf',
+        mimeType: 'application/pdf',
+      });
+
+      // Share the file
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      // Upload content
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('PDF content')
+        .expect(200);
+
+      // Attacker tries to download with malicious .html extension to trigger XSS
+      const { body: buffer, header } = await request
+        .get(root, `/api/files/public/blob/malicious-script.html?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .buffer()
+        .expect(200);
+
+      // Security fix: Content-type should come from stored MIME type, not URL filename
+      expect(header['content-type']).toEqual('application/pdf'); // NOT text/html!
+      expect(header['content-disposition']).toEqual('attachment; filename=malicious-script.html');
+      expect(buffer.toString('utf8')).toEqual('PDF content');
     });
   });
 });
