@@ -75,5 +75,8 @@ export function isCollapsiblePattern(pattern: string) {
 }
 
 export function sanitize(value: string) {
-  return value.replaceAll(/[\.\[\]\{\}]/g, '\\$&');
+  // switch to RegExp.escape() when we are on node 24+
+  const escaped = value.replaceAll(/\\(?![sdwSDW])/g, '\\\\');
+
+  return escaped.replaceAll(/[\.\[\]\{\}]/g, '\\$&');
 }
