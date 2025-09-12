@@ -22,8 +22,8 @@ import {
 import { rgba } from 'polished';
 import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
-import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
  * The total height of an entity node including the shape and details below, in pixels.
@@ -213,36 +213,50 @@ export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
   `};
 `;
 
-export interface NodeButtonProps extends CommonProps {
+interface ButtonContainerProps extends CommonProps {
   width?: number;
   height?: number;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+}
+
+export interface NodeButtonProps extends ButtonContainerProps {
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const NodeButton = ({ onClick, width, height, ...props }: NodeButtonProps) => (
   <StyledNodeContainer width={width} height={height} {...props}>
-    <StyledNodeButton width={width} height={height} onClick={onClick} />
+    <StyledNodeButton
+      width={width}
+      height={height}
+      onClick={onClick}
+      data-test-subj={GRAPH_ENTITY_NODE_BUTTON_ID}
+    />
   </StyledNodeContainer>
 );
 
-const StyledNodeContainer = styled.div<NodeButtonProps>`
+const StyledNodeContainer = styled.div<ButtonContainerProps>`
   position: absolute;
   width: ${(props) => props.width ?? NODE_WIDTH}px;
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
   z-index: 1;
 `;
 
-const StyledNodeButton = styled.div<NodeButtonProps>`
+const StyledNodeButton = styled.button<NodeButtonProps>`
+  appearance: none;
   width: ${(props) => props.width ?? NODE_WIDTH}px;
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
 `;
 
-export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
+interface NodeExpandButtonContainerProps extends CommonProps {
+  x?: string;
+  y?: string;
+}
+
+export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerProps>`
+  appearance: none;
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
-  ${(props: NodeExpandButtonProps) =>
-    (Boolean(props.x) || Boolean(props.y)) &&
-    `transform: translate(${props.x ?? '0'}, ${props.y ?? '0'});`}
+  ${({ x, y }: NodeExpandButtonContainerProps) =>
+    (x || y) && `transform: translate(${x ?? '0'}, ${y ?? '0'});`}
   position: absolute;
   z-index: 1;
 
@@ -271,8 +285,8 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &,
-  ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled) &,
+  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
