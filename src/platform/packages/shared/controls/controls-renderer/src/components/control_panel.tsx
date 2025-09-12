@@ -202,9 +202,10 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
                   maybeId={uuid}
                   type={type}
                   getParentApi={() => parentApi}
-                  onApiAvailable={(api) => {
-                    setApi(api);
-                    parentApi.registerChildApi(api);
+                  onApiAvailable={(panelApi) => {
+                    console.log({ panelApi });
+                    setApi(panelApi);
+                    parentApi.registerChildApi(panelApi);
                   }}
                   hidePanelChrome
                 />

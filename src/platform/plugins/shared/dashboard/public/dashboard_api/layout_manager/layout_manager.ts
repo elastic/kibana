@@ -115,11 +115,7 @@ export function initializeLayoutManager(
       const expectedChildCount =
         Object.values(layout.panels).filter((panel) => {
           return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
-        }).length +
-        Object.values(layout.controls).filter((control) => {
-          // TODO: Remove this filtering
-          return control.type === 'optionsListControl'; // temporarily filter out range slider controls so that count is accurate
-        }).length;
+        }).length + Object.values(layout.controls).length;
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
     }),
