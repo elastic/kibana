@@ -21,8 +21,6 @@
     "*/plugins/**/*",
     "plugins/**/*",
     "security_solution_cypress/cypress/**/*",
-    "security_solution_api_integration/**/*",
-    "security_solution_endpoint/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
   ],

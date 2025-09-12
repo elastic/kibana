@@ -8,8 +8,8 @@
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
-import { SecuritySolutionApiProvider } from './security_solution_api.gen';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from './security_solution_exceptions_api.gen';
+import { SecuritySolutionApiProvider } from '../../security_solution_api_integration/config/services/security_solution_api.gen';
+import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '../../security_solution_api_integration/config/services/security_solution_exceptions_api.gen';
 
 export const services = {
   ...platformServices,

@@ -19,7 +19,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 import type { CreateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
 import type { CreateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
@@ -40,7 +39,9 @@ import type { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysoluti
 import type { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
 import type { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
 import type { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
