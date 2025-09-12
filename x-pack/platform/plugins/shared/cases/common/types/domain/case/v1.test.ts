@@ -97,6 +97,7 @@ const basicCase = {
   time_to_acknowledge: undefined,
   time_to_investigate: undefined,
   time_to_resolve: undefined,
+  is_generated_by_assistant: undefined,
 };
 
 describe('RelatedCaseRt', () => {
@@ -215,6 +216,7 @@ describe('CaseAttributesRt', () => {
     time_to_acknowledge: undefined,
     time_to_investigate: undefined,
     time_to_resolve: undefined,
+    is_generated_by_assistant: undefined,
   };
 
   it('has expected attributes in request', () => {
@@ -258,6 +260,21 @@ describe('CaseAttributesRt', () => {
       right: defaultRequest,
     });
   });
+
+  test.each([undefined, null, false, true])(
+    'has expected attributes in request if the `isGeneratedByAssistant` is %s',
+    (isGeneratedByAssistant) => {
+      const query = CaseAttributesRt.decode({
+        ...defaultRequest,
+        is_generated_by_assistant: isGeneratedByAssistant,
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, is_generated_by_assistant: isGeneratedByAssistant },
+      });
+    }
+  );
 });
 
 describe('CasesRt', () => {
@@ -284,4 +301,18 @@ describe('CasesRt', () => {
       right: defaultRequest,
     });
   });
+
+  test.each([undefined, null, false, true])(
+    'has expected attributes in request if the `isGeneratedByAssistant` is %s',
+    (isGeneratedByAssistant) => {
+      const query = CasesRt.decode([
+        { ...basicCase, is_generated_by_assistant: isGeneratedByAssistant },
+      ]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [{ ...basicCase, is_generated_by_assistant: isGeneratedByAssistant }],
+      });
+    }
+  );
 });

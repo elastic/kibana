@@ -84,6 +84,7 @@ describe('CasesConnectorExecutor', () => {
     rule,
     timeWindow,
     internallyManagedAlerts: null,
+    isGeneratedByAssistant: null,
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
@@ -3164,6 +3165,7 @@ describe('CasesConnectorExecutor', () => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      isGeneratedByAssistant: null,
     };
 
     describe('run', () => {

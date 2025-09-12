@@ -105,6 +105,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
   }),
   templateId: schema.nullable(schema.string()),
   internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
+  isGeneratedByAssistant: schema.nullable(schema.boolean({ defaultValue: false })),
 });
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
