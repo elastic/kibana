@@ -651,7 +651,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
-        {isBackgroundSearchEnabled && <BackgroundSearchRestoredCallout state$={session.state$} />}
+        {isBackgroundSearchEnabled && (
+          <BackgroundSearchRestoredCallout isESQLQuery={isESQLQuery} state$={session.state$} />
+        )}
         <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
