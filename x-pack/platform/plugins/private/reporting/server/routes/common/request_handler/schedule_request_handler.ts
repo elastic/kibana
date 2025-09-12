@@ -13,6 +13,7 @@ import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { ScheduleType } from '@kbn/reporting-server';
 import type { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import type {
@@ -238,6 +239,14 @@ export class ScheduleRequestHandler extends RequestHandler<
     const id = SavedObjectsUtils.generateId();
     try {
       report = await this.enqueueJob({ ...params, id });
+
+      const eventTracker = reporting.getEventTracker(report.id, exportTypeId, jobParams.objectType);
+      eventTracker?.createReport({
+        isDeprecated: Boolean(report.payload.isDeprecated),
+        isPublicApi: false,
+        scheduleType: ScheduleType.SCHEDULED,
+      });
+
       return res.ok<ScheduledReportingJobResponse>({
         headers: { 'content-type': 'application/json' },
         body: {

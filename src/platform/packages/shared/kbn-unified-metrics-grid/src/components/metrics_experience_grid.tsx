@@ -10,30 +10,24 @@
 import React, { useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { ChartSectionTemplate, useFetch } from '@kbn/unified-histogram';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
 import {
-  EuiDelayRender,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiProgress,
   EuiText,
   euiScrollBarStyles,
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { IconChartBarStacked } from '@kbn/chart-icons';
 import { Subject } from 'rxjs';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { DimensionsSelector } from './toolbar/dimensions_selector';
-import { ValuesSelector } from './toolbar/values_selector';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
+import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
+import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -50,16 +44,7 @@ export const MetricsExperienceGrid = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const {
-    currentPage,
-    dimensions,
-    valueFilters,
-    onDimensionsChange,
-    onValuesChange,
-    onPageChange,
-    onClearValues,
-    onClearAllDimensions,
-  } = useMetricsGridState();
+  const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
 
   const { getTimeRange, updateTimeRange } = requestParams;
 
@@ -77,6 +62,13 @@ export const MetricsExperienceGrid = ({
   const { data: fields = [], isLoading } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange: getTimeRange(),
+  });
+
+  const { leftSideActions, rightSideActions } = useToolbarActions({
+    fields,
+    requestParams,
+    indexPattern,
+    renderToggleActions,
   });
 
   const {
@@ -107,105 +99,8 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  const actions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
-    {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-    },
-  ];
-
-  const rightSideComponents = useMemo(
-    () => [
-      renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-        onClear={onClearAllDimensions}
-      />,
-      dimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
-          indices={[indexPattern]}
-          timeRange={getTimeRange()}
-          onClear={onClearValues}
-        />
-      ) : null,
-    ],
-    [
-      dimensions,
-      fields,
-      getTimeRange,
-      indexPattern,
-      onClearAllDimensions,
-      onClearValues,
-      onDimensionsChange,
-      onValuesChange,
-      renderToggleActions,
-      valueFilters,
-    ]
-  );
-
-  if (currentPageFields?.length === 0) {
-    return (
-      <div
-        css={css`
-          height: 100%;
-        `}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="spaceAround"
-          css={css`
-            height: 100%;
-          `}
-          gutterSize="s"
-        >
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiDelayRender delay={500} data-test-subj="metricsExperienceProgressBar">
-                <EuiProgress size="xs" color="accent" position="absolute" />
-              </EuiDelayRender>
-            </EuiFlexItem>
-          ) : (
-            <>
-              <EuiFlexItem
-                css={css`
-                  justify-content: end;
-                `}
-              >
-                <EuiIcon type={IconChartBarStacked as IconType} size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" data-test-subj="metricsExperienceNoData">
-                  {i18n.translate('metricsExperience.grid.noData', {
-                    defaultMessage: 'No results found',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      </div>
-    );
+  if (fields.length === 0) {
+    return <EmptyState isLoading={isLoading} />;
   }
 
   return (
@@ -213,8 +108,8 @@ export const MetricsExperienceGrid = ({
       id="unifiedMetricsExperienceGridPanel"
       toolbarCss={chartToolbarCss}
       toolbar={{
-        leftSide: rightSideComponents,
-        rightSide: actions,
+        leftSide: leftSideActions,
+        rightSide: rightSideActions,
       }}
     >
       <EuiFlexGroup
