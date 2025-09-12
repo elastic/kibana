@@ -10,12 +10,13 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+import { lazyObject } from '@kbn/lazy-object';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = () => {
-  const mock: jest.Mocked<SavedObjectsStart> = {
-    client: {
+  const mock: jest.Mocked<SavedObjectsStart> = lazyObject({
+    client: lazyObject({
       create: jest.fn(),
       bulkCreate: jest.fn(),
       bulkResolve: jest.fn(),
@@ -27,18 +28,17 @@ const createStartContractMock = () => {
       get: jest.fn(),
       resolve: jest.fn(),
       update: jest.fn(),
-    },
-  };
+    }),
+  });
   return mock;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<SavedObjectsServiceContract> = {
+  const mocked: jest.Mocked<SavedObjectsServiceContract> = lazyObject({
     setup: jest.fn(),
-    start: jest.fn(),
+    start: jest.fn().mockReturnValue(Promise.resolve(createStartContractMock())),
     stop: jest.fn(),
-  };
-  mocked.start.mockReturnValue(Promise.resolve(createStartContractMock()));
+  });
   return mocked;
 };
 

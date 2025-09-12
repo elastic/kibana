@@ -12,6 +12,7 @@ import type {
   SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { lazyObject } from '@kbn/lazy-object';
 
 type T = unknown;
 
@@ -33,7 +34,7 @@ const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
 const createSimpleSavedObjectMock = (
   savedObject: SavedObject
 ): jest.Mocked<SimpleSavedObject<T>> => {
-  const mock = {
+  const mock = lazyObject({
     ...simpleSavedObjectMockDefaults,
     attributes: savedObject.attributes,
     _version: savedObject.version,
@@ -50,22 +51,20 @@ const createSimpleSavedObjectMock = (
     createdAt: savedObject.created_at,
     createdBy: savedObject.created_by,
     namespaces: savedObject.namespaces,
-    get: jest.fn(),
-    set: jest.fn(),
-    has: jest.fn(),
+    get: jest
+      .fn()
+      .mockImplementation((key: string): any => (savedObject.attributes as any)[key] || undefined),
+    set: jest.fn().mockReturnValue((key: string, value: any) => {
+      (savedObject as any)[key] = value;
+      return savedObject;
+    }),
+    has: jest.fn().mockReturnValue(true),
     save: jest.fn(),
-    delete: jest.fn(),
-  };
-  mock.get.mockImplementation(
-    (key: string): any => (savedObject.attributes as any)[key] || undefined
-  );
-  mock.set.mockReturnValue((key: string, value: any) => {
-    (savedObject as any)[key] = value;
-    return savedObject;
+    delete: jest.fn().mockImplementation(() => Promise.resolve({})),
   });
-  mock.has.mockReturnValue(true);
+
   mock.save.mockImplementation(() => Promise.resolve(mock));
-  mock.delete.mockImplementation(() => Promise.resolve({}));
+
   return mock;
 };
 

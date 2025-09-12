@@ -8,12 +8,13 @@
  */
 
 import type { ISavedObjectsImporter } from '@kbn/core-saved-objects-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createImporterMock = () => {
-  const mock: jest.Mocked<ISavedObjectsImporter> = {
+  const mock: jest.Mocked<ISavedObjectsImporter> = lazyObject({
     import: jest.fn(),
     resolveImportErrors: jest.fn(),
-  };
+  });
 
   return mock;
 };

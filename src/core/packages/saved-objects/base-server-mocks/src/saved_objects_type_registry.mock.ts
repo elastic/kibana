@@ -9,46 +9,31 @@
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { type SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createRegistryMock = (): jest.Mocked<
   ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
 > => {
-  const mock = {
+  const mock = lazyObject({
     registerType: jest.fn(),
-    getLegacyTypes: jest.fn(),
+    getLegacyTypes: jest.fn().mockReturnValue([]),
     getType: jest.fn(),
-    getVisibleTypes: jest.fn(),
-    getVisibleToHttpApisTypes: jest.fn(),
-    getAllTypes: jest.fn(),
-    getImportableAndExportableTypes: jest.fn(),
-    isNamespaceAgnostic: jest.fn(),
-    isSingleNamespace: jest.fn(),
-    isMultiNamespace: jest.fn(),
-    isShareable: jest.fn(),
-    isHidden: jest.fn(),
+    getVisibleTypes: jest.fn().mockReturnValue([]),
+    getVisibleToHttpApisTypes: jest.fn().mockReturnValue(false),
+    getAllTypes: jest.fn().mockReturnValue([]),
+    getImportableAndExportableTypes: jest.fn().mockReturnValue([]),
+    isNamespaceAgnostic: jest.fn().mockImplementation((type: string) => type === 'global'),
+    isSingleNamespace: jest
+      .fn()
+      .mockImplementation((type: string) => type !== 'global' && type !== 'shared'),
+    isMultiNamespace: jest.fn().mockImplementation((type: string) => type === 'shared'),
+    isShareable: jest.fn().mockImplementation((type: string) => type === 'shared'),
+    isHidden: jest.fn().mockReturnValue(false),
     isHiddenFromHttpApis: jest.fn(),
-    getIndex: jest.fn(),
-    isImportableAndExportable: jest.fn(),
-    getNameAttribute: jest.fn(),
-  };
-
-  mock.getVisibleTypes.mockReturnValue([]);
-  mock.getAllTypes.mockReturnValue([]);
-  mock.getLegacyTypes.mockReturnValue([]);
-  mock.getImportableAndExportableTypes.mockReturnValue([]);
-  mock.getIndex.mockReturnValue('.kibana-test');
-  mock.getIndex.mockReturnValue('.kibana-test');
-  mock.isHidden.mockReturnValue(false);
-  mock.isHiddenFromHttpApis.mockReturnValue(false);
-  mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
-  mock.isSingleNamespace.mockImplementation(
-    (type: string) => type !== 'global' && type !== 'shared'
-  );
-  mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
-  mock.isShareable.mockImplementation((type: string) => type === 'shared');
-  mock.isImportableAndExportable.mockReturnValue(true);
-  mock.getVisibleToHttpApisTypes.mockReturnValue(false);
-  mock.getNameAttribute.mockReturnValue(undefined);
+    getIndex: jest.fn().mockReturnValue('.kibana-test'),
+    isImportableAndExportable: jest.fn().mockReturnValue(true),
+    getNameAttribute: jest.fn().mockReturnValue(undefined),
+  });
 
   return mock;
 };
