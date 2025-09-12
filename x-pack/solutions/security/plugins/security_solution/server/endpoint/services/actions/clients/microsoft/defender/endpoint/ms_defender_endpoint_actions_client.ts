@@ -396,6 +396,31 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       };
     }
 
+    // Cancel action specific validation
+    if (payload.command === 'cancel') {
+      const actionId = (payload.parameters as ResponseActionCancelParameters)?.id;
+      if (actionId) {
+        try {
+          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(actionId);
+
+          if (actionAlreadyCanceled) {
+            return {
+              isValid: false,
+              error: new ResponseActionsClientError(
+                `Unable to cancel action [${actionId}]. Action has already been cancelled.`,
+                409
+              ),
+            };
+          }
+        } catch (error) {
+          return {
+            isValid: false,
+            error,
+          };
+        }
+      }
+    }
+
     return super.validateRequest(payload);
   }
 
@@ -592,16 +617,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       if (!error) {
         try {
-          // Check for existing cancel action
-          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(actionId);
-
-          if (actionAlreadyCanceled) {
-            throw new ResponseActionsClientError(
-              `Unable to cancel action [${actionId}]. Action has already been cancelled.`,
-              409
-            );
-          }
-
           // Get the external action ID from the internal response action ID
           const externalActionId = await this.getExternalActionId(actionId);
 
