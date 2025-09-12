@@ -53,7 +53,7 @@ export const DashboardAppNoDataPage = ({
     )
   );
 
-  const lensHelpersAsync = useAsync(() => {
+  const { value: lensHelpersAsync } = useAsync(() => {
     return lensService?.stateHelperApi() ?? Promise.resolve(null);
   }, [lensService]);
 
@@ -65,7 +65,7 @@ export const DashboardAppNoDataPage = ({
 
   const onTryESQL = useCallback(async () => {
     abortController?.abort();
-    if (lensHelpersAsync.value) {
+    if (lensHelpersAsync) {
       const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
@@ -90,7 +90,7 @@ export const DashboardAppNoDataPage = ({
 
         setAbortController(abc);
 
-        const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
+        const chartSuggestions = lensHelpersAsync.suggestions(context, dataView);
         if (chartSuggestions?.length) {
           const [suggestion] = chartSuggestions;
 
@@ -126,7 +126,7 @@ export const DashboardAppNoDataPage = ({
         }
       }
     }
-  }, [abortController, lensHelpersAsync.value]);
+  }, [abortController, lensHelpersAsync]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>

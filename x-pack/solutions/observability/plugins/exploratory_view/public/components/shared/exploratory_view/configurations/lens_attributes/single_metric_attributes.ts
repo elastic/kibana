@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
+import type { MetricState, OperationType } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
@@ -25,10 +25,9 @@ export class SingleMetricLensAttributes extends LensAttributes {
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper: FormulaPublicApi,
     dslFilters?: QueryDslQueryContainer[]
   ) {
-    super(layerConfigs, reportType, lensFormulaHelper, dslFilters);
+    super(layerConfigs, reportType, dslFilters);
     this.layers = {};
     this.reportType = reportType;
 

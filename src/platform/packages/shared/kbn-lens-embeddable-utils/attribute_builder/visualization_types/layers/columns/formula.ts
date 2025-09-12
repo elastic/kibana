@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FormulaValueConfig, ChartColumn } from '../../../types';
 
@@ -21,16 +21,10 @@ export class FormulaColumn implements ChartColumn {
   getData(
     id: string,
     baseLayer: PersistedIndexPatternLayer,
-    dataView: DataView,
-    formulaAPI: FormulaPublicApi
+    dataView: DataView
   ): PersistedIndexPatternLayer {
     const { value, ...rest } = this.getValueConfig();
-    const formulaLayer = formulaAPI.insertOrReplaceFormulaColumn(
-      id,
-      { formula: value, ...rest },
-      baseLayer,
-      dataView
-    );
+    const formulaLayer = { ...baseLayer, [id]: { formula: value, ...rest } };
 
     if (!formulaLayer) {
       throw new Error('Error generating the data layer for the chart');

@@ -21,8 +21,7 @@ import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import type { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
+import type { XYState } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
 
 describe('Lens Attribute', () => {
@@ -51,13 +50,8 @@ describe('Lens Attribute', () => {
     selectedMetricField: TRANSACTION_DURATION,
   };
 
-  const lensPluginMockStart = lensPluginMock.createStartContract();
-
-  let formulaHelper: FormulaPublicApi;
-
   beforeEach(async () => {
-    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
-    lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType, formulaHelper);
+    lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType);
   });
 
   it('should return expected json', function () {
@@ -227,7 +221,7 @@ describe('Lens Attribute', () => {
       selectedMetricField: TRANSACTION_DURATION,
     };
 
-    lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+    lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
     expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig1))).toEqual(
       JSON.stringify({
@@ -328,8 +322,7 @@ describe('Lens Attribute', () => {
   it('should hide y axis when there are multiple series', function () {
     const lensAttrWithMultiSeries = new LensAttributes(
       [layerConfig, layerConfig],
-      reportViewConfig.reportType,
-      formulaHelper
+      reportViewConfig.reportType
     ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
       x: false,
@@ -341,8 +334,7 @@ describe('Lens Attribute', () => {
   it('should show y axis when there is a single series', function () {
     const lensAttrWithMultiSeries = new LensAttributes(
       [layerConfig],
-      reportViewConfig.reportType,
-      formulaHelper
+      reportViewConfig.reportType
     ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
       x: false,
@@ -441,8 +433,7 @@ describe('Lens Attribute', () => {
   it('should not use global filters when there is more than one series', function () {
     const multiSeriesLensAttr = new LensAttributes(
       [layerConfig, layerConfig],
-      reportViewConfig.reportType,
-      formulaHelper
+      reportViewConfig.reportType
     ).getJSON();
     expect((multiSeriesLensAttr.state.query as Query).query).toEqual(
       'transaction.duration.us < 60000000'
@@ -464,7 +455,7 @@ describe('Lens Attribute', () => {
         selectedMetricField: LCP_FIELD,
       };
 
-      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       lnsAttr.getBreakdownColumn({
         layerConfig: layerConfig1,
@@ -666,7 +657,7 @@ describe('Lens Attribute', () => {
         selectedMetricField: TRANSACTION_DURATION,
       };
 
-      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       const attributes = lnsAttr.getJSON();
 
