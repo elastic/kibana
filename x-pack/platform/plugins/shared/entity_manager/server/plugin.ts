@@ -143,7 +143,9 @@ export class EntityManagerServerPlugin
     // the api key invalidation requires a check against the cluster license
     // which is lazily loaded. we ensure it gets loaded before the update
     firstValueFrom(plugins.licensing.license$)
-      .then(() => disableManagedEntityDiscovery({ server: this.server! }))
+      .then(() =>
+        disableManagedEntityDiscovery({ server: this.server!, isServerless: this.isServerless })
+      )
       .then(() => this.logger.debug(`Disabled managed entity discovery`))
       .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 

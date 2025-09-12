@@ -34,6 +34,8 @@ import {
   ENTITY_RESET_ILM_POLICY,
 } from '../../../common/constants_entities';
 
+const isServerless: boolean = false;
+
 const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
@@ -221,6 +223,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: { id: 'a'.repeat(50) } as EntityDefinition,
           logger: loggerMock.create(),
         })
@@ -253,6 +256,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: mockEntityDefinition,
           logger: loggerMock.create(),
         })
@@ -273,6 +277,7 @@ describe('install_entity_definition', () => {
       await installEntityDefinition({
         esClient,
         soClient,
+        isServerless,
         definition: mockEntityDefinition,
         logger: loggerMock.create(),
       });
@@ -290,6 +295,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: mockEntityDefinition,
           logger: loggerMock.create(),
         })
@@ -315,6 +321,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
@@ -358,6 +365,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
@@ -403,6 +411,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [updatedDefinition],
         logger: loggerMock.create(),
       });
@@ -450,6 +459,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [updatedDefinition],
         logger: loggerMock.create(),
       });
@@ -492,6 +502,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [mockEntityDefinition],
         logger: loggerMock.create(),
       });

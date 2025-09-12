@@ -190,4 +190,8 @@ export class EntityClient {
       this.options.logger
     );
   }
+
+  public isServerless(): boolean {
+    return this.options.isServerless;
+  }
 }

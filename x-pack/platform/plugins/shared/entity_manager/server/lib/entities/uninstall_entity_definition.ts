@@ -63,8 +63,10 @@ export async function uninstallBuiltInEntityDefinitions({
 
 export async function disableManagedEntityDiscovery({
   server,
+  isServerless,
 }: {
   server: EntityManagerServerSetup;
+  isServerless: boolean;
 }) {
   const apiKey = await readEntityDiscoveryAPIKey(server);
   if (!apiKey) {
@@ -72,7 +74,12 @@ export async function disableManagedEntityDiscovery({
   }
 
   const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
-  const entityClient = new EntityClient({ clusterClient, soClient, logger: server.logger });
+  const entityClient = new EntityClient({
+    clusterClient,
+    soClient,
+    isServerless,
+    logger: server.logger,
+  });
 
   await uninstallBuiltInEntityDefinitions({ entityClient, deleteData: true });
 
