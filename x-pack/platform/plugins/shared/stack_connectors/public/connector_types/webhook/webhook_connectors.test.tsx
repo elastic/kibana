@@ -12,8 +12,14 @@ import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+jest.mock('../../common/get_experimental_features');
 
 describe('WebhookActionConnectorFields renders', () => {
+  beforeAll(() => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+  });
+
   it('renders all connector fields', async () => {
     const actionConnector = {
       actionTypeId: '.webhook',
@@ -50,6 +56,36 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
+  });
+
+  it('renders OAuth2 option and fields', () => {
+    const actionConnector = {
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'https://test.com',
+        headers: [{ key: 'content-type', value: 'text' }],
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+      },
+      secrets: {},
+      isDeprecated: false,
+    };
+
+    const { getByTestId } = render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <WebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(getByTestId('authOAuth2')).toBeInTheDocument();
+    expect(getByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
+    expect(getByTestId('clientIdOAuth2')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
