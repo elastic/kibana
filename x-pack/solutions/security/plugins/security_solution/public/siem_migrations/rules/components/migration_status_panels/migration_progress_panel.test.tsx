@@ -8,15 +8,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MigrationProgressPanel } from './migration_progress_panel';
-import { useStopMigration } from '../../service/hooks/use_stop_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
+import { useStopSiemMigration } from '../../../common/hooks/use_stop_siem_migration';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../../service/hooks/use_stop_migration');
-const useStopMigrationMock = useStopMigration as jest.Mock;
+jest.mock('../../../common/hooks/use_stop_siem_migration');
+const useStopMigrationMock = useStopSiemMigration as jest.Mock;
 const mockStopMigration = jest.fn();
 
 const inProgressMigrationStats: RuleMigrationStats = {
@@ -43,7 +43,7 @@ const renderMigrationProgressPanel = (migrationStats: RuleMigrationStats) => {
 describe('MigrationProgressPanel', () => {
   beforeEach(() => {
     useStopMigrationMock.mockReturnValue({
-      stopMigration: mockStopMigration,
+      mutate: mockStopMigration,
       isLoading: false,
     });
   });
@@ -97,7 +97,7 @@ describe('MigrationProgressPanel', () => {
       renderMigrationProgressPanel(inProgressMigrationStats);
 
       screen.getByTestId('stopMigrationButton').click();
-      expect(mockStopMigration).toHaveBeenCalledWith(inProgressMigrationStats.id);
+      expect(mockStopMigration).toHaveBeenCalledWith({ migrationId: inProgressMigrationStats.id });
     });
 
     it('should show loading state when stopping migration', async () => {
