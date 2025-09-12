@@ -8,8 +8,7 @@
  */
 
 import * as z from '@kbn/zod';
-import type { KbnZodType } from './kbn_zod_type';
-import { KbnZodTypes } from './kbn_zod_type';
+import { type KbnZodType, KbnZodTypes } from './kbn_zod_type';
 
 /**
  * This is a helper schema to convert a boolean string ("true" or "false") to a
@@ -17,33 +16,25 @@ import { KbnZodTypes } from './kbn_zod_type';
  *
  * Accepts "true" or "false" as strings, or a boolean.
  */
-class KbnZodBooleanFromString extends z.ZodUnion<any> implements KbnZodType {
-  readonly kbnTypeName = KbnZodTypes.BooleanFromString;
-
-  static create() {
-    return new KbnZodBooleanFromString({
-      typeName: z.ZodFirstPartyTypeKind.ZodUnion,
-      options: [z.enum(['true', 'false']), z.boolean()],
-    }).describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
-  }
-
-  override _parse(input: z.ParseInput): z.ParseReturnType<this['_output']> {
-    const result = super._parse(input); // Use ZodUnion's default parsing
-
-    if (z.isValid(result)) {
-      const value = result.value;
-      return {
-        status: 'valid',
-        value: value === 'true' ? true : value === 'false' ? false : value,
-      };
+export const BooleanFromString = z
+  .union([z.literal('true'), z.literal('false'), z.boolean()])
+  .transform((val) => {
+    if (typeof val === 'string') {
+      return val === 'true';
     }
+    return val;
+  })
+  .meta({ kbnTypeName: KbnZodTypes.BooleanFromString })
+  .describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
 
-    return result;
-  }
-}
-
-export const BooleanFromString = KbnZodBooleanFromString.create();
+// Infer the exact type of the `PassThroughAny` schema instance
+type KbnZodBooleanFromString = typeof BooleanFromString;
 
 export const isBooleanFromString = (val: unknown): val is KbnZodBooleanFromString => {
-  return (val as KbnZodBooleanFromString).kbnTypeName === KbnZodTypes.BooleanFromString;
+  const zodSchema = val as z.ZodTypeAny;
+  return (
+    zodSchema instanceof z.ZodUnion &&
+    (zodSchema.meta() as Record<string, any> as KbnZodType)?.kbnTypeName ===
+      KbnZodTypes.BooleanFromString
+  );
 };

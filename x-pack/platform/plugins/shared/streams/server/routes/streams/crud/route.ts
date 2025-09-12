@@ -32,6 +32,13 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<Streams.all.GetResponse> => {
     const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
       request,
@@ -64,6 +71,13 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({
     request,
     getScopedClients,
@@ -97,6 +111,13 @@ export const editStreamRoute = createServerRoute({
     }),
     body: Streams.all.UpsertRequest.right,
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({
     params,
     request,
@@ -148,6 +169,13 @@ export const deleteStreamRoute = createServerRoute({
       name: z.string(),
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,

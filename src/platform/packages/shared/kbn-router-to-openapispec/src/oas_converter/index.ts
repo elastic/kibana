@@ -53,6 +53,10 @@ export class OasConverter {
     return query;
   }
 
+  public isUndefined(type: unknown) {
+    return this.#getConverter(type).isUndefined(type);
+  }
+
   public getSchemaComponents() {
     return {
       schemas: Object.fromEntries(this.#sharedSchemas.entries()),

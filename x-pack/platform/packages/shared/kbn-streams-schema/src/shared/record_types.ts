@@ -22,7 +22,7 @@ export interface RecursiveRecord {
 }
 
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(primitive), recursiveRecord]))
+  z.record(z.string(), z.union([primitive, z.array(primitive), recursiveRecord]))
 );
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[]>;
