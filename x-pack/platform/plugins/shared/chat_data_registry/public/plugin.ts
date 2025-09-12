@@ -7,11 +7,13 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
+import { renderApp } from './application';
 
 export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
 {
   public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
+    renderApp();
     return {};
   }
 

@@ -7,17 +7,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { ChatDataRegistryApp } from './components/app';
 
-export const renderApp = (
-  { notifications, http }: CoreStart,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(
-    <ChatDataRegistryApp basename={appBasePath} notifications={notifications} http={http} />,
-    element
-  );
+export const renderApp = (mountParameters: AppMountParameters) => {
+  ReactDOM.render(<ChatDataRegistryApp />, mountParameters.element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => ReactDOM.unmountComponentAtNode(mountParameters.element);
 };
