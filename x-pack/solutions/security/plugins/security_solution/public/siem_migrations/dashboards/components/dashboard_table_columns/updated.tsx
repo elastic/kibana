@@ -6,21 +6,36 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
+import { TableHeader } from '../../../common/components';
+
+export const SIEM_DASHBOARDS_MIGRATIONS_UPDATED_HEADER_ID = 'siemDashboardsMigrationsUpdatedHeader';
 
 export const createUpdatedColumn = (): TableColumn => {
   return {
     field: 'original_dashboard.last_updated',
-    name: i18n.COLUMN_UPDATED,
+    name: (
+      <TableHeader
+        id={SIEM_DASHBOARDS_MIGRATIONS_UPDATED_HEADER_ID}
+        title={i18n.COLUMN_UPDATED}
+        tooltipContent={
+          <FormattedMessage
+            id="xpack.securitySolution.siemMigrations.dashboards.tableColumn.updatedTooltip"
+            defaultMessage={i18n.COLUMN_UPDATED}
+          />
+        }
+      />
+    ),
     render: (value: DashboardMigrationDashboard['original_dashboard']['last_updated']) => (
       <FormattedRelativePreferenceDate value={value} dateFormat="M/D/YY" />
     ),
     sortable: true,
     truncateText: true,
     align: 'center',
-    width: '25%',
+    width: '15%',
   };
 };
