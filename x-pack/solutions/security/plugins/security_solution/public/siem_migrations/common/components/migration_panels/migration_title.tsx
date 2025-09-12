@@ -5,39 +5,49 @@
  * 2.0.
  */
 
+/*
+ * Generic MigrationTitle component for SIEM migrations (rules & dashboards)
+ * Wraps inline rename + delete actions. Preserves existing data-test-subj values used by rule panels.
+ */
 import React, { useState, useCallback, useMemo } from 'react';
 import {
-  EuiButtonIcon,
-  EuiConfirmModal,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditText,
   EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiConfirmModal,
   EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
-import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
-import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { PanelText } from '../../../../common/components/panel_text';
-import { useUpdateSiemMigration } from '../../../common/hooks/use_update_siem_migration';
-import type { RuleMigrationStats } from '../../types';
+import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
+import { useDeleteMigration } from '../../hooks/use_delete_migrations';
+import { useUpdateSiemMigration } from '../../hooks/use_update_siem_migration';
 import * as i18n from './translations';
-import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
+import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 
-interface MigrationPanelTitleProps {
-  migrationStats: RuleMigrationStats;
+export interface MigrationPanelTitleProps<T extends MigrationTaskStats> {
+  migrationStats: T;
+  migrationType: MigrationType;
 }
-export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migrationStats }) => {
+
+export const MigrationPanelTitle = React.memo(function MigrationPanelTitle<
+  T extends MigrationTaskStats
+>({ migrationStats, migrationType }: MigrationPanelTitleProps<T>) {
   const { euiTheme } = useEuiTheme();
-  const [name, setName] = useState<string>(migrationStats.name);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [name, setName] = useState(migrationStats.name);
+  const [isEditing, setIsEditing] = useState(false);
+
   const {
     isOpen: isPopoverOpen,
-    close: closePopover,
     toggle: togglePopover,
+    close: closePopover,
   } = useIsOpenState(false);
   const {
     isOpen: isDeleteModalOpen,
@@ -48,35 +58,16 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
   const confirmModalTitleId = useGeneratedHtmlId();
 
   const onRenameError = useCallback(() => {
-    setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
+    setName(migrationStats.name); // revert visual name; toast handled in hook
   }, [migrationStats.name]);
 
-  const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
+  const { mutate: deleteMigration, isLoading: isDeleting } = useDeleteMigration(
     migrationStats.id,
-    'rule'
+    migrationType
   );
-  const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateSiemMigration(
-    'rule',
-    { onError: onRenameError }
-  );
-
-  const cancelEdit = useCallback(() => {
-    setIsEditing(false);
-  }, []);
-
-  const saveName = useCallback(
-    (value: string) => {
-      setName(value);
-      updateMigration({ migrationId: migrationStats.id, body: { name: value } });
-      setIsEditing(false);
-    },
-    [updateMigration, migrationStats.id]
-  );
-
-  const confirmDeleteMigration = useCallback(() => {
-    deleteMigration();
-    closeDeleteModal();
-  }, [deleteMigration, closeDeleteModal]);
+  const { mutate: updateMigration, isLoading: isUpdating } = useUpdateSiemMigration(migrationType, {
+    onError: onRenameError,
+  });
 
   const isDeletable = useMemo(
     () => migrationStats.status !== SiemMigrationTaskStatus.RUNNING,
@@ -93,12 +84,31 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     openDeleteModal();
   }, [closePopover, openDeleteModal]);
 
-  const stopPropagation = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation(); // prevent click events from bubbling up and toggle the collapsible panel
-  }, []);
+  const cancelEdit = useCallback(() => setIsEditing(false), []);
+
+  const saveName = useCallback(
+    (value: string) => {
+      setName(value);
+      updateMigration({ migrationId: migrationStats.id, body: { name: value } });
+      setIsEditing(false);
+    },
+    [migrationStats.id, updateMigration]
+  );
+
+  const confirmDelete = useCallback(() => {
+    deleteMigration();
+    closeDeleteModal();
+  }, [deleteMigration, closeDeleteModal]);
+
+  const stopPropagation = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
 
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+    <EuiFlexGroup
+      direction="row"
+      alignItems="center"
+      gutterSize="xs"
+      data-test-subj="migrationPanelTitle"
+    >
       {isEditing ? (
         <EuiFlexItem grow={false} onClick={stopPropagation}>
           <EuiInlineEditText
@@ -125,7 +135,7 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
                   onClick={togglePopover}
                   aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
                   data-test-subj="openMigrationOptionsButton"
-                  isLoading={isUpdatingMigrationName || isDeletingMigration}
+                  isLoading={isUpdating || isDeleting}
                 />
               }
               isOpen={isPopoverOpen}
@@ -160,11 +170,11 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
                 title={i18n.DELETE_MIGRATION_TITLE}
                 titleProps={{ id: confirmModalTitleId }}
                 onCancel={closeDeleteModal}
-                onConfirm={confirmDeleteMigration}
+                onConfirm={confirmDelete}
                 confirmButtonText={i18n.DELETE_MIGRATION_TEXT}
                 cancelButtonText={i18n.CANCEL_DELETE_MIGRATION_TEXT}
                 buttonColor="danger"
-                isLoading={isDeletingMigration}
+                isLoading={isDeleting}
               >
                 <p>{i18n.DELETE_MIGRATION_DESCRIPTION}</p>
               </EuiConfirmModal>
@@ -175,4 +185,3 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     </EuiFlexGroup>
   );
 });
-MigrationPanelTitle.displayName = 'MigrationPanelTitle';

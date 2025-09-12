@@ -7,26 +7,19 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MigrationPanelTitle } from './migration_panel_title';
-import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
+import { MigrationPanelTitle as MigrationTitle } from './migration_title';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
-import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
-import { updateMigration } from '../../api';
+import * as ruleApi from '../../../rules/api';
+import { useDeleteMigration } from '../../hooks/use_delete_migrations';
+import type { RuleMigrationStats } from '../../../rules/types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../../api', () => {
-  return {
-    ...jest.requireActual('../../api'),
-    updateMigration: jest.fn(),
-  };
-});
+const mockUpdateMigrationApi = jest.spyOn(ruleApi, 'updateMigration');
 
-const mockUpdateMigrationApi = updateMigration as jest.Mock;
-
-jest.mock('../../../common/hooks/use_delete_migrations');
+jest.mock('../../hooks/use_delete_migrations');
 const useDeleteMigrationMock = useDeleteMigration as jest.Mock;
 const mockDeleteMigration = jest.fn();
 
@@ -45,7 +38,7 @@ const mockMigrationStatsRunning: RuleMigrationStats = {
 };
 
 const renderMigrationPanelTitle = (migrationStats: RuleMigrationStats) => {
-  return render(<MigrationPanelTitle migrationStats={migrationStats} />, {
+  return render(<MigrationTitle migrationStats={migrationStats} migrationType="rule" />, {
     wrapper: TestProviders,
   });
 };
