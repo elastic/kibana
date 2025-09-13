@@ -31,6 +31,7 @@ import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 export interface RulesClientFactoryOpts {
@@ -137,6 +138,7 @@ export class RulesClientFactory {
         excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: [
           RULE_SAVED_OBJECT_TYPE,
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
           API_KEY_PENDING_INVALIDATION_TYPE,
           AD_HOC_RUN_SAVED_OBJECT_TYPE,
         ],
