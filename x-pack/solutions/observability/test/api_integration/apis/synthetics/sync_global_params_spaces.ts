@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       const data = await monitorTestService.addsNewSpace();
       spaceId = data.SPACE_ID;
       locWithSpace = await testPrivateLocations.createPrivateLocation({
-        spaceId,
+        spaces: ['default', spaceId],
         label: 'Test private location 1',
       });
     });
@@ -92,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
+          spaceIds: ['default', spaceId],
         })
       );
     });
@@ -139,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
+          spaceIds: ['default', spaceId],
         })
       );
     });
@@ -183,6 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.id },
+          spaceIds: ['default', spaceId],
         })
       );
     });
@@ -206,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.id },
+          spaceIds: ['default', spaceId],
         })
       );
     });

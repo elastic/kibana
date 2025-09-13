@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 
 import yaml from 'js-yaml';
+import { PackagePolicyLink } from './monitor_inspect/package_policy_link';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
@@ -111,6 +112,8 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
                 {formatContent(data.result, asJson)}
               </EuiCodeBlock>
               {data.decodedCode && <MonitorCode code={data.decodedCode} />}
+              <EuiHorizontalRule margin="xs" />
+              <PackagePolicyLink data={data.result} />
             </>
           ) : loading && !error ? (
             <LoadingState />

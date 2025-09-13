@@ -1863,6 +1863,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       skipUnassignFromAgentPolicies?: boolean;
       force?: boolean;
+      spaceId?: string;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -1880,7 +1881,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = this.getLogger('delete');
     logger.debug(`Deleting package policies ${ids}`);
 
-    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
+    const packagePolicies = await this.getByIDs(soClient, ids, {
+      ignoreMissing: true,
+      spaceIds: options?.spaceId ? [options?.spaceId] : undefined,
+    });
     if (!packagePolicies) {
       return [];
     }
@@ -1907,7 +1911,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+        const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, false, {
+          spaceId: options?.spaceId,
+        });
         if (!agentPolicy) {
           throw new AgentPolicyNotFoundError('Agent policy not found');
         }
