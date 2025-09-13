@@ -19,6 +19,7 @@ import type {
   ListAgentResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
+import { publicApiPath } from '../../../common/constants';
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -31,7 +32,7 @@ export class AgentService {
    * List all agents
    */
   async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
-    const res = await this.http.get<ListAgentResponse>('/api/chat/agents');
+    const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
     return res.results;
   }
 
@@ -39,14 +40,14 @@ export class AgentService {
    * Get a single agent by id
    */
   async get(id: string): Promise<AgentDefinition> {
-    return await this.http.get<GetAgentResponse>(`/api/chat/agents/${id}`);
+    return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
   }
 
   /**
    * Create a new agent
    */
   async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
-    return await this.http.post<CreateAgentResponse>(`/api/chat/agents`, {
+    return await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
       body: JSON.stringify(profile),
     });
   }
@@ -55,7 +56,7 @@ export class AgentService {
    * Update an existing agent
    */
   async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
-    return await this.http.put<UpdateAgentResponse>(`/api/chat/agents/${id}`, {
+    return await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
       body: JSON.stringify(update),
     });
   }
@@ -64,6 +65,6 @@ export class AgentService {
    * Delete an agent by id
    */
   async delete(id: string): Promise<DeleteAgentResponse> {
-    return await this.http.delete<DeleteAgentResponse>(`/api/chat/agents/${id}`);
+    return await this.http.delete<DeleteAgentResponse>(`${publicApiPath}/agents/${id}`);
   }
 }

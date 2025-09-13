@@ -278,7 +278,7 @@ try {
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/chat/mcp` endpoint.
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/agent_builder/mcp` endpoint.
 
 
 ### Running with Claude Desktop
@@ -291,7 +291,7 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/chat/mcp",
+        "http://localhost:5601/api/agent_builder/mcp",
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],
@@ -307,14 +307,14 @@ Configure Claude Desktop by adding this to its configuration:
 
 The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
 
-Agentcards for onechat agents are exposed on `GET /api/chat/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/chat/a2a/{agentId}`.
+Agentcards for onechat agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 
 The ES|QL Tool API enables users to build custom ES|QL-powered tools that the LLM can execute against any index. Here's how to create your first ES|QL tool using a POST request in Kibana DevTools:
 
 ```json
-POST kbn://api/chat/tools
+POST kbn://api/agent_builder/tools
 {
   "id": "case_by_id",
   "description": "Find a custom case by id.",

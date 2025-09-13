@@ -69,12 +69,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               pageTestSubject: 'onechatPageConversations',
             },
             {
-              link: { deepLinkId: 'onechat:tools' },
+              link: { deepLinkId: 'agent_builder:tools' },
               breadcrumbs: ['Tools'],
               pageTestSubject: 'kbnAppWrapper visibleChrome',
             },
             {
-              link: { deepLinkId: 'onechat:agents' },
+              link: { deepLinkId: 'agent_builder:agents' },
               breadcrumbs: ['Agents'],
               pageTestSubject: 'kbnAppWrapper visibleChrome',
             },

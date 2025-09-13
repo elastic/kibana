@@ -10,6 +10,7 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type { ListConversationsResponse } from '../../common/http_api/conversations';
 import { apiPrivileges } from '../../common/features';
+import { publicApiPath } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Conversation API');
@@ -24,7 +25,7 @@ export function registerConversationRoutes({
   // List conversations
   router.versioned
     .get({
-      path: '/api/chat/conversations',
+      path: `${publicApiPath}/conversations`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -63,7 +64,7 @@ export function registerConversationRoutes({
   // Get conversation by ID
   router.versioned
     .get({
-      path: '/api/chat/conversations/{conversation_id}',
+      path: `${publicApiPath}/conversations/{conversation_id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
