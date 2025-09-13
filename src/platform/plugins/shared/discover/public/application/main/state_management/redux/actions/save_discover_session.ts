@@ -18,18 +18,15 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
+import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
-import { internalStateSlice } from '../internal_state';
 import {
-  fromSavedObjectTabToSavedSearch,
-  fromSavedObjectTabToTabState,
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
-import { appendAdHocDataViews, replaceAdHocDataViewWithId, setDataView } from './data_views';
-import { setTabs } from './tabs';
+import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
+import { resetDiscoverSession } from './reset_discover_session';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -206,48 +203,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
-      await Promise.all(
-        updatedTabs.map(async (tab) => {
-          dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
-
-          const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-          const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
-
-          if (!tabStateContainer) {
-            return;
-          }
-
-          const savedSearch = await fromSavedObjectTabToSavedSearch({
-            tab,
-            discoverSession,
-            services,
-          });
-          const dataView = savedSearch.searchSource.getField('index');
-
-          if (dataView) {
-            dispatch(setDataView({ tabId: tab.id, dataView }));
-          }
-
-          tabStateContainer.savedSearchState.set(savedSearch);
-          tabStateContainer.actions.undoSavedSearchChanges();
-          tabStateContainer.appState.resetInitialState();
-        })
-      );
-
-      const allTabs = discoverSession.tabs.map((tab) =>
-        fromSavedObjectTabToTabState({
-          tab,
-          existingTab: selectTab(state, tab.id),
-        })
-      );
-
-      dispatch(
-        setTabs({
-          allTabs,
-          selectedTabId: state.tabs.unsafeCurrentId,
-          recentlyClosedTabs: selectRecentlyClosedTabs(state),
-        })
-      );
+      await dispatch(resetDiscoverSession({ discoverSession })).unwrap();
     }
 
     return { discoverSession };
