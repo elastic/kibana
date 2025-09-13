@@ -4,25 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+
+import React, { useCallback } from 'react';
 import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
-import { generateRandomIndexName } from '../utils/indices';
 import { SampleDataActionButton } from './sample_data_action_button';
+import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
 
 export const ConnectToElasticsearchSidePanel = () => {
-  const { application, sampleDataIngest } = useKibana().services;
+  const { application } = useKibana().services;
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
-
-  const indexName = useMemo(() => generateRandomIndexName(), []);
-  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
+  const {
+    hasRequiredLicense,
+    isPluginAvailable: isSampleDataIngestPluginAvailable,
+    hasPrivileges: hasSampleDataRequiredPrivileges,
+  } = useIsSampleDataAvailable();
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -54,13 +56,29 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
         />
 
-        {sampleDataIngest && userPrivileges?.privileges?.canManageIndex === true && (
+        {isSampleDataIngestPluginAvailable && hasSampleDataRequiredPrivileges && (
           <EuiCard
             display="plain"
             hasBorder
             textAlign="left"
             titleSize="xs"
             data-test-subj="sampleDataSection"
+            betaBadgeProps={{
+              label: i18n.translate(
+                'xpack.searchHomepage.connectToElasticsearch.licenseBadge.title',
+                {
+                  defaultMessage: 'Enterprise',
+                }
+              ),
+              'data-test-subj': 'licenceRequiredBadge',
+              tooltipContent: i18n.translate(
+                'xpack.searchHomepage.connectToElasticsearch.licenseBadge.description',
+                {
+                  defaultMessage:
+                    'This dataset makes use of AI features that require an Enterprise license.',
+                }
+              ),
+            }}
             title={
               <FormattedMessage
                 id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
@@ -73,7 +91,12 @@ export const ConnectToElasticsearchSidePanel = () => {
                 defaultMessage="Add data sets with sample visualizations, dashboards, and more."
               />
             }
-            footer={<SampleDataActionButton />}
+            footer={
+              <SampleDataActionButton
+                data-test-subj="sampleDataActionButton"
+                hasRequiredLicense={hasRequiredLicense}
+              />
+            }
           />
         )}
 
