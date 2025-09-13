@@ -71,7 +71,7 @@ streamlangApiTest.describe(
         }
       );
 
-      // Add template tests
+      // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
           templateLabel: 'double-braces',
@@ -87,8 +87,8 @@ streamlangApiTest.describe(
         },
       ].forEach(({ templateLabel, templateType, to, value }) => {
         streamlangApiTest(
-          `should consistently handle ${templateType} template syntax for both to and value fields`,
-          async ({ testBed, esql }) => {
+          `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
+          async () => {
             const streamlangDSL: StreamlangDSL = {
               steps: [
                 {
@@ -99,35 +99,9 @@ streamlangApiTest.describe(
               ],
             };
 
-            const { processors } = asIngest(streamlangDSL);
-            const { query } = asEsql(streamlangDSL);
-
-            const docs = [
-              {
-                [to]: ['existing_tag'],
-                template_to: 'original_template_to', // Should not be appended to
-                template_value: 'substituted-tag', // Should not be substituted
-              },
-            ];
-
-            await testBed.ingest(`ingest-append-template-${templateLabel}`, docs, processors);
-            const ingestResult = await testBed.getDocs(`ingest-append-template-${templateLabel}`);
-
-            await testBed.ingest(`esql-append-template-${templateLabel}`, docs);
-            const esqlResult = await esql.queryOnIndex(
-              `esql-append-template-${templateLabel}`,
-              query
-            );
-
-            // Both engines should treat the templates as literal values, not as template variables to substitute
-            expect(ingestResult[0][to]).toEqual(['existing_tag', ...value]);
-            expect(esqlResult.documents[0][to]).toEqual(['existing_tag', ...value]);
-
-            // Templates should not be parsed/substituted
-            expect(ingestResult[0]).toHaveProperty('template_to', 'original_template_to');
-            expect(ingestResult[0]).toHaveProperty('template_value', 'substituted-tag');
-            expect(esqlResult.documents[0]).toHaveProperty('template_to', 'original_template_to');
-            expect(esqlResult.documents[0]).toHaveProperty('template_value', 'substituted-tag');
+            // Both transpilers should throw validation errors for Mustache templates
+            expect(() => asIngest(streamlangDSL)).toThrow(); // Ingest Pipeline transpiler should reject
+            expect(() => asEsql(streamlangDSL)).toThrow(); // ES|QL transpiler should reject
           }
         );
       });

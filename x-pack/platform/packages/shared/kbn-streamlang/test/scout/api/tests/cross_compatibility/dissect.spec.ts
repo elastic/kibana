@@ -82,7 +82,7 @@ streamlangApiTest.describe(
         }
       );
 
-      // Add template tests
+      // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
           templateLabel: 'double-braces',
@@ -98,8 +98,8 @@ streamlangApiTest.describe(
         },
       ].forEach(({ templateLabel, templateType, from, pattern }) => {
         streamlangApiTest(
-          `should consistently handle ${templateType} template syntax for from and pattern fields`,
-          async ({ testBed, esql }) => {
+          `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
+          async () => {
             const streamlangDSL: StreamlangDSL = {
               steps: [
                 {
@@ -110,38 +110,9 @@ streamlangApiTest.describe(
               ],
             };
 
-            const { processors } = asIngest(streamlangDSL);
-            const { query } = asEsql(streamlangDSL);
-
-            // Create a document with the literal template field and pattern content
-            const message = '[info] message content';
-            const docs = [
-              {
-                [from]: message,
-              },
-            ];
-
-            await testBed.ingest(`ingest-dissect-template-${templateLabel}`, docs, processors);
-            const ingestResult = await testBed.getDocs(`ingest-dissect-template-${templateLabel}`);
-
-            // Prepare mapping for ES|QL
-            const mappingDoc = { 'log.level': '' };
-            await testBed.ingest(`esql-dissect-template-${templateLabel}`, [mappingDoc]);
-            await testBed.ingest(`esql-dissect-template-${templateLabel}`, docs);
-            const esqlResult = await esql.queryOnIndex(
-              `esql-dissect-template-${templateLabel}`,
-              query
-            );
-
-            // Both engines should treat the templates as literal values, not as template variables to substitute
-            // expect(ingestResult[0]).toHaveProperty('log.level', 'info');
-            expect(esqlResult.documents[1]).toEqual(
-              expect.objectContaining({ 'log.level': 'info' })
-            );
-
-            // Original fields should remain
-            expect(ingestResult[0]).toHaveProperty(from);
-            expect(esqlResult.documents[1][from]).toEqual(message);
+            // Both transpilers should throw validation errors for Mustache templates
+            expect(() => asIngest(streamlangDSL)).toThrow(); // Ingest Pipeline transpiler should reject
+            expect(() => asEsql(streamlangDSL)).toThrow(); // ES|QL transpiler should reject
           }
         );
       });

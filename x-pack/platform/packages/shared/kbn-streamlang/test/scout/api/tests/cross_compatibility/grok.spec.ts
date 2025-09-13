@@ -95,7 +95,7 @@ streamlangApiTest.describe(
         }
       );
 
-      // Add template tests
+      // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
           templateLabel: 'double-braces',
@@ -111,8 +111,8 @@ streamlangApiTest.describe(
         },
       ].forEach(({ templateLabel, templateType, from, pattern }) => {
         streamlangApiTest(
-          `should consistently handle ${templateType} template syntax for from and patterns fields`,
-          async ({ testBed, esql }) => {
+          `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
+          async () => {
             const streamlangDSL: StreamlangDSL = {
               steps: [
                 {
@@ -123,38 +123,9 @@ streamlangApiTest.describe(
               ],
             };
 
-            const { processors } = asIngest(streamlangDSL);
-            const { query } = asEsql(streamlangDSL);
-
-            // Create a document with the literal template field and pattern content
-            const message = '55.3.244.1 GET /index.html';
-            const docs = [
-              {
-                [from]: message,
-              },
-            ];
-
-            await testBed.ingest(`ingest-grok-template-${templateLabel}`, docs, processors);
-            const ingestResult = await testBed.getDocs(`ingest-grok-template-${templateLabel}`);
-
-            // Prepare mapping for ES|QL
-            const mappingDoc = { 'client.ip': '' };
-            await testBed.ingest(`esql-grok-template-${templateLabel}`, [mappingDoc]); // Pre-map the field, ES|QL requires it
-            await testBed.ingest(`esql-grok-template-${templateLabel}`, docs);
-            const esqlResult = await esql.queryOnIndex(
-              `esql-grok-template-${templateLabel}`,
-              query
-            );
-
-            // Both engines should treat the templates as literal values, not as template variables to substitute
-            expect(ingestResult[0]).toHaveProperty('client.ip', '55.3.244.1');
-            expect(esqlResult.documents[1]).toEqual(
-              expect.objectContaining({ 'client.ip': '55.3.244.1' })
-            );
-
-            // Original fields should remain
-            expect(ingestResult[0]).toHaveProperty(from);
-            expect(esqlResult.documents[1][from]).toEqual(message);
+            // Both transpilers should throw validation errors for Mustache templates
+            expect(() => asIngest(streamlangDSL)).toThrow(); // Ingest Pipeline transpiler should reject
+            expect(() => asEsql(streamlangDSL)).toThrow(); // ES|QL transpiler should reject
           }
         );
       });

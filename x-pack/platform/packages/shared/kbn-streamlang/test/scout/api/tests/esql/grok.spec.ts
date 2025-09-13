@@ -513,34 +513,19 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
-      'should escape (and not parse) template syntax {{ and {{{',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-grok-escape-template';
+    streamlangApiTest('should reject Mustache template syntax {{ and {{{', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: '{{message.field}}',
+            patterns: ['%{IP:client.ip} %{NUMBER:bytes.field:int}'],
+          } as GrokProcessor,
+        ],
+      };
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'grok',
-              from: '{{message.field}}',
-              patterns: ['%{IP:client.ip} %{NUMBER:bytes.field:int}'],
-            } as GrokProcessor,
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        const docs = [{ '{{message.field}}': '10.0.0.1 1024' }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-
-        expect(esqlResult.documents[0]).toEqual(
-          expect.objectContaining({
-            'client.ip': '10.0.0.1',
-            'bytes.field': 1024,
-          })
-        );
-      }
-    );
+      // Should throw validation error for Mustache templates
+      expect(() => transpile(streamlangDSL)).toThrow();
+    });
   }
 );

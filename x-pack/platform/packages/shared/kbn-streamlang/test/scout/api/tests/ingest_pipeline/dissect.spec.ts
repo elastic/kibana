@@ -130,46 +130,26 @@ streamlangApiTest.describe(
     [
       {
         templateFrom: '{{fromField}}',
-        description: 'should use {{ }} as literal field names',
+        description: 'should reject {{ }} template syntax in field names',
       },
       {
         templateFrom: '{{{fromField}}}',
-        description: 'should use {{{ }}} as literal field names',
+        description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateFrom, description }) => {
       streamlangApiTest(description, async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-dissect-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'dissect',
-              from: templateFrom,
-              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-            } as DissectProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [
-          {
-            [templateFrom]: '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1',
-          },
-        ];
-        await testBed.ingest(indexName, docs, processors);
-
-        const ingestedDocs = await testBed.getDocs(indexName);
-
-        // Check that the fields were correctly extracted
-        expect(ingestedDocs[0]).toHaveProperty('@timestamp', '2025-01-01T00:00:00.000Z');
-        expect(ingestedDocs[0]).toHaveProperty('log.level', 'info');
-        expect(ingestedDocs[0]).toHaveProperty('client.ip', '127.0.0.1');
-        // Original template field should remain unchanged - now we're testing literal field names
-        expect(ingestedDocs[0]).toHaveProperty(
-          templateFrom,
-          '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1'
-        );
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: templateFrom,
+                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+              } as DissectProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow(); // Should throw validation error for Mustache templates
       });
     });
   }

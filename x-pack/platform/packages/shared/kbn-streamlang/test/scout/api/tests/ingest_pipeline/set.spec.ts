@@ -36,43 +36,46 @@ streamlangApiTest.describe(
       expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
     });
 
+    // Template syntax validation tests - these should now REJECT Mustache templates
     [
       {
         templateValue: '{{value}}',
         templateTo: '{{templated_to}}',
-        description: 'should set a field using {{ }} template',
+        templateType: '{{ }}',
+        description: 'should reject {{ }} template syntax',
+      },
+      {
+        templateValue: '{{value}}',
+        templateTo: 'template_to',
+        templateType: '{{ }}',
+        description: 'should reject {{ }} template syntax in field names',
+      },
+      {
+        templateValue: 'template_value',
+        templateTo: '{{templated_to}}',
+        templateType: '{{ }}',
+        description: 'should reject {{ }} template syntax in values',
       },
       {
         templateValue: '{{{value}}}',
         templateTo: '{{{templated_to}}}',
-        description: 'should set a field using {{{ }}} template',
+        templateType: '{{{ }}}',
+        description: 'should reject {{{ }}} template syntax',
       },
-    ].forEach(({ templateValue, templateTo, description }) => {
-      streamlangApiTest(description, async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-set-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: templateTo,
-              value: templateValue,
-            } as SetProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [{ value: 'substituted-value', templated_to: 'attributes.status' }];
-        await testBed.ingest(indexName, docs, processors);
-
-        const ingestedDocs = await testBed.getDocs(indexName);
-
-        expect(ingestedDocs[0]).toMatchObject({
-          [templateTo]: templateValue, // Not escaped and assigned literally
-          templated_to: 'attributes.status', // original fields unchanged
-          value: 'substituted-value', // original fields unchanged
-        });
+    ].forEach(({ templateValue, templateTo, templateType, description }) => {
+      streamlangApiTest(description, async () => {
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'set',
+                to: templateTo,
+                value: templateValue,
+              } as SetProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow(); // Should throw validation error for Mustache templates
       });
     });
 

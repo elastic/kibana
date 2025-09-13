@@ -155,33 +155,21 @@ streamlangApiTest.describe(
     );
 
     streamlangApiTest(
-      'should escape (and not parse) template syntax {{ and {{{',
+      'should reject Mustache template syntax {{ and {{{ in field names',
       async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-rename-escape-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: '{{source.field}}',
-              to: '{{{target.field}}}',
-              override: true,
-            } as RenameProcessor,
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        const docs = [{ '{{source.field}}': 'test-value' }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-
-        expect(esqlResult.documents[0]).toEqual(
-          expect.objectContaining({
-            '{{{target.field}}}': 'test-value',
-          })
-        );
-        expect(esqlResult.documents[0]).not.toHaveProperty('{{source.field}}');
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'rename',
+                from: '{{source.field}}',
+                to: '{{{target.field}}}',
+                override: true,
+              } as RenameProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow(); // Should throw validation error for Mustache templates
       }
     );
   }

@@ -164,43 +164,29 @@ streamlangApiTest.describe(
       {
         templateFrom: '{{fromField}}',
         templateTo: '{{toField}}',
-        description: 'should use {{ }} as literal field names',
+        description: 'should reject {{ }} template syntax in field names',
       },
       {
         templateFrom: '{{{fromField}}}',
         templateTo: '{{{toField}}}',
-        description: 'should use {{{ }}} as literal field names',
+        description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateFrom, templateTo, description }) => {
       streamlangApiTest(description, async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-date-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: templateFrom,
-              to: templateTo,
-              formats: ['ISO8601'],
-              output_format: 'yyyy-MM-dd',
-            } as DateProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [
-          {
-            [templateFrom]: '2025-01-01T12:34:56.789Z',
-            [templateTo]: '',
-          },
-        ];
-        await testBed.ingest(indexName, docs, processors);
-
-        const ingestedDocs = await testBed.getDocs(indexName);
-
-        expect(ingestedDocs[0]).toHaveProperty(templateFrom, '2025-01-01T12:34:56.789Z');
-        expect(ingestedDocs[0]).toHaveProperty(templateTo, '2025-01-01');
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'date',
+                from: templateFrom,
+                to: templateTo,
+                formats: ['ISO8601'],
+                output_format: 'yyyy-MM-dd',
+              } as DateProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow(); // Should throw validation error for Mustache templates
       });
     });
   }

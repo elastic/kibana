@@ -144,35 +144,20 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
-      'should escape (and not parse) template syntax {{ and {{{',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-date-escape-template';
+    streamlangApiTest('should reject Mustache template syntax {{ and {{{', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: '{{date.field}}',
+            to: '{{{parsed.field}}}',
+            formats: ['ISO8601'],
+          } as DateProcessor,
+        ],
+      };
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: '{{date.field}}',
-              to: '{{{parsed.field}}}',
-              formats: ['ISO8601'],
-            } as DateProcessor,
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        const docs = [{ '{{date.field}}': '2025-01-01T12:34:56.789Z' }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-
-        expect(esqlResult.documents[0]).toEqual(
-          expect.objectContaining({
-            '{{date.field}}': '2025-01-01T12:34:56.789Z',
-            '{{{parsed.field}}}': '2025-01-01T12:34:56.789Z',
-          })
-        );
-      }
-    );
+      // Should throw validation error for Mustache templates
+      expect(() => transpile(streamlangDSL)).toThrow();
+    });
   }
 );

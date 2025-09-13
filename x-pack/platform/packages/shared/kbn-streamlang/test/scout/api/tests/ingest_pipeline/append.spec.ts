@@ -114,21 +114,20 @@ streamlangApiTest.describe(
       }
     );
 
+    // Template validation tests - should reject Mustache templates
     [
       {
         templateTo: '{{tags_field}}',
         templateValue: '{{value_field}}',
-        description: 'should append a {{ }} templated value',
+        description: 'should reject {{ }} template syntax',
       },
       {
         templateTo: '{{{tags_field}}}',
         templateValue: '{{{value_field}}}',
-        description: 'should append a {{{ ]}} templated value',
+        description: 'should reject {{{ }}} template syntax',
       },
     ].forEach(({ templateTo, templateValue, description }) => {
-      streamlangApiTest(description, async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-append-templated';
-
+      streamlangApiTest(description, async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -139,24 +138,8 @@ streamlangApiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [
-          {
-            tags: ['existing_tag'],
-            tags_field: 'tags',
-            value_field: 'new_tag',
-            '{{tags_field}}': ['existing-01'],
-            '{{{tags_field}}}': ['existing-01'],
-          },
-        ];
-
-        await testBed.ingest(indexName, docs, processors);
-        const ingestedDocs = await testBed.getDocs(indexName);
-
-        expect(ingestedDocs.length).toBe(1);
-        expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag']); // Should not append
-        expect(ingestedDocs[0]).toHaveProperty(templateTo, ['existing-01', templateValue]);
+        // Should throw validation error for Mustache templates
+        expect(() => transpile(streamlangDSL)).toThrow();
       });
     });
   }

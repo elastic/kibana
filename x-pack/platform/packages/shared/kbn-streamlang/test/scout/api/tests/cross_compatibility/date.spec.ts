@@ -98,7 +98,7 @@ streamlangApiTest.describe(
         expect(esqlResult.documents[0]['@timestamp']).toEqual('2025/01/01');
       });
 
-      // Add template tests
+      // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
           templateLabel: 'double-braces',
@@ -114,8 +114,8 @@ streamlangApiTest.describe(
         },
       ].forEach(({ templateLabel, templateType, from, to }) => {
         streamlangApiTest(
-          `should consistently handle ${templateType} template syntax for from and to fields`,
-          async ({ testBed, esql }) => {
+          `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
+          async () => {
             const streamlangDSL: StreamlangDSL = {
               steps: [
                 {
@@ -128,37 +128,9 @@ streamlangApiTest.describe(
               ],
             };
 
-            const { processors } = asIngest(streamlangDSL);
-            const { query } = asEsql(streamlangDSL);
-
-            // Create a document with the literal template strings as fields and the fields they would (should not) substitute to
-            const docs = [
-              {
-                [from]: '2025-01-01T12:34:56.789Z',
-                template_from: 'source.field', // Should not be substituted
-                template_to: 'target.field', // Should not be substituted
-              },
-            ];
-
-            await testBed.ingest(`ingest-date-template-${templateLabel}`, docs, processors);
-            const ingestResult = await testBed.getDocs(`ingest-date-template-${templateLabel}`);
-
-            await testBed.ingest(`esql-date-template-${templateLabel}`, docs);
-            const esqlResult = await esql.queryOnIndex(
-              `esql-date-template-${templateLabel}`,
-              query
-            );
-
-            // Both engines should treat the templates as literal values, not as template variables to substitute
-            expect(ingestResult[0]).toHaveProperty(to, '2025/01/01');
-            expect(ingestResult[0]).toHaveProperty('template_from', 'source.field');
-            expect(ingestResult[0]).toHaveProperty('template_to', 'target.field');
-
-            expect(esqlResult.documents[0]).toEqual(
-              expect.objectContaining({ [to]: '2025/01/01' })
-            );
-            expect(esqlResult.documents[0]).toHaveProperty('template_from', 'source.field');
-            expect(esqlResult.documents[0]).toHaveProperty('template_to', 'target.field');
+            // Both transpilers should throw validation errors for Mustache templates
+            expect(() => asIngest(streamlangDSL)).toThrow(); // Ingest Pipeline transpiler should reject
+            expect(() => asEsql(streamlangDSL)).toThrow(); // ES|QL transpiler should reject
           }
         );
       });

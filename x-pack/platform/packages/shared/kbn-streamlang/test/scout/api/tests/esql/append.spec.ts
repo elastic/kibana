@@ -185,33 +185,19 @@ streamlangApiTest.describe(
       ]);
     });
 
-    streamlangApiTest(
-      'should escape (and not parse) template syntax {{ and {{{',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-append-escape-template';
+    streamlangApiTest('should reject Mustache template syntax {{ and {{{', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'append',
+            to: '{{my.list}}',
+            value: ['{{{template.value}}}'],
+          } as AppendProcessor,
+        ],
+      };
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'append',
-              to: '{{my.list}}',
-              value: ['{{{template.value}}}'],
-            } as AppendProcessor,
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        const docs = [{ '{{my.list}}': ['existing'] }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-
-        expect(esqlResult.documents[0]).toEqual(
-          expect.objectContaining({
-            '{{my.list}}': ['existing', '{{{template.value}}}'],
-          })
-        );
-      }
-    );
+      // Should throw validation error for Mustache templates
+      expect(() => transpile(streamlangDSL)).toThrow();
+    });
   }
 );

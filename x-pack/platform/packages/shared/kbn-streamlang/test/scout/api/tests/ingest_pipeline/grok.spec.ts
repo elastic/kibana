@@ -122,50 +122,28 @@ streamlangApiTest.describe(
     [
       {
         templateFrom: '{{fromField}}',
-        description: 'should use {{ }} as literal field names',
+        description: 'should reject {{ }} template syntax in field names',
       },
       {
         templateFrom: '{{{fromField}}}',
-        description: 'should use {{{ }}} as literal field names',
+        description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateFrom, description }) => {
       streamlangApiTest(description, async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-grok-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'grok',
-              from: templateFrom,
-              patterns: [
-                '%{IP:client.ip} %{WORD:http.request.method} %{URIPATHPARAM:url.path} %{NUMBER:http.response.body.bytes} %{NUMBER:event.duration}',
-              ],
-            } as GrokProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [
-          {
-            [templateFrom]: '55.3.244.1 GET /index.html 15824 0.043',
-          },
-        ];
-        await testBed.ingest(indexName, docs, processors);
-
-        const ingestedDocs = await testBed.getDocs(indexName);
-
-        // Check that the fields were correctly extracted
-        expect(ingestedDocs[0]).toHaveProperty('client.ip', '55.3.244.1');
-        expect(ingestedDocs[0]).toHaveProperty('http.request.method', 'GET');
-        expect(ingestedDocs[0]).toHaveProperty('url.path', '/index.html');
-        expect(ingestedDocs[0]).toHaveProperty('http.response.body.bytes', '15824');
-        expect(ingestedDocs[0]).toHaveProperty('event.duration', '0.043');
-        // Original template field should remain unchanged - now we're testing literal field names
-        expect(ingestedDocs[0]).toHaveProperty(
-          templateFrom,
-          '55.3.244.1 GET /index.html 15824 0.043'
-        );
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: templateFrom,
+                patterns: [
+                  '%{IP:client.ip} %{WORD:http.request.method} %{URIPATHPARAM:url.path} %{NUMBER:http.response.body.bytes} %{NUMBER:event.duration}',
+                ],
+              } as GrokProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow(); // Should throw validation error for Mustache templates
       });
     });
   }

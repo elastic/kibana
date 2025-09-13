@@ -41,35 +41,20 @@ streamlangApiTest.describe(
       );
     });
 
-    streamlangApiTest(
-      'should escape (and not parse) template syntax {{ and {{{',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-set-escape-template';
+    streamlangApiTest('should reject Mustache template syntax {{ and {{{', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: '{{attributes.status}}',
+            value: '{{{value}}}',
+          } as SetProcessor,
+        ],
+      };
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: '{{attributes.status}}',
-              value: '{{{value}}}',
-            } as SetProcessor,
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        const docs = [{ attributes: { size: 4096 } }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-
-        // `toHaveProperty` doesn't work with flattened ES|QL Rows/Documents
-        expect(esqlResult.documents[0]).toEqual(
-          expect.objectContaining({
-            '{{attributes.status}}': '{{{value}}}',
-          })
-        );
-      }
-    );
+      // Should throw validation error for Mustache templates
+      expect(() => transpile(streamlangDSL)).toThrow();
+    });
 
     streamlangApiTest('should not set a field when where is false', async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-set-where-false';

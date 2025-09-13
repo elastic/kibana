@@ -484,34 +484,19 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
-      'should escape (and not parse) template syntax {{ and {{{',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-dissect-escape-template';
+    streamlangApiTest('should reject Mustache template syntax {{ and {{{', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: '{{message.field}}',
+            pattern: '%{@timestamp} %{client.ip}',
+          } as DissectProcessor,
+        ],
+      };
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'dissect',
-              from: '{{message.field}}',
-              pattern: '%{@timestamp} %{client.ip}',
-            } as DissectProcessor,
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        const docs = [{ '{{message.field}}': '2025-01-01 10.0.0.1' }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-
-        expect(esqlResult.documents[0]).toEqual(
-          expect.objectContaining({
-            '@timestamp': '2025-01-01',
-            'client.ip': '10.0.0.1',
-          })
-        );
-      }
-    );
+      // Should throw validation error for Mustache templates
+      expect(() => transpile(streamlangDSL)).toThrow();
+    });
   }
 );

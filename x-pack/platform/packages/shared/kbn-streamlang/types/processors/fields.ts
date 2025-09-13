@@ -12,9 +12,9 @@ import { NonEmptyString } from '@kbn/zod-helpers';
  * String schema that rejects Mustache template syntax.
  * Validation at Zod level ensures immediate feedback in Streamlang editors,
  * validation APIs, and prevents invalid DSL creation entirely.
- * Only checks for starting {{ braces since that's when Mustache becomes active in Ingest Pipelines.
+ * Checks for `{{` anywhere in the string which makes Mustache active in Ingest Pipelines.
  */
-const NoMustacheString = NonEmptyString.refine((val) => !val.startsWith('{{'), {
+const NoMustacheString = NonEmptyString.refine((val) => !val.includes('{{'), {
   message: 'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
 });
 
@@ -25,7 +25,7 @@ const NoMustacheString = NonEmptyString.refine((val) => !val.startsWith('{{'), {
 export const NoMustacheValue = z.unknown().refine(
   (val) => {
     if (typeof val === 'string') {
-      return !val.startsWith('{{');
+      return !val.includes('{{');
     }
     return true; // Non-strings are allowed
   },
@@ -45,7 +45,7 @@ export const NoMustacheArrayValues = z
     (arr) => {
       return arr.every((val) => {
         if (typeof val === 'string') {
-          return !val.startsWith('{{');
+          return !val.includes('{{');
         }
         return true; // Non-strings are allowed
       });
@@ -64,3 +64,8 @@ export const StreamlangSourceField = NoMustacheString;
  * Target field names (to fields) - prevents Mustache templates in field creation
  */
 export const StreamlangTargetField = NoMustacheString;
+
+/**
+ * Separator for join and split processors. Allows spaces and other characters.
+ */
+export const StreamlangSeparator = z.string().min(1);

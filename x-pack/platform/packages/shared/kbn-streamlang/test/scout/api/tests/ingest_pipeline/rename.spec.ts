@@ -43,52 +43,27 @@ streamlangApiTest.describe(
       {
         templateFrom: 'host.{{source_field}}',
         templateTo: 'host.{{target_field}}',
-        description: 'should rename a field using a {{ }} template for the target',
+        description: 'should reject {{ }} template syntax in field names',
       },
       {
         templateFrom: 'host.{{{source_field}}}',
         templateTo: 'host.{{{target_field}}}',
-        description: 'should rename a field using a {{{ }}} template for the target',
+        description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateFrom, templateTo, description }) => {
       streamlangApiTest(description, async ({ testBed }) => {
-        const indexName = 'streams-e2e-test-rename-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: templateFrom,
-              to: templateTo,
-            } as RenameProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [
-          {
-            host: {
-              original: 'test-host',
-              '{{source_field}}': 'curly-braces',
-              '{{{source_field}}}': 'curly-braces',
-            },
-            source_field: 'original',
-            target_field: 'renamed',
-          },
-        ];
-        await testBed.ingest(indexName, docs, processors);
-
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
-        const source = ingestedDocs[0];
-
-        // Template should not be parsed/substituted, hence original properties should remain as is
-        expect(source).not.toHaveProperty('host.renamed', 'test-host'); // Shouldn't rename a substituted field
-        expect(source).toHaveProperty('host.original', 'test-host');
-
-        expect(source).not.toHaveProperty(templateFrom); // Renamed the literal templated field (no parsing)
-        expect(source).toHaveProperty(templateTo, 'curly-braces'); // Renamed a literal templated field (no parsing)
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'rename',
+                from: templateFrom,
+                to: templateTo,
+              } as RenameProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow(); // Should throw validation error for Mustache templates
       });
     });
 

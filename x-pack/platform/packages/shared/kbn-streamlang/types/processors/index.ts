@@ -15,6 +15,7 @@ import {
   NoMustacheArrayValues,
   StreamlangSourceField,
   StreamlangTargetField,
+  StreamlangSeparator,
 } from './fields';
 import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_processors';
 import { elasticsearchProcessorTypes } from './manual_ingest_pipeline_processors';
@@ -104,7 +105,7 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('dissect'),
   from: StreamlangSourceField,
   pattern: NonEmptyString,
-  append_separator: z.optional(NonEmptyString),
+  append_separator: z.optional(StreamlangSeparator),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<DissectProcessor>;
 
