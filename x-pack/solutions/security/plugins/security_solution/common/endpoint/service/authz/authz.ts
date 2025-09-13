@@ -177,16 +177,18 @@ export const calculateEndpointAuthz = (
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
-  // of the response actions except `release`. Sole access to `release` is something
+  // of the response actions except `release` and `cancel`. Sole access to `release` is something
   // that is supported for a user in a license downgrade scenario, and in that case, we don't want
   // to allow access to Response Console.
+  //
+  // NOTE: Cancel actions use `canAccessResponseConsole` as their base permission check
   authz.canAccessResponseConsole =
     isEnterpriseLicense &&
-    Object.values(omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, 'release')).some(
-      (responseActionAuthzKey) => {
-        return authz[responseActionAuthzKey];
-      }
-    );
+    Object.values(
+      omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, ['release', 'cancel'])
+    ).some((responseActionAuthzKey) => {
+      return authz[responseActionAuthzKey as keyof EndpointAuthz];
+    });
 
   return authz;
 };

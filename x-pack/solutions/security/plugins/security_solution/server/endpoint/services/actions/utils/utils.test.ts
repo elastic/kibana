@@ -77,7 +77,7 @@ describe('When using Actions service utilities', () => {
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
         agentType: 'endpoint',
         hosts: {},
-        command: 'kill-process',
+        command: 'suspend-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'elastic',
@@ -99,7 +99,7 @@ describe('When using Actions service utilities', () => {
         agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
         agentType: 'endpoint',
         hosts: {},
-        command: 'kill-process',
+        command: 'suspend-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'Shanel',
@@ -107,6 +107,32 @@ describe('When using Actions service utilities', () => {
         id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
         type: 'ACTION_REQUEST',
         parameters: undefined,
+        meta: undefined,
+      });
+    });
+
+    it('normalizes a `LogsEndpointAction` with meta field', () => {
+      const machineActionId = 'ms-defender-action-123';
+      expect(
+        mapToNormalizedActionRequest(
+          endpointActionGenerator.generate({
+            '@timestamp': '2022-04-27T16:08:47.449Z',
+            meta: { machineActionId },
+          })
+        )
+      ).toEqual({
+        agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
+        agentType: 'endpoint',
+        hosts: {},
+        command: 'suspend-process',
+        comment: expect.any(String),
+        createdAt: '2022-04-27T16:08:47.449Z',
+        createdBy: 'Shanel',
+        expiration: '2022-05-10T16:08:47.449Z',
+        id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+        type: 'ACTION_REQUEST',
+        parameters: undefined,
+        meta: { machineActionId },
       });
     });
   });
@@ -1006,6 +1032,7 @@ describe('When using Actions service utilities', () => {
         parameters: undefined,
         agentType: 'endpoint',
         hosts: {},
+        meta: undefined,
       };
 
       actionResponses = {
@@ -1050,6 +1077,7 @@ describe('When using Actions service utilities', () => {
         parameters: undefined,
         ruleId: undefined,
         ruleName: undefined,
+        meta: undefined,
         agentState: {
           '6e6796b0-af39-4f12-b025-fcb06db499e5': {
             completedAt: expect.any(String),
@@ -1066,17 +1094,9 @@ describe('When using Actions service utilities', () => {
         outputs: {
           '6e6796b0-af39-4f12-b025-fcb06db499e5': {
             content: {
-              code: 'ra_execute_success_done',
-              cwd: '/some/path',
-              output_file_id: 'some-output-file-id',
-              output_file_stderr_truncated: false,
-              output_file_stdout_truncated: true,
-              shell: 'bash',
-              shell_code: 0,
-              stderr: expect.any(String),
-              stderr_truncated: true,
-              stdout: expect.any(String),
-              stdout_truncated: true,
+              code: 'ra_upload_file-success',
+              disk_free_space: 4825566125475,
+              path: '/disk1/file/saved/here',
             },
             type: 'json',
           },

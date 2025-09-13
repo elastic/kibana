@@ -26,15 +26,16 @@ describe('Endpoint Authz service', () => {
   let fleetAuthz: FleetAuthz;
   let userRoles: string[];
 
-  const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
-    ResponseConsoleRbacControls[]
-  >((acc, e) => {
-    const item = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e];
-    if (!acc.includes(item)) {
-      acc.push(item);
-    }
-    return acc;
-  }, []);
+  const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice()
+    .filter((cmd) => cmd !== 'cancel') // Exclude cancel as it uses dynamic permission checking
+    .reduce<ResponseConsoleRbacControls[]>((acc, e) => {
+      const item =
+        RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e as Exclude<typeof e, 'cancel'>];
+      if (!acc.includes(item)) {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
 
   beforeEach(() => {
     licenseService = createLicenseServiceMock();
