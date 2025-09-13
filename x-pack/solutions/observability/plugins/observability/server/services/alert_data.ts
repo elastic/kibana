@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
+  ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -18,6 +19,16 @@ import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom
 import type { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import type { SuggestedDashboardsValidRuleTypeIds } from './helpers';
 import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
+
+// TODO: This is is missing many fields most likely, add more during review
+const SCORING_EXCLUDED_FIELDS = new Set<string>([
+  'tags',
+  'labels',
+  'event.action',
+  'event.kind',
+  '@timestamp',
+  '__records__',
+]);
 
 // TS will make sure that if we add a new supported rule type id we had the corresponding function to get the relevant rule fields
 const getRelevantRuleFieldsMap: Record<
@@ -84,10 +95,13 @@ export class AlertData {
     return Object.keys(nonTechnicalFields);
   }
 
-  getAllRelevantFields(): string[] {
-    const ruleFields = this.getRelevantRuleFields();
-    const aadFields = this.getRelevantAADFields();
-    return Array.from(new Set([...ruleFields, ...aadFields]));
+  getAllRelevantFields(): Set<string> {
+    const dedup = new Set<string>();
+    [this.getRelevantRuleFields(), this.getRelevantAADFields()].forEach((fieldSet) => {
+      fieldSet.forEach((f) => SCORING_EXCLUDED_FIELDS.has(f) && dedup.add(f));
+    });
+
+    return dedup;
   }
 
   getAlertTags(): string[] {
@@ -108,5 +122,9 @@ export class AlertData {
 
   getRuleTypeId(): string | undefined {
     return this.alert[ALERT_RULE_TYPE_ID];
+  }
+
+  getRuleName(): string | undefined {
+    return this.alert[ALERT_RULE_NAME];
   }
 }
