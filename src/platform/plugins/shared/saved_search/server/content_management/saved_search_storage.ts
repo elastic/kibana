@@ -49,6 +49,9 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'density',
         'visContext',
         'tabs',
+  // meta fields (stored automatically on the saved object, surfaced through content mgmt item)
+  'createdBy',
+  'updatedBy',
       ],
       logger,
       throwOnResultValidationError,
