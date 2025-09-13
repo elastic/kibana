@@ -7,15 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_COMMENTS_INDEX_NAME,
-  CAI_COMMENTS_INDEX_ALIAS,
+  getCommentsDestinationIndexName,
+  getCommentsDestinationIndexAlias,
   CAI_COMMENTS_INDEX_VERSION,
   CAI_COMMENTS_SOURCE_INDEX,
-  CAI_COMMENTS_SOURCE_QUERY,
-  CAI_COMMENTS_BACKFILL_TASK_ID,
-  CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+  getCommentsSourceQuery,
+  getCAICommentsBackfillTaskId,
+  getCAICommentsSynchronizationTaskId,
+  CAI_COMMENTS_SYNC_TYPE,
 } from './constants';
 import { CAI_COMMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_COMMENTS_INDEX_SCRIPT, CAI_COMMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -26,44 +28,54 @@ export const createCommentsAnalyticsIndex = ({
   logger,
   isServerless,
   taskManager,
+  spaceId,
+  owner,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  spaceId: string;
+  owner: Owner;
 }): AnalyticsIndex =>
   new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
-    indexName: CAI_COMMENTS_INDEX_NAME,
-    indexAlias: CAI_COMMENTS_INDEX_ALIAS,
+    indexName: getCommentsDestinationIndexName(spaceId, owner),
+    indexAlias: getCommentsDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_COMMENTS_INDEX_VERSION,
     mappings: CAI_COMMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_COMMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_COMMENTS_INDEX_SCRIPT,
-    taskId: CAI_COMMENTS_BACKFILL_TASK_ID,
+    taskId: getCAICommentsBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-    sourceQuery: CAI_COMMENTS_SOURCE_QUERY,
+    sourceQuery: getCommentsSourceQuery(spaceId, owner),
   });
 
 export const scheduleCommentsAnalyticsSyncTask = ({
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) => {
+  const taskId = getCAICommentsSynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-    destIndex: CAI_COMMENTS_INDEX_NAME,
+    destIndex: getCommentsDestinationIndexName(spaceId, owner),
     taskManager,
+    owner,
+    spaceId,
+    syncType: CAI_COMMENTS_SYNC_TYPE,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_COMMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
