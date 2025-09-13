@@ -14,9 +14,10 @@ import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateData, config } from './generate_data';
+import type { ApmApiError } from '../../../../services/apm_api';
 
 type ErrorGroupsMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/errors/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -28,13 +29,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/errors/groups/main_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/main_statistics`,
+      endpoint: `GET /internal/apm/services/errors/groups/main_statistics`,
       params: {
-        path: { serviceName, ...overrides?.path },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
@@ -47,9 +47,37 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Error groups main statistics', () => {
+    describe('params validation ', () => {
+      it('teturns 400 when neither serviceName nor traceId is provide', async () => {
+        try {
+          await callApi();
+        } catch (e) {
+          const error = e as ApmApiError;
+          expect(error.res.status).to.be(400);
+          expect(error.res.body.message).to.match(
+            /At least one of the following parameters must be provided: serviceName, traceI/i
+          );
+        }
+      });
+    });
     describe(' when data is not loaded', () => {
-      it('handles empty state', async () => {
-        const response = await callApi();
+      it('handles empty state with serviceName', async () => {
+        const response = await callApi({
+          query: {
+            serviceName,
+          },
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errorGroups).to.empty();
+      });
+      it('handles empty state with traceId', async () => {
+        const response = await callApi({
+          query: {
+            traceId: 'foo-1',
+          },
+        });
+
         expect(response.status).to.be(200);
         expect(response.body.errorGroups).to.empty();
       });
@@ -69,7 +97,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       describe('returns the correct data', () => {
         let errorGroupMainStatistics: ErrorGroupsMainStatistics;
         before(async () => {
-          const response = await callApi();
+          const response = await callApi({
+            query: {
+              serviceName,
+            },
+          });
           errorGroupMainStatistics = response.body;
         });
 

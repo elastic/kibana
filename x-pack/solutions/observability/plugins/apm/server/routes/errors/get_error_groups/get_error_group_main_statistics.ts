@@ -8,6 +8,7 @@
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -22,26 +23,14 @@ import {
   TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_ID,
+  SPAN_ID,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-
-export interface ErrorGroupMainStatisticsResponse {
-  errorGroups: Array<{
-    groupId: string;
-    name: string;
-    lastSeen: number;
-    occurrences: number;
-    culprit: string | undefined;
-    handled: boolean | undefined;
-    type: string | undefined;
-    traceId: string | undefined;
-  }>;
-  maxCountExceeded: boolean;
-}
 
 export async function getErrorGroupMainStatistics({
   kuery,
@@ -56,9 +45,12 @@ export async function getErrorGroupMainStatistics({
   transactionName,
   transactionType,
   searchQuery,
+  traceId,
+  spanId,
+  transactionId,
 }: {
   kuery?: string;
-  serviceName: string;
+  serviceName?: string;
   apmEventClient: APMEventClient;
   environment?: string;
   sortField?: string;
@@ -68,6 +60,9 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
+  traceId?: string;
+  spanId?: string;
+  transactionId?: string;
   searchQuery?: string;
 }): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
@@ -124,6 +119,9 @@ export async function getErrorGroupMainStatistics({
           ...termQuery(SERVICE_NAME, serviceName),
           ...termQuery(TRANSACTION_NAME, transactionName),
           ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...termQuery(TRACE_ID, traceId),
+          ...termQuery(SPAN_ID, spanId),
+          ...termQuery(TRANSACTION_ID, transactionId),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),
