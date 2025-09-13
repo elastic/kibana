@@ -115,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         indexPatterns: 0,
         filesManagement: 0,
         filesSharedImage: 0,
+        fileUpload: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
         dataQuality: 0,
