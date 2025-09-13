@@ -146,8 +146,14 @@ function removeTrailingSlash(url: string) {
     return url;
   }
 }
+interface NestedSchemaNode {
+  type?: string;
+  properties?: NestedObject;
+  items?: NestedSchemaNode;
+  [key: string]: unknown;
+}
 interface NestedObject {
-  [key: string]: { type?: string; properties?: NestedObject };
+  [key: string]: NestedSchemaNode;
 }
 
 function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
@@ -158,24 +164,46 @@ function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
     const { obj, prefix } = queue.shift()!;
     for (const key in obj) {
       if (typeof obj[key] === 'object' && obj[key] !== null) {
+        const newKey = `${prefix}${key}`;
+
         if ('type' in obj[key]) {
-          const newKey = `${prefix}${key}`;
-          // @ts-ignore
-          result[newKey] = obj[key].type;
+          const node = obj[key];
+          if (node.type === 'array') {
+            const item = node.items;
+            if (item && typeof item === 'object') {
+              if ('type' in item && item.type) {
+                // array of primitive types
+                result[newKey] = String(item.type);
+              } else if (item.properties) {
+                // array of objects
+                queue.push({ obj: item.properties, prefix: `${newKey}.` });
+              } else {
+                // unknown array item type, leave it unaffected
+                result[newKey] = 'array';
+              }
+            } else {
+              // items is not defined or not an object, leave it unaffected
+              result[newKey] = 'array';
+            }
+          } else {
+            // @ts-ignore
+            result[newKey] = obj[key].type;
+          }
         } else if (obj[key].properties) {
           const nestedObj = obj[key].properties;
-          const nestedPrefix = `${prefix}${key}.`;
+          const nestedPrefix = `${newKey}.`;
           // @ts-ignore
           queue.push({ obj: nestedObj, prefix: nestedPrefix });
         } else if (obj[key]) {
           const nestedObj = obj[key];
-          const nestedPrefix = `${prefix}${key}.`;
+          const nestedPrefix = `${newKey}.`;
           // @ts-ignore
           queue.push({ obj: nestedObj, prefix: nestedPrefix });
         }
       }
     }
   }
+
   return result;
 }
 
