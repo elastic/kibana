@@ -10,32 +10,33 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
 import type { PricingService } from '@kbn/core-pricing-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PricingServiceSetup> = {
+  const setupContract: jest.Mocked<PricingServiceSetup> = lazyObject({
     isFeatureAvailable: jest.fn(),
     registerProductFeatures: jest.fn(),
-  };
+  });
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<PricingServiceStart> = {
+  const startContract: jest.Mocked<PricingServiceStart> = lazyObject({
     isFeatureAvailable: jest.fn(),
     getActiveProduct: jest.fn(),
-  };
+  });
   return startContract;
 };
 
 export type PricingServiceContract = PublicMethodsOf<PricingService>;
 
 const createMock = () => {
-  const mocked: jest.Mocked<PricingServiceContract> = {
+  const mocked: jest.Mocked<PricingServiceContract> = lazyObject({
     preboot: jest.fn(),
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
-  };
+  });
   return mocked;
 };
 
