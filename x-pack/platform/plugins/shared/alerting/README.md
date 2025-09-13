@@ -108,7 +108,7 @@ The following table describes the properties of the `options` object.
 |alerts|(Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.|IRuleTypeAlerts|
 |autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
 |getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
-|internallyManaged|(Optional) Indicates that the rule type is managed internally by a Kibana plugin. Internally managed rule types cannot be created through the APIs. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.|boolean|
+|internallyManaged|(Optional) Indicates that the rule type is managed internally by a Kibana plugin. Internally managed rule types cannot be created or updated through the APIs. API keys of internal rule types can be updated. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.|boolean|
 
 ### Executor
 
