@@ -7,10 +7,9 @@
 
 import { useSelector } from '@xstate/react';
 import { formatNumber } from '@elastic/eui';
-import { mapPercentageToQuality } from '../../common/utils';
+import { mapPercentageToQuality, calculatePercentage } from '@kbn/data-quality/common';
 import { BYTE_NUMBER_FORMAT, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
-import { calculatePercentage } from '../utils';
 
 export const useOverviewSummaryPanel = () => {
   const { service } = useDatasetQualityDetailsContext();

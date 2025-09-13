@@ -8,9 +8,9 @@
 import { useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { countBy } from 'lodash';
+import type { QualityIndicators } from '@kbn/data-quality/common';
 import { useDatasetQualityTable } from '.';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import type { QualityIndicators } from '../../common/types';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
 

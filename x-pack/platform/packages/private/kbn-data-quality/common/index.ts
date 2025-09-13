@@ -6,4 +6,6 @@
  */
 
 export * from './url_schema';
-export * from './utils/deep_compact_object';
+export * from './utils';
+export * from './constants';
+export * from './types';

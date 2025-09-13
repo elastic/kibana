@@ -8,9 +8,9 @@
 import { EuiFilterButton, EuiPopover, EuiSelectable, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { QualityIndicators } from '@kbn/data-quality/common';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import type { QualityIndicators } from '../../../../common/types';
 import { QualityIndicator } from '../../quality_indicator';
 
 const qualitiesSelectorLabel = i18n.translate('xpack.datasetQuality.qualitiesSelectorLabel', {
