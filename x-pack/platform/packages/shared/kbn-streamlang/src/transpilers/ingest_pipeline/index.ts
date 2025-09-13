@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/function';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
 import { convertStreamlangDSLActionsToIngestPipelineProcessors } from './conversions';
-import { applyPostProcessing } from './post_processing';
+import { applyPostProcessing } from './processors/post_processing';
 
 export interface IngestPipelineTranspilationOptions {
   ignoreMalformed?: boolean;

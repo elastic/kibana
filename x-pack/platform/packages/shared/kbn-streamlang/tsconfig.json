@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -16,5 +16,7 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/zod-helpers",
+    "@kbn/scout",
+    "@kbn/esql-ast"
   ]
 }
