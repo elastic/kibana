@@ -27,6 +27,7 @@ export const createPrivilegedUsersCrudService = ({
     source: PrivMonUserSource,
     maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
+    deps.logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
     // Check if user already exists by username
     const username = user.user?.name;
     if (username) {

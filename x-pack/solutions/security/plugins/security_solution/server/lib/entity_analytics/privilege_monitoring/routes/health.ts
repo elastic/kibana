@@ -18,6 +18,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../engine/status_service';
+import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -49,12 +50,30 @@ export const healthCheckPrivilegeMonitoringRoute = (
         );
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
         const soClient = dataClient.getScopedSoClient(request);
+        const config = secSol.getConfig();
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
 
         const statusService = createEngineStatusService(dataClient, soClient);
 
         try {
           const body = await statusService.get();
-          return response.ok({ body });
+
+          // Only include user count if engine status is "started"
+          if (body.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+            const userCountResponse = await statusService.getCurrentUserCount();
+            return response.ok({
+              body: {
+                ...body,
+                users: {
+                  current_count: userCountResponse.count,
+                  max_allowed: maxUsersAllowed,
+                },
+              },
+            });
+          } else {
+            return response.ok({ body });
+          }
         } catch (e) {
           const error = transformError(e);
 

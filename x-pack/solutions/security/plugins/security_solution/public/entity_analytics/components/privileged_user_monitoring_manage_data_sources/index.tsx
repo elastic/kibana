@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiButtonEmpty, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -13,6 +13,7 @@ import { CsvUploadManageDataSource } from './csv_upload_manage_data_source';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { IndexImportManageDataSource } from './index_import_manage_data_source';
+import { UserLimitCallOut } from '../user_limit_callout';
 
 export interface AddDataSourceResult {
   successful: boolean;
@@ -49,32 +50,40 @@ export const PrivilegedUserMonitoringManageDataSources = ({
           />
         }
       />
-      {addDataSourceResult?.successful && (
-        <>
-          <EuiCallOut
-            title={
-              addDataSourceResult.userCount > 0
-                ? i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.successMessage',
-                    {
-                      defaultMessage:
-                        'New data source of privileged users successfully set up: {userCount} users added',
-                      values: { userCount: addDataSourceResult.userCount },
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.successMessageWithoutUserCount',
-                    {
-                      defaultMessage: 'New data source of privileged users successfully set up',
-                    }
-                  )
-            }
-            color="success"
-            iconType="check"
-          />
+
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <UserLimitCallOut variant="compact" />
           <EuiSpacer size="l" />
-        </>
-      )}
+        </EuiFlexItem>
+
+        {addDataSourceResult?.successful && (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={
+                addDataSourceResult.userCount > 0
+                  ? i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.successMessage',
+                      {
+                        defaultMessage:
+                          'New data source of privileged users successfully set up: {userCount} users added',
+                        values: { userCount: addDataSourceResult.userCount },
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.successMessageWithoutUserCount',
+                      {
+                        defaultMessage: 'New data source of privileged users successfully set up',
+                      }
+                    )
+              }
+              color="success"
+              iconType="check"
+            />
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       <IndexImportManageDataSource setAddDataSourceResult={setAddDataSourceResult} />
       <EuiSpacer size="xxl" />
