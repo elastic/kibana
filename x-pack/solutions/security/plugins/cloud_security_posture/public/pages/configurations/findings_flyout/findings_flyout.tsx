@@ -12,7 +12,7 @@ import {
   EuiFlexGroup,
   EuiCodeBlock,
   EuiMarkdownFormat,
-  EuiIcon,
+  EuiIconTip,
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
@@ -48,9 +48,7 @@ export const BenchmarkIcons = ({
   <EuiFlexGroup gutterSize="s" alignItems="center">
     {benchmarkId.startsWith('cis') && (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Center for Internet Security">
-          <EuiIcon type={cisLogoIcon} size={size} />
-        </EuiToolTip>
+        <EuiIconTip content="Center for Internet Security" type={cisLogoIcon} size={size} />
       </EuiFlexItem>
     )}
     <EuiFlexItem grow={false}>

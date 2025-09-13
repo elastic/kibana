@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
 import type { EuiTableFieldDataColumnType, HorizontalAlignment } from '@elastic/eui';
 import React from 'react';
 
@@ -28,9 +28,14 @@ export const getIconHeaderColumns = ({
       align: 'center' as HorizontalAlignment,
       field: 'eventIdToNoteIds',
       name: (
-        <EuiToolTip content={i18n.NOTES}>
-          <EuiIcon data-test-subj="notes-count-header-icon" size="m" type="editorComment" />
-        </EuiToolTip>
+        <EuiIconTip
+          content={i18n.NOTES}
+          iconProps={{
+            'data-test-subj': 'notes-count-header-icon',
+          }}
+          size="m"
+          type="editorComment"
+        />
       ),
       render: (
         _: Record<string, string[]> | null | undefined,
@@ -43,9 +48,14 @@ export const getIconHeaderColumns = ({
       align: 'center' as HorizontalAlignment,
       field: 'pinnedEventIds',
       name: (
-        <EuiToolTip content={i18n.PINNED_EVENTS}>
-          <EuiIcon data-test-subj="pinned-event-header-icon" size="m" type="pin" />
-        </EuiToolTip>
+        <EuiIconTip
+          content={i18n.PINNED_EVENTS}
+          iconProps={{
+            'data-test-subj': 'pinned-event-header-icon',
+          }}
+          size="m"
+          type="pin"
+        />
       ),
       render: (
         _: Record<string, boolean> | null | undefined,
@@ -60,9 +70,14 @@ export const getIconHeaderColumns = ({
       align: 'center' as HorizontalAlignment,
       field: 'favorite',
       name: (
-        <EuiToolTip content={i18n.FAVORITES}>
-          <EuiIcon data-test-subj="favorites-header-icon" size="m" type="starEmpty" />
-        </EuiToolTip>
+        <EuiIconTip
+          content={i18n.FAVORITES}
+          iconProps={{
+            'data-test-subj': 'favorites-header-icon',
+          }}
+          size="m"
+          type="starEmpty"
+        />
       ),
       render: (favorite: FavoriteTimelineResult[] | null | undefined) => {
         const isFavorite = favorite != null && favorite.length > 0;

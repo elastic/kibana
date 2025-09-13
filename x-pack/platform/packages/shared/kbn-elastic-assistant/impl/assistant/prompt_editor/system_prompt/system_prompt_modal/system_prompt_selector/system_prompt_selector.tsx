@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiHighlight,
   EuiComboBox,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -201,9 +201,11 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
               </EuiFlexItem>
               {value?.isNewConversationDefault && (
                 <EuiFlexItem grow={false} component={'span'}>
-                  <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
-                    <EuiIcon type={'starFilled'} />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    position="right"
+                    content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}
+                    type={'starFilled'}
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
