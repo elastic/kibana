@@ -32,7 +32,8 @@ fi
 NODE="${DIR}/node/default/bin/node"
 {{/darwin}}
 {{#linux}}
-NODE="${DIR}/node/glibc-217/bin/node"
+NODE_DIR=${KI_NODE_HOME:-"$DIR/node/glibc-217"}
+NODE="${NODE_DIR}/bin/node"
 {{#serverless}}
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
