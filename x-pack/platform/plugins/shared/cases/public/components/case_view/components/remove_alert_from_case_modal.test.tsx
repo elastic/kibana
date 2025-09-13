@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RemoveAlertFromCaseModal from './remove_alert_from_case_modal';
-import { useRemoveAlertFromCase } from '../../../containers/use_remove_alert_from_case';
+import { useRemoveAlertFromCase } from '../../../containers/use_remove_alerts_from_case';
 
-jest.mock('../../../containers/use_remove_alert_from_case');
+jest.mock('../../../containers/use_remove_alerts_from_case');
 
 const useRemoveAlertFromCaseMock = useRemoveAlertFromCase as jest.Mock;
 
@@ -31,19 +31,19 @@ describe('RemoveAlertFromCaseModal', () => {
     render(
       <RemoveAlertFromCaseModal
         caseId="case-1"
-        alertId={['alert-1', 'alert-2']}
+        alertIds={['alert-1', 'alert-2']}
         onClose={onClose}
         onSuccess={onSuccess}
       />
     );
-    expect(screen.getByText(/Remove alert from case/i)).toBeInTheDocument();
+    expect(screen.getByText(/Remove 2 alerts from case/i)).toBeInTheDocument();
   });
 
   it('calls onClose when cancel button is clicked', () => {
     render(
       <RemoveAlertFromCaseModal
         caseId="case-1"
-        alertId={['alert-1', 'alert-2']}
+        alertIds={['alert-1', 'alert-2']}
         onClose={onClose}
         onSuccess={onSuccess}
       />
@@ -58,13 +58,13 @@ describe('RemoveAlertFromCaseModal', () => {
     render(
       <RemoveAlertFromCaseModal
         caseId="case-1"
-        alertId={['alert-1', 'alert-2']}
+        alertIds={['alert-1', 'alert-2']}
         onClose={onClose}
         onSuccess={onSuccess}
       />
     );
     fireEvent.click(screen.getByText('Remove'));
-    expect(mutateAsync).toHaveBeenCalledTimes(2);
+    expect(mutateAsync).toHaveBeenCalledTimes(1);
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalled();
     });

@@ -12,13 +12,13 @@ import { type RemoveAlertModalProps } from '../../components/case_view/component
 
 export const getRemoveAlertFromCaseModal = ({
   caseId,
-  alertId,
+  alertIds,
   onClose,
   onSuccess,
 }: RemoveAlertModalProps) => (
   <RemoveAlertFromCaseModalLazy
     caseId={caseId}
-    alertId={alertId}
+    alertIds={alertIds}
     onClose={onClose}
     onSuccess={onSuccess}
   />

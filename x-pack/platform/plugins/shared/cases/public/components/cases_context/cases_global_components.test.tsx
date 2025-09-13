@@ -95,7 +95,7 @@ describe('Cases context UI', () => {
           isModalOpen: true,
           props: {
             caseId: 'case-id',
-            alertId: ['alert-id'],
+            alertIds: ['alert-id'],
             onSuccess: jest.fn(),
             onClose: jest.fn(),
           },
@@ -104,7 +104,7 @@ describe('Cases context UI', () => {
       renderWithTestingProviders(<CasesGlobalComponents state={state} />);
       expect(getRemoveAlertFromCaseModalMock).toHaveBeenCalledWith({
         caseId: 'case-id',
-        alertId: ['alert-id'],
+        alertIds: ['alert-id'],
         onSuccess: expect.any(Function),
         onClose: expect.any(Function),
       });

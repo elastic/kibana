@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useRemoveAlertFromCase } from './use_remove_alert_from_case';
+import { useRemoveAlertFromCase } from './use_remove_alerts_from_case';
 import * as api from './api';
 import * as useGetCaseModule from './use_get_case';
 import type { UseGetCase } from './use_get_case';
@@ -51,7 +51,6 @@ describe('useRemoveAlertFromCase', () => {
 
   beforeEach(() => {
     queryClient = new QueryClient();
-    jest.spyOn(api, 'removeAlertFromComment').mockResolvedValue(Promise.resolve());
     mockShowErrorToast.mockClear();
     mockShowSuccessToast.mockClear();
     mockRefreshCaseViewPage.mockClear();
@@ -61,35 +60,26 @@ describe('useRemoveAlertFromCase', () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  it('shows error toast if alert attachment not found', async () => {
-    jest
-      .spyOn(useGetCaseModule, 'useGetCase')
-      .mockReturnValue({ data: { case: { comments: [] } } } as unknown as UseGetCase);
-    const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
-
-    await act(async () => {
-      result.current.mutate({ alertId: 'not-found', successToasterTitle: 'Removed!' });
-    });
-
-    expect(mockShowErrorToast).toHaveBeenCalled();
-    expect(api.removeAlertFromComment).not.toHaveBeenCalled();
-  });
-
   it('calls removeAlertFromComment with correct params and shows success toast', async () => {
     jest.spyOn(useGetCaseModule, 'useGetCase').mockReturnValue({ data: caseData } as UseGetCase);
+    jest
+      .spyOn(api, 'removeAlertFromComment')
+      .mockResolvedValue([{ status: 'fulfilled', value: undefined }]);
     const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
 
     await act(async () => {
-      result.current.mutate({ alertId: 'alert-123', successToasterTitle: 'Removed!' });
+      result.current.mutate({ alertIds: ['alert-123'], successToasterTitle: 'Removed!' });
     });
 
     expect(api.removeAlertFromComment).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: 'case-1',
-        alertId: 'alert-123',
-        alertAttachment: expect.objectContaining({
-          alertId: ['alert-123'],
-        }),
+        alertIds: ['alert-123'],
+        caseAttachments: expect.arrayContaining([
+          expect.objectContaining({
+            alertId: ['alert-123'],
+          }),
+        ]),
       })
     );
     await waitFor(() => expect(mockShowSuccessToast).toHaveBeenCalledWith('Removed!'));
@@ -98,14 +88,39 @@ describe('useRemoveAlertFromCase', () => {
 
   it('shows error toast if removeAlertFromComment throws', async () => {
     jest.spyOn(useGetCaseModule, 'useGetCase').mockReturnValue({ data: caseData } as UseGetCase);
-
-    (api.removeAlertFromComment as jest.Mock).mockRejectedValueOnce(new Error('API error'));
+    jest
+      .spyOn(api, 'removeAlertFromComment')
+      .mockResolvedValue(Promise.reject(new Error('Failed to remove alert')));
     const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
 
     await act(async () => {
-      result.current.mutate({ alertId: 'alert-123', successToasterTitle: 'Removed!' });
+      result.current.mutate({ alertIds: ['alert-123'], successToasterTitle: 'Removed!' });
     });
 
     await waitFor(() => expect(mockShowErrorToast).toHaveBeenCalled());
+  });
+
+  it('shows error toast if alert attachment not found', async () => {
+    jest
+      .spyOn(useGetCaseModule, 'useGetCase')
+      .mockReturnValue({ data: { case: { comments: [] } } } as unknown as UseGetCase);
+    jest
+      .spyOn(api, 'removeAlertFromComment')
+      .mockResolvedValue(Promise.reject(new Error('Failed to remove alert')));
+
+    const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
+
+    await act(async () => {
+      result.current.mutate({ alertIds: ['not-found'], successToasterTitle: 'Removed!' });
+    });
+
+    expect(api.removeAlertFromComment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: 'case-1',
+        alertIds: ['not-found'],
+        caseAttachments: [],
+      })
+    );
+    expect(mockShowErrorToast).toHaveBeenCalled();
   });
 });
