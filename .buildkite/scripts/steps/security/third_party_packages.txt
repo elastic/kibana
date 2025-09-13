@@ -7,4 +7,3 @@ tree-dump
 @opentelemetry/exporter-metrics-otlp-http
 inversify
 @types/d3-color
-@finom/zod-to-json-schema

@@ -9,7 +9,7 @@
 
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from '@finom/zod-to-json-schema';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export function parsePath(path: string) {
   const segments = path

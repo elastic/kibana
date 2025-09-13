@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from '@finom/zod-to-json-schema';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,

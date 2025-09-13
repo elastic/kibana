@@ -8,7 +8,7 @@
 require('../../../../../../src/setup_node_env');
 
 const swaggerJsdoc = require('swagger-jsdoc');
-const { zodToJsonSchema } = require('@finom/zod-to-json-schema');
+const { zodToJsonSchema } = require('zod-to-json-schema');
 
 const {
   createEntityDefinitionQuerySchema,

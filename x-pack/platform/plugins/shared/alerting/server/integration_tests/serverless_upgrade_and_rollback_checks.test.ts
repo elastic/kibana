@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
-import zodToJsonSchema from '@finom/zod-to-json-schema';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
 

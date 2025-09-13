@@ -77,13 +77,6 @@ module.exports = (request, options) => {
     });
   }
 
-  if (request === 'zod-to-json-schema') {
-    return resolve.sync('@finom/zod-to-json-schema', {
-      basedir: options.basedir,
-      extensions: options.extensions,
-    });
-  }
-
   if (request === 'zod' || request === 'zod/v3') {
     return resolve.sync('zod/v3/index.cjs', {
       basedir: options.basedir,
