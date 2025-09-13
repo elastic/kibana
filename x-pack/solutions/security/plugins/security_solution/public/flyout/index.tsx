@@ -24,6 +24,11 @@ import { GenericEntityPanel } from './entity_details/generic_right';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';
+import { IOCDetailsProvider } from './indicator_of_compromise/context';
+import { IOCPanel } from './indicator_of_compromise';
+import { IOCRightPanelKey } from './indicator_of_compromise/constants/panel_keys';
+import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
+import { UniversalEntityPanel } from './entity_details/universal_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -67,6 +72,8 @@ import {
   ServicePanelKey,
   GenericEntityPanelKey,
   UserPanelKey,
+  UniversalEntityPanelKey,
+  UserPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
@@ -83,6 +90,7 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
+import type { IOCDetailsProps } from './indicator_of_compromise/types';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -256,6 +264,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <FindingsVulnerabilityPanel
         {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
       />
+    ),
+  },
+  {
+    key: IOCRightPanelKey,
+    component: (props) => (
+      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <IOCPanel path={props.path as IOCDetailsProps['path']} />
+      </IOCDetailsProvider>
     ),
   },
 ];

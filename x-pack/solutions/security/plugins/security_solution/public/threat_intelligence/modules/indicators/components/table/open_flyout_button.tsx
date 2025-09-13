@@ -35,6 +35,21 @@ export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
   onOpen,
   isOpen,
 }) => {
+  const securitySolutionContext = useSecurityContext();
+
+  const { openFlyout } = securitySolutionContext.useExpandableFlyoutApi();
+
+  const open = useCallback(() => {
+    openFlyout({
+      right: {
+        id: 'ioc-details-right',
+        params: {
+          id: indicator._id,
+        },
+      },
+    });
+  }, [indicator._id, openFlyout]);
+
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
@@ -44,7 +59,8 @@ export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
         isSelected={isOpen}
         iconSize="s"
         aria-label={VIEW_DETAILS_BUTTON_LABEL}
-        onClick={() => onOpen(indicator)}
+        // onClick={() => onOpen(indicator)}
+        onClick={() => open()}
       />
     </EuiToolTip>
   );
