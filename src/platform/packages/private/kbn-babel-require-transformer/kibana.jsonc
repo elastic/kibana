@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/babel-require-transformer",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}
