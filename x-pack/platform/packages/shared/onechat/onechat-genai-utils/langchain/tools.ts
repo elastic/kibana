@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import { z } from '@kbn/zod';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
@@ -16,8 +18,8 @@ import type {
   ExecutableTool,
   OnechatToolEvent,
   RunToolReturn,
-  ToolProvider,
   ToolEventHandlerFn,
+  ToolProvider,
 } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolCall } from './messages';
@@ -106,7 +108,7 @@ export const toolToLangchain = ({
     : tool.description;
 
   return toTool(
-    async (input, config): Promise<[string, RunToolReturn]> => {
+    async (rawInput, config): Promise<[string, RunToolReturn]> => {
       let onEvent: ToolEventHandlerFn | undefined;
       if (sendEvent) {
         const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
@@ -115,6 +117,9 @@ export const toolToLangchain = ({
           sendEvent(convertEvent(event));
         };
       }
+
+      // remove internal parameters before calling tool handler.
+      const input = omit(rawInput, ['_reasoning']);
 
       try {
         logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
@@ -140,7 +145,12 @@ export const toolToLangchain = ({
     },
     {
       name: toolId ?? tool.id,
-      schema: tool.schema,
+      schema: tool.schema.extend({
+        _reasoning: z
+          .string()
+          .optional()
+          .describe('Optional brief reasoning of why you are calling this tool'),
+      }),
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
