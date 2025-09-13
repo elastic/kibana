@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { minimatch } from 'minimatch';
-
-export function matchesAnyGlob(path, globs) {
-  return globs.some((pattern) =>
-    minimatch(path, pattern, {
-      dot: true,
-    })
-  );
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-eslint-rule-overrides'],
+};
