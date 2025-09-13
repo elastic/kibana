@@ -37,10 +37,13 @@ describe('ESQL query utils', () => {
 
   describe('toEsqlQueryHits', () => {
     it('correctly converts ESQL table to ES query hits', () => {
-      const { results, rows, cols } = toEsqlQueryHits({
-        columns,
-        values: [value1, value2],
-      });
+      const { results, rows, cols } = toEsqlQueryHits(
+        {
+          columns,
+          values: [value1, value2],
+        },
+        true // isPreview
+      );
       expect(results).toEqual({
         esResult: {
           _shards: {
@@ -106,7 +109,8 @@ describe('ESQL query utils', () => {
           columns,
           values: [value1, value2],
         },
-        ['ecs.version']
+        ['ecs.version'],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -311,7 +315,8 @@ describe('ESQL query utils', () => {
           'tags',
           'message',
           'request',
-        ]
+        ],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -431,7 +436,8 @@ describe('ESQL query utils', () => {
           columns,
           values: [value1, value2, value4],
         },
-        ['error.code']
+        ['error.code'],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -492,7 +498,8 @@ describe('ESQL query utils', () => {
           columns,
           values: [value1, value2, value4],
         },
-        ['error.code', 'ecs.version']
+        ['error.code', 'ecs.version'],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -667,7 +674,7 @@ describe('ESQL query utils', () => {
             { name: 'count', type: 'number' },
           ]
         )
-      ).toEqual(['c', 'h']);
+      ).toEqual(['h', 'c']);
 
       expect(
         getAlertIdFields(
@@ -678,7 +685,7 @@ describe('ESQL query utils', () => {
             { name: 'count', type: 'number' },
           ]
         )
-      ).toEqual(['c', 'h']);
+      ).toEqual(['h', 'c']);
     });
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and drops fields', () => {
