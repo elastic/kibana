@@ -14,19 +14,22 @@ const { run } = require('@kbn/dev-cli-runner');
 const yaml = require('js-yaml');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-const NON_SPACE_PATH_PREFIXES = new Set([
-  '/api/upgrade_assistant',
-  '/api/logstash/pipeline',
-  '/api/logstash/pipelines',
-  '/api/task_manager/_health',
-  '/api/cases/reporters',
-  '/api/encrypted_saved_objects/_rotate_key',
-  '/api/short_url',
-  '/api/features',
-  '/api/security/role',
-  '/api/spaces',
-  '/api/security/session/_invalidate',
-]).values();
+const NON_SPACE_PATH_PREFIXES = [
+  ...new Set([
+    '/api/upgrade_assistant',
+    '/api/logstash/pipeline',
+    '/api/logstash/pipelines',
+    '/api/task_manager/_health',
+    '/api/cases/reporters',
+    '/api/encrypted_saved_objects/_rotate_key',
+    '/api/short_url',
+    '/api/features',
+    '/api/status',
+    '/api/security/role',
+    '/api/spaces',
+    '/api/security/session/_invalidate',
+  ]),
+];
 
 const SPACE_PREFIX = '/s/';
 
@@ -46,10 +49,18 @@ run(
     const absPath = path.resolve(REPO_ROOT, relativeFilePath);
     const oasDoc = yaml.load(fs.readFileSync(absPath, 'utf8'));
 
-    for (const [pathName, pathValue] of Object.entries(oasDoc.paths)) {
-      if (pathName.startsWith(SPACE_PREFIX)) continue;
-      if (NON_SPACE_PATH_PREFIXES.some((nonSpacePrefix) => pathName.startsWith(nonSpacePrefix)))
+    for (const [_pathName, pathValue] of Object.entries(oasDoc.paths)) {
+      const pathName = _pathName.trim();
+      log.debug(`Processing path: ${pathName}`);
+      if (
+        pathName.startsWith(SPACE_PREFIX) ||
+        NON_SPACE_PATH_PREFIXES.some((nonSpacePrefix) => {
+          return pathName.startsWith(nonSpacePrefix);
+        })
+      ) {
+        log.debug(`Skipping path: ${pathName}.`);
         continue;
+      }
 
       for (const [method, methodValue] of Object.entries(pathValue)) {
         methodValue.description = `**Spaces method and path for this operation:**\n\n${getSpaceAlternatePathHtml(
@@ -59,7 +70,7 @@ run(
       }
     }
 
-    log.info(`Writing file to ${absPath}`);
+    log.info(`Writing file with spaces promoted to ${absPath}`);
     fs.writeFileSync(absPath, yaml.dump(oasDoc, { noRefs: true, lineWidth: -1 }), 'utf8');
   },
   {
