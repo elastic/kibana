@@ -19,7 +19,7 @@ import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
-import type { AIAssistantType } from '../common/ai_assistant_type';
+import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -113,7 +113,8 @@ export class AIAssistantManagementPlugin
 
   public start(coreStart: CoreStart, { licensing }: StartDependencies) {
     const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      AIAssistantType.Default
     );
 
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
