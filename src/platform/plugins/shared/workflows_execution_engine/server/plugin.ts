@@ -72,7 +72,7 @@ export class WorkflowsExecutionEnginePlugin
         description: 'Executes a workflow immediately',
         timeout: '5m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -85,6 +85,7 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
+              // Task Manager automatically provides fakeRequest if task was scheduled with user context
               const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
                 await createContainer(
                   workflowRunId,
@@ -94,9 +95,10 @@ export class WorkflowsExecutionEnginePlugin
                   esClient,
                   logger,
                   config,
-                  workflowExecutionRepository
+                  workflowExecutionRepository,
+                  fakeRequest, // Provided by Task Manager's first-class API key support
+                  coreStart
                 );
-
               await workflowRuntime.start();
               await workflowExecutionLoop(
                 workflowRuntime,
@@ -118,7 +120,7 @@ export class WorkflowsExecutionEnginePlugin
         description: 'Resumes a paused workflow',
         timeout: '5m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -131,6 +133,7 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
+              // Task Manager automatically provides fakeRequest if task was scheduled with user context
               const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
                 await createContainer(
                   workflowRunId,
@@ -140,7 +143,9 @@ export class WorkflowsExecutionEnginePlugin
                   esClient,
                   logger,
                   config,
-                  workflowExecutionRepository
+                  workflowExecutionRepository,
+                  fakeRequest, // Provided by Task Manager's first-class API key support
+                  coreStart
                 );
               await workflowRuntime.resume();
 
@@ -165,7 +170,8 @@ export class WorkflowsExecutionEnginePlugin
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>
+      context: Record<string, any>,
+      request?: any // KibanaRequest for user-scoped execution
     ) => {
       const workflowCreatedAt = new Date();
 
@@ -206,7 +212,22 @@ export class WorkflowsExecutionEnginePlugin
         enabled: true,
       };
 
-      await plugins.taskManager.schedule(taskInstance);
+      // Use Task Manager's first-class API key support by passing the request
+      // Task Manager will automatically create and manage the API key
+      if (request) {
+        // Debug: Log the user info from the original request
+        this.logger.info(`Scheduling workflow task with user context`, {
+          has_auth: !!request.auth,
+          has_credentials: !!request.auth?.credentials,
+          username: request.auth?.credentials?.username || 'unknown',
+          realm: request.auth?.credentials?.realm || 'unknown',
+          headers_auth: request.headers?.authorization ? 'present' : 'missing',
+        });
+        await plugins.taskManager.schedule(taskInstance, { request });
+      } else {
+        this.logger.info(`Scheduling workflow task without user context`);
+        await plugins.taskManager.schedule(taskInstance);
+      }
       return {
         workflowExecutionId: workflowExecution.id!,
       };
@@ -268,7 +289,9 @@ async function createContainer(
   esClient: Client,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
-  workflowExecutionRepository: WorkflowExecutionRepository
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  fakeRequest?: any, // KibanaRequest from task manager
+  coreStart?: any // CoreStart for creating esClientAsUser
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -313,9 +336,21 @@ async function createContainer(
     workflowExecutionState,
   });
 
+  // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
+  let clientToUse = esClient; // fallback
+  if (fakeRequest && coreStart) {
+    clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  }
+
+  // fakeRequest is automatically created by Task Manager from taskInstance.apiKey
+  // Will be undefined if no API key was provided when scheduling the workflow task
+
   const contextManager = new WorkflowContextManager({
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
+    esClient: clientToUse, // Either user-scoped or fallback client
+    fakeRequest, // Will be undefined if no API key provided
+    coreStart, // For accessing Kibana's internal services
   });
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);

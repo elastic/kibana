@@ -166,6 +166,79 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 
+// Generic Elasticsearch step schema for backend validation
+export const ElasticsearchStepSchema = BaseStepSchema.extend({
+  type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
+    message: 'Elasticsearch step type must start with "elasticsearch."',
+  }),
+  with: z.union([
+    // Raw API format - like Dev Console
+    z.object({
+      request: z.object({
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+        path: z.string().min(1),
+        body: z.any().optional(),
+      }),
+    }),
+    // Sugar syntax for common operations
+    z
+      .object({
+        index: z.string().optional(),
+        id: z.string().optional(),
+        query: z.record(z.string(), z.any()).optional(),
+        body: z.record(z.string(), z.any()).optional(),
+        size: z.number().optional(),
+        from: z.number().optional(),
+        sort: z.array(z.any()).optional(),
+        _source: z.union([z.boolean(), z.array(z.string()), z.string()]).optional(),
+        aggs: z.record(z.string(), z.any()).optional(),
+        aggregations: z.record(z.string(), z.any()).optional(),
+      })
+      .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+  ]),
+});
+export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
+
+// Generic Kibana step schema for backend validation
+export const KibanaStepSchema = BaseStepSchema.extend({
+  type: z.string().refine((val) => val.startsWith('kibana.'), {
+    message: 'Kibana step type must start with "kibana."',
+  }),
+  with: z.union([
+    // Raw API format - direct HTTP API calls
+    z.object({
+      request: z.object({
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+        path: z.string().min(1),
+        body: z.any().optional(),
+        headers: z.record(z.string(), z.string()).optional(),
+      }),
+    }),
+    // Sugar syntax for common Kibana operations
+    z
+      .object({
+        // Cases API
+        title: z.string().optional(),
+        description: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+        assignees: z.array(z.string()).optional(),
+        owner: z.string().optional(),
+        connector: z.record(z.string(), z.any()).optional(),
+        settings: z.record(z.string(), z.any()).optional(),
+        // Generic parameters
+        id: z.string().optional(),
+        case_id: z.string().optional(),
+        space_id: z.string().optional(),
+        page: z.number().optional(),
+        perPage: z.number().optional(),
+        status: z.string().optional(),
+      })
+      .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+  ]),
+});
+export type KibanaStep = z.infer<typeof KibanaStepSchema>;
+
 export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = HttpStepSchema.extend({
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
@@ -323,6 +396,8 @@ const StepSchema = z.lazy(() =>
     IfStepSchema,
     WaitStepSchema,
     HttpStepSchema,
+    ElasticsearchStepSchema,
+    KibanaStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,

@@ -11,6 +11,9 @@ import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
+  BaseStepSchema,
+  ElasticsearchStepSchema,
+  KibanaStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -27,19 +30,24 @@ export interface ConnectorContract {
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   outputSchema: z.ZodType;
+  description?: string;
 }
 
-function generateStepSchemaForConnector(
-  connector: ConnectorContract,
-  stepSchema: z.ZodType,
-  loose: boolean = false
-) {
-  return BaseConnectorStepSchema.extend({
-    type: z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-    with: connector.paramsSchema,
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
-  });
+export interface InternalConnectorContract extends ConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods?: string[];
+  /** URL pattern(s) for this API endpoint */
+  patterns?: string[];
+  /** Whether this is an internal connector with hardcoded endpoint details */
+  isInternal?: boolean;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  /** Parameter type metadata for proper request building */
+  parameterTypes?: {
+    pathParams?: string[];
+    urlParams?: string[];
+    bodyParams?: string[];
+  };
 }
 
 function createRecursiveStepSchema(
@@ -53,18 +61,30 @@ function createRecursiveStepSchema(
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
+
+    // Create individual connector schemas for proper validation
+    // This gives us proper schema validation per connector type
     const connectorSchemas = connectors.map((c) =>
-      generateStepSchemaForConnector(c, stepSchema, loose)
+      BaseConnectorStepSchema.extend({
+        type: z.literal(c.type),
+        'connector-id': c.connectorIdRequired ? z.string() : z.string().optional(),
+        with: c.paramsSchema,
+        'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+      })
     );
 
-    // Return discriminated union with all step types
-    return z.discriminatedUnion('type', [
+    // Return union with all step types
+    // Note: We can't use discriminatedUnion because ElasticsearchStepSchema and KibanaStepSchema
+    // use .refine() validation which doesn't work with discriminated unions
+    return z.union([
       forEachSchema,
       ifSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
       httpSchema,
+      ElasticsearchStepSchema,
+      KibanaStepSchema,
       ...connectorSchemas,
     ]);
   });
@@ -85,7 +105,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    settings: getWorkflowSettingsSchema(BaseStepSchema, loose).optional(), // Use BaseStepSchema to avoid circular reference
     steps: z.array(recursiveStepSchema),
   });
 }

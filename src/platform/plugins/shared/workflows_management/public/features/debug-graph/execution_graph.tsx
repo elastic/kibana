@@ -12,7 +12,7 @@ import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
+import { getWorkflowZodSchemaLoose } from '../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { ExecutionGraphEdge, ExecutionGraphNode } from './nodes';
 import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
@@ -90,7 +90,7 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) 
     let result = null;
     let error = null;
     try {
-      const parsingResult = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+      const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
       if (parsingResult.error) {
         error = parsingResult.error;
       }
