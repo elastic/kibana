@@ -126,7 +126,7 @@ export const DashboardAppNoDataPage = ({
         }
       }
     }
-  }, [abortController, lensHelpersAsync]);
+  }, [abortController, lensHelpersAsync.value]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
