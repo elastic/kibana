@@ -11,9 +11,30 @@ import { maintenanceWindowStatusSchema } from '../../../../shared/schemas/v1';
 import { maxMaintenanceWindowDocs } from '../../../../shared/constants/v1';
 import { validatePagination } from '../../../../shared/validation/v1';
 
-export const findMaintenanceWindowsRequestQuerySchema = schema.object(
+export const findMaintenanceWindowsQuerySchema = schema.object(
   {
-    // we do not need to use schema.maybe here, because if we do not pass property page, defaultValue will be used
+    title: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The title of the maintenance window.',
+        },
+      })
+    ),
+    created_by: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The user who created the maintenance window.',
+        },
+      })
+    ),
+    status: schema.maybe(
+      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)], {
+        meta: {
+          description:
+            'The status of the maintenance window. One of "running", "upcoming", "finished" or "archived".',
+        },
+      })
+    ),
     page: schema.number({
       defaultValue: 1,
       min: 1,
@@ -22,7 +43,6 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The page number to return.',
       },
     }),
-    // we do not need to use schema.maybe here, because if we do not pass property per_page, defaultValue will be used
     per_page: schema.number({
       defaultValue: 1000,
       min: 0,
@@ -31,24 +51,13 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The number of maintenance windows to return per page.',
       },
     }),
-    search: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'An Elasticsearch simple_query_string query that filters the objects in the response.',
-        },
-      })
-    ),
-    status: schema.maybe(
-      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)])
-    ),
   },
   {
     validate: validatePagination,
   }
 );
 
-export const findMaintenanceWindowsResponseBodySchema = schema.object({
+export const findMaintenanceWindowsResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),
