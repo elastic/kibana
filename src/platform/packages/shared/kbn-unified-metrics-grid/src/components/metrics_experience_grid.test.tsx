@@ -19,6 +19,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Subject } from 'rxjs';
+import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
 
 jest.mock('../store/hooks');
 jest.mock('../hooks');
@@ -41,6 +42,28 @@ const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
 >;
 
 const input$ = new Subject<UnifiedHistogramInputMessage>();
+
+const dimensions: Dimension[] = [
+  { name: 'foo', type: 'keyword', description: 'some description' },
+  { name: 'qux', type: 'keyword', description: 'some description' },
+];
+const dimensionNames = dimensions.map((d) => d.name);
+const allFields: MetricField[] = [
+  {
+    name: 'field1',
+    dimensions: [dimensions[0]],
+    index: 'metrics-*',
+    type: 'long',
+    noData: false,
+  },
+  {
+    name: 'field2',
+    dimensions: [dimensions[1]],
+    index: 'metrics-*',
+    type: 'long',
+    noData: false,
+  },
+];
 
 describe('MetricsExperienceGrid', () => {
   const defaultProps: ChartSectionProps = {
@@ -75,80 +98,76 @@ describe('MetricsExperienceGrid', () => {
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 1,
-      allFields: [],
-      currentPageFields: [],
-      dimensions: [],
+      allFields,
+      currentPageFields: [allFields[0]],
+      dimensions: dimensionNames,
     });
 
     useDimensionsQueryMock.mockReturnValue({
-      data: [
-        {
-          field: 'foo',
-          value: 'bar',
-        },
-        {
-          field: 'qux',
-          value: 'baz',
-        },
-      ],
+      data: dimensions,
     } as unknown as ReturnType<typeof hooks.useDimensionsQuery>);
 
     useMetricFieldsQueryMock.mockReturnValue({
-      data: [
-        {
-          name: 'field1',
-          dimensions: [{ name: 'foo', type: 'number', description: 'some description' }],
-          index: 'metrics-*',
-          type: 'number',
-          noData: false,
-        },
-        {
-          name: 'field2',
-          dimensions: [{ name: 'foo', type: 'number', description: 'some description' }],
-          index: 'metrics-*',
-          type: 'number',
-          noData: false,
-        },
-      ],
+      data: allFields,
       status: 'success',
       isLoading: false,
     });
   });
 
-  it('renders the <MetricsGrid />', () => {
+  it('renders the <MetricsGrid />', async () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
-    waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
+    await waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
   });
 
-  it('renders the loading state', () => {
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
+  it('renders the loading state', async () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'loading',
       isLoading: true,
     });
 
-    waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
-  });
-
-  it('renders the no data state', () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
+    await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
+  });
+
+  it('renders the no data state covering the entire container when Fields API returns no data', () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
-      status: 'loading',
+      status: 'success',
       isLoading: false,
     });
+    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
 
-    waitFor(() => expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument());
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).not.toBeInTheDocument();
+    expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
+  });
+
+  it('renders the no data state covering only the grid section when paginated fields returns no fields', async () => {
+    usePaginatedFieldsMock.mockReturnValue({
+      totalPages: 0,
+      allFields: [],
+      currentPageFields: [],
+      dimensions: dimensionNames,
+    });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('toggleActions')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
+    });
   });
 
   it('renders the toolbar', () => {
@@ -156,13 +175,11 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    waitFor(() => {
-      expect(getByTestId('toggleActions')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
-      expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
-    });
+    expect(getByTestId('toggleActions')).toBeInTheDocument();
+    expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
+    expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
+    expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+    expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
   });
 
   it('render <ValuesSelector /> when dimensions are selected', async () => {
@@ -181,6 +198,8 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    waitFor(() => expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument()
+    );
   });
 });
