@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
@@ -703,4 +703,31 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex,
     currentArg,
   };
+}
+
+export function createInferenceEndpointToCompletionItem(
+  inferenceEndpoint: InferenceEndpointAutocompleteItem
+): ISuggestionItem {
+  return {
+    detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
+      defaultMessage: 'Inference endpoint used for the completion',
+    }),
+    kind: 'Reference',
+    label: inferenceEndpoint.inference_id,
+    sortText: '1',
+    text: inferenceEndpoint.inference_id,
+  };
+}
+
+export function createBasicConstants(label: string): ISuggestionItem[] {
+  return [
+    {
+      label,
+      text: `"\${0:${label}}"`,
+      asSnippet: true,
+      kind: 'Constant',
+      sortText: '1',
+      detail: '',
+    },
+  ];
 }

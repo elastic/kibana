@@ -87,6 +87,25 @@ export const whereCompleteItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
+export const onCompleteItem: ISuggestionItem = {
+  label: 'ON',
+  text: 'ON ',
+  kind: 'Reference',
+  detail: 'On',
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const withCompleteItem: ISuggestionItem = {
+  label: 'WITH',
+  text: 'WITH { $0 }',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: 'With',
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
 export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionItem => {
   return {
     label,
