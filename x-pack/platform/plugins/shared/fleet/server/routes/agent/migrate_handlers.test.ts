@@ -174,14 +174,6 @@ describe('Migrate handlers', () => {
     let mockContext: any;
 
     const agentIds = ['agent-id-1', 'agent-id-2'];
-    const mockAgents = [
-      { id: agentIds[0], components: [] },
-      { id: agentIds[1], components: [] },
-    ];
-    const mockAgentPolicies = [
-      { id: 'policy-id-1', is_protected: false },
-      { id: 'policy-id-2', is_protected: false },
-    ];
     const mockSettings = {
       enrollment_token: 'token123',
       uri: 'https://example.com',
@@ -195,9 +187,6 @@ describe('Migrate handlers', () => {
       mockResponse = httpServerMock.createResponseFactory();
       mockSavedObjectsClient = savedObjectsClientMock.create();
       mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mockRequest = {
-        body: mockSettings,
-      };
 
       // Setup the context with correct structure
       mockContext = {
@@ -214,41 +203,25 @@ describe('Migrate handlers', () => {
         fleet: {},
       };
 
-      // Default mock returns
-      (AgentService.getAgentById as jest.Mock).mockResolvedValue(mockAgents);
-      (AgentService.getByIds as jest.Mock).mockResolvedValue(mockAgents);
-      (AgentService.getAgentPolicyForAgent as jest.Mock).mockResolvedValue(mockAgentPolicies);
-      (AgentService.getAgentPolicyForAgents as jest.Mock).mockResolvedValue(mockAgentPolicies);
-      (AgentService.migrateSingleAgent as jest.Mock).mockResolvedValue({
-        actionId: mockActionResponse.id,
-      });
       (AgentService.bulkMigrateAgents as jest.Mock).mockResolvedValue({
         actionId: mockActionResponse.id,
       });
     });
 
     it('calls bulkMigrateAgents with correct parameters and returns success', async () => {
+      mockRequest = {
+        body: mockSettings,
+      };
+
       await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
-
-      // Verify services were called with correct parameters
-      expect(AgentService.getByIds).toHaveBeenCalledWith(
-        mockElasticsearchClient,
-        mockSavedObjectsClient,
-        agentIds,
-        { ignoreMissing: false }
-      );
-
-      expect(AgentService.getAgentPolicyForAgents).toHaveBeenCalledWith(
-        mockSavedObjectsClient,
-        mockAgents
-      );
 
       expect(AgentService.bulkMigrateAgents).toHaveBeenCalledWith(
         mockElasticsearchClient,
-        mockAgents,
-        mockAgentPolicies,
+        mockSavedObjectsClient,
         {
-          ...mockSettings,
+          agentIds,
+          enrollment_token: 'token123',
+          uri: 'https://example.com',
         }
       );
 
@@ -258,38 +231,27 @@ describe('Migrate handlers', () => {
       });
     });
 
-    it('returns error when agent belongs to a protected policy', async () => {
-      // Mock agent policy as protected
-      (AgentService.getAgentPolicyForAgents as jest.Mock).mockResolvedValue(mockAgentPolicies);
-      // Change the bulkMigrateAgents mock to be an error
-      (AgentService.bulkMigrateAgents as jest.Mock).mockRejectedValue(
-        new FleetUnauthorizedError('One or more agents are protected agents and cannot be migrated')
-      );
-      await expect(
-        bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse)
-      ).rejects.toThrow('One or more agents are protected agents and cannot be migrated');
-    });
+    it('calls bulkMigrateAgents with correct query parameters and returns success', async () => {
+      mockRequest = {
+        body: { ...mockSettings, agents: 'status: online' },
+      };
 
-    it('returns error when agent is a fleet-server agent', async () => {
-      // Mock agent as fleet-server agent
-      (AgentService.getByIds as jest.Mock).mockResolvedValue(mockAgents);
-      // Change the bulkMigrateAgents mock to be an error
-      (AgentService.bulkMigrateAgents as jest.Mock).mockRejectedValue(
-        new FleetUnauthorizedError(
-          'One or more agents are fleet-server agents and cannot be migrated'
-        )
-      );
-      await expect(
-        bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse)
-      ).rejects.toThrow('One or more agents are fleet-server agents and cannot be migrated');
-    });
+      await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
 
-    it('returns error when agent is not found', async () => {
-      const agentError = new AgentNotFoundError('Agent not found');
-      (AgentService.getByIds as jest.Mock).mockRejectedValue(agentError);
-      await expect(
-        bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse)
-      ).rejects.toThrow(agentError.message);
+      expect(AgentService.bulkMigrateAgents).toHaveBeenCalledWith(
+        mockElasticsearchClient,
+        mockSavedObjectsClient,
+        {
+          kuery: 'status: online',
+          enrollment_token: 'token123',
+          uri: 'https://example.com',
+        }
+      );
+
+      // Verify response was returned correctly
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { actionId: mockActionResponse.id },
+      });
     });
   });
 });
