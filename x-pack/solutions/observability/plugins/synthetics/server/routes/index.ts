@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
 import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
@@ -113,6 +114,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   editPrivateLocationRoute,
+  resetPrivateLocationRoute,
   getPrivateLocationsRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,
