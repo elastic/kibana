@@ -15,6 +15,8 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
@@ -29,6 +31,7 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
+  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -167,6 +170,7 @@ export const createTabsStorageManager = ({
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
       globalState: tabState.globalState,
+      controlGroupState: tabState.controlGroupState,
     };
   };
 
@@ -198,12 +202,16 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
+    const controlGroupState = getDefinedStateOnly(
+      tabStateInStorage.controlGroupState || defaultTabState.controlGroupState
+    );
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
       initialAppState: appState,
       globalState: globalState || {},
+      controlGroupState,
     };
   };
 

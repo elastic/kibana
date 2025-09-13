@@ -25,6 +25,7 @@ import {
 } from '@reduxjs/toolkit';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import {
@@ -55,6 +56,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
+  esqlVariables: undefined,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
@@ -172,8 +174,22 @@ export const internalStateSlice = createSlice({
           action.payload.overriddenVisContextAfterInvalidation;
       }),
 
+    setControlGroupState: (
+      state,
+      action: TabAction<{
+        controlGroupState: TabState['controlGroupState'];
+      }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.controlGroupState = action.payload.controlGroupState;
+      }),
+
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
+    },
+
+    setEsqlVariables: (state, action: PayloadAction<ESQLControlVariable[] | undefined>) => {
+      state.esqlVariables = action.payload;
     },
 
     setResetDefaultProfileState: {

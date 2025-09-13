@@ -13,12 +13,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import type {
-  SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
+  SCHEMA_SEARCH_MODEL_VERSION_8,
 } from '../../server/saved_objects/schema';
 
 export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
-  TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>,
+  TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_8>,
   TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6>
 > = (prevDoc) => {
   const attributes = extractTabs(prevDoc.attributes);
@@ -30,7 +30,7 @@ export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
  * @param attributes The previous attributes to be transformed (version 5)
  */
 export const extractTabs = (
-  attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
+  attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_8>
 ): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> => {
   const { title, description, ...tabAttrs } = attributes;
   const tabs = [

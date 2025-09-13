@@ -575,6 +575,7 @@ export function getDiscoverStateContainer({
     savedSearchContainer.set(nextSavedSearch);
     await appStateContainer.replaceUrlState(newAppState);
 
+    savedSearchContainer.getHasReset$().next(true);
     return nextSavedSearch;
   };
 
