@@ -41,6 +41,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       },
       immutable: true,
     });
@@ -61,6 +63,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       },
       immutable: true,
     });
@@ -84,6 +88,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: true,
+        customized_fields: [],
+        has_base_version: false,
       },
       immutable: true,
     });
@@ -105,6 +111,21 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: true,
+        customized_fields: [
+          {
+            field_name: 'tags',
+          },
+          {
+            field_name: 'false_positives',
+          },
+          {
+            field_name: 'references',
+          },
+          {
+            field_name: 'index',
+          },
+        ],
+        has_base_version: true,
       },
       immutable: true,
     });
@@ -126,6 +147,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
       },
       immutable: true,
     });

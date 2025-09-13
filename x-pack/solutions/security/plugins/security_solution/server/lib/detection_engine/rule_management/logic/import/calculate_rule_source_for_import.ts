@@ -50,7 +50,7 @@ export const calculateRuleSourceForImport = ({
   // satisfy the type system.
   const nextRule = convertRuleToImportToRuleResponse(importedRule);
 
-  const isCustomized = calculateIsCustomized({
+  const { isCustomized, customizedFields } = calculateIsCustomized({
     baseRule,
     nextRule,
     currentRule,
@@ -60,6 +60,8 @@ export const calculateRuleSourceForImport = ({
     ruleSource: {
       type: 'external',
       is_customized: isCustomized,
+      customized_fields: customizedFields,
+      has_base_version: !!baseRule,
     },
     immutable: true,
   };

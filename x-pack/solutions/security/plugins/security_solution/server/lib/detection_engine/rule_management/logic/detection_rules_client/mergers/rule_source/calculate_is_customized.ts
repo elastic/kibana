@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
-import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import type {
+  ExternalRuleCustomizedFields,
+  IsExternalRuleCustomized,
+  RuleResponse,
+} from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
+import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert_prebuilt_rule_asset_to_rule_response';
 
 interface CalculateIsCustomizedArgs {
@@ -17,15 +21,27 @@ interface CalculateIsCustomizedArgs {
   currentRule: RuleResponse | undefined;
 }
 
+interface CalculateIsCustomizedReturn {
+  isCustomized: IsExternalRuleCustomized;
+  customizedFields: ExternalRuleCustomizedFields;
+}
+
 export function calculateIsCustomized({
   baseRule,
   nextRule,
   currentRule,
-}: CalculateIsCustomizedArgs) {
+}: CalculateIsCustomizedArgs): CalculateIsCustomizedReturn {
   if (baseRule) {
     // Base version is available, so we can determine the customization status
     // by comparing the base version with the next version
-    return areRulesEqual(convertPrebuiltRuleAssetToRuleResponse(baseRule), nextRule) === false;
+    const customizedFields = getCustomizedFields(
+      convertPrebuiltRuleAssetToRuleResponse(baseRule),
+      nextRule
+    );
+    return {
+      isCustomized: customizedFields.length > 0,
+      customizedFields,
+    };
   }
   // Base version is not available, apply a heuristic to determine the
   // customization status
@@ -33,7 +49,10 @@ export function calculateIsCustomized({
   if (currentRule == null) {
     // Current rule is not installed and base rule is not available, so we can't
     // determine if the rule is customized. Defaulting to false.
-    return false;
+    return {
+      isCustomized: false,
+      customizedFields: [],
+    };
   }
 
   if (
@@ -43,22 +62,33 @@ export function calculateIsCustomized({
     // If the rule was previously customized, there's no way to determine
     // whether the customization remained or was reverted. Keeping it as
     // customized in this case.
-    return true;
+    return {
+      isCustomized: true,
+      customizedFields: [],
+    };
   }
 
   // If the rule has not been customized before, its customization status can be
   // determined by comparing the current version with the next version.
-  return areRulesEqual(currentRule, nextRule) === false;
+  const customizedFields = getCustomizedFields(currentRule, nextRule);
+  return {
+    isCustomized: customizedFields.length > 0,
+    customizedFields: [], // Don't have base version so these fields are not necessarily the same fields that would be calculated from base_version
+  };
 }
 
 /**
- * A helper function to determine if two rules are equal
+ * A helper function to retrieve all customized fields between 2 rule versions
  *
  * @param ruleA
  * @param ruleB
- * @returns true if all rule fields are equal, false otherwise
+ * @returns `ExternalRuleCustomizedFields` type with all fields that are different between the two given rules
  */
-function areRulesEqual(ruleA: RuleResponse, ruleB: RuleResponse) {
+function getCustomizedFields(ruleA: RuleResponse, ruleB: RuleResponse) {
   const fieldsDiff = calculateRuleFieldsDiff({ ruleA, ruleB });
-  return Object.values(fieldsDiff).every((field) => field.is_equal === true);
+  return Object.entries(fieldsDiff)
+    .filter(([, diff]) => !diff.is_equal)
+    .map(([key]) => ({
+      field_name: key,
+    }));
 }

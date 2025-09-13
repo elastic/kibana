@@ -35,7 +35,7 @@ export async function calculateRuleSource({
     ]);
     const baseRule: PrebuiltRuleAsset | undefined = prebuiltRulesResponse.at(0);
 
-    const isCustomized = calculateIsCustomized({
+    const { isCustomized, customizedFields } = calculateIsCustomized({
       baseRule,
       nextRule,
       currentRule,
@@ -44,6 +44,8 @@ export async function calculateRuleSource({
     return {
       type: 'external',
       is_customized: isCustomized,
+      customized_fields: customizedFields,
+      has_base_version: !!baseRule,
     };
   }
 

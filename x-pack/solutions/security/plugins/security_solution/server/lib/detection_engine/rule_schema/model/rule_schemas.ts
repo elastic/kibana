@@ -29,6 +29,7 @@ import {
   ConcurrentSearches,
   DataViewId,
   EventCategoryOverride,
+  ExternalRuleHasBaseVersion,
   HistoryWindowStart,
   IndexPatternArray,
   InvestigationFields,
@@ -104,6 +105,12 @@ export const RuleSourceCamelCased = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('external'),
     isCustomized: IsExternalRuleCustomized,
+    customizedFields: z.array(
+      z.object({
+        fieldName: z.string(),
+      })
+    ),
+    hasBaseVersion: ExternalRuleHasBaseVersion,
   }),
   z.object({
     type: z.literal('internal'),

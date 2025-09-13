@@ -66,6 +66,8 @@ const convertImmutableToRuleSource = (immutable: boolean): RuleSource => {
     return {
       type: 'external',
       is_customized: false,
+      customized_fields: [],
+      has_base_version: true,
     };
   }
 

@@ -31,6 +31,8 @@ export const normalizeRuleSource = ({
       ? {
           type: 'external',
           isCustomized: false,
+          customizedFields: [],
+          hasBaseVersion: true,
         }
       : {
           type: 'internal',

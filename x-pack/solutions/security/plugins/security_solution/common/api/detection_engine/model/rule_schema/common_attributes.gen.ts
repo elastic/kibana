@@ -90,6 +90,25 @@ export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
 export const IsExternalRuleCustomized = z.boolean();
 
 /**
+ * Determines whether or not an external/prebuilt rule has its original, unmodified version present when the `is_customized` calculation is performed.
+ */
+export type ExternalRuleHasBaseVersion = z.infer<typeof ExternalRuleHasBaseVersion>;
+export const ExternalRuleHasBaseVersion = z.boolean();
+
+/**
+ * An array of field names that have been customized by the user (i.e. any of its fields that have been modified and have diverged from the base value). Defaults to an empty array.
+ */
+export type ExternalRuleCustomizedFields = z.infer<typeof ExternalRuleCustomizedFields>;
+export const ExternalRuleCustomizedFields = z.array(
+  z.object({
+    /**
+     * Name of the field in the rule object that has been customized from its base value by the user.
+     */
+    field_name: z.string(),
+  })
+);
+
+/**
  * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
  */
 export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
@@ -104,6 +123,8 @@ export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
 export const ExternalRuleSource = z.object({
   type: z.literal('external'),
   is_customized: IsExternalRuleCustomized,
+  has_base_version: ExternalRuleHasBaseVersion,
+  customized_fields: ExternalRuleCustomizedFields,
 });
 
 /**
