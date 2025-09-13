@@ -7,38 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type { v1 } from '../../common';
+import { inject, injectable } from 'inversify';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { Request, Response, SavedObjectsClient } from '@kbn/core-di-server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-export const registerBulkDeleteRoute = (router: IRouter) => {
-  router.post(
-    {
-      path: '/internal/kibana/management/saved_objects/_bulk_delete',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {
-        body: schema.arrayOf(
-          schema.object({
-            type: schema.string(),
-            id: schema.string(),
-          })
-        ),
-      },
+@injectable()
+export class BulkDeleteRoute {
+  static method = 'post' as const;
+  static handleLegacyErrors = true;
+  static path = '/internal/kibana/management/saved_objects/_bulk_delete';
+  static security = {
+    authz: {
+      enabled: false,
+      reason: 'This route is opted out from authorization',
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const { getClient } = (await context.core).savedObjects;
+  } as const;
+  static validate = {
+    body: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        id: schema.string(),
+      })
+    ),
+  };
 
-      const objects = req.body;
-      const client = getClient();
-      const response = await client.bulkDelete(objects, { force: true });
+  constructor(
+    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      never,
+      never,
+      TypeOf<typeof BulkDeleteRoute.validate.body>
+    >,
+    @inject(Response) private readonly response: KibanaResponseFactory
+  ) {}
 
-      const body: v1.BulkDeleteResponseHTTP = response.statuses;
-      return res.ok({ body });
-    })
-  );
-};
+  async handle() {
+    const objects = this.request.body;
+    const { statuses: body } = await this.client.bulkDelete(objects, { force: true });
+
+    return this.response.ok({ body });
+  }
+}

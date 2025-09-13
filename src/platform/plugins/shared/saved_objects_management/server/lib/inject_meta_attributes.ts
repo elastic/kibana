@@ -8,8 +8,8 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectWithMetadata } from '../../common';
 import type { ISavedObjectsManagement } from '../services';
-import type { SavedObjectWithMetadata } from '../types';
 
 export function injectMetaAttributes<T = unknown>(
   savedObject: SavedObject<T> | SavedObjectWithMetadata<T>,

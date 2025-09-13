@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { inject, injectable } from 'inversify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { SavedObjectsTypeRegistry } from '@kbn/core-di-server';
 import type { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core/server';
 
 export type ISavedObjectsManagement = PublicMethodsOf<SavedObjectsManagement>;
 
+@injectable()
 export class SavedObjectsManagement {
-  constructor(private readonly registry: ISavedObjectTypeRegistry) {}
+  constructor(
+    @inject(SavedObjectsTypeRegistry) private readonly registry: ISavedObjectTypeRegistry
+  ) {}
 
   public isImportAndExportable(type: string) {
     return this.registry.isImportableAndExportable(type);
