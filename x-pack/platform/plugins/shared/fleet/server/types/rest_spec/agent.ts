@@ -98,9 +98,9 @@ export const MigrateOptionsSchema = {
   proxy_disabled: schema.maybe(schema.boolean()),
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
-  staging: schema.maybe(schema.boolean()),
+  staging: schema.maybe(schema.string()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
-  replace_token: schema.maybe(schema.boolean()),
+  replace_token: schema.maybe(schema.string()),
 };
 export const BulkMigrateOptionsSchema = {
   ca_sha256: schema.maybe(schema.string()),
@@ -113,7 +113,7 @@ export const BulkMigrateOptionsSchema = {
   proxy_disabled: schema.maybe(schema.boolean()),
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
-  staging: schema.maybe(schema.boolean()),
+  staging: schema.maybe(schema.string()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
 };
 export const AgentComponentStateSchema = schema.oneOf([
