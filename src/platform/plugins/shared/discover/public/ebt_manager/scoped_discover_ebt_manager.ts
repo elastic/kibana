@@ -17,6 +17,8 @@ import {
   FIELD_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
+  TABS_EVENT_NAME,
+  TABS_EVENT_TYPE,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
@@ -35,10 +37,27 @@ enum FieldUsageEventName {
   dataTableRemoval = 'dataTableRemoval',
   filterAddition = 'filterAddition',
 }
+
+export enum TabsEventName {
+  tabCreated = 'tabCreated',
+  tabClosed = 'tabClosed',
+  tabSwitched = 'tabSwitched',
+  tabReordered = 'tabReordered',
+  tabDuplicated = 'tabDuplicated',
+  tabClosedOthers = 'tabClosedOthers',
+  tabRenamed = 'tabRenamed',
+  tabsLimitReached = 'tabsLimitReached',
+  tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
+  tabsRestoredOnLoad = 'tabsRestoredOnLoad',
+}
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
+}
+
+interface TabsEventData {
+  [TABS_EVENT_NAME]: TabsEventName;
 }
 
 interface ContextualProfileResolvedEventData {
@@ -196,5 +215,18 @@ export class ScopedDiscoverEBTManager {
         });
       },
     };
+  }
+
+  // TODO better type for payload
+  public trackTabs({ eventName, payload }: { eventName: TabsEventName; payload: any }) {
+    if (!this.reportEvent) {
+      return;
+    }
+    const eventData: TabsEventData = {
+      [TABS_EVENT_NAME]: eventName,
+      ...payload,
+    };
+    console.log({ TABS_EVENT_TYPE, eventData });
+    this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 }

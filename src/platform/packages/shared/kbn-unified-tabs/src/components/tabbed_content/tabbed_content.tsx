@@ -39,6 +39,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
+  onEvent: (eventName: string, payload?: any) => void; // TODO better type for payload
 }
 
 export interface TabbedContentState {
@@ -57,6 +58,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   createItem,
   onChanged,
   getPreviewData,
+  onEvent,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -85,15 +87,18 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       const editedItem = { ...item, label: newLabel };
       tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
+
+      onEvent('tabRenamed');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onSelect = useCallback(
     async (item: TabItem) => {
       changeState((prevState) => selectTab(prevState, item));
+      onEvent('tabSwitched');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onSelectRecentlyClosed = useCallback(
@@ -110,10 +115,13 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         if (nextState.selectedItem) {
           tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
         }
+
+        onEvent('tabClosed', { remainingTabsCount: nextState.items.length });
+
         return nextState;
       });
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onReorder = useCallback(
@@ -122,15 +130,19 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         ...prevState,
         items: reorderedItems,
       }));
+
+      onEvent('tabReordered');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onAdd = useCallback(async () => {
     const newItem = createItem();
     tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
     changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
-  }, [changeState, createItem, maxItemsCount]);
+
+    onEvent('tabCreated');
+  }, [changeState, createItem, maxItemsCount, onEvent]);
 
   const onDuplicate = useCallback(
     (item: TabItem) => {
@@ -151,8 +163,18 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
       tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
       changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
+
+      onEvent('tabDuplicated');
     },
-    [changeState, createItem, maxItemsCount, state.items]
+    [changeState, createItem, maxItemsCount, state.items, onEvent]
+  );
+
+  const onCloseOtherTabs = useCallback(
+    (item: TabItem) => {
+      changeState((prevState) => closeOtherTabs(prevState, item));
+      onEvent('tabClosedOthers');
+    },
+    [changeState, onEvent]
   );
 
   const getTabMenuItems = useMemo(() => {
@@ -160,11 +182,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       tabsState: state,
       maxItemsCount,
       onDuplicate,
-      onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
+      onCloseOtherTabs,
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [state, maxItemsCount, onDuplicate, changeState]);
+  }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, changeState]);
 
   return (
     <EuiFlexGroup
@@ -191,6 +213,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onReorder={onReorder}
             onClose={onClose}
             getPreviewData={getPreviewData}
+            onEvent={onEvent}
           />
         </EuiFlexItem>
       )}
