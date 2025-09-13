@@ -25,6 +25,7 @@ import type { IndexDetails } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { EmptyStatesIllustrationContainer } from './empty_states_illustration_container';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
@@ -41,7 +42,8 @@ import type { PostureTypes } from '../../common/types_old';
 import { useAdd3PIntegrationRoute } from '../common/api/use_wiz_integration_route';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
-import vulnerabilitiesVendorsSVG from '../assets/illustrations/vulnerabilities_vendors.svg';
+import vulnerabilityVendorDarkSVG from '../assets/illustrations/vulnerability_vendor_dark.svg';
+import vulnerabilityVendorBrightSVG from '../assets/illustrations/vulnerability_vendor_bright.svg';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -78,6 +80,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   const { euiTheme } = useEuiTheme();
   const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiFlexGroup>
@@ -152,8 +155,8 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <EmptyStatesIllustrationContainer>
                 <EuiImage
                   size="fullWidth"
-                  src={vulnerabilitiesVendorsSVG}
-                  alt="vulnerabilitiesVendorsSVG"
+                  src={isDarkMode ? vulnerabilityVendorDarkSVG : vulnerabilityVendorBrightSVG}
+                  alt={isDarkMode ? 'vulnerabilityVendorDarkSVG' : 'vulnerabilityVendorBrightSVG'}
                   role="presentation"
                 />
               </EmptyStatesIllustrationContainer>
@@ -173,7 +176,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <p>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.promptDescription"
-                  defaultMessage="Ingest data from your existing vulnerability {lineBreak} solution for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
+                  defaultMessage="Ingest data from your existing vulnerability {lineBreak} solution for centralized analytics, hunting, {lineBreak} investigations, visualizations, and contextual {lineBreak} insights across your entire infrastructure."
                   values={{ lineBreak: <br /> }}
                 />
               </p>
