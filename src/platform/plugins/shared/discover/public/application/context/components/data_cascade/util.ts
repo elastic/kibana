@@ -20,6 +20,7 @@ import {
   type ESQLFunction,
   type ESQLAstItem,
 } from '@kbn/esql-ast';
+import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
 import { isESQLFunction } from '@kbn/esql-ast/src/types';
 
 type NodeType = 'group' | 'leaf';
@@ -31,7 +32,7 @@ export interface AppliedStatsFunction {
   operator: string;
 }
 
-// helper for removing backticks from field names
+// helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
 
 export interface ESQLStatsQueryMeta {
@@ -47,35 +48,51 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   const statsCommands = Array.from(mutate.commands.stats.list(esqlQuery.ast));
 
-  let statsCommand: StatsCommand | null = null;
+  let summarizedStatsCommand: StatsCommandSummary | null = null;
 
   // TODO: when a where clause follows the stats command, it would not be regarded as a candidate for the cascade experience
 
   // we always want to operate on the last stats command that has valid grouping options,
   // but allow for the possibility of multiple stats commands in the query
   for (let i = statsCommands.length - 1; i >= 0; i--) {
-    const { grouping } = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommands[i]);
+    summarizedStatsCommand = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommands[i]);
 
-    if (grouping && Object.keys(grouping).length) {
-      statsCommand = statsCommands[i] as StatsCommand;
+    if (summarizedStatsCommand.grouping && Object.keys(summarizedStatsCommand.grouping).length) {
       break;
     }
   }
 
-  if (!statsCommand) {
+  if (!summarizedStatsCommand) {
     return { groupByFields, appliedFunctions };
   }
 
-  const { grouping, aggregates } = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommand);
+  const grouping = Object.values(summarizedStatsCommand.grouping);
 
-  groupByFields.push(
-    ...Object.values(grouping).map((group) => ({
-      field: removeBackticks(group.field),
+  for (let j = 0; j < grouping.length; j++) {
+    const group = grouping[j];
+
+    const groupFieldName = removeBackticks(group.field);
+
+    const whereCommandGroupFieldSearch = mutate.commands.where.byField(
+      esqlQuery.ast,
+      Builder.expression.column({
+        args: [Builder.identifier({ name: groupFieldName })],
+      })
+    );
+
+    if (whereCommandGroupFieldSearch?.length) {
+      // if there is a where command targeting a column on the stats command we are processing in the query,
+      // then we do not want to classify it as having metadata required for the cascade experience
+      return { groupByFields: [], appliedFunctions: [] };
+    }
+
+    groupByFields.push({
+      field: groupFieldName,
       type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
-    }))
-  );
+    });
+  }
 
-  Object.values(aggregates).forEach((aggregate) => {
+  Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
     appliedFunctions.push({
       identifier: removeBackticks(aggregate.field),
       operator: (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
