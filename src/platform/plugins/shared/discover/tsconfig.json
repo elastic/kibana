@@ -115,6 +115,7 @@
     "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
+    "@kbn/esql-multiterm-transformer"
   ],
   "exclude": ["target/**/*"]
 }

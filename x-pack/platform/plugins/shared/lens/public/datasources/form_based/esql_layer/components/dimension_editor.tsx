@@ -12,6 +12,10 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import {
+  transformEsqlMultiTermBreakdown,
+  getMultiTermsFormatterParams,
+} from '@kbn/esql-multiterm-transformer';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
 import { FormatSelector } from '../../dimension_panel/format_selector';
@@ -24,6 +28,7 @@ import type { TextBasedLayer } from '../types';
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
     expressions: ExpressionsStart;
+    data: DataPublicPluginStart;
   };
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
@@ -58,7 +63,18 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
-          const columns = table.columns.map((col) => {
+
+          const { columns: transformedColumns } = transformEsqlMultiTermBreakdown({
+            columns: table.columns,
+            rows: [],
+            query: query.esql,
+            formatter: props.data.fieldFormats.getInstance(
+              'multi_terms',
+              getMultiTermsFormatterParams(table.columns)
+            ),
+          });
+
+          const columns = transformedColumns.map((col) => {
             return {
               id: col.variable ?? col.id,
               name: col.variable ? `??${col.variable}` : col.name,
@@ -74,6 +90,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   : true,
             };
           });
+
           setAllColumns(columns);
         }
       }
@@ -88,6 +105,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props.expressions,
     esqlVariables,
     query,
+    props.data,
   ]);
 
   const selectedField = useMemo(() => {
@@ -130,12 +148,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           selectedField={selectedField}
           onChoose={(choice) => {
             const column = allColumns?.find((f) => f.name === choice.field);
+            if (!column) return;
             const newColumn = {
               columnId: props.columnId,
-              fieldName: choice.field,
+              fieldName: column.id,
               meta: column?.meta,
               variable: column?.variable,
-              label: choice.field,
+              label: column.name,
             };
             return props.setState(
               !selectedField
