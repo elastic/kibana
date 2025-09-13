@@ -34,6 +34,12 @@ export const labels = {
       defaultMessage: 'Edit index search tool',
     }),
 
+    editToolContextMenuButtonLabel: i18n.translate(
+      'xpack.onechat.tools.editToolContextMenuButtonLabel',
+      {
+        defaultMessage: 'Edit tool context menu',
+      }
+    ),
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
