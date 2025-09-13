@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "target_types"
+  },
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "target_types/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-packages"
+  ]
+}
