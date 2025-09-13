@@ -6,7 +6,7 @@
  */
 
 import { chunk, intersection } from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   FIELD_TYPES,
