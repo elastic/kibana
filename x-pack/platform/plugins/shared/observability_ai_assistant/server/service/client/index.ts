@@ -475,10 +475,11 @@ export class ObservabilityAIAssistantClient {
         : ToolChoiceType.auto;
     }
 
+    const availableToolNames = functions?.map((fn) => fn.name) ?? [];
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages, this.dependencies.logger),
+      messages: convertMessagesForInference(messages, availableToolNames, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
@@ -521,7 +522,6 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
-        messages: convertMessagesForInference(messages, this.dependencies.logger),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
