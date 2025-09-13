@@ -51,7 +51,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
 
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const packageRegistryConfig = path.join(
+      __dirname,
+      '../../resources/package_registry_config.yml'
+    );
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     /**

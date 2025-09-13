@@ -107,7 +107,10 @@ export function createTestConfig(
 
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const packageRegistryConfig = path.join(
+      __dirname,
+      '../../resources/package_registry_config.yml'
+    );
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     return {
