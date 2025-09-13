@@ -467,10 +467,10 @@ describe('UnifiedDataTable', () => {
       screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
     const getCellValuesByColumn = () => {
       const columns = screen
-        .getAllByRole('columnheader')
+        .getAllByTestId(/dataGridHeaderCell-/)
         .map((header) => header.dataset.gridcellColumnId!);
       const values = screen
-        .getAllByRole('gridcell')
+        .getAllByTestId('dataGridRowCell')
         .map((cell) => cell.querySelector('.unifiedDataTable__cellValue')?.textContent ?? '');
       return values.reduce<Record<string, string[]>>((acc, value, i) => {
         const column = columns[i % columns.length];
@@ -505,9 +505,7 @@ describe('UnifiedDataTable', () => {
         ]);
         await userEvent.click(getColumnActions('message'));
         await waitForEuiPopoverOpen();
-        // Column sort button incorrectly renders as "Sort " instead
-        // of "Sort Z-A" in Jest tests, so we need to find it by index
-        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+        await userEvent.click(screen.getByTitle(/Sort\s+Z-A/im).closest('button')!);
         await waitFor(() => {
           values = getCellValuesByColumn();
           expect(values.message).toEqual([
@@ -551,9 +549,7 @@ describe('UnifiedDataTable', () => {
         ]);
         await userEvent.click(getColumnActions('message'));
         await waitForEuiPopoverOpen();
-        // Column sort button incorrectly renders as "Sort " instead
-        // of "Sort Z-A" in Jest tests, so we need to find it by index
-        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+        await userEvent.click(screen.getByTitle(/Sort\s+Z-A/im).closest('button')!);
         await waitFor(() => {
           values = getCellValuesByColumn();
           expect(values.message).toEqual([
@@ -1166,7 +1162,7 @@ describe('UnifiedDataTable', () => {
 
     const getColumnHeaders = () =>
       screen
-        .getAllByRole('columnheader')
+        .getAllByTestId(/dataGridHeaderCell-/)
         .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
 
     const getCellValues = () =>
@@ -1303,18 +1299,18 @@ describe('UnifiedDataTable', () => {
   describe('columns', () => {
     // Default column width in EUI is hardcoded to 100px for Jest envs
     const EUI_DEFAULT_COLUMN_WIDTH = '100px';
-    const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
-    const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
+    const getColumnHeader = (name: string) => screen.getByTestId(`dataGridHeaderCell-${name}`);
+    const queryColumnHeader = (name: string) => screen.queryByTestId(`dataGridHeaderCell-${name}`);
     const openColumnActions = async (name: string) => {
       const actionsButton = screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
       await userEvent.click(actionsButton);
       await waitForEuiPopoverOpen();
     };
-    const clickColumnAction = async (name: string) => {
-      const action = screen.getByRole('button', { name });
+    const clickColumnAction = async (title: string) => {
+      const action = screen.getByTitle(title).closest('button')!;
       await userEvent.click(action);
     };
-    const queryButton = (name: string) => screen.queryByRole('button', { name });
+    const queryButton = (title: string) => screen.queryByTitle(title)?.closest('button') ?? null;
 
     it(
       'should reset the last column to auto width if only absolute width columns remain',
