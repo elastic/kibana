@@ -10,7 +10,6 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
-  FormulaPublicApi,
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
@@ -53,8 +52,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   getLayer(
     layerId: string,
     accessorId: string,
-    chartDataView: DataView,
-    formulaAPI: FormulaPublicApi
+    chartDataView: DataView
   ): FormBasedPersistedState['layers'] {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [HISTOGRAM_COLUMN_NAME],
@@ -79,8 +77,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
             columnOrder: [],
             columns: {},
           },
-          this.layerConfig.dataView ?? chartDataView,
-          formulaAPI
+          this.layerConfig.dataView ?? chartDataView
         ),
       },
       ...(this.layerConfig.options?.showTrendLine
@@ -90,8 +87,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
               ...this.column.getData(
                 `${accessorId}_trendline`,
                 baseLayer,
-                this.layerConfig.dataView ?? chartDataView,
-                formulaAPI
+                this.layerConfig.dataView ?? chartDataView
               ),
             },
           }

@@ -10,7 +10,6 @@
 import 'jest-canvas-mock';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { LensAttributesBuilder } from './lens_attributes_builder';
 import {
   MetricChart,
@@ -19,7 +18,7 @@ import {
   XYDataLayer,
   XYReferenceLinesLayer,
 } from './visualization_types';
-import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import type { FormulaValueConfig } from './types';
 
@@ -33,8 +32,6 @@ const mockDataView = {
   fields: [],
   metaFields: [],
 } as unknown as jest.Mocked<DataView>;
-
-const lensPluginMockStart = lensPluginMock.createStartContract();
 
 const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
   customLabel: false,
@@ -98,11 +95,6 @@ const AVERAGE_CPU_USER_FORMULA = 'average(system.cpu.user.pct)';
 const AVERAGE_CPU_SYSTEM_FORMULA = 'average(system.cpu.system.pct)';
 
 describe('lens_attributes_builder', () => {
-  let formulaAPI: FormulaPublicApi;
-  beforeAll(async () => {
-    formulaAPI = (await lensPluginMockStart.stateHelperApi()).formula;
-  });
-
   describe('MetricChart', () => {
     it('should build MetricChart', async () => {
       const metriChart = new MetricChart({
@@ -111,7 +103,6 @@ describe('lens_attributes_builder', () => {
         }),
 
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
 
@@ -151,7 +142,6 @@ describe('lens_attributes_builder', () => {
         }),
 
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
@@ -207,7 +197,6 @@ describe('lens_attributes_builder', () => {
           }),
         ],
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -261,7 +250,6 @@ describe('lens_attributes_builder', () => {
           }),
         ],
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -326,7 +314,6 @@ describe('lens_attributes_builder', () => {
           }),
         ],
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
