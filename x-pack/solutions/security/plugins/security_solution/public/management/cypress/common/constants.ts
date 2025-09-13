@@ -30,9 +30,10 @@ export const SIEM_VERSIONS = [
   // deprecated siem versions
   'siem',
   'siemV2',
+  'siemV3',
 
   // actual version, should equal to SECURITY_FEATURE_ID
-  'siemV3',
+  'siemV4',
 ] as const;
 
 export type SiemVersion = (typeof SIEM_VERSIONS)[number];
