@@ -10,7 +10,7 @@ import type { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -73,7 +73,9 @@ export const useSchemaFields = ({
     [dataViews, definition.stream.name]
   );
 
-  const fields = useMemo(() => {
+  const [fields, setFields] = useState<SchemaField[]>([]);
+
+  const storedFields = useMemo(() => {
     let inheritedFields: SchemaField[] = [];
 
     if (Streams.WiredStream.GetResponse.is(definition)) {
@@ -135,7 +137,14 @@ export const useSchemaFields = ({
           status: 'unmapped',
         })) ?? [];
 
-    return [...inheritedFields, ...mappedFields, ...unmappedFields, ...unmanagedFields];
+    const nextStoredFields = [
+      ...inheritedFields,
+      ...mappedFields,
+      ...unmanagedFields,
+      ...unmappedFields,
+    ];
+    setFields(nextStoredFields);
+    return nextStoredFields;
   }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
 
   const refreshFields = useCallback(() => {
@@ -144,7 +153,8 @@ export const useSchemaFields = ({
     refreshDataViewFields();
   }, [refreshDefinition, refreshUnmappedFields, refreshDataViewFields]);
 
-  const updateField = useCallback(
+  // I need to rewrite this to actually put all fields instead
+  const updateFields = useCallback(
     async (field: SchemaField) => {
       try {
         if (!isSchemaFieldTyped(field)) {
@@ -215,6 +225,22 @@ export const useSchemaFields = ({
     [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
   );
 
+  const updateField = useCallback(
+    async (field: SchemaField) => {
+      const index = fields.findIndex((f) => f.name === field.name);
+      if (index === -1) {
+        return;
+      }
+
+      const before = fields.slice(0, index);
+      const after = fields.slice(index + 1);
+      const nextFields = [...before, field, ...after];
+      setFields(nextFields);
+    },
+    [fields]
+  );
+
+  // This I can likely remove?
   const unmapField = useCallback(
     async (fieldName: SchemaField['name']) => {
       try {
@@ -278,12 +304,35 @@ export const useSchemaFields = ({
     [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
   );
 
+  const pendingChangesCount = useMemo(() => {
+    const added = fields.length - storedFields.length;
+
+    const changed = fields.filter((field) => {
+      const stored = storedFields.find((storedField) => storedField.name === field.name);
+      return stored && !isEqual(field, stored);
+    }).length;
+
+    return added + changed;
+  }, [fields, storedFields]);
+
+  const discardChanges = useCallback(() => {
+    setFields(storedFields);
+  }, [storedFields]);
+
+  const submitChanges = useCallback(async () => {
+    // Implement this
+  }, []);
+
   return {
     fields,
+    storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
     refreshFields,
     unmapField,
     updateField,
+    pendingChangesCount,
+    discardChanges,
+    submitChanges,
   };
 };
 

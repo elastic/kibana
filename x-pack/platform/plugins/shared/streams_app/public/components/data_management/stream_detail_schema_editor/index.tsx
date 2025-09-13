@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
-import { Streams } from '@kbn/streams-schema';
-import { isRootStreamDefinition } from '@kbn/streams-schema';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
-import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
+import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
@@ -21,27 +26,102 @@ const wiredDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES;
 const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
+  const { core } = useKibana();
   const { loading } = useStreamDetail();
 
-  const { fields, isLoadingFields, refreshFields, unmapField, updateField } = useSchemaFields({
+  const {
+    fields,
+    storedFields,
+    isLoadingFields,
+    refreshFields,
+    unmapField,
+    updateField,
+    pendingChangesCount,
+    discardChanges,
+    submitChanges,
+  } = useSchemaFields({
     definition,
     refreshDefinition,
   });
 
-  return (
-    <SchemaEditor
-      fields={fields}
-      isLoading={loading || isLoadingFields}
-      defaultColumns={
-        Streams.WiredStream.GetResponse.is(definition) ? wiredDefaultColumns : classicDefaultColumns
+  const handleCancelClick = useDiscardConfirm(discardChanges, {
+    defaultFocusedButton: 'cancel',
+  });
+
+  const openConfirmationModal = () => {
+    const overlay = core.overlays.openModal(
+      toMountPoint(
+        <SchemaChangesReviewModal
+          fields={fields}
+          storedFields={storedFields}
+          submitChanges={submitChanges}
+          onClose={() => overlay.close()}
+        />,
+        core
+      ),
+      {
+        maxWidth: 500,
       }
-      stream={definition.stream}
-      onFieldUnmap={unmapField}
-      onFieldUpdate={updateField}
-      onRefreshData={refreshFields}
-      withControls
-      withFieldSimulation
-      withTableActions={!isRootStreamDefinition(definition.stream) && definition.privileges.manage}
-    />
+    );
+  };
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+      <EuiFlexItem grow={1} css={{ minHeight: 0 }}>
+        <SchemaEditor
+          fields={fields}
+          isLoading={loading || isLoadingFields}
+          defaultColumns={
+            Streams.WiredStream.GetResponse.is(definition)
+              ? wiredDefaultColumns
+              : classicDefaultColumns
+          }
+          stream={definition.stream}
+          onFieldUnmap={unmapField}
+          onFieldUpdate={updateField}
+          onRefreshData={refreshFields}
+          withControls
+          withFieldSimulation
+          withTableActions={
+            !isRootStreamDefinition(definition.stream) && definition.privileges.manage
+          }
+        />
+      </EuiFlexItem>
+      {pendingChangesCount > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiBottomBar position="static">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="xpack.streams.schemaEditor.changesPendingLabel"
+                  defaultMessage="{count, plural, one {# change pending. Review and submit when ready.} other {# changes pending. Review and submit when ready.}}"
+                  values={{ count: pendingChangesCount }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="text" onClick={handleCancelClick}>
+                      <FormattedMessage
+                        id="xpack.streams.schemaEditor.cancelButtonLabel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill onClick={openConfirmationModal}>
+                      <FormattedMessage
+                        id="xpack.streams.schemaEditor.submitChangesButtonLabel"
+                        defaultMessage="Submit changes"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiBottomBar>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
