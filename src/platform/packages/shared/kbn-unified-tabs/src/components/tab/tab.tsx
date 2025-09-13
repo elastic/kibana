@@ -25,7 +25,6 @@ import {
   EuiProgress,
   EuiTextTruncate,
   EuiIcon,
-  CanvasTextUtils,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -34,6 +33,7 @@ import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../
 import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 import { TabPreview } from '../tab_preview';
+import { useTabLabelWidth } from './use_tab_label_width';
 
 export interface TabProps {
   item: TabItem;
@@ -169,49 +169,16 @@ export const Tab: React.FC<TabProps> = (props) => {
     [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
 
+  const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
+    item,
+    tabsSizeConfig,
+  });
+
   useEffect(() => {
     if (isInlineEditActive && !isSelected) {
       setIsInlineEditActive(false);
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
-
-  const container = useRef<HTMLDivElement | null>(null);
-  const [textUtils, setTextUtils] = useState<CanvasTextUtils>();
-  const { labelWidth, labelTextWidth } = useMemo(() => {
-    if (!textUtils) {
-      return { labelWidth: 0, labelTextWidth: 0 };
-    }
-
-    textUtils.setTextToCheck(item.label);
-
-    const textWidth = Math.ceil(textUtils.textWidth);
-    const indicatorWidth = euiTheme.base * 1.25;
-    const textWithIndicatorWidth = textWidth + indicatorWidth;
-    const tabPaddingWidth = euiTheme.base;
-    const resolvedLabelWidth = Math.max(
-      Math.min(textWithIndicatorWidth, tabsSizeConfig.regularTabMaxWidth - tabPaddingWidth),
-      tabsSizeConfig.regularTabMinWidth - tabPaddingWidth
-    );
-
-    return {
-      labelWidth: resolvedLabelWidth,
-      labelTextWidth: resolvedLabelWidth - indicatorWidth,
-    };
-  }, [
-    euiTheme.base,
-    item.label,
-    tabsSizeConfig.regularTabMaxWidth,
-    tabsSizeConfig.regularTabMinWidth,
-    textUtils,
-  ]);
-
-  useEffect(() => {
-    if (!container.current) {
-      return;
-    }
-
-    setTextUtils(new CanvasTextUtils({ container: container.current }));
-  }, []);
 
   const mainTabContent = (
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
@@ -245,13 +212,13 @@ export const Tab: React.FC<TabProps> = (props) => {
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
               <EuiFlexGroup
-                ref={container}
+                ref={tabLabelRef}
                 gutterSize="xs"
                 alignItems="center"
                 justifyContent="spaceBetween"
                 wrap={false}
                 responsive={false}
-                style={{ width: labelWidth }}
+                style={{ width: tabLabelWidth }}
               >
                 <EuiText
                   id={tabLabelId}
@@ -262,7 +229,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 >
                   <EuiTextTruncate
                     text={item.label}
-                    width={labelTextWidth}
+                    width={tabLabelTextWidth}
                     truncation="middle"
                     title=""
                   />
