@@ -85,18 +85,16 @@ streamlangApiTest.describe(
       // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
-          templateLabel: 'double-braces',
           templateType: '{{ }}',
           from: '{{template_from}}',
           pattern: '[%{log.level}]',
         },
         {
-          templateLabel: 'triple-braces',
           templateType: '{{{ }}}',
           from: '{{{template_from}}}',
           pattern: '[%{log.level}]',
         },
-      ].forEach(({ templateLabel, templateType, from, pattern }) => {
+      ].forEach(({ templateType, from, pattern }) => {
         streamlangApiTest(
           `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
           async () => {
@@ -117,105 +115,296 @@ streamlangApiTest.describe(
         );
       });
 
-      streamlangApiTest.describe('Incompatible', () => {
-        streamlangApiTest(
-          'should support where clause both in ingest as well as in ES|QL',
-          async ({ testBed, esql }) => {
-            const streamlangDSL: StreamlangDSL = {
-              steps: [
-                {
-                  action: 'dissect',
-                  from: 'message',
-                  pattern: '[%{log.level}]',
-                  where: {
-                    field: 'attributes.should_exist',
-                    exists: true,
-                  },
-                } as DissectProcessor,
-              ],
-            };
-
-            const { processors } = asIngest(streamlangDSL);
-            const { query } = asEsql(streamlangDSL);
-
-            const docs = [
-              { case: 'dissected', attributes: { should_exist: 'YES' }, message: '[info]' },
-              { case: 'missing', attributes: { size: 2048 }, message: '[warn]' },
-            ];
-            await testBed.ingest('ingest-dissect-where', docs, processors);
-            const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-where');
-
-            const mappingDoc = { log: { level: '' } };
-            await testBed.ingest('esql-dissect-where', [mappingDoc, ...docs]);
-            const esqlResult = await esql.queryOnIndex('esql-dissect-where', query);
-
-            // Loop is needed as ES|QL's FORK may return documents in different order
-            for (const doc of esqlResult.documents) {
-              switch (doc.case) {
-                case 'missing':
-                  // NOTE that ES|QL returns null for an ignored but mapped field, whereas ingest simply doesn't add the field
-                  expect(ingestResult[1]['log.level']).toBeUndefined();
-                  expect(doc['log.level']).toBeNull();
-                  break;
-                case 'dissected':
-                  expect(ingestResult[0]['log.level']).toEqual('info');
-                  expect(doc['log.level']).toBe('info');
-                  break;
-              }
-            }
-          }
-        );
-      });
-
-      // TODO: Implement
-      streamlangApiTest(
-        'should nullify undissected fields in the doc when only partial dissection is possible',
-        async ({ testBed, esql }) => {}
-      );
-
-      // TODO: Implement
-      streamlangApiTest(
-        'should not nullify existing fields when no dissection is possible',
-        async ({ testBed, esql }) => {}
-      );
-
-      // TODO: Implement
       streamlangApiTest(
         'should leave the source field intact if not present in pattern',
-        async ({ testBed, esql }) => {}
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip} - %{response_message}',
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [
+            {
+              message:
+                '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1 - Request processed successfully',
+              existing_field: 'preserved',
+            },
+          ];
+
+          await testBed.ingest('ingest-dissect-source', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-source');
+
+          // For ES|QL, create mapping document to establish field types
+          const mappingDoc = {
+            '@timestamp': '',
+            log: { level: '' },
+            client: { ip: '' },
+            response_message: '',
+          };
+          await testBed.ingest('esql-dissect-source', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-source', query);
+
+          expect(ingestResult[0]).toHaveProperty('message', docs[0].message);
+          expect(esqlResult.documentsWithoutKeywords[1]).toHaveProperty('message', docs[0].message);
+
+          expect(ingestResult[0]).toEqual(esqlResult.documentsWithoutKeywords[1]);
+        }
       );
     });
 
-    streamlangApiTest(
-      'should fail in ingest when field is missing and ignore_missing is false but ES|QL ignores the document',
-      async ({ testBed, esql }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
+    streamlangApiTest.describe('Incompatible', () => {
+      streamlangApiTest(
+        'should support where clause both in ingest as well as in ES|QL',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                pattern: '[%{log.level}]',
+                where: {
+                  field: 'attributes.should_exist',
+                  exists: true,
+                },
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [
+            { case: 'dissected', attributes: { should_exist: 'YES' }, message: '[info]' },
+            { case: 'missing', attributes: { size: 2048 }, message: '[warn]' },
+          ];
+          await testBed.ingest('ingest-dissect-where', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-where');
+
+          const mappingDoc = { log: { level: '' } };
+          await testBed.ingest('esql-dissect-where', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-where', query);
+
+          // Loop is needed as ES|QL's FORK may return documents in different order
+          for (const doc of esqlResult.documents) {
+            switch (doc.case) {
+              case 'missing':
+                // NOTE: BEHAVIORAL DIFFERENCE - Where clause conditional processing
+                // Ingest Pipeline: Doesn't add field when where condition fails
+                // ES|QL: Since every operand field has to be pre-mapped, it adds the nullified field
+                expect(ingestResult[1]['log.level']).toBeUndefined();
+                expect(doc['log.level']).toBeNull();
+                break;
+              case 'dissected':
+                expect(ingestResult[0]['log.level']).toEqual('info');
+                expect(doc['log.level']).toBe('info');
+                break;
+            }
+          }
+        }
+      );
+
+      streamlangApiTest(
+        'should handle pattern matching failures differently - ingest throws errors while ES|QL leaves fields undefined',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                // Pattern expects 3 fields but message only has 2 - partial match
+                pattern: '[%{log.level}] %{client.ip} %{missing_field}',
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [
             {
-              action: 'dissect',
-              from: 'message',
-              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-              ignore_missing: false,
-            } as DissectProcessor,
-          ],
-        };
+              message: '[info] 127.0.0.1', // Missing the third field expected by pattern
+              existing_field: 'should_remain',
+            },
+          ];
 
-        const { processors } = asIngest(streamlangDSL);
-        const { query } = asEsql(streamlangDSL);
+          // NOTE: BEHAVIORAL DIFFERENCE - Pattern matching failure handling
+          // Ingest Pipeline: Throws error when pattern doesn't fully match
+          // ES|QL: Since a failure would break the whole pipeline, it retains the document with pattern fields as undefined
+          const { errors } = await testBed.ingest('ingest-dissect-partial', docs, processors);
+          expect(errors[0].reason).toContain('Unable to find match for dissect pattern');
 
-        const docs = [{ case: 'missing', log: { level: 'info' } }];
-        const { errors } = await testBed.ingest('ingest-dissect-fail', docs, processors);
-        expect(errors[0].reason).toContain('field [message] not present as part of path [message]');
+          // For ES|QL, create mapping document to ensure fields exist as null when not matched
+          const mappingDoc = { log: { level: '' }, client: { ip: '' }, missing_field: '' };
+          await testBed.ingest('esql-dissect-partial', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-partial', query);
 
-        const mappingDoc = { message: '' };
-        await testBed.ingest('esql-dissect-fail', [mappingDoc, ...docs]);
-        const esqlResult = await esql.queryOnIndex('esql-dissect-fail', query);
-        expect(esqlResult.documentsWithoutKeywords.length).toBe(2);
-        expect(
-          // Filtering is needed as ES|QL's FORK may return documents in different order
-          esqlResult.documentsWithoutKeywords.filter((d) => d.case === 'missing')[0].message
-        ).toBeNull();
-      }
-    );
+          // ES|QL: Also fails to extract any fields when pattern doesn't fully match
+          const esqlDoc = esqlResult.documentsWithoutKeywords.find(
+            (doc) => doc.existing_field === 'should_remain'
+          );
+
+          expect(esqlDoc).toBeDefined();
+
+          expect(esqlDoc!).toMatchObject({
+            existing_field: 'should_remain',
+            message: '[info] 127.0.0.1',
+          });
+
+          // Verify that ES|QL leaves all dissect pattern fields undefined when match fails
+          expect(esqlDoc!['log.level']).toBeUndefined();
+          expect(esqlDoc!['client.ip']).toBeUndefined();
+          expect(esqlDoc!.missing_field).toBeUndefined();
+        }
+      );
+
+      streamlangApiTest(
+        'should handle complete pattern mismatches differently - ingest throws errors while ES|QL leaves pattern fields undefined',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                // Pattern expects structured log but message is unstructured - no match
+                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [
+            {
+              message: 'This is an unstructured log message that does not match the pattern',
+              'log.level': 'existing_value', // Pre-existing field that should remain
+              'client.ip': '192.168.1.1', // Pre-existing field that should remain
+              other_field: 'untouched',
+            },
+          ];
+
+          // NOTE: BEHAVIORAL DIFFERENCE - Complete pattern mismatch handling
+          // Ingest Pipeline: Throws error when pattern doesn't match at all
+          // ES|QL: Since a failure would break the whole pipeline, it retains the document with pattern fields as undefined
+          const { errors } = await testBed.ingest('ingest-dissect-nomatch', docs, processors);
+          expect(errors[0].reason).toContain('Unable to find match for dissect pattern');
+
+          // For ES|QL, create mapping document to establish field types
+          const mappingDoc = { '@timestamp': '', log: { level: '' }, client: { ip: '' } };
+          await testBed.ingest('esql-dissect-nomatch', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-nomatch', query);
+
+          // ES|QL: nullifies pattern fields that didn't match, preserves non-pattern fields
+          const esqlDoc = esqlResult.documentsWithoutKeywords.find(
+            (doc) => doc.other_field === 'untouched'
+          );
+          expect(esqlDoc).toBeDefined();
+          expect(esqlDoc!).toMatchObject({
+            message: 'This is an unstructured log message that does not match the pattern',
+            other_field: 'untouched',
+          });
+
+          // Verify that ES|QL leaves all dissect pattern fields undefined when match fails
+          expect(esqlDoc!['@timestamp']).toBeUndefined();
+          expect(esqlDoc!['log.level']).toBeUndefined();
+          expect(esqlDoc!['client.ip']).toBeUndefined();
+        }
+      );
+
+      streamlangApiTest(
+        'should fail in ingest when field is missing and ignore_missing is false but ES|QL ignores the document',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+                ignore_missing: false,
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [{ case: 'missing', log: { level: 'info' } }];
+          const { errors } = await testBed.ingest('ingest-dissect-fail', docs, processors);
+          expect(errors[0].reason).toContain(
+            'field [message] not present as part of path [message]'
+          );
+
+          // NOTE: BEHAVIORAL DIFFERENCE - Missing field handling with ignore_missing=false
+          // Ingest Pipeline: Throws error when required field is missing and ignore_missing=false
+          // ES|QL: Gracefully handles missing fields by nullifying them, doesn't throw errors
+          const mappingDoc = { message: '' };
+          await testBed.ingest('esql-dissect-fail', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-fail', query);
+          expect(esqlResult.documentsWithoutKeywords.length).toBe(2);
+          expect(
+            // Filtering is needed as ES|QL's FORK may return documents in different order
+            esqlResult.documentsWithoutKeywords.filter((d) => d.case === 'missing')[0].message
+          ).toBeNull();
+        }
+      );
+
+      streamlangApiTest(
+        'should handle explicitly null source field values differently between transpilers',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                pattern: '[%{log.level}] %{client.ip}',
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [
+            {
+              case: 'null_source',
+              message: null, // Explicitly null, not missing
+              existing_field: 'preserved',
+            },
+          ];
+
+          const { errors } = await testBed.ingest('ingest-dissect-null', docs, processors);
+          await testBed.getFlattenedDocs('ingest-dissect-null');
+
+          // NOTE: BEHAVIORAL DIFFERENCE - Null source field handling
+          // Ingest Pipeline: throws error when source field is explicitly null
+          // ES|QL: Treats null values in source consistently with its column-based model
+          const mappingDoc = { message: '', log: { level: '' }, client: { ip: '' } };
+          await testBed.ingest('esql-dissect-null', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-null', query);
+
+          // Both should handle null source gracefully, but behavior may differ
+          // Ingest Pipeline might skip processing entirely on null source
+          expect(errors[0]?.reason).toContain('field [message] is null');
+
+          const esqlDoc = esqlResult.documentsWithoutKeywords.find(
+            (doc) => doc.case === 'null_source'
+          );
+          expect(esqlDoc).toBeDefined();
+          expect(esqlDoc!).toMatchObject({
+            case: 'null_source',
+            message: null,
+            existing_field: 'preserved',
+          });
+        }
+      );
+    });
   }
 );
