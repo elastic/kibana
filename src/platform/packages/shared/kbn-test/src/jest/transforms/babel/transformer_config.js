@@ -12,6 +12,24 @@ module.exports = () => ({
     [
       require.resolve('@kbn/babel-preset/node_preset'),
       {
+        lazyRequire: {
+          enabled: true,
+          files: {
+            include: [
+              '@elastic/eui',
+              'kbn-monaco',
+              '/server/',
+              'es_ui_shared',
+              'kibana_react',
+              'src/core',
+            ],
+            exclude: ['mock'],
+          },
+          specifiers: {
+            exclude: ['@testing-library', '@emotion'],
+            exclude: ['mock'],
+          },
+        },
         '@babel/preset-env': {
           // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
           useBuiltIns: false,
