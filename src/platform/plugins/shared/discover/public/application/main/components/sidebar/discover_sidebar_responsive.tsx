@@ -181,7 +181,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
+  const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -296,10 +296,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     };
   }, []);
 
-  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
-    closeDataViewEditor.current = ref;
-  }, []);
-
   const { dataViewEditor } = services;
 
   const canEditDataView =
@@ -309,19 +305,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const createNewDataView = useMemo(
     () =>
       canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
+        ? (dataView: DataView) => {
+            onDataViewCreated(dataView);
             closeFieldListFlyout?.();
           }
         : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
+    [canEditDataView, onDataViewCreated, closeFieldListFlyout]
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
@@ -336,7 +325,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <DataViewPicker
           currentDataViewId={selectedDataView.id}
           adHocDataViews={adHocDataViews}
-          managedDataViews={managedDataViews}
           savedDataViews={savedDataViews}
           onChangeDataView={onChangeDataView}
           onAddField={createField}
@@ -354,7 +342,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     CustomDataViewPicker,
     adHocDataViews,
-    managedDataViews,
     savedDataViews,
     onChangeDataView,
     createField,
