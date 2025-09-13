@@ -81,3 +81,14 @@ export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
+
+export const DEPRECATED_LABEL = i18n.translate('xpack.triggersActionsUI.deprecatedLabel', {
+  defaultMessage: 'Deprecated',
+});
+
+export const DEPRECATED_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.deprecatedBadgeDescription',
+  {
+    defaultMessage: 'This connector is deprecated and will be removed in a future update.',
+  }
+);
