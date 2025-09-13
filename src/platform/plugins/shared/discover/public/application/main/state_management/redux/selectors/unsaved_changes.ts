@@ -8,7 +8,7 @@
  */
 
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { difference, isEqual, isObject, omit } from 'lodash';
+import { isEqual, isObject, omit } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
@@ -51,11 +51,10 @@ export const selectHasUnsavedChanges = (
   const persistedTabIds = persistedDiscoverSession.tabs.map((tab) => tab.id);
   const currentTabsIds = state.tabs.allIds;
 
+  let tabIdsChanged = false;
+
   if (!isEqual(persistedTabIds, currentTabsIds)) {
-    return {
-      hasUnsavedChanges: true,
-      unsavedTabIds: new Set(difference(currentTabsIds, persistedTabIds)),
-    };
+    tabIdsChanged = true;
   }
 
   const unsavedTabIds = new Set<string>();
@@ -63,7 +62,6 @@ export const selectHasUnsavedChanges = (
   for (const tabId of currentTabsIds) {
     const persistedTab = persistedDiscoverSession.tabs.find((tab) => tab.id === tabId);
 
-    // this should never happen as we already compare tab ids above
     if (!persistedTab) {
       unsavedTabIds.add(tabId);
       continue;
@@ -106,7 +104,7 @@ export const selectHasUnsavedChanges = (
 
   addLog('[DiscoverSession] no difference between initial and changed version');
 
-  return { hasUnsavedChanges: unsavedTabIds.size > 0, unsavedTabIds };
+  return { hasUnsavedChanges: tabIdsChanged || unsavedTabIds.size > 0, unsavedTabIds };
 };
 
 type FieldComparator<T> = (a: T, b: T) => boolean;
