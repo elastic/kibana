@@ -680,22 +680,20 @@ export class StreamsClient {
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
     const definition = await this.getStream(name);
 
+    if (Streams.ClassicStream.Definition.is(definition)) {
+      // attempting to delete a classic stream that was not previously stored
+      // results in a noop so we make sure to make it available in the state first
+      await this.ensureStream(name);
+    }
+
     if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    await State.attemptChanges(
-      [
-        // attempting to delete a classic stream that was not previously stored
-        // results in a noop so we make sure to make it available in the state first
-        { type: 'upsert', definition },
-        { type: 'delete', name },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
-      }
-    );
+    await State.attemptChanges([{ type: 'delete', name }], {
+      ...this.dependencies,
+      streamsClient: this,
+    });
 
     return { acknowledged: true, result: 'deleted' };
   }
