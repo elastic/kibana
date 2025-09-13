@@ -34,6 +34,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { css } from '@emotion/react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { defer } from 'lodash';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -72,9 +74,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  const { services } = useKibana();
   const {
-    services: { notifications },
-  } = useKibana();
+    notifications,
+    http,
+    overlays: { openConfirm },
+    application: { navigateToUrl },
+    appParams: { history },
+  } = services;
   const agentFormId = useGeneratedHtmlId({
     prefix: 'agentForm',
   });
@@ -125,15 +132,29 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     mode: 'onBlur',
     resolver: zodResolver(agentFormSchema),
   });
-  const { control, handleSubmit, reset, formState, watch } = formMethods;
+  const { control, handleSubmit, reset, formState, watch, getValues } = formMethods;
   const { errors, isDirty } = formState;
   const hasErrors = Object.keys(errors).length > 0;
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+  });
 
   useEffect(() => {
     if (agentState && !isLoading) {
       reset(agentState);
     }
   }, [agentState, isLoading, reset]);
+
+  const handleCancel = useCallback(() => {
+    // Bypass unsaved changes prompt
+    reset(getValues());
+    defer(() => navigateToOnechatUrl(appPaths.agents.list));
+  }, [navigateToOnechatUrl, reset, getValues]);
 
   const handleSave = useCallback(
     async (
@@ -146,6 +167,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       setSubmittingButtonId(buttonId);
       try {
         await submit(data);
+        reset(data);
       } finally {
         setSubmittingButtonId(undefined);
       }
@@ -153,7 +175,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         navigateToOnechatUrl(appPaths.agents.list);
       }
     },
-    [submit, navigateToOnechatUrl]
+    [submit, navigateToOnechatUrl, reset]
   );
 
   const handleSaveAndChat = useCallback(
@@ -503,12 +525,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="cross"
-              color="text"
-              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-            >
+            <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
               {i18n.translate('xpack.onechat.agents.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}

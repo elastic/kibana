@@ -25,6 +25,8 @@ import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool, isIndexSearchTool } from '@kbn/onechat-common/tools';
 import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import type {
@@ -34,6 +36,7 @@ import type {
   UpdateToolResponse,
 } from '../../../../common/http_api/tools';
 import { useToolForm } from '../../hooks/tools/use_tool_form';
+import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useQueryState } from '../../hooks/use_query_state';
 import { appPaths } from '../../utils/app_paths';
@@ -106,10 +109,17 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
-  const { reset, formState, watch, handleSubmit } = form;
+  const { reset, formState, watch, handleSubmit, getValues } = form;
   const { errors, isDirty } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+  const { services } = useKibana();
+  const {
+    application: { navigateToUrl },
+    overlays: { openConfirm },
+    http,
+    appParams: { history },
+  } = services;
 
   const currentToolId = watch('toolId');
 
@@ -122,8 +132,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam]);
 
   const handleCancel = useCallback(() => {
-    navigateToOnechatUrl(appPaths.tools.list);
-  }, [navigateToOnechatUrl]);
+    // Bypass unsaved changes prompt
+    reset(getValues());
+    defer(() => navigateToOnechatUrl(appPaths.tools.list));
+  }, [navigateToOnechatUrl, reset, getValues]);
 
   const handleSave = useCallback(
     async (
@@ -159,6 +171,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               break;
           }
         }
+        reset(data);
       } finally {
         setSubmittingButtonId(undefined);
       }
@@ -166,7 +179,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         navigateToOnechatUrl(appPaths.tools.list);
       }
     },
-    [mode, saveTool, navigateToOnechatUrl]
+    [mode, saveTool, navigateToOnechatUrl, reset]
   );
 
   const handleTestTool = useCallback(() => {
@@ -198,6 +211,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   });
 
   const isViewMode = mode === ToolFormMode.View;
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: !isViewMode && isDirty,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+  });
   const hasErrors = Object.keys(errors).length > 0;
 
   const renderSaveButton = useCallback(
