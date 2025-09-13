@@ -15,7 +15,7 @@ export const createDefaultAgentDefinition = (): AgentDefinition => {
     name: 'Default agent',
     description: 'The default agent',
     configuration: {
-      tools: [{ tool_ids: [...defaultAgentToolIds] }],
+      tools: { tool_ids: [...defaultAgentToolIds] },
     },
   };
 };
