@@ -9,6 +9,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -233,5 +234,35 @@ describe('ESQLEditor', () => {
       queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
     });
     expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
+  });
+
+  it('should render client warnings if the clientWarning prop is set', async () => {
+    const user = userEvent.setup();
+
+    mockValidate.mockResolvedValue({
+      errors: [],
+      warnings: [{ message: 'Data warning example', severity: 'warning' }],
+    });
+
+    renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        clientWarning: 'Client warning example',
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('2 warnings')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('2 warnings'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Data warning example')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Client warning example')).toBeInTheDocument();
+    });
   });
 });
