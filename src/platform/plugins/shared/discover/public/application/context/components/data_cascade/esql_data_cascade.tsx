@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, type ComponentProps } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   DataCascade,
   DataCascadeRow,
@@ -43,7 +42,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useScopedServices } from '../../../../components/scoped_services_provider/scoped_services_provider';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useAppStateSelector } from '../../../main/state_management/discover_app_state_container';
-import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
+// import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
 import { fetchEsql } from '../../../main/data_fetching/fetch_esql';
 import {
   constructCascadeQuery,
@@ -58,20 +57,27 @@ export { getESQLStatsQueryMeta } from './util';
 
 const DEFAULT_FILTERS: Filter[] = [];
 
-interface ESQLDataCascadeProps {
-  initialData: DataTableRecord[];
+interface ESQLDataCascadeProps extends ComponentProps<typeof UnifiedDataTable> {
   cascadeGroups: string[];
-  dataView: DataView;
   defaultFilters?: Filter[];
-  onGroupClose: () => void;
-  stateContainer: DiscoverStateContainer;
   viewModeToggle?: React.ReactElement;
+  // dataView: DataView;
+  // stateContainer: DiscoverStateContainer;
 }
 
-interface ESQLDataCascadeLeafCellProps {
+interface ESQLDataCascadeLeafCellProps
+  extends Pick<
+    ComponentProps<typeof UnifiedDataTable>,
+    | 'dataView'
+    | 'showTimeCol'
+    | 'showKeyboardShortcuts'
+    | 'sort'
+    | 'columns'
+    | 'services'
+    | 'renderDocumentView'
+  > {
   cellData: DataTableRecord[];
   queryMeta: ESQLStatsQueryMeta;
-  dataView: DataView;
 }
 
 type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
@@ -142,6 +148,7 @@ function ContextMenu({
           color="text"
           iconType="boxesVertical"
           onClick={() => setOpenPopoverRowId(row.id)}
+          aria-label="row context menu button"
         />
       }
       isOpen={openPopoverRowId === row.id}
@@ -155,13 +162,14 @@ function ContextMenu({
 }
 
 const ESQLDataCascadeLeafCell = React.memo(
-  ({ cellData, queryMeta, dataView }: ESQLDataCascadeLeafCellProps) => {
-    const { data, uiSettings, theme, storage, toastNotifications, fieldFormats } =
-      useDiscoverServices();
+  ({ cellData, queryMeta, ...props }: ESQLDataCascadeLeafCellProps) => {
     const [visibleColumns, setVisibleColumns] = useState(
       queryMeta.groupByFields.map((group) => group.field)
     );
     const [sampleSize, setSampleSize] = useState(cellData.length);
+    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+
+    // make columns to be timestamp and summary fields only for starters
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -183,40 +191,23 @@ const ESQLDataCascadeLeafCell = React.memo(
       [cellData]
     );
 
+    // console.log('props received:: %o \n', props);
+
     return (
       <EuiPanel paddingSize="s">
         <UnifiedDataTable
-          showColumnTokens
+          {...props}
+          ariaLabelledBy="data-cascade-leaf-cell"
           enableInTableSearch
           rows={cellData}
-          dataView={dataView}
           loadingState={DataLoadingState.loaded}
-          columns={visibleColumns}
-          showTimeCol={false}
+          columns={[]} // only allow filter in to modify this
           onSetColumns={setVisibleColumns}
-          sort={[]}
           sampleSizeState={sampleSize}
-          services={{
-            theme,
-            data,
-            uiSettings,
-            toastNotifications,
-            storage,
-            fieldFormats,
-          }}
-          ariaLabelledBy="data-cascade-leaf-cell"
-          isPaginationEnabled={false}
           renderCustomToolbar={renderCustomToolbarWithElements}
-          onUpdateDataGridDensity={() => {
-            /* No-op for now */
-          }}
-          onUpdateRowHeight={() => {
-            /* No-op for now */
-          }}
-          onUpdateHeaderRowHeight={() => {
-            /* No-op for now */
-          }}
           onUpdateSampleSize={setSampleSize}
+          expandedDoc={expandedDoc}
+          setExpandedDoc={(doc) => setExpandedDoc(doc)}
         />
       </EuiPanel>
     );
@@ -224,15 +215,15 @@ const ESQLDataCascadeLeafCell = React.memo(
 );
 
 export const ESQLDataCascade = ({
-  initialData,
+  rows: initialData,
   cascadeGroups,
   dataView,
-  stateContainer,
-  onGroupClose,
-  defaultFilters = DEFAULT_FILTERS,
+  // stateContainer,
   viewModeToggle,
+  ...props
 }: ESQLDataCascadeProps) => {
-  const globalState = stateContainer.getCurrentTab().globalState;
+  const defaultFilters = /* stateContainer.appState.getState().filters || */ DEFAULT_FILTERS;
+  const globalState = /* stateContainer.getCurrentTab().globalState*/ {};
   const globalFilters = globalState?.filters;
   const globalTimeRange = globalState?.timeRange;
   const { euiTheme } = useEuiTheme();
@@ -327,16 +318,22 @@ export const ESQLDataCascade = ({
     DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
   >(
     ({ data: cellData }) => (
-      <ESQLDataCascadeLeafCell dataView={dataView} cellData={cellData!} queryMeta={queryMeta} />
+      <ESQLDataCascadeLeafCell
+        {...props}
+        dataView={dataView}
+        cellData={cellData!}
+        queryMeta={queryMeta}
+      />
     ),
-    [dataView, queryMeta]
+    [dataView, props, queryMeta]
   );
 
   return (
     <div css={styles.wrapper}>
       <DataCascade<ESQLDataGroupNode>
         size="s"
-        data={initialData.map((datum) => ({
+        overscan={15}
+        data={(initialData ?? []).map((datum) => ({
           id: datum.id,
           ...datum.flattened,
         }))}

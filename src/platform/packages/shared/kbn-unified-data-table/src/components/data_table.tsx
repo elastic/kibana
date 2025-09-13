@@ -329,7 +329,8 @@ interface InternalUnifiedDataTableProps {
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
-    columnsMeta?: DataTableColumnsMeta
+    columnsMeta?: DataTableColumnsMeta,
+    onClose?: () => void
   ) => JSX.Element | undefined;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
@@ -1427,7 +1428,13 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+            renderDocumentView!(
+              expandedDoc,
+              displayedRows,
+              displayedColumns,
+              columnsMeta,
+              setExpandedDoc?.bind(null, undefined)
+            )}
         </span>
       </UnifiedDataTableContext.Provider>
     );
