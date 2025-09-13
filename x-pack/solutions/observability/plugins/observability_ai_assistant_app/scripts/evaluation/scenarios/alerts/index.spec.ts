@@ -18,6 +18,12 @@ import {
   customThresholdAIAssistantLogCount,
 } from '../../alert_templates/templates';
 
+/**
+ * NOTE: This scenario has been migrated to the new evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/alerts/alerts.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 describe('Alerts', () => {
   const ruleIds: any[] = [];
 
