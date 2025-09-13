@@ -101,7 +101,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           authz.fleet.allAgentPolicies && (
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiLink onClick={onClickCreatePolicy}>
+                <EuiLink onClick={onClickCreatePolicy} data-test-subj="createNewAgentPolicyLink">
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"
