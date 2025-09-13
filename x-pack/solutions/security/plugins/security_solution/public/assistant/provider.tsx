@@ -42,7 +42,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     },
     params: {
       prompt_group_id: 'aiAssistant',
-      prompt_ids: ['alertEvaluation', 'dataQualityAnalysis', 'ruleAnalysis'],
+      prompt_ids: ['alertEvaluation', 'dataQualityAnalysis', 'ruleAnalysis', 'assetAnalysis'],
     },
   });
   const promptContext = useObservable(

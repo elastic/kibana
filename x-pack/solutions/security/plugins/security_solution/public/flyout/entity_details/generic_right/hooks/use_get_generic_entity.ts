@@ -28,6 +28,7 @@ const fetchGenericEntity = async (
         query: {
           term: { _id: docId },
         },
+        fields: ['*'],
       },
     })
   );
