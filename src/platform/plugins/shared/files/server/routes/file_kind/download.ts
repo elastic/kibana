@@ -14,7 +14,7 @@ import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
 import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
-import { getById } from './helpers';
+import { getById, validateFileNameExtension } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
 import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
@@ -37,9 +37,16 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   const {
     params: { id, fileName },
   } = req;
+
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
+
   try {
+    const invalidExtensionResponse = validateFileNameExtension(fileName, file);
+    if (invalidExtensionResponse) {
+      return invalidExtensionResponse;
+    }
+
     const body: Response = await file.downloadContent();
     return res.file({
       body,
