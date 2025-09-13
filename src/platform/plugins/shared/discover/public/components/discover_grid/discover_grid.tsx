@@ -14,9 +14,14 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import {
+  ESQLDataCascade,
+  getESQLStatsQueryMeta,
+} from '../../application/context/components/data_cascade/esql_data_cascade';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -73,7 +78,21 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     return getColumnsConfigurationAccessor(() => ({}))();
   }, [getColumnsConfigurationAccessor]);
 
-  return (
+  // Determine the cascade groups from the query if it's of ESQL type
+  const cascadeGroups = useMemo(() => {
+    if (!isOfAggregateQueryType(query)) return [];
+    return getESQLStatsQueryMeta(query.esql).groupByFields.map((group) => group.field);
+  }, [query]);
+
+  return Boolean(cascadeGroups.length) ? (
+    <ESQLDataCascade
+      {...props}
+      cascadeGroups={cascadeGroups}
+      dataView={dataView}
+      // stateContainer={stateContainer}
+      // viewModeToggle={renderCustomToolbar}
+    />
+  ) : (
     <UnifiedDataTable
       showColumnTokens
       canDragAndDropColumns
