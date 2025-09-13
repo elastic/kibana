@@ -25,6 +25,7 @@ import {
   EuiProgress,
   EuiTextTruncate,
   EuiIcon,
+  CanvasTextUtils,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -174,6 +175,44 @@ export const Tab: React.FC<TabProps> = (props) => {
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
+  const container = useRef<HTMLDivElement | null>(null);
+  const [textUtils, setTextUtils] = useState<CanvasTextUtils>();
+  const { labelWidth, labelTextWidth } = useMemo(() => {
+    if (!textUtils) {
+      return { labelWidth: 0, labelTextWidth: 0 };
+    }
+
+    textUtils.setTextToCheck(item.label);
+
+    const textWidth = Math.ceil(textUtils.textWidth);
+    const indicatorWidth = euiTheme.base * 1.25;
+    const textWithIndicatorWidth = textWidth + indicatorWidth;
+    const tabPaddingWidth = euiTheme.base;
+    const resolvedLabelWidth = Math.max(
+      Math.min(textWithIndicatorWidth, tabsSizeConfig.regularTabMaxWidth - tabPaddingWidth),
+      tabsSizeConfig.regularTabMinWidth - tabPaddingWidth
+    );
+
+    return {
+      labelWidth: resolvedLabelWidth,
+      labelTextWidth: resolvedLabelWidth - indicatorWidth,
+    };
+  }, [
+    euiTheme.base,
+    item.label,
+    tabsSizeConfig.regularTabMaxWidth,
+    tabsSizeConfig.regularTabMinWidth,
+    textUtils,
+  ]);
+
+  useEffect(() => {
+    if (!container.current) {
+      return;
+    }
+
+    setTextUtils(new CanvasTextUtils({ container: container.current }));
+  }, []);
+
   const mainTabContent = (
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
@@ -206,11 +245,13 @@ export const Tab: React.FC<TabProps> = (props) => {
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
               <EuiFlexGroup
+                ref={container}
                 gutterSize="xs"
                 alignItems="center"
                 justifyContent="spaceBetween"
                 wrap={false}
                 responsive={false}
+                style={{ width: labelWidth }}
               >
                 <EuiText
                   id={tabLabelId}
@@ -221,8 +262,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 >
                   <EuiTextTruncate
                     text={item.label}
-                    // Truncation width must be equal to max tab width minus padding
-                    width={tabsSizeConfig.regularTabMaxWidth - euiTheme.base}
+                    width={labelTextWidth}
                     truncation="middle"
                     title=""
                   />
@@ -303,14 +343,20 @@ function getTabContainerCss(
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 
-    color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
-
     .unifiedTabs__tabActions {
       position: absolute;
       top: ${euiTheme.size.xs};
       right: ${euiTheme.size.xs};
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
+    }
+
+    .unifiedTabs__tabLabelText {
+      color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
+    }
+
+    &:hover .unifiedTabs__tabLabelText {
+      color: ${euiTheme.colors.text};
     }
 
     &:hover,
@@ -320,20 +366,13 @@ function getTabContainerCss(
       }
 
       .unifiedTabs__tabLabel {
-        width: calc(100% - ${euiTheme.size.l} * 2);
-      }
-
-      .unifiedTabs__tabLabelText {
+        width: calc(100% - ${euiTheme.size.l} * 2 - ${euiTheme.size.xs});
         mask-image: linear-gradient(
           to right,
           rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
           rgba(255, 0, 0, 0.1) 100%
         );
       }
-    }
-
-    &:hover {
-      color: ${euiTheme.colors.text};
     }
   `;
 }
