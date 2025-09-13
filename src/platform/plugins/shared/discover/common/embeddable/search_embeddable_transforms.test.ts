@@ -73,5 +73,40 @@ describe('searchEmbeddableTransforms', () => {
         attributes: expectedAttributes,
       });
     });
+
+    it('removes top-level tab attributes if tabs already present', () => {
+      const state = {
+        title: 'Test Title',
+        description: 'Test Description',
+        attributes: {
+          title: 'Test Title',
+          description: 'Test Description',
+          tabs: [
+            {
+              id: 'tab-1',
+              label: 'Tab 1',
+              attributes: { columns: ['foo'] },
+            },
+          ],
+          columns: ['should be removed'],
+        },
+      } as SearchEmbeddableSerializedState;
+      const expectedAttributes = {
+        title: 'Test Title',
+        description: 'Test Description',
+        tabs: [
+          {
+            id: 'tab-1',
+            label: 'Tab 1',
+            attributes: { columns: ['foo'] },
+          },
+        ],
+      };
+      const result = searchEmbeddableTransforms.transformOut?.(state);
+      expect(result).toEqual({
+        ...state,
+        attributes: expectedAttributes,
+      });
+    });
   });
 });

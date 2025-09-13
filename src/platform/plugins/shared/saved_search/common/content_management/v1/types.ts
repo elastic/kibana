@@ -13,8 +13,8 @@ import type {
   SavedObjectSearchOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import type { SavedSearchAttributes } from '../../types';
 import type { SavedSearchContentType } from '../../constants';
+import type { DiscoverSessionAttributes } from '../../../server/saved_objects';
 
 interface SavedSearchCreateOptions {
   id?: SavedObjectCreateOptions['id'];
@@ -33,7 +33,7 @@ interface SavedSearchSearchOptions {
 
 export type SavedSearchCrudTypes = ContentManagementCrudTypes<
   SavedSearchContentType,
-  SavedSearchAttributes,
+  DiscoverSessionAttributes,
   SavedSearchCreateOptions,
   SavedSearchUpdateOptions,
   SavedSearchSearchOptions
