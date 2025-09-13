@@ -45,7 +45,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickAddProcessor();
 
     await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton')
+      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
     ).toBeDisabled();
 
     // Cancel the operation
@@ -53,7 +53,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
 
     // Verify we're back to idle state
     await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton')
+      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
     ).toBeEnabled();
   });
 
@@ -99,9 +99,12 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
+    // Field can be automatically filled based on the samples, empty it.
+    await pageObjects.streams.fillFieldInput('');
 
     // Try to create without filling required fields
     await pageObjects.streams.clickSaveProcessor();
+
     await expect(page.getByText('A field value is required.')).toBeVisible();
 
     await pageObjects.streams.fillFieldInput('message');
@@ -125,7 +128,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
 
     // Create button should be disabled or show tooltip
-    const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton');
+    const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
     await expect(createButton).toBeHidden();
   });
 });

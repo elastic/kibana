@@ -20,7 +20,8 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import type { GrokProcessor } from '@kbn/streamlang';
+import type { StreamlangProcessorDefinitionWithUIAttributes, GrokProcessor } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
@@ -40,7 +41,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { isProcessorUnderEdit } from './state_management/processor_state_machine';
+import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
@@ -196,13 +197,17 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     (state) => state.context.dataSourcesRefs.length >= 2
   );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
-      isProcessorUnderEdit(processorRef.getSnapshot())
+    const currentProcessorRef = state.context.stepRefs.find(
+      (stepRef) =>
+        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
     );
 
     if (!currentProcessorRef) return undefined;
 
-    return getSourceField(currentProcessorRef.getSnapshot().context.processor);
+    return getSourceField(
+      currentProcessorRef.getSnapshot().context
+        .step as StreamlangProcessorDefinitionWithUIAttributes
+    );
   });
 
   const { dependencies } = useKibana();
@@ -250,6 +255,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const grokMode =
     draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
     !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
