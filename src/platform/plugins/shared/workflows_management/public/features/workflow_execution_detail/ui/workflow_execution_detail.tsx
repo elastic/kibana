@@ -32,8 +32,12 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
-  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedExecution } =
-    useWorkflowUrlState();
+  const {
+    setSelectedStepExecution,
+    selectedStepExecutionId,
+    setSelectedExecution,
+    setSelectedStep,
+  } = useWorkflowUrlState();
 
   const closeFlyout = useCallback(() => {
     setSelectedStepExecution(null);
@@ -102,18 +106,23 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     return (
       <WorkflowStepExecutionFlyout
         workflowExecutionId={workflowExecutionId}
-        stepId={selectedStepExecution.stepId}
+        stepExecutionId={selectedStepExecution.id}
+        stepExecution={selectedStepExecution}
         closeFlyout={closeFlyout}
         goNext={goNext}
         goPrevious={goPrevious}
+        setSelectedStepId={setSelectedStep}
+        isLoading={isLoading}
       />
     );
   }, [
     workflowExecution?.stepExecutions,
     workflowExecutionId,
+    closeFlyout,
+    setSelectedStep,
     selectedStepExecutionId,
     setSelectedStepExecution,
-    closeFlyout,
+    isLoading,
   ]);
 
   const closeSidePanel = useCallback(() => {
