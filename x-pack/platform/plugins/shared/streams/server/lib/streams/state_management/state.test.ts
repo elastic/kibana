@@ -40,6 +40,7 @@ describe('State', () => {
     const wiredStream: Streams.WiredStream.Definition = {
       name: 'wired_stream',
       description: '',
+      systems: [],
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
@@ -52,6 +53,7 @@ describe('State', () => {
     const classicStream: Streams.ClassicStream.Definition = {
       name: 'classic_stream',
       description: '',
+      systems: [],
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
@@ -61,6 +63,7 @@ describe('State', () => {
     const groupStream: Streams.GroupStream.Definition = {
       name: 'group_stream',
       description: '',
+      systems: [],
       group: {
         metadata: {},
         tags: [],
@@ -125,6 +128,7 @@ describe('State', () => {
               definition: {
                 description: '',
                 name: 'whatever',
+                systems: [],
                 group: {
                   metadata: {},
                   tags: [],
@@ -159,6 +163,7 @@ describe('State', () => {
               definition: {
                 description: '',
                 name: 'new_group_stream',
+                systems: [],
                 group: {
                   metadata: {},
                   tags: [],
@@ -193,6 +198,7 @@ describe('State', () => {
               definition: {
                 name: 'stream_that_fails',
                 description: 'Something went wrong',
+                systems: [],
                 group: {
                   metadata: {},
                   tags: [],
@@ -311,6 +317,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
             definition: {
               name: 'and_another',
               description: '',
+              systems: [],
               group: {
                 metadata: {},
                 tags: [],

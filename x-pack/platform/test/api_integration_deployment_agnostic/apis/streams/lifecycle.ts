@@ -111,6 +111,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const wiredPutBody: Streams.WiredStream.UpsertRequest = {
       stream: {
         description: '',
+        systems: [],
         ingest: {
           lifecycle: { inherit: {} },
           processing: {
@@ -130,6 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '999d' } },
@@ -162,6 +164,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
                 lifecycle: { inherit: {} },
@@ -178,6 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '50d' } },
@@ -203,6 +207,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '10m' } },
@@ -213,6 +218,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -246,6 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '10d' } },
@@ -256,6 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '20d' } },
@@ -269,6 +277,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -296,6 +305,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
@@ -307,6 +317,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: {} },
@@ -329,6 +340,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                systems: [],
                 ingest: {
                   ...wiredPutBody.stream.ingest,
                   lifecycle: { ilm: { policy: 'my-policy' } },
@@ -345,6 +357,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -370,6 +383,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
@@ -384,6 +398,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -404,6 +419,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -422,6 +438,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -442,6 +459,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
           description: '',
+          systems: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
@@ -504,6 +522,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...classicPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
@@ -525,6 +544,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...classicPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '11d' } },
@@ -547,6 +567,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                systems: [],
                 ingest: {
                   ...wiredPutBody.stream.ingest,
                   lifecycle: { ilm: { policy: 'my-policy' } },
@@ -565,6 +586,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '1d' } },
@@ -583,6 +605,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...classicPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
@@ -608,6 +631,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '2d' } },
@@ -651,6 +675,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '2d' } },
@@ -664,6 +689,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...classicPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
@@ -686,6 +712,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            systems: [],
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -706,6 +733,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -737,6 +765,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...emptyAssets,
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {

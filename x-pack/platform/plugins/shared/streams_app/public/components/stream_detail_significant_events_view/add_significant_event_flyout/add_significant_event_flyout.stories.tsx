@@ -20,6 +20,7 @@ export default stories;
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  systems: [],
   ingest: {
     wired: {
       fields: {},

@@ -144,6 +144,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         definition: {
           name: parentId,
           description: '',
+          systems: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
@@ -174,6 +175,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: routeTarget,
               description: '',
+              systems: [],
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: { steps: [] },
@@ -203,6 +205,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: parentId,
               description: '',
+              systems: [],
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -252,6 +255,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: parentId,
               description: '',
+              systems: [],
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {

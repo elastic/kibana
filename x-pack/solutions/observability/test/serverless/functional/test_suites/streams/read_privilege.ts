@@ -23,6 +23,7 @@ const STREAM_NAME = 'logs.crud';
 const request: Streams.WiredStream.UpsertRequest = {
   stream: {
     description: '',
+    systems: [],
     ingest: {
       lifecycle: { inherit: {} },
       processing: {

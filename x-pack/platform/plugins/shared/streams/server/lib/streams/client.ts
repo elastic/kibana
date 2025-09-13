@@ -345,6 +345,7 @@ export class StreamsClient {
           definition: {
             name,
             description: '',
+            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -544,6 +545,7 @@ export class StreamsClient {
     const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
+      systems: [],
       ingest: {
         lifecycle: { inherit: {} },
         processing: {
@@ -621,6 +623,7 @@ export class StreamsClient {
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
       description: '',
+      systems: [],
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },

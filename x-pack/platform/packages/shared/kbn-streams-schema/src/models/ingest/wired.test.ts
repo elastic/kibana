@@ -24,6 +24,7 @@ describe('WiredStream', () => {
             routing: [],
           },
         },
+        systems: [],
       },
     ] satisfies WiredStream.Definition[])('is valid %s', (val) => {
       expect(WiredStream.Definition.is(val)).toBe(true);
@@ -93,6 +94,7 @@ describe('WiredStream', () => {
               routing: [],
             },
           },
+          systems: [],
         },
         privileges: {
           lifecycle: true,
@@ -163,6 +165,7 @@ describe('WiredStream', () => {
               routing: [],
             },
           },
+          systems: [],
         },
         ...emptyAssets,
       },
