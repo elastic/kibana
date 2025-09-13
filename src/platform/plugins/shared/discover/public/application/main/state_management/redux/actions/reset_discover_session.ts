@@ -62,10 +62,13 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       })
     );
 
+    const selectedTabId =
+      allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId)?.id ?? allTabs[0]?.id;
+
     dispatch(
       setTabs({
         allTabs,
-        selectedTabId: state.tabs.unsafeCurrentId,
+        selectedTabId,
         recentlyClosedTabs: selectRecentlyClosedTabs(state),
       })
     );
