@@ -331,10 +331,14 @@ export function getDiscoverStateContainer({
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const currentSavedSearch = savedSearchContainer.getState();
-    if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+    const { persistedDiscoverSession } = internalState.getState();
+    if (persistedDiscoverSession?.id === newSavedSearchId) {
       addLog('[discoverState] undo changes since saved search did not change');
-      await undoSavedSearchChanges();
+      await internalState
+        .dispatch(
+          internalStateActions.resetDiscoverSession({ discoverSession: persistedDiscoverSession })
+        )
+        .unwrap();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
       services.locator.navigate({
