@@ -32,9 +32,22 @@ export function getDistributionInPercentageColumn({
   return {
     dataType: 'number',
     isBucketed: false,
-    label,
+    label: label ?? '',
+    customLabel: label != null,
     operationType: 'formula',
-    params: { formula: lensFormula, format },
+    params: {
+      formula: lensFormula,
+      isFormulaBroken: false,
+      format:
+        format === 'percent' || !format
+          ? {
+              id: 'percent',
+              params: {
+                decimals: 0,
+              },
+            }
+          : undefined,
+    },
     references: [],
-  } as FormulaIndexPatternColumn;
+  } satisfies FormulaIndexPatternColumn;
 }

@@ -286,6 +286,7 @@ export const AnalyticsCollectionCardWithLens = withLensData<
                 columnOrder: [LENS_LAYERS.trend.x, LENS_LAYERS.trend.y],
                 columns: {
                   [LENS_LAYERS.trend.y]: {
+                    customLabel: false,
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
@@ -294,7 +295,7 @@ export const AnalyticsCollectionCardWithLens = withLensData<
                       formula: getFormulaByFilter(filterBy),
                     },
                     references: [],
-                  } as FormulaIndexPatternColumn,
+                  } satisfies FormulaIndexPatternColumn,
                   [LENS_LAYERS.trend.x]: {
                     dataType: 'date',
                     isBucketed: true,
@@ -310,6 +311,7 @@ export const AnalyticsCollectionCardWithLens = withLensData<
                 columnOrder: [LENS_LAYERS.metrics.percentage, LENS_LAYERS.metrics.hitsTotal],
                 columns: {
                   [LENS_LAYERS.metrics.percentage]: {
+                    customLabel: false,
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
@@ -319,17 +321,19 @@ export const AnalyticsCollectionCardWithLens = withLensData<
                         filterBy,
                         'previous'
                       )})-1) * 100)`,
+                      isFormulaBroken: false,
                     },
                     references: [],
-                  } as FormulaIndexPatternColumn,
+                  } satisfies FormulaIndexPatternColumn,
                   [LENS_LAYERS.metrics.hitsTotal]: {
+                    customLabel: false,
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
                     operationType: 'formula',
-                    params: { formula: getFormulaByFilter(filterBy), label: ' ' },
+                    params: { formula: getFormulaByFilter(filterBy), isFormulaBroken: false },
                     references: [],
-                  } as FormulaIndexPatternColumn,
+                  } satisfies FormulaIndexPatternColumn,
                 },
               },
             },

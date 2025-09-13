@@ -189,17 +189,17 @@ export const AnalyticsCollectionViewMetricWithLens = withLensData<
           isBucketed: false,
           label: percentageFormula,
           operationType: 'formula',
-          params: { formula: percentageFormula },
+          params: { formula: percentageFormula, isFormulaBroken: false },
           references: [],
-        } as FormulaIndexPatternColumn,
+        } satisfies FormulaIndexPatternColumn,
         [LENS_LAYERS.metrics.hitsTotal]: {
           dataType: 'number',
           isBucketed: false,
           label: hitsTotalFormula,
           operationType: 'formula',
-          params: { formula: hitsTotalFormula },
+          params: { formula: hitsTotalFormula, isFormulaBroken: false },
           references: [],
-        } as FormulaIndexPatternColumn,
+        } satisfies FormulaIndexPatternColumn,
       },
     };
 

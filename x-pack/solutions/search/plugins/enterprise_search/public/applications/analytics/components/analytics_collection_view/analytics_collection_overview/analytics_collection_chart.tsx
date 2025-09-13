@@ -268,9 +268,9 @@ export const AnalyticsCollectionChartWithLens = withLensData<
                     isBucketed: false,
                     label: formula,
                     operationType: 'formula',
-                    params: { formula },
+                    params: { formula, isFormulaBroken: false },
                     references: [],
-                  } as FormulaIndexPatternColumn,
+                  } satisfies FormulaIndexPatternColumn,
                 },
               }),
               {}
