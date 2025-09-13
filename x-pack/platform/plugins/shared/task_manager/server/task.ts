@@ -80,6 +80,7 @@ export type SuccessfulRunResult = {
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
   shouldDisableTask?: boolean;
+  data?: Record<string, unknown>;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -422,6 +423,7 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+  storeResult?: boolean;
 }
 
 /**
