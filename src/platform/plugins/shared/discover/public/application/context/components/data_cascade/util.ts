@@ -8,6 +8,7 @@
  */
 
 import { type AggregateQuery } from '@kbn/es-query';
+import { extractCategorizeTokens } from '@kbn/esql-utils';
 import {
   BasicPrettyPrinter,
   Builder,
@@ -26,6 +27,8 @@ import { isESQLFunction } from '@kbn/esql-ast/src/types';
 type NodeType = 'group' | 'leaf';
 
 type StatsCommand = ESQLCommand<'stats'>;
+
+type CategorizeESQLFunction = ESQLFunction<'variadic-call', 'categorize'>;
 
 export interface AppliedStatsFunction {
   identifier: string;
@@ -148,6 +151,9 @@ export const constructCascadeQuery = ({
     if (grouping && Object.keys(grouping).length) {
       statsCommandToOperateOn = statsCommands[i] as StatsCommand;
       break;
+    } else {
+      // remove stats command since we won't be operating on it
+      mutate.generic.commands.remove(ESQLQuery.ast, statsCommands[i]);
     }
   }
 
@@ -193,7 +199,14 @@ export const constructCascadeQuery = ({
     } else if (isESQLFunction(groupValue.definition)) {
       switch (groupValue.definition.name) {
         case 'categorize': {
-          // TODO: handle categorize option
+          if (nodeType === 'leaf') {
+            handleStatsByCategorizeLeafOperation(
+              ESQLQuery,
+              groupValue.definition as CategorizeESQLFunction,
+              nodePathMap
+            );
+            handled = true;
+          }
           break;
         }
         case 'bucket': {
@@ -322,12 +335,45 @@ function handleStatsByColumnGroupOperation(
   });
 }
 
-// function handleStatsByCategorizeLeafOperation(
-//   query: EsqlQuery,
-//   nodePathMap: Record<string, string>
-// ) {
-//   throw new Error('Not yet implemented!');
-// }
+/**
+ * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
+ */
+function handleStatsByCategorizeLeafOperation(
+  query: EsqlQuery,
+  categorizeFunction: CategorizeESQLFunction,
+  nodePathMap: Record<string, string>
+) {
+  // build a where command with match expressions for the selected categorize function
+  const whereCommand = Builder.command({
+    name: 'where',
+    args: categorizeFunction.args
+      .map((arg) => {
+        const matchValue = nodePathMap[categorizeFunction.text];
+
+        if (!matchValue) {
+          return null;
+        }
+
+        return Builder.expression.func.call('match', [
+          Builder.identifier({ name: arg.text }),
+          Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
+          Builder.expression.map({
+            entries: [
+              Builder.expression.entry(
+                'auto_generate_synonyms_phrase_query',
+                Builder.expression.literal.boolean(false)
+              ),
+              Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
+              Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
+            ],
+          }),
+        ]);
+      })
+      .filter(Boolean) as ESQLAstItem[],
+  });
+
+  mutate.generic.commands.insert(query.ast, whereCommand, 1);
+}
 
 // function handleStatsByCategorizeGroupOperation(
 //   query: EsqlQuery,

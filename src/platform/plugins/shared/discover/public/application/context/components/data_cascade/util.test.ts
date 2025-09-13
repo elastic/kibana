@@ -247,6 +247,33 @@ describe('utils', () => {
           });
         });
       });
+
+      describe('function options', () => {
+        describe('categorize operation', () => {
+          it('should construct a valid cascade query for a categorize operation', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                  FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
+                `,
+            };
+
+            const nodeType = 'leaf';
+            const nodePath = ['CATEGORIZE(message)'];
+            const nodePathMap = { 'CATEGORIZE(message)': 'error' };
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
+
+            expect(cascadeQuery.esql).toEqual(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "error", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
+          });
+        });
+      });
     });
   });
 });
