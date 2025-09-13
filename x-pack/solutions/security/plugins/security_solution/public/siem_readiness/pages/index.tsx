@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLogReadinessTask } from '@kbn/siem-readiness';
-import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText, EuiButton } from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { ReadinessTasksTable } from './readiness_tasks_table';
 
 const SiemReadinessDashboard = () => {
-  const { logReadinessTask } = useLogReadinessTask();
-
-  const handleLogTask = useCallback(async () => {
-    logReadinessTask({ task_id: '1', status: 'complete', meta: { demo: 'demo_data' } });
-  }, [logReadinessTask]);
-
   return (
     <>
       <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
@@ -47,15 +41,10 @@ const SiemReadinessDashboard = () => {
               </p>
             </EuiText>
           }
-          actions={
-            <EuiButton color="primary" fill onClick={handleLogTask}>
-              <FormattedMessage
-                id="xpack.securitySolution.siemReadiness.logTestTask"
-                defaultMessage="Log Test Task"
-              />
-            </EuiButton>
-          }
         />
+      </EuiPageSection>
+      <EuiPageSection>
+        <ReadinessTasksTable />
       </EuiPageSection>
     </>
   );
