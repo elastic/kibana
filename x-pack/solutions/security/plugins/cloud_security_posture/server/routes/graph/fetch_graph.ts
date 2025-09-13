@@ -198,16 +198,16 @@ ${
 | EVAL targetDocData = TO_STRING(null)`
 }
 // Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${
+| EVAL isOrigin = COALESCE(${
     originEventIds.length > 0
       ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
       : 'false'
-  }
-| EVAL isOriginAlert = isOrigin AND ${
+  }, false)
+| EVAL isOriginAlert = COALESCE(isOrigin AND ${
     originAlertIds.length > 0
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
-  }
+  }, false)
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 // Aggregate document's data for popover expansion and metadata enhancements
 // We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND

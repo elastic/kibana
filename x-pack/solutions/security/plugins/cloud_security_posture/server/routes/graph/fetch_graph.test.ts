@@ -263,4 +263,236 @@ describe('fetchGraph', () => {
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
+
+  describe('COALESCE behavior for empty origin event arrays', () => {
+    it('should use COALESCE with false fallback when originEventIds is empty', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[], // Empty array
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(false, false)');
+      expect(query).toContain('EVAL isOriginAlert = COALESCE(isOrigin AND false, false)');
+
+      // Should not have any parameters since no origin events
+      expect(esqlCallArgs[0].params).toEqual([]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should use COALESCE with false fallback when only non-alert originEventIds are provided', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: false },
+        { id: '2', isAlert: false },
+      ];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds, // No alerts in this array
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(event.id in (?og_id0, ?og_id1), false)');
+      expect(query).toContain('EVAL isOriginAlert = COALESCE(isOrigin AND false, false)');
+
+      // Should have parameters only for the non-alert events
+      expect(esqlCallArgs[0].params).toHaveLength(2);
+      expect(esqlCallArgs[0].params).toEqual([{ og_id0: '1' }, { og_id1: '2' }]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should use COALESCE with false fallback when only alert originEventIds are provided', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: 'alert1', isAlert: true },
+        { id: 'alert2', isAlert: true },
+      ];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds, // Only alerts in this array
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(event.id in (?og_id0, ?og_id1), false)');
+      expect(query).toContain(
+        'EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0, ?og_alrt_id1), false)'
+      );
+
+      // Should have parameters for all events (og_id) + alert events (og_alrt_id)
+      expect(esqlCallArgs[0].params).toHaveLength(4);
+      expect(esqlCallArgs[0].params).toEqual([
+        { og_id0: 'alert1' },
+        { og_id1: 'alert2' },
+        { og_alrt_id0: 'alert1' },
+        { og_alrt_id1: 'alert2' },
+      ]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should use COALESCE with false fallback when mixed event and alert originEventIds are provided', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: 'event1', isAlert: false },
+        { id: 'alert1', isAlert: true },
+      ];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds, // Mix of event and alert
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(event.id in (?og_id0, ?og_id1), false)');
+      expect(query).toContain(
+        'EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0), false)'
+      );
+
+      // Should have parameters for all events (og_id) + alert events (og_alrt_id)
+      expect(esqlCallArgs[0].params).toHaveLength(3);
+      expect(esqlCallArgs[0].params).toEqual([
+        { og_id0: 'event1' },
+        { og_id1: 'alert1' },
+        { og_alrt_id0: 'alert1' },
+      ]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should use COALESCE with false fallback when originEventId has empty string id', async () => {
+      const originEventIds: OriginEventId[] = [{ id: '', isAlert: false }];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds, // Event with empty string id
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(event.id in (?og_id0), false)');
+      expect(query).toContain('EVAL isOriginAlert = COALESCE(isOrigin AND false, false)');
+
+      // Should have parameter with empty string
+      expect(esqlCallArgs[0].params).toHaveLength(1);
+      expect(esqlCallArgs[0].params).toEqual([{ og_id0: '' }]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should use COALESCE with false fallback when originEventId has null id', async () => {
+      const originEventIds: OriginEventId[] = [{ id: null as any, isAlert: false }];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds, // Event with null id
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(event.id in (?og_id0), false)');
+      expect(query).toContain('EVAL isOriginAlert = COALESCE(isOrigin AND false, false)');
+
+      // Should have parameter with null value
+      expect(esqlCallArgs[0].params).toHaveLength(1);
+      expect(esqlCallArgs[0].params).toEqual([{ og_id0: null }]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should use COALESCE with false fallback when originEventId has undefined id', async () => {
+      const originEventIds: OriginEventId[] = [{ id: undefined as any, isAlert: false }];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds, // Event with undefined id
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('EVAL isOrigin = COALESCE(event.id in (?og_id0), false)');
+      expect(query).toContain('EVAL isOriginAlert = COALESCE(isOrigin AND false, false)');
+
+      // Should have parameter with undefined value
+      expect(esqlCallArgs[0].params).toHaveLength(1);
+      expect(esqlCallArgs[0].params).toEqual([{ og_id0: undefined }]);
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+  });
 });
