@@ -24,25 +24,43 @@ export const EngineMetadata = z.object({
   Type: z.string(),
 });
 
+export type EntityField = z.infer<typeof EntityField>;
+export const EntityField = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  type: z.string().optional(),
+  sub_type: z.string().optional(),
+  source: z.string().optional(),
+  EngineMetadata: EngineMetadata.optional(),
+  attributes: z
+    .object({
+      privileged: z.boolean().optional(),
+    })
+    .optional(),
+  behavior: z.object({}).optional(),
+  lifecycle: z
+    .object({
+      first_seen: z.string().datetime().optional(),
+    })
+    .optional(),
+});
+
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
   '@timestamp': z.string().datetime().optional(),
-  entity: z.object({
-    EngineMetadata: EngineMetadata.optional(),
-    name: z.string(),
-    source: z.string(),
-    type: z.string(),
-  }),
-  user: z.object({
-    full_name: z.array(z.string()).optional(),
-    domain: z.array(z.string()).optional(),
-    roles: z.array(z.string()).optional(),
-    name: z.string(),
-    id: z.array(z.string()).optional(),
-    email: z.array(z.string()).optional(),
-    hash: z.array(z.string()).optional(),
-    risk: EntityRiskScoreRecord.optional(),
-  }),
+  entity: EntityField,
+  user: z
+    .object({
+      full_name: z.array(z.string()).optional(),
+      domain: z.array(z.string()).optional(),
+      roles: z.array(z.string()).optional(),
+      name: z.string(),
+      id: z.array(z.string()).optional(),
+      email: z.array(z.string()).optional(),
+      hash: z.array(z.string()).optional(),
+      risk: EntityRiskScoreRecord.optional(),
+    })
+    .optional(),
   asset: z
     .object({
       criticality: AssetCriticalityLevel,
@@ -58,23 +76,21 @@ export const UserEntity = z.object({
 export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z.object({
   '@timestamp': z.string().datetime().optional(),
-  entity: z.object({
-    EngineMetadata: EngineMetadata.optional(),
-    name: z.string(),
-    source: z.string(),
-    type: z.string(),
-  }),
-  host: z.object({
-    hostname: z.array(z.string()).optional(),
-    domain: z.array(z.string()).optional(),
-    ip: z.array(z.string()).optional(),
-    name: z.string(),
-    id: z.array(z.string()).optional(),
-    type: z.array(z.string()).optional(),
-    mac: z.array(z.string()).optional(),
-    architecture: z.array(z.string()).optional(),
-    risk: EntityRiskScoreRecord.optional(),
-  }),
+  entity: EntityField,
+  host: z
+    .object({
+      hostname: z.array(z.string()).optional(),
+      domain: z.array(z.string()).optional(),
+      ip: z.array(z.string()).optional(),
+      name: z.string(),
+      id: z.array(z.string()).optional(),
+      type: z.array(z.string()).optional(),
+      mac: z.array(z.string()).optional(),
+      architecture: z.array(z.string()).optional(),
+      risk: EntityRiskScoreRecord.optional(),
+      entity: EntityField.optional(),
+    })
+    .optional(),
   asset: z
     .object({
       criticality: AssetCriticalityLevel,
@@ -90,16 +106,14 @@ export const HostEntity = z.object({
 export type ServiceEntity = z.infer<typeof ServiceEntity>;
 export const ServiceEntity = z.object({
   '@timestamp': z.string().datetime().optional(),
-  entity: z.object({
-    EngineMetadata: EngineMetadata.optional(),
-    name: z.string(),
-    source: z.string(),
-    type: z.string(),
-  }),
-  service: z.object({
-    name: z.string(),
-    risk: EntityRiskScoreRecord.optional(),
-  }),
+  entity: EntityField,
+  service: z
+    .object({
+      name: z.string(),
+      risk: EntityRiskScoreRecord.optional(),
+      entity: EntityField.optional(),
+    })
+    .optional(),
   asset: z
     .object({
       criticality: AssetCriticalityLevel,
@@ -115,14 +129,7 @@ export const ServiceEntity = z.object({
 export type GenericEntity = z.infer<typeof GenericEntity>;
 export const GenericEntity = z.object({
   '@timestamp': z.string().datetime().optional(),
-  entity: z.object({
-    EngineMetadata: EngineMetadata.optional(),
-    id: z.string(),
-    name: z.string(),
-    type: z.string(),
-    category: z.string().optional(),
-    source: z.string().optional(),
-  }),
+  entity: EntityField,
   asset: z
     .object({
       criticality: AssetCriticalityLevel,

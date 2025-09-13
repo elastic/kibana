@@ -968,6 +968,57 @@ paths:
       summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
+  /api/entity_store/entities/{entityType}:
+    put:
+      description: >
+        Update or create an entity in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created. By default,
+        only the following fields can be updated: * `entity.attributes.*` *
+        `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set
+        the `force` query parameter to `true`. > info > Some fields always
+        retain the first observed value. Updates to these fields will not appear
+        in the final index.
+
+        > Due to technical limitations, not all updates are guaranteed to appear
+        in the final list of observed values.
+      operationId: UpsertEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entity'
+        description: Schema for the updating a single entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+          description: Entity updated or created
+        '400':
+          description: Operation on a non-existent field or on an uninitialized Engine
+        '403':
+          description: Operation on a restricted field
+        '404':
+          description: Entity not found
+      summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -1561,6 +1612,36 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityField:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            privileged:
+              type: boolean
+        behavior:
+          type: object
+        EngineMetadata:
+          $ref: '#/components/schemas/EngineMetadata'
+        id:
+          type: string
+        lifecycle:
+          type: object
+          properties:
+            first_seen:
+              format: date-time
+              type: string
+        name:
+          type: string
+        source:
+          type: string
+        sub_type:
+          type: string
+        type:
+          type: string
+      required:
+        - id
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1669,24 +1750,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            category:
-              type: string
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            id:
-              type: string
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - id
-            - name
-            - type
+          $ref: '#/components/schemas/EntityField'
       required:
         - entity
     HostEntity:
@@ -1703,20 +1767,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
           type: object
           properties:
@@ -1734,6 +1785,8 @@ components:
               items:
                 type: string
               type: array
+            entity:
+              $ref: '#/components/schemas/EntityField'
             hostname:
               items:
                 type: string
@@ -1761,7 +1814,6 @@ components:
           required:
             - name
       required:
-        - host
         - entity
     IdField:
       enum:
@@ -1973,20 +2025,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
           type: object
           properties:
@@ -1996,6 +2035,8 @@ components:
         service:
           type: object
           properties:
+            entity:
+              $ref: '#/components/schemas/EntityField'
             name:
               type: string
             risk:
@@ -2003,7 +2044,6 @@ components:
           required:
             - name
       required:
-        - service
         - entity
     StoreStatus:
       enum:
@@ -2092,20 +2132,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
           type: object
           properties:
@@ -2146,7 +2173,6 @@ components:
           required:
             - name
       required:
-        - user
         - entity
     UserName:
       type: object

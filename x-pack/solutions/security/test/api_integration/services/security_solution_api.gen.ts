@@ -223,6 +223,11 @@ import type {
   UpsertDashboardMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
+import type {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -2338,6 +2343,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
+      * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+
+      */
+    upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(
+          getRouteUrlForSpace(
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
+    /**
      * Creates or updates resources for an existing SIEM rules migration
      */
     upsertRuleMigrationResources(
@@ -2740,6 +2765,11 @@ export interface UpdateWorkflowInsightProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;
