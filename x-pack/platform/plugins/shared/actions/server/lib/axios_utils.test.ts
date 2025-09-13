@@ -571,6 +571,14 @@ describe('throwIfResponseIsNotValid', () => {
     ).toThrow('Response is missing at least one of the expected fields: not-exist');
   });
 
+  test('it does throw a user error if the response status code is 422', () => {
+    expect(() =>
+      throwIfResponseIsNotValid({
+        res: { ...res, status: 422 },
+      })
+    ).toThrow('Received Unprocessable Entity error from external API https://example.com');
+  });
+
   test('it does NOT throw if the value of the required attribute is null', () => {
     expect(() =>
       throwIfResponseIsNotValid({
