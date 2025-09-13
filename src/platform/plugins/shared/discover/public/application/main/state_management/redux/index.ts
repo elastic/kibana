@@ -21,7 +21,6 @@ import {
   updateTabs,
   disconnectTab,
   restoreTab,
-  clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
 } from './actions';
@@ -56,7 +55,6 @@ export const internalStateActions = {
   initializeSingleTab,
   syncLocallyPersistedTabState,
   restoreTab,
-  clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
 };

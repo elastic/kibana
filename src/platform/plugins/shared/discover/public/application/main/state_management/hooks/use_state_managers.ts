@@ -68,9 +68,6 @@ export const useStateManagers = ({
         const { tabId: restoreTabId } = urlState;
         if (restoreTabId) {
           internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
-        } else {
-          // if tabId is not present in `_t`, clear all tabs
-          internalState.dispatch(internalStateActions.clearAllTabs());
         }
       },
     });
