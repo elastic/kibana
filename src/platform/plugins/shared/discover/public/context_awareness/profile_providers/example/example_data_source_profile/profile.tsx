@@ -12,6 +12,7 @@ import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
@@ -258,6 +259,36 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ...prev(),
       paginationMode: 'singlePage',
     }),
+    /**
+     * The `getRecommendedFields` extension point allows profiles to define fields that should be surfaced
+     * as recommended in the field list sidebar. These fields appear in a dedicated "Recommended Fields" section.
+     * This is useful for highlighting important fields for specific data source types.
+     * @param prev
+     */
+    getRecommendedFields: (prev) => (fields) => {
+      const prevValue = prev ? prev(fields) : {};
+
+      // Define example recommended field names for the example logs data source
+      const exampleRecommendedFieldNames = ['log.level', 'message', 'service.name', 'host.name'];
+
+      return {
+        ...prevValue,
+        recommendedFields:
+          fields && fields.length
+            ? // Filter existing fields to only include recommended ones
+              fields.filter((field) => exampleRecommendedFieldNames.includes(field.name))
+            : // If no fields are provided, create DataViewField instances for recommended fields
+              exampleRecommendedFieldNames.map(
+                (name) =>
+                  new DataViewField({
+                    name,
+                    type: 'string',
+                    searchable: true,
+                    aggregatable: true,
+                  })
+              ),
+      };
+    },
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
