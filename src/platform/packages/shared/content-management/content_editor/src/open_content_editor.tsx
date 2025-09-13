@@ -42,15 +42,15 @@ export function useOpenContentEditor() {
         flyout.current?.close();
       };
 
-      flyout.current = openFlyout(
-        <ContentEditorLoader {...args} onCancel={closeFlyout} services={services} />,
-        {
-          maxWidth: 600,
-          size: 'm',
-          ownFocus: true,
-          hideCloseButton: true,
-        }
-      );
+      flyout.current = openFlyout(<ContentEditorLoader {...args} services={services} />, {
+        maxWidth: 600,
+        size: 'm',
+        ownFocus: true,
+        onClose: closeFlyout,
+        closeButtonProps: {
+          'data-test-subj': 'closeFlyoutButton',
+        },
+      });
 
       return closeFlyout;
     },

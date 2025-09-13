@@ -7,14 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { AccessModeContainer } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { CONTENT_ID } from '../../../common/content_management';
+import { getAccessControlClient } from '../../services/access_control_service';
+import {
+  coreServices,
+  savedObjectsTaggingService,
+  spacesService,
+} from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
 interface DashboardSaveModalProps {
@@ -24,6 +39,7 @@ interface DashboardSaveModalProps {
     newCopyOnSave,
     newTags,
     newTimeRestore,
+    newAccessMode,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: DashboardSaveOptions) => Promise<SaveResult>;
@@ -35,6 +51,7 @@ interface DashboardSaveModalProps {
   showCopyOnSave: boolean;
   showStoreTimeOnSave?: boolean;
   customModalTitle?: string;
+  accessControl?: Partial<SavedObjectAccessControl>;
 }
 
 type SaveDashboardHandler = (args: {
@@ -55,9 +72,14 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   tags,
   title,
   timeRestore,
+  accessControl,
 }) => {
+  const accessControlClient = useMemo(() => getAccessControlClient(), []);
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
+  const [selectedAccessMode, setSelectedAccessMode] = React.useState(
+    accessControl?.accessMode ?? 'default'
+  );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
     async ({
@@ -72,11 +94,12 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
+        newAccessMode: selectedAccessMode,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
       }),
-    [onSave, persistSelectedTimeInterval, selectedTags]
+    [onSave, persistSelectedTimeInterval, selectedTags, selectedAccessMode]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -126,9 +149,26 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
+        <Fragment>
+          <EuiSpacer size="l" />
+          <AccessModeContainer
+            accessControl={accessControl}
+            onChangeAccessMode={setSelectedAccessMode}
+            getActiveSpace={spacesService?.getActiveSpace}
+            getCurrentUser={coreServices.userProfile.getCurrent}
+            accessControlClient={accessControlClient}
+            entityName={CONTENT_ID}
+          />
+        </Fragment>
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
+  }, [
+    persistSelectedTimeInterval,
+    selectedTags,
+    showStoreTimeOnSave,
+    accessControl,
+    accessControlClient,
+  ]);
 
   return (
     <SavedObjectSaveModalWithSaveResult
