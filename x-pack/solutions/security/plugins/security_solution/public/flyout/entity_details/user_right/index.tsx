@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useAssetInventoryRefresh } from '../../../asset_inventory/hooks/use_asset_inventory_refresh';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -59,6 +60,8 @@ const FIRST_RECORD_PAGINATION = {
 export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
+  const { assetInventoryRefresh } = useAssetInventoryRefresh();
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -135,6 +138,11 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
     [isRiskScoreExist, openDetailsPanel]
   );
 
+  const onAssetCriticalityChange = useCallback(() => {
+    calculateEntityRiskScore();
+    assetInventoryRefresh();
+  }, [assetInventoryRefresh, calculateEntityRiskScore]);
+
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
@@ -181,7 +189,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
               recalculatingScore={recalculatingScore}
-              onAssetCriticalityChange={calculateEntityRiskScore}
+              onAssetCriticalityChange={onAssetCriticalityChange}
               contextID={contextID}
               scopeId={scopeId}
               openDetailsPanel={openDetailsPanel}
