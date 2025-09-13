@@ -7,9 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const DEFAULT_LAZY_REQUIRE_OPTIONS = {
+  enabled: true,
+  files: {
+    exclude: ['mock', 'test'],
+  },
+  specifiers: {
+    exclude: ['mock', 'test'],
+  },
+};
+
+/**
+ *
+ * @param {*} _
+ * @param {{ lazyRequire?: import('@kbn/lazy-require').LazyRequirePluginOptions }} options
+ * @returns
+ */
 module.exports = (_, options = {}) => {
+  const lazyRequireOptions = options.lazyRequire ?? DEFAULT_LAZY_REQUIRE_OPTIONS;
+
   return {
     presets: [
+      {
+        plugins: [
+          [
+            require.resolve('@kbn/lazy-require/src/plugin/plugin'),
+            {
+              ...lazyRequireOptions,
+            },
+          ],
+        ],
+      },
       [
         require.resolve('@babel/preset-env'),
         {

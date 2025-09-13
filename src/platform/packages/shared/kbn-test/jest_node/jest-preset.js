@@ -18,6 +18,11 @@ module.exports = {
   ...presetClone,
   snapshotSerializers: [],
   setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
+  transform: {
+    ...preset.transform,
+    '^.+\\.(js|tsx?)$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/jest_node_preset.js',
+  },
   haste: {
     ...preset.haste,
     throwOnModuleCollision: true,
