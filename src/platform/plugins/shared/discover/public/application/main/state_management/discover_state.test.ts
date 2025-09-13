@@ -1307,7 +1307,7 @@ describe('Discover state', () => {
       state.actions.stopSyncing();
     });
 
-    test('undoSavedSearchChanges - when changing data views', async () => {
+    test('resetDiscoverSession - when changing data views', async () => {
       const { state, customizationService, runtimeStateManager, getCurrentUrl } = await getState(
         '/',
         {
@@ -1353,7 +1353,12 @@ describe('Discover state', () => {
       ).toBe(dataViewComplexMock.id);
 
       // Undo all changes to the saved search, this should trigger a fetch, again
-      await state.actions.undoSavedSearchChanges();
+      const { persistedDiscoverSession } = state.internalState.getState();
+      if (persistedDiscoverSession) {
+        await state.internalState.dispatch(
+          internalStateActions.resetDiscoverSession({ discoverSession: persistedDiscoverSession })
+        );
+      }
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toBe(initialUrlState);
       await waitFor(() => {
@@ -1369,7 +1374,7 @@ describe('Discover state', () => {
       state.actions.stopSyncing();
     });
 
-    test('undoSavedSearchChanges with timeRestore', async () => {
+    test('resetDiscoverSession with timeRestore', async () => {
       const savedSearch = {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
@@ -1394,7 +1399,12 @@ describe('Discover state', () => {
       expect(setTime).toHaveBeenCalledTimes(1);
       expect(setTime).toHaveBeenLastCalledWith({ from: 'now-15d', to: 'now-10d' });
       expect(setRefreshInterval).toHaveBeenLastCalledWith({ pause: false, value: 1000 });
-      await state.actions.undoSavedSearchChanges();
+      const { persistedDiscoverSession } = state.internalState.getState();
+      if (persistedDiscoverSession) {
+        await state.internalState.dispatch(
+          internalStateActions.resetDiscoverSession({ discoverSession: persistedDiscoverSession })
+        );
+      }
       expect(setTime).toHaveBeenCalledTimes(2);
       expect(setTime).toHaveBeenLastCalledWith({ from: 'now-15d', to: 'now-10d' });
       expect(setRefreshInterval).toHaveBeenCalledWith({ pause: false, value: 1000 });
