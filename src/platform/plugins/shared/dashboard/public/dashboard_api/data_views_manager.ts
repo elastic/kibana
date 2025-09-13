@@ -22,6 +22,7 @@ export function initializeDataViewsManager(
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
+  const allDataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
   const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = controlGroupApi$.pipe(
@@ -40,9 +41,7 @@ export function initializeDataViewsManager(
   const dataViewsSubscription = combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
     .pipe(
       switchMap(async ([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews].filter(
-          (dataView) => dataView.isPersisted()
-        );
+        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews];
 
         if (allDataViews.length === 0) {
           try {
@@ -58,11 +57,13 @@ export function initializeDataViewsManager(
       })
     )
     .subscribe((nextDataViews) => {
-      dataViews$.next(nextDataViews);
+      allDataViews$.next(nextDataViews);
+      dataViews$.next(nextDataViews.filter((dataView) => dataView.isPersisted()));
     });
 
   return {
     api: {
+      allDataViews$,
       dataViews$,
     },
     cleanup: () => {

@@ -103,7 +103,7 @@ export type DashboardApi = CanExpandPanels &
   PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
-  PublishesDataViews &
+  Required<PublishesDataViews> &
   PublishesDescription &
   Pick<PublishesTitle, 'title$'> &
   PublishesReload &

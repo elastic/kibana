@@ -11,10 +11,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { PublishingSubject } from '../publishing_subject';
 
 /**
- * This API publishes a list of data views that it uses. Note that this should not contain any
- * ad-hoc data views.
+ * This API publishes a list of data views that it uses.
  */
 export interface PublishesDataViews {
+  allDataViews$?: PublishingSubject<DataView[] | undefined>;
+  /**
+   * Excludes ad-hoc data views.
+   */
   dataViews$: PublishingSubject<DataView[] | undefined>;
 }
 
