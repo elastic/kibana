@@ -8,50 +8,50 @@
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import {
-  ENTITY_LATEST,
+  ENTITY_HISTORY,
   ENTITY_SCHEMA_VERSION_V1,
-  entitiesIndexPattern,
+  entitiesHistoryIndexPattern,
   entitiesAliasPattern,
 } from '@kbn/entities-schema';
-import { generateLatestIndexTemplateId } from '../helpers/generate_component_id';
+import { generateHistoryIndexTemplateId } from '../helpers/generate_component_id';
 import {
   ECS_MAPPINGS_COMPONENT_TEMPLATE,
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-  ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
+  ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
 } from '../../../../common/constants_entities';
 import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
-export const generateEntitiesLatestIndexTemplateConfig = (
+export const generateEntitiesHistoryIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: generateLatestIndexTemplateId(definition),
+  name: generateHistoryIndexTemplateId(definition),
   _meta: {
     description:
-      "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
+      "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",
     ecs_version: '8.0.0',
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  ignore_missing_component_templates: getCustomLatestTemplateComponents(definition),
+  ignore_missing_component_templates: getCustomHistoryTemplateComponents(definition),
   composed_of: [
     ECS_MAPPINGS_COMPONENT_TEMPLATE,
-    ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
+    ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-    ...getCustomLatestTemplateComponents(definition),
+    ...getCustomHistoryTemplateComponents(definition),
   ],
   index_patterns: [
-    entitiesIndexPattern({
+    entitiesHistoryIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V1,
-      dataset: ENTITY_LATEST,
+      dataset: ENTITY_HISTORY,
       definitionId: definition.id,
     }),
   ],
   priority: 200,
   template: {
     aliases: {
-      [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_LATEST })]: {},
+      [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_HISTORY })]: {},
     },
     mappings: {
       _meta: {
@@ -97,15 +97,15 @@ export const generateEntitiesLatestIndexTemplateConfig = (
   },
 });
 
-function getCustomLatestTemplateComponents(definition: EntityDefinition) {
+function getCustomHistoryTemplateComponents(definition: EntityDefinition) {
   if (isBuiltinDefinition(definition)) {
     return [];
   }
 
   return [
     `${definition.id}@platform`, // @platform goes before so it can be overwritten by custom
-    `${definition.id}-latest@platform`,
+    `${definition.id}-history@platform`,
     `${definition.id}@custom`,
-    `${definition.id}-latest@custom`,
+    `${definition.id}-history@custom`,
   ];
 }

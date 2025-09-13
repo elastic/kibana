@@ -20,6 +20,8 @@ import {
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateLatestIndexTemplateId,
+  generateHistoryIndexTemplateId,
+  generateResetIndexTemplateId,
   generateLatestIngestPipelineId,
   generateLatestTransformId,
 } from './helpers/generate_component_id';
@@ -27,12 +29,22 @@ import { generateLatestTransform } from './transform/generate_latest_transform';
 import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
 import { EntityDefinitionIdInvalid } from './errors/entity_definition_id_invalid';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
+import {
+  ENTITY_HISTORY_ILM_POLICY,
+  ENTITY_RESET_ILM_POLICY,
+} from '../../../common/constants_entities';
+
+const isServerless: boolean = false;
 
 const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
+    { type: 'template', id: generateHistoryIndexTemplateId(definition) },
+    { type: 'template', id: generateResetIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
+    { type: 'ilm_policy', id: ENTITY_RESET_ILM_POLICY },
+    { type: 'ilm_policy', id: ENTITY_HISTORY_ILM_POLICY },
   ];
 };
 
@@ -62,10 +74,20 @@ const assertHasCreatedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(3);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
     })
   );
 
@@ -100,10 +122,20 @@ const assertHasUpgradedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(3);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
     })
   );
 
@@ -136,10 +168,22 @@ const assertHasDeletedDefinition = (
     { ignore: [404] }
   );
 
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(3);
   expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
     {
       name: generateLatestIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateResetIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateHistoryIndexTemplateId(definition),
     },
     { ignore: [404] }
   );
@@ -179,6 +223,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: { id: 'a'.repeat(50) } as EntityDefinition,
           logger: loggerMock.create(),
         })
@@ -211,6 +256,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: mockEntityDefinition,
           logger: loggerMock.create(),
         })
@@ -231,6 +277,7 @@ describe('install_entity_definition', () => {
       await installEntityDefinition({
         esClient,
         soClient,
+        isServerless,
         definition: mockEntityDefinition,
         logger: loggerMock.create(),
       });
@@ -248,6 +295,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: mockEntityDefinition,
           logger: loggerMock.create(),
         })
@@ -273,6 +321,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
@@ -316,6 +365,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
@@ -361,6 +411,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [updatedDefinition],
         logger: loggerMock.create(),
       });
@@ -408,6 +459,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [updatedDefinition],
         logger: loggerMock.create(),
       });
@@ -450,6 +502,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [mockEntityDefinition],
         logger: loggerMock.create(),
       });
