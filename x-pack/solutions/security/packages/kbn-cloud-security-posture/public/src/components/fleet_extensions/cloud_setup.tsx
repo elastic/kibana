@@ -90,7 +90,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       config,
       defaultProviderType,
       getCloudSetupProviderByInputType,
-      cloudConnectorEnabledVersion,
+      azureCloudConnectors,
+      gcpCloudConnectors,
+      awsCloudConnectors,
     } = useCloudSetup();
     const {
       input,
@@ -101,7 +103,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       shouldRenderAgentlessSelector,
       isServerless,
       hasInvalidRequiredVars,
-      showCloudConnectors,
     } = useLoadCloudSetup({
       newPolicy,
       updatePolicy,
@@ -112,12 +113,10 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       isAgentlessEnabled,
       defaultSetupTechnology,
       cloud,
-      uiSettings,
       templateName,
       defaultProviderType,
       config,
       getCloudSetupProviderByInputType,
-      cloudConnectorEnabledVersion,
     });
 
     const namespaceSupportEnabled = config.namespaceSupportEnabled;
@@ -136,7 +135,15 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {/* Defines the single enabled input of the active policy template */}
         <ProviderSelector
           selectedProvider={selectedProvider}
-          setInput={setEnabledPolicyInput}
+          setSelectedProvider={(provider) => {
+            const showCloudConnectors =
+              provider === AWS_PROVIDER
+                ? awsCloudConnectors
+                : provider === AZURE_PROVIDER
+                ? azureCloudConnectors
+                : gcpCloudConnectors;
+            setEnabledPolicyInput(provider, showCloudConnectors);
+          }}
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
@@ -167,9 +174,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             input={input}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
-            packageInfo={packageInfo}
             disabled={isEditPage}
-            setupTechnology={setupTechnology}
           />
         )}
 
@@ -233,6 +238,12 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
               useDescribedFormGroup={false}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
+                const showCloudConnectors =
+                  selectedProvider === AWS_PROVIDER
+                    ? awsCloudConnectors
+                    : selectedProvider === AZURE_PROVIDER
+                    ? azureCloudConnectors
+                    : gcpCloudConnectors;
                 updatePolicy({
                   updatedPolicy: updatePolicyWithInputs(
                     newPolicy,
@@ -260,8 +271,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             isEditPage={isEditPage}
             setupTechnology={setupTechnology}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
-            showCloudConnectors={showCloudConnectors}
-            cloud={cloud}
           />
         )}
         {selectedProvider === AWS_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
@@ -304,6 +313,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            setupTechnology={setupTechnology}
           />
         )}
         {selectedProvider === AZURE_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
@@ -341,7 +351,13 @@ export const CloudSetup = memo<CloudSetupProps>(
     uiSettings,
   }: CloudSetupProps) => {
     return (
-      <CloudSetupProvider config={configuration}>
+      <CloudSetupProvider
+        config={configuration}
+        cloud={cloud}
+        uiSettings={uiSettings}
+        packagePolicy={newPolicy}
+        packageInfo={packageInfo}
+      >
         <CloudIntegrationSetup
           cloud={cloud}
           defaultSetupTechnology={defaultSetupTechnology}

@@ -7,8 +7,17 @@
 
 import React, { useContext } from 'react';
 import { render, screen } from '@testing-library/react';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CloudSetupContext, CloudSetupProvider } from './cloud_setup_context';
-import { mockConfig } from './test/mock';
+import { getMockPackageInfo, getMockPolicyAWS, mockConfig } from './test/mock';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+
+const mockCore = coreMock.createStart();
+const mockCloud = cloudMock.createSetup();
+
+const packageInfo = getMockPackageInfo() as PackageInfo;
+const packagePolicy = getMockPolicyAWS() as NewPackagePolicy;
 
 const TestComponent = () => {
   const context = useContext(CloudSetupContext);
@@ -21,10 +30,18 @@ const TestComponent = () => {
   );
 };
 
+const mockProviderProps = {
+  config: mockConfig,
+  uiSettings: mockCore.uiSettings,
+  cloud: mockCloud,
+  packageInfo,
+  packagePolicy,
+};
+
 describe('CloudSetupContext', () => {
   it('provides the config to children via context', async () => {
     render(
-      <CloudSetupProvider config={mockConfig}>
+      <CloudSetupProvider {...mockProviderProps}>
         <TestComponent />
       </CloudSetupProvider>
     );
