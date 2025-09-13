@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export {
-  executeAsReasoningAgent,
-  type ReasoningPromptResponse,
-  type ReasoningPromptResponseOf,
-} from './src/flows/reasoning/execute_as_reasoning_agent';
+export const BEGIN_INTERNAL_REASONING_MARKER = `<<<BEGIN_INTERNAL>>>`;
+export const END_INTERNAL_REASONING_MARKER = `<<<END_INTERNAL>>>`;
