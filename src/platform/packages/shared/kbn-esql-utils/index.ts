@@ -46,6 +46,7 @@ export {
   getArgsFromRenameFunction,
   getCategorizeField,
   getRemoteClustersFromESQLQuery,
+  getLookupIndicesFromQuery,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';
