@@ -21,7 +21,10 @@ export const generateConversationTitle = async ({
   const structuredModel = chatModel.withStructuredOutput(
     z.object({
       title: z.string().describe('The title for the conversation'),
-    })
+    }),
+    {
+      name: 'set_title',
+    }
   );
 
   const prompt = ChatPromptTemplate.fromMessages([
