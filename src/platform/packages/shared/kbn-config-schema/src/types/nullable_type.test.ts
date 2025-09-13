@@ -41,6 +41,11 @@ test('returns object value when passed object', () => {
   expect(type.validate(object)).toEqual(object);
 });
 
+test('returns null if null for literal', () => {
+  const type = schema.nullable(schema.literal('string literal'));
+  expect(type.validate(null)).toBe(null);
+});
+
 test('returns null if null for string', () => {
   const type = schema.nullable(schema.string());
   expect(type.validate(null)).toBe(null);
@@ -54,6 +59,11 @@ test('returns null if null for number', () => {
 test('returns null if null for boolean', () => {
   const type = schema.nullable(schema.boolean());
   expect(type.validate(null)).toBe(null);
+});
+
+test('returns null if undefined for literal', () => {
+  const type = schema.nullable(schema.literal('string literal'));
+  expect(type.validate(undefined)).toBe(null);
 });
 
 test('returns null if undefined for string', () => {

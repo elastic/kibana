@@ -12,32 +12,36 @@ import type { Duration } from '../duration';
 import { ensureDuration } from '../duration';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
-import type { Reference } from '../references';
-import { Type } from './type';
+import { Type, type DefaultValue } from './type';
 
+// we need to special-case defaultValue as we want to handle string inputs too
 export type DurationValueType = Duration | string | number;
 
-export interface DurationOptions {
-  // we need to special-case defaultValue as we want to handle string inputs too
-  defaultValue?: DurationValueType | Reference<DurationValueType> | (() => DurationValueType);
+export interface DurationOptions<D extends DefaultValue<DurationValueType>> {
+  defaultValue?: D;
   validate?: (value: Duration) => string | void;
   min?: DurationValueType;
   max?: DurationValueType;
 }
 
-export class DurationType extends Type<Duration> {
-  constructor(options: DurationOptions = {}) {
-    let defaultValue;
-    if (typeof options.defaultValue === 'function') {
-      const originalDefaultValue = options.defaultValue;
+export class DurationType<D extends DefaultValue<DurationValueType>> extends Type<
+  Duration,
+  [D] extends [never] ? never : Duration
+> {
+  constructor(options: DurationOptions<D> = {}) {
+    let defaultValue: DefaultValue<Duration> | undefined;
+
+    const originalDefaultValue = options.defaultValue;
+
+    if (typeof originalDefaultValue === 'function') {
       defaultValue = () => ensureDuration(originalDefaultValue());
     } else if (
-      typeof options.defaultValue === 'string' ||
-      typeof options.defaultValue === 'number'
+      typeof originalDefaultValue === 'string' ||
+      typeof originalDefaultValue === 'number'
     ) {
-      defaultValue = ensureDuration(options.defaultValue);
+      defaultValue = ensureDuration(originalDefaultValue);
     } else {
-      defaultValue = options.defaultValue;
+      defaultValue = originalDefaultValue;
     }
 
     let schema = internals.duration();
@@ -48,7 +52,10 @@ export class DurationType extends Type<Duration> {
       schema = schema.max(options.max);
     }
 
-    super(schema, { validate: options.validate, defaultValue });
+    super(schema, {
+      validate: options.validate,
+      defaultValue: defaultValue as [D] extends [never] ? never : Duration,
+    });
   }
 
   protected handleError(

@@ -9,6 +9,7 @@
 
 import { schema } from '../..';
 import type { Type, TypeOptions } from '../types';
+import type { DefaultValue } from '../types/type';
 
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
@@ -54,11 +55,12 @@ import type { Type, TypeOptions } from '../types';
  * @param opts.traditional The validation to apply in the Traditional offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.options Any options to pass down in the types.
  */
-export function offeringBasedSchema<V>(opts: {
-  serverless?: Type<V>;
-  traditional?: Type<V>;
-  options?: TypeOptions<V>;
-}) {
+export function offeringBasedSchema<
+  T,
+  SLD extends DefaultValue<T>,
+  TRD extends DefaultValue<T>,
+  DV extends DefaultValue<T>
+>(opts: { serverless?: Type<T, SLD>; traditional?: Type<T, TRD>; options?: TypeOptions<T, DV> }) {
   const { serverless = schema.never(), traditional = schema.never(), options } = opts;
   return schema.conditional(
     schema.contextRef('serverless'),
