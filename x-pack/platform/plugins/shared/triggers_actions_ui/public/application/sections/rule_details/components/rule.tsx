@@ -33,6 +33,7 @@ import {
 } from '../../rules_list/translations';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
+const RuleGapList = lazy(() => import('./rule_gap_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
@@ -52,6 +53,7 @@ export type RuleComponentProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+const GAP_TAB = 'rule_gap_list';
 
 // We don't want to show the Feature column in the rule page
 const alertsTableColumns = [defaultAlertsTableColumns[0], ...defaultAlertsTableColumns.slice(2)];
@@ -188,6 +190,23 @@ export function RuleComponent({
         refreshToken,
         isLoadingRuleSummary: isLoadingChart,
         onChangeDuration,
+        requestRefresh,
+      }),
+    },
+    {
+      id: GAP_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.gapTabText', {
+        defaultMessage: 'Gaps',
+      }),
+      'data-test-subj': 'ruleGapListTab',
+      content: suspendedComponentWithProps(
+        RuleGapList,
+        'xl'
+      )({
+        fetchRuleSummary: false,
+        ruleId: rule.id,
+        ruleType,
+        refreshToken,
         requestRefresh,
       }),
     },

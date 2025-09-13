@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import type { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+import {
+  type RuleMonitoring,
+  type RuleMonitoringHistory,
+  type PublicRuleMonitoringService,
+  parseDuration,
+} from '../types';
 
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
@@ -18,6 +24,11 @@ export class RuleMonitoringService {
   public setMonitoring(monitoringFromSO: RuleMonitoring | undefined) {
     if (monitoringFromSO) {
       this.monitoring = monitoringFromSO;
+
+      // Clear gap range that was persisted in the rule SO
+      if (this.monitoring?.run?.last_run?.metrics?.gap_range) {
+        this.monitoring.run.last_run.metrics.gap_range = null;
+      }
     }
   }
 
@@ -65,6 +76,33 @@ export class RuleMonitoringService {
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
       setLastRunMetricsGapRange: this.setLastRunMetricsGapRange.bind(this),
     };
+  }
+
+  public checkForGaps(
+    previousStartedAt: string | null | undefined,
+    startedAt: Date | null,
+    schedule: { interval: string }
+  ) {
+    if (!previousStartedAt || !startedAt) {
+      return;
+    }
+
+    const previousStartedAtDate = new Date(previousStartedAt);
+    const gapDurationInSeconds = (startedAt.getTime() - previousStartedAtDate.getTime()) / 1000;
+
+    const scheduleIntervalInSeconds = parseDuration(schedule.interval) / 1000;
+
+    // what's a reasonable threshold for a gap?
+    if (gapDurationInSeconds / scheduleIntervalInSeconds > 1.25) {
+      this.setLastRunMetricsGapDurationS(gapDurationInSeconds - scheduleIntervalInSeconds);
+      this.setLastRunMetricsGapRange({
+        gte: previousStartedAtDate.toISOString(),
+        lte: moment(previousStartedAt)
+          .add((gapDurationInSeconds - scheduleIntervalInSeconds) * 1000)
+          .toDate()
+          .toISOString(),
+      });
+    }
   }
 
   private setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs: number) {

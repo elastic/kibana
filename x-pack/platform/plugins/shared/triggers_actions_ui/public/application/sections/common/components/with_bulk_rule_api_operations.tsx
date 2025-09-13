@@ -59,6 +59,8 @@ import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
 import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
 
 import { useKibana } from '../../../../common/lib/kibana';
+import type { LoadGapsProps } from '../../../lib/rule_api/load_gaps';
+import { loadGaps } from '../../../lib/rule_api/load_gaps';
 
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
@@ -77,6 +79,7 @@ export interface ComponentOpts {
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
+  loadGaps: (props: LoadGapsProps) => Promise<{}>;
   loadGlobalExecutionLogAggregations: (
     props: LoadGlobalExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
@@ -147,6 +150,7 @@ export function withBulkRuleOperations<T>(
             http,
           })
         }
+        loadGaps={async (loadProps: LoadGapsProps) => loadGaps({ ...loadProps, http })}
         loadGlobalExecutionLogAggregations={async (
           loadProps: LoadGlobalExecutionLogAggregationsProps
         ) =>
