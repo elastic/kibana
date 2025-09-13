@@ -83,5 +83,5 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   HasLibraryTransforms &
   DefaultEmbeddableApi<VisualizeSerializedState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
-    openInspector: () => OverlayRef | undefined;
+    openInspector: () => Promise<OverlayRef | undefined>;
   };
