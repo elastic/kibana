@@ -7,6 +7,7 @@
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { HttpError } from '../../../../../common/types/api';
@@ -17,6 +18,8 @@ import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/f
 
 import { SearchApplicationsListLogic } from './search_applications_list_logic';
 import { DEFAULT_META } from './types';
+
+requireDeferred();
 
 const DEFAULT_VALUES = {
   data: undefined,

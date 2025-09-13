@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { IsolateHostPanelContext } from './context';
@@ -15,6 +16,8 @@ import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../commo
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
+
+requireDeferred();
 
 jest.mock('./context');
 

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import type { SavedTimeline, Note } from '../../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
+
+requireDeferred();
 
 describe('pickSavedTimeline', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();

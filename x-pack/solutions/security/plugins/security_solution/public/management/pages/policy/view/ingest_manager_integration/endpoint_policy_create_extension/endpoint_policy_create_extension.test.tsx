@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -18,6 +19,8 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { licenseService } from '../../../../../../common/hooks/use_license';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/hooks/use_license', () => {

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { ReactElement } from 'react';
 import { act, renderHook } from '@testing-library/react';
 
 import { fields } from '../../fields/index.mock';
 import { useEsField } from '../use_es_field';
+
+requireDeferred();
 
 jest.mock('../../translations', () => ({
   BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',

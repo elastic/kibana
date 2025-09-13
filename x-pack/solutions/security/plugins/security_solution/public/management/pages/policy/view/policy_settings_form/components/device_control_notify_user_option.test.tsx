@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import userEvent from '@testing-library/user-event';
@@ -22,6 +23,8 @@ import {
 } from './shared_translations';
 import type { DeviceControlNotifyUserOptionProps } from './device_control_notify_user_option';
 import { DeviceControlNotifyUserOption } from './device_control_notify_user_option';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/hooks/use_license');
 

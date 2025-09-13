@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -23,6 +24,8 @@ import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { ExceptionsListItemGenerator } from '../../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { buildPerPolicyTag } from '../../../../../../../common/endpoint/service/artifacts/utils';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;

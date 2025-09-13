@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -25,6 +26,8 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/api_cli
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/components/user_privileges');
 

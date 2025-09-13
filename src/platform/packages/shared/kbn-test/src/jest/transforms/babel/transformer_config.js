@@ -6,12 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-module.exports = () => ({
+/**
+ *
+ * @param {{ lazyRequire?: import('@kbn/lazy-require').LazyRequirePluginOptions }} options
+ * @returns
+ */
+module.exports = (options = {}) => ({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
       {
+        lazyRequire: options.lazyRequire,
         '@babel/preset-env': {
           // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
           useBuiltIns: false,

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { IndexPattern } from '../../types';
 import { getESQLForLayer } from './to_esql';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import type { DateHistogramIndexPatternColumn } from '../..';
+
+requireDeferred();
 
 const defaultUiSettingsGet = (key: string) => {
   switch (key) {

@@ -12,6 +12,9 @@ import { ConfigurationForm } from '../../components/configuration_form';
 import { WithAppDependencies } from './helpers/setup_environment';
 import type { TestSubjects } from './helpers/mappings_editor.helpers';
 import { act } from 'react-dom/test-utils';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 const setup = (props: any = { onUpdate() {} }, appDependencies?: any) => {
   const setupTestBed = registerTestBed<TestSubjects>(

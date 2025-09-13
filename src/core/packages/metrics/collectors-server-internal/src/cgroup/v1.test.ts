@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 import { gatherV1CgroupMetrics } from './v1';
+
+requireDeferred();
 
 describe('gatherV1CgroupMetrics', () => {
   afterEach(() => mockFs.restore());

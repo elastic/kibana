@@ -15,6 +15,7 @@ jest.mock('@kbn/core-http-router-server-internal', () => {
   };
 });
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
@@ -26,6 +27,8 @@ import * as requestModule from '../../../../lib/proxy_request';
 import { createHandler } from './create_handler';
 
 import { createResponseStub } from './stubs';
+
+requireDeferred();
 
 describe('Console Proxy Route', () => {
   let handler: ReturnType<typeof createHandler>;

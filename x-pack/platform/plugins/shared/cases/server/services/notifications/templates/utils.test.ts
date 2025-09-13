@@ -7,6 +7,9 @@
 
 import path, { join, resolve } from 'path';
 import { getTemplateFilePath } from './utils';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 describe('getTemplateFilePath', () => {
   beforeEach(() => {

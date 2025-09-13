@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -13,6 +14,8 @@ import type { GetPackagePoliciesRequest } from '@kbn/fleet-plugin/common/types';
 import { allFleetHttpMocks } from '../../mocks';
 import { useFetchIntegrationPolicyList } from './use_fetch_integration_policy_list';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+
+requireDeferred();
 
 const useQueryMock = _useQuery as jest.Mock;
 

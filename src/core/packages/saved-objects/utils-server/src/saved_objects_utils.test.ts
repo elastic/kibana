@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { mockUuidv4, mockUuidv5 } from './saved_objects_utils.test.mock';
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from './saved_objects_utils';
+
+requireDeferred();
 
 describe('SavedObjectsUtils', () => {
   const {

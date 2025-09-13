@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { toArray } from 'rxjs';
@@ -14,6 +15,8 @@ import { resolve } from 'path';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 import type { PluginDiscoveryError } from './plugin_discovery_error';
 import { firstValueFrom } from 'rxjs';
+
+requireDeferred();
 
 const KIBANA_ROOT = process.cwd();
 

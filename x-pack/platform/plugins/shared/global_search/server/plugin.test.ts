@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { registerRoutesMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { GlobalSearchPlugin } from './plugin';
+
+requireDeferred();
 
 describe('GlobalSearchPlugin', () => {
   let plugin: GlobalSearchPlugin;

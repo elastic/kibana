@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -24,6 +25,8 @@ import {
   NOTIFY_USER_CHECKBOX_LABEL,
   CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
 } from './shared_translations';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/hooks/use_license');
 

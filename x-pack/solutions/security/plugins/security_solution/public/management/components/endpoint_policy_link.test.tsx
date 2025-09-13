@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../common/mock/endpoint';
 import React from 'react';
 import type { EndpointPolicyLinkProps } from './endpoint_policy_link';
 import { EndpointPolicyLink, POLICY_NOT_FOUND_MESSAGE } from './endpoint_policy_link';
 import { useUserPrivileges as _useUserPrivileges } from '../../common/components/user_privileges';
+
+requireDeferred();
 
 jest.mock('../../common/components/user_privileges');
 

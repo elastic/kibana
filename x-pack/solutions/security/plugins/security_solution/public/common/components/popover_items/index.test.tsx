@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 
 import type { PopoverItemsProps } from '.';
@@ -12,6 +13,8 @@ import { PopoverItems } from '.';
 import { TestProviders } from '../../mock';
 import { render, screen, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+
+requireDeferred();
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 

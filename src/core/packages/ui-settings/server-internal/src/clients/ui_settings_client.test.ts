@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -19,6 +20,8 @@ import {
   ValidationBadValueError,
   ValidationSettingNotFoundError,
 } from '../ui_settings_errors';
+
+requireDeferred();
 
 const logger = loggingSystemMock.create().get();
 

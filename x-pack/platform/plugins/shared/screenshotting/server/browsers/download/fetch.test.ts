@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 import axios from 'axios';
 import { createHash } from 'crypto';
@@ -12,6 +13,8 @@ import { readFile } from 'fs/promises';
 import { resolve as resolvePath } from 'path';
 import { Readable } from 'stream';
 import { fetch } from './fetch';
+
+requireDeferred();
 
 const TEMP_DIR = resolvePath(__dirname, '__tmp__');
 const TEMP_FILE = resolvePath(TEMP_DIR, 'foo/bar/download');

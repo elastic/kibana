@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
@@ -15,6 +16,8 @@ import {
   forNearestButton,
 } from '../../../lib/helper/rtl_helpers';
 import * as labels from './translations';
+
+requireDeferred();
 
 describe('Manage ML Job', () => {
   const makeMlCapabilities = (mlCapabilities?: Partial<{ canDeleteJob: boolean }>) => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   ApmConfigurationMock,
   applyConfigOverridesMock,
@@ -16,6 +17,8 @@ import {
 } from './config_loader.test.mocks';
 
 import { loadConfiguration } from './config_loader';
+
+requireDeferred();
 
 describe('loadConfiguration', () => {
   const argv = ['some', 'arbitrary', 'args'];

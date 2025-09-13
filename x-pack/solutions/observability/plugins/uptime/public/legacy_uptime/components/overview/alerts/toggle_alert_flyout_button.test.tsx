@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
@@ -15,6 +16,8 @@ import {
 } from '../../../lib/helper/rtl_helpers';
 import { ToggleAlertFlyoutButtonComponent } from './toggle_alert_flyout_button';
 import { ToggleFlyoutTranslations } from './translations';
+
+requireDeferred();
 
 describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {

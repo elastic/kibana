@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import userEvent from '@testing-library/user-event';
@@ -16,6 +17,8 @@ import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../
 import { exactMatchText, expectIsViewOnly } from '../mocks';
 import type { DeviceControlSettingCardSwitchProps } from './device_control_setting_card_switch';
 import { DeviceControlSettingCardSwitch } from './device_control_setting_card_switch';
+
+requireDeferred();
 
 const setDeviceControlMode = ({
   policy,

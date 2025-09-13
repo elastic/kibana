@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { firstValueFrom } from 'rxjs';
 import { take, toArray } from 'rxjs';
 import type { LicenseType } from '@kbn/licensing-types';
@@ -16,6 +17,8 @@ import { License } from '../common/license';
 import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { HttpInterceptor } from '@kbn/core/public';
+
+requireDeferred();
 
 const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {

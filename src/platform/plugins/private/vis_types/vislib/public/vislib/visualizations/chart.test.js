@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import d3 from 'd3';
 import $ from 'jquery';
 import {
@@ -17,6 +18,8 @@ import {
 import { Chart } from './_chart';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
+
+requireDeferred();
 
 describe('Vislib _chart Test Suite', function () {
   let vis;

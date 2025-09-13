@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -30,6 +31,8 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+
+requireDeferred();
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');

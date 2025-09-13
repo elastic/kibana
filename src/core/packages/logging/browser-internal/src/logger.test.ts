@@ -11,6 +11,9 @@ import type { Appender } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { getLoggerContext } from '@kbn/core-logging-common-internal';
 import { BaseLogger, BROWSER_PID } from './logger';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 const context = getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];

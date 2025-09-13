@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
@@ -12,6 +13,8 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { savedObjectsTaggingFeature } from './features';
+
+requireDeferred();
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;

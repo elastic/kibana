@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -18,6 +19,8 @@ import type { UserPrivilegesState } from '../../../common/components/user_privil
 import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { allFleetHttpMocks } from '../../mocks';
+
+requireDeferred();
 
 jest.mock('../../../common/components/user_privileges');
 

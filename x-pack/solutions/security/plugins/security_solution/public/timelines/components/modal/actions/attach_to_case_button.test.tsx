@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,6 +14,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AttachToCaseButton } from './attach_to_case_button';
 import { SecurityPageName } from '../../../../../common/constants';
+
+requireDeferred();
 
 jest.mock('../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../common/components/link_to');

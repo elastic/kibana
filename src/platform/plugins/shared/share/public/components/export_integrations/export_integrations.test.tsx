@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -15,6 +16,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ExportMenu } from './export_integrations';
 import type { IShareContext } from '../context';
 import type { ExportShareConfig, ShareConfigs } from '../../types';
+
+requireDeferred();
 
 const mockShareContext: IShareContext = {
   shareMenuItems: [

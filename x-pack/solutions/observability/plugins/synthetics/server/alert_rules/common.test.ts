@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import type { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
 import type {
@@ -12,6 +13,8 @@ import type {
   SyntheticsCommonState,
 } from '../../common/runtime_types/alert_rules/common';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+
+requireDeferred();
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const monitorName = 'test-monitor';

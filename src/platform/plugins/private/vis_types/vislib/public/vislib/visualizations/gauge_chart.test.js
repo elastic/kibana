@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import $ from 'jquery';
 import _ from 'lodash';
 import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test-jest-helpers';
@@ -14,6 +15,8 @@ import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test-jest-
 import data from '../../fixtures/mock_data/terms/_series_multiple';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
+
+requireDeferred();
 
 describe('Vislib Gauge Chart Test Suite', function () {
   let vis;

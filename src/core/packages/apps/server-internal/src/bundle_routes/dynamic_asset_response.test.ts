@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
+
+requireDeferred();
 
 function getHandler(args?: Partial<Parameters<typeof createDynamicAssetHandler>[0]>) {
   return createDynamicAssetHandler({

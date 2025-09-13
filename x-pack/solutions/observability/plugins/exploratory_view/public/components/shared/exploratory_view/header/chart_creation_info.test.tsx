@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '../rtl_helpers';
 import { ChartCreationInfo } from './chart_creation_info';
+
+requireDeferred();
 
 const info = {
   to: 1634071132571,

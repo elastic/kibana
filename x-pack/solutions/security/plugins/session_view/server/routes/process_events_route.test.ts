@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEventsAndScopedAlerts } from './process_events_route';
 import {
@@ -14,6 +15,8 @@ import {
 } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';
 import type { ProcessEvent } from '../../common';
+
+requireDeferred();
 
 const getEmptyResponse = async () => {
   return {

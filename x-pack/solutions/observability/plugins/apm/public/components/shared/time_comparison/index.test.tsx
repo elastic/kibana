@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -25,6 +26,8 @@ import { merge } from 'lodash';
 import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EuiThemeProvider } from '@elastic/eui';
+
+requireDeferred();
 
 const ML_AD_JOBS = {
   jobs: [

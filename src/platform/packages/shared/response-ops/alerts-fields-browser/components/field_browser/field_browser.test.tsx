@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -14,6 +15,8 @@ import { mockBrowserFields } from '../../mock';
 import { FIELD_BROWSER_WIDTH } from '../../helpers';
 import { FieldBrowserComponent } from './field_browser';
 import type { FieldBrowserProps } from '../../types';
+
+requireDeferred();
 
 const defaultProps: FieldBrowserProps = {
   browserFields: mockBrowserFields,

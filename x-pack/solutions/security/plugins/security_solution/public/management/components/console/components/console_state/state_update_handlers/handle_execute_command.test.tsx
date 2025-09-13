@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
@@ -16,6 +17,8 @@ import type {
   Command,
 } from '../../../types';
 import { executionTranslations } from './translations';
+
+requireDeferred();
 
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

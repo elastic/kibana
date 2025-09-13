@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { Switch, MemoryRouter } from 'react-router-dom';
@@ -15,6 +16,8 @@ import type { PrivilegedRouteProps } from './privileged_route';
 import { AdministrationSubTab } from '../../types';
 import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
+
+requireDeferred();
 
 describe('PrivilegedRoute', () => {
   const noPrivilegesPageTestId = 'noPrivilegesPage';

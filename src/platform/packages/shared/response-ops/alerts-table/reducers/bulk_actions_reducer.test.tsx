@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React, { useMemo, useReducer } from 'react';
 import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,6 +29,8 @@ import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+
+requireDeferred();
 
 const columns = [
   {

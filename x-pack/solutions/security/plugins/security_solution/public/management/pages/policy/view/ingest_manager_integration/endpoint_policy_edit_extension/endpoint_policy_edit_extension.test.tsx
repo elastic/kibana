@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
@@ -16,6 +17,8 @@ import { createFleetContextRendererMock } from '../mocks';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useReducer } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -39,6 +40,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+
+requireDeferred();
 
 jest.mock('../hooks/use_case_view_navigation');
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -17,6 +18,8 @@ import { licenseService as licenseServiceMocked } from '../../../../../../../com
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import type { DeviceControlProps } from './device_control_card';
 import { DEVICE_CONTROL_CARD_TITLE, DeviceControlCard } from './device_control_card';
+
+requireDeferred();
 
 jest.mock('../../../../../../../common/hooks/use_license');
 

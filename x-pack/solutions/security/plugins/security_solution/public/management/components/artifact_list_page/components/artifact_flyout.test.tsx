@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { ArtifactListPageProps } from '../artifact_list_page';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,6 +21,8 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../common/comp
 import { entriesToConditionEntries } from '../../../../common/utils/exception_list_items/mappers';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getDeferred } from '../../../mocks/utils';
+
+requireDeferred();
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { EndpointActionFailureMessage } from './endpoint_action_failure_message';
+
+requireDeferred();
 
 describe('EndpointActionFailureMessage', () => {
   const testPrefix = 'test';

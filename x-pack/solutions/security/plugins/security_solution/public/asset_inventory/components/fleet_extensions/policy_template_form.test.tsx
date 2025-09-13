@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -43,6 +44,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ, SetupTechnology } from '@kbn/fleet-plugin/public';
+
+requireDeferred();
 
 // mock useParams
 jest.mock('react-router-dom', () => ({

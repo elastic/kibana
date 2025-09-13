@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { from } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { Filter } from '@kbn/es-query';
@@ -24,6 +25,8 @@ jest.mock('../../tabify', () => ({
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
 import { toArray } from 'rxjs';
+
+requireDeferred();
 
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;

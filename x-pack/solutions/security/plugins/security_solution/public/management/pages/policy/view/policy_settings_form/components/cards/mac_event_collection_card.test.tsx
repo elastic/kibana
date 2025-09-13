@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -13,6 +14,8 @@ import React from 'react';
 import { set } from '@kbn/safer-lodash-set';
 import type { MacEventCollectionCardProps } from './mac_event_collection_card';
 import { MacEventCollectionCard } from './mac_event_collection_card';
+
+requireDeferred();
 
 describe('Policy Mac Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').macEvents;

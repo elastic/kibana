@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -17,6 +18,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 import { unifiedSearchMock } from '../mocks';
+
+requireDeferred();
 
 describe('TopNavMenu', () => {
   const WRAPPER_SELECTOR = 'TopNavMenuItems[data-test-subj="kbn-top-nav-menu-wrapper"]';

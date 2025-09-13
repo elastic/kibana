@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act } from 'react-dom/test-utils';
 
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
@@ -13,6 +14,8 @@ import { getRepository } from '../../test/fixtures';
 import type { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers } from './helpers';
 import type { RepositoryAddTestBed } from './helpers/repository_add.helpers';
+
+requireDeferred();
 
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];

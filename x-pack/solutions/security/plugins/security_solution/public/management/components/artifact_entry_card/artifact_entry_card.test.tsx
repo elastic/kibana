@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React, { memo } from 'react';
 import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -27,6 +28,8 @@ import {
   buildSpaceOwnerIdTag,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+requireDeferred();
 
 jest.mock('../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;

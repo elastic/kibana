@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { setTlsConfigMock } from './http_server.test.mocks';
 import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
@@ -34,6 +35,8 @@ import type { Observable } from 'rxjs';
 import { of, BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+requireDeferred();
 
 const options = getEnvOptions();
 options.cliArgs.dev = false;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import moment from 'moment';
@@ -17,6 +18,8 @@ import type { AppMockRenderer } from '../../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../../lib/test_utils';
 import type { FormProps } from '../schema';
 import { DatePickerRangeField } from './date_picker_range_field';
+
+requireDeferred();
 
 jest.mock('../../../../utils/kibana_react');
 jest.mock('../../helpers/get_selected_for_date_picker');

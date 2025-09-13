@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   envCreateDefaultMock,
   configServiceMock,
@@ -16,6 +17,8 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { fromRoot } from '@kbn/repo-info';
 import { getConfigService } from './config_service';
+
+requireDeferred();
 
 const DEFAULT_CONFIG_PATH = fromRoot('config/gateway.yml');
 

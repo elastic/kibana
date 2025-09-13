@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   fetchArtifactVersionsMock,
   validateArtifactArchiveMock,
@@ -21,6 +22,8 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getArtifactName } from '@kbn/product-doc-common';
 import { DatasetSampleType } from '../../../common';
 import { ArtifactManager } from './artifact_manager';
+
+requireDeferred();
 
 const artifactsFolder = '/tmp/artifacts';
 const artifactRepositoryUrl = 'https://artifacts.elastic.co';

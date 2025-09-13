@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import moment from 'moment';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { rollUsageCountersIndices } from './rollups';
 import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '..';
 import { createMockSavedObjectDoc } from '../saved_objects.test';
 import type { IUsageCounter } from '../usage_counter';
+
+requireDeferred();
 
 describe('rollUsageCountersIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

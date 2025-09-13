@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
@@ -12,6 +13,8 @@ import { EndpointPackageCustomExtension } from './endpoint_package_custom_extens
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;

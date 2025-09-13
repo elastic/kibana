@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { screen, render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -17,6 +18,8 @@ import { getEmptyValue } from '../../../../common/components/empty_value';
 
 import { UncommonProcessTable } from '.';
 import { mockData } from './mock';
+
+requireDeferred();
 
 jest.mock('../../../../common/lib/kibana');
 

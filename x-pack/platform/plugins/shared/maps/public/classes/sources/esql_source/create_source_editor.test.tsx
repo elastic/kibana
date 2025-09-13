@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { CreateSourceEditor } from './create_source_editor';
+
+requireDeferred();
 
 jest.mock('../../../kibana_services', () => {
   const DEFAULT_DATA_VIEW_INDEX_PATTERN = 'logs';

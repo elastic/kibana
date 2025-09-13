@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetAgentStatus } from './use_get_agent_status';
@@ -12,6 +13,8 @@ import { agentStatusGetHttpMock } from '../../mocks';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { RenderHookResult } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
+
+requireDeferred();
 
 describe('useGetAgentStatus hook', () => {
   let httpMock: AppContextTestRender['coreStart']['http'];
