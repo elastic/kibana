@@ -63,6 +63,7 @@ export const useGetCases = (
     },
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(
