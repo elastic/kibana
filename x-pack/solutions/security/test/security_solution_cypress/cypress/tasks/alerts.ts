@@ -113,10 +113,22 @@ export const openAddEndpointExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_MENU).should('be.visible');
   cy.get(ADD_ENDPOINT_EXCEPTION_BTN, { timeout: 10000 }).first().click();
 };
+
+export const selectAndConfirmClosingReason = () => {
+  cy.get('[data-test-subj="euiSelectableList"]').within(() => {
+    //  Select first available closing reason
+    cy.get('li').eq(0).click();
+  });
+  //  Confirm selection
+  cy.get('button').contains('Close alert').click();
+};
+
 export const closeFirstAlert = (verifyModal?: () => void) => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
+
   if (verifyModal) {
     verifyModal();
   }
@@ -144,6 +156,9 @@ export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+
+  selectAndConfirmClosingReason();
+
   confirmAlertCloseModal();
   cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };

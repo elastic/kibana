@@ -210,7 +210,7 @@ export const TakeActionDropdown = memo(
     );
 
     // alert status interaction
-    const { actionItems: statusActionItems } = useAlertsActions({
+    const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
       alertStatus: alertSummaryData.alertStatus,
       closePopover: closePopoverAndFlyout,
       eventId: alertSummaryData.eventId,
@@ -347,6 +347,7 @@ export const TakeActionDropdown = memo(
       },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
+      ...statusActionPanels,
     ];
 
     const takeActionButton = useMemo(
