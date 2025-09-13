@@ -8,9 +8,9 @@
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
-import type { DataViewManagerScopeName } from '../constants';
+import { LRUCache as LRU } from 'lru-cache';
 
-type DataViewTitle = ReturnType<DataView['getIndexPattern']>;
+type DataViewId = NonNullable<DataView['id']>;
 interface BrowserFieldsResult {
   browserFields: BrowserFields;
 }
@@ -18,15 +18,26 @@ interface BrowserFieldsResult {
 // NOTE:for referential comparison optimization
 const emptyBrowserFields = {};
 
+export const MAX_DATAVIEWS_TO_CACHE = 5; // only store a max of 5 data views
+export const MAX_NUMBER_OF_FIELDS_TO_CACHE = 1_000_000; // 1 million fields
+export const BROWSER_FIELDS_CACHE_TTL = 60 * 60 * 1000; // one hour
+
 /**
  * SecurityBrowserFieldsManager is a singleton class that manages the browser fields
  * for the Security Solution. It caches the browser fields to improve performance
- * when accessing the fields multiple times across multiple scopes.
+ * as the same dataView can be accessed multiple times across multiple scopes.
+ *
+ * We use an LRU cache to limit memory usage and ensure that the most recently
+ * accessed dataViews are kept in memory. The cache is limited by both the number
+ * of dataViews and the total number of fields across all cached dataViews.
  */
 class SecurityBrowserFieldsManager {
   private static instance: SecurityBrowserFieldsManager;
-  private scopeToDataViewIndexPatternsCache = new Map<DataViewManagerScopeName, DataViewTitle>();
-  private dataViewIndexPatternsToBrowserFieldsCache = new Map<DataViewTitle, BrowserFieldsResult>();
+  private browserFieldsCache = new LRU<DataViewId, BrowserFieldsResult>({
+    max: MAX_DATAVIEWS_TO_CACHE,
+    maxSize: MAX_NUMBER_OF_FIELDS_TO_CACHE,
+    ttl: BROWSER_FIELDS_CACHE_TTL,
+  });
 
   constructor() {
     if (SecurityBrowserFieldsManager.instance) {
@@ -37,15 +48,13 @@ class SecurityBrowserFieldsManager {
 
   /**
    * Builds the browser fields from the provided dataView fields.
+   * We use a for loop for performance reasons, as this function could be called
+   * multiple times and we want to minimize the overhead of array methods.
    * @param fields - The fields from the dataView to be processed.
-   * @returns An object containing the browserFields.
+   * @returns An object containing the formatted browserFields.
    */
   private buildBrowserFields(fields: DataView['fields']): BrowserFieldsResult {
-    if (fields == null) return { browserFields: emptyBrowserFields };
-
-    if (!fields.length) {
-      return { browserFields: emptyBrowserFields };
-    }
+    if (fields == null || !fields.length) return { browserFields: emptyBrowserFields };
 
     const browserFields: BrowserFields = {};
     for (let i = 0; i < fields.length; i++) {
@@ -62,85 +71,39 @@ class SecurityBrowserFieldsManager {
         }
       }
     }
+
     return { browserFields };
   }
 
   /**
    *
-   * @param dataViewtitle - The title of the dataView, which is used as a key for caching.
-   * This is typically the index pattern of the dataView.
-   * @param scope - The scope of the data view manager, used to differentiate between different contexts.
-   * @returns The cached browser fields for the specified dataView title and scope, or undefined if not found.
-   */
-  private getCachedBrowserFields(
-    dataViewTitle: DataViewTitle,
-    scope: DataViewManagerScopeName
-  ): BrowserFieldsResult | undefined {
-    // Check if the scope is already mapped to a dataView title
-    const cachedDataViewTitle = this.scopeToDataViewIndexPatternsCache.get(scope);
-    if (cachedDataViewTitle && cachedDataViewTitle === dataViewTitle) {
-      // If the title matches, return the cached browser fields
-      const cachedResult = this.dataViewIndexPatternsToBrowserFieldsCache.get(cachedDataViewTitle);
-      if (cachedResult) {
-        return cachedResult;
-      }
-    }
-    // If the title does not match or is not cached, update the cache with the new title
-    this.scopeToDataViewIndexPatternsCache.set(scope, dataViewTitle);
-    // Check if the browser fields for this title are already cached
-    const cachedBrowserFields = this.dataViewIndexPatternsToBrowserFieldsCache.get(dataViewTitle);
-    if (cachedBrowserFields) {
-      return cachedBrowserFields;
-    }
-    return undefined;
-  }
-
-  /**
-   *
    * @param dataView - The dataView containing the fields to be processed.
-   * @param [scope] - Optional The scope of the data view manager, used to differentiate between different contexts.
-   * If passed, will use cache for the specified scope, but can be ignored if caching is not desired.
    * @returns An object containing the browserFields built from the dataView fields.
    */
-  public getBrowserFields(
-    dataView: DataView,
-    scope?: DataViewManagerScopeName
-  ): BrowserFieldsResult {
+  public getBrowserFields(dataView: DataView): BrowserFieldsResult {
     const { fields } = dataView;
     // If the dataView has no fields, return an empty browserFields object
     if (!fields || fields.length === 0) {
       return { browserFields: emptyBrowserFields };
     }
 
-    const indexPatterns = dataView.getIndexPattern();
-
-    // Caching depends on the scope and title
-    if (scope && indexPatterns) {
-      const cachedResult = this.getCachedBrowserFields(indexPatterns, scope);
-      if (cachedResult) {
-        // If the browser fields for this indexPatterns are cached, return them
-        return cachedResult;
-      }
-      // If the browser fields for this indexPatterns are not cached, build them
-      const result = this.buildBrowserFields(fields);
-      this.dataViewIndexPatternsToBrowserFieldsCache.set(indexPatterns, result);
-      return result;
+    const dataViewId = dataView.id;
+    // Only cache if the dataView has an id
+    if (dataViewId == null) {
+      return this.buildBrowserFields(fields);
     }
 
-    // If scope is not provided or title is not defined, return the browser fields without caching
-    return this.buildBrowserFields(fields);
+    const cachedResult = this.browserFieldsCache.get(dataViewId);
+    if (cachedResult) return cachedResult;
+
+    const result = this.buildBrowserFields(fields);
+    this.browserFieldsCache.set(dataViewId, result, { size: fields.length });
+    return result;
   }
 
-  public removeFromCache(scope: DataViewManagerScopeName): void {
-    const indexPatterns = this.scopeToDataViewIndexPatternsCache.get(scope);
-    if (indexPatterns) {
-      this.scopeToDataViewIndexPatternsCache.delete(scope);
-      const scopesUsingIndexPattern = Array.from(this.scopeToDataViewIndexPatternsCache.values());
-
-      if (!scopesUsingIndexPattern.includes(indexPatterns)) {
-        // If no other scope is using this indexPattern, remove it from the browser fields cache
-        this.dataViewIndexPatternsToBrowserFieldsCache.delete(indexPatterns);
-      }
+  public removeFromCache(dataViewId: DataViewId): void {
+    if (dataViewId != null && this.browserFieldsCache.has(dataViewId)) {
+      this.browserFieldsCache.delete(dataViewId);
     }
   }
 
@@ -149,8 +112,7 @@ class SecurityBrowserFieldsManager {
    * This method is useful for resetting the state of the manager, especially during tests
    */
   public clearCache(): void {
-    this.scopeToDataViewIndexPatternsCache.clear();
-    this.dataViewIndexPatternsToBrowserFieldsCache.clear();
+    this.browserFieldsCache.clear();
   }
 }
 
