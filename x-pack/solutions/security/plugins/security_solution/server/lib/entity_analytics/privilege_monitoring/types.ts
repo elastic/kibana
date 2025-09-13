@@ -12,3 +12,13 @@ export interface PrivMonBulkUser {
   existingUserId?: string;
   sourceId: string;
 }
+
+export interface PrivMonOktaIntegrationsUser extends PrivMonBulkUser {
+  id: string; // do you actually need this? I think you can use existingUserId instead
+  email: string | undefined;
+  roles: string[];
+  lastSeen: string;
+  isPrivileged: boolean;
+}
+
+export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';
