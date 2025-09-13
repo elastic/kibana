@@ -45,7 +45,7 @@ export const AwsInputVarFields = ({
 
   // Helper to get error message
   const getInvalidError = (label: string) =>
-    i18n.translate('securitySolutionPackages.cspmIntegration.integration.fieldRequired', {
+    i18n.translate('securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.', {
       defaultMessage: '{field} is required',
       values: { field: label },
     });

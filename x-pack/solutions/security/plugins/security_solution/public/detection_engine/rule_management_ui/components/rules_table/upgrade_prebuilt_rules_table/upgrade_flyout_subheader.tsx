@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { convertFieldToDisplayName } from '../../../../rule_management/components/rule_details/helpers';
-import type { FieldsDiff } from '../../../../../../common/api/detection_engine';
+import type { ThreeWayFieldsDiff } from '../../../../../../common/api/detection_engine';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { ModifiedBadge } from '../../../../rule_management/components/rule_details/three_way_diff/badges/modified_badge';
@@ -52,7 +52,7 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
       <ModifiedBadge tooltip={i18n.RULE_MODIFIED_BADGE_DESCRIPTION} />
     );
 
-  const fieldsDiff: FieldsDiff<Record<string, unknown>> = ruleUpgradeState.diff.fields;
+  const fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>> = ruleUpgradeState.diff.fields;
   const fieldsNamesWithUpdates = Object.keys(ruleUpgradeState.fieldsUpgradeState).filter(
     (fieldName) => fieldsDiff[fieldName].has_update
   );

@@ -62,12 +62,12 @@ describe('<DocumentProfileTable />', () => {
       getDataTableRecordWithContextMock({
         id: 'record2',
         raw: generateEsHit({ _id: 'some other record' }),
-        context: getDocumentContextMock({ type: DocumentType.Span }),
+        context: getDocumentContextMock({ type: DocumentType.Trace }),
       }),
       getDataTableRecordWithContextMock({
         id: 'record3',
         raw: generateEsHit({ _id: 'one specific record' }),
-        context: getDocumentContextMock({ type: DocumentType.Transaction }),
+        context: getDocumentContextMock({ type: DocumentType.Trace }),
       }),
     ];
 
@@ -87,8 +87,7 @@ describe('<DocumentProfileTable />', () => {
 
       // Then
       expect(screen.getByText('log')).toBeVisible();
-      expect(screen.getByText('span')).toBeVisible();
-      expect(screen.getByText('transaction')).toBeVisible();
+      expect(screen.getAllByText('trace')).toHaveLength(2);
     });
 
     describe('when the inspect action is clicked', () => {
