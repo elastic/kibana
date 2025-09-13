@@ -6,20 +6,20 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { first, startsWith } from 'lodash';
+import { startsWith, merge } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
-import type {
-  InfraMetadataFields,
-  InfraMetadataInfo,
-} from '../../../../common/http_api/metadata_api';
+import type { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
+import {
+  unflattenMetadataFromSource,
+  unflattenMetadataInfoFields,
+} from './unflatten_metadata_info_fileds';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fileds';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,
@@ -59,21 +59,10 @@ export const getNodeInfo = async (
   const params = {
     allow_no_indices: true,
     ignore_unavailable: true,
-    terminate_after: 1,
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,
-      fields: [
-        'host.*',
-        'cloud.*',
-        'agent.*',
-        'container.*',
-        'resource.attributes.os.*',
-        'resource.attributes.host.*',
-        'resource.attributes.agent.*',
-        'resource.attributes.cloud.*',
-        TIMESTAMP_FIELD,
-      ],
+      fields: [TIMESTAMP_FIELD],
       sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
       query: {
         bool: {
@@ -91,6 +80,136 @@ export const getNodeInfo = async (
           ],
         },
       },
+      aggs: {
+        hostMetadata: {
+          filter: {
+            exists: { field: 'host.name' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['host.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        cloudMetadata: {
+          filter: {
+            exists: { field: 'cloud.provider' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['cloud.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        agentMetadata: {
+          filter: {
+            exists: { field: 'agent.name' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['agent.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        containerMetadata: {
+          filter: {
+            exists: { field: 'container.id' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['container.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        resourceOsMetadata: {
+          filter: {
+            exists: { field: 'resource.attributes.os.type' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['resource.attributes.os.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        resourceHostMetadata: {
+          filter: {
+            exists: { field: 'resource.attributes.host.name' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['resource.attributes.host.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        resourceAgentMetadata: {
+          filter: {
+            exists: { field: 'resource.attributes.agent.name' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['resource.attributes.agent.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+        resourceCloudMetadata: {
+          filter: {
+            exists: { field: 'resource.attributes.cloud.provider' },
+          },
+          aggs: {
+            latest: {
+              top_hits: {
+                _source: {
+                  includes: ['resource.attributes.cloud.*'],
+                },
+                size: 10,
+                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+      },
     },
   };
   if (!CLOUD_METRICS_MODULES.some((m) => startsWith(nodeType, m))) {
@@ -100,16 +219,81 @@ export const getNodeInfo = async (
       CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } }))
     );
   }
-  const response = await framework.callWithRequest<InfraMetadataFields, {}>(
-    requestContext,
-    'search',
-    params
-  );
-  const firstHit = first(response.hits.hits);
-  if (firstHit) {
-    const unflattenedFields = {};
-    unflattenMetadataInfoFields(unflattenedFields, firstHit);
+  const response = await framework.callWithRequest<
+    {},
+    {
+      aggregations: {
+        hostMetadata: any;
+        cloudMetadata: any;
+        agentMetadata: any;
+        containerMetadata: any;
+        resourceOsMetadata: any;
+        resourceHostMetadata: any;
+        resourceAgentMetadata: any;
+        resourceCloudMetadata: any;
+      };
+    }
+  >(requestContext, 'search', params);
+
+  const unflattenedFields: Record<string, any> = {};
+  const firstHit = response.hits.hits[0];
+  unflattenMetadataInfoFields(unflattenedFields, firstHit);
+
+  const extractAndMergeFieldsFromAggregation = (aggregation: any) => {
+    const hits = aggregation?.latest?.hits?.hits || [];
+    const mergedFields: Record<string, any> = {};
+
+    hits.forEach((hit: any) => {
+      if (hit?._source) {
+        const hitFields: Record<string, any> = {};
+        unflattenMetadataFromSource(hitFields, hit._source);
+
+        Object.keys(hitFields).forEach((key) => {
+          if (mergedFields[key] === undefined) {
+            mergedFields[key] = hitFields[key];
+          }
+        });
+      }
+    });
+
+    return mergedFields;
+  };
+
+  if (response.aggregations) {
+    const {
+      hostMetadata,
+      cloudMetadata,
+      agentMetadata,
+      containerMetadata,
+      resourceOsMetadata,
+      resourceHostMetadata,
+      resourceAgentMetadata,
+      resourceCloudMetadata,
+    } = response.aggregations;
+
+    const hostFields = extractAndMergeFieldsFromAggregation(hostMetadata);
+    const cloudFields = extractAndMergeFieldsFromAggregation(cloudMetadata);
+    const agentFields = extractAndMergeFieldsFromAggregation(agentMetadata);
+    const containerFields = extractAndMergeFieldsFromAggregation(containerMetadata);
+    const resourceOsFields = extractAndMergeFieldsFromAggregation(resourceOsMetadata);
+    const resourceHostFields = extractAndMergeFieldsFromAggregation(resourceHostMetadata);
+    const resourceAgentFields = extractAndMergeFieldsFromAggregation(resourceAgentMetadata);
+    const resourceCloudFields = extractAndMergeFieldsFromAggregation(resourceCloudMetadata);
+
+    merge(
+      unflattenedFields,
+      hostFields,
+      cloudFields,
+      agentFields,
+      containerFields,
+      resourceOsFields,
+      resourceHostFields,
+      resourceAgentFields,
+      resourceCloudFields
+    );
+
     return unflattenedFields;
   }
+
   return {};
 };
