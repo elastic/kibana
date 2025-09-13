@@ -125,9 +125,9 @@ export const getNavigationTreeDefinition = ({
                     { link: 'agent_builder:tools' },
                     { link: 'agent_builder:agents' },
                   ],
-                  id: 'chat',
+                  id: 'agent_builder',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
-                    defaultMessage: 'AI Agent Builder',
+                    defaultMessage: 'Agents',
                   }),
                   renderAs: 'accordion',
                 },
