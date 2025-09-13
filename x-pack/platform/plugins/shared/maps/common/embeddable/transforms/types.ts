@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export type { MapEmbeddablePersistableState } from './types';
-export { extract } from './extract';
-export { inject } from './inject';
+import type { MapByReferenceState, MapByValueState } from '../types';
+
+export type StoredMapByReferenceState = Omit<MapByReferenceState, 'savedObjectId'>;
+
+export type StoredMapEmbeddableState = StoredMapByReferenceState | MapByValueState;
