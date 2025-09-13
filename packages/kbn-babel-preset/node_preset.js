@@ -8,8 +8,22 @@
  */
 
 module.exports = (_, options = {}) => {
+  const lazyRequireOptions = options.lazyRequire ?? {
+    enabled: false,
+  };
+
   return {
     presets: [
+      {
+        plugins: [
+          [
+            require.resolve('@kbn/lazy-require/src/plugin/plugin'),
+            {
+              ...lazyRequireOptions,
+            },
+          ],
+        ],
+      },
       [
         require.resolve('@babel/preset-env'),
         {
