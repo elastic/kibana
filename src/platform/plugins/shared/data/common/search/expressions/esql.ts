@@ -356,11 +356,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              const kibanaFieldType = hasConflict
+                ? KBN_FIELD_TYPES.CONFLICT
+                : esFieldTypeToKibanaFieldType(type);
               return {
                 id: name,
                 name,
                 meta: {
-                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  type: kibanaFieldType,
                   esType: type,
                   sourceParams:
                     type === 'date'
@@ -374,6 +377,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           indexPattern,
                           sourceField: name,
                         },
+                  params: {
+                    id: kibanaFieldType,
+                  },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
               };
@@ -392,7 +398,15 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) => zipObject(columnNames, row));
+          const rows = body.values.map((row) =>
+            zipObject(
+              columnNames,
+              hasEmptyColumns
+                ? // fill up with nulls if emptyColumns are returned by ES|QL
+                  row.concat(Array.from({ length: columnNames.length - row.length }).fill(null))
+                : row
+            )
+          );
 
           return {
             type: 'datatable',
