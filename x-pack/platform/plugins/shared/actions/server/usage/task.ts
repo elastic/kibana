@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import type { InMemoryConnector } from '../types';
+import type { ActionsPluginSetupDeps, InMemoryConnector } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
@@ -24,7 +24,7 @@ export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  core: CoreSetup,
+  core: ActionsPluginSetupDeps['core'],
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
@@ -40,7 +40,7 @@ export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManage
 function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  core: CoreSetup,
+  core: ActionsPluginSetupDeps['core'],
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
@@ -70,7 +70,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export function telemetryTaskRunner(
   logger: Logger,
-  core: CoreSetup,
+  core: ActionsPluginSetupDeps['core'],
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
