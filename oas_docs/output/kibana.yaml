@@ -97,6 +97,7 @@ tags:
   - name: Elastic Agent status
   - name: Elastic Agents
   - name: Elastic Package Manager (EPM)
+  - name: Fleet cloud connectors
   - name: Fleet enrollment API keys
   - name: Fleet internals
   - name: Fleet outputs
@@ -19015,6 +19016,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -19326,6 +19331,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -19932,6 +19942,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -20243,6 +20257,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -20645,6 +20664,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -20956,6 +20979,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -21337,6 +21365,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -21648,6 +21680,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -22254,6 +22291,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -22565,6 +22606,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -23038,6 +23084,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -23349,6 +23399,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -27472,6 +27527,221 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/check-permissions</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/cloud_connectors:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-connectors
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: perPage
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cloudProvider:
+                      type: string
+                    created_at:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    packagePolicyCount:
+                      type: number
+                    updated_at:
+                      type: string
+                    vars:
+                      additionalProperties: {}
+                      type: object
+                  required:
+                    - id
+                    - name
+                    - cloudProvider
+                    - vars
+                    - packagePolicyCount
+                    - created_at
+                    - updated_at
+                type: array
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connectors
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: post-fleet-cloud-connectors
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                cloudProvider:
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+              required:
+                - name
+                - cloudProvider
+                - vars
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  cloudProvider:
+                    type: string
+                  created_at:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  packagePolicyCount:
+                    type: number
+                  updated_at:
+                    type: string
+                  vars:
+                    additionalProperties: {}
+                    type: object
+                required:
+                  - id
+                  - name
+                  - cloudProvider
+                  - vars
+                  - packagePolicyCount
+                  - created_at
+                  - updated_at
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Create cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/data_streams:
     get:
       description: |-
@@ -37647,6 +37917,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -37960,6 +38234,11 @@ paths:
                           description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -38092,6 +38371,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -38307,6 +38590,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -38517,6 +38805,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -38830,6 +39122,11 @@ paths:
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -38996,6 +39293,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -39309,6 +39610,11 @@ paths:
                           description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -39522,6 +39828,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -39835,6 +40145,11 @@ paths:
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -39975,6 +40290,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -40185,6 +40504,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -40393,6 +40717,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -40704,6 +41032,11 @@ paths:
                       supports_agentless:
                         default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -41201,6 +41534,10 @@ paths:
                                 type: array
                               agents:
                                 type: number
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -41514,6 +41851,11 @@ paths:
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
                                 nullable: true
                                 type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
+                                nullable: true
+                                type: boolean
                               updated_at:
                                 type: string
                               updated_by:
@@ -41578,6 +41920,10 @@ paths:
                                   type: string
                                 nullable: true
                                 type: array
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -41832,6 +42178,11 @@ paths:
                               supports_agentless:
                                 default: false
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
                                 nullable: true
                                 type: boolean
                               updated_at:
