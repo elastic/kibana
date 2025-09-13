@@ -36,6 +36,7 @@ export const useSchemaFields = ({
     core: {
       notifications: { toasts },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const abortController = useAbortController();
@@ -199,6 +200,11 @@ export const useSchemaFields = ({
             values: { field: field.name },
           })
         );
+        telemetryClient.trackSchemaFieldUpdated({
+          field_name: field.name,
+          field_type: nextFieldDefinitionConfig.type,
+          field_status: 'mapped',
+        });
 
         refreshFields();
       } catch (error) {
@@ -212,7 +218,14 @@ export const useSchemaFields = ({
         });
       }
     },
-    [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
+    [
+      abortController.signal,
+      definition,
+      refreshFields,
+      streamsRepositoryClient,
+      telemetryClient,
+      toasts,
+    ]
   );
 
   const unmapField = useCallback(
@@ -262,6 +275,10 @@ export const useSchemaFields = ({
             values: { field: fieldName },
           })
         );
+        telemetryClient.trackSchemaFieldUpdated({
+          field_name: fieldName,
+          field_status: 'unmapped',
+        });
 
         refreshFields();
       } catch (error) {
@@ -275,7 +292,14 @@ export const useSchemaFields = ({
         });
       }
     },
-    [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
+    [
+      abortController.signal,
+      definition,
+      refreshFields,
+      streamsRepositoryClient,
+      telemetryClient,
+      toasts,
+    ]
   );
 
   return {

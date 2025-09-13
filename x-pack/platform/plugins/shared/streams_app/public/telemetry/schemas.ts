@@ -11,6 +11,12 @@ import type {
   StreamsAIGrokSuggestionLatencyProps,
   StreamsAssetClickEventProps,
   StreamsAssetCountProps,
+  StreamsChildStreamCreatedProps,
+  StreamsProcessingSavedProps,
+  StreamsRetentionChangedProps,
+  StreamsSchemaFieldUpdatedProps,
+  StreamsSignificantEventsCreatedProps,
+  StreamsSignificantEventsSuggestionsGeneratedEventProps,
 } from './types';
 
 const streamsAssetCountSchema: RootSchema<StreamsAssetCountProps> = {
@@ -143,9 +149,91 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
   },
 };
 
+const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
+  processors_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of processors configured on the stream',
+    },
+  },
+};
+
+const streamsRetentionChangedSchema: RootSchema<StreamsRetentionChangedProps> = {
+  type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of retention: dsl, ilm, inherit',
+    },
+  },
+  value: {
+    type: 'keyword',
+    _meta: {
+      description: 'The retention value, if applicable',
+      optional: true,
+    },
+  },
+};
+
+const streamsChildStreamCreatedSchema: RootSchema<StreamsChildStreamCreatedProps> = {
+  name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the child stream',
+    },
+  },
+};
+
+const streamsSchemaFieldUpdatedSchema: RootSchema<StreamsSchemaFieldUpdatedProps> = {
+  field_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the updated field',
+    },
+  },
+  field_status: {
+    type: 'keyword',
+    _meta: {
+      description: "Mapping status of the updated field: 'mapped' or 'unmapped'",
+    },
+  },
+  field_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the updated mapped field',
+      optional: true,
+    },
+  },
+};
+
+const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
+  {
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'The time (in milliseconds) it took to generate significant events suggestions',
+      },
+    },
+  };
+
+const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEventsCreatedProps> = {
+  count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of significant events created',
+    },
+  },
+};
+
 export {
   streamsAssetCountSchema,
   streamsAssetClickEventSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
+  streamsRetentionChangedSchema,
+  streamsProcessingSavedSchema,
+  streamsChildStreamCreatedSchema,
+  streamsSchemaFieldUpdatedSchema,
+  streamsSignificantEventsSuggestionsGeneratedSchema,
+  streamsSignificantEventsCreatedSchema,
 };

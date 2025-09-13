@@ -6,17 +6,29 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
   StreamsAssetClickEventProps,
   StreamsAssetCountProps,
+  StreamsChildStreamCreatedProps,
+  StreamsProcessingSavedProps,
+  StreamsSchemaFieldUpdatedProps,
+  StreamsSignificantEventsCreatedProps,
+  StreamsSignificantEventsSuggestionsGeneratedEventProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ASSET_CLICK_EVENT_TYPE,
   STREAMS_ASSET_COUNT_EVENT_TYPE,
+  STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
+  STREAMS_PROCESSING_SAVED_EVENT_TYPE,
+  STREAMS_RETENTION_CHANGED_EVENT_TYPE,
+  STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -46,5 +58,54 @@ export class StreamsTelemetryClient {
 
   public trackAIGrokSuggestionAccepted(params: StreamsAIGrokSuggestionAcceptedProps) {
     this.analytics.reportEvent(STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
+  }
+
+  public trackProcessingSaved(params: StreamsProcessingSavedProps) {
+    this.analytics.reportEvent(STREAMS_PROCESSING_SAVED_EVENT_TYPE, params);
+  }
+
+  public trackRetentionChanged(lifecycle: IngestStreamLifecycle) {
+    this.analytics.reportEvent(STREAMS_RETENTION_CHANGED_EVENT_TYPE, {
+      type: this.getLifecycleType(lifecycle),
+      value: this.getLifecycleValue(lifecycle),
+    });
+  }
+
+  public trackChildStreamCreated(props: StreamsChildStreamCreatedProps) {
+    this.analytics.reportEvent(STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE, props);
+  }
+
+  public trackSchemaFieldUpdated(params: StreamsSchemaFieldUpdatedProps) {
+    this.analytics.reportEvent(STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsSuggestionsGenerate(
+    params: StreamsSignificantEventsSuggestionsGeneratedEventProps
+  ) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsCreated(params: StreamsSignificantEventsCreatedProps) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
+  }
+
+  private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {
+    if ('dsl' in lifecycle) {
+      return 'dsl';
+    }
+    if ('ilm' in lifecycle) {
+      return 'ilm';
+    }
+    return 'inherit';
+  }
+
+  private getLifecycleValue(lifecycle: IngestStreamLifecycle): string | undefined {
+    if ('dsl' in lifecycle) {
+      return lifecycle.dsl.data_retention;
+    }
+    if ('ilm' in lifecycle) {
+      return lifecycle.ilm.policy;
+    }
+    return undefined;
   }
 }

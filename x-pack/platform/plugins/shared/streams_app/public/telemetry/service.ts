@@ -11,6 +11,12 @@ import {
   streamsAIGrokSuggestionLatencyEventType,
   streamsAssetClickEventType,
   streamsAssetCountEventType,
+  streamsChildStreamCreatedEventType,
+  streamsProcessingSavedEventType,
+  streamsRetentionChangedEventType,
+  streamsSchemaFieldUpdatedEventType,
+  streamsSignificantEventsCreatedEventType,
+  streamsSignificantEventsSuggestionsGeneratedEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -25,6 +31,12 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsAssetClickEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionLatencyEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionAcceptedEventType);
+    this.analytics.registerEventType(streamsProcessingSavedEventType);
+    this.analytics.registerEventType(streamsRetentionChangedEventType);
+    this.analytics.registerEventType(streamsChildStreamCreatedEventType);
+    this.analytics.registerEventType(streamsSchemaFieldUpdatedEventType);
+    this.analytics.registerEventType(streamsSignificantEventsSuggestionsGeneratedEventType);
+    this.analytics.registerEventType(streamsSignificantEventsCreatedEventType);
   }
 
   public getClient() {

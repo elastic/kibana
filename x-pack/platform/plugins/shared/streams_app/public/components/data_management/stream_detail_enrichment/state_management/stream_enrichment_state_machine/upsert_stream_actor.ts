@@ -28,42 +28,52 @@ export interface UpsertStreamInput {
 
 export function createUpsertStreamActor({
   streamsRepositoryClient,
-}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient'>) {
-  return fromPromise<UpsertStreamResponse, UpsertStreamInput>(({ input, signal }) => {
-    return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
-      signal,
-      params: {
-        path: {
-          name: input.definition.stream.name,
-        },
-        body: Streams.WiredStream.GetResponse.is(input.definition)
-          ? {
-              ingest: {
-                ...input.definition.stream.ingest,
-                processing: {
-                  steps: input.processors.map(processorConverter.toAPIDefinition),
-                },
-                ...(input.fields && {
-                  wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
-                }),
-              },
-            }
-          : {
-              ingest: {
-                ...input.definition.stream.ingest,
-                processing: {
-                  steps: input.processors.map(processorConverter.toAPIDefinition),
-                },
-                ...(input.fields && {
-                  classic: {
-                    ...input.definition.stream.ingest.classic,
-                    field_overrides: input.fields,
+  telemetryClient,
+}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient' | 'telemetryClient'>) {
+  return fromPromise<UpsertStreamResponse, UpsertStreamInput>(async ({ input, signal }) => {
+    const response = await streamsRepositoryClient.fetch(
+      `PUT /api/streams/{name}/_ingest 2023-10-31`,
+      {
+        signal,
+        params: {
+          path: {
+            name: input.definition.stream.name,
+          },
+          body: Streams.WiredStream.GetResponse.is(input.definition)
+            ? {
+                ingest: {
+                  ...input.definition.stream.ingest,
+                  processing: {
+                    steps: input.processors.map(processorConverter.toAPIDefinition),
                   },
-                }),
+                  ...(input.fields && {
+                    wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
+                  }),
+                },
+              }
+            : {
+                ingest: {
+                  ...input.definition.stream.ingest,
+                  processing: {
+                    steps: input.processors.map(processorConverter.toAPIDefinition),
+                  },
+                  ...(input.fields && {
+                    classic: {
+                      ...input.definition.stream.ingest.classic,
+                      field_overrides: input.fields,
+                    },
+                  }),
+                },
               },
-            },
-      },
+        },
+      }
+    );
+
+    telemetryClient.trackProcessingSaved({
+      processors_count: input.processors.length,
     });
+
+    return response;
   });
 }
 

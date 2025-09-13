@@ -38,6 +38,7 @@ export const StreamDetailGeneralData = ({
       },
     },
     isServerless,
+    services: { telemetryClient },
   } = useKibana();
 
   const {
@@ -83,6 +84,7 @@ export const StreamDetailGeneralData = ({
       refreshDefinition();
       setOpenEditModal('none');
 
+      telemetryClient.trackRetentionChanged(lifecycle);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
           defaultMessage: 'Stream lifecycle updated',

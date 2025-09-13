@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import type { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import type {
@@ -28,6 +29,7 @@ export interface StreamEnrichmentServiceDependencies {
   core: CoreStart;
   data: DataPublicPluginStart;
   urlStateStorageContainer: IKbnUrlStateStorage;
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export interface StreamEnrichmentInput {
