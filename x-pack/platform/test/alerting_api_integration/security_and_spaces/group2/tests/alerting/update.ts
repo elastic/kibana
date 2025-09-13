@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { Response as SupertestResponse } from 'supertest';
 import { RuleNotifyWhen, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -20,6 +21,7 @@ import {
   ObjectRemover,
   ensureDatetimeIsWithinRange,
   getUnauthorizedErrorMessage,
+  AlertUtils,
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -1404,6 +1406,33 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             ],
           })
           .expect(400);
+      });
+    });
+
+    describe('internally managed rule types', () => {
+      const rulePayload = getAlwaysFiringInternalRule();
+
+      const alertUtils = new AlertUtils({
+        user: SuperuserAtSpace1.user,
+        space: SuperuserAtSpace1.space,
+        supertestWithoutAuth,
+      });
+
+      it('should throw 400 error when trying to update an internally managed rule type', async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send(rulePayload)
+          .expect(200);
+
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+
+        const response = await alertUtils.updateInternallyManagedRule(
+          createdRule1.id,
+          objectRemover
+        );
+
+        expect(response.statusCode).to.eql(400);
       });
     });
   });
