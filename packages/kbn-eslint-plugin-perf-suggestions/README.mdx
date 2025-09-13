@@ -1,0 +1,51 @@
+---
+id: kibDevDocsOpsEslintPluginPerfSuggestions
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-perf-suggestions
+title: '@kbn/eslint-plugin-perf-suggestions'
+description: Custom ESLint rules to remind engineers of common performance pitfalls
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'performance', 'suggestions']
+---
+
+This plugin adds warnings for common performance pitfalls in JS / TS code, and offers suggestions.
+
+All performance issues are scored from 1 to 5, where 5 is the most pressing performance problem and 1 is the least.
+
+### CLI reporting
+
+This package also offers generating of performance reports, optionally per package.
+
+Run this:
+
+```
+node scripts/eslint_custom_config --concurrency=10 --formatter=packages/kbn-eslint-plugin-perf-suggestions/format_perf_summary.ts --eslint_conf=packages/kbn-eslint-plugin-perf-suggestions/.eslintrc.js x-pack/
+```
+
+and you should get something like this as output:
+
+```
+info @kbn/security-solution-plugin
+ info [285] Avoid using await inside loops. Consider collecting promises and awaiting Promise.all for concurrency. (score=5)
+ info [55] Linear membership checks (includes/indexOf) inside loops are O(n^2). Consider using a Set/Map for O(1) lookups. (score=5)
+ info [15] JSON.parse/stringify inside tight loops can be costly. Hoist or avoid when possible. (score=4)
+ info [11] Array.concat inside loops allocates new arrays. Prefer push or pre-sizing when possible. (score=4)
+ info [197] Multiple array transformations chained (map/filter/reduce/flatMap). Consider a single-pass loop for performance-critical paths. (score=3)
+ info [62] Object spread in tight loops can cause allocations. Consider mutating a preallocated object or moving spread out of the loop. (score=3)
+ info [33] Using array spread in concatenation inside hot paths can be costly. Prefer push/apply or preallocate when possible. (score=3)
+ info [7] RegExp creation or heavy parsing inside loops can be expensive. Hoist the RegExp or parsed value outside the loop. (score=3)
+ info [1] Function.bind inside loops allocates. Hoist bound functions or use stable arrow functions created once. (score=3)
+ info [1608] Avoid creating new object/array literals in JSX props; hoist or memoize to keep prop identity stable. (score=2)
+ info [595] Avoid inline functions in JSX props; define handlers with useCallback or as stable methods to prevent unnecessary re-renders. (score=2)
+ info [31] try/catch inside tight loops may impact performance. Move it outside the loop if possible. (score=2)
+ info [4] Array.map is meant for transformations. For side effects use forEach; for performance-critical paths, consider a for loop. (score=1)
+```
+
+Where the occurrences are between brackets. The most impactful issues will be at the top.
+
+Available flags:
+
+- --concurrency (optionally set the amount of workers you want to use)
+- --formatter (optionally pass in the path to a formatter which will format the results of ESLint)
+- --eslint_conf (optionally pass in the path to an eslint config)
+- [optional folder path to which you want to limit the checking]
+
+If you want the result in the output, you need to pass in the --formatter and --eslint_conf arguments.
