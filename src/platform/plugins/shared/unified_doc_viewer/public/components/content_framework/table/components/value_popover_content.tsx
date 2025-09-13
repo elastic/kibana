@@ -33,7 +33,7 @@ export function ValuePopoverContent({ fieldConfig, cellActions }: ValuePopoveCon
             : undefined
         }
       >
-        {fieldConfig?.valueCellContent}
+        {fieldConfig?.valueCellContent ? fieldConfig.valueCellContent({ truncate: false }) : null}
       </EuiText>
       {cellActions}
     </>

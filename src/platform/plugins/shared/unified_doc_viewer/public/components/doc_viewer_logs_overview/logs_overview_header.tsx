@@ -8,15 +8,7 @@
  */
 
 import React from 'react';
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiAccordion,
-  useGeneratedHtmlId,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +16,7 @@ import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/pu
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
+import { ContentFrameworkSection } from '../content_framework/section';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
@@ -54,12 +47,6 @@ export function LogsOverviewHeader({
   const accordionId = useGeneratedHtmlId({
     prefix: contentLabel,
   });
-
-  const accordionTitle = (
-    <EuiTitle size="xxs">
-      <p>{contentLabel}</p>
-    </EuiTitle>
-  );
 
   const badges = hasBadges && (
     <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
@@ -115,14 +102,12 @@ export function LogsOverviewHeader({
   );
 
   return hasFlyoutHeader ? (
-    <EuiAccordion
+    <ContentFrameworkSection
       id={accordionId}
-      buttonContent={accordionTitle}
-      paddingSize="m"
-      initialIsOpen={true}
+      title={contentLabel}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
     >
       {hasMessageField ? contentField : badges}
-    </EuiAccordion>
+    </ContentFrameworkSection>
   ) : null;
 }

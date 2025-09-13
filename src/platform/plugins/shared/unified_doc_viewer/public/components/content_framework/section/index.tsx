@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { IconType } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import type { EuiAccordionProps, IconType } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiBetaBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
@@ -39,6 +41,9 @@ export interface ContentFrameworkSectionProps {
   actions?: Action[];
   children: React.ReactNode;
   'data-test-subj'?: string;
+  onToggle?: () => {};
+  forceState?: EuiAccordionProps['forceState'];
+  isTechPreview?: boolean;
 }
 
 export function ContentFrameworkSection({
@@ -47,8 +52,15 @@ export function ContentFrameworkSection({
   description,
   actions,
   children,
+  onToggle,
+  forceState = 'open',
   'data-test-subj': accordionDataTestSubj,
+  isTechPreview = false,
 }: ContentFrameworkSectionProps) {
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(
+    forceState ? forceState === 'open' : true
+  );
+
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
@@ -82,39 +94,73 @@ export function ContentFrameworkSection({
     </EuiFlexGroup>
   );
 
+  useEffect(() => {
+    if (forceState !== undefined) {
+      setIsAccordionExpanded(forceState === 'open');
+    }
+  }, [forceState]);
+
+  const handleToggle = (isOpen: boolean) => {
+    setIsAccordionExpanded(isOpen);
+    if (onToggle) {
+      onToggle();
+    }
+  };
+
   return (
-    <EuiAccordion
-      data-test-subj={accordionDataTestSubj}
-      id={`sectionAccordion-${id}`}
-      initialIsOpen
-      buttonContent={
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          {description && (
+    <>
+      <EuiAccordion
+        data-test-subj={accordionDataTestSubj}
+        id={`sectionAccordion-${id}`}
+        initialIsOpen={forceState !== 'closed'}
+        onToggle={handleToggle}
+        forceState={isAccordionExpanded ? 'open' : 'closed'}
+        buttonContent={
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      }
-      extraAction={
-        actions?.length && (
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>{' '}
+            {description ? (
+              <EuiFlexItem grow={false}>
+                {isTechPreview ? (
+                  <EuiBetaBadge
+                    size="s"
+                    label={description}
+                    alignment="middle"
+                    color="hollow"
+                    iconType="beaker"
+                    title={title}
+                  />
+                ) : (
+                  <EuiIconTip
+                    content={description}
+                    size="s"
+                    color="subdued"
+                    aria-label={description}
+                  />
+                )}
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
-        )
-      }
-    >
-      <>
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder={true} hasShadow={false}>
-          {children}
-        </EuiPanel>
-      </>
-    </EuiAccordion>
+        }
+        extraAction={
+          actions?.length && (
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        }
+      >
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+            {children}
+          </EuiPanel>
+        </>
+      </EuiAccordion>
+      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="s" />}
+    </>
   );
 }

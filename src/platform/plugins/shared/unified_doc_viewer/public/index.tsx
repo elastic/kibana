@@ -30,6 +30,8 @@ export { useEsDocSearch } from './hooks';
 export { UnifiedDocViewer } from './components/lazy_doc_viewer';
 export { UnifiedDocViewerFlyout } from './components/lazy_doc_viewer_flyout';
 
+export { ContentFrameworkSection } from './components/content_framework';
+
 export type {
   LogsOverviewProps as UnifiedDocViewerLogsOverviewProps,
   LogsOverviewApi as UnifiedDocViewerLogsOverviewApi,

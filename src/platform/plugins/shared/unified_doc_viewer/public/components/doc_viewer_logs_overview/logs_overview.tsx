@@ -9,6 +9,7 @@
 
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   SPAN_ID_FIELD,
@@ -16,7 +17,6 @@ import {
   TRANSACTION_ID_FIELD,
   getLogDocumentOverview,
 } from '@kbn/discover-utils';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeature,
@@ -113,17 +113,22 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             }
           >
             <EuiSpacer size="m" />
+            <LogsOverviewHighlights
+              formattedDoc={parsedDoc}
+              doc={hit}
+              dataView={dataView}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
             <LogsOverviewHeader
               formattedDoc={parsedDoc}
               doc={hit}
               renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
             />
-            <EuiHorizontalRule margin="xs" />
-            <LogsOverviewHighlights
-              formattedDoc={parsedDoc}
-              doc={hit}
-              renderFlyoutStreamField={renderFlyoutStreamField}
-            />
+
+            <div>{renderFlyoutStreamField && renderFlyoutStreamField({ doc: hit })}</div>
+
             <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
             {isStacktraceAvailable && (
               <LogsOverviewStacktraceSection

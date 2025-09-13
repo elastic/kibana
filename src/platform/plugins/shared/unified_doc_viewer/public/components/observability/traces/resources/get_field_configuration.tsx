@@ -72,6 +72,7 @@ export const getCommonFieldConfiguration = ({
               serviceName={value as string}
               agentName={flattenedDoc[AGENT_NAME_FIELD]}
               formattedServiceName={content}
+              data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
             />
           )}
         </HighlightField>
@@ -85,7 +86,13 @@ export const getCommonFieldConfiguration = ({
       }),
       content: (value, formattedValue) => (
         <HighlightField value={value} formattedValue={formattedValue}>
-          {({ content }) => <TraceIdLink traceId={value as string} formattedTraceId={content} />}
+          {({ content }) => (
+            <TraceIdLink
+              traceId={value as string}
+              formattedTraceId={content}
+              data-test-subj="unifiedDocViewerObservabilityTracesTraceIdLink"
+            />
+          )}
         </HighlightField>
       ),
       value: flattenedDoc[TRACE_ID_FIELD],
