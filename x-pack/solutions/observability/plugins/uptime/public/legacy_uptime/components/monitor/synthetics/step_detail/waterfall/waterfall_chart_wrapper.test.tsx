@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
@@ -19,6 +20,8 @@ import {
   FILTER_REQUESTS_LABEL,
   FILTER_COLLAPSE_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
+
+requireDeferred();
 
 const getHighLightedItems = (query: string, filters: string[]) => {
   return NETWORK_EVENTS.events.filter((item) => isHighlightedItem(item, query, filters));

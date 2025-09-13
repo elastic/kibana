@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -12,6 +13,8 @@ import '@testing-library/jest-dom';
 import { DEFAULT_VALUES } from './documents_list.test';
 import { DocumentList } from './document_list';
 import { DocumentsOverview } from './documents_overview';
+
+requireDeferred();
 
 describe('DocumentList', () => {
   test('render empty', async () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 
 import type { AgentStatusProps } from './agent_status';
@@ -18,6 +19,8 @@ import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+
+requireDeferred();
 
 jest.mock('../../../../hooks/use_experimental_features');
 jest.mock('../../../../../management/hooks/agents/use_get_agent_status');

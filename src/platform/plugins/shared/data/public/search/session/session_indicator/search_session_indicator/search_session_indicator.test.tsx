@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import userEventDep from '@testing-library/user-event';
@@ -14,6 +15,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SearchSessionIndicator } from './search_session_indicator';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SearchSessionState } from '../../../..';
+
+requireDeferred();
 
 function setup(props: Partial<React.ComponentProps<typeof SearchSessionIndicator>> = {}) {
   const user = userEventDep.setup();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useMutation as _useMutation } from '@tanstack/react-query';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import type { RenderHookResult } from '@testing-library/react';
@@ -17,6 +18,8 @@ import type {
   UseSendRunScriptRequestResult,
 } from './use_send_run_script_endpoint_request';
 import { useSendRunScriptEndpoint } from './use_send_run_script_endpoint_request';
+
+requireDeferred();
 
 const useMutationMock = _useMutation as jest.Mock;
 

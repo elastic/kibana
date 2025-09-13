@@ -14,7 +14,11 @@ import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
 import { CreateSearchApplicationButton } from './search_applications_list';
+
+requireDeferred();
 
 function Container({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +16,8 @@ import {
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { waitFor } from '@testing-library/react';
+
+requireDeferred();
 
 describe('Users filter', () => {
   let render: (

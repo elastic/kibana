@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { styleServiceMock, momentServiceMock } from './integrations_service.test.mocks';
 
 import { IntegrationsService } from './integrations_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+
+requireDeferred();
 
 describe('IntegrationsService', () => {
   test('it wires up styles and moment', async () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -12,6 +13,8 @@ import { StatusBadge } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+
+requireDeferred();
 
 const renderScheduleStatus = (
   status: 'unknown' | 'ok' | 'active' | 'error' | 'warning' = 'ok',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,6 +23,8 @@ import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/
 import { INPUT_ERRORS, CONDITION_FIELD_TITLE, OPERATOR_TITLES } from '../translations';
 import { TrustedDevicesForm } from './form';
 import { licenseService } from '../../../../../common/hooks/use_license';
+
+requireDeferred();
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/use_license', () => {

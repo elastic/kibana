@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -20,6 +21,8 @@ import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
 import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+
+requireDeferred();
 
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
 jest.mock('../logic/use_update_schedule');

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React, { useCallback, useState } from 'react';
 import type { ReactWrapper } from 'enzyme';
 import {
@@ -51,6 +52,8 @@ import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { dataViewsMock } from '../../__mocks__/data_views';
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
+
+requireDeferred();
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({

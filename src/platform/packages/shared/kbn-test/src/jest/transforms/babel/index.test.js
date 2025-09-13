@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import transformer from '.';
+import transformer from './jest_preset';
 
 // Minimal transformOptions passed to getCacheKey. Jest provides a large object,
 // but for our purposes we only need rootDir and a couple of transform fields

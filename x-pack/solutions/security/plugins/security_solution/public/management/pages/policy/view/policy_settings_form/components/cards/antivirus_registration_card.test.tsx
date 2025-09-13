@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AntivirusRegistrationCardProps } from './antivirus_registration_card';
@@ -15,6 +16,8 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endp
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
+
+requireDeferred();
 
 describe('Policy Form Antivirus Registration Card', () => {
   const antivirusTestSubj = getPolicySettingsFormTestSubjects('test').antivirusRegistration;

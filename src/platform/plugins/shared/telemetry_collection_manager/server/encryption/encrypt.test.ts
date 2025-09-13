@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { createRequestEncryptor, mockEncrypt } from './encrypt.test.mocks';
 import { telemetryJWKS } from './telemetry_jwks';
 import { encryptTelemetry, getKID } from './encrypt';
+
+requireDeferred();
 
 describe('getKID', () => {
   it(`returns 'kibana_dev' kid for development`, async () => {

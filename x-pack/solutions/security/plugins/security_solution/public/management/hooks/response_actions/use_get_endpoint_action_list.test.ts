@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointActionList } from './use_get_endpoint_action_list';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+
+requireDeferred();
 
 const useQueryMock = _useQuery as jest.Mock;
 

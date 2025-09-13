@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +16,8 @@ import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../
 import { expectIsViewOnly } from '../mocks';
 import type { DeviceControlProtectionLevelProps } from './device_control_protection_level';
 import { DeviceControlProtectionLevel } from './device_control_protection_level';
+
+requireDeferred();
 
 describe('Policy form DeviceControlProtectionLevel component', () => {
   let formProps: DeviceControlProtectionLevelProps;

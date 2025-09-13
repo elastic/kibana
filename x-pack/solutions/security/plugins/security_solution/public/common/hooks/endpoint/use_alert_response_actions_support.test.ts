@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { AppContextTestRender } from '../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../mock/endpoint';
@@ -22,6 +23,8 @@ import {
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+
+requireDeferred();
 
 describe('When using `useAlertResponseActionsSupport()` hook', () => {
   let appContextMock: AppContextTestRender;

@@ -35,6 +35,10 @@ import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.tes
 import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
+
 const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {

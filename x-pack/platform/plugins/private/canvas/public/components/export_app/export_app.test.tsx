@@ -9,6 +9,9 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { ExportApp } from './export_app.component';
 import type { CanvasWorkpad } from '../../../types';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 jest.mock('../workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,

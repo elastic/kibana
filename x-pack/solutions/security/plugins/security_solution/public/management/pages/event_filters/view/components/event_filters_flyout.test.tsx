@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { EventFiltersFlyoutProps } from './event_filters_flyout';
 import { EventFiltersFlyout } from './event_filters_flyout';
@@ -25,6 +26,8 @@ import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { of } from 'rxjs';
 import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+requireDeferred();
 
 // mocked modules
 jest.mock('../../../../../common/lib/kibana');

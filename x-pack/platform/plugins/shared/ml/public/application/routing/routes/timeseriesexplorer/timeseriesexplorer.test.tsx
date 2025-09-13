@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -15,6 +16,8 @@ import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesex
 import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
+
+requireDeferred();
 
 jest.mock('../../../services/toast_notification_service');
 

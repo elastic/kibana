@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React, { Fragment } from 'react';
 import { shallow } from 'enzyme';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
+
+requireDeferred();
 
 const kibanaMock = {
   services: {

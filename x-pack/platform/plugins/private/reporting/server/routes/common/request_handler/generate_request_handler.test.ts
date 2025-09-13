@@ -24,6 +24,9 @@ import type {
   ReportingSetup,
 } from '../../../types';
 import { GenerateRequestHandler } from './generate_request_handler';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 jest.mock('@kbn/reporting-server/crypto', () => ({
   cryptoFactory: () => ({

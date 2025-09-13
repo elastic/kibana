@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -20,6 +21,8 @@ import {
   BehaviourProtectionCard,
   LOCKED_CARD_BEHAVIOR_TITLE,
 } from './protection_settings_card/behaviour_protection_card';
+
+requireDeferred();
 
 jest.mock('../../../../../../../common/hooks/use_license');
 

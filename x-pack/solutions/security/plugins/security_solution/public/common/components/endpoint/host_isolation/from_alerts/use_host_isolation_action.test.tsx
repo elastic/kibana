@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import type React from 'react';
 import { act } from '@testing-library/react';
 import type { UseHostIsolationActionProps } from './use_host_isolation_action';
@@ -22,6 +23,8 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../..';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+
+requireDeferred();
 
 jest.mock('../../../user_privileges');
 

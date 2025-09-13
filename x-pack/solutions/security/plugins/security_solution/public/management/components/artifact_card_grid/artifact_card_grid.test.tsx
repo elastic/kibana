@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import React from 'react';
@@ -16,6 +17,8 @@ import {
   getTrustedAppProviderMock,
 } from '../artifact_entry_card/test_utils';
 import type { AnyArtifact } from '../artifact_entry_card';
+
+requireDeferred();
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

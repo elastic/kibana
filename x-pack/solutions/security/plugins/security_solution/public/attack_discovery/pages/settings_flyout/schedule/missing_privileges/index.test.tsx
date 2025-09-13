@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiFlexItem } from '@elastic/eui';
@@ -14,6 +15,8 @@ import { TestProviders } from '../../../../../common/mock';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
+
+requireDeferred();
 
 jest.mock('../../../../../common/lib/kibana');
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type {
   UseWithResponderActionDataFromAlertProps,
   ResponderActionData,
@@ -35,6 +36,8 @@ import {
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getAgentTypeName } from '../../../../translations';
 import { ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD } from '../../../../hooks/endpoint/use_alert_response_actions_support';
+
+requireDeferred();
 
 describe('use responder action data hooks', () => {
   let appContextMock: AppContextTestRender;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type {
@@ -27,6 +28,8 @@ import { getDeferred } from '../../mocks/utils';
 import { waitFor } from '@testing-library/react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
+
+requireDeferred();
 
 describe('When using the `ResponseActionFileDownloadLink` component', () => {
   let appTestContext: AppContextTestRender;

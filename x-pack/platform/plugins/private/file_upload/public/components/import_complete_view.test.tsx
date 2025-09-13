@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, act } from '@testing-library/react';
 import 'jest-canvas-mock';
 import { ImportCompleteView } from './import_complete_view';
+
+requireDeferred();
 
 jest.mock('../kibana_services', () => ({
   get: jest.fn(),

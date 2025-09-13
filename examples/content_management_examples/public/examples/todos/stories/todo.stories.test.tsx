@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SimpleTodoApp } from './todo.stories';
+
+requireDeferred();
 
 test('SimpleTodoApp works', async () => {
   render(<SimpleTodoApp />);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { join } from 'path';
 import { accessMock, readdirMock, renameMock, clearAllMocks } from './rolling_tasks.test.mocks';
 import {
@@ -15,6 +16,8 @@ import {
   rollPreviousFilesInOrder,
   getOrderedRolledFiles,
 } from './rolling_tasks';
+
+requireDeferred();
 
 describe('NumericRollingStrategy tasks', () => {
   afterEach(() => {

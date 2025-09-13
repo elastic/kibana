@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   mockGetConvertedObjectId,
   validateTypeMigrationsMock,
@@ -21,6 +22,8 @@ import {
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+
+requireDeferred();
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');

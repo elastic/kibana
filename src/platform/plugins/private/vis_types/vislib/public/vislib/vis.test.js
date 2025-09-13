@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import _ from 'lodash';
 import $ from 'jquery';
 import {
@@ -20,6 +21,8 @@ import rows from '../fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
 import { getMockUiState } from '../fixtures/mocks';
 import { getVis } from './visualizations/_vis_fixture';
+
+requireDeferred();
 
 const dataArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];

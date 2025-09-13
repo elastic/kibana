@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -19,6 +20,9 @@ import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+
+requireDeferred();
+
 jest.mock('../../../common/containers/query_toggle');
 
 jest.mock('react', () => {

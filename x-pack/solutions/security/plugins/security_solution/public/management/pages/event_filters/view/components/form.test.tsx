@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import React, { useCallback, useState } from 'react';
 import { act, cleanup, fireEvent } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
@@ -27,6 +28,8 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
+
+requireDeferred();
 
 jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 

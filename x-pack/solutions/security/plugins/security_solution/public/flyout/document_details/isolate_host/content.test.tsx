@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
 import { FLYOUT_HOST_ISOLATION_PANEL_TEST_ID } from './test_ids';
 import { IsolateHostPanelContent } from './content';
+
+requireDeferred();
 
 describe('<IsolateHostPanelContent />', () => {
   let appContextMock: AppContextTestRender;

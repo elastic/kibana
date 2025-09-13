@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { EventMergingBanner, type EventMergingBannerProps } from './event_merging_banner';
+
+requireDeferred();
 
 describe('EventMergingBanner component', () => {
   let formProps: EventMergingBannerProps;

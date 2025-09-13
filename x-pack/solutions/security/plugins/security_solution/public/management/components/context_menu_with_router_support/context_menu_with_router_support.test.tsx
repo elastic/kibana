@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -13,6 +14,8 @@ import type { ContextMenuWithRouterSupportProps } from './context_menu_with_rout
 import { ContextMenuWithRouterSupport } from './context_menu_with_router_support';
 import { act, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../common/constants';
+
+requireDeferred();
 
 describe('When using the ContextMenuWithRouterSupport component', () => {
   let appTestContext: AppContextTestRender;

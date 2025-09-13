@@ -16,6 +16,9 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { notificationCoordinator, Coordinator } from '../notification_coordinator';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();

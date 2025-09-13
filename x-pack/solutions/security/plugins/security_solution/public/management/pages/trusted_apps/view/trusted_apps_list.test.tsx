@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
@@ -17,6 +18,8 @@ import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+
+requireDeferred();
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;

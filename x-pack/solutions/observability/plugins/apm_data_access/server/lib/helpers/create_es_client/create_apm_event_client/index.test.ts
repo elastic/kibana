@@ -19,6 +19,10 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
 import * as observabilityPluginModule from '@kbn/observability-plugin/server';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
+
 jest.mock('@kbn/observability-plugin/server', () => ({
   __esModule: true,
   ...jest.requireActual('@kbn/observability-plugin/server'),

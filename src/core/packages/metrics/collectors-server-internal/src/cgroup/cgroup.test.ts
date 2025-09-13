@@ -23,12 +23,15 @@ jest.mock('./v2', () => {
   };
 });
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { OsCgroupMetricsCollector } from '.';
 import type { Logger } from '@kbn/logging';
 import { gatherV1CgroupMetrics } from './v1';
 import { gatherV2CgroupMetrics } from './v2';
+
+requireDeferred();
 
 describe('OsCgroupMetricsCollector', () => {
   let collector: OsCgroupMetricsCollector;

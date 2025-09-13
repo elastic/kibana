@@ -15,6 +15,9 @@ import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import type { Ping } from '../../../../common/runtime_types/ping';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 interface MockAnomaly {
   severity: MlAnomaliesTableRecord['severity'];

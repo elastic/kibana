@@ -10,6 +10,10 @@ import { act } from 'react-dom/test-utils';
 import type { MappingsEditorTestBed } from './helpers';
 import { componentHelpers } from './helpers';
 import { defaultTextParameters, defaultShapeParameters } from './datatypes';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
+
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
 describe('Mappings editor: edit field', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -34,6 +35,8 @@ import type {
   AssetDetailsLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+
+requireDeferred();
 
 const mockAssetDetailsLocator = {
   getRedirectUrl: jest

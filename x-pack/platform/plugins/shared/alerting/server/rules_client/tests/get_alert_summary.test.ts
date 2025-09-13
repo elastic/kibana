@@ -31,6 +31,10 @@ import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_ada
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

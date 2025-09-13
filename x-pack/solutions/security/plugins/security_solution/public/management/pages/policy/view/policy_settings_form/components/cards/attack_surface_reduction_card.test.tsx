@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -22,6 +23,8 @@ import { set } from '@kbn/safer-lodash-set';
 import userEvent from '@testing-library/user-event';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
+
+requireDeferred();
 
 jest.mock('../../../../../../../common/hooks/use_license');
 

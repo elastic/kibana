@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AnomalyValueDisplay } from './anomaly_value_display';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+
+requireDeferred();
 
 jest.mock('../../contexts/kibana', () => ({
   useFieldFormatter: jest.fn().mockReturnValue((value: number | string) => value.toString()),

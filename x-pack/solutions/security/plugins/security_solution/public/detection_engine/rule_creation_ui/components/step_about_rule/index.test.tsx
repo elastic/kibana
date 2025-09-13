@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { mount, shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
 import { act } from '@testing-library/react';
@@ -37,6 +38,8 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
+
+requireDeferred();
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');

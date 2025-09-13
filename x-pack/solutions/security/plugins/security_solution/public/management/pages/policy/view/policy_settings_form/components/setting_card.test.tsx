@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import React from 'react';
@@ -12,6 +13,8 @@ import type { SettingCardProps } from './setting_card';
 import { SettingCard } from './setting_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { exactMatchText } from '../mocks';
+
+requireDeferred();
 
 describe('Policy form SettingCard component', () => {
   let formProps: SettingCardProps;

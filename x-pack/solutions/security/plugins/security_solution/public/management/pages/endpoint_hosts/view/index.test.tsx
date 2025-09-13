@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -61,6 +62,8 @@ import { agentStatusMocks } from '../../../../../common/endpoint/service/respons
 import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 import type { PartialEndpointPolicyData } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+
+requireDeferred();
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
@@ -19,6 +20,8 @@ import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_serv
 import { KibanaErrorService } from '../services/error_service';
 import { KibanaErrorBoundary } from './error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
+
+requireDeferred();
 
 jest.mock('@elastic/apm-rum');
 

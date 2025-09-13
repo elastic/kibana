@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,6 +19,8 @@ import { BehaviorSubject } from 'rxjs';
 import type { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import type { ViewMode } from '@kbn/presentation-publishing';
+
+requireDeferred();
 
 const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
 

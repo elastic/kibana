@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -26,6 +27,8 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/a
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { IHttpFetchError } from '@kbn/core/public';
+
+requireDeferred();
 
 jest.mock('../../../../../common/components/user_privileges');
 

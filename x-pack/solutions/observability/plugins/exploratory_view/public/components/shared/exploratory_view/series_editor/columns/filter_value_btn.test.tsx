@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterValueButton } from './filter_value_btn';
@@ -13,6 +14,8 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
 } from '../../configurations/constants/elasticsearch_fieldnames';
+
+requireDeferred();
 
 describe('FilterValueButton', function () {
   it('renders', async () => {

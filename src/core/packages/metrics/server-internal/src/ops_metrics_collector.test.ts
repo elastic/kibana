@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
@@ -18,6 +19,8 @@ import {
   mockServerCollector,
 } from './ops_metrics_collector.test.mocks';
 import { OpsMetricsCollector } from './ops_metrics_collector';
+
+requireDeferred();
 
 export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalActiveSockets: 25,

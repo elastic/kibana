@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { Timestamp } from '.';
 import userEvent from '@testing-library/user-event';
 import { mockNow } from '../../utils/test_helpers/mock_now';
+
+requireDeferred();
 
 const timestamp = 1570720000123; // Oct 10, 2019, 08:06:40.123 (UTC-7)
 const absoluteTimeMilis = 'Oct 10, 2019 @ 08:06:40.123 (UTC-7)';

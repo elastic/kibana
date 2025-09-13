@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   ActionMocks,
   setMetaDocMigrationStartedMock,
@@ -27,6 +28,8 @@ import type {
   UpdateIndexMappingsState,
   CreateTargetIndexState,
 } from './state';
+
+requireDeferred();
 
 describe('actions', () => {
   let context: MockedMigratorContext;

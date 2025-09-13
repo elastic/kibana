@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointsList, PAGING_PARAMS } from './use_get_endpoints_list';
@@ -13,6 +14,8 @@ import { useQuery as _useQuery } from '@tanstack/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
 import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+
+requireDeferred();
 
 const useQueryMock = _useQuery as jest.Mock;
 

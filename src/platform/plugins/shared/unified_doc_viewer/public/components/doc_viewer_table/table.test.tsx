@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
@@ -19,6 +20,8 @@ import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS } from './table';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { userEvent } from '@testing-library/user-event';
+
+requireDeferred();
 
 const storage = new Storage(window.localStorage);
 

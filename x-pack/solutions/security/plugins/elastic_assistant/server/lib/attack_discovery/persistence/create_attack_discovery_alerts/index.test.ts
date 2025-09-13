@@ -11,6 +11,9 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createAttackDiscoveryAlerts } from '.';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 import { mockCreateAttackDiscoveryAlertsParams } from '../../../../__mocks__/mock_create_attack_discovery_alerts_params';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 const ADHOC_ALERTS_INDEX = 'mock-index' as const;
 const ruleDataClientMock = ruleRegistryMocks.createRuleDataClient(ADHOC_ALERTS_INDEX);

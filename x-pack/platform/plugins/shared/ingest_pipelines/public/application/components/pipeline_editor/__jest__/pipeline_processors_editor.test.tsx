@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { SetupResult } from './pipeline_processors_editor.helpers';
@@ -16,6 +17,8 @@ import {
   groupProcessorsByCategory,
 } from '../components/processor_form/processors/common_fields/processor_type_field';
 import { mapProcessorTypeToDescriptor } from '../components/shared/map_processor_type_to_form';
+
+requireDeferred();
 
 const testProcessors: Pick<Pipeline, 'processors'> = {
   processors: [

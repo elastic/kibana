@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -12,6 +13,8 @@ import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from 
 import { AppearancePopover } from './appearance_popover';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { METRIC_LAYOUT_BY_POSITION } from '../constants';
+
+requireDeferred();
 
 const palette: PaletteOutput<CustomPaletteParams> = {
   type: 'palette',

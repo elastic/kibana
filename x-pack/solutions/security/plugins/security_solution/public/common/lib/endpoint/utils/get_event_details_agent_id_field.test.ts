@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { endpointAlertDataMock } from '../../../mock/endpoint';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { getEventDetailsAgentIdField, parseEcsFieldPath } from '..';
+
+requireDeferred();
 
 describe('getEventDetailsAgentIdField()', () => {
   it.each(RESPONSE_ACTION_AGENT_TYPE)(`should return agent id info for %s`, (agentType) => {

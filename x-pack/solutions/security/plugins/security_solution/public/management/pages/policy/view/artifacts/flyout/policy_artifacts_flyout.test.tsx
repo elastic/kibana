@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -27,6 +28,8 @@ import type {
 import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
+
+requireDeferred();
 
 const apiVersion = '2023-10-31';
 

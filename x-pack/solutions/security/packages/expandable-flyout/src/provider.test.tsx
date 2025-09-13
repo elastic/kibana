@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
@@ -13,6 +14,8 @@ import * as actions from './store/actions';
 import type { State } from './store/state';
 import { initialUiState } from './store/state';
 import { of } from 'rxjs';
+
+requireDeferred();
 
 const mockGet = jest.fn();
 const mockSet = jest.fn();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { duration } from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -12,6 +13,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { LaunchDarklyClientProviderMocked } from './plugin.test.mocks';
 import { CloudExperimentsPlugin } from './plugin';
 import { MetadataService } from '../common/metadata_service';
+
+requireDeferred();
 
 describe('Cloud Experiments public plugin', () => {
   jest.spyOn(console, 'debug').mockImplementation(); // silence console.debug logs

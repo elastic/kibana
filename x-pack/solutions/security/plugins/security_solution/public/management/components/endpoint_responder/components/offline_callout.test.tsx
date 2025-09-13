@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
 import React from 'react';
@@ -15,6 +16,8 @@ import { OfflineCallout } from './offline_callout';
 import { agentStatusGetHttpMock } from '../../../mocks';
 import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { waitFor } from '@testing-library/react';
+
+requireDeferred();
 
 describe('Responder offline callout', () => {
   let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;

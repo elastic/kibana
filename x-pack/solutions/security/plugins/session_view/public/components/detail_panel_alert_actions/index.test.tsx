@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -18,6 +19,8 @@ import {
 } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import type { ProcessEvent } from '../../../common';
+
+requireDeferred();
 
 describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

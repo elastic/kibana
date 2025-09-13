@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import moment from 'moment';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEventCount } from './get_event_count';
+
+requireDeferred();
 
 describe('getEventCount', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

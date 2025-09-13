@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -20,6 +21,8 @@ import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { of, ReplaySubject } from 'rxjs';
 import { CoreAppsService } from './core_app';
 import type { CoreAppConfig } from './core_app_config';
+
+requireDeferred();
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),

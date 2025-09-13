@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
@@ -16,6 +17,8 @@ import { mockEndpointDetailsApiResult } from '../../../../../pages/endpoint_host
 import { HeaderEndpointInfo } from './header_endpoint_info';
 import { agentStatusGetHttpMock } from '../../../../../mocks';
 import { waitFor } from '@testing-library/react';
+
+requireDeferred();
 
 jest.mock('../../../../../hooks/endpoint/use_get_endpoint_details');
 jest.mock('../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');

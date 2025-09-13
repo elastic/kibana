@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { updateMappingsMock } from './update_index_meta.test.mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { updateIndexMeta } from './update_index_meta';
+
+requireDeferred();
 
 describe('updateIndexMeta', () => {
   it('calls updateMappings with the correct parameters', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act } from 'react-dom/test-utils';
 
 import type { EsDoc } from './helpers';
@@ -25,6 +26,8 @@ import {
 } from './field_editor_flyout_preview.helpers';
 import { spyGetFieldsForWildcard } from './helpers/setup_environment';
 import { mockDocuments, createPreviewError } from './helpers/mocks';
+
+requireDeferred();
 
 describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();

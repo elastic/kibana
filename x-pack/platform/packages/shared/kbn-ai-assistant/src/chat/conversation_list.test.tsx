@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -14,6 +15,8 @@ import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConversationsByDate, useConversationContextMenu } from '../hooks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getDisplayedConversation } from '../hooks/use_conversations_by_date.test';
+
+requireDeferred();
 
 jest.mock('../hooks/use_conversations_by_date', () => ({
   useConversationsByDate: jest.fn(),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { SCORE_SUGGESTIONS_FUNCTION_NAME, scoreSuggestions } from './score_suggestions';
 import type { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
@@ -13,6 +14,8 @@ import type { RecalledSuggestion } from './recall_and_score';
 import type { FunctionCallChatFunction } from '../../../service/types';
 import type { ChatEvent } from '../../../../common/conversation_complete';
 import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
+
+requireDeferred();
 
 const suggestions: RecalledSuggestion[] = [
   { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },

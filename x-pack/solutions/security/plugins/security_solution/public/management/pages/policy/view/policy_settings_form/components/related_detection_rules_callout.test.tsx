@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import React from 'react';
 import { RelatedDetectionRulesCallout } from './related_detection_rules_callout';
 import { exactMatchText } from '../mocks';
+
+requireDeferred();
 
 describe('Policy form RelatedDetectionRulesCallout component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

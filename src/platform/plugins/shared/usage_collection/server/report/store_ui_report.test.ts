@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { storeApplicationUsageMock } from './store_ui_report.test.mocks';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
@@ -14,6 +15,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { ReportSchemaType } from './schema';
 import { storeUiReport } from './store_ui_report';
 import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
+
+requireDeferred();
 
 describe('store_ui_report', () => {
   let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;

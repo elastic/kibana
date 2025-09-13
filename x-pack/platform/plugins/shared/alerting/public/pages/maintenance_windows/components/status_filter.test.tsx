@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -12,6 +13,8 @@ import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { StatusFilter } from './status_filter';
 import { MaintenanceWindowStatus } from '../../../../common';
+
+requireDeferred();
 
 describe('StatusFilter', () => {
   let appMockRenderer: AppMockRenderer;

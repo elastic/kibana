@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
@@ -27,6 +28,8 @@ import { createIndexPatternServiceMock } from '../../../../mocks/data_views_serv
 import { createMockFramePublicAPI } from '../../../../mocks';
 import type { DataViewsState } from '../../../../state_management';
 import { addColumnsToCache } from '../fieldlist_cache';
+
+requireDeferred();
 
 const fieldsFromQuery = [
   {

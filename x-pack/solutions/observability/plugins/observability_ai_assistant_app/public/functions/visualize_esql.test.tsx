@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,6 +14,8 @@ import { lensPluginMock } from '@kbn/lens-plugin/public/mocks/lens_plugin_mock';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { VisualizeESQL } from './visualize_esql';
+
+requireDeferred();
 
 describe('VisualizeESQL', () => {
   function renderComponent(

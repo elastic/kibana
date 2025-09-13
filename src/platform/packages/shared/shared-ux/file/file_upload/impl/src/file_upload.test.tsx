@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
@@ -16,6 +17,8 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import type { Props } from './file_upload';
 import { FileUpload } from './file_upload';
+
+requireDeferred();
 
 describe('FileUpload', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));

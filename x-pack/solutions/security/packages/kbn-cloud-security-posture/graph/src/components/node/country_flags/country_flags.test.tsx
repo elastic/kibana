@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,6 +17,8 @@ import {
   GRAPH_FLAGS_TOOLTIP_COUNTRY_ID,
 } from '../../test_ids';
 import { CountryFlags, MAX_COUNTRY_FLAGS_IN_TOOLTIP } from './country_flags';
+
+requireDeferred();
 
 describe('CountryFlags', () => {
   test('render null when input array is empty', () => {

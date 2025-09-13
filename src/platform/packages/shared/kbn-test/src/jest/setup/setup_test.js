@@ -12,6 +12,7 @@
   https://www.npmjs.com/package/jest-styled-components#global-installation
 */
 import '@testing-library/jest-dom';
+import '@kbn/lazy-require/src/wrap_styled';
 
 // uses subpath exports
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports

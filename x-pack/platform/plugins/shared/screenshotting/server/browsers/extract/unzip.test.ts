@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 import { readFile } from 'fs/promises';
 import { ExtractError } from './extract_error';
 import { unzip } from './unzip';
+
+requireDeferred();
 
 describe('unzip', () => {
   beforeEach(() => {

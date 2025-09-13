@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { getResultsForJobId } from './util';
 import {
   mlResultsServiceMock,
@@ -12,6 +13,8 @@ import {
   actualExpected,
   typicalToActualExpected,
 } from './results.test.mock';
+
+requireDeferred();
 
 describe('Maps util', () => {
   describe('getResultsForJobId', () => {

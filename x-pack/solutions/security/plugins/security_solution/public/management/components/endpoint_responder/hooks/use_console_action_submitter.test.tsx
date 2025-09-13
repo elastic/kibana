@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type {
   UseConsoleActionSubmitterOptions,
   ConsoleActionSubmitter,
@@ -21,6 +22,8 @@ import { getDeferred } from '../../../mocks/utils';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { act, waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
+
+requireDeferred();
 
 describe('When using `useConsoleActionSubmitter()` hook', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

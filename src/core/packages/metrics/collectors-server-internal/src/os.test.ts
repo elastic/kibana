@@ -10,10 +10,13 @@
 let mockGetOsResult: object = {};
 jest.mock('getos', () => (cb: Function) => cb(null, mockGetOsResult));
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { loggerMock } from '@kbn/logging-mocks';
 import os from 'os';
 import { cgroupCollectorMock } from './os.test.mocks';
 import { OsMetricsCollector } from './os';
+
+requireDeferred();
 
 describe('OsMetricsCollector', () => {
   let collector: OsMetricsCollector;

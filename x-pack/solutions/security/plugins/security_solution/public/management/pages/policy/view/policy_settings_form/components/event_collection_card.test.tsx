@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -20,6 +21,8 @@ import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { within } from '@testing-library/react';
+
+requireDeferred();
 
 describe('Policy Event Collection Card common component', () => {
   let formProps: EventCollectionCardProps<OperatingSystem.WINDOWS>;

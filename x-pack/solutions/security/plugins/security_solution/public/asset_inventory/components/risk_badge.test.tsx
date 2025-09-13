@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { screen, render, cleanup, fireEvent } from '@testing-library/react';
 import { RiskSeverity } from '../../../common/search_strategy';
 import { RiskBadge } from './risk_badge';
+
+requireDeferred();
 
 describe('AssetInventory', () => {
   describe('RiskBadge', () => {

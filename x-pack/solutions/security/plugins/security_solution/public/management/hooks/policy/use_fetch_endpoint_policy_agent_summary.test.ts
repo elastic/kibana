@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -14,6 +15,8 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { useFetchAgentByAgentPolicySummary } from './use_fetch_endpoint_policy_agent_summary';
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
+
+requireDeferred();
 
 const useQueryMock = _useQuery as jest.Mock;
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useMutation as _useMutation } from '@tanstack/react-query';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -19,6 +20,8 @@ import type { PolicyData } from '../../../../common/endpoint/types';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
+
+requireDeferred();
 
 const useMutationMock = _useMutation as jest.Mock;
 

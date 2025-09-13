@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -15,6 +16,8 @@ import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData, mockCount } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+
+requireDeferred();
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/link_to');

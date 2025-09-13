@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
@@ -13,6 +14,8 @@ import { AgentTypeIntegration, INTEGRATION_SECTION_LABEL } from './agent_type_in
 import { getAgentTypeName } from '../../../../translations';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { isAgentTypeInTechPreview } from '../../../../../../common/endpoint/service/response_actions/is_agent_type_in_tech_preview';
+
+requireDeferred();
 
 describe('AgentTypeIntegration component', () => {
   let props: AgentTypeIntegrationProps;

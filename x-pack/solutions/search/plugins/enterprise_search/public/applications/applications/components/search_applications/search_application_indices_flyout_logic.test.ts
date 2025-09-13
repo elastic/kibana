@@ -6,6 +6,7 @@
  */
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
@@ -15,6 +16,8 @@ import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fe
 
 import type { SearchApplicationIndicesFlyoutValues } from './search_application_indices_flyout_logic';
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
+
+requireDeferred();
 
 const DEFAULT_VALUES: SearchApplicationIndicesFlyoutValues = {
   fetchSearchApplicationApiError: undefined,

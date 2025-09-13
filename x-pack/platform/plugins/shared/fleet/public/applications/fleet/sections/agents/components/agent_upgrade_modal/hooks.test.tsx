@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import moment from 'moment';
 import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useScheduleDateTime } from './hooks';
+
+requireDeferred();
 
 describe('useScheduleDateTime', () => {
   it('do not allow to set a date before the current time', async () => {

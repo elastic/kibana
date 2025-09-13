@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { registerRoutesMock } from './plugin.test.mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
+
+requireDeferred();
 
 describe('SavedObjectsManagementPlugin', () => {
   let plugin: SavedObjectsManagementPlugin;

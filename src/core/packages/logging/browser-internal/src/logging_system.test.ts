@@ -12,6 +12,9 @@ import { unsafeConsole } from '@kbn/security-hardening';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 import { BrowserLoggingSystem } from './logging_system';
 import type { BaseLogger } from './logger';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 describe('BrowserLoggingSystem', () => {
   const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
@@ -25,6 +26,8 @@ import {
   createDataStreamBackingIndex,
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
+
+requireDeferred();
 
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 

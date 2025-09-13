@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -17,6 +18,8 @@ import {
   JSON_TAB_CONTENT_TEST_ID,
   TABLE_TAB_CONTENT_TEST_ID,
 } from '../../../document_details/right/tabs/test_ids';
+
+requireDeferred();
 
 describe('AssetDocumentTab', () => {
   it('renders', () => {

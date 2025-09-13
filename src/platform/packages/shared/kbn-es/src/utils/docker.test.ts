@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import mockFs from 'mock-fs';
 
 import Fsp from 'fs/promises';
@@ -45,6 +46,8 @@ import {
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+
+requireDeferred();
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');

@@ -7,6 +7,8 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
 import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
@@ -16,6 +18,8 @@ import { SearchApplicationsListLogic } from '../search_applications/search_appli
 
 import type { SearchApplicationViewValues } from './search_application_view_logic';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
+
+requireDeferred();
 
 const DEFAULT_VALUES: SearchApplicationViewValues = {
   fetchSearchApplicationApiError: undefined,

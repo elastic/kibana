@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { ArtifactFormComponentProps } from '../../components/artifact_list_page';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -16,6 +17,8 @@ import {
 } from '../../../common/mock/endpoint';
 import { useCanAssignArtifactPerPolicy } from './use_can_assign_artifact_per_policy';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
+
+requireDeferred();
 
 jest.mock('../../../common/hooks/use_license');
 

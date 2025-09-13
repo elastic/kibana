@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { EuiProgress, EuiButtonIcon } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -16,6 +17,8 @@ import { FieldTopValues } from './field_top_values';
 import { getChildrenTextBySelector } from './field_stats.test';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+
+requireDeferred();
 
 describe('UnifiedFieldList <FieldTopValues />', () => {
   let defaultProps: FieldTopValuesProps;

@@ -1276,6 +1276,8 @@
       "@kbn/language-documentation/*": ["src/platform/packages/private/kbn-language-documentation/*"],
       "@kbn/lazy-object": ["src/platform/packages/shared/kbn-lazy-object"],
       "@kbn/lazy-object/*": ["src/platform/packages/shared/kbn-lazy-object/*"],
+      "@kbn/lazy-require": ["src/platform/packages/shared/kbn-lazy-require"],
+      "@kbn/lazy-require/*": ["src/platform/packages/shared/kbn-lazy-require/*"],
       "@kbn/lens-config-builder-example-plugin": ["x-pack/examples/lens_config_builder_example"],
       "@kbn/lens-config-builder-example-plugin/*": ["x-pack/examples/lens_config_builder_example/*"],
       "@kbn/lens-embeddable-utils": ["src/platform/packages/shared/kbn-lens-embeddable-utils"],

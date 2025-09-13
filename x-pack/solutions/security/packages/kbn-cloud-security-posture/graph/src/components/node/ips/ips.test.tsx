@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +16,8 @@ import {
   GRAPH_IPS_TOOLTIP_IP_ID,
 } from '../../test_ids';
 import { Ips, MAX_IPS_IN_TOOLTIP } from './ips';
+
+requireDeferred();
 
 describe('Ips', () => {
   test('renders nothing when input array is empty', () => {

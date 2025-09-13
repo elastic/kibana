@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
@@ -12,6 +13,8 @@ import '../../../lib/__mocks__/ut_router_history.mock';
 
 import { ReactRouterEuiLink } from './link_for_eui';
 import { mockHistory } from '../../../lib/__mocks__/ut_router_history.mock';
+
+requireDeferred();
 
 describe('EUI & React Router Component Helpers', () => {
   beforeEach(() => {

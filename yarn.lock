@@ -6520,6 +6520,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lazy-require@link:src/platform/packages/shared/kbn-lazy-require":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-config-builder-example-plugin@link:x-pack/examples/lens_config_builder_example":
   version "0.0.0"
   uid ""

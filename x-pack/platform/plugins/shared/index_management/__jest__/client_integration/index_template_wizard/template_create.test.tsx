@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -19,6 +20,8 @@ import {
 } from './constants';
 import { setup } from './template_create.helpers';
 import type { TemplateFormTestBed } from './template_form.helpers';
+
+requireDeferred();
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

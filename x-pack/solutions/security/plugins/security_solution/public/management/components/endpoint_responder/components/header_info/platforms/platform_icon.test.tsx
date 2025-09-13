@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { PlatformIcon, type PlatformIconProps } from './platform_icon';
+
+requireDeferred();
 
 describe('PlatformIcon', () => {
   let render: (props: PlatformIconProps) => ReturnType<AppContextTestRender['render']>;

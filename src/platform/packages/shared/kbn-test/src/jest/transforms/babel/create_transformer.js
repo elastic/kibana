@@ -14,9 +14,6 @@ const babelJest = require('babel-jest');
 const babel = require('@babel/core');
 const createTransformerConfig = require('./transformer_config');
 
-// Base transformer from babel-jest
-const baseTransformer = babelJest.default.createTransformer(createTransformerConfig());
-
 // Memoize materialized Babel options by (cwd, rootDir) pair to avoid recomputation
 const materializedOptionsCache = new Map();
 
@@ -31,7 +28,7 @@ const THIS_FILE = fs.readFileSync(__filename);
  * Materialize Babel options using @babel/core's loadPartialConfig.
  * Returns a stable JSON string of the resolved options.
  */
-function getMaterializedBabelOptions({ cwd, rootDir }) {
+function getMaterializedBabelOptions(baseConfig, { cwd, rootDir }) {
   const normalizedCwd = path.resolve(cwd || process.cwd());
   const normalizedRoot = path.resolve(rootDir || normalizedCwd);
   const cacheKey = `${normalizedCwd}\n${normalizedRoot}`;
@@ -39,9 +36,6 @@ function getMaterializedBabelOptions({ cwd, rootDir }) {
   if (materializedOptionsCache.has(cacheKey)) {
     return materializedOptionsCache.get(cacheKey);
   }
-
-  // Build a base config and materialize with a dummy filename
-  const baseConfig = createTransformerConfig();
 
   let optionsJson = '{}';
   try {
@@ -97,60 +91,67 @@ function serializeJestTransformBits(cfg) {
     return '{}';
   }
 }
+/**
+ * @param {{ lazyRequire?: import('@kbn/lazy-require').LazyRequirePluginOptions }} options
+ */
+exports.createTransformer = function (options = {}) {
+  const baseConfig = createTransformerConfig(options);
 
-module.exports = {
-  // Preserve all base transformer properties
-  ...baseTransformer,
+  // Base transformer from babel-jest
+  const baseTransformer = babelJest.default.createTransformer(baseConfig);
 
-  // Wrap getCacheKey to normalize the config string and rootDir before delegating
-  getCacheKey(sourceText, sourcePath, transformOptions) {
-    const cfg = (transformOptions && transformOptions.config) || {};
+  return {
+    ...baseTransformer,
+    // Wrap getCacheKey to normalize the config string and rootDir before delegating
+    getCacheKey(sourceText, sourcePath, transformOptions) {
+      const cfg = (transformOptions && transformOptions.config) || {};
 
-    const normalizedRoot = path.resolve(cfg.rootDir || process.cwd());
-    const normalizedCwd = path.resolve(cfg.cwd || normalizedRoot);
+      const normalizedRoot = path.resolve(cfg.rootDir || process.cwd());
+      const normalizedCwd = path.resolve(cfg.cwd || normalizedRoot);
 
-    // Resolve materialized Babel options and compute a compact cache key
-    const optionsJson = getMaterializedBabelOptions({
-      cwd: normalizedCwd,
-      rootDir: normalizedRoot,
-    });
+      // Resolve materialized Babel options and compute a compact cache key
+      const optionsJson = getMaterializedBabelOptions(baseConfig, {
+        cwd: normalizedCwd,
+        rootDir: normalizedRoot,
+      });
 
-    const relFile = path.relative(normalizedRoot, path.resolve(sourcePath || ''));
+      const relFile = path.relative(normalizedRoot, path.resolve(sourcePath || ''));
 
-    const hash = crypto.createHash('sha256');
-    // File contents of this transformer
+      const hash = crypto.createHash('sha256');
+      // File contents of this transformer
 
-    hash.update(THIS_FILE);
-    hash.update('\0', 'utf8');
+      hash.update(THIS_FILE);
+      hash.update('\0', 'utf8');
 
-    // Materialized babel options
-    hash.update(optionsJson);
-    hash.update('\0', 'utf8');
-    // Jest transform-related config
-    hash.update(serializeJestTransformBits(cfg));
-    hash.update('\0', 'utf8');
+      // Materialized babel options
+      hash.update(optionsJson);
+      hash.update('\0', 'utf8');
+      // Jest transform-related config
+      hash.update(serializeJestTransformBits(cfg));
+      hash.update('\0', 'utf8');
 
-    // Relative filename
-    hash.update(relFile);
-    hash.update('\0', 'utf8');
-    // Instrumentation flag
-    if (transformOptions && transformOptions.instrument) {
-      hash.update('instrument');
-    }
-    hash.update('\0', 'utf8');
-    // Environment variables
-    hash.update(process.env.NODE_ENV || '');
-    hash.update('\0', 'utf8');
-    hash.update(process.env.BABEL_ENV || '');
-    hash.update('\0', 'utf8');
-    // Node version
-    hash.update(process.version);
+      // Relative filename
+      hash.update(relFile);
+      hash.update('\0', 'utf8');
+      // Instrumentation flag
+      if (transformOptions && transformOptions.instrument) {
+        hash.update('instrument');
+      }
+      hash.update('\0', 'utf8');
+      // Environment variables
+      hash.update(process.env.NODE_ENV || '');
+      hash.update('\0', 'utf8');
+      hash.update(process.env.BABEL_ENV || '');
+      hash.update('\0', 'utf8');
+      // Node version
+      hash.update(process.version);
 
-    // Source text
-    hash.update(String(sourceText || ''));
-    hash.update('\0', 'utf8');
+      // Source text
+      hash.update(String(sourceText || ''));
+      hash.update('\0', 'utf8');
 
-    // Truncate to 32 chars to align with prior expectations
-    return hash.digest('hex').slice(0, 32);
-  },
+      // Truncate to 32 chars to align with prior expectations
+      return hash.digest('hex').slice(0, 32);
+    },
+  };
 };

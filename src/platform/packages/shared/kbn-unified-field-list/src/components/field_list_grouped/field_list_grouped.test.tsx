@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -26,6 +27,8 @@ import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grou
 import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
+
+requireDeferred();
 
 const DESCRIPTION_ID = 'fieldListGrouped__ariaDescription';
 

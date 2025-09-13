@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { EventFiltersProcessDescendantIndicator } from './event_filters_process_descendant_indicator';
@@ -16,6 +17,8 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+
+requireDeferred();
 
 describe('EventFiltersProcessDescendantIndicator', () => {
   let appTestContext: AppContextTestRender;

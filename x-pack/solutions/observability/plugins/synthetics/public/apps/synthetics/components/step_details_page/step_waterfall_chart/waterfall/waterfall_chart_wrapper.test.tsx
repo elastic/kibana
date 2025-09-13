@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
@@ -20,6 +21,8 @@ import { BAR_HEIGHT } from './constants';
 import { MimeType } from '../../common/network_data/types';
 import { FILTER_REQUESTS_LABEL } from './translations';
 import { render } from '../../../../utils/testing';
+
+requireDeferred();
 
 const getHighLightedItems = (query: string, filters: string[]) => {
   return NETWORK_EVENTS.events.filter((item) =>

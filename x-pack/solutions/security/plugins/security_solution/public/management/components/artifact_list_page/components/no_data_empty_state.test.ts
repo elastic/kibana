@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { trustedAppsAllHttpMocks, TrustedAppsGetListHttpMocksInterface } from '../../../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,6 +14,8 @@ import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { artifactListPageLabels } from '../translations';
+
+requireDeferred();
 
 describe('When showing the Empty State in ArtifactListPage', () => {
   let render: (

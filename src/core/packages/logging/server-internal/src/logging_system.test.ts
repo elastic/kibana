@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
 
 const dynamicProps = { process: { pid: expect.any(Number) }, ecs: { version: EcsVersion } };
@@ -20,6 +21,8 @@ const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof c
 import { LoggingSystem, config } from '..';
 import { EcsVersion } from '@elastic/ecs';
 import { unsafeConsole } from '@kbn/security-hardening';
+
+requireDeferred();
 
 let system: LoggingSystem;
 beforeEach(() => {

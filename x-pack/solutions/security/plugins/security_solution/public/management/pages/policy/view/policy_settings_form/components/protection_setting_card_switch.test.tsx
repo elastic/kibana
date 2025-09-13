@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -19,6 +20,8 @@ import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import userEvent from '@testing-library/user-event';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/hooks/use_license');
 

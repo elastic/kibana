@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { getConsoleTestSetup } from './mocks';
 import userEvent from '@testing-library/user-event';
 import type { ConsoleProps } from './types';
+
+requireDeferred();
 
 describe('When using Console component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

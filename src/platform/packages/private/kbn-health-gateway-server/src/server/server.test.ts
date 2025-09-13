@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   createServerMock,
   getServerOptionsMock,
@@ -19,6 +20,8 @@ import { configServiceMock } from '@kbn/config-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Server } from './server';
+
+requireDeferred();
 
 const mockConfig = {
   port: 3000,

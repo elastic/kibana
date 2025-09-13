@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -16,6 +17,8 @@ import {
   PageOverlay,
 } from './page_overlay';
 import { act, waitFor } from '@testing-library/react';
+
+requireDeferred();
 
 describe('When using PageOverlay component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

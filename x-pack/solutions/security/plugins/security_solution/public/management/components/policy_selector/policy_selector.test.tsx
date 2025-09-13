@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { PolicySelectorProps } from './policy_selector';
 import { PolicySelector } from './policy_selector';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -23,6 +24,8 @@ import { getPolicyDetailPath } from '../../common/routing';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { BulkGetPackagePoliciesRequestBody } from '@kbn/fleet-plugin/common/types';
 import { policySelectorMocks } from './mocks';
+
+requireDeferred();
 
 jest.mock('../../../common/components/user_privileges');
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { EffectedPolicySelectProps } from './effected_policy_select';
 import { EffectedPolicySelect } from './effected_policy_select';
 import React from 'react';
@@ -22,6 +23,8 @@ import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts
 import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../common/translations';
 import { allFleetHttpMocks } from '../../mocks';
 import { policySelectorMocks } from '../policy_selector/mocks';
+
+requireDeferred();
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/hooks/use_license');

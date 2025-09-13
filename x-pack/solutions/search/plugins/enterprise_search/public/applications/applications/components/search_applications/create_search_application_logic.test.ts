@@ -7,6 +7,8 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
 import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 
@@ -17,6 +19,8 @@ import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import type { CreateSearchApplicationLogicValues } from './create_search_application_logic';
 import { CreateSearchApplicationLogic } from './create_search_application_logic';
+
+requireDeferred();
 
 const DEFAULT_VALUES: CreateSearchApplicationLogicValues = {
   createDisabled: true,

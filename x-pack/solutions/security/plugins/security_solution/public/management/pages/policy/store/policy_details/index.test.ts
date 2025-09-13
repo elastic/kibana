@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { PolicyDetailsState } from '../../types';
 import type { Dispatch, Store } from 'redux';
 import { applyMiddleware, createStore } from 'redux';
@@ -20,6 +21,8 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+
+requireDeferred();
 
 describe('policy details: ', () => {
   let store: Store;

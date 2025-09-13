@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { waitFor } from '@testing-library/react';
 import type { CommandDefinition, ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
 import { getConsoleTestSetup } from '../mocks';
+
+requireDeferred();
 
 describe('BadArgument component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

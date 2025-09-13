@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -16,6 +17,8 @@ import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discov
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../../common/constants';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/lib/kibana');
 

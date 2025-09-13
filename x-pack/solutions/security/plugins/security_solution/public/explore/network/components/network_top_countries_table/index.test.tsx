@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -17,6 +18,8 @@ import { networkModel } from '../../store';
 
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
+
+requireDeferred();
 
 jest.mock('../../../../common/lib/kibana');
 

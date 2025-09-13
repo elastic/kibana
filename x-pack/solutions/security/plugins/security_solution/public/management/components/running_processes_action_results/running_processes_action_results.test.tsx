@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -17,6 +18,8 @@ import { RunningProcessesActionResults } from './running_processes_action_result
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
+
+requireDeferred();
 
 jest.mock('../../../common/components/user_privileges');
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, waitFor, renderHook } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -23,6 +24,8 @@ import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
 import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import type { HttpStart } from '@kbn/core/public';
+
+requireDeferred();
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/tags/api');

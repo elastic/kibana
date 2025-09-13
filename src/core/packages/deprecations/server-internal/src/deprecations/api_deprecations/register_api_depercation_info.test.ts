@@ -28,6 +28,10 @@ import _ from 'lodash';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
+
 describe('#registerApiDeprecationsInfo', () => {
   const deprecationsFactory = mockDeprecationsFactory.create();
   const deprecationsRegistry = mockDeprecationsRegistry.create();

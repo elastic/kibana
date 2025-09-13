@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -18,6 +19,8 @@ import { initialUserPrivilegesState } from '../../../../../../common/components/
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
   const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');

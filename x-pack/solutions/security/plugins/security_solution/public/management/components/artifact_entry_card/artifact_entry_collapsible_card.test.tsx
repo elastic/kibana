@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -14,6 +15,8 @@ import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_util
 import type { ArtifactEntryCollapsibleCardProps } from './artifact_entry_collapsible_card';
 import { ArtifactEntryCollapsibleCard } from './artifact_entry_collapsible_card';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
+
+requireDeferred();
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

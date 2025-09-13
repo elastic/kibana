@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type {
@@ -20,6 +21,8 @@ import {
 } from './execute_action_host_response';
 import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
 import { EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE } from './execute_action_host_response_output';
+
+requireDeferred();
 
 describe('When using the `ExecuteActionHostResponse` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

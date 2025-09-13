@@ -14,6 +14,9 @@ import type { BaseConnectionPool } from '@elastic/elasticsearch';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import type { ErrorHandlerAccessor } from './create_transport';
 import { createTransport } from './create_transport';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 const createConnectionPool = () => {
   return { _connectionPool: 'mocked' } as unknown as BaseConnectionPool;

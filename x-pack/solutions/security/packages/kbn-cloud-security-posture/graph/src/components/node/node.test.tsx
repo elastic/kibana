@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -31,6 +32,8 @@ import {
   GRAPH_STACKED_SHAPE_ID,
 } from '../test_ids';
 import userEvent from '@testing-library/user-event';
+
+requireDeferred();
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({

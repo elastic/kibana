@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act } from '@testing-library/react';
 import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../mocks';
 import {
@@ -13,6 +14,8 @@ import {
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
 import React from 'react';
+
+requireDeferred();
 
 describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];

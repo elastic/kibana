@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
@@ -12,6 +13,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AuthType } from '../../../common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
+
+requireDeferred();
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');

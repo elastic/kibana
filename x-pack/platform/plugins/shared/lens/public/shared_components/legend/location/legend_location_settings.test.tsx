@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { LegendLocationSettingsProps } from './legend_location_settings';
 import { LegendLocationSettings } from './legend_location_settings';
 import type { RenderOptions } from '@testing-library/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
+
+requireDeferred();
 
 describe('Legend Location Settings', () => {
   let defaultProps: LegendLocationSettingsProps;

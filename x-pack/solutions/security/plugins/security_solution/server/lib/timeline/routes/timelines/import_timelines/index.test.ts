@@ -36,6 +36,9 @@ import {
   NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
   NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
 } from '../../../utils/failure_cases';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 describe('import timelines', () => {
   let server: ReturnType<typeof serverMock.create>;

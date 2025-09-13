@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import _ from 'lodash';
 import $ from 'jquery';
 import d3 from 'd3';
@@ -24,6 +25,8 @@ import termsColumns from '../../../fixtures/mock_data/terms/_columns';
 import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
 import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
+
+requireDeferred();
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,6 +13,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ComponentOpts } from './rule_status_dropdown';
 import { RuleStatusDropdown } from './rule_status_dropdown';
+
+requireDeferred();
 
 const NOW_STRING = '2020-03-01T00:00:00.000Z';
 const SNOOZE_UNTIL = new Date('2020-03-04T00:00:00.000Z');

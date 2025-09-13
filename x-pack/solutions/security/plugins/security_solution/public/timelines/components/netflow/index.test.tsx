@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { get } from 'lodash/fp';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -62,6 +63,8 @@ import {
 } from '../../../explore/network/components/source_destination/field_names';
 import { getMockNetflowData } from '../../../common/mock/netflow';
 import { CellActionsWrapper } from '../../../common/components/drag_and_drop/cell_actions_wrapper';
+
+requireDeferred();
 
 jest.mock('../../../common/lib/kibana');
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   fromKueryExpression,
   fromLiteralExpression,
@@ -18,6 +19,8 @@ import type { DataViewBase } from '../../..';
 import type { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 import { performance } from 'perf_hooks';
+
+requireDeferred();
 
 describe('kuery AST API', () => {
   let indexPattern: DataViewBase;

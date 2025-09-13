@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 
@@ -16,6 +17,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { createHandler } from './create_handler';
 import * as requestModule from '../../../../lib/proxy_request';
 import { createResponseStub } from './stubs';
+
+requireDeferred();
 
 describe('Console Proxy Route', () => {
   let request: (
