@@ -27,10 +27,15 @@ const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}`;
 
 const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
 
-const buildStorybook = (storybook: string): Promise<void> => {
+const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
   return new Promise((resolve, reject) => {
+    const logsBuffer: string[] = [];
+    const handleBufferChunk = (chunk: Buffer) => {
+      logsBuffer.push(chunk.toString());
+    };
+
     const child = spawn('yarn', ['storybook', '--site', storybook], {
-      stdio: 'inherit',
+      stdio: 'pipe',
       env: {
         ...process.env,
         STORYBOOK_BASE_URL,
@@ -38,16 +43,22 @@ const buildStorybook = (storybook: string): Promise<void> => {
       },
     });
 
+    child.stdout?.on('data', handleBufferChunk);
+    child.stderr?.on('data', handleBufferChunk);
+
     child.on('close', (code) => {
       if (code === 0) {
-        resolve();
+        logsBuffer.unshift(`--- ✅ Storybook: ${storybook}\n`);
+        resolve({ logs: logsBuffer.join('') });
       } else {
-        reject(new Error(`Storybook build failed for ${storybook} with exit code ${code}`));
+        logsBuffer.unshift(`--- ❌ Storybook: ${storybook}\n`);
+        reject(new Error(logsBuffer.join('')));
       }
     });
 
-    child.on('error', (error) => {
-      reject(error);
+    child.on('error', () => {
+      logsBuffer.unshift(`--- ❌ Storybook: ${storybook}\n`);
+      reject(new Error(logsBuffer.join('')));
     });
   });
 };
@@ -66,10 +77,20 @@ const build = async () => {
   console.log('--- Building Storybooks');
 
   const limit = pLimit(os.availableParallelism());
+  const storybooks = Object.keys(storybookAliases);
 
-  await Promise.all(
-    Object.keys(storybookAliases).map((storybook) => limit(() => buildStorybook(storybook)))
-  );
+  try {
+    const results = await Promise.all(
+      storybooks.map((storybook) => limit(() => buildStorybook(storybook)))
+    );
+
+    results.forEach(({ logs }) => {
+      console.log(logs);
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 const upload = () => {
