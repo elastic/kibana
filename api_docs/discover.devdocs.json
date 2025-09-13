@@ -2507,7 +2507,9 @@
                 "section": "def-common.DataTableRecord",
                 "text": "DataTableRecord"
               },
-              " | undefined; initialDocViewerTabId?: string | undefined; }, \"internalState/setExpandedDoc\">; setDataRequestParams: ",
+              " | undefined; initialDocViewerTabId?: string | undefined; }, \"internalState/setExpandedDoc\">; discardFlyoutsOnTabChange: ",
+              "ActionCreatorWithoutPayload",
+              "<\"internalState/discardFlyoutsOnTabChange\">; setDataRequestParams: ",
               "ActionCreatorWithPayload",
               "<",
               "TabActionPayload",
