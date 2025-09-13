@@ -62,7 +62,7 @@ export function validateMimeType(
     return;
   }
 
-  if (allowedMimeTypes && !allowedMimeTypes.includes(mimeType)) {
+  if (!allowedMimeTypes.includes(mimeType)) {
     return kibanaResponseFactory.badRequest({
       body: {
         message: `File type is not supported`,
