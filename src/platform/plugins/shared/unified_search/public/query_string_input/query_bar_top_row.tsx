@@ -21,6 +21,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
+import { getESQLResults } from '@kbn/esql-utils';
 import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
@@ -324,7 +325,7 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
+    const [commonlyUsedRanges, setCommonlyUsedRanges] = useState(() => {
       return (
         uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
@@ -477,6 +478,69 @@ export const QueryBarTopRow = React.memo(
     useEffect(() => {
       onDraftChange?.(draft);
     }, [onDraftChange, draft]);
+
+    // Track the current ad-hoc dataview for dependency array
+    const currentAdHocDataview = useMemo(() => {
+      const adHocDataview = props.indexPatterns?.[0];
+      return adHocDataview && typeof adHocDataview !== 'string' ? adHocDataview : null;
+    }, [props.indexPatterns]);
+
+    // Handle adding "All time" range for ESQL queries with timestamp field
+    useEffect(() => {
+      const addAllTimeRange = async () => {
+        if (Boolean(isQueryLangSelected)) {
+          if (currentAdHocDataview && currentAdHocDataview.timeFieldName) {
+            try {
+              const abortController = new AbortController();
+              const results = await getESQLResults({
+                esqlQuery: `FROM ${currentAdHocDataview.getIndexPattern()} | STATS MIN(${
+                  currentAdHocDataview.timeFieldName
+                }), MAX(${currentAdHocDataview.timeFieldName})`,
+                search: data.search.search,
+                signal: abortController?.signal,
+                dropNullColumns: true,
+              });
+
+              // Extract the minimum and maximum timestamp from results to use as start time
+              const minTimestamp = results?.response?.values?.[0]?.[0];
+              const maxTimestamp = results?.response?.values?.[0]?.[1];
+              const startTime =
+                minTimestamp && typeof minTimestamp === 'string'
+                  ? new Date(minTimestamp).toISOString()
+                  : '';
+              const endTime =
+                maxTimestamp && typeof maxTimestamp === 'string'
+                  ? new Date(maxTimestamp).toISOString()
+                  : '';
+
+              setCommonlyUsedRanges(
+                (prev: Array<{ start: string; end: string; label: string }>) => {
+                  // Remove existing "All time" range if it exists and add the new one
+                  const filteredRanges = prev.filter((range) => range.label !== 'All time');
+                  return [
+                    ...filteredRanges,
+                    {
+                      label: 'All time',
+                      start: startTime,
+                      end: endTime,
+                    },
+                  ];
+                }
+              );
+            } catch (error) {
+              // If ESQL query fails, do nothing
+            }
+          }
+        } else {
+          // Remove "All time" range when not in ESQL mode
+          setCommonlyUsedRanges((prev: Array<{ start: string; end: string; label: string }>) => {
+            return prev.filter((range) => range.label !== 'All time');
+          });
+        }
+      };
+
+      addAllTimeRange();
+    }, [currentAdHocDataview, data.search.search, isQueryLangSelected]); // Only re-run when dataview changes for performance
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
