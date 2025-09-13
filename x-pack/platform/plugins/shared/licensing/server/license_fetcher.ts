@@ -132,7 +132,7 @@ function sign({
         license,
         features,
         error,
-      })
+      }) as string
     )
     .digest('hex');
 }
