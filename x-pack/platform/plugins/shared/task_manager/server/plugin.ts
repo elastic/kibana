@@ -25,6 +25,7 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -74,6 +75,7 @@ export interface TaskManagerSetupContract {
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
+  registerEventLogService: (service: IEventLogService) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -137,6 +139,7 @@ export class TaskManagerPlugin
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
+  private eventLogger?: IEventLogger;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -286,6 +289,15 @@ export class TaskManagerPlugin
       registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
         this.canEncryptSavedObjects = canEncrypt;
       },
+      registerEventLogService: (service: IEventLogService) => {
+        if (this.eventLogger) {
+          throw new Error('eventLogger already defined');
+        }
+        this.eventLogger = service.getLogger({
+          event: { provider: 'task_manager' },
+        });
+        service.registerProviderActions('task_manager', ['execute', 'execute-start']);
+      },
     };
   }
 
@@ -371,6 +383,10 @@ export class TaskManagerPlugin
         kibanasPerPartition: this.config.kibanas_per_partition,
       });
 
+      if (!this.eventLogger) {
+        throw new Error('Unable to start. eventLogger not defined.');
+      }
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         basePathService: http.basePath,
         config: this.config!,
@@ -383,6 +399,7 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
         startingCapacity,
+        eventLogger: this.eventLogger,
       });
     }
 

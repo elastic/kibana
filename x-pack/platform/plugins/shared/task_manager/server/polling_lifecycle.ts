@@ -13,6 +13,7 @@ import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -80,6 +81,7 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
+  eventLogger: IEventLogger;
 }
 
 export type TaskLifecycleEvent =
@@ -102,6 +104,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private bufferedStore: BufferedTaskStore;
   private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
+  private eventLogger: IEventLogger;
 
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
@@ -140,6 +143,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     usageCounter,
     taskPartitioner,
     startingCapacity,
+    eventLogger,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -151,6 +155,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.config = config;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
+    this.eventLogger = eventLogger;
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
@@ -270,6 +275,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
+      eventLogger: this.eventLogger,
     });
   };
 
