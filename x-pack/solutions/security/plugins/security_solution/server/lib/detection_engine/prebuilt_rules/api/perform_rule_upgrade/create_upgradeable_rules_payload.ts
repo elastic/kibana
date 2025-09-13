@@ -24,6 +24,10 @@ import { calculateThreeWayRuleFieldsDiff } from '../../logic/diff/calculation/ca
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getValueForField } from './get_value_for_field';
+import {
+  buildRuleUpdateTelemetryDraft,
+  type RuleUpdateTelemetryDraft,
+} from './update_rule_telemetry';
 
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
@@ -34,6 +38,7 @@ interface CreateModifiedPrebuiltRuleAssetsProps {
 interface ProcessedRules {
   modifiedPrebuiltRuleAssets: PrebuiltRuleAsset[];
   processingErrors: Array<PromisePoolError<{ rule_id: string }>>;
+  ruleUpdateTelemetryDrafts: RuleUpdateTelemetryDraft[];
 }
 
 export const createModifiedPrebuiltRuleAssets = ({
@@ -48,7 +53,7 @@ export const createModifiedPrebuiltRuleAssets = ({
       on_conflict: onConflict,
     } = requestBody;
 
-    const { modifiedPrebuiltRuleAssets, processingErrors } =
+    const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpdateTelemetryDrafts } =
       upgradeableRules.reduce<ProcessedRules>(
         (processedRules, upgradeableRule) => {
           const targetRuleType = upgradeableRule.target.type;
@@ -107,25 +112,34 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
 
+            const ruleUpdateTelemetryDraft = buildRuleUpdateTelemetryDraft({
+              calculatedRuleDiff,
+              ruleId,
+              ruleName: upgradeableRule.target.name,
+              hasMissingBaseVersion: upgradeableRule.base == null,
+            });
+            processedRules.ruleUpdateTelemetryDrafts.push(ruleUpdateTelemetryDraft);
+
             return processedRules;
           } catch (err) {
             processedRules.processingErrors.push({
               error: err,
               item: { rule_id: ruleId },
             });
-
             return processedRules;
           }
         },
         {
           modifiedPrebuiltRuleAssets: [],
           processingErrors: [],
+          ruleUpdateTelemetryDrafts: [],
         }
       );
 
     return {
       modifiedPrebuiltRuleAssets,
       processingErrors,
+      ruleUpdateTelemetryDrafts,
     };
   });
 };
