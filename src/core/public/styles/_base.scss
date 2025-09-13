@@ -26,3 +26,9 @@
 .euiBody--hasFlyout .euiBottomBar--fixed {
   margin-left: var(--euiCollapsibleNavOffset, 0);
 }
+
+// POC: Numeric font style overrides
+body, .euiDataGrid__content {
+  font-variant-numeric: tabular-nums slashed-zero !important;
+  font-feature-settings: 'ss07', 'cv02', 'cv09' !important;
+}
