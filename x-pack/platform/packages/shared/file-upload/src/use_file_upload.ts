@@ -37,9 +37,7 @@ export function useFileUpload(
   const [indexCreateMode, setIndexCreateMode] = useState<UPLOAD_TYPE>(UPLOAD_TYPE.NEW);
   const [indices, setIndices] = useState<Index[]>([]);
 
-  const [indexName, setIndexName] = useState<string>(
-    fileUploadManager.getExistingIndexName() ?? ''
-  );
+  const [indexName, setIndexName] = useState<string>('');
   const [dataViewName, setDataViewName] = useState<string | null>(
     fileUploadManager.getAutoCreateDataView() ? '' : null
   );
@@ -48,9 +46,7 @@ export function useFileUpload(
 
   const [dataViewNameError, setDataViewNameError] = useState<string>('');
 
-  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(
-    fileUploadManager.getExistingIndexName() ? STATUS.COMPLETED : STATUS.NOT_STARTED
-  );
+  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
 
   const deleteFile = useCallback(
     (i: number) => fileUploadManager.removeFile(i),
@@ -72,42 +68,71 @@ export function useFileUpload(
     [navigateToApp]
   );
 
-  useEffect(() => {
-    if (http === undefined) {
-      return;
-    }
-
-    http.get<Index[]>('/api/index_management/indices').then((indx) => {
-      if (!isMounted()) {
+  useEffect(
+    function loadIndices() {
+      if (http === undefined) {
         return;
       }
-      setIndices(indx.filter((i) => i.hidden === false && i.isFrozen === false));
-    });
-  }, [http, fileUploadManager, isMounted]);
 
-  useEffect(() => {
-    dataViews.getTitles().then((titles) => {
-      if (!isMounted()) {
+      http.get<Index[]>('/api/index_management/indices').then((loadedIndices) => {
+        if (!isMounted()) {
+          return;
+        }
+        const tempIndices = loadedIndices.filter((i) => i.hidden === false && i.isFrozen === false);
+        setIndices(tempIndices);
+        const initializedWithExistingIndex = fileUploadManager.getInitializedWithExistingIndex();
+        const existingIndex = fileUploadManager.getExistingIndexName();
+        if (
+          initializedWithExistingIndex &&
+          existingIndex !== null &&
+          tempIndices.find((idx) => idx.name === existingIndex)
+        ) {
+          setIndexName(existingIndex);
+        }
+      });
+    },
+    [http, fileUploadManager, isMounted]
+  );
+
+  useEffect(
+    function loadDataViewNames() {
+      dataViews.getTitles().then((titles) => {
+        if (!isMounted()) {
+          return;
+        }
+        setExistingDataViewNames(titles);
+      });
+    },
+    [dataViews, isMounted]
+  );
+
+  useEffect(
+    function initAndDestroy() {
+      if (fileUploadManager.getInitializedWithExistingIndex()) {
+        setIndexCreateMode(UPLOAD_TYPE.EXISTING);
+        setIndexName(fileUploadManager.getExistingIndexName() ?? '');
+      } else {
+        setIndexName('');
+        setIndexCreateMode(UPLOAD_TYPE.NEW);
+      }
+      return () => {
+        fileUploadManager.destroy();
+      };
+    },
+    [fileUploadManager]
+  );
+
+  useEffect(
+    function checkDataViewName() {
+      if (dataViewName === null || dataViewName === '') {
+        setDataViewNameError('');
         return;
       }
-      setExistingDataViewNames(titles);
-    });
-  }, [dataViews, isMounted]);
 
-  useEffect(() => {
-    return () => {
-      fileUploadManager.destroy();
-    };
-  }, [fileUploadManager]);
-
-  useEffect(() => {
-    if (dataViewName === null || dataViewName === '') {
-      setDataViewNameError('');
-      return;
-    }
-
-    setDataViewNameError(isDataViewNameValid(dataViewName, existingDataViewNames, indexName));
-  }, [dataViewName, existingDataViewNames, indexName]);
+      setDataViewNameError(isDataViewNameValid(dataViewName, existingDataViewNames, indexName));
+    },
+    [dataViewName, existingDataViewNames, indexName]
+  );
 
   const uploadStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
@@ -172,17 +197,21 @@ export function useFileUpload(
   const mappings = useObservable(fileUploadManager.mappings$, fileUploadManager.getMappings());
   const settings = useObservable(fileUploadManager.settings$, fileUploadManager.getSettings());
 
-  const setExistingIndexName = useCallback(
-    (idxName: string | null) => {
-      fileUploadManager.setExistingIndexName(idxName);
+  useEffect(
+    function cleanIndexSelection() {
+      const tempExistingIndexName = fileUploadManager.getExistingIndexName();
+      setIndexName(
+        tempExistingIndexName && indexCreateMode === UPLOAD_TYPE.EXISTING
+          ? tempExistingIndexName
+          : ''
+      );
     },
-    [fileUploadManager]
+    [indexCreateMode, fileUploadManager]
   );
 
   useEffect(() => {
-    setIndexName('');
-    setExistingIndexName(null);
-  }, [indexCreateMode, setExistingIndexName]);
+    setIndexName(existingIndexName ?? '');
+  }, [existingIndexName]);
 
   const pipelines = useObservable(fileUploadManager.filePipelines$, []);
 
@@ -211,7 +240,6 @@ export function useFileUpload(
     setIndexCreateMode,
     indices,
     existingIndexName,
-    setExistingIndexName,
   };
 }
 

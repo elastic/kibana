@@ -114,6 +114,7 @@ function getReader(results: TextStructureFindStructureResponse) {
   switch (results.format) {
     case FILE_FORMATS.NDJSON:
       return new NdjsonReader();
+    case FILE_FORMATS.SEMI_STRUCTURED_TEXT:
     case FILE_FORMATS.DELIMITED:
       const options: {
         docLimit?: number;
