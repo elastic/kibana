@@ -9,7 +9,6 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { WorkflowsManagementPluginServerDependenciesSetup } from './types';
 
 /**
@@ -50,7 +49,6 @@ export const registerFeatures = (plugins: WorkflowsManagementPluginServerDepende
         ui: ['read'],
       },
     },
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     subFeatures: [
       {
         name: i18n.translate(

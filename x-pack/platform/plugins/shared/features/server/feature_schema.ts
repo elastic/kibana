@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { difference } from 'lodash';
 import type { Capabilities as UICapabilities } from '@kbn/core/server';
 import type { KibanaFeatureConfig } from '../common';
-import { KibanaFeatureScope } from '../common';
 import type { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 import type { AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';
 
@@ -233,7 +232,6 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
-  scope: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
   // The hidden flag is only supported for explicit configuration for features with reserved privileges.
   // All other usages are via configuration overrides.
   hidden: schema.maybe(schema.boolean()),
@@ -246,23 +244,13 @@ const kibanaFeatureSchema = schema.object({
   catalogue: schema.maybe(catalogueSchema),
   alerting: schema.maybe(alertingSchema),
   cases: schema.maybe(casesSchema),
-  // Features registered only for the spaces scope should not have a `privileges` property.
-  // Such features are applicable only to the Spaces Visibility Toggles
-  privileges: schema.conditional(
-    schema.siblingRef('scope'),
-    schema.arrayOf(schema.literal('spaces'), {
-      minSize: 1,
-      maxSize: 1,
-    }),
+  privileges: schema.oneOf([
     schema.literal(null),
-    schema.oneOf([
-      schema.literal(null),
-      schema.object({
-        all: schema.maybe(kibanaPrivilegeSchema),
-        read: schema.maybe(kibanaPrivilegeSchema),
-      }),
-    ])
-  ),
+    schema.object({
+      all: schema.maybe(kibanaPrivilegeSchema),
+      read: schema.maybe(kibanaPrivilegeSchema),
+    }),
+  ]),
   subFeatures: schema.maybe(
     schema.conditional(
       schema.siblingRef('privileges'),
@@ -332,14 +320,6 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   const { hidden, privileges, reserved } = feature;
   if (hidden && (privileges !== null || typeof reserved === 'undefined')) {
     throw new Error(`Feature ${feature.id} cannot be hidden.`);
-  }
-
-  const unknownScopesEntries = difference(feature.scope ?? [], Object.values(KibanaFeatureScope));
-
-  if (unknownScopesEntries.length) {
-    throw new Error(
-      `Feature ${feature.id} has unknown scope entries: ${unknownScopesEntries.join(', ')}`
-    );
   }
 
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
