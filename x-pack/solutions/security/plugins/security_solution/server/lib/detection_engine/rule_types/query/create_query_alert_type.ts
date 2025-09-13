@@ -7,11 +7,10 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
 import { UnifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from './query';
-import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
+import type { CreateQueryRuleOptions, SecurityRuleType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export interface QueryRuleState {
@@ -21,7 +20,7 @@ export interface QueryRuleState {
 
 export const createQueryAlertType = (
   createOptions: CreateQueryRuleOptions
-): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState> => {
+): SecurityRuleType<UnifiedQueryRuleParams, QueryRuleState> => {
   const { id, name } = createOptions;
   return {
     id,

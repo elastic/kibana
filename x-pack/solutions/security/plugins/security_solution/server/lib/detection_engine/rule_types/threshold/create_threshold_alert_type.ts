@@ -13,10 +13,10 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ThresholdRuleParams } from '../../rule_schema';
 import { thresholdExecutor } from './threshold';
 import type { ThresholdAlertState } from './types';
-import type { SecurityAlertType } from '../types';
+import type { SecurityRuleType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
-export const createThresholdAlertType = (): SecurityAlertType<
+export const createThresholdAlertType = (): SecurityRuleType<
   ThresholdRuleParams,
   ThresholdAlertState
 > => {

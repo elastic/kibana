@@ -51,7 +51,7 @@ import type { ConfigType } from '../../../../../config';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
   CreateSecurityRuleTypeWrapperProps,
-  SecurityAlertType,
+  SecurityRuleType,
 } from '../../../rule_types/types';
 import {
   createEqlAlertType,
@@ -199,7 +199,7 @@ export const previewRulesRoute = (
           });
 
           const runExecutors = async <TParams extends RuleParams, TState extends RuleTypeState>(
-            securityRuleType: SecurityAlertType<TParams, TState>,
+            securityRuleType: SecurityRuleType<TParams, TState>,
             params: TParams
           ) => {
             const ruleType = previewRuleTypeWrapper(securityRuleType);
