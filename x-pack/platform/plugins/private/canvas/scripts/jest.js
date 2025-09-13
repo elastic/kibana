@@ -34,7 +34,7 @@ if (storybookPosition > -1) {
   process.argv.push('--modulePathIgnorePatterns="/canvas/storybook/"');
 }
 
-if (process.env.NODE_ENV == null) {
+if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'test';
 }
 
