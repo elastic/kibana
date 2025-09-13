@@ -48,16 +48,16 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
 
     child.on('close', (code) => {
       if (code === 0) {
-        logsBuffer.unshift(`--- ✅ Storybook: ${storybook}\n`);
+        logsBuffer.unshift(`--- ✅ ${storybook} Storybook\n`);
         resolve({ logs: logsBuffer.join('') });
       } else {
-        logsBuffer.unshift(`--- ❌ Storybook: ${storybook}\n`);
+        logsBuffer.unshift(`--- ❌ ${storybook} Storybook\n`);
         reject(new Error(logsBuffer.join('')));
       }
     });
 
     child.on('error', () => {
-      logsBuffer.unshift(`--- ❌ Storybook: ${storybook}\n`);
+      logsBuffer.unshift(`--- ❌ ${storybook} Storybook\n`);
       reject(new Error(logsBuffer.join('')));
     });
   });
