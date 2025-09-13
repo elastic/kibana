@@ -492,11 +492,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('project monitors - handles url ecoded project names', async () => {
       const monitors = [];
-      const projectName = 'Test project';
+      const projectName = 'Test-project';
       for (let i = 0; i < 600; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
-          id: `test url id ${i}`,
+          id: `test-url-id-${i}`,
           name: `test name ${i}`,
         });
       }
