@@ -12,6 +12,7 @@ import type {
   AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Group } from '@kbn/alerting-rule-utils';
+import { get } from 'lodash';
 
 export const UngroupedGroupId = 'all documents';
 export interface ParsedAggregationGroup {
@@ -111,24 +112,22 @@ export const parseAggregationResults = ({
         : undefined;
 
     const sourceFields: { [key: string]: string[] } = {};
-
-    sourceFieldsParams.forEach((field) => {
-      if (generateSourceFieldsFromHits) {
+    if (generateSourceFieldsFromHits) {
+      sourceFieldsParams.forEach((field) => {
         const fieldsSet: string[] = [];
-        groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
-          if (hit._source && hit._source[field.label]) {
-            fieldsSet.push(hit._source[field.label]);
+        const hits = groupBucket?.topHitsAgg?.hits?.hits ?? [];
+        hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
+          const sourceField = get(hit._source, field.label);
+          if (sourceField) {
+            fieldsSet.push(sourceField);
           }
         });
-        sourceFields[field.label] = Array.from(fieldsSet);
-      } else {
-        if (groupBucket[field.label]?.buckets && groupBucket[field.label].buckets.length > 0) {
-          sourceFields[field.label] = groupBucket[field.label].buckets.map(
-            (bucket: { doc_count: number; key: string | number }) => bucket.key
-          );
+        if (fieldsSet.length > 0) {
+          const isArray = Array.isArray(fieldsSet);
+          sourceFields[field.label] = Array.from(isArray ? fieldsSet.flat() : fieldsSet);
         }
-      }
-    });
+      });
+    }
 
     const groupResult: any = {
       group: groupName,
