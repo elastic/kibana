@@ -347,9 +347,8 @@ export class StreamsClient {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {},
                 routing: [],
@@ -546,9 +545,8 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         classic: {},
       },
     };
@@ -624,6 +622,7 @@ export class StreamsClient {
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
+        settings: {},
         classic: {},
       },
     }));
@@ -687,10 +686,10 @@ export class StreamsClient {
 
     await State.attemptChanges(
       [
-        {
-          type: 'delete',
-          name,
-        },
+        // attempting to delete a classic stream that was not previously stored
+        // results in a noop so we make sure to make it available in the state first
+        { type: 'upsert', definition },
+        { type: 'delete', name },
       ],
       {
         ...this.dependencies,

@@ -597,7 +597,7 @@ function ModalFooter({
   );
 }
 
-function LinkToStream({ name }: { name: string }) {
+export function LinkToStream({ name }: { name: string }) {
   const router = useStreamsAppRouter();
 
   return (

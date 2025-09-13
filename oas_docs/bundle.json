@@ -49514,11 +49514,64 @@
                                                   "steps"
                                                 ],
                                                 "type": "object"
+                                              },
+                                              "settings": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "index.number_of_replicas": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.number_of_shards": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.refresh_interval": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "enum": [
+                                                              -1
+                                                            ],
+                                                            "type": "number"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  }
+                                                },
+                                                "type": "object"
                                               }
                                             },
                                             "required": [
                                               "lifecycle",
-                                              "processing"
+                                              "processing",
+                                              "settings"
                                             ],
                                             "type": "object"
                                           }
@@ -52796,11 +52849,64 @@
                                               "steps"
                                             ],
                                             "type": "object"
+                                          },
+                                          "settings": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "index.number_of_replicas": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.number_of_shards": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.refresh_interval": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "anyOf": [
+                                                      {
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "enum": [
+                                                          -1
+                                                        ],
+                                                        "type": "number"
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              }
+                                            },
+                                            "type": "object"
                                           }
                                         },
                                         "required": [
                                           "lifecycle",
-                                          "processing"
+                                          "processing",
+                                          "settings"
                                         ],
                                         "type": "object"
                                       }
@@ -55675,11 +55781,64 @@
                                                   "steps"
                                                 ],
                                                 "type": "object"
+                                              },
+                                              "settings": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "index.number_of_replicas": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.number_of_shards": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.refresh_interval": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "enum": [
+                                                              -1
+                                                            ],
+                                                            "type": "number"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  }
+                                                },
+                                                "type": "object"
                                               }
                                             },
                                             "required": [
                                               "lifecycle",
-                                              "processing"
+                                              "processing",
+                                              "settings"
                                             ],
                                             "type": "object"
                                           }
@@ -58653,11 +58812,64 @@
                                               "steps"
                                             ],
                                             "type": "object"
+                                          },
+                                          "settings": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "index.number_of_replicas": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.number_of_shards": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.refresh_interval": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "anyOf": [
+                                                      {
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "enum": [
+                                                          -1
+                                                        ],
+                                                        "type": "number"
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              }
+                                            },
+                                            "type": "object"
                                           }
                                         },
                                         "required": [
                                           "lifecycle",
-                                          "processing"
+                                          "processing",
+                                          "settings"
                                         ],
                                         "type": "object"
                                       }
@@ -62116,11 +62328,64 @@
                                   "steps"
                                 ],
                                 "type": "object"
+                              },
+                              "settings": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "index.number_of_replicas": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.number_of_shards": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.refresh_interval": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "enum": [
+                                              -1
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
                               }
                             },
                             "required": [
                               "lifecycle",
-                              "processing"
+                              "processing",
+                              "settings"
                             ],
                             "type": "object"
                           },
@@ -65253,11 +65518,64 @@
                                   "steps"
                                 ],
                                 "type": "object"
+                              },
+                              "settings": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "index.number_of_replicas": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.number_of_shards": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.refresh_interval": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "enum": [
+                                              -1
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
                               }
                             },
                             "required": [
                               "lifecycle",
-                              "processing"
+                              "processing",
+                              "settings"
                             ],
                             "type": "object"
                           },
