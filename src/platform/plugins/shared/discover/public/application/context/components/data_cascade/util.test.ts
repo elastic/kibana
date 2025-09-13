@@ -103,6 +103,19 @@ describe('utils', () => {
       ]);
       expect(result.appliedFunctions).toEqual([{ identifier: 'var0', operator: 'AVG' }]);
     });
+
+    it('should return empty arrays if there is a where command targeting a column on the last STATS command in the query', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS COUNT() BY clientip
+        | WHERE clientip == "192.168.1.1"
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
   });
 
   describe('constructCascadeQuery', () => {
