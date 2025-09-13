@@ -49,6 +49,27 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
     );
   }
 
+  public getInputSchema(): RecordOfType<K, V> | import('./maybe_type').MaybeType<Record<K, V>> {
+    // For records, create a new record with the input schemas of key and value types
+    const inputKeyType = this.keyType.getInputSchema();
+    const inputValueType = this.valueType.getInputSchema();
+    
+    // Create new options without defaultValue to avoid circular default handling
+    const { defaultValue, ...optionsWithoutDefault } = this.options;
+    const inputRecordType = new RecordOfType(
+      inputKeyType as Type<K>, 
+      inputValueType as Type<V>, 
+      optionsWithoutDefault
+    );
+    
+    // If this record has a default value, wrap it in MaybeType
+    if (defaultValue !== undefined) {
+      return new (require('./maybe_type').MaybeType)(inputRecordType);
+    }
+    
+    return inputRecordType;
+  }
+
   protected handleError(
     type: string,
     { entryKey, reason, value }: Record<string, any>,

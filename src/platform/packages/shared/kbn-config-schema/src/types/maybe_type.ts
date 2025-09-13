@@ -28,4 +28,10 @@ export class MaybeType<V> extends Type<V | undefined> {
   public extendsDeep(options: ExtendsDeepOptions) {
     return new MaybeType(this.maybeType.extendsDeep(options));
   }
+
+  public getInputSchema(): MaybeType<V> {
+    // For maybe types, create a new maybe with the input schema of the wrapped type
+    const inputType = this.maybeType.getInputSchema();
+    return new MaybeType(inputType as Type<V>);
+  }
 }
