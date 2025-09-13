@@ -118,7 +118,9 @@ export async function autocomplete(
                 },
               ]
             : []),
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          getNewUserDefinedColumnSuggestion(
+            (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
+          ),
         ],
         afterCompleteSuggestions: [
           whereCompleteItem,
@@ -251,7 +253,9 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          getNewUserDefinedColumnSuggestion(
+            (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
+          ),
           getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),

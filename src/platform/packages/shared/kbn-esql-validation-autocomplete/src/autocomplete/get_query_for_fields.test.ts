@@ -8,7 +8,7 @@
  */
 
 import { BasicPrettyPrinter, EDITOR_MARKER, parse } from '@kbn/esql-ast';
-import { getQueryForFields } from './resources_helpers';
+import { getQueryForFields } from './get_query_for_fields';
 
 describe('getQueryForFields', () => {
   const assert = (query: string, expected: string) => {

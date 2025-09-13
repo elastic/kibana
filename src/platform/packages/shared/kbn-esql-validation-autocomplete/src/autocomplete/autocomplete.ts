@@ -34,10 +34,11 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { getAstContext } from '../shared/context';
 import { isSourceCommand } from '../shared/helpers';
-import { getColumnsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
+import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
+import { getQueryForFields } from './get_query_for_fields';
 
 type GetColumnMapFn = () => Promise<Map<string, ESQLColumnData>>;
 
@@ -57,7 +58,7 @@ export async function suggest(
   }
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    root,
+    getQueryForFields(correctedQuery, root),
     innerText,
     resourceRetriever
   );
@@ -173,7 +174,7 @@ export function getColumnsByTypeRetriever(
   queryText: string,
   resourceRetriever?: ESQLCallbacks
 ): { getColumnsByType: GetColumnsByTypeFn; getColumnMap: GetColumnMapFn } {
-  const helpers = getColumnsByTypeHelper(query, queryText, resourceRetriever);
+  const helpers = new QueryColumns(query, queryText, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 
@@ -195,7 +196,7 @@ export function getColumnsByTypeRetriever(
         recommendedFields: [],
       };
       const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
-      const columns = await helpers.getColumnsByType(expectedType, ignored);
+      const columns = await helpers.byType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(
         columns,
         recommendedFieldsFromExtensions,
@@ -203,7 +204,7 @@ export function getColumnsByTypeRetriever(
         await getVariables?.()
       );
     },
-    getColumnMap: helpers.getColumnMap,
+    getColumnMap: helpers.asMap.bind(helpers),
   };
 }
 
@@ -242,16 +243,18 @@ async function getSuggestionsWithinCommandExpression(
   const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
   const references = { columns: columnMap };
 
-  const getSuggestedUserDefinedColumnName = (extraColumnNames?: string[]) => {
-    if (!extraColumnNames?.length) {
-      return findNewUserDefinedColumn(columnMap);
-    }
+  const getSuggestedUserDefinedColumnName = async () => {
+    const correctedQuery = correctQuerySyntax(innerText);
+    const { root } = parse(correctedQuery, { withFormatting: true });
+    // get columns including the current command being edited
+    // this is needed to avoid suggesting a user defined column name that is already used
+    const columnsIncludingCurrentCommand = await new QueryColumns(
+      root,
+      correctedQuery,
+      callbacks
+    ).asMap();
 
-    const augmentedColumnsMap = new Map(columnMap);
-    extraColumnNames.forEach((name) => {
-      augmentedColumnsMap.set(name, { name, type: 'double', userDefined: false });
-    });
-    return findNewUserDefinedColumn(augmentedColumnsMap);
+    return findNewUserDefinedColumn(columnsIncludingCurrentCommand);
   };
 
   const additionalCommandContext = await getCommandContext(
