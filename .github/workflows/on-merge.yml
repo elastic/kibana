@@ -13,20 +13,12 @@ jobs:
       github.event.pull_request.merged == true &&
         (github.event.action == 'closed' ||
           (github.event.action == 'labeled' &&
-            (github.event.label.name == 'backport:prev-minor' ||
-              github.event.label.name == 'backport:prev-major' ||
-              github.event.label.name == 'backport:current-major' ||
-              github.event.label.name == 'backport:all-open' ||
-              github.event.label.name == 'backport:version' ||
-              github.event.label.name == 'auto-backport')) ||
+            (github.event.label.name == 'backport:all-open' ||
+              github.event.label.name == 'backport:version')) ||
           (github.event.action == 'unlabeled' &&
             github.event.label.name == 'backport:skip' &&
-            (contains(github.event.pull_request.labels.*.name, 'backport:prev-minor') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:prev-major') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:current-major') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:version') ||
-              contains(github.event.pull_request.labels.*.name, 'auto-backport'))))
+            (contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
+              contains(github.event.pull_request.labels.*.name, 'backport:version'))))
     steps:
       - name: Checkout Actions
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
