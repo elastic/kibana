@@ -9,7 +9,7 @@
 
 import type { graphlib } from '@dagrejs/dagre';
 import type { StepContext, WorkflowContext } from '@kbn/workflows';
-import type { ElasticsearchClient } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
