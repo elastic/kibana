@@ -335,10 +335,12 @@ export const openInNewTab: InternalStateThunkActionCreator<
   (dispatch, getState) => {
     const initialAppState = appState ? cloneDeep(appState) : undefined;
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
+    const currentState = getState();
+    const currentTabs = selectAllTabs(currentState);
 
     const newDefaultTab: TabState = {
       ...DEFAULT_TAB_STATE,
-      ...createTabItem([]),
+      ...createTabItem(currentTabs),
       initialAppState,
       globalState: initialGlobalState,
     };
@@ -349,9 +351,6 @@ export const openInNewTab: InternalStateThunkActionCreator<
         searchSessionId,
       };
     }
-
-    const currentState = getState();
-    const currentTabs = selectAllTabs(currentState);
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
