@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Simplify } from './helper_types';
 import type {
   ObjectProps,
   ObjectResultType,
@@ -15,8 +16,6 @@ import type {
   TypeOrLazyType,
 } from './object_type';
 import type { Type } from './type';
-
-type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 /**
  * General type that encompases all possible schema types

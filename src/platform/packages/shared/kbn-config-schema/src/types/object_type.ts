@@ -105,7 +105,7 @@ export type ObjectResultType<P extends ObjectProps<Props>> = {
 export type TypeOfDefault<RT extends TypeOrLazyType> = RT extends TypeOrLazyType<infer V, infer D>
   ? [D] extends [never]
     ? V
-    : D
+    : V | D // generalize default (i.e. 'foo' to string)
   : 1;
 
 export type ObjectResultDefaults<P extends ObjectProps<Props>> = {

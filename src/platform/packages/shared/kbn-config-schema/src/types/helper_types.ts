@@ -13,30 +13,12 @@
 export type Simplify<T extends object> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 /**
- * Merges keys with different types
+ * Check if `T` is of type `any`.
  *
- * @example
- * ```ts
- * type T1 = Type<number, never>;
- * type T2 = Type<string, string>;
+ * This uses the fact that `any` will absorb all types.
  *
- * type MergedT = IntersectionMergedType<T1, T2>; // Type<number | string, string>
- * ```
+ * For example:
+ * - If `T` is `any`, `1 & any` resolves to `any`, and `0 extends any` is `true` (since `any` accepts any type).
+ * - If `T` is not `any` (e.g. `string`, `number`, `{}`), `1 & T` is `never` (because `1` is a literal type that can't intersect with most types), so `0 extends never` is `false`.
  */
-export type IntersectedUnion<T extends any[]> = Intersection<T> & Union<T>;
-
-/**
- * Helper type to compute the union of all types in a tuple
- */
-export type Union<T extends any[]> = T extends [infer First, ...infer Rest]
-  ? First | Union<Rest>
-  : {};
-
-/**
- * Helper type to compute the intersection of all types in a tuple
- */
-export type Intersection<T extends any[]> = T extends [infer First, ...infer Rest]
-  ? Rest extends any[]
-    ? First & Intersection<Rest>
-    : First
-  : {};
+export type IsAny<T> = 0 extends 1 & T ? true : false;
