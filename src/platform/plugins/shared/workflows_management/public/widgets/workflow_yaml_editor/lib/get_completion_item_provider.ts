@@ -1255,6 +1255,43 @@ export function getCompletionItemProvider(
           }
         }
 
+        // SPECIAL CASE: Variable expression completion
+        // Handle completions inside {{ }} or after @ triggers
+        if (parseResult.matchType === 'variable-unfinished' || parseResult.matchType === 'at') {
+          // We're inside a variable expression, provide context-based completions
+          if (context instanceof z.ZodObject) {
+            const contextKeys = Object.keys(context.shape);
+            
+            // Filter based on what the user has typed so far
+            const filteredKeys = lastPathSegment 
+              ? contextKeys.filter(key => key.startsWith(lastPathSegment))
+              : contextKeys;
+
+            for (const key of filteredKeys) {
+              const keySchema = context.shape[key];
+              const propertyTypeName = getZodTypeName(keySchema);
+              
+              suggestions.push(
+                getSuggestion(
+                  key,
+                  completionContext,
+                  range,
+                  scalarType,
+                  shouldBeQuoted,
+                  propertyTypeName,
+                  keySchema?.description
+                )
+              );
+            }
+
+            // Return early for variable expressions to prevent other completions
+            return {
+              suggestions,
+              incomplete: false,
+            };
+          }
+        }
+
         // SPECIAL CASE: Direct type completion - context-aware
         // Check if we're trying to complete a type field, regardless of schema validation
         const typeCompletionMatch = lineUpToCursor.match(
