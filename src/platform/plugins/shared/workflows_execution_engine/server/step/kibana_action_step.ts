@@ -187,7 +187,6 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
       fullUrl = `${fullUrl}?${queryString}`;
     }
 
-    // Use Node.js fetch (available in Node 18+)
     const response = await fetch(fullUrl, {
       method,
       headers,

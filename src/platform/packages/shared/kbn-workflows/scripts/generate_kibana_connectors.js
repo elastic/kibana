@@ -803,26 +803,39 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
 
   // Generate schema fields
   const schemaFields = [];
+  const addedParams = new Set(); // Track added parameter names to avoid duplicates
 
   // Add path parameters (always required)
   for (const param of pathParams) {
-    schemaFields.push(
-      `    ${safeParamName(param)}: z.string().describe('Path parameter: ${param} (required)'),`
-    );
+    const safeParam = safeParamName(param);
+    if (!addedParams.has(safeParam)) {
+      schemaFields.push(
+        `    ${safeParam}: z.string().describe('Path parameter: ${param} (required)'),`
+      );
+      addedParams.add(safeParam);
+    }
   }
 
   // Add query parameters (optional)
   for (const param of queryParams) {
-    schemaFields.push(
-      `    ${safeParamName(param)}: z.any().optional().describe('Query parameter: ${param}'),`
-    );
+    const safeParam = safeParamName(param);
+    if (!addedParams.has(safeParam)) {
+      schemaFields.push(
+        `    ${safeParam}: z.any().optional().describe('Query parameter: ${param}'),`
+      );
+      addedParams.add(safeParam);
+    }
   }
 
   // Add header parameters (usually required but make optional for flexibility)
   for (const param of headerParams) {
-    schemaFields.push(
-      `    ${safeParamName(param)}: z.string().optional().describe('Header parameter: ${param}'),`
-    );
+    const safeParam = safeParamName(param);
+    if (!addedParams.has(safeParam)) {
+      schemaFields.push(
+        `    ${safeParam}: z.string().optional().describe('Header parameter: ${param}'),`
+      );
+      addedParams.add(safeParam);
+    }
   }
 
   // Get body parameters using hardcoded definitions (like ES connectors)
@@ -840,30 +853,36 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
       // Use actual Zod schemas from the original schema definition
       for (const paramName of bodyParamNames) {
         const safeFieldName = safeParamName(paramName);
-        const originalZodDef = fieldDefinitions.get(paramName);
+        if (!addedParams.has(safeFieldName)) {
+          const originalZodDef = fieldDefinitions.get(paramName);
 
-        if (originalZodDef) {
-          // For now, use safe generic schema to avoid syntax errors
-          // TODO: Fix complex field extraction later
-          bodySchemaFields.push(
-            `    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`
-          );
-        } else {
-          // Fallback to generic if definition not found
-          bodySchemaFields.push(
-            `    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`
-          );
+          if (originalZodDef) {
+            // For now, use safe generic schema to avoid syntax errors
+            // TODO: Fix complex field extraction later
+            bodySchemaFields.push(
+              `    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`
+            );
+          } else {
+            // Fallback to generic if definition not found
+            bodySchemaFields.push(
+              `    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`
+            );
+          }
+          flattenedBodyParams.push(paramName);
+          addedParams.add(safeFieldName);
         }
-        flattenedBodyParams.push(paramName);
       }
     } else if (bodyParamNames.length > 0) {
       // Fallback: use generic z.any().optional() if no field definitions available
       for (const paramName of bodyParamNames) {
         const safeFieldName = safeParamName(paramName);
-        bodySchemaFields.push(
-          `    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`
-        );
-        flattenedBodyParams.push(paramName);
+        if (!addedParams.has(safeFieldName)) {
+          bodySchemaFields.push(
+            `    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`
+          );
+          flattenedBodyParams.push(paramName);
+          addedParams.add(safeFieldName);
+        }
       }
     } else {
       // No specific body parameters found, add a generic body parameter
@@ -880,9 +899,10 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
   bodyParams.push(...flattenedBodyParams);
 
   // If no specific query params found but it's a GET request, add generic query support
-  if (method === 'GET' && queryParams.length === 0) {
+  if (method === 'GET' && queryParams.length === 0 && !addedParams.has('query')) {
     schemaFields.push(`    query: z.record(z.any()).optional().describe('Query parameters'),`);
     queryParams.push('query');
+    addedParams.add('query');
   }
 
   // Determine connector type
