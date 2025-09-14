@@ -36,6 +36,12 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         defaultNavigationTree.dashboards(),
         {
           link: 'workflows',
+          withBadge: true,
+          badgeTypeV2: 'techPreview' as const,
+          badgeOptions: {
+            icon: 'beaker',
+            tooltip: i18nStrings.workflows.badgeTooltip,
+          },
         },
         {
           breadcrumbStatus: 'hidden',

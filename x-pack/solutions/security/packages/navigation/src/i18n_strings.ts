@@ -31,6 +31,11 @@ export const i18nStrings = {
       defaultMessage: 'Explore',
     }),
   },
+  workflows: {
+    badgeTooltip: i18n.translate('securitySolutionPackages.navLinks.workflows.badgeTooltip', {
+      defaultMessage: 'Technical preview',
+    }),
+  },
   launchpad: {
     title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
       defaultMessage: 'Security launchpad',

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
@@ -109,6 +109,14 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           },
           {
             link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.serverlessObservability.nav.workflowsBadgeTooltip', {
+                defaultMessage: 'Technical preview',
+              }),
+            },
           },
           {
             title: AGENTS_TITLE,

@@ -59,6 +59,15 @@ export class WorkflowsPlugin
           const { renderApp } = await import('./application');
           // Get start services as specified in kibana.json
           const [coreStart, depsStart] = await core.getStartServices();
+
+          // Set badge for classic navbar
+          coreStart.chrome.setBadge({
+            text: 'Technical preview',
+            tooltip:
+              'This functionality is in technical preview. It may change or be removed in a future release.',
+            iconType: 'beaker',
+          });
+
           // Render the application
           return renderApp(
             coreStart,

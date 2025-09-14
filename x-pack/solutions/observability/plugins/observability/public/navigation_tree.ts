@@ -55,6 +55,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
           {
             link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.observability.nav.workflowsBadgeTooltip', {
+                defaultMessage: 'Technical preview',
+              }),
+            },
           },
           {
             link: 'observability-overview:alerts',

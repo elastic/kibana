@@ -55,6 +55,14 @@ export const createNavigationTree = ({
           },
           {
             link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.serverlessObservability.nav.workflowsBadgeTooltip', {
+                defaultMessage: 'Technical preview',
+              }),
+            },
           },
           {
             link: 'observability-overview:alerts',

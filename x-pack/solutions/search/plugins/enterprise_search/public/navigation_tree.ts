@@ -120,7 +120,18 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate(
+                      'xpack.serverlessObservability.nav.workflowsBadgeTooltip',
+                      {
+                        defaultMessage: 'Technical preview',
+                      }
+                    ),
+                  },
+                  badgeTypeV2: 'techPreview' as const,
                   link: 'workflows',
+                  withBadge: true,
                 },
                 {
                   children: [
