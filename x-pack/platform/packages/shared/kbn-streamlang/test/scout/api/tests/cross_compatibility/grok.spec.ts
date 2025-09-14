@@ -174,9 +174,6 @@ streamlangApiTest.describe(
         'should coerce float values to integer if mapped type is long and GROK is :float',
         async ({ testBed, esql }) => {}
       );
-
-      // TODO: Implement
-      streamlangApiTest('should be affected by FORK reordering', async ({ testBed, esql }) => {});
     });
 
     streamlangApiTest.describe('Incompatible', () => {
@@ -209,6 +206,42 @@ streamlangApiTest.describe(
           expect(esqlResult.documents[1]['client.ip']).toBeUndefined(); // ES|QL returns undefined for unmapped fields
         }
       );
+
+      streamlangApiTest('should maintain order of documents', async ({ testBed, esql }) => {
+        // This test ensures that the order of FORK branches affects the output as expected
+        // Simulate with a where clause and ignore_missing
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'grok',
+              from: 'message',
+              patterns: ['%{IP:ip}'],
+              ignore_missing: true,
+              where: { field: 'flag', exists: true },
+            } as GrokProcessor,
+          ],
+        };
+        const { processors } = asIngest(streamlangDSL);
+        const { query } = asEsql(streamlangDSL);
+        const docs = [
+          { id: 1, message: '1.2.3.4', flag: 'yes' },
+          { id: 2, message: '192.168.1.1' },
+          { id: 3, message: '178.75.90.92', flag: 'yes' },
+          { id: 4, message: '127.0.0.1' },
+        ];
+        await testBed.ingest('ingest-grok-fork', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocs('ingest-grok-fork');
+
+        const mappingDoc = { ip: '' };
+        await testBed.ingest('esql-grok-fork', [mappingDoc, ...docs]);
+        const esqlResult = await esql.queryOnIndex('esql-grok-fork', query);
+
+        // NOTE - Behavioral Difference - ES|QL's FORK may return documents in different order
+        expect(ingestResult.filter((id) => !!id).map(({ id }) => id)).toEqual([1, 2, 3, 4]);
+        expect(esqlResult.documents.filter((id) => !!id).map(({ id }) => id)).not.toEqual([
+          1, 2, 3, 4,
+        ]);
+      });
     });
   }
 );
