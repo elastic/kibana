@@ -19,7 +19,6 @@ describe('GroupStream', () => {
           tags: [],
           members: [],
         },
-        systems: [],
       },
     ])('is valid', (val) => {
       expect(GroupStream.Definition.is(val)).toBe(true);
@@ -62,7 +61,6 @@ describe('GroupStream', () => {
             tags: [],
             members: [],
           },
-          systems: [],
         },
         ...emptyAssets,
       },
@@ -115,7 +113,6 @@ describe('GroupStream', () => {
             tags: [],
             members: [],
           },
-          systems: [],
         },
         ...emptyAssets,
       },

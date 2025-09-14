@@ -163,7 +163,6 @@ describe('WiredStream', () => {
               routing: [],
             },
           },
-          systems: [],
         },
         ...emptyAssets,
       },
