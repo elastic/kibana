@@ -98,18 +98,16 @@ streamlangApiTest.describe(
       // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
-          templateLabel: 'double-braces',
           templateType: '{{ }}',
           from: '{{template_from}}',
           pattern: '%{IP:client.ip}',
         },
         {
-          templateLabel: 'triple-braces',
           templateType: '{{{ }}}',
           from: '{{{template_from}}}',
           pattern: '%{IP:client.ip}',
         },
-      ].forEach(({ templateLabel, templateType, from, pattern }) => {
+      ].forEach(({ templateType, from, pattern }) => {
         streamlangApiTest(
           `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
           async () => {
@@ -130,49 +128,279 @@ streamlangApiTest.describe(
         );
       });
 
-      // TODO: Implement
       streamlangApiTest(
         'should handle custom oniguruma patterns in both ingest and ES|QL',
         async ({ testBed, esql }) => {
-          //
+          // Use the COMMONAPACHELOG pattern, which expands to HTTPD_COMMONLOG
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{COMMONAPACHELOG}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          // Example log from COMMONAPACHELOG pattern
+          const docs = [
+            {
+              message:
+                '127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326',
+            },
+          ];
+          await testBed.ingest('ingest-grok-oniguruma', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-oniguruma');
+          await testBed.ingest('esql-grok-oniguruma', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-oniguruma', query);
+
+          // COMMONAPACHELOG extracts multiple fields, check a few for equality
+          const expectedExtractDoc = {
+            'http.request.method': 'GET',
+            'http.response.status_code': 200,
+            'http.response.body.bytes': 2326,
+            'http.version': '1.0',
+            'source.address': '127.0.0.1',
+            message:
+              '127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326',
+            'user.name': 'frank',
+            'url.original': '/apache_pb.gif',
+            timestamp: '10/Oct/2000:13:55:36 -0700',
+          };
+
+          expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
+          expect(esqlResult.documentsWithoutKeywords[0]).toEqual(
+            expect.objectContaining(expectedExtractDoc)
+          );
         }
       );
 
-      // TODO: Implement
       streamlangApiTest(
         'should handle same field captured multiple times in both ingest and ES|QL',
         async ({ testBed, esql }) => {
-          //
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} %{IP:ip}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [{ message: '1.2.3.4 5.6.7.8' }];
+          await testBed.ingest('ingest-grok-multi', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-multi');
+          await testBed.ingest('esql-grok-multi', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-multi', query);
+
+          const expectedExtractDoc = { message: '1.2.3.4 5.6.7.8', ip: ['1.2.3.4', '5.6.7.8'] };
+
+          expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
+          expect(esqlResult.documentsWithoutKeywords[0]).toEqual(
+            expect.objectContaining(expectedExtractDoc)
+          );
         }
       );
 
-      // TODO: Implement
       streamlangApiTest(
         'should nullify ungroked fields in the doc when only partial groking is possible',
         async ({ testBed, esql }) => {
-          //
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} %{WORD:method} %{NUMBER:size}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [
+            { message: '1.2.3.4 GET' }, // missing size
+          ];
+
+          // NOTE: For partial GROK matching
+          // Ingest: fails the entire GROK operation if pattern doesn't fully match
+          // ES|QL: since FORKing isn't used, will also leave the fields undefined
+          const { errors } = await testBed.ingest('ingest-grok-partial', docs, processors);
+          await testBed.getFlattenedDocs('ingest-grok-partial');
+
+          await testBed.ingest('esql-grok-partial', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-partial', query);
+
+          // Ingest pipeline should fail for partial matches
+          expect(errors.length).toBeGreaterThan(0);
+          expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
+
+          // ES|QL should extract what it can
+          if (esqlResult.documentsWithoutKeywords[0]) {
+            expect(esqlResult.documentsWithoutKeywords[0].ip).toBeUndefined();
+            expect(esqlResult.documentsWithoutKeywords[0].method).toBeUndefined();
+            expect(esqlResult.documentsWithoutKeywords[0].size).toBeUndefined();
+          }
         }
       );
 
-      // TODO: Implement
-      // ES|QL may need escaping if """ aren't used e.g for pattern "%{IP:ip} \[%{TIMESTAMP_ISO8601:@timestamp}\] %{GREEDYDATA:status}"
       streamlangApiTest(
         'should support special character in grok regex patterns in both ingest and ES|QL',
         async ({ testBed, esql }) => {
-          //
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} \\[%{TIMESTAMP_ISO8601:@timestamp}\\] %{GREEDYDATA:status}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [{ message: '1.2.3.4 [2025-09-13T12:34:56.789Z] OK' }];
+          await testBed.ingest('ingest-grok-special', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-special');
+          await testBed.ingest('esql-grok-special', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-special', query);
+
+          const expectedExtractDoc = {
+            '@timestamp': '2025-09-13T12:34:56.789Z',
+            ip: '1.2.3.4',
+            message: '1.2.3.4 [2025-09-13T12:34:56.789Z] OK',
+            status: 'OK',
+          };
+
+          expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
+          expect(esqlResult.documentsWithoutKeywords[0]).toEqual(
+            expect.objectContaining(expectedExtractDoc)
+          );
         }
       );
 
-      // TODO: Implement
       streamlangApiTest(
-        'should leave the source field intact if not present in pattern',
-        async ({ testBed, esql }) => {}
+        'should leave the source field intact if source field name is not present in pattern',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [{ message: '1.2.3.4', untouched: 'preserved' }];
+          await testBed.ingest('ingest-grok-source', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-source');
+          await testBed.ingest('esql-grok-source', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-source', query);
+
+          // Source field and other fields should remain intact
+          const expectedExtractDoc = {
+            message: '1.2.3.4',
+            untouched: 'preserved',
+          };
+
+          expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
+          expect(esqlResult.documentsWithoutKeywords[0]).toEqual(
+            expect.objectContaining(expectedExtractDoc)
+          );
+        }
       );
 
-      // TODO: Implement
       streamlangApiTest(
-        'should coerce float values to integer if mapped type is long and GROK is :float',
-        async ({ testBed, esql }) => {}
+        'should coerce int/float values to int/float when mapped type is different than the extracted type',
+        async ({ testBed, esql }) => {
+          // Simulate a mapping where the field is expected to be long, but GROK extracts float
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: [
+                  '%{NUMBER:int2int:float} %{NUMBER:int2float:float} %{NUMBER:float2int:float} %{NUMBER:float2float:float}',
+                ],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          // Pre-map
+          const mappingDoc = {
+            int2int: 0,
+            int2float: 0,
+            float2int: 0.1,
+            float2float: 0.1,
+            message: 'mapping',
+          };
+          const docs = [{ message: '123 456 90.12 34.56' }]; // GROK extracts all as float
+
+          await testBed.ingest('ingest-grok-coerce', [mappingDoc]); // Ensure mapping
+          await testBed.ingest('ingest-grok-coerce', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-coerce');
+
+          await testBed.ingest('esql-grok-coerce', [mappingDoc]); // Ensure mapping
+          await testBed.ingest('esql-grok-coerce', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-coerce', query);
+
+          const expectedExtractDoc = {
+            message: '123 456 90.12 34.56',
+            float2float: 34.560001373291016, // Ingest Processor yields 34.56
+            float2int: 90.12000274658203, // Ingest Processor yields 90.12
+            int2float: 456,
+            int2int: 123,
+          };
+
+          // NOTE Behavioral Difference - Ingest Pipeline return fixed float precision to 2 decimals
+          // Whereas ES|QL returns full precision as a double
+          for (const [key, value] of Object.entries(expectedExtractDoc)) {
+            if (typeof value === 'number' && !Number.isInteger(value)) {
+              expect(ingestResult[1][key]).toBeCloseTo(value as number, 3);
+              expect(esqlResult.documentsWithoutKeywords[1][key]).toBeCloseTo(value as number, 3);
+            } else {
+              expect(ingestResult[1][key]).toEqual(value);
+              expect(esqlResult.documentsWithoutKeywords[1][key]).toEqual(value);
+            }
+          }
+        }
+      );
+
+      streamlangApiTest(
+        'should nullify ungroked fields when no groking is possible',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} %{WORD:method}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [{ message: 'no match here at all' }];
+
+          const { errors } = await testBed.ingest('ingest-grok-nomatch', docs, processors);
+          await testBed.getFlattenedDocs('ingest-grok-nomatch');
+
+          await testBed.ingest('esql-grok-nomatch', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-nomatch', query);
+
+          // Ingest pipeline should fail when no GROK patterns match
+          expect(errors.length).toBeGreaterThan(0);
+          expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
+
+          // Since no FORKing is used, ES|QL will also leave the fields undefined
+          expect(esqlResult.documentsWithoutKeywords[0].ip).toBeUndefined();
+          expect(esqlResult.documentsWithoutKeywords[0].method).toBeUndefined();
+          expect(esqlResult.documentsWithoutKeywords[0].message).toEqual('no match here at all');
+        }
       );
     });
 
@@ -207,41 +435,44 @@ streamlangApiTest.describe(
         }
       );
 
-      streamlangApiTest('should maintain order of documents', async ({ testBed, esql }) => {
-        // This test ensures that the order of FORK branches affects the output as expected
-        // Simulate with a where clause and ignore_missing
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'grok',
-              from: 'message',
-              patterns: ['%{IP:ip}'],
-              ignore_missing: true,
-              where: { field: 'flag', exists: true },
-            } as GrokProcessor,
-          ],
-        };
-        const { processors } = asIngest(streamlangDSL);
-        const { query } = asEsql(streamlangDSL);
-        const docs = [
-          { id: 1, message: '1.2.3.4', flag: 'yes' },
-          { id: 2, message: '192.168.1.1' },
-          { id: 3, message: '178.75.90.92', flag: 'yes' },
-          { id: 4, message: '127.0.0.1' },
-        ];
-        await testBed.ingest('ingest-grok-fork', docs, processors);
-        const ingestResult = await testBed.getFlattenedDocs('ingest-grok-fork');
+      streamlangApiTest(
+        'should maintain order of documents differently',
+        async ({ testBed, esql }) => {
+          // This test ensures that the order of FORK branches affects the output as expected
+          // Simulate with a where clause and ignore_missing
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip}'],
+                ignore_missing: true,
+                where: { field: 'flag', exists: true },
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [
+            { id: 1, message: '1.2.3.4', flag: 'yes' },
+            { id: 2, message: '192.168.1.1' },
+            { id: 3, message: '178.75.90.92', flag: 'yes' },
+            { id: 4, message: '127.0.0.1' },
+          ];
+          await testBed.ingest('ingest-grok-fork', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-fork');
 
-        const mappingDoc = { ip: '' };
-        await testBed.ingest('esql-grok-fork', [mappingDoc, ...docs]);
-        const esqlResult = await esql.queryOnIndex('esql-grok-fork', query);
+          const mappingDoc = { ip: '' };
+          await testBed.ingest('esql-grok-fork', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-grok-fork', query);
 
-        // NOTE - Behavioral Difference - ES|QL's FORK may return documents in different order
-        expect(ingestResult.filter((id) => !!id).map(({ id }) => id)).toEqual([1, 2, 3, 4]);
-        expect(esqlResult.documents.filter((id) => !!id).map(({ id }) => id)).not.toEqual([
-          1, 2, 3, 4,
-        ]);
-      });
+          // NOTE - Behavioral Difference - ES|QL's FORK may return documents in different order
+          expect(ingestResult.filter((doc) => doc.id).map(({ id }) => id)).toEqual([1, 2, 3, 4]);
+          expect(esqlResult.documents.filter((doc) => doc.id).map(({ id }) => id)).not.toEqual([
+            1, 2, 3, 4,
+          ]);
+        }
+      );
     });
   }
 );

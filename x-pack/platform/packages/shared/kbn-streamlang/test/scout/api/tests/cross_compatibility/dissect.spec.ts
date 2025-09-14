@@ -116,7 +116,7 @@ streamlangApiTest.describe(
       });
 
       streamlangApiTest(
-        'should leave the source field intact if not present in pattern',
+        'should leave the source field intact if source field name is not present in pattern',
         async ({ testBed, esql }) => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
