@@ -313,6 +313,44 @@ streamlangApiTest.describe(
       );
 
       streamlangApiTest(
+        'should override the source field if source field name is present in pattern',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} %{GREEDYDATA:message}'], // Extract to both ip and message fields
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [
+            { message: '1.2.3.4 This is the extracted message', untouched: 'preserved' },
+          ];
+
+          await testBed.ingest('ingest-grok-override', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-override');
+
+          await testBed.ingest('esql-grok-override', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-override', query);
+
+          // The source field (message) should be overridden with the extracted value
+          const expectedExtractDoc = {
+            ip: '1.2.3.4',
+            message: 'This is the extracted message', // Overridden by GROK extraction
+            untouched: 'preserved',
+          };
+
+          expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
+          expect(esqlResult.documentsWithoutKeywords[0]).toEqual(
+            expect.objectContaining(expectedExtractDoc)
+          );
+        }
+      );
+
+      streamlangApiTest(
         'should coerce int/float values to int/float when mapped type is different than the extracted type',
         async ({ testBed, esql }) => {
           // Simulate a mapping where the field is expected to be long, but GROK extracts float

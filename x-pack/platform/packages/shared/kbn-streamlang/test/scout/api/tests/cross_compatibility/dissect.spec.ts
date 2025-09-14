@@ -158,6 +158,54 @@ streamlangApiTest.describe(
           expect(ingestResult[0]).toEqual(esqlResult.documentsWithoutKeywords[1]);
         }
       );
+
+      streamlangApiTest(
+        'should override the source field if source field name is present in pattern',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'dissect',
+                from: 'message',
+                pattern: '%{client.ip} - %{message}', // Extract to both client.ip and message fields
+              } as DissectProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          const docs = [
+            {
+              message: '127.0.0.1 - This is the extracted message',
+              existing_field: 'preserved',
+            },
+          ];
+
+          await testBed.ingest('ingest-dissect-override', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-override');
+
+          // For ES|QL, create mapping document to establish field types
+          const mappingDoc = {
+            client: { ip: '' },
+            message: '',
+          };
+          await testBed.ingest('esql-dissect-override', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-dissect-override', query);
+
+          // The source field (message) should be overridden with the extracted value
+          const expectedExtractDoc = {
+            'client.ip': '127.0.0.1',
+            message: 'This is the extracted message', // Overridden by dissect extraction
+            existing_field: 'preserved',
+          };
+
+          expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
+          expect(esqlResult.documentsWithoutKeywords[1]).toEqual(
+            expect.objectContaining(expectedExtractDoc)
+          );
+        }
+      );
     });
 
     streamlangApiTest.describe('Incompatible', () => {
