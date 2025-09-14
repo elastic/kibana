@@ -97,7 +97,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           };
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflowToRun, spaceId, inputs);
+          return await this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
         };
       };
 

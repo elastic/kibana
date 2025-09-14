@@ -29,7 +29,7 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   /**
    * This handler accepts any connector type as a fallback
    */
-  canHandle(connectorType: string): boolean {
+  canHandle(): boolean {
     return true; // Always accepts as fallback
   }
 
@@ -287,7 +287,7 @@ ${Object.entries(category.examples.params || {})
    */
   private async validateStep(context: ActionContext): Promise<void> {
     try {
-      const { connectorType, stepContext } = context;
+      const { stepContext } = context;
       if (!stepContext) {
         return;
       }

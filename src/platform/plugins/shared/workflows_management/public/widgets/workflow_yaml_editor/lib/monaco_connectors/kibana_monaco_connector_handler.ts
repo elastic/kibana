@@ -35,7 +35,7 @@ function getCachedAllConnectors(): any[] {
 export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   private readonly http?: HttpSetup;
   private readonly notifications?: NotificationsSetup;
-  private readonly kibanaHost?: string;
+  // private readonly kibanaHost?: string;
   private readonly connectorExamples: Map<string, ConnectorExamples>;
 
   constructor(
@@ -55,7 +55,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     super('KibanaMonacoConnectorHandler', 90, ['kibana.']);
     this.http = options.http;
     this.notifications = options.notifications;
-    this.kibanaHost = options.kibanaHost;
+    //this.kibanaHost = options.kibanaHost;
     this.connectorExamples = new Map();
 
     // Process generated connectors to extract examples
@@ -356,133 +356,4 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     }
   }
 
-  /**
-   * Copy step as cURL command
-   */
-  private async copyAsCurl(context: ActionContext): Promise<void> {
-    try {
-      const { connectorType, stepContext } = context;
-      if (!stepContext) return;
-
-      const withParams = this.extractWithParams(stepContext.stepNode);
-      const apiInfo = this.parseKibanaConnectorType(connectorType);
-      if (!apiInfo) return;
-
-      const kibanaUrl = this.kibanaHost || 'http://localhost:5601';
-      const curlCommand = this.generateCurlCommand(kibanaUrl, apiInfo, withParams);
-
-      await navigator.clipboard.writeText(curlCommand);
-
-      if (this.notifications) {
-        this.notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'cURL command copied successfully',
-        });
-      }
-    } catch (error) {
-      // console.error('KibanaMonacoConnectorHandler: Error copying as cURL', error);
-      if (this.notifications) {
-        this.notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy',
-        });
-      }
-    }
-  }
-
-  /**
-   * Copy step as JavaScript fetch
-   */
-  private async copyAsFetch(context: ActionContext): Promise<void> {
-    try {
-      const { connectorType, stepContext } = context;
-      if (!stepContext) return;
-
-      const withParams = this.extractWithParams(stepContext.stepNode);
-      const apiInfo = this.parseKibanaConnectorType(connectorType);
-      if (!apiInfo) return;
-
-      const fetchCode = this.generateFetchCode(apiInfo, withParams);
-
-      await navigator.clipboard.writeText(fetchCode);
-
-      if (this.notifications) {
-        this.notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'JavaScript fetch code copied successfully',
-        });
-      }
-    } catch (error) {
-      // console.error('KibanaMonacoConnectorHandler: Error copying as fetch', error);
-    }
-  }
-
-  /**
-   * Open API documentation
-   */
-  private async openApiDocs(context: ActionContext): Promise<void> {
-    try {
-      // This could open the Kibana API docs or OpenAPI explorer
-      const docsUrl = `${this.kibanaHost || 'http://localhost:5601'}/app/dev_tools#/console`;
-      window.open(docsUrl, '_blank');
-
-      if (this.notifications) {
-        this.notifications.toasts.addInfo({
-          title: 'API Documentation',
-          text: 'Opened Kibana Dev Tools Console',
-        });
-      }
-    } catch (error) {
-      // console.error('KibanaMonacoConnectorHandler: Error opening API docs', error);
-    }
-  }
-
-  /**
-   * Generate cURL command
-   */
-  private generateCurlCommand(
-    kibanaUrl: string,
-    apiInfo: { method: string; path: string },
-    withParams: Record<string, any>
-  ): string {
-    const lines = [
-      `curl -X ${apiInfo.method} "${kibanaUrl}${apiInfo.path}" \\`,
-      `  -H "Content-Type: application/json" \\`,
-      `  -H "kbn-xsrf: true" \\`,
-    ];
-
-    // Add body if present
-    if (Object.keys(withParams).length > 0) {
-      lines.push(`  -d '${JSON.stringify(withParams, null, 2)}'`);
-    }
-
-    return lines.join('\n');
-  }
-
-  /**
-   * Generate JavaScript fetch code
-   */
-  private generateFetchCode(
-    apiInfo: { method: string; path: string },
-    withParams: Record<string, any>
-  ): string {
-    const lines = [
-      `fetch('${apiInfo.path}', {`,
-      `  method: '${apiInfo.method}',`,
-      `  headers: {`,
-      `    'Content-Type': 'application/json',`,
-      `    'kbn-xsrf': 'true',`,
-      `  },`,
-    ];
-
-    if (Object.keys(withParams).length > 0) {
-      lines.push(`  body: JSON.stringify(${JSON.stringify(withParams, null, 4)}),`);
-    }
-
-    lines.push(`})`);
-    lines.push(`.then(response => response.json())`);
-    lines.push(`.then(data => console.log(data))`);
-    lines.push(`.catch(error => console.error('Error:', error));`);
-
-    return lines.join('\n');
-  }
 }

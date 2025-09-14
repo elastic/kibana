@@ -394,8 +394,6 @@ function getConnectorTypeFromContext(
 function getConnectorTypeFromPosition(model: any, position: any): string | null {
   try {
     const currentLineNumber = position.lineNumber;
-    const currentLine = model.getLineContent(currentLineNumber);
-
     // Position analysis
 
     // Check if we're inside a "with" block by analyzing indentation and structure
@@ -475,13 +473,9 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
  * Find the connector type by looking for the "type:" field in the current step
  */
 function findConnectorTypeInStep(model: any, currentLineNumber: number): string | null {
-  const currentLine = model.getLineContent(currentLineNumber);
-  const currentIndent = getIndentLevel(currentLine);
-
   // Look backwards for the type field, staying within the same step
   for (let lineNumber = currentLineNumber - 1; lineNumber >= 1; lineNumber--) {
     const line = model.getLineContent(lineNumber);
-    const lineIndent = getIndentLevel(line);
 
     // Look for type field at the step level (same indentation as name field)
     const typeMatch = line.match(/^\s*type:\s*(.+)$/);

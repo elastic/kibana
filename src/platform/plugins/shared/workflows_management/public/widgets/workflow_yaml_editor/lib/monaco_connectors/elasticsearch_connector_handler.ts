@@ -36,22 +36,22 @@ function getCachedAllConnectors(): any[] {
 export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   private readonly http?: HttpSetup;
   private readonly notifications?: NotificationsSetup;
-  private readonly esHost?: string;
-  private readonly kibanaHost?: string;
+  // private readonly esHost?: string;
+  // private readonly kibanaHost?: string;
 
   constructor(
     options: {
       http?: HttpSetup;
       notifications?: NotificationsSetup;
-      esHost?: string;
-      kibanaHost?: string;
+      // esHost?: string;
+      // kibanaHost?: string;
     } = {}
   ) {
     super('ElasticsearchMonacoConnectorHandler', 100, ['elasticsearch.']);
     this.http = options.http;
     this.notifications = options.notifications;
-    this.esHost = options.esHost;
-    this.kibanaHost = options.kibanaHost;
+    // this.esHost = options.esHost;
+    // this.kibanaHost = options.kibanaHost;
   }
 
   /**

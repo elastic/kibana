@@ -27,7 +27,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   kibanaHost,
 }) => {
   // Use state to force re-renders when actions change
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [, setRefreshTrigger] = useState(0);
 
   // Get current actions directly from the unified actions provider
   const currentActions = actionsProvider?.getCurrentActions?.() || [];
@@ -48,7 +48,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {currentActions.map((action, index) => (
+      {currentActions.map((action: any, index: number) => (
         <EuiFlexItem key={action.id || index} grow={false}>
           <EuiToolTip content={action.tooltip || action.label}>
             <EuiButtonIcon

@@ -24,7 +24,6 @@ const DEBOUNCE_HIGHLIGHT_WAIT_MS = 100;
 export class UnifiedActionsProvider {
   private readonly editor: monaco.editor.IStandaloneCodeEditor;
   private readonly getYamlDocument: () => YAML.Document | null;
-  private readonly options: Record<string, any>;
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   private currentConnectorType: string | null = null;
   private currentActionButtons: HTMLElement[] = [];
@@ -33,7 +32,6 @@ export class UnifiedActionsProvider {
   constructor(editor: monaco.editor.IStandaloneCodeEditor, config: ProviderConfig) {
     this.editor = editor;
     this.getYamlDocument = config.getYamlDocument;
-    this.options = config.options || {};
 
     // Initialize decorations collection
     this.highlightedLines = editor.createDecorationsCollection();
@@ -50,13 +48,6 @@ export class UnifiedActionsProvider {
     const debouncedHighlight = debounce(() => {
       this.updateHighlightAndActions();
     }, DEBOUNCE_HIGHLIGHT_WAIT_MS);
-
-    // Also clear immediately on position change (before debounced update)
-    const immediateClear = () => {
-      this.highlightedLines.clear();
-      // Also hide action buttons immediately
-      this.updateEditorActionsCss({ display: 'none' });
-    };
 
     // Listen for cursor position changes
     this.editor.onDidChangeCursorPosition((e) => {
@@ -530,7 +521,7 @@ export class UnifiedActionsProvider {
 
     // Also register Monaco editor actions for command palette access
     actions.forEach((action, index) => {
-      const editorAction = this.editor.addAction({
+      this.editor.addAction({
         id: `unified.${action.id}.${index}`,
         label: action.label,
         run: action.handler,

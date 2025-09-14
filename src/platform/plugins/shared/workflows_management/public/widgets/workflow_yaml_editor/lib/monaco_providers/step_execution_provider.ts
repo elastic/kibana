@@ -9,14 +9,14 @@
 
 import { monaco } from '@kbn/monaco';
 import type * as YAML from 'yaml';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { getStepNode } from '../../../../../common/lib/yaml_utils';
 import { getStepRange } from '../step_detection_utils';
 
 export interface StepExecutionProviderOptions {
   editor: monaco.editor.IStandaloneCodeEditor;
   getYamlDocument: () => YAML.Document | null;
-  getStepExecutions: () => EsWorkflowStepExecution[];
+  getStepExecutions: () => WorkflowStepExecutionDto[];
   getHighlightStep: () => string | null;
   isReadOnly: () => boolean;
 }
@@ -27,7 +27,7 @@ export interface StepExecutionProviderOptions {
 export class StepExecutionProvider {
   private editor: monaco.editor.IStandaloneCodeEditor;
   private getYamlDocument: () => YAML.Document | null;
-  private getStepExecutions: () => EsWorkflowStepExecution[];
+  private getStepExecutions: () => WorkflowStepExecutionDto[];
   private getHighlightStep: () => string | null;
   private isReadOnly: () => boolean;
   private decorationsCollection: monaco.editor.IEditorDecorationsCollection | null = null;

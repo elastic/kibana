@@ -20,11 +20,11 @@ import type { HoverContext, ProviderConfig } from './provider_interfaces';
  */
 export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   private readonly getYamlDocument: () => YAML.Document | null;
-  private readonly options: Record<string, any>;
+  // private readonly options: Record<string, any>;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
-    this.options = config.options || {};
+    // this.options = config.options || {};
   }
 
   /**

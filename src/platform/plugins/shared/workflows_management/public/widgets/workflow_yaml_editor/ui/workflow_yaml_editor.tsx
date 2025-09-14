@@ -279,7 +279,7 @@ export const WorkflowYAMLEditor = ({
 
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
-  const stepExecutionsRef = useRef<EsWorkflowStepExecution[] | undefined>(stepExecutions);
+  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
 
   // Keep stepExecutionsRef in sync
   useEffect(() => {
@@ -506,8 +506,8 @@ export const WorkflowYAMLEditor = ({
       const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
         http,
         notifications: notifications as any, // Temporary type cast
-        esHost,
-        kibanaHost: kibanaHost || window.location.origin,
+        // esHost,
+        // kibanaHost || window.location.origin,
       });
       registerMonacoConnectorHandler(elasticsearchHandler);
 

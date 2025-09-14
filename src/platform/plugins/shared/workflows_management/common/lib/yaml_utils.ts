@@ -73,7 +73,7 @@ export function formatValidationError(error: any): { message: string; formattedE
   const formattedError = {
     ...error,
     issues: formattedIssues,
-    message: formattedIssues.map((i) => i.message).join(', '),
+    message: formattedIssues.map((i: { message: string }) => i.message).join(', '),
   };
 
   return {
@@ -238,15 +238,18 @@ export function getPathFromAncestors(
           if (item === targetNode) return true;
 
           // Check if the target node is contained within this sequence item
+          // Avoid using 'in' operator on possibly primitive values
+          const itemHasRange = typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, 'range');
+          const targetNodeHasRange = typeof targetNode === 'object' && targetNode !== null && Object.prototype.hasOwnProperty.call(targetNode, 'range');
           if (
             item &&
             targetNode &&
-            'range' in item &&
-            'range' in targetNode &&
-            item.range &&
-            targetNode.range
+            itemHasRange &&
+            targetNodeHasRange &&
+            (item as any).range &&
+            (targetNode as any).range
           ) {
-            return targetNode.range[0] >= item.range[0] && targetNode.range[1] <= item.range[2];
+            return (targetNode as any).range[0] >= (item as any).range[0] && (targetNode as any).range[1] <= (item as any).range[2];
           }
 
           return false;
@@ -266,15 +269,17 @@ export function getPathFromAncestors(
 
           // Sometimes the nodes might not be exactly the same reference
           // but represent the same YAML node - let's check ranges if available
+          const itemHasRange = typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, 'range');
+          const childNodeHasRange = typeof childNode === 'object' && childNode !== null && Object.prototype.hasOwnProperty.call(childNode, 'range');
           if (
             item &&
             childNode &&
-            'range' in item &&
-            'range' in childNode &&
-            item.range &&
-            childNode.range
+            itemHasRange &&
+            childNodeHasRange &&
+            (item as any).range &&
+            (childNode as any).range
           ) {
-            return item.range[0] === childNode.range[0] && item.range[1] === childNode.range[1];
+            return (item as any).range[0] === (childNode as any).range[0] && (item as any).range[1] === (childNode as any).range[1];
           }
 
           return false;
