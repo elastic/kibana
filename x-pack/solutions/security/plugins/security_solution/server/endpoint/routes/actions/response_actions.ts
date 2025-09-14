@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -23,7 +23,6 @@ import {
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
   CancelActionRequestSchema,
-  type CancelActionRequestBody,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -58,10 +57,11 @@ import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import { executeResponseAction, buildResponseActionResult } from './utils';
-import { checkCancelPermission } from '../../../../common/endpoint/service/authz/cancel_authz_utils';
-import { EndpointAuthorizationError } from '../../errors';
-import { fetchActionRequestById } from '../../services/actions/utils/fetch_action_request_by_id';
+import {
+  executeResponseAction,
+  buildResponseActionResult,
+  createCancelActionAdditionalChecks,
+} from './utils';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -354,110 +354,12 @@ export function registerResponseActionRoutes(
         },
       },
       withEndpointAuthz(
-        { all: ['canAccessResponseConsole'] }, // Use base permission for middleware
+        { all: ['canAccessResponseConsole'] },
         logger,
-        cancelActionHandler(endpointContext)
+        responseActionRequestHandler(endpointContext, 'cancel'),
+        createCancelActionAdditionalChecks(endpointContext)
       )
     );
-}
-
-/**
- * Custom cancel action handler that uses utility functions for dynamic permission checking
- * instead of static authorization middleware.
- */
-function cancelActionHandler(
-  endpointContext: EndpointAppContext
-): RequestHandler<unknown, unknown, CancelActionRequestBody, SecuritySolutionRequestHandlerContext> {
-  return async (
-    context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, CancelActionRequestBody>,
-    response: KibanaResponseFactory
-  ) => {
-    const cancelActionLogger = endpointContext.logFactory.get('cancelActionHandler');
-    const { parameters } = request.body;
-    const actionId = parameters.action_id;
-
-    try {
-      // Get space ID from context
-      const spaceId = (await context.securitySolution).getSpaceId();
-
-      // Fetch original action to determine command type and agent type
-      const originalAction = await fetchActionRequestById(
-        endpointContext.service,
-        spaceId,
-        actionId
-      );
-
-      if (!originalAction) {
-        return errorHandler(
-          cancelActionLogger,
-          response,
-          new CustomHttpRequestError(`Action with id '${actionId}' not found.`, 404)
-        );
-      }
-
-      // Validate that endpoint_id (if provided) is associated with the original action
-      const requestEndpointId = request.body.endpoint_ids?.[0];
-      if (requestEndpointId && originalAction.agent?.id) {
-        const originalActionAgentIds = Array.isArray(originalAction.agent.id)
-          ? originalAction.agent.id
-          : [originalAction.agent.id];
-        if (!originalActionAgentIds.includes(requestEndpointId)) {
-          return errorHandler(
-            cancelActionLogger,
-            response,
-            new CustomHttpRequestError(
-              `Endpoint '${requestEndpointId}' is not associated with action '${actionId}'`,
-              403
-            )
-          );
-        }
-      }
-
-      // Extract command and agent type from original action
-      const command = originalAction.EndpointActions?.data?.command;
-      const agentType = originalAction.EndpointActions?.input_type;
-
-      if (!command) {
-        cancelActionLogger.warn(`Action ${actionId} missing command information`);
-        return errorHandler(
-          cancelActionLogger,
-          response,
-          new CustomHttpRequestError(
-            `Unable to determine command type for action '${actionId}'`,
-            500
-          )
-        );
-      }
-
-      if (!agentType) {
-        cancelActionLogger.warn(`Action ${actionId} missing agent type information`);
-        return errorHandler(
-          cancelActionLogger,
-          response,
-          new CustomHttpRequestError(`Unable to determine agent type for action '${actionId}'`, 500)
-        );
-      }
-
-      // Use utility to check if cancellation is allowed
-      const endpointAuthz = await (await context.securitySolution).getEndpointAuthz();
-      const canCancel = checkCancelPermission(
-        endpointAuthz,
-        endpointContext.experimentalFeatures,
-        agentType,
-        command
-      );
-
-      if (!canCancel) {
-        return errorHandler(cancelActionLogger, response, new EndpointAuthorizationError());
-      }
-
-      // Proceed with existing cancellation logic using the standard response action handler
-      return responseActionRequestHandler(endpointContext, 'cancel')(context, request, response);
-    } catch (error) {
-      return errorHandler(cancelActionLogger, response, error);
-    }
-  };
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(

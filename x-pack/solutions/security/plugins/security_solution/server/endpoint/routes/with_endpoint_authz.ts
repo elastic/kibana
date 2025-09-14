@@ -38,7 +38,8 @@ export const withEndpointAuthz = <T>(
   routeHandler: T,
   additionalChecks?: (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest
+    request: KibanaRequest,
+    logger: Logger
   ) => void | Promise<void>
 ): T => {
   const needAll: EndpointAuthzKeyList = neededAuthz.all ?? [];
@@ -112,7 +113,7 @@ export const withEndpointAuthz = <T>(
 
     if (additionalChecks) {
       try {
-        await additionalChecks(context, request);
+        await additionalChecks(context, request, logger);
       } catch (err) {
         logger.debug(() => stringify(err));
 
