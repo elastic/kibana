@@ -1136,15 +1136,15 @@ x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-ge
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/distribution-bar @elastic/kibana-contextual-security
 x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/packages/siem_readiness @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/kibana-contextual-security
+x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-contextual-security
+x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-contextual-security
+x-pack/solutions/security/packages/siem_readiness @elastic/kibana-contextual-security
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -1165,7 +1165,7 @@ x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generat
 x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-contextual-security
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-generative-ai
@@ -1173,7 +1173,7 @@ x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
-x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/session_view @elastic/kibana-contextual-security
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 ####
@@ -2389,7 +2389,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/serverless/ @elastic/security-solution
 /x-pack/solutions/security/test/serverless/functional/configs/config.ts @elastic/security-solution @elastic/appex-qa
 /x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/kibana-cloud-security-posture
+/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/kibana-contextual-security
 /x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts @elastic/security-solution
 
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
@@ -2470,8 +2470,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 
 ## Security Solution sub teams - Cloud Security Posture
 
-x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/kibana-contextual-security
+x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/kibana-contextual-security
 
 ## Security Solution sub teams - Security Entity Store
 x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/entity-store
@@ -2818,38 +2818,38 @@ x-pack/platform/test/automatic_import_api_integration @elastic/security-scalabil
 # Cloud Security Posture team
 
 ## Packages
-x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture @elastic/kibana-contextual-security
 ## Plugins
-x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
-x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/plugins/cloud_security_posture @elastic/kibana-contextual-security
+x-pack/plugins/kubernetes_security @elastic/kibana-contextual-security
 ## Security Solution sub teams
-x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/kibana-cloud-security-posture
-/x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-contextual-security
+x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-contextual-security
+x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-contextual-security
+x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-contextual-security
+x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/kibana-contextual-security
+x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/kibana-contextual-security
+/x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/kibana-contextual-security
 
 ## Fleet plugin (co-owned with Fleet team)
-x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
+x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-contextual-security
+x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-contextual-security
+x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-contextual-security
 ## SessionView tests
-x-pack/solutions/security/test/fixtures/es_archives/session_view @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
+x-pack/solutions/security/test/fixtures/es_archives/session_view @elastic/kibana-contextual-security
+x-pack/solutions/security/test/session_view @elastic/kibana-contextual-security # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
 ## CSP tests
-x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-contextual-security
+x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/kibana-contextual-security
+x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/kibana-contextual-security
 ## CSP Serverless tests
-x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.* @elastic/kibana-contextual-security
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture/ @elastic/kibana-contextual-security
+x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_security_posture/ @elastic/kibana-contextual-security
 ## CSP e2e tests
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-contextual-security
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-contextual-security
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-contextual-security
 
 # Security Service Integrations
 x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
