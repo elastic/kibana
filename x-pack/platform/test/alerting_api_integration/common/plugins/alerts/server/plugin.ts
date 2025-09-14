@@ -82,6 +82,7 @@ const testRuleTypes = [
   'test.severity',
   'test.dangerouslyCreateAlertsInAllSpaces',
   'test.persistenceDangerouslyCreateAlertsInAllSpaces',
+  'test.internal-rule-type',
 ];
 
 const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({

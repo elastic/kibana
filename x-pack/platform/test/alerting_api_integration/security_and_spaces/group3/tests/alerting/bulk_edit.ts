@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { SavedObject } from '@kbn/core/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
@@ -13,6 +13,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -1042,6 +1043,145 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(response.body.errors.length).to.eql(1);
 
         expect(response.body.errors[0].message).to.eql('Cannot use the same system action twice');
+      });
+    });
+
+    describe('internally managed rule types', () => {
+      const rulePayload = getAlwaysFiringInternalRule();
+
+      const payloadWithFilter = {
+        filter: `alert.attributes.tags: "internally-managed"`,
+        operations: [
+          {
+            operation: 'add',
+            field: 'tags',
+            value: ['tag-A'],
+          },
+        ],
+      };
+
+      const getPayloadWithIds = (ids: string[]) => ({
+        ids,
+        operations: [
+          {
+            operation: 'add',
+            field: 'tags',
+            value: ['tag-A'],
+          },
+        ],
+      });
+
+      const getAPIKeyPayloadWithIds = (ids: string[]) => ({
+        ids,
+        operations: [
+          {
+            operation: 'set',
+            field: 'apiKey',
+          },
+        ],
+      });
+
+      const getMultiplePayloadsWithIds = (ids: string[]) => ({
+        ids,
+        operations: [
+          {
+            operation: 'add',
+            field: 'tags',
+            value: ['tag-A'],
+          },
+          {
+            operation: 'set',
+            field: 'apiKey',
+          },
+        ],
+      });
+
+      it('should throw 400 error when trying to bulk update an internally managed rule type using the ids param', async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send({ ...rulePayload, tags: ['internally-managed'] })
+          .expect(200);
+
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post('/internal/alerting/rules/_bulk_edit')
+          .set('kbn-xsrf', 'foo')
+          .send(getPayloadWithIds([createdRule1.id]));
+
+        expect(response.status).to.eql(400);
+      });
+
+      it('should throw 400 error when trying to bulk update an internally managed rule type using the filter param', async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send({ ...rulePayload, tags: ['internally-managed'] })
+          .expect(200);
+
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post('/internal/alerting/rules/_bulk_edit')
+          .set('kbn-xsrf', 'foo')
+          .send(payloadWithFilter);
+
+        expect(response.status).to.eql(400);
+      });
+
+      it('should throw 400 error when supplying both ids and filter', async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send({ ...rulePayload, tags: ['internally-managed'] })
+          .expect(200);
+
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post('/internal/alerting/rules/_bulk_edit')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule1.id],
+            ...payloadWithFilter,
+          });
+
+        expect(response.status).to.eql(400);
+      });
+
+      it('should update the api key', async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send({ ...rulePayload, tags: ['internally-managed'] })
+          .expect(200);
+
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post('/internal/alerting/rules/_bulk_edit')
+          .set('kbn-xsrf', 'foo')
+          .send(getAPIKeyPayloadWithIds([createdRule1.id]));
+
+        expect(response.status).to.eql(200);
+      });
+
+      it('should throw 400 error when multiple supported and non supported operations', async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send({ ...rulePayload, tags: ['internally-managed'] })
+          .expect(200);
+
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .post('/internal/alerting/rules/_bulk_edit')
+          .set('kbn-xsrf', 'foo')
+          .send(getMultiplePayloadsWithIds([createdRule1.id]));
+
+        expect(response.status).to.eql(400);
       });
     });
   });
