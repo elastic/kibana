@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
+import crypto from 'crypto';
 import type { RunStepResult } from '../step/step_base';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -91,13 +92,28 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
+  /**
+   * Generates a deterministic execution ID for the current workflow step.
+   *
+   * The algorithm combines the workflow execution ID, current step path, and step ID
+   * into a single string, then applies SHA-256 hashing and truncates to 16 characters
+   * to create a unique identifier.
+   *
+   * The ID is always predictable and deterministic because it's derived from static
+   * workflow state components (execution ID, path, step ID) rather than random values.
+   * This ensures the same step in the same execution context will always generate
+   * the same ID, enabling reliable step tracking and idempotent operations.
+   *
+   * @returns A 16-character hexadecimal string representing the current step execution ID
+   */
   public getCurrentStepExecutionId(): string {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     const node = this.getCurrentNode();
     const stepId = node.stepId;
     const path = this.buildCurrentStepPath();
-
-    return [workflowExecution.id, ...path, stepId].join('_');
+    const generatedId = [workflowExecution.id, ...path, stepId].join('_');
+    const hashedId = crypto.createHash('sha256').update(generatedId).digest('hex');
+    return hashedId;
   }
 
   public getCurrentNode(): GraphNode {
@@ -563,6 +579,7 @@ export class WorkflowExecutionRuntimeManager {
     const currentNode = this.getCurrentNode();
     const path: string[] = [];
 
+    // TODO: TO REVISIT IT
     for (const part of this.stack) {
       // If the provided stepId is part of the stack, use read path until its position and stop
       if (part === currentNode.stepId) {

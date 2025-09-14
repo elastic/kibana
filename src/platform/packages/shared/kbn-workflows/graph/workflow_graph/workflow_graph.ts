@@ -14,6 +14,7 @@ import { convertToWorkflowGraph } from '../build_execution_graph/build_execution
 export class WorkflowGraph {
   private graph: graphlib.Graph | null = null;
   private __topologicalOrder: string[] | null = null;
+  private stepIdsSet: Set<string> | null = null;
 
   public static fromWorkflowDefinition(workflowDefinition: any): WorkflowGraph {
     const workflowGraph = new WorkflowGraph();
@@ -54,6 +55,14 @@ export class WorkflowGraph {
 
   public getEdges(): Array<{ v: string; w: string }> {
     return this.graph!.edges().map((edge) => ({ v: edge.v, w: edge.w }));
+  }
+
+  public hasStep(stepId: string): boolean {
+    if (!this.stepIdsSet) {
+      this.stepIdsSet = new Set(this.getAllNodes().map((node) => node.stepId));
+    }
+
+    return this.stepIdsSet.has(stepId);
   }
 
   public getStepGraph(stepId: string): WorkflowGraph {

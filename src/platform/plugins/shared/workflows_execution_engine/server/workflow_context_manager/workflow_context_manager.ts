@@ -103,9 +103,15 @@ export class WorkflowContextManager {
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
     for (const stepId of this.workflowExecutionState.getWorkflowExecution().stack) {
+      if (!this.workflowExecutionGraph.hasStep(stepId)) {
+        continue;
+      }
+
       const stepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
 
-      if (!stepExecution) continue;
+      if (!stepExecution) {
+        continue;
+      }
 
       switch (stepExecution.stepType) {
         case 'foreach':
