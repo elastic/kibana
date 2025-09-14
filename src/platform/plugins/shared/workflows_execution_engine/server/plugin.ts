@@ -198,14 +198,16 @@ export class WorkflowsExecutionEnginePlugin
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
-      const isRunningInTaskManager = 
-        triggeredBy === 'scheduled' || 
+      const isRunningInTaskManager =
+        triggeredBy === 'scheduled' ||
         context.source === 'task-manager' ||
         request?.isFakeRequest === true;
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
-        this.logger.info(`Executing workflow directly (already in Task Manager context): ${workflow.id}`);
+        this.logger.info(
+          `Executing workflow directly (already in Task Manager context): ${workflow.id}`
+        );
 
         const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
           await createContainer(
@@ -250,7 +252,9 @@ export class WorkflowsExecutionEnginePlugin
         // Task Manager will automatically create and manage the API key
         if (request) {
           // Debug: Log the user info from the original request
-          this.logger.info(`Scheduling workflow task with user context for workflow ${workflow.id}`);
+          this.logger.info(
+            `Scheduling workflow task with user context for workflow ${workflow.id}`
+          );
           await plugins.taskManager.schedule(taskInstance, { request });
         } else {
           this.logger.info(`Scheduling workflow task without user context`);
