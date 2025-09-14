@@ -132,6 +132,20 @@ export interface DeleteQueriesAction {
   };
 }
 
+export interface UnlinkAssetsAction {
+  type: 'unlink_assets';
+  request: {
+    name: string;
+  };
+}
+
+export interface UnlinkSystemsAction {
+  type: 'unlink_systems';
+  request: {
+    name: string;
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -149,7 +163,9 @@ export type ElasticsearchAction =
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
-  | DeleteQueriesAction;
+  | DeleteQueriesAction
+  | UnlinkAssetsAction
+  | UnlinkSystemsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -169,4 +185,6 @@ export interface ActionsByType {
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  unlink_assets: UnlinkAssetsAction[];
+  unlink_systems: UnlinkSystemsAction[];
 }

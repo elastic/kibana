@@ -27,9 +27,6 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     };
     hasBeenMigrated = true;
   }
-  if (migratedDefinition.systems === undefined) {
-    migratedDefinition.systems = [];
-  }
   // Rename unwired to classic
   if (
     isObject(migratedDefinition.ingest) &&

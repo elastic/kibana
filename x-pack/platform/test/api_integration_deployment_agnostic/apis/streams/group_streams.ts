@@ -46,7 +46,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: 'A Group stream',
-                  systems: [],
                   group: {
                     metadata: {},
                     tags: [],
@@ -101,7 +100,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -128,7 +126,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               name: 'test-group',
               description: 'A Group stream',
-              systems: [],
               group: {
                 metadata: {},
                 tags: [],
@@ -147,7 +144,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -172,7 +168,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               name: 'test-group',
               description: 'A Group stream',
-              systems: [],
               group: {
                 metadata: {},
                 tags: [],
@@ -203,7 +198,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -223,7 +217,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -269,7 +262,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -291,7 +283,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -317,7 +308,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -345,7 +335,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -371,7 +360,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],
@@ -393,7 +381,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   stream: {
                     description: 'A Group stream',
-                    systems: [],
                     group: {
                       metadata: {},
                       tags: [],

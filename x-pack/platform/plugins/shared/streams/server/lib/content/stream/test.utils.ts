@@ -31,7 +31,6 @@ export const testContentPackEntry = ({
     queries,
     stream: {
       description: '',
-      systems: [],
       ingest: {
         processing: {
           steps: [],

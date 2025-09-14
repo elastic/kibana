@@ -53,7 +53,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...emptyAssets,
         stream: {
           description: '',
-          systems: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {

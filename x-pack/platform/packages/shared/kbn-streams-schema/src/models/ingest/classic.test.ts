@@ -103,7 +103,6 @@ describe('ClassicStream', () => {
             processing: { steps: [] },
             classic: {},
           },
-          systems: [],
         },
         effective_lifecycle: {
           dsl: {},

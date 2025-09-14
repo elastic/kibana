@@ -14,7 +14,6 @@ import { verifyQueries } from './verify_queries';
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
-  systems: [],
   ingest: {
     wired: {
       fields: {},

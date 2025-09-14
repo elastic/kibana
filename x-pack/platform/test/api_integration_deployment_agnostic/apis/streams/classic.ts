@@ -58,7 +58,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             classic: {},
           },
-          systems: [],
         } satisfies Streams.ClassicStream.Definition);
       });
 
@@ -72,7 +71,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
-                systems: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: {
@@ -121,7 +119,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(stream).to.eql({
           name: TEST_STREAM_NAME,
           description: '',
-          systems: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
@@ -178,7 +175,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
-                systems: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: {
@@ -223,7 +219,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -272,7 +267,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
-                systems: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: {
@@ -302,7 +296,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
-                systems: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: {
@@ -439,7 +432,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -504,7 +496,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -539,7 +530,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -562,7 +552,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
@@ -596,7 +585,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -673,7 +661,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
-            systems: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -722,7 +709,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
-                systems: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
