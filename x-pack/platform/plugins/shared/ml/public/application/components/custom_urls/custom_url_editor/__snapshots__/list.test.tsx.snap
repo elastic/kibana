@@ -345,7 +345,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   id="generated-id"
                   placeholder="auto"
                   type="text"
-                  value="1h"
+                  value="auto"
                 />
               </div>
             </div>

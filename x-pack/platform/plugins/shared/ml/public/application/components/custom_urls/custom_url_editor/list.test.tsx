@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { CustomUrlListProps } from './list';
@@ -17,6 +17,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
+import type { Job } from '../../../../../common';
 
 jest.mock('@kbn/ml-url-state', () => ({
   parseUrlState: jest.fn(),
@@ -36,10 +37,18 @@ jest.mock('../../../contexts/kibana', () => ({
   useMlApi: () => ({}),
 }));
 
+jest.mock('../../../services/toast_notification_service', () => ({
+  useToastNotificationService: () => {
+    return {
+      displayErrorToast: jest.fn(),
+    };
+  },
+}));
+
 const TEST_CUSTOM_URLS = {
   dashboard: {
     url_name: 'Show dashboard',
-    time_range: '1h',
+    time_range: 'auto',
     url_value:
       'dashboards#/view/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=' +
       "(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&" +
@@ -115,13 +124,34 @@ const mockDFAJob: DataFrameAnalyticsConfig = {
   },
 };
 
-jest.mock('../../../services/toast_notification_service', () => ({
-  useToastNotificationService: () => {
-    return {
-      displayErrorToast: jest.fn(),
-    };
+const mockADJob: Job = {
+  job_id: 'test-ad-job',
+  analysis_config: {
+    bucket_span: '15m',
+    detectors: [
+      {
+        function: 'mean',
+        field_name: 'responsetime',
+      },
+    ],
   },
-}));
+  data_description: {
+    time_field: '@timestamp',
+  },
+  datafeed_config: {
+    indices: ['logs-*'],
+    datafeed_id: 'datafeed-test-ad-job',
+    job_id: 'test-ad-job',
+    query: { match_all: {} },
+    delayed_data_check_config: {
+      check_window: '60m',
+      enabled: true, // This was missing and required
+    },
+  },
+  allow_lazy_open: true,
+  model_snapshot_retention_days: 12354123,
+  results_index_name: 'string',
+};
 
 const mockParseUrlState = parseUrlState as jest.MockedFunction<typeof parseUrlState>;
 
@@ -152,8 +182,8 @@ afterEach(() => {
 function renderCustomUrlList(
   customUrls: any[],
   options: {
+    job?: Job | DataFrameAnalyticsConfig;
     onChange?: jest.Mock;
-    job?: any;
     dataViewListItems?: any[];
   } = {}
 ) {
@@ -248,193 +278,392 @@ describe('checkTimeRangeVisibility', () => {
     jest.clearAllMocks();
   });
 
-  describe('should display time range field when', () => {
-    it('should always display time range field for dashboard URLs', async () => {
-      // Even with no timeFieldName, dashboards should show time range
-      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
-
-      await waitFor(() => {
-        expect(
-          container.querySelector('input[aria-label^="Time range for custom URL"]')
-        ).toBeInTheDocument();
-      });
-
-      // Verify dataViews.get was never called for dashboard URLs
-      expect(mockDataViews.get).not.toHaveBeenCalled();
-
-      unmount();
+  describe('Data Frame Analytics Job - Time Range Field Visibility', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    it('index has timestamp field', async () => {
-      mockDataViews.get.mockResolvedValue({
-        timeFieldName: '@timestamp',
-      });
-
-      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
-
-      // Wait for async checkTimeRangeVisibility to complete
-      await waitFor(() => {
-        const inputs = container.querySelectorAll('input[aria-label^="Time range for custom URL"]');
-        expect(inputs).toHaveLength(1);
-      });
-
-      unmount();
+    afterEach(() => {
+      jest.clearAllMocks();
     });
 
-    it('dashboard time range is 1h', async () => {
-      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
+    describe('should display time range when', () => {
+      it('DFA job index has timestamp and Dashboards URL is selected', async () => {
+        mockDataViews.get.mockResolvedValue({
+          timeFieldName: '@timestamp',
+        });
 
-      await waitFor(() => {
-        expect(container).toBeTruthy();
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
+
+        // Wait for async checkTimeRangeVisibility to complete
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(1);
+        });
+
+        unmount();
       });
+      it('DFA job index has timestamp and Dashboard time range is auto', async () => {
+        mockDataViews.get.mockResolvedValue({
+          timeFieldName: '@timestamp',
+        });
 
-      await waitFor(() => {
-        const input = container.querySelector('input[aria-label^="Time range for custom URL"]');
-        expect(input).toBeInTheDocument();
-        expect(input).toHaveValue('1h');
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          const input = container.querySelector('input[aria-label^="Time range for custom URL"]');
+          expect(input).toBeInTheDocument();
+          expect(input).toHaveValue('auto');
+        });
+
+        unmount();
       });
+      it('DFA job index has timestamp and Dashboard time range is 1h', async () => {
+        const customUrls = [
+          {
+            ...TEST_CUSTOM_URLS.dashboard,
+            time_range: '1h',
+          },
+        ];
 
-      unmount();
+        const { container, unmount } = renderCustomUrlList(customUrls);
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          const input = container.querySelector('input[aria-label^="Time range for custom URL"]');
+          expect(input).toBeInTheDocument();
+          expect(input).toHaveValue('1h');
+        });
+
+        unmount();
+      });
+      it('DFA job index has timestamp and Discover URL has timestamp', async () => {
+        // First call (for DFA job index check) - has timestamp
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
+
+        // Second call (for Discover URL index check) - also has timestamp
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(1);
+        });
+
+        unmount();
+      });
+      it('DFA job index has timestamp and Other URL is not recognized', async () => {
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.unknown]);
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(1);
+        });
+
+        unmount();
+      });
+      it('Discover data view ID can not be determined', async () => {
+        mockParseUrlState.mockReturnValue({ _a: { index: undefined } });
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          expect(
+            container.querySelector('input[aria-label^="Time range for custom URL"]')
+          ).toBeInTheDocument();
+        });
+
+        unmount();
+      });
+      it('should handle multiple custom URLs with mixed timestamp support', async () => {
+        mockDataViews.get
+          .mockResolvedValueOnce({ timeFieldName: '@timestamp' }) // DFA job URL has timestamp
+          .mockResolvedValueOnce({ timeFieldName: '@timestamp' }) // Discover URL has timestamp
+          .mockResolvedValueOnce({ timeFieldName: '@timestamp' }) // Second DFA job URL has timestamp
+          .mockResolvedValueOnce({ timeFieldName: undefined }); // Second Discover URL has no timestamp
+
+        const customUrls = [TEST_CUSTOM_URLS.discover, TEST_CUSTOM_URLS.discover];
+        const { container, unmount } = renderCustomUrlList(customUrls);
+
+        // Should render time range for first URL only
+        await waitFor(() => {
+          const timeRangeInputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(timeRangeInputs).toHaveLength(1);
+        });
+
+        unmount();
+      });
     });
+    describe('should not display time range when', () => {
+      it('DFA job index does not have timestamp and Dashboards URL is selected', async () => {
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: undefined,
+        });
 
-    it('dashboard time range is auto', async () => {
-      const customUrls = [
-        {
-          ...TEST_CUSTOM_URLS.dashboard,
-          time_range: 'auto',
-        },
-      ];
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
 
-      const { container, unmount } = renderCustomUrlList(customUrls);
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
 
-      await waitFor(() => {
-        expect(container).toBeTruthy();
+        unmount();
       });
+      it('DFA job index has timestamp and Dashboards URL is selected and Custom time range was selected', async () => {
+        mockDataViews.get.mockResolvedValue({
+          timeFieldName: '@timestamp',
+        });
 
-      await waitFor(() => {
-        const input = container.querySelector('input[aria-label^="Time range for custom URL"]');
-        expect(input).toBeInTheDocument();
-        expect(input).toHaveValue('auto');
+        const customUrls = [
+          {
+            ...TEST_CUSTOM_URLS.dashboard,
+            is_custom_time_range: true, // Custom time range selected
+          },
+        ];
+
+        const { container, unmount } = renderCustomUrlList(customUrls);
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        // Wait for async checkTimeRangeVisibility to complete
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
+
+        unmount();
       });
+      it('DFA job index has timestamp and Discover URL does not have timestamp', async () => {
+        // First call (for DFA job index check) - has timestamp
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
 
-      unmount();
+        // Second call (for Discover URL index check) - does not have timestamp
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: undefined,
+        });
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
+
+        unmount();
+      });
+      it('DFA job index does not have timestamp and Discover URL has timestamp', async () => {
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: undefined,
+        });
+
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
+
+        unmount();
+      });
+      it('DFA job index does not have timestamp and Discover URL does not have timestamp', async () => {
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: undefined,
+        });
+
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: undefined,
+        });
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
+
+        unmount();
+      });
+      it('DFA job has timestamp and Discover has timefield and Custom time range was selected', async () => {
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
+
+        mockDataViews.get.mockResolvedValueOnce({
+          timeFieldName: '@timestamp',
+        });
+
+        const customUrls = [
+          {
+            ...TEST_CUSTOM_URLS.discover,
+            is_custom_time_range: true, // Custom time range selected
+          },
+        ];
+
+        const { container, unmount } = renderCustomUrlList(customUrls);
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
+
+        unmount();
+      });
     });
   });
 
-  describe('should not display time range field when', () => {
-    it('index does not have timestamp field', async () => {
-      mockDataViews.get.mockResolvedValue({
-        timeFieldName: undefined,
+  describe('Anomaly Detection Job - Time Range Field Visibility', () => {
+    describe('should display time range when', () => {
+      it('Dashboards URL is selected', async () => {
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard], {
+          job: mockADJob,
+        });
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(1);
+        });
+
+        unmount();
       });
 
-      const { unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
+      it('Discover URL has timestamp', async () => {
+        mockDataViews.get.mockResolvedValue({
+          timeFieldName: '@timestamp',
+        });
 
-      await waitFor(() => {
-        expect(mockDataViews.get).toHaveBeenCalled();
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover], {
+          job: mockADJob,
+        });
+
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(1);
+        });
+
+        unmount();
       });
 
-      await waitFor(() => {
-        expect(screen.queryByLabelText(/^Time range for custom URL \d+$/)).not.toBeInTheDocument();
-      });
+      it('Other URL is not recognized', async () => {
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.other], {
+          job: mockADJob,
+        });
 
-      unmount();
+        await waitFor(() => {
+          expect(container).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(1);
+        });
+
+        unmount();
+      });
+      it('Discover data view cannot be found', async () => {
+        mockDataViews.get.mockRejectedValue(new Error('Data view not found'));
+
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover], {
+          job: mockADJob,
+        });
+
+        await waitFor(() => {
+          expect(mockDataViews.get).toHaveBeenCalled();
+        });
+
+        await waitFor(() => {
+          expect(
+            container.querySelector('input[aria-label^="Time range for custom URL"]')
+          ).toBeInTheDocument();
+        });
+
+        unmount();
+      });
     });
+    describe('should not display time range when', () => {
+      it('Discover does not have timestamp', async () => {
+        mockDataViews.get.mockResolvedValue({
+          timeFieldName: undefined,
+        });
 
-    it('user has selected custom time range in editor', async () => {
-      mockDataViews.get.mockResolvedValue({
-        timeFieldName: '@timestamp',
+        const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover], {
+          job: mockADJob,
+        });
+
+        await waitFor(() => {
+          const inputs = container.querySelectorAll(
+            'input[aria-label^="Time range for custom URL"]'
+          );
+          expect(inputs).toHaveLength(0);
+        });
+
+        unmount();
       });
-
-      const customUrls = [
-        {
-          ...TEST_CUSTOM_URLS.discover,
-          is_custom_time_range: true, // Custom time range selected
-        },
-      ];
-
-      const { container, unmount } = renderCustomUrlList(customUrls);
-
-      await waitFor(() => {
-        expect(mockDataViews.get).toHaveBeenCalled();
-      });
-
-      await waitFor(() => {
-        expect(
-          container.querySelector('input[aria-label^="Time range for custom URL"]')
-        ).not.toBeInTheDocument();
-      });
-
-      unmount();
-    });
-
-    it('data view cannot be found', async () => {
-      mockDataViews.get.mockRejectedValue(new Error('Data view not found'));
-
-      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
-
-      await waitFor(() => {
-        expect(mockDataViews.get).toHaveBeenCalled();
-      });
-
-      await waitFor(() => {
-        expect(
-          container.querySelector('input[aria-label^="Time range for custom URL"]')
-        ).not.toBeInTheDocument();
-      });
-
-      unmount();
-    });
-  });
-
-  describe('should display time range field when no data view info available', () => {
-    it('no data view ID can be determined', async () => {
-      mockParseUrlState.mockReturnValue({ _a: { index: undefined } });
-
-      // Use empty data view list so no ID is found
-      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
-
-      await waitFor(() => {
-        // Based on business logic: if (!dataViewId) return true; - should show time range field
-        expect(
-          container.querySelector('input[aria-label^="Time range for custom URL"]')
-        ).toBeInTheDocument();
-      });
-
-      unmount();
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle multiple custom URLs with mixed timestamp support', async () => {
-      mockDataViews.get
-        .mockResolvedValueOnce({ timeFieldName: '@timestamp' }) // First URL has timestamp
-        .mockResolvedValueOnce({ timeFieldName: undefined }); // Second URL has no timestamp
-
-      const customUrls = [TEST_CUSTOM_URLS.discover, TEST_CUSTOM_URLS.discover];
-      const { container, unmount } = renderCustomUrlList(customUrls);
-
-      // Should render time range for first URL only
-      await waitFor(() => {
-        const timeRangeInputs = container.querySelectorAll(
-          'input[aria-label^="Time range for custom URL"]'
-        );
-        expect(timeRangeInputs).toHaveLength(1);
-      });
-
-      unmount();
-    });
-
-    it('should default to showing time range when data view ID cannot be determined', async () => {
-      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.unknown]);
-
-      // Should show time range by default when unable to determine data view
-      await waitFor(() => {
-        expect(
-          container.querySelector('input[aria-label^="Time range for custom URL"]')
-        ).toBeInTheDocument();
-      });
-
-      unmount();
     });
   });
 });

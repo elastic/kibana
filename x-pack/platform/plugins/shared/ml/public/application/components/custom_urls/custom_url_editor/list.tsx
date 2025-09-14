@@ -34,13 +34,13 @@ import { parseUrlState } from '@kbn/ml-url-state';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { css } from '@emotion/react';
+import type { Job } from '../../../../../common';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
 import { TIME_RANGE_TYPE } from './constants';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -52,9 +52,27 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   return interval !== null;
 }
 
+function findDFADataViewId(
+  dfaJob: DataFrameAnalyticsConfig,
+  dataViewListItems?: DataViewListItem[],
+  isPartialDFAJob?: boolean
+): string | undefined {
+  let dataViewId;
+  const sourceIndex = Array.isArray(dfaJob.source.index)
+    ? dfaJob.source.index.join()
+    : dfaJob.source.index;
+  const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+  const backupIndexName = sourceIndex;
+  dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
+  if (!dataViewId) {
+    return dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
+  }
+  return dataViewId;
+}
+
 /**
- * Finds the data view ID for a custom URL based on the job configuration.
- * For dashboard URLs: Searches data views by matching index names from job config.
+ * Finds the data view ID for a custom URL.
+ * For dashboards URLs: Returns the job's destination index data view ID.
  * Uses source index for partial DFA jobs since destination index doesn't exist yet.
  * For discover URLs: Extracts data view ID directly from the URL state.
  */
@@ -65,16 +83,9 @@ export function extractDataViewIdFromCustomUrl(
   isPartialDFAJob?: boolean
 ): string | undefined {
   let dataViewId;
+
   if (customUrl.url_value.includes('dashboards')) {
-    const sourceIndex = Array.isArray(dfaJob.source.index)
-      ? dfaJob.source.index.join()
-      : dfaJob.source.index;
-    const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
-    const backupIndexName = sourceIndex;
-    dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
-    if (!dataViewId) {
-      dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
-    }
+    dataViewId = findDFADataViewId(dfaJob, dataViewListItems, isPartialDFAJob);
   } else {
     const urlState = parseUrlState(customUrl.url_value);
     dataViewId = urlState._a?.index;
@@ -135,23 +146,65 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     const checkTimeRangeVisibility = async () => {
       const results = await Promise.all(
         customUrls.map(async (customUrl) => {
-          // Show time range field by default for Dashboards
-          if (customUrl.url_value.includes('dashboards')) return true;
+          const kibanaUrl = customUrl as MlKibanaUrlConfig;
 
-          // Get the dataViewId from the URL state
-          const urlState = parseUrlState(customUrl.url_value);
-          const dataViewId = urlState._a?.index;
+          const hasTimeField = async (dataViewId: string | undefined): Promise<boolean> => {
+            if (!dataViewId) return false;
+            try {
+              const dataView = await dataViews.get(dataViewId);
+              return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
+            } catch {
+              return true;
+            }
+          };
 
-          // Show time range field by default for others or unknown urls
-          if (!dataViewId) return true;
+          const getDFATimeFieldStatus = async (): Promise<boolean | undefined> => {
+            if (!isDataFrameAnalyticsConfigs(job) && !isPartialDFAJob) {
+              return undefined; // Not a DFA job
+            }
 
-          try {
-            const dataView = await dataViews.get(dataViewId);
-            // For Discover URLs, check if the data view has a time field
-            return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
-          } catch {
-            return false;
+            const dataViewId = findDFADataViewId(
+              job as DataFrameAnalyticsConfig,
+              dataViewListItems,
+              isPartialDFAJob
+            );
+
+            return dataViewId ? await hasTimeField(dataViewId) : false;
+          };
+
+          const getDiscoverTimeFieldStatus = async (): Promise<boolean | undefined> => {
+            if (!kibanaUrl.url_value.includes('discover')) {
+              return undefined; // Not a Discover URL
+            }
+
+            const urlState = parseUrlState(kibanaUrl.url_value);
+            const dataViewId = urlState._a?.index;
+
+            return dataViewId ? await hasTimeField(dataViewId) : true;
+          };
+
+          const dfaHasTimeField = await getDFATimeFieldStatus();
+          const discoverHasTimeField = await getDiscoverTimeFieldStatus();
+
+          // Anomaly Detection Jobs logic
+          if (dfaHasTimeField === undefined) {
+            if (kibanaUrl.url_value.includes('dashboards')) return true;
+            if (kibanaUrl.url_value.includes('discover')) return discoverHasTimeField === true;
+            return true; // Show for other/unknown URLs
           }
+
+          // Data Frame Analytics Jobs logic
+          if (kibanaUrl.url_value.includes('discover')) {
+            // For discover URLs: show only if both DFA and Discover have time fields
+            return dfaHasTimeField === true && discoverHasTimeField === true;
+          }
+
+          if (kibanaUrl.url_value.includes('dashboards')) {
+            // For dashboard URLs: show only if DFA has time field
+            return dfaHasTimeField === true;
+          }
+
+          return true;
         })
       );
       setShowTimeRange(results);
