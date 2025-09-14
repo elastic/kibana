@@ -8656,10 +8656,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod@link:src/platform/packages/kbn-zod":
-  version "0.0.0"
-  uid ""
-
 "@kbn/zod@link:src/platform/packages/shared/kbn-zod":
   version "0.0.0"
   uid ""

@@ -651,7 +651,13 @@ export class WorkflowExecutionRuntimeManager {
         step_id: step.stepId,
         execution_time_ms: step.executionTimeMs,
       },
-      ...(step.error && { error: step.error }),
+      ...(step.error && { 
+        error: {
+          message: typeof step.error === 'string' ? step.error : (step.error as Error)?.message || 'Unknown error',
+          type: typeof step.error === 'string' ? 'WorkflowStepError' : (step.error as Error)?.name || 'Error',
+          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
+        }
+      }),
     });
   }
 

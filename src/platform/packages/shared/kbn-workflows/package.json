@@ -9,8 +9,5 @@
   "scripts": {
     "generate:es-connectors": "node scripts/generate_es_connectors.js",
     "generate:kibana-connectors": "node scripts/generate_kibana_connectors.js"
-  },
-  "dependencies": {
-    "@kbn/zod": "link:../../kbn-zod"
   }
 }
