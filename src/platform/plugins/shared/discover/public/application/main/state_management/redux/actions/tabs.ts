@@ -325,13 +325,14 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
 export const openInNewTab: InternalStateThunkActionCreator<
   [
     {
+      tabLabel?: string;
       appState?: TabState['initialAppState'];
       globalState?: TabState['globalState'];
       searchSessionId?: string;
     }
   ]
 > =
-  ({ appState, globalState, searchSessionId }) =>
+  ({ tabLabel, appState, globalState, searchSessionId }) =>
   (dispatch, getState) => {
     const initialAppState = appState ? cloneDeep(appState) : undefined;
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -344,6 +345,10 @@ export const openInNewTab: InternalStateThunkActionCreator<
       initialAppState,
       globalState: initialGlobalState,
     };
+
+    if (tabLabel) {
+      newDefaultTab.label = tabLabel;
+    }
 
     if (searchSessionId) {
       newDefaultTab.dataRequestParams = {
