@@ -1261,16 +1261,16 @@ export function getCompletionItemProvider(
           // We're inside a variable expression, provide context-based completions
           if (context instanceof z.ZodObject) {
             const contextKeys = Object.keys(context.shape);
-            
+
             // Filter based on what the user has typed so far
-            const filteredKeys = lastPathSegment 
-              ? contextKeys.filter(key => key.startsWith(lastPathSegment))
+            const filteredKeys = lastPathSegment
+              ? contextKeys.filter((key) => key.startsWith(lastPathSegment))
               : contextKeys;
 
             for (const key of filteredKeys) {
               const keySchema = context.shape[key];
               const propertyTypeName = getZodTypeName(keySchema);
-              
+
               suggestions.push(
                 getSuggestion(
                   key,
