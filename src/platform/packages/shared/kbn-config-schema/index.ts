@@ -76,9 +76,6 @@ import type { UnionBaseType, UnionDefaultValue } from './src/types/union_type';
 import type {
   IntersectionDefaultValue,
   IntersectionBaseType,
-  IntersectionCombinedDefaultValue,
-  InferAllOfTypes,
-  IntersectionCombinedValues,
   IntersectionCombinedProps,
   IntersectionCombinedDefault,
 } from './src/types/intersection_type';
