@@ -9,6 +9,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
 import { services } from './ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../functional/config.base.ts')
