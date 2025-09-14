@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: xPackAPITestsConfig.get('servers'),
     services: xPackAPITestsConfig.get('services'),
     junit: {
-      reportName: 'X-Pack OneChat API Integration Tests',
+      reportName: 'X-Pack Agent Builder API Integration Tests',
     },
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {

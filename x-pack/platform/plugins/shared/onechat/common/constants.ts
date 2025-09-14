@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { publicApiPath } from './constants';
-
-export const MCP_SERVER_PATH = `${publicApiPath}/mcp`;
+export const publicApiPath = `/api/agent_builder`;
+export const internalApiPath = `/internal/agent_builder`;
