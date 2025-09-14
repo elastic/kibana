@@ -43,12 +43,12 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       let body: ChatResponse;
 
       beforeEach(async () => {
-        llmProxy.interceptors.toolChoice({
+        void llmProxy.interceptors.toolChoice({
           name: 'set_title',
           response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
         });
 
-        llmProxy.interceptors.userMessage({ response: MOCKED_LLM_RESPONSE });
+        void llmProxy.interceptors.userMessage({ response: MOCKED_LLM_RESPONSE });
 
         body = await oneChatApiClient.converse({
           input: 'Hello OneChat',
