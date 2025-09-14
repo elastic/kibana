@@ -388,17 +388,18 @@ export const createTabsStorageManager = ({
       toRecentlyClosedTabState(tab, defaultTabState)
     );
 
-    const newDefaultTab = {
-      ...defaultTabState,
-      ...createTabItem([]),
-    };
-
     if (enabled && selectedTabId) {
       if (selectedTabId === NEW_TAB_ID) {
         // append a new tab if requested via URL
+
+        const newTab = {
+          ...defaultTabState,
+          ...createTabItem(openTabs),
+        };
+
         return {
-          allTabs: [...openTabs, newDefaultTab],
-          selectedTabId: newDefaultTab.id,
+          allTabs: [...openTabs, newTab],
+          selectedTabId: newTab.id,
           recentlyClosedTabs: closedTabs,
         };
       }
@@ -428,6 +429,10 @@ export const createTabsStorageManager = ({
       }
     }
 
+    const newDefaultTab = {
+      ...defaultTabState,
+      ...createTabItem([]),
+    };
     let allTabs = [newDefaultTab];
     let selectedTab = newDefaultTab;
 
