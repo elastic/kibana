@@ -10,22 +10,22 @@ import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { DissectProcessor } from '../../../../types/processors';
 import { parseMultiDissectPatterns } from '../../../../types/utils/dissect_patterns';
 import { conditionToESQL } from '../condition_to_esql';
-import { castFieldsToString, buildOptInCondition, buildOptOutCondition, buildFork } from './common';
+import { castFieldsToString, buildWhereCondition } from './common';
 
 /**
  * Converts a Streamlang DissectProcessor into a list of ES|QL AST commands.
  *
- * Forking logic:
- *  - If neither ignore_missing nor where is provided: emit a single DISSECT command.
- *  - Otherwise, fork into:
- *      * dissect (opt-in) branch
- *      * skip (opt-out) branch
- *    Opt-in condition: (exists(from) if ignore_missing) AND (where condition, if provided)
- *    Opt-out condition: (NOT exists(from) if ignore_missing) OR (NOT where condition, if provided)
+ * Conditional execution logic:
+ *  - If neither `ignore_missing` nor `where` is provided: emit a single DISSECT command.
+ *  - Otherwise, use CASE approach to conditionally execute DISSECT:
+ *      * Create temporary field using CASE to conditionally set to source field or empty string (empty string avoids ES|QL NULL errors)
+ *      * Apply DISSECT to temporary field
+ *      * Drop temporary field
+ *    Condition: (exists(from) if ignore_missing) AND (where condition, if provided)
  *
  * Type handling:
- *  - Pre-fork: cast all prospective DISSECT output fields via TO_STRING to prevent FORK type conflicts.
- *  - Post-fork: no automatic casting; DISSECT yields keyword (string) values; further casts are user driven.
+ *  - Pre-dissect: cast all prospective DISSECT output fields to avoid ES|QL's type conflict errors.
+ *  - DISSECT yields keyword (string) values; further casts are user driven.
  *
  *  @example
  *     ```typescript
@@ -49,10 +49,9 @@ import { castFieldsToString, buildOptInCondition, buildOptOutCondition, buildFor
  *    ```txt
  *      | EVAL `log.level` = TO_STRING(`log.level`)
  *      | EVAL `client.ip` = TO_STRING(`client.ip`)
- *      | FORK
- *        (WHERE NOT(message IS NULL) AND NOT(`flags.process` IS NULL) | DISSECT message "[%{log.level}] %{client.ip}")
- *        (WHERE NOT NOT(message IS NULL) OR NOT NOT(`flags.process` IS NULL))
- *      | DROP _fork
+ *      | EVAL __temp_dissect_where_message__ = CASE(NOT(message IS NULL) AND NOT(`flags.process` IS NULL), message, "")
+ *      | DISSECT __temp_dissect_where_message__ "[%{log.level}] %{client.ip}"
+ *      | DROP __temp_dissect_where_message__
  *    ```
  */
 export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQLAstCommand[] {
@@ -63,51 +62,54 @@ export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQL
     ignore_missing = false, // default same as ES Dissect Enrich Processor
     where,
   } = processor;
+
   const fromColumn = Builder.expression.column(from);
   const dissectCommand = buildDissectCommand(pattern, fromColumn, append_separator);
 
-  // Whenever there's a need to conditionally execute DISSECT, we need ES|QL's FORK
-  // It's needed for a Streamlang's where clause or when ignore_missing is true
-  const needFork = ignore_missing || Boolean(where);
+  // Check if conditional execution is needed
+  const needConditional = ignore_missing || Boolean(where);
 
-  // If no forking needed, just return plain dissect command
-  if (!needFork) {
+  // If no conditional logic needed, just return plain dissect command
+  if (!needConditional) {
     return [dissectCommand];
   }
 
   const commands: ESQLAstCommand[] = [];
 
-  // Pre-cast all dissect output fields to string to unify branch schemas
-  // ES|QL requires all branches to have identical schemas, or it fails with:
-  // "type": "verification_exception",
-  // "reason": """Found 1 problem line 2:5: Column [<a>] has conflicting data types in FORK branches: [<mapped-type>] and [KEYWORD]"""
+  // Pre-cast all dissect output fields to string for consistency
   const { allFields } = parseMultiDissectPatterns([pattern]);
   const fieldNames = allFields.map((f) => f.name);
   commands.push(...castFieldsToString(fieldNames));
 
-  // WHERE conditions for ES|QL's FORK branches
-  const dissectCondition = buildOptInCondition(from, ignore_missing, where, conditionToESQL);
-  const skipCondition = buildOptOutCondition(from, ignore_missing, where, conditionToESQL);
+  // Build condition for when DISSECT should execute
+  const dissectCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQL);
 
-  // Unlikely that FORK won't have a skip branch, but handle it just in case
-  if (!skipCondition) {
-    commands.push(dissectCommand);
-    return commands;
-  }
+  // Create temporary field name for conditional processing
+  // Using CASE, set temporary field to source field if condition passes, empty string otherwise
+  const tempFieldName = `__temp_dissect_where_${from}__`;
+  const tempColumn = Builder.expression.column(tempFieldName);
 
-  const dissectBranch = Builder.expression.query([
-    Builder.command({ name: 'where', args: [dissectCondition] }),
-    dissectCommand,
-  ]);
-  const skipBranch = Builder.expression.query([
-    Builder.command({ name: 'where', args: [skipCondition] }),
-  ]);
+  commands.push(
+    Builder.command({
+      name: 'eval',
+      args: [
+        Builder.expression.func.binary('=', [
+          tempColumn,
+          Builder.expression.func.call('CASE', [
+            dissectCondition,
+            fromColumn,
+            Builder.expression.literal.string(''), // Empty string avoids ES|QL NULL errors that would break the pipeline
+          ]),
+        ]),
+      ],
+    })
+  );
 
-  // The FORK command
-  commands.push(buildFork(dissectBranch, skipBranch));
+  // Apply DISSECT to the temporary field
+  commands.push(buildDissectCommand(pattern, tempColumn, append_separator));
 
-  // Clean up the _fork field added by FORK
-  commands.push(Builder.command({ name: 'drop', args: [Builder.expression.column('_fork')] }));
+  // Clean up temporary field
+  commands.push(Builder.command({ name: 'drop', args: [tempColumn] }));
 
   return commands;
 }

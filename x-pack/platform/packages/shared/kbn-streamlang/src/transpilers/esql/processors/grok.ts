@@ -10,31 +10,24 @@ import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { GrokProcessor } from '../../../../types/processors';
 import { parseMultiGrokPatterns } from '../../../../types/utils/grok_patterns';
 import { conditionToESQL } from '../condition_to_esql';
-import {
-  castFieldsToGrokTypes,
-  buildOptInCondition,
-  buildOptOutCondition,
-  buildFork,
-} from './common';
+import { castFieldsToGrokTypes, buildWhereCondition } from './common';
 
 /**
  * Converts a Streamlang GrokProcessor into a list of ES|QL AST commands.
  *
- * Forking logic:
+ * Conditional execution logic:
  *  - If neither `ignore_missing` nor `where` is provided: emit a single GROK command.
- *  - Otherwise, fork into:
- *      * grok (opt-in) branch e.g. WHERE NOT(from IS NULL) AND (where condition, if provided)
- *      * skip (opt-out) branch e.g. WHERE (from IS NULL) OR (NOT where condition, if provided)
+ *  - Otherwise, use CASE approach to conditionally execute GROK:
+ *      * Create temporary field and use CASE to conditionally set source field or empty string (empty string avoids ES|QL NULL errors)
+ *      * Apply GROK to temporary field
+ *      * Drop temporary field
+ *    Condition: (exists(from) if ignore_missing) AND (where condition, if provided)
  *
  * Type handling:
- *  - Pre-fork: cast all GROKed target fields to their suffixed (or default) types with
- *              TO_STRING (keyword), TO_INTEGER or TO_DOUBLE. This is to prevent the verification_exception
- *              which GROK raises when the mapped field types conflict with GROK output types.
- *              For such a case, GROK fails with an error e.g.:
- *              `"""Found 1 problem
- * line 4:12: Column [size] has conflicting data types in FORK branches: [KEYWORD] and [INTEGER]"""`
+ *  - Pre-grok: cast all GROKed target fields to their suffixed (or default) types with
+ *              TO_STRING (keyword), TO_INTEGER or TO_DOUBLE for consistency.
  *
- * Example:
+ * @example:
  *    ```typescript
  *    const streamlangDSL: StreamlangDSL = {
  *      steps: [
@@ -54,10 +47,9 @@ import {
  *    | EVAL `client.ip` = TO_STRING(`client.ip`)
  *    | EVAL `size` = TO_INTEGER(`size`)
  *    | EVAL `burn_rate` = TO_DOUBLE(`burn_rate`)
- *    | FORK
- *      (WHERE NOT(message IS NULL) AND NOT(`flags.process` IS NULL) | GROK message "%{IP:client.ip} %{NUMBER:size:int} %{NUMBER:burn_rate:float}")
- *      (WHERE NOT NOT(message IS NULL) OR NOT NOT(`flags.process` IS NULL))
- *    | DROP _fork
+ *    | EVAL __temp_grok_where_message__ = CASE(NOT(message IS NULL) AND NOT(`flags.process` IS NULL), message, "")
+ *    | GROK __temp_grok_where_message__ "%{IP:client.ip} %{NUMBER:size:int} %{NUMBER:burn_rate:float}"
+ *    | DROP __temp_grok_where_message__
  *    ```
  */
 export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCommand[] {
@@ -72,44 +64,50 @@ export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCom
   const primaryPattern = patterns[0];
   const grokCommand = buildGrokCommand(fromColumn, primaryPattern);
 
-  // Need FORK if conditional or ignore_missing semantics are involved
-  const needFork = ignore_missing || Boolean(where);
-  if (!needFork) {
+  // Check if conditional execution is needed
+  const needConditional = ignore_missing || Boolean(where);
+  if (!needConditional) {
     return [grokCommand];
   }
 
   const commands: ESQLAstCommand[] = [];
 
-  // Pre-cast existing target fields to their configured GROK types to prevent type conflicts
+  // Pre-cast existing target fields to their configured GROK types to avoid ES|QL type conflict errors
   const { allFields } = parseMultiGrokPatterns([primaryPattern]);
   if (allFields.length > 0) {
     commands.push(...castFieldsToGrokTypes(allFields));
   }
 
-  // Build opt-in / opt-out conditions for FORK
-  const grokOptIn = buildOptInCondition(from, ignore_missing, where, conditionToESQL);
-  const grokOptOut = buildOptOutCondition(from, ignore_missing, where, conditionToESQL);
+  // Build condition for when GROK should execute
+  const grokCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQL);
 
-  // If no opt-out branch, execute GROK directly
-  if (!grokOptOut) {
-    commands.push(grokCommand);
-    return commands;
-  }
+  // Create temporary field name for conditional processing
+  // Using CASE, set temporary field to source field if condition passes, empty string otherwise
+  const tempFieldName = `__temp_grok_where_${from}__`;
+  const tempColumn = Builder.expression.column(tempFieldName);
 
-  // Construct branch queries
-  const grokBranch = Builder.expression.query([
-    Builder.command({ name: 'where', args: [grokOptIn] }),
-    grokCommand,
-  ]);
-  const skipBranch = Builder.expression.query([
-    Builder.command({ name: 'where', args: [grokOptOut] }),
-  ]);
+  //
+  commands.push(
+    Builder.command({
+      name: 'eval',
+      args: [
+        Builder.expression.func.binary('=', [
+          tempColumn,
+          Builder.expression.func.call('CASE', [
+            grokCondition,
+            fromColumn,
+            Builder.expression.literal.string(''), // Empty string avoids ES|QL NULL errors that would break the pipeline
+          ]),
+        ]),
+      ],
+    })
+  );
 
-  // FORK command
-  commands.push(buildFork(grokBranch, skipBranch));
+  // Apply GROK to the temporary field
+  commands.push(buildGrokCommand(tempColumn, primaryPattern));
 
-  // Drop helper column
-  commands.push(Builder.command({ name: 'drop', args: [Builder.expression.column('_fork')] }));
+  // Clean up temporary field
+  commands.push(Builder.command({ name: 'drop', args: [tempColumn] }));
 
   return commands;
 }

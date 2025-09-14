@@ -141,7 +141,7 @@ streamlangApiTest.describe(
         };
         const { query } = transpile(streamlangDSL);
         const docs = [
-          { expect: '192.168.1.1', log: { level: 'info' }, client: { ip: '192.168.1.1' } }, // Should not grok
+          { expect: null, log: { level: 'info' }, client: { ip: '192.168.1.1' } }, // Should not grok, but nullifies the field
           { expect: '127.0.0.1', client: { ip: '192.168.1.1' }, message: 'User IP: 127.0.0.1' }, // Should grok
           { expect: null, client: { ip: '192.168.1.1' }, message: 'User IP: N/A' }, // Should grok
         ];
@@ -150,11 +150,10 @@ streamlangApiTest.describe(
 
         // Looping over as FORK may change order of documents
         for (const esqlDoc of esqlResult.documents) {
-          const expectValue = esqlDoc.expect;
-          if (expectValue === null) {
+          if (esqlDoc.expect === null) {
             expect(esqlDoc['client.ip']).toBeNull();
-          } else if (expectValue !== undefined) {
-            expect(esqlDoc['client.ip']).toEqual(expectValue);
+          } else if (esqlDoc.expect !== undefined) {
+            expect(esqlDoc['client.ip']).toEqual(esqlDoc.expect);
           }
         }
       }
@@ -270,8 +269,8 @@ streamlangApiTest.describe(
             expect(doc['http.response.body.bytes']).toBe('2048'); // String as no :int GROK suffix
             expect(doc['status.keyword']).toBe('SUCCESS');
           } else if (doc.case === 'skip_numeric') {
-            expect(doc['http.response.body.bytes']).toBe('1024'); // Not groked but type casted
-            expect(doc['status.keyword']).toBe('preexisting');
+            expect(doc['http.response.body.bytes']).toBeNull(); // Not groked but nullifies the matching field
+            expect(doc['status.keyword']).toBeNull(); // Not groked but nullifies the matching field
           }
         }
       }
@@ -325,8 +324,8 @@ streamlangApiTest.describe(
               expect(doc['client.ip']).toBe('10.0.0.1');
               break;
             case 'no_message':
-              // Original user.name cast to string; client.ip stays '' or undefined
-              expect(doc['user.name']).toBe('legacy');
+              // Grok didn't extract but nullified tne operand/matching fields
+              expect(doc['user.name']).toBeNull();
               expect(doc['client.ip']).toBeNull();
               break;
             case 'no_where':
@@ -335,7 +334,7 @@ streamlangApiTest.describe(
               expect(doc['client.ip']).toBeNull();
               break;
             case 'none':
-              expect(doc['user.name']).toBe('offline');
+              expect(doc['user.name']).toBeNull(); // Non groked but matching field nullified
               expect(doc['client.ip']).toBeNull();
               break;
           }
@@ -436,37 +435,31 @@ streamlangApiTest.describe(
               break;
             }
             case 'skip_where': {
-              // Not grokked: original values should remain (after numeric casts)
-              expect(doc['client.ip']).toBe('1.1.1.1'); // IP unchanged (string)
-              expect(doc['user.name']).toBe('bob'); // user.name unchanged
-              // bytes: original numeric 123 -> pre-cast TO_INTEGER -> 123
-              expect(doc['http.response.body.bytes']).toBe(123);
-              expect(doc['http.response.status']).toBe('UNCHANGED');
-
-              // duration: original float 7.89 -> ES|QL reads as 7 because the mapped type is long -> pre-cast TO_DOUBLE 7 -> 7
-              expect(doc['event.duration']).toBeCloseTo(7.0);
+              // Not grokked: original values are nullified
+              expect(doc['client.ip']).toBeNull();
+              expect(doc['user.name']).toBeNull();
+              expect(doc['http.response.body.bytes']).toBeNull();
+              expect(doc['http.response.status']).toBeNull();
+              expect(doc['event.duration']).toBeNull();
               break;
             }
             case 'skip_missing': {
-              // Missing `message`, where passes; fields intact & typed
-              expect(doc['client.ip']).toBe('2.2.2.2');
-              expect(doc['user.name']).toBe('carol');
-              expect(doc['http.response.body.bytes']).toBe(456);
-              expect(doc['http.response.status']).toBe('LEGACY');
-
-              // ES|QL reads a long mapped field as integer 3 -> pre-cast TO_DOUBLE -> 3
-              expect(doc['event.duration']).toBeCloseTo(3.0);
+              // Missing `message`, where passes; fields are nullified
+              expect(doc['client.ip']).toBeNull();
+              expect(doc['user.name']).toBeNull();
+              expect(doc['http.response.body.bytes']).toBeNull();
+              expect(doc['http.response.status']).toBeNull();
+              expect(doc['event.duration']).toBeNull(); // Non-grokked but matching field nullified
               break;
             }
             case 'skip_both': {
-              // Neither `where` nor `message`; still skip; ensure coercions succeeded
-              expect(typeof doc['client.ip']).toBe('string'); // IP numeric originally -> pre-cast string -> remains string (not typed field)
-              expect(doc['user.name']).toBe('dave'); // user.name intact
-              expect(doc['http.response.body.bytes']).toBe(789); // bytes numeric 789 -> remains numeric after casts
-              expect(doc['http.response.status']).toBe('NOOP');
-
-              // duration string '6.28', ES|QL reads as 6 because mapped type is long -> pre-cast TO_DOUBLE -> 6
-              expect(doc['event.duration']).toBeCloseTo(6.0);
+              // Fields are not grokked; but since they match the pattern, they are nullified
+              // It's a caveat of the approach to simulate `where` in ES|QL GORK
+              expect(doc['client.ip']).toBeNull();
+              expect(doc['user.name']).toBeNull();
+              expect(doc['http.response.body.bytes']).toBeNull();
+              expect(doc['http.response.status']).toBeNull();
+              expect(doc['event.duration']).toBeNull();
               break;
             }
           }
@@ -504,9 +497,8 @@ streamlangApiTest.describe(
               expect(doc.size).toBeCloseTo(3.1415); // Because groked as float
               break;
             case 'skipped':
-              // size: 88.99 is read as 88 by ES|QL because it's mapped as "long" in the index
-              // the GROK casts it as double
-              expect(doc.size).toEqual(88);
+              // Non-extracted but matching fields are nullified
+              expect(doc.size).toBeNull();
               break;
           }
         }

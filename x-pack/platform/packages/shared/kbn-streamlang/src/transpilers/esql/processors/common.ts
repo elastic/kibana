@@ -68,7 +68,7 @@ export function combineOr(predicates: ESQLAstItem[]): ESQLAstItem | null {
   return predicates.reduce((acc, c) => (acc ? Builder.expression.func.binary('or', [acc, c]) : c));
 }
 
-export function buildOptInCondition(
+export function buildWhereCondition(
   fromField: string,
   ignoreMissing: boolean,
   where: Condition | undefined,
@@ -78,26 +78,4 @@ export function buildOptInCondition(
   if (ignoreMissing) predicates.push(conditionToESQL({ field: fromField, exists: true }));
   if (where) predicates.push(conditionToESQL(where));
   return combineAnd(predicates) ?? Builder.expression.literal.boolean(true);
-}
-
-export function buildOptOutCondition(
-  fromField: string,
-  ignoreMissing: boolean,
-  where: Condition | undefined,
-  conditionToESQL: (c: Condition) => ESQLAstItem
-): ESQLAstItem | null {
-  const predicates: ESQLAstItem[] = [];
-  if (ignoreMissing) {
-    predicates.push(
-      Builder.expression.func.unary('NOT', conditionToESQL({ field: fromField, exists: true }))
-    );
-  }
-  if (where) {
-    predicates.push(Builder.expression.func.unary('NOT', conditionToESQL(where)));
-  }
-  return combineOr(predicates);
-}
-
-export function buildFork(dissectBranch: ESQLAstItem, skipBranch: ESQLAstItem): ESQLAstCommand {
-  return Builder.command({ name: 'fork', args: [dissectBranch, skipBranch] });
 }
