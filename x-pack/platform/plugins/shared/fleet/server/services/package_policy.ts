@@ -3066,7 +3066,9 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 
     // Add debug logging
     const logger = appContextService.getLogger();
-    logger.debug(`PackagePolicyService.create called with supports_agentless: ${packagePolicy.supports_agentless}`);
+    logger.debug(
+      `PackagePolicyService.create called with supports_agentless: ${packagePolicy.supports_agentless}`
+    );
 
     return super.create(soClient, esClient, packagePolicy, options, context, request);
   }
