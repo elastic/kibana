@@ -322,6 +322,42 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
     );
   };
 
+export const openInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      appState?: TabState['initialAppState'];
+      globalState?: TabState['globalState'];
+      searchSessionId?: string;
+    }
+  ]
+> =
+  ({ appState, globalState, searchSessionId }) =>
+  (dispatch, getState) => {
+    const initialAppState = appState ? cloneDeep(appState) : undefined;
+    const initialGlobalState = globalState ? cloneDeep(globalState) : {};
+
+    const newDefaultTab: TabState = {
+      ...DEFAULT_TAB_STATE,
+      ...createTabItem([]),
+      initialAppState,
+      globalState: initialGlobalState,
+    };
+
+    if (searchSessionId) {
+      newDefaultTab.dataRequestParams = {
+        ...newDefaultTab.dataRequestParams,
+        searchSessionId,
+      };
+    }
+
+    const currentState = getState();
+    const currentTabs = selectAllTabs(currentState);
+
+    return dispatch(
+      updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
   (_, __, { runtimeStateManager }) => {
