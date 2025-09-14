@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const POST_SIEM_READINESS_TASK_API_PATH = '/internal/siem/readiness/task';
+export const POST_SIEM_READINESS_TASK_API_PATH = '/api/siem_readiness/post_task';

@@ -75,26 +75,24 @@ export const getLatestReadinessTaskRoute = (
 
           const searchResult = await esClient.search<TaskSource, AggregationResponse<TaskSource>>({
             index: SIEM_READINESS_INDEX,
-            body: {
-              size: 0,
-              aggs: {
-                latest_tasks: {
-                  terms: {
-                    field: 'task_id.keyword',
-                    size: 1000,
-                  },
-                  aggs: {
-                    latest_doc: {
-                      top_hits: {
-                        size: 1,
-                        sort: [
-                          {
-                            '@timestamp': {
-                              order: 'desc',
-                            },
+            size: 0,
+            aggs: {
+              latest_tasks: {
+                terms: {
+                  field: 'task_id.keyword',
+                  size: 1000,
+                },
+                aggs: {
+                  latest_doc: {
+                    top_hits: {
+                      size: 1,
+                      sort: [
+                        {
+                          '@timestamp': {
+                            order: 'desc',
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
                   },
                 },

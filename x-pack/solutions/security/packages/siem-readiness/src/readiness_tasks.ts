@@ -7,8 +7,37 @@
 
 import { i18n } from '@kbn/i18n';
 
+export type ReadinessTaskId =
+  | 'enable-endpoint-visibility'
+  | 'ingest-cloud-audit-logs'
+  | 'ingest-asset-inventory'
+  | 'enable-kubernetes-container-logs'
+  | 'ingest-all-cloud-logs-inventory'
+  | 'enable-mitre-aligned-detection-rules'
+  | 'view-detection-coverage-mitre'
+  | 'add-threat-intel-feeds'
+  | 'customize-create-rules'
+  | 'use-attack-discovery'
+  | 'maintain-rule-coverage'
+  | 'enable-cspm-on-all-clouds'
+  | 'investigate-alert-using-timeline'
+  | 'use-ai-assistant-for-alert-root-cause'
+  | 'add-external-connectors'
+  | 'automate-response-rules-case-creation'
+  | 'create-manage-case-workflows'
+  | 'complete-automated-cases';
+
+export interface ReadinessTaskConfig {
+  id: ReadinessTaskId;
+  title: string;
+  description: string;
+  pillar: 'visibility' | 'detection' | 'response';
+  order: number;
+  meta?: Record<string, unknown>;
+}
+
 // Used to define and validate readiness tasks structure
-export const READINESS_TASKS = [
+export const READINESS_TASKS: ReadinessTaskConfig[] = [
   /**
    *  ### Visibility Pillar Tasks ###
    */
@@ -324,14 +353,3 @@ export const READINESS_TASKS = [
     order: 18,
   },
 ] as const;
-
-export type ReadinessTaskId = (typeof READINESS_TASKS)[number]['id'];
-
-export interface ReadinessTaskConfig {
-  id: ReadinessTaskId;
-  title: string;
-  description: string;
-  pillar: 'visibility' | 'detection' | 'response';
-  order: number;
-  meta?: Record<string, unknown>;
-}

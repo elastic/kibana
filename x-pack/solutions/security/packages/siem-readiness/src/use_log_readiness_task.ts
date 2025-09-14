@@ -23,7 +23,7 @@ export const useLogReadinessTask = (
   const { http } = useKibana<CoreStart>().services;
 
   const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>(
-    async (task: SiemReadinessTask) => {
+    async (task: SiemReadinessTask): Promise<void> => {
       validateTask(task);
 
       await http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {

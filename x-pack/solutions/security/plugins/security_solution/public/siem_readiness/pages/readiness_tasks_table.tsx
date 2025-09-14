@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiTitle,
   EuiSuperSelect,
@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiSplitPanel,
-  EuiLoadingElastic,
   useEuiTheme,
 } from '@elastic/eui';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
@@ -54,25 +53,40 @@ export const ReadinessTasksTable: React.FC = () => {
   const readinessTasksActionsMap: Record<
     ReadinessTaskId,
     { action?: () => void; actionButtonLabel?: string }
-  > = {
-    'enable-endpoint-visibility': {
-      action: () => handleLogTask({ task_id: 'enable-endpoint-visibility', status: 'completed' }),
-      actionButtonLabel: 'Complete Demo Task',
-    },
-    'ingest-cloud-audit-logs': {
-      action: () =>
-        handleLogTask({
-          task_id: 'ingest-cloud-audit-logs',
-          status: 'completed',
-          meta: { test: 'demo' }, // purposefully invalid meta to demonstrate validation
-        }),
-      actionButtonLabel: 'try to log invalid task',
-    },
-  };
-
-  if (getLatestTasks.isLoading) {
-    return <EuiLoadingElastic />;
-  }
+  > = useMemo(
+    () => ({
+      'enable-endpoint-visibility': {
+        action: () => handleLogTask({ task_id: 'enable-endpoint-visibility', status: 'completed' }),
+        actionButtonLabel: 'Complete Demo Task',
+      },
+      'ingest-cloud-audit-logs': {
+        action: () =>
+          handleLogTask({
+            task_id: 'ingest-cloud-audit-logs',
+            status: 'completed',
+            meta: { test: 'demo' }, // purposefully invalid meta to demonstrate validation
+          }),
+        actionButtonLabel: 'try to log invalid task',
+      },
+      'ingest-asset-inventory': {},
+      'enable-kubernetes-container-logs': {},
+      'ingest-all-cloud-logs-inventory': {},
+      'enable-mitre-aligned-detection-rules': {},
+      'view-detection-coverage-mitre': {},
+      'add-threat-intel-feeds': {},
+      'customize-create-rules': {},
+      'use-attack-discovery': {},
+      'maintain-rule-coverage': {},
+      'enable-cspm-on-all-clouds': {},
+      'investigate-alert-using-timeline': {},
+      'use-ai-assistant-for-alert-root-cause': {},
+      'add-external-connectors': {},
+      'automate-response-rules-case-creation': {},
+      'create-manage-case-workflows': {},
+      'complete-automated-cases': {},
+    }),
+    [handleLogTask]
+  );
 
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ height: PANEL_HEIGHT }}>
