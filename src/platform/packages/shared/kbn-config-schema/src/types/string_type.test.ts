@@ -171,7 +171,7 @@ describe('#defaultValue', () => {
     schema.string({ defaultValue: 'some-string' });
     schema.string({ defaultValue: undefined });
     // @ts-expect-error
-    schema.string({ defaultValue: types.number });
+    schema.string({ defaultValue: 123 });
     // @ts-expect-error
     schema.string({ defaultValue: false });
     // @ts-expect-error

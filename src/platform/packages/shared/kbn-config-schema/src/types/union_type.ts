@@ -73,7 +73,11 @@ export class UnionType<
   constructor(types: RTS, options?: UnionTypeOptions<T, D>) {
     const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
-    super(schema, options);
+    super(
+      schema,
+      // @ts-expect-error - due to mixed types
+      options
+    );
     this.unionTypes = types;
     this.typeOptions = options;
   }
