@@ -64,8 +64,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               pageTestSubject: 'search-homepage',
             },
             {
-              link: { navId: 'agent_builder' },
-              breadcrumbs: ['Conversations'],
+              link: { navId: 'agent_builder:conversation' },
+              breadcrumbs: ['Agent Chat'],
               pageTestSubject: 'onechatPageConversations',
             },
             {
