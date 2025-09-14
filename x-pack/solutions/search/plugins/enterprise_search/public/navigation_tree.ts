@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Observable, map, debounceTime } from 'rxjs';
+import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type {
+  EuiSideNavItemTypeEnhanced,
   NavigationTreeDefinition,
   NodeDefinition,
-  EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
@@ -123,7 +123,7 @@ export const getNavigationTreeDefinition = ({
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate(
-                      'xpack.serverlessObservability.nav.workflowsBadgeTooltip',
+                      'xpack.enterpriseSearch.searchNav.workflowsBadgeTooltip',
                       {
                         defaultMessage: 'Technical preview',
                       }
