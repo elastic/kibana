@@ -115,7 +115,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       const {
         method,
         path,
-        body,
+        body: requestBody,
         params: queryParams,
       } = buildRequestFromConnector(stepType, params);
 
@@ -129,12 +129,12 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       const requestOptions = {
         method,
         path: finalPath,
-        body,
+        body: requestBody,
       };
 
-      console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
+      // console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
       if (requestOptions.path.endsWith('/_bulk')) {
-        console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
+        // console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
         // Further processing for bulk requests can be added here
         // SG: ugly hack cuz _bulk is special
         const docs = requestOptions.body.operations; // your 3 doc objects
@@ -145,7 +145,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         const refresh = queryParams?.refresh ?? false;
 
         // Turn each doc into an action+doc pair
-        const body = docs.flatMap((doc: any, i: number) => {
+        const bulkBody = docs.flatMap((doc: any, i: number) => {
           // If you have ids, use: { index: { _id: doc._id } }
           return [{ index: {} }, doc];
         });
@@ -153,7 +153,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         const resp = await esClient.bulk({
           index: pathIndex, // default index for all actions
           refresh, // true | false | 'wait_for'
-          body, // [ {index:{}}, doc, {index:{}}, doc, ... ]
+          body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
         });
 
         // Helpful: surface per-item errors if any
@@ -165,7 +165,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
               result: it[Object.keys(it)[0]],
             }))
             .filter((x: any) => x.result.error);
-          console.error('Bulk had item errors:', itemsWithErrors);
+          // console.error('Bulk had item errors:', itemsWithErrors);
         }
         return resp;
       }

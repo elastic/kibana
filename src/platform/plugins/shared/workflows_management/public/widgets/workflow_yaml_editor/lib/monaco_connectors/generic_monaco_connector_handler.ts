@@ -68,7 +68,7 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
 
       return this.createMarkdownContent(content);
     } catch (error) {
-      console.warn('GenericMonacoConnectorHandler: Error generating hover content', error);
+      // console.warn('GenericMonacoConnectorHandler: Error generating hover content', error);
       return null;
     }
   }
@@ -278,7 +278,7 @@ ${Object.entries(category.examples.params || {})
 
       // console.log('GenericMonacoConnectorHandler: Step copied to clipboard');
     } catch (error) {
-      console.error('GenericMonacoConnectorHandler: Error copying step', error);
+      // console.error('GenericMonacoConnectorHandler: Error copying step', error);
     }
   }
 
@@ -308,7 +308,7 @@ ${Object.entries(category.examples.params || {})
       }
       */
     } catch (error) {
-      console.error('GenericMonacoConnectorHandler: Error validating step', error);
+      // console.error('GenericMonacoConnectorHandler: Error validating step', error);
     }
   }
 }

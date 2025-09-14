@@ -41,6 +41,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         defaultMessage: 'Copy step as Console format',
       }),
       keybindings: [
+        // eslint-disable-next-line no-bitwise
         monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyC),
       ],
       run: async () => {
@@ -56,6 +57,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         defaultMessage: 'Copy step as cURL command',
       }),
       keybindings: [
+        // eslint-disable-next-line no-bitwise
         monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyU),
       ],
       run: async () => {
@@ -71,6 +73,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         defaultMessage: 'Copy workflow step',
       }),
       keybindings: [
+        // eslint-disable-next-line no-bitwise
         monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyS),
       ],
       run: async () => {
@@ -122,7 +125,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         await action.handler();
       }
     } catch (error) {
-      console.warn('UnifiedHoverProvider: Error running action', error);
+      // console.warn('UnifiedHoverProvider: Error running action', error);
     }
   }
 
@@ -154,65 +157,65 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position
   ): Promise<monaco.languages.Hover | null> {
     try {
-      console.log('UnifiedHoverProvider: provideHover called at position', position);
+      // console.log('UnifiedHoverProvider: provideHover called at position', position);
 
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
-        console.log('UnifiedHoverProvider: No YAML document available');
+        // console.log('UnifiedHoverProvider: No YAML document available');
         return null;
       }
 
       // Detect context at current position
       const context = await this.buildHoverContext(model, position, yamlDocument);
       if (!context) {
-        console.log('UnifiedHoverProvider: Could not build hover context');
+        // console.log('UnifiedHoverProvider: Could not build hover context');
         return null;
       }
 
-      console.log('✅ UnifiedHoverProvider: Context detected', {
-        connectorType: context.connectorType,
-        yamlPath: context.yamlPath,
-        stepContext: context.stepContext,
-        parameterContext: context.parameterContext,
-      });
+      // console.log('✅ UnifiedHoverProvider: Context detected', {
+      //   connectorType: context.connectorType,
+      //   yamlPath: context.yamlPath,
+      //   stepContext: context.stepContext,
+      //   parameterContext: context.parameterContext,
+      // });
 
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (!handler) {
-        console.log(
-          'UnifiedHoverProvider: No Monaco handler found for connector type:',
-          context.connectorType
-        );
+        // console.log(
+        //   'UnifiedHoverProvider: No Monaco handler found for connector type:',
+        //   context.connectorType
+        // );
         return null;
       }
 
-      console.log(
-        'UnifiedHoverProvider: Found Monaco handler for connector type:',
-        context.connectorType
-      );
+      // console.log(
+      //   'UnifiedHoverProvider: Found Monaco handler for connector type:',
+      //   context.connectorType
+      // );
 
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);
       if (!hoverContent) {
-        console.log('UnifiedHoverProvider: Handler returned no hover content');
+        // console.log('UnifiedHoverProvider: Handler returned no hover content');
         return null;
       }
 
       // Calculate range for hover
       const range = this.calculateHoverRange(model, position, context);
       if (!range) {
-        console.log('UnifiedHoverProvider: Could not calculate hover range');
+        // console.log('UnifiedHoverProvider: Could not calculate hover range');
         return null;
       }
 
-      console.log('UnifiedHoverProvider: Returning hover content');
+      // console.log('UnifiedHoverProvider: Returning hover content');
       return {
         range,
         contents: [hoverContent],
       };
     } catch (error) {
-      console.warn('UnifiedHoverProvider: Error providing hover', error);
+      // console.warn('UnifiedHoverProvider: Error providing hover', error);
       return null;
     }
   }
@@ -233,13 +236,13 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // If no path found (e.g., cursor after colon), try to find it from the current line
       if (yamlPath.length === 0) {
         yamlPath = this.getPathFromCurrentLine(model, position, yamlDocument);
-        console.log('🔍 buildHoverContext: Found path from current line:', yamlPath);
+        // console.log('🔍 buildHoverContext: Found path from current line:', yamlPath);
       }
 
       // Detect connector type and step context
       const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
       if (!stepContext?.stepType) {
-        console.log('🔍 buildHoverContext: No stepContext found for path:', yamlPath);
+        // console.log('🔍 buildHoverContext: No stepContext found for path:', yamlPath);
         return null;
       }
 
@@ -260,7 +263,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         parameterContext,
       };
     } catch (error) {
-      console.warn('UnifiedHoverProvider: Error building context', error);
+      // console.warn('UnifiedHoverProvider: Error building context', error);
       return null;
     }
   }
@@ -277,17 +280,17 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       const lineContent = model.getLineContent(position.lineNumber);
       const beforeCursor = lineContent.substring(0, position.column - 1);
 
-      console.log('🔍 getPathFromCurrentLine (hover):', {
-        lineContent: JSON.stringify(lineContent),
-        beforeCursor: JSON.stringify(beforeCursor),
-        position: { line: position.lineNumber, column: position.column },
-      });
+      // console.log('🔍 getPathFromCurrentLine (hover):', {
+      //   lineContent: JSON.stringify(lineContent),
+      //   beforeCursor: JSON.stringify(beforeCursor),
+      //   position: { line: position.lineNumber, column: position.column },
+      // });
 
       // Check if we're after a colon (common case: "with:|")
       const colonMatch = beforeCursor.match(/(\w+)\s*:\s*$/);
       if (colonMatch) {
         const keyName = colonMatch[1];
-        console.log('🔍 Found key after colon:', keyName);
+        // console.log('🔍 Found key after colon:', keyName);
 
         // Try to find this key in the document by looking at nearby positions
         // Look at the start of the key on this line
@@ -318,14 +321,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         const testPosition = lineStartPosition + offset;
         const testPath = getCurrentPath(yamlDocument, testPosition);
         if (testPath.length > 0) {
-          console.log('🔍 Found fallback path at offset', offset, ':', testPath);
+          // console.log('🔍 Found fallback path at offset', offset, ':', testPath);
           return testPath;
         }
       }
 
       return [];
     } catch (error) {
-      console.warn('UnifiedHoverProvider: Error getting path from current line', error);
+      // console.warn('UnifiedHoverProvider: Error getting path from current line', error);
       return [];
     }
   }
@@ -361,7 +364,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
       const stepNode = yamlDocument.getIn(stepPath, true);
       if (!stepNode) {
-        console.log('🔍 detectStepContext: No stepNode found for stepPath:', stepPath);
+        // console.log('🔍 detectStepContext: No stepNode found for stepPath:', stepPath);
         return null;
       }
 
@@ -370,15 +373,15 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       const typeNode = (stepNode as any)?.get?.('type', true);
       const stepType = typeNode?.value;
 
-      console.log('🔍 detectStepContext debug:', {
-        stepName,
-        stepType,
-        typeNode: typeNode?.value,
-        stepNodeType: typeof stepNode,
-      });
+      // console.log('🔍 detectStepContext debug:', {
+      //   stepName,
+      //   stepType,
+      //   typeNode: typeNode?.value,
+      //   stepNodeType: typeof stepNode,
+      // });
 
       if (!stepType) {
-        console.log('❌ No stepType found, returning null');
+        // console.log('❌ No stepType found, returning null');
         return null;
       }
 
@@ -394,7 +397,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         typeNode,
       };
     } catch (error) {
-      console.warn('UnifiedHoverProvider: Error detecting step context', error);
+      // console.warn('UnifiedHoverProvider: Error detecting step context', error);
       return null;
     }
   }
@@ -470,7 +473,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         position.column + 1
       );
     } catch (error) {
-      console.warn('UnifiedHoverProvider: Error calculating range', error);
+      // console.warn('UnifiedHoverProvider: Error calculating range', error);
       return null;
     }
   }

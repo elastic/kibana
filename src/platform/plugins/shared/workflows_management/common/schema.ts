@@ -124,10 +124,13 @@ function generateElasticsearchConnectors(): ConnectorContract[] {
   // Lazy load the large generated files to keep them out of the main bundle
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('@kbn/workflows/common/generated_es_connectors');
+
   const {
     ENHANCED_ELASTICSEARCH_CONNECTORS,
     mergeEnhancedConnectors,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('./enhanced_es_connectors');
 
   // Return enhanced connectors (merge generated with enhanced definitions)
@@ -139,8 +142,10 @@ function generateElasticsearchConnectors(): ConnectorContract[] {
 
 function generateKibanaConnectors(): ConnectorContract[] {
   // Lazy load the generated Kibana connectors
+
   const {
     GENERATED_KIBANA_CONNECTORS,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('@kbn/workflows/common/generated_kibana_connectors');
 
   // Return the pre-generated Kibana connectors (build-time generated, browser-safe)

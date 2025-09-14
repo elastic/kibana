@@ -13,6 +13,7 @@ import type YAML from 'yaml';
 import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
 import { getMonacoConnectorHandler } from './provider_registry';
 import type { ActionContext, ProviderConfig } from './provider_interfaces';
+import { getStepRange } from '../step_detection_utils';
 
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 100;
 
@@ -171,7 +172,7 @@ export class UnifiedActionsProvider {
         this.updateActionButtonPositions();
       }
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error updating highlight and actions', error);
+      // console.warn('UnifiedActionsProvider: Error updating highlight and actions', error);
       this.clearHighlightAndActions();
     }
   }
@@ -231,7 +232,7 @@ export class UnifiedActionsProvider {
         editor: this.editor,
       };
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error building context', error);
+      // console.warn('UnifiedActionsProvider: Error building context', error);
       return null;
     }
   }
@@ -423,8 +424,11 @@ export class UnifiedActionsProvider {
       // Create Dev Console-style decoration (single block border)
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-      // Get step range
-      const stepRange = this.getStepRange(context.stepContext.stepNode);
+      // Get step range using shared utility
+      const model = this.editor.getModel();
+      if (!model) return;
+
+      const stepRange = getStepRange(context.stepContext.stepNode, model);
       if (stepRange) {
         // Create decorations for first line, middle lines, and last line
         for (
@@ -466,79 +470,7 @@ export class UnifiedActionsProvider {
       });
       */
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error updating highlighting', error);
-    }
-  }
-
-  /**
-   * Get range for a step node
-   */
-  private getStepRange(stepNode: any): monaco.Range | null {
-    try {
-      if (!stepNode.range) {
-        return null;
-      }
-
-      const model = this.editor.getModel();
-      if (!model) {
-        return null;
-      }
-
-      const [startOffset, , endOffset] = stepNode.range;
-      const startPos = model.getPositionAt(startOffset);
-      const endPos = model.getPositionAt(endOffset);
-
-      /*
-      console.log('🔍 getStepRange initial:', {
-        startOffset,
-        endOffset,
-        startPos: { line: startPos.lineNumber, column: startPos.column },
-        endPos: { line: endPos.lineNumber, column: endPos.column },
-      });
-      */
-
-      // Use the YAML node's actual range instead of trying to detect boundaries manually
-      // The stepNode.range already contains the correct boundaries from the YAML parser
-      let adjustedEndLine = endPos.lineNumber;
-      let adjustedEndColumn = endPos.column;
-
-      // Only adjust for trailing whitespace, but trust the YAML parser's range
-      // Walk backwards from endPos to find the last non-whitespace line
-      while (adjustedEndLine > startPos.lineNumber) {
-        const lineContent = model.getLineContent(adjustedEndLine);
-        const trimmedContent = lineContent.trim();
-
-        // If this line has content, use it as the end
-        if (trimmedContent.length > 0) {
-          adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
-          break;
-        }
-
-        // If it's empty, move to the previous line
-        adjustedEndLine--;
-      }
-
-      // Safety check: ensure we don't go beyond the start line
-      if (adjustedEndLine < startPos.lineNumber) {
-        adjustedEndLine = startPos.lineNumber;
-        adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
-      }
-
-      /*
-      console.log('🔍 getStepRange adjustment:', {
-        originalEnd: { line: endPos.lineNumber, column: endPos.column },
-        adjustedEnd: { line: adjustedEndLine, column: adjustedEndColumn },
-      });
-      */
-      return new monaco.Range(
-        startPos.lineNumber,
-        startPos.column,
-        adjustedEndLine,
-        adjustedEndColumn
-      );
-    } catch (error) {
-      // console.warn('UnifiedActionsProvider: Error getting step range', error);
-      return null;
+      // console.warn('UnifiedActionsProvider: Error updating highlighting', error);
     }
   }
 
@@ -568,9 +500,12 @@ export class UnifiedActionsProvider {
     // Get the step range to find the first line
     let targetLineNumber = position.lineNumber;
     try {
-      const stepRange = this.getStepRange(this.currentStepNode);
-      if (stepRange) {
-        targetLineNumber = stepRange.startLineNumber;
+      const model = this.editor.getModel();
+      if (model && this.currentStepNode) {
+        const stepRange = getStepRange(this.currentStepNode, model);
+        if (stepRange) {
+          targetLineNumber = stepRange.startLineNumber;
+        }
       }
     } catch (error) {
       // Fallback to current position
@@ -615,23 +550,26 @@ export class UnifiedActionsProvider {
       const lineHeight = this.editor.getOption(monaco.editor.EditorOption.lineHeight);
       const scrollTop = this.editor.getScrollTop();
 
-      const stepRange = this.getStepRange(this.currentStepNode);
-      if (stepRange) {
-        const targetLineNumber = stepRange.startLineNumber;
-        const topPosition = (targetLineNumber - 1) * lineHeight - scrollTop;
+      const model = this.editor.getModel();
+      if (model) {
+        const stepRange = getStepRange(this.currentStepNode, model);
+        if (stepRange) {
+          const targetLineNumber = stepRange.startLineNumber;
+          const topPosition = (targetLineNumber - 1) * lineHeight - scrollTop;
 
-        this.updateEditorActionsCss({
-          position: 'absolute',
-          top: `${topPosition + 20}px`, // Account for border and padding + 4px down
-          right: '8px', // Inside the step area
-          zIndex: 1002, // Above the highlighting and pseudo-element
-          pointerEvents: 'auto',
-          display: 'flex',
-          gap: '2px',
-        });
+          this.updateEditorActionsCss({
+            position: 'absolute',
+            top: `${topPosition + 20}px`, // Account for border and padding + 4px down
+            right: '8px', // Inside the step area
+            zIndex: 1002, // Above the highlighting and pseudo-element
+            pointerEvents: 'auto',
+            display: 'flex',
+            gap: '2px',
+          });
+        }
       }
     } catch (error) {
-      console.warn('Error updating action button positions:', error);
+      // console.warn('Error updating action button positions:', error);
     }
   }
 
@@ -719,7 +657,7 @@ export class UnifiedActionsProvider {
         typeNode: stepContext.typeNode,
       };
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error getting current Elasticsearch step', error);
+      // console.warn('UnifiedActionsProvider: Error getting current Elasticsearch step', error);
       return null;
     }
   }

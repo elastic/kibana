@@ -114,7 +114,7 @@ function extractTagDocumentation() {
     let match;
 
     while ((match = externalDocsRegex.exec(specContent)) !== null) {
-      const [fullMatch, description, url] = match;
+      const [, description, url] = match;
       const beforeMatch = specContent.substring(0, match.index);
 
       // Look backwards for the most recent tag name
@@ -234,7 +234,7 @@ function extractExamplesFromSpec(method, path) {
           const requestExamples = extractYamlExamples(requestBodyMatch[1]);
           if (requestExamples.length > 0) {
             examples.request = requestExamples[0]; // Use first example
-            examples.requestParams = parseExampleForParams(requestExamples[0], method);
+            examples.requestParams = parseExampleForParams(requestExamples[0]);
           }
         }
 
@@ -297,7 +297,7 @@ function extractYamlExamples(examplesContent) {
 /**
  * Parse example YAML content to extract parameter values
  */
-function parseExampleForParams(exampleContent, method) {
+function parseExampleForParams(exampleContent) {
   const params = {};
 
   try {
@@ -493,7 +493,6 @@ function extractEndpointInfo(content) {
  * Parse balanced brackets/parentheses to extract complete field definitions
  */
 function extractFieldDefinition(content, startIndex) {
-  const depth = 0;
   let inString = false;
   let stringChar = '';
   let i = startIndex;

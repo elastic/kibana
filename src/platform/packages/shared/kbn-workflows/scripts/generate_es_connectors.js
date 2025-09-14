@@ -216,8 +216,6 @@ function readConsoleBodyDefinitions(endpointName) {
  * Intelligently infer body parameters from API endpoint name and common patterns
  */
 function inferBodyParamsFromApiName(endpointName) {
-  const bodyParams = [];
-
   // Index management APIs
   if (endpointName.includes('indices.create') && !endpointName.includes('data_stream')) {
     return ['mappings', 'settings', 'aliases'];

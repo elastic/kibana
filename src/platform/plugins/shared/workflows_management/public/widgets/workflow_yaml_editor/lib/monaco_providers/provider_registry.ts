@@ -22,7 +22,7 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
   register(handler: MonacoConnectorHandler): void {
     // Check if handler is already registered
     if (this.handlers.includes(handler)) {
-      console.warn('MonacoConnectorHandlerRegistry: Handler already registered');
+      // console.warn('MonacoConnectorHandlerRegistry: Handler already registered');
       return;
     }
 
@@ -31,9 +31,9 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
     // Sort by priority (highest first)
     this.handlers.sort((a, b) => b.getPriority() - a.getPriority());
 
-    console.log(
-      `MonacoConnectorHandlerRegistry: Registered handler with priority ${handler.getPriority()}`
-    );
+    // console.log(
+    //   `MonacoConnectorHandlerRegistry: Registered handler with priority ${handler.getPriority()}`
+    // );
   }
 
   /**
@@ -62,7 +62,7 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
     const index = this.handlers.indexOf(handler);
     if (index !== -1) {
       this.handlers.splice(index, 1);
-      console.log('MonacoConnectorHandlerRegistry: Unregistered handler');
+      // console.log('MonacoConnectorHandlerRegistry: Unregistered handler');
     }
   }
 
@@ -71,7 +71,7 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
    */
   clear(): void {
     this.handlers = [];
-    console.log('MonacoConnectorHandlerRegistry: Cleared all handlers');
+    // console.log('MonacoConnectorHandlerRegistry: Cleared all handlers');
   }
 
   /**

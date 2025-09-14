@@ -20,6 +20,7 @@ export function buildRequestFromConnector(
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
   // Lazy load the generated connectors to avoid main bundle bloat
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated_es_connectors');
 
   // Find the connector definition for this step type
@@ -63,6 +64,7 @@ export function buildRequestFromConnector(
     const queryParams: any = {};
 
     for (const [key, value] of Object.entries(params)) {
+      // eslint-disable-next-line no-console
       console.log(
         `DEBUG - Processing param: ${key}, isPathParam: ${pathParams.has(
           key

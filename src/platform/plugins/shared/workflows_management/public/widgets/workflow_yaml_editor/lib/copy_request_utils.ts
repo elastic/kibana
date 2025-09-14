@@ -90,7 +90,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Failed to copy to clipboard:', error);
+    // console.error('Failed to copy to clipboard:', error);
     return false;
   }
 }

@@ -99,7 +99,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
 
       return this.createMarkdownContent(content);
     } catch (error) {
-      console.warn('ElasticsearchMonacoConnectorHandler: Error generating hover content', error);
+      // console.warn('ElasticsearchMonacoConnectorHandler: Error generating hover content', error);
       return null;
     }
   }
@@ -226,7 +226,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
         }
       }
     } catch (error) {
-      console.warn('ElasticsearchMonacoConnectorHandler: Error extracting with params', error);
+      // console.warn('ElasticsearchMonacoConnectorHandler: Error extracting with params', error);
     }
 
     return withParams;
@@ -269,7 +269,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
         });
       }
     } catch (error) {
-      console.error('ElasticsearchMonacoConnectorHandler: Error copying as console', error);
+      // console.error('ElasticsearchMonacoConnectorHandler: Error copying as console', error);
       if (this.notifications) {
         this.notifications.toasts.addError(error as Error, {
           title: 'Failed to copy',
@@ -299,7 +299,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
 
       return null;
     } catch (error) {
-      console.warn('ElasticsearchMonacoConnectorHandler: Error getting documentation URL', error);
+      // console.warn('ElasticsearchMonacoConnectorHandler: Error getting documentation URL', error);
       return null;
     }
   }

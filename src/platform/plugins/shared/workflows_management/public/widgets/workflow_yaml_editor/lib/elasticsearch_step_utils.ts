@@ -104,13 +104,14 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
                   withParams = {};
                   for (const withItem of item.value.items) {
                     if (isPair(withItem) && isScalar(withItem.key)) {
-                      const key = withItem.key.value as string;
+                      const paramKey = withItem.key.value as string;
                       // Handle both scalar values and nested objects
                       if (isScalar(withItem.value)) {
-                        withParams[key] = withItem.value.value;
+                        withParams[paramKey] = withItem.value.value;
                       } else {
                         // For nested objects (like query), convert the YAML node to a JS object
-                        withParams[key] = (withItem.value as any)?.toJSON?.() || withItem.value;
+                        withParams[paramKey] =
+                          (withItem.value as any)?.toJSON?.() || withItem.value;
                       }
                     }
                   }

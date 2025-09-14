@@ -121,7 +121,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
 
       return this.createMarkdownContent(content);
     } catch (error) {
-      console.warn('KibanaMonacoConnectorHandler: Error generating hover content', error);
+      // console.warn('KibanaMonacoConnectorHandler: Error generating hover content', error);
       return null;
     }
   }
@@ -170,9 +170,9 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         this.connectorExamples.set(connector.type, connector.examples);
       }
     }
-    console.log(
-      `KibanaMonacoConnectorHandler: Processed ${this.connectorExamples.size} connector examples`
-    );
+    // console.log(
+    //   `KibanaMonacoConnectorHandler: Processed ${this.connectorExamples.size} connector examples`
+    // );
   }
 
   /**
@@ -248,7 +248,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       if (!allConnectors) return null;
       return allConnectors.find((c: any) => c.type === connectorType);
     } catch (error) {
-      console.warn('KibanaMonacoConnectorHandler: Error getting connector info', error);
+      // console.warn('KibanaMonacoConnectorHandler: Error getting connector info', error);
       return null;
     }
   }
@@ -273,7 +273,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // Fallback to generic Kibana API docs
       return 'https://www.elastic.co/guide/en/kibana/current/api.html';
     } catch (error) {
-      console.warn('KibanaMonacoConnectorHandler: Error getting documentation URL', error);
+      // console.warn('KibanaMonacoConnectorHandler: Error getting documentation URL', error);
       return null;
     }
   }
@@ -321,7 +321,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         }
       }
     } catch (error) {
-      console.warn('KibanaMonacoConnectorHandler: Error extracting with params', error);
+      // console.warn('KibanaMonacoConnectorHandler: Error extracting with params', error);
     }
 
     return withParams;
@@ -347,7 +347,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         });
       }
     } catch (error) {
-      console.error('KibanaMonacoConnectorHandler: Error copying step', error);
+      // console.error('KibanaMonacoConnectorHandler: Error copying step', error);
       if (this.notifications) {
         this.notifications.toasts.addError(error as Error, {
           title: 'Failed to copy step',
@@ -380,7 +380,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         });
       }
     } catch (error) {
-      console.error('KibanaMonacoConnectorHandler: Error copying as cURL', error);
+      // console.error('KibanaMonacoConnectorHandler: Error copying as cURL', error);
       if (this.notifications) {
         this.notifications.toasts.addError(error as Error, {
           title: 'Failed to copy',
@@ -412,7 +412,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         });
       }
     } catch (error) {
-      console.error('KibanaMonacoConnectorHandler: Error copying as fetch', error);
+      // console.error('KibanaMonacoConnectorHandler: Error copying as fetch', error);
     }
   }
 
@@ -432,7 +432,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         });
       }
     } catch (error) {
-      console.error('KibanaMonacoConnectorHandler: Error opening API docs', error);
+      // console.error('KibanaMonacoConnectorHandler: Error opening API docs', error);
     }
   }
 

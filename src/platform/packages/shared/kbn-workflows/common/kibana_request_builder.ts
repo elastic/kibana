@@ -24,6 +24,7 @@ export function buildKibanaRequestFromAction(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { GENERATED_KIBANA_CONNECTORS } = require('./generated_kibana_connectors');
 
   // Find the connector definition for this action type

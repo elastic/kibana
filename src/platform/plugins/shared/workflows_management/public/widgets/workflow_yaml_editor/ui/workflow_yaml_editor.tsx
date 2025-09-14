@@ -97,32 +97,41 @@ const getStepNodesWithType = (yamlDocument: YAML.Document): any[] => {
         return;
       }
 
-      // Check if this is a type field within a step
+      // Check if this is a type field within a step (not nested inside 'with' or other blocks)
       const path = ancestors.slice();
-      let isStepType = false;
+      let isMainStepType = false;
 
       // Walk up the ancestors to see if we're in a steps array
+      // and ensure this type field is a direct child of a step, not nested in 'with'
       for (let i = path.length - 1; i >= 0; i--) {
         const ancestor = path[i];
+
+        // If we encounter a 'with' field before finding 'steps', this is a nested type
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'with') {
+          return; // Skip this type field - it's inside a 'with' block
+        }
+
+        // If we find 'steps', this could be a main step type
         if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'steps') {
-          isStepType = true;
+          isMainStepType = true;
           break;
         }
       }
 
-      if (isStepType && isScalar(pair.value)) {
-        // Find the step node (parent containing the type)
-        for (let i = path.length - 1; i >= 0; i--) {
-          const ancestor = path[i];
-          if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
-            // Check if this map contains a type field
-            const hasType = ancestor.items.some(
-              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
-            );
-            if (hasType) {
-              stepNodes.push(ancestor);
-              break;
-            }
+      if (isMainStepType && isScalar(pair.value)) {
+        // Find the step node (parent containing the type) - should be the immediate parent map
+        const immediateParent = ancestors[ancestors.length - 1];
+        if (isMap(immediateParent) && 'items' in immediateParent && immediateParent.items) {
+          // Ensure this is a step node by checking it has both 'name' and 'type' fields
+          const hasName = immediateParent.items.some(
+            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'name'
+          );
+          const hasType = immediateParent.items.some(
+            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+          );
+
+          if (hasName && hasType) {
+            stepNodes.push(immediateParent);
           }
         }
       }
@@ -193,7 +202,7 @@ const useWorkflowJsonSchema = () => {
 
       return processedSchema ?? null;
     } catch (error) {
-      console.error('🚨 Schema generation failed:', error);
+      // console.error('🚨 Schema generation failed:', error);
       return null;
     }
   }, []);
@@ -413,7 +422,7 @@ export const WorkflowYAMLEditor = ({
           setYamlDocument(parsedDocument);
           yamlDocumentRef.current = parsedDocument;
         } catch (error) {
-          console.error('❌ Error parsing YAML document:', error);
+          // console.error('❌ Error parsing YAML document:', error);
           clearAllDecorations();
           setYamlDocument(null);
           yamlDocumentRef.current = null;
@@ -630,9 +639,9 @@ export const WorkflowYAMLEditor = ({
           // Additional check: if we have stepExecutions but no yamlDocument,
           // the document might not be parsed yet - skip and let next update handle it
           if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
-            console.warn(
-              '🎯 StepExecutions present but no YAML document - waiting for document parse'
-            );
+            // console.warn(
+            //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
+            // );
             return;
           }
 
@@ -652,7 +661,7 @@ export const WorkflowYAMLEditor = ({
           }
         }
       } catch (error) {
-        console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
+        // console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
       }
     }, 20); // Small delay to ensure YAML document is ready
 
@@ -795,19 +804,24 @@ export const WorkflowYAMLEditor = ({
 
       // Find all steps with connector types
       const stepNodes = getStepNodesWithType(yamlDocument);
-      console.log('🎨 Connector decorations: Found step nodes:', stepNodes.length);
+      // console.log('🎨 Connector decorations: Found step nodes:', stepNodes.length);
 
       for (const stepNode of stepNodes) {
-        const typePair = stepNode.items.find((item: any) => item.key?.value === 'type');
+        // Find the main step type (not nested inside 'with' or other blocks)
+        const typePair = stepNode.items.find((item: any) => {
+          // Must be a direct child of the step node (not nested)
+          return isPair(item) && isScalar(item.key) && item.key.value === 'type';
+        });
+
         if (!typePair?.value?.value) continue;
 
         const connectorType = typePair.value.value;
-        console.log('🎨 Processing connector type:', connectorType);
+        // console.log('🎨 Processing connector type:', connectorType);
 
         // Skip decoration for very short connector types to avoid false matches
         // allow "if" as a special case
         if (connectorType.length < 3 && connectorType !== 'if') {
-          console.log('🎨 Skipping short connector type:', connectorType);
+          // console.log('🎨 Skipping short connector type:', connectorType);
           continue; // Skip this iteration
         }
 
@@ -862,7 +876,7 @@ export const WorkflowYAMLEditor = ({
           }
 
           // Background highlighting and after content (working version)
-          const decorations_to_add = [
+          const decorationsToAdd = [
             // Background highlighting on the connector type text
             {
               range: {
@@ -877,17 +891,17 @@ export const WorkflowYAMLEditor = ({
             },
           ];
 
-          decorations.push(...decorations_to_add);
+          decorations.push(...decorationsToAdd);
         }
       }
 
-      console.log('🎨 Final decorations count:', decorations.length);
+      // console.log('🎨 Final decorations count:', decorations.length);
       if (decorations.length > 0) {
         connectorTypeDecorationCollectionRef.current =
           editor.createDecorationsCollection(decorations);
-        console.log('🎨 Applied connector decorations successfully');
+        // console.log('🎨 Applied connector decorations successfully');
       } else {
-        console.log('🎨 No decorations to apply');
+        // console.log('🎨 No decorations to apply');
       }
     }, 100); // Small delay to avoid multiple rapid executions
 
@@ -978,7 +992,7 @@ export const WorkflowYAMLEditor = ({
           }
 
           // Background highlighting for trigger types
-          const decorations_to_add = [
+          const decorationsToAdd = [
             // Background highlighting on the trigger type text
             {
               range: {
@@ -993,7 +1007,7 @@ export const WorkflowYAMLEditor = ({
             },
           ];
 
-          decorations.push(...decorations_to_add);
+          decorations.push(...decorationsToAdd);
         }
       }
 
