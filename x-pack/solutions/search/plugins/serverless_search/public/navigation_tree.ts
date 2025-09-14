@@ -113,7 +113,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             badgeTypeV2: 'techPreview' as const,
             badgeOptions: {
               icon: 'beaker',
-              tooltip: i18n.translate('xpack.serverlessObservability.nav.workflowsBadgeTooltip', {
+              tooltip: i18n.translate('xpack.serverlessSearch.nav.workflowsBadgeTooltip', {
                 defaultMessage: 'Technical preview',
               }),
             },
