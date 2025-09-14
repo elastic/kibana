@@ -306,8 +306,7 @@ export class WorkflowsService {
           updatedData.description = workflowDef.description;
           updatedData.tags = workflowDef.tags;
           updatedData.valid = true;
-          shouldUpdateScheduler = true;
-          updatedData.valid = true;
+          updatedData.yaml = workflow.yaml;
           shouldUpdateScheduler = true;
         }
       }

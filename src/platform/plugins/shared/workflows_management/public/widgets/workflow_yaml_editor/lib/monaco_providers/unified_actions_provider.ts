@@ -497,41 +497,24 @@ export class UnifiedActionsProvider {
       });
       */
 
-      // Adjust end position to exclude trailing empty lines and prevent bleeding into next step
+      // Use the YAML node's actual range instead of trying to detect boundaries manually
+      // The stepNode.range already contains the correct boundaries from the YAML parser
       let adjustedEndLine = endPos.lineNumber;
       let adjustedEndColumn = endPos.column;
 
-      // Walk backwards from endPos to find the last non-empty line
+      // Only adjust for trailing whitespace, but trust the YAML parser's range
+      // Walk backwards from endPos to find the last non-whitespace line
       while (adjustedEndLine > startPos.lineNumber) {
         const lineContent = model.getLineContent(adjustedEndLine);
         const trimmedContent = lineContent.trim();
-        /*
-        console.log(
-          '🔍 Checking line',
-          adjustedEndLine,
-          ':',
-          JSON.stringify(lineContent),
-          'trimmed:',
-          JSON.stringify(trimmedContent)
-        );
-        */
 
-        // If this line is non-empty and doesn't start with "- " (which would be the next step)
-        if (trimmedContent.length > 0 && !trimmedContent.startsWith('- ')) {
-          // Use the full line length for this non-empty line
+        // If this line has content, use it as the end
+        if (trimmedContent.length > 0) {
           adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
           break;
         }
 
-        // If we found a line that starts with "- ", this is likely the next step
-        if (trimmedContent.startsWith('- ')) {
-          // Go back to the previous line and use its end
-          adjustedEndLine = Math.max(startPos.lineNumber, adjustedEndLine - 1);
-          adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
-          // console.log('🔍 Found next step marker, adjusting to previous line', adjustedEndLine);
-          break;
-        }
-
+        // If it's empty, move to the previous line
         adjustedEndLine--;
       }
 

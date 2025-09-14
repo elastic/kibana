@@ -795,16 +795,19 @@ export const WorkflowYAMLEditor = ({
 
       // Find all steps with connector types
       const stepNodes = getStepNodesWithType(yamlDocument);
+      console.log('🎨 Connector decorations: Found step nodes:', stepNodes.length);
 
       for (const stepNode of stepNodes) {
         const typePair = stepNode.items.find((item: any) => item.key?.value === 'type');
         if (!typePair?.value?.value) continue;
 
         const connectorType = typePair.value.value;
+        console.log('🎨 Processing connector type:', connectorType);
 
         // Skip decoration for very short connector types to avoid false matches
         // allow "if" as a special case
         if (connectorType.length < 3 && connectorType !== 'if') {
+          console.log('🎨 Skipping short connector type:', connectorType);
           continue; // Skip this iteration
         }
 
@@ -878,9 +881,13 @@ export const WorkflowYAMLEditor = ({
         }
       }
 
+      console.log('🎨 Final decorations count:', decorations.length);
       if (decorations.length > 0) {
         connectorTypeDecorationCollectionRef.current =
           editor.createDecorationsCollection(decorations);
+        console.log('🎨 Applied connector decorations successfully');
+      } else {
+        console.log('🎨 No decorations to apply');
       }
     }, 100); // Small delay to avoid multiple rapid executions
 

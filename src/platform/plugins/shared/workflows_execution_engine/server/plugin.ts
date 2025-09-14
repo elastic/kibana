@@ -196,37 +196,66 @@ export class WorkflowsExecutionEnginePlugin
         triggeredBy, // <-- new field for scheduled workflows
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
-      const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
-        taskType: 'workflow:run',
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        } as StartWorkflowExecutionParams,
-        state: {
-          lastRunAt: null,
-          lastRunStatus: null,
-          lastRunError: null,
-        },
-        scope: ['workflows'],
-        enabled: true,
-      };
 
-      // Use Task Manager's first-class API key support by passing the request
-      // Task Manager will automatically create and manage the API key
-      if (request) {
-        // Debug: Log the user info from the original request
-        this.logger.info(`Scheduling workflow task with user context`, {
-          has_auth: !!request.auth,
-          has_credentials: !!request.auth?.credentials,
-          username: request.auth?.credentials?.username || 'unknown',
-          realm: request.auth?.credentials?.realm || 'unknown',
-          headers_auth: request.headers?.authorization ? 'present' : 'missing',
-        });
-        await plugins.taskManager.schedule(taskInstance, { request });
+      // AUTO-DETECT: Check if we're already running in a Task Manager context
+      const isRunningInTaskManager = 
+        triggeredBy === 'scheduled' || 
+        context.source === 'task-manager' ||
+        request?.isFakeRequest === true;
+
+      if (isRunningInTaskManager) {
+        // We're already in a task - execute directly without scheduling another task
+        this.logger.info(`Executing workflow directly (already in Task Manager context): ${workflow.id}`);
+
+        const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+          await createContainer(
+            workflowExecution.id!,
+            workflowExecution.spaceId!,
+            plugins.actions,
+            plugins.taskManager,
+            esClient,
+            this.logger,
+            this.config,
+            workflowExecutionRepository,
+            request, // Pass the fakeRequest for user context
+            core
+          );
+
+        await workflowRuntime.start();
+        await workflowExecutionLoop(
+          workflowRuntime,
+          workflowExecutionState,
+          workflowLogger,
+          nodesFactory
+        );
       } else {
-        this.logger.info(`Scheduling workflow task without user context`);
-        await plugins.taskManager.schedule(taskInstance);
+        // Normal manual execution - schedule a task
+        const taskInstance = {
+          id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+          taskType: 'workflow:run',
+          params: {
+            workflowRunId: workflowExecution.id,
+            spaceId: workflowExecution.spaceId,
+          } as StartWorkflowExecutionParams,
+          state: {
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          },
+          scope: ['workflows'],
+          enabled: true,
+        };
+
+        // Use Task Manager's first-class API key support by passing the request
+        // Task Manager will automatically create and manage the API key
+        if (request) {
+          // Debug: Log the user info from the original request
+          this.logger.info(`Scheduling workflow task with user context for workflow ${workflow.id}`);
+          await plugins.taskManager.schedule(taskInstance, { request });
+        } else {
+          this.logger.info(`Scheduling workflow task without user context`);
+          await plugins.taskManager.schedule(taskInstance);
+        }
       }
       return {
         workflowExecutionId: workflowExecution.id!,
