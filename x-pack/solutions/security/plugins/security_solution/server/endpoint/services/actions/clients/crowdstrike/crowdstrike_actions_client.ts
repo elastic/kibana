@@ -609,5 +609,4 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     //   return;
     // }
   }
-
 }

@@ -2213,5 +2213,4 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     return completedResponses;
   }
-
 }
