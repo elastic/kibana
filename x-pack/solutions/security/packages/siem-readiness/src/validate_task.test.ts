@@ -145,7 +145,7 @@ describe('validateTask', () => {
       };
 
       expect(() => validateTask(task)).toThrow(
-        'Meta must be an object for task enable-endpoint-visibility, and include the fields agent_status, endpoint_count'
+        'Task enable-endpoint-visibility should have a meta field'
       );
     });
 
@@ -203,7 +203,7 @@ describe('validateTask', () => {
       };
 
       expect(() => validateTask(task)).toThrow(
-        'Extra meta fields not allowed: extra_field for task enable-endpoint-visibility'
+        'Unexpected meta fields for task enable-endpoint-visibility: extra_field'
       );
     });
   });
