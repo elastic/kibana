@@ -62,6 +62,7 @@ export const mapToUISession = ({
   const restoreUrl = getUrlFromState(locators, locatorId, {
     ...restoreState,
     tabId: 'new',
+    tabLabel: name,
   });
 
   return {

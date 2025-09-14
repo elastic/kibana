@@ -46,6 +46,7 @@ export const appLocatorGetLocationCommon = async (
     breakdownField,
     isAlertResults,
     tabId,
+    tabLabel,
   } = params;
   const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
   const appState: Partial<DiscoverAppState> = {};
@@ -93,7 +94,7 @@ export const appLocatorGetLocationCommon = async (
   }
 
   if (tabId) {
-    path = setStateToKbnUrl(TABS_STATE_URL_KEY, { tabId }, { useHash }, path);
+    path = setStateToKbnUrl(TABS_STATE_URL_KEY, { tabId, tabLabel }, { useHash }, path);
   }
 
   return {

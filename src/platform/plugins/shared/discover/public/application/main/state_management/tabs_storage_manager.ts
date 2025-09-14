@@ -57,7 +57,14 @@ export interface TabsInternalStatePayload {
 }
 
 export interface TabsUrlState {
-  tabId?: string; // syncing the selected tab id with the URL
+  /**
+   * Syncing the selected tab id with the URL
+   */
+  tabId?: string;
+  /**
+   * (Optional) Label for the tab, used when creating a new tab via locator URL.
+   */
+  tabLabel?: string;
 }
 
 export interface TabsStorageManager {
@@ -140,8 +147,8 @@ export const createTabsStorageManager = ({
     };
   };
 
-  const getSelectedTabIdFromURL = () => {
-    return (urlStateStorage.get(TABS_STATE_URL_KEY) as TabsUrlState)?.tabId;
+  const getTabsStateFromURL = () => {
+    return urlStateStorage.get(TABS_STATE_URL_KEY) as TabsUrlState;
   };
 
   const pushSelectedTabIdToUrl = async (selectedTabId: string) => {
@@ -359,7 +366,8 @@ export const createTabsStorageManager = ({
     persistedDiscoverSession,
     defaultTabState,
   }) => {
-    const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
+    const tabsStateFromURL = getTabsStateFromURL();
+    const selectedTabId = enabled ? tabsStateFromURL?.tabId : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
@@ -396,6 +404,10 @@ export const createTabsStorageManager = ({
           ...defaultTabState,
           ...createTabItem(openTabs),
         };
+
+        if (tabsStateFromURL?.tabLabel) {
+          newTab.label = tabsStateFromURL.tabLabel;
+        }
 
         return {
           allTabs: [...openTabs, newTab],

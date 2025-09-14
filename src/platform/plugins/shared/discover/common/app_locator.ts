@@ -73,6 +73,12 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   tabId?: string | typeof NEW_TAB_ID;
 
   /**
+   * Optional label for the tab, used when `tabId` is `new` to set the initial label of the newly created tab.
+   * If not provided, a default label will be assigned.
+   */
+  tabLabel?: string;
+
+  /**
    * Columns displayed in the table
    */
   columns?: string[];
