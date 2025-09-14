@@ -160,18 +160,12 @@ interface ObjectTypeOptionsMeta {
 
 export type ObjectTypeOptions<
   P extends ObjectProps<Props>,
-  D extends ObjectDefaultValue<P>
-> = TypeOptions<
-  ObjectResultType<P>,
-  // @ts-expect-error - The object type allows partial properties based on the defaultValue
-  D,
-  ObjectTypeOptionsMeta
-> &
-  UnknownOptions;
+  D extends ObjectDefaultValue<P | any>
+> = TypeOptions<ObjectResultType<P>, D, ObjectTypeOptionsMeta> & UnknownOptions;
 
 export class ObjectType<
   P extends ObjectProps<Props>,
-  D extends ObjectDefaultValue<P> = never
+  D extends ObjectDefaultValue<P | any> = never
 > extends Type<ObjectResultType<P>, D> {
   private props: P;
   private options: ObjectTypeOptions<P, D>;
@@ -209,7 +203,6 @@ export class ObjectType<
           return schema.validate(defaultValueFn());
         };
         schema = schema.default(newDefaultFn);
-        // @ts-expect-error - need to fix this error
       } else if (Reference.isReference(defaultValue)) {
         // Ref typings are ambagious, cannot validate but probably a rare case.
         schema = schema.default(defaultValue.getSchema());

@@ -42,7 +42,11 @@ export interface TypeMeta {
 
 export type DefaultValue<T> = T | (() => T) | Reference<T>;
 
-export interface TypeOptions<T, D extends DefaultValue<T>, M extends Record<string, unknown> = {}> {
+export interface TypeOptions<
+  T,
+  D extends DefaultValue<T | unknown>,
+  M extends Record<string, any> = {}
+> {
   defaultValue?: D;
   validate?: (value: T) => string | void;
   meta?: TypeMeta & M;
@@ -101,9 +105,9 @@ export const convertValidationFunction = <T = unknown>(
 // Need to turn off the distributive behavior to check never correctly
 type Input<V, D = never> = [D] extends [never] ? V : V | undefined;
 
-export abstract class Type<V, D extends DefaultValue<V> = never> {
+export abstract class Type<V, D extends DefaultValue<V | unknown> = never> {
   /**
-   * To track output type of the schema, duplicate alias of `_ouput`
+   * To track output type of the schema, duplicate alias of `_output`
    *
    * @deprecated Use `TypeOf<typeof mySchema>` - Never use this directly
    */
@@ -121,7 +125,7 @@ export abstract class Type<V, D extends DefaultValue<V> = never> {
    */
   public readonly _input: Input<V, D> = null! as Input<V, D>;
 
-  // @ts-ignore - This is needed to preserve the type of D, otherwise it will become ambigious
+  // @ts-ignore - This is needed to preserve the type of D, otherwise it will become ambiguous
   private readonly _default: D = null! as D;
 
   // used for the `isConfigSchema` typeguard
