@@ -12,7 +12,7 @@ export default createStatefulTestConfig({
   services: oneChatServices,
   testFiles: [require.resolve('../apis')],
   junit: {
-    reportName: 'X-Pack OneChat API Integration Tests',
+    reportName: 'X-Pack Agent Builder API Integration Tests',
   },
   // @ts-expect-error
   kbnTestServer: {
