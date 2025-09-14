@@ -3897,6 +3897,10 @@
                 "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
+                "plugin": "stackConnectors",
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_webhook_secret_headers_key.ts"
+              },
+              {
                 "plugin": "customBranding",
                 "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
               },
@@ -4891,6 +4895,18 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_webhook_secret_headers_key.test.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_webhook_secret_headers_key.test.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_webhook_secret_headers_key.test.ts"
               },
               {
                 "plugin": "stackConnectors",

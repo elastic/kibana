@@ -390,6 +390,16 @@ paths:
         content:
           application/json:
             examples:
+              MDE:
+                description: Microsoft Defender Endpoint runscript
+                summary: Run a script against a Microsoft Defender Endpoint agent
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    args: '-param1 value1 -param2 value2'
+                    scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
                 summary: Run a script against a SentinelOne agent
@@ -1435,6 +1445,30 @@ components:
       description: A KQL string.
       example: 'united.endpoint.host.os.name : ''Windows'''
       type: string
+    MDERunScriptParameters:
+      description: >-
+        Parameters for Run Script response action against Microsoft Defender
+        Endpoint agent type.
+      example:
+        agent_type: microsoft_defender_endpoint
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          args: '-param1 value1 -param2 value2'
+          scriptName: my-script.ps1
+      properties:
+        args:
+          description: Optional command line arguments for the script.
+          minLength: 1
+          type: string
+        scriptName:
+          description: The name of the script to execute from the cloud storage.
+          minLength: 1
+          type: string
+      required:
+        - scriptName
+      title: Microsoft Defender Endpoint Run Script Parameters
+      type: object
     MetadataListResponse:
       example:
         data:
@@ -1845,6 +1879,7 @@ components:
                 - $ref: '#/components/schemas/HostPathScriptParameters'
                 - $ref: '#/components/schemas/CloudFileScriptParameters'
                 - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
+                - $ref: '#/components/schemas/MDERunScriptParameters'
           required:
             - parameters
     ScanRouteRequestBody:

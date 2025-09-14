@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const ONECHAT_FEATURE_ID = 'onechat';
-export const ONECHAT_FEATURE_NAME = 'onechat';
+export const ONECHAT_FEATURE_ID = 'agentBuilder';
+export const ONECHAT_FEATURE_NAME = 'Agent Builder';
 export const ONECHAT_APP_ID = 'onechat';
 export const ONECHAT_PATH = '/app/chat';
 export const ONECHAT_TITLE = 'Chat';
