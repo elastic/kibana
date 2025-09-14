@@ -484,12 +484,12 @@ export class WorkflowsService {
       },
     });
 
-    if (enabled !== undefined) {
-      must.push({ term: { enabled } });
+    if (enabled !== undefined && enabled.length > 0) {
+      must.push({ terms: { enabled } });
     }
 
-    if (createdBy) {
-      must.push({ term: { createdBy } });
+    if (createdBy && createdBy.length > 0) {
+      must.push({ terms: { createdBy } });
     }
 
     if (query) {
@@ -740,6 +740,7 @@ export class WorkflowsService {
     fields.forEach((field) => {
       if (responseAggs[field]) {
         result[field] = responseAggs[field].buckets.map((bucket: any) => ({
+          label: bucket.key_as_string,
           key: bucket.key,
           doc_count: bucket.doc_count,
         }));
