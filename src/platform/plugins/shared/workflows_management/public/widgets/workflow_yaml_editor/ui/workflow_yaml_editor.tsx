@@ -25,8 +25,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
-import { getStepNode } from '../../../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -364,7 +362,7 @@ export const WorkflowYAMLEditor = ({
 
   // Add a ref to track if the last change was just typing
   const lastChangeWasTypingRef = useRef(false);
-  
+
   // Track the last value we set internally to distinguish from external changes
   const lastInternalValueRef = useRef<string | undefined>(props.value);
 
@@ -392,45 +390,48 @@ export const WorkflowYAMLEditor = ({
 
   // ... existing code ...
 
-const changeSideEffects = useCallback((isTypingChange = false) => {
-  if (editorRef.current) {
-    const model = editorRef.current.getModel();
-    if (!model) {
-      return;
-    }
-    validateVariables(editorRef.current);
-    try {
-      const value = model.getValue();
-      const parsedDocument = YAML.parseDocument(value ?? '');
+  const changeSideEffects = useCallback(
+    (isTypingChange = false) => {
+      if (editorRef.current) {
+        const model = editorRef.current.getModel();
+        if (!model) {
+          return;
+        }
+        validateVariables(editorRef.current);
+        try {
+          const value = model.getValue();
+          const parsedDocument = YAML.parseDocument(value ?? '');
 
-      if (isTypingChange) {
-        // If it's because of typing - skip clearing decorations entirely
-        // Let the decoration hooks handle updates naturally
-      } else {
-        // If not typing - continue with the original logic (always clear)
-        clearAllDecorations();
+          if (isTypingChange) {
+            // If it's because of typing - skip clearing decorations entirely
+            // Let the decoration hooks handle updates naturally
+          } else {
+            // If not typing - continue with the original logic (always clear)
+            clearAllDecorations();
+          }
+
+          setYamlDocument(parsedDocument);
+          yamlDocumentRef.current = parsedDocument;
+        } catch (error) {
+          console.error('❌ Error parsing YAML document:', error);
+          clearAllDecorations();
+          setYamlDocument(null);
+          yamlDocumentRef.current = null;
+        }
       }
-
-      setYamlDocument(parsedDocument);
-      yamlDocumentRef.current = parsedDocument;
-    } catch (error) {
-      console.error('❌ Error parsing YAML document:', error);
-      clearAllDecorations();
-      setYamlDocument(null);
-      yamlDocumentRef.current = null;
-    }
-  }
-}, [validateVariables, clearAllDecorations]);
+    },
+    [validateVariables, clearAllDecorations]
+  );
 
   const handleChange = useCallback(
     (value: string | undefined) => {
       // Track this as an internal change BEFORE calling onChange
       lastInternalValueRef.current = value;
-      
+
       if (onChange) {
         onChange(value);
       }
-      
+
       // Pass the typing flag to changeSideEffects
       changeSideEffects(lastChangeWasTypingRef.current);
       // Reset the flag
@@ -451,10 +452,11 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
     if (model) {
       model.onDidChangeContent((e) => {
         // Check if this was a simple typing change
-        const isSimpleTyping = e.changes.length === 1 && 
+        const isSimpleTyping =
+          e.changes.length === 1 &&
           e.changes[0].text.length <= 1 && // Single character or deletion
           !e.changes[0].text.includes('\n'); // No line breaks
-        
+
         lastChangeWasTypingRef.current = isSimpleTyping;
       });
 
@@ -565,7 +567,7 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
     if (isEditorMounted && editorRef.current && props.value !== undefined) {
       // Check if this is an external change (not from our own typing)
       const isExternalChange = props.value !== lastInternalValueRef.current;
-      
+
       if (isExternalChange) {
         // Always clear decorations first when switching executions/revisions
         clearAllDecorations();
@@ -586,7 +588,7 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
             }, 10);
           }
         }
-        
+
         // Update our tracking ref
         lastInternalValueRef.current = props.value;
       }
