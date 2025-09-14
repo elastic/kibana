@@ -62,6 +62,7 @@ describe('CloudConnectorService', () => {
       references: [],
       attributes: {
         name: 'arn:aws:iam::123456789012:role/TestRole',
+        namespace: '*',
         cloudProvider: 'aws',
         vars: {
           role_arn: {
@@ -82,7 +83,10 @@ describe('CloudConnectorService', () => {
       },
     };
 
-    it('should create a cloud connector successfully', async () => {
+    it('should create a cloud connector successfully with space awareness enabled', async () => {
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
       mockSoClient.create.mockResolvedValue(mockSavedObject);
 
       const result = await service.create(mockSoClient, mockCreateRequest);
@@ -91,9 +95,16 @@ describe('CloudConnectorService', () => {
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
           name: 'arn:aws:iam::123456789012:role/TestRole',
+          namespace: '*',
           cloudProvider: 'aws',
+          packagePolicyCount: 1,
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
           vars: expect.objectContaining({
-            role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+            role_arn: expect.objectContaining({
+              type: 'text',
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+            }),
             external_id: expect.objectContaining({
               type: 'password',
               value: expect.objectContaining({
@@ -102,13 +113,15 @@ describe('CloudConnectorService', () => {
               }),
             }),
           }),
-        })
+        }),
+        { namespace: '*' } // Should include namespace in options
       );
 
       expect(result).toEqual({
         id: 'cloud-connector-123',
         name: 'arn:aws:iam::123456789012:role/TestRole',
         cloudProvider: 'aws',
+        namespace: '*',
         vars: {
           role_arn: {
             value: 'arn:aws:iam::123456789012:role/TestRole',
@@ -206,6 +219,7 @@ describe('CloudConnectorService', () => {
           attributes: {
             name: 'connector-1',
             cloudProvider: 'aws',
+            namespace: '*',
             vars: {
               role_arn: {
                 value: 'arn:aws:iam::123456789012:role/Role1',
@@ -248,6 +262,7 @@ describe('CloudConnectorService', () => {
           id: 'cloud-connector-1',
           name: 'connector-1',
           cloudProvider: 'aws',
+          namespace: '*',
           vars: {
             role_arn: {
               value: 'arn:aws:iam::123456789012:role/Role1',
@@ -285,10 +300,6 @@ describe('CloudConnectorService', () => {
   });
 
   describe('validateCloudConnectorDetails', () => {
-    const validateCloudConnectorDetails = (service as any).validateCloudConnectorDetails.bind(
-      service
-    );
-
     describe('AWS validation', () => {
       it('should validate successfully with valid AWS variables', () => {
         const validRequest: CreateCloudConnectorRequest = {
@@ -309,7 +320,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(validRequest)).not.toThrow();
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should throw error when role_arn is missing', () => {
@@ -327,7 +338,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Package policy must contain role_arn variable'
         );
       });
@@ -351,7 +362,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Package policy must contain role_arn variable'
         );
       });
@@ -368,7 +379,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Package policy must contain valid external_id secret reference'
         );
       });
@@ -388,7 +399,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Package policy must contain valid external_id secret reference'
         );
       });
@@ -412,7 +423,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'External ID secret reference is not valid'
         );
       });
@@ -436,7 +447,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'External ID secret reference is not valid'
         );
       });
@@ -460,7 +471,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'External ID secret reference is not valid'
         );
       });
@@ -484,7 +495,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'External ID secret reference is not valid'
         );
       });
@@ -508,7 +519,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(validRequest)).not.toThrow();
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should validate successfully with valid external_id format - numbers only', () => {
@@ -530,7 +541,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(validRequest)).not.toThrow();
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should validate successfully with valid external_id format - mixed case', () => {
@@ -552,7 +563,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(validRequest)).not.toThrow();
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should validate successfully with valid external_id format - underscores and hyphens', () => {
@@ -566,7 +577,7 @@ describe('CloudConnectorService', () => {
             },
             external_id: {
               value: {
-                id: '0BrW7JgB-08CS_HiWrORw', // 20 characters with underscores and hyphens
+                id: '0BrW7JgB-08CS_HiWrOR', // 20 characters with underscores and hyphens
                 isSecretRef: true,
               },
               type: 'password',
@@ -574,7 +585,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(validRequest)).not.toThrow();
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
     });
 
@@ -598,7 +609,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Unsupported cloud provider: azure'
         );
       });
@@ -622,7 +633,7 @@ describe('CloudConnectorService', () => {
           },
         };
 
-        expect(() => validateCloudConnectorDetails(invalidRequest)).toThrow(
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Unsupported cloud provider: gcp'
         );
       });

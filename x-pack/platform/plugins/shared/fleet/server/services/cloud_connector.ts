@@ -66,9 +66,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           ? vars.role_arn.value
           : cloudConnector.name;
 
+      // Check if space awareness is enabled for namespace handling
+      const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
+      const useSpaceAwareness = await isSpaceAwarenessEnabled();
+      const namespace = useSpaceAwareness ? '*' : undefined;
+
       // Create cloud connector saved object
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
+        namespace,
         cloudProvider,
         vars: {
           ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
@@ -81,7 +87,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        cloudConnectorAttributes
+        cloudConnectorAttributes,
+        { namespace }
       );
 
       logger.info('Successfully created cloud connector');
@@ -94,6 +101,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount: savedObject.attributes.packagePolicyCount,
         created_at: savedObject.attributes.created_at,
         updated_at: savedObject.attributes.updated_at,
+        namespace: savedObject.attributes.namespace,
       };
     } catch (error) {
       logger.error('Failed to create cloud connector', error.message);
@@ -124,6 +132,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return cloudConnectors.saved_objects.map((so) => ({
         id: so.id,
         name: so.attributes.name,
+        namespace: so.attributes.namespace,
         cloudProvider: so.attributes.cloudProvider,
         vars: so.attributes.vars,
         packagePolicyCount: so.attributes.packagePolicyCount,
@@ -149,28 +158,23 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
+      const externalId: CloudConnectorSecretReference | undefined = vars.external_id?.value;
 
-      // Check for AWS variables
-      if (roleArn) {
-        const externalId: CloudConnectorSecretReference | undefined = vars.external_id?.value;
+      if (!externalId) {
+        logger.error('Package policy must contain valid external_id secret reference');
+        throw new CloudConnectorInvalidVarsError(
+          'Package policy must contain valid external_id secret reference'
+        );
+      }
 
-        if (!externalId) {
-          logger.error('Package policy must contain valid external_id secret reference');
-          throw new CloudConnectorInvalidVarsError(
-            'Package policy must contain valid external_id secret reference'
-          );
-        }
-        if (externalId?.id) {
-          const isValidExternalId =
-            externalId?.id &&
-            externalId?.isSecretRef &&
-            CloudConnectorService.EXTERNAL_ID_REGEX.test(externalId.id);
+      const isValidExternalId =
+        externalId?.id &&
+        externalId?.isSecretRef &&
+        CloudConnectorService.EXTERNAL_ID_REGEX.test(externalId.id);
 
-          if (!isValidExternalId) {
-            logger.error('External ID secret reference must be a valid secret reference');
-            throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
-          }
-        }
+      if (!isValidExternalId) {
+        logger.error('External ID secret reference must be a valid secret reference');
+        throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
       }
     } else {
       logger.error(`Unsupported cloud provider: ${cloudConnector.cloudProvider}`);

@@ -1341,6 +1341,7 @@ export const getSavedObjectTypes = (
         dynamic: false,
         properties: {
           name: { type: 'keyword' },
+          namespace: { type: 'keyword' },
           cloudProvider: { type: 'keyword' },
           vars: { type: 'flattened' },
           packagePolicyCount: { type: 'integer' },

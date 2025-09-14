@@ -43,6 +43,7 @@ export interface CloudConnectorResponse {
   packagePolicyCount: number;
   created_at: string;
   updated_at: string;
+  namespace?: string;
 }
 
 export interface CloudConnectorListOptions {

@@ -291,6 +291,7 @@ export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
 
 export interface CloudConnectorSOAttributes {
   name: string;
+  namespace?: string;
   cloudProvider: CloudProvider;
   vars: CloudConnectorVars;
   packagePolicyCount: number;

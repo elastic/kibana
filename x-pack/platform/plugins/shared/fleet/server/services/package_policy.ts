@@ -119,7 +119,8 @@ import {
 } from '../constants';
 
 import {
-  validateDeploymentModesForInputs
+  validateDeploymentModesForInputs,
+  isAgentlessIntegration,
 } from '../../common/services/agentless_policy_helper';
 
 import {
@@ -403,7 +404,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
 
-
       validateDeploymentModesForInputs(
         packagePolicy.inputs,
         agentPolicy?.supports_agentless || packagePolicy.supports_agentless
@@ -489,8 +489,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       // Create cloud connector for package policy if it is supported and package supports agentless
       if (
-        enrichedPackagePolicy.supports_agentless &&
-        enrichedPackagePolicy.supports_cloud_connector
+        enrichedPackagePolicy?.supports_agentless &&
+        enrichedPackagePolicy?.supports_cloud_connector
       ) {
         const cloudConnector = await this.createCloudConnectorForPackagePolicy(
           soClient,
