@@ -7,13 +7,77 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Props, ObjectTypeOptions, ObjectProps, ObjectDefaultValue } from './object_type';
+import type { IsAny, Simplify } from './helper_types';
+import type {
+  Props,
+  ObjectTypeOptions,
+  ObjectProps,
+  ObjectDefaultValue,
+  ObjectResultType,
+  ObjectResultDefaults,
+} from './object_type';
 import { ObjectType } from './object_type';
 
 export type IntersectionTypeOptions<
-  T extends ObjectProps<Props>,
-  D extends ObjectDefaultValue<T>
-> = ObjectTypeOptions<T, D>;
+  P extends ObjectProps<Props>,
+  D extends ObjectDefaultValue<any>
+> = ObjectTypeOptions<P, D>;
+
+export type IntersectionBaseType<P extends ObjectProps<Props>, D extends ObjectDefaultValue<P>> = [
+  D
+] extends [never]
+  ? ObjectType<P, ObjectDefaultValue<P>>
+  : [D] extends [ObjectDefaultValue<P>]
+  ? ObjectType<P, D | ObjectDefaultValue<P>>
+  : never;
+
+export type IntersectionDefaultValue<
+  P extends ObjectProps<Props>,
+  D extends ObjectDefaultValue<P & any>
+> = [D] extends [never] ? (P extends ObjectResultType<infer P2> ? ObjectResultDefaults<P2> : P) : D;
+
+export type IntersectionCombinedDefaultValue<Types extends ObjectType<any, any>[]> = {
+  [K in keyof Types]: Types[K] extends ObjectType<infer P, infer D>
+    ? IntersectionDefaultValue<P, D>
+    : never;
+}[number] & {}; // Force intersection without deep recursion
+
+export type ExtractObjectType<T> = T extends ObjectType<infer P, infer D>
+  ? { Props: P; DefaultValue: IsAny<D> extends true ? never : D }
+  : never;
+
+export type IntersectionCombinedValues<T extends ObjectType<any, any>[]> = T extends [
+  infer Head,
+  ...infer Tail
+]
+  ? ExtractObjectType<Head> &
+      (Tail extends ObjectType<any, any>[] ? IntersectionCombinedValues<Tail> : unknown)
+  : unknown;
+
+export type ExtractProps<T> = T extends ObjectType<infer P, infer D> ? P : never;
+
+export type IntersectionCombinedProps<T extends ObjectType<any, any>[]> = Simplify<
+  T extends [infer Head, ...infer Tail]
+    ? ExtractProps<Head> &
+        (Tail extends ObjectType<any, any>[] ? IntersectionCombinedProps<Tail> : unknown)
+    : unknown
+>;
+
+export type ExtractDefault<T> = T extends ObjectType<infer P, infer D>
+  ? IsAny<D> extends true
+    ? ObjectResultDefaults<P>
+    : IntersectionDefaultValue<P, D>
+  : never;
+
+export type IntersectionCombinedDefault<T extends ObjectType<any, any>[]> = T extends [
+  infer Head,
+  ...infer Tail
+]
+  ? Simplify<
+      ExtractDefault<Head> &
+        (Tail extends ObjectType<any, any>[] ? IntersectionCombinedDefault<Tail> : unknown)
+    >
+  : unknown;
 
 export class IntersectionType<
   RTS extends Array<ObjectType<any>>,

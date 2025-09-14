@@ -73,6 +73,15 @@ import {
 import type { DurationValueType } from './src/types/duration_type';
 import type { ByteSizeValueType } from './src/types/byte_size_type';
 import type { UnionBaseType, UnionDefaultValue } from './src/types/union_type';
+import type {
+  IntersectionDefaultValue,
+  IntersectionBaseType,
+  IntersectionCombinedDefaultValue,
+  InferAllOfTypes,
+  IntersectionCombinedValues,
+  IntersectionCombinedProps,
+  IntersectionCombinedDefault,
+} from './src/types/intersection_type';
 
 export type {
   AnyType,
@@ -168,7 +177,7 @@ function maybe<V, D extends DefaultValue<V> = never>(type: Type<V, D>): Type<V |
  * @note wrapping with `nullable` ignores the `defaultValue` on `type` when validating.
  */
 function nullable<V, D extends DefaultValue<V> = never>(type: UnionBaseType<V, D>) {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+  return oneOf([type, literal(null)], { defaultValue: null });
 }
 
 function object<P extends ObjectProps<Props>, D extends ObjectDefaultValue<P> = never>(
@@ -589,189 +598,71 @@ function oneOf<RTS extends Array<Type<any>>, DV extends DefaultValue<any> = neve
   return new UnionType(types, options) as any;
 }
 
+/**
+ * Intersection of multiple object types
+ *
+ * @example
+ * ```ts
+ * const mySchema = schema.allOf([
+ *   schema.object({ str: schema.string() }),
+ *   schema.object({ num: schema.number() }}),
+ * ]);
+ * ```
+ *
+ * Limitations:
+ *
+ * - Types are only supported up to about 20 types.
+ * - Ignores root-level `schema.object` defaults when validating.
+ *
+ * @example
+ * ```ts
+ * const mySchema = schema.allOf([
+ *   schema.object({ str: schema.string({ defaultValue: 'test' }) }), // respects string default
+ *   schema.object({ num: schema.number() }, { defaultValue: { num1: 1 } }), // ignores object default
+ * ]);
+ * ```
+ *
+ * - Any Key collisions across types will ignore all previous types.
+ *
+ * @example
+ * ```ts
+ * const mySchema = schema.allOf([
+ *   schema.object({ foo: schema.number() }), // foo ignored
+ *   schema.object({ foo: schema.string() }), // foo expects string only
+ * ]);
+ * ```
+ */
 function allOf<
   A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  F extends ObjectProps<Props>,
-  G extends ObjectProps<Props>,
-  H extends ObjectProps<Props>,
-  I extends ObjectProps<Props>,
-  J extends ObjectProps<Props>,
-  K extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E & F & G & H & I & J & K> = never
+  ADV extends ObjectDefaultValue<A> = never,
+  DV extends IntersectionDefaultValue<A, ADV> = never
 >(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>,
-    ObjectType<I>,
-    ObjectType<J>,
-    ObjectType<K>
-  ],
-  options?: IntersectionTypeOptions<A & B & C & D & E & F & G & H & I & J & K, DV>
-): ObjectType<A & B & C & D & E & F & G & H & I & J & K>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  F extends ObjectProps<Props>,
-  G extends ObjectProps<Props>,
-  H extends ObjectProps<Props>,
-  I extends ObjectProps<Props>,
-  J extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E & F & G & H & I & J> = never
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>,
-    ObjectType<I>,
-    ObjectType<J>
-  ],
-  options?: IntersectionTypeOptions<A & B & C & D & E & F & G & H & I & J, DV>
-): ObjectType<A & B & C & D & E & F & G & H & I & J>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  F extends ObjectProps<Props>,
-  G extends ObjectProps<Props>,
-  H extends ObjectProps<Props>,
-  I extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E & F & G & H & I> = never
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>,
-    ObjectType<I>
-  ],
-  options?: IntersectionTypeOptions<A & B & C & D & E & F & G & H & I, DV>
-): ObjectType<A & B & C & D & E & F & G & H & I>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  F extends ObjectProps<Props>,
-  G extends ObjectProps<Props>,
-  H extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E & F & G & H> = never
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>
-  ],
-  options?: IntersectionTypeOptions<A & B & C & D & E & F & G & H, DV>
-): ObjectType<A & B & C & D & E & F & G & H>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  F extends ObjectProps<Props>,
-  G extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E & F & G> = never
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>
-  ],
-  options?: IntersectionTypeOptions<A & B & C & D & E & F & G, DV>
-): ObjectType<A & B & C & D & E & F & G>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  F extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E & F> = never
->(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
-  options?: IntersectionTypeOptions<A & B & C & D & E & F, DV>
-): ObjectType<A & B & C & D & E & F>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  E extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D & E> = never
->(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>],
-  options?: IntersectionTypeOptions<A & B & C & D & E, DV>
-): ObjectType<A & B & C & D & E>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  D extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C & D> = never
->(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>],
-  options?: IntersectionTypeOptions<A & B & C & D, DV>
-): ObjectType<A & B & C & D>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  C extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B & C> = never
->(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>],
-  options?: IntersectionTypeOptions<A & B & C, DV>
-): ObjectType<A & B & C>;
-function allOf<
-  A extends ObjectProps<Props>,
-  B extends ObjectProps<Props>,
-  DV extends ObjectDefaultValue<A & B> = never
->(
-  types: [ObjectType<A>, ObjectType<B>],
-  options?: IntersectionTypeOptions<A & B, DV>
-): ObjectType<A & B, DV>;
-function allOf<A extends ObjectProps<Props>, DV extends ObjectDefaultValue<A> = never>(
-  types: [ObjectType<A>],
+  types: [IntersectionBaseType<A, ADV>],
   options?: IntersectionTypeOptions<A, DV>
 ): ObjectType<A, DV>;
+function allOf<
+  A extends ObjectProps<Props>,
+  B extends ObjectProps<Props>,
+  ADV extends ObjectDefaultValue<A> = never,
+  BDV extends ObjectDefaultValue<B> = never,
+  DV extends IntersectionDefaultValue<A, ADV> & IntersectionDefaultValue<B, BDV> = never
+>(
+  types: [IntersectionBaseType<A, ADV>, IntersectionBaseType<B, BDV>],
+  options?: IntersectionTypeOptions<A & B, DV>
+): ObjectType<A & B, DV>;
+function allOf<
+  Types extends [ObjectType<any, any>, ...ObjectType<any, any>[]],
+  CombinedProps extends IntersectionCombinedProps<Types> = IntersectionCombinedProps<Types>,
+  CombinedDefault extends IntersectionCombinedDefault<Types> = IntersectionCombinedDefault<Types>,
+  DV extends IntersectionDefaultValue<CombinedProps, CombinedDefault> = never
+>(
+  types: Types,
+  options?: IntersectionTypeOptions<CombinedProps, DV>
+): ObjectType<CombinedProps, DV>;
 function allOf<RTS extends Array<ObjectType<any>>, DV extends ObjectDefaultValue<any> = never>(
   types: RTS,
   options?: IntersectionTypeOptions<any, DV>
-): Type<any, DV> {
+): ObjectType<any, DV> {
   return new IntersectionType(types, options);
 }
 
