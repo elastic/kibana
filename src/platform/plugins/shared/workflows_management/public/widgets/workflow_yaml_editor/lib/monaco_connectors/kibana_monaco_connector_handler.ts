@@ -55,7 +55,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     super('KibanaMonacoConnectorHandler', 90, ['kibana.']);
     this.http = options.http;
     this.notifications = options.notifications;
-    //this.kibanaHost = options.kibanaHost;
+    // this.kibanaHost = options.kibanaHost;
     this.connectorExamples = new Map();
 
     // Process generated connectors to extract examples
@@ -355,5 +355,4 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       }
     }
   }
-
 }

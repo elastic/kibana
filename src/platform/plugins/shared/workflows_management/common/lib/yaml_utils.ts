@@ -239,8 +239,14 @@ export function getPathFromAncestors(
 
           // Check if the target node is contained within this sequence item
           // Avoid using 'in' operator on possibly primitive values
-          const itemHasRange = typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, 'range');
-          const targetNodeHasRange = typeof targetNode === 'object' && targetNode !== null && Object.prototype.hasOwnProperty.call(targetNode, 'range');
+          const itemHasRange =
+            typeof item === 'object' &&
+            item !== null &&
+            Object.prototype.hasOwnProperty.call(item, 'range');
+          const targetNodeHasRange =
+            typeof targetNode === 'object' &&
+            targetNode !== null &&
+            Object.prototype.hasOwnProperty.call(targetNode, 'range');
           if (
             item &&
             targetNode &&
@@ -249,7 +255,10 @@ export function getPathFromAncestors(
             (item as any).range &&
             (targetNode as any).range
           ) {
-            return (targetNode as any).range[0] >= (item as any).range[0] && (targetNode as any).range[1] <= (item as any).range[2];
+            return (
+              (targetNode as any).range[0] >= (item as any).range[0] &&
+              (targetNode as any).range[1] <= (item as any).range[2]
+            );
           }
 
           return false;
@@ -269,8 +278,14 @@ export function getPathFromAncestors(
 
           // Sometimes the nodes might not be exactly the same reference
           // but represent the same YAML node - let's check ranges if available
-          const itemHasRange = typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, 'range');
-          const childNodeHasRange = typeof childNode === 'object' && childNode !== null && Object.prototype.hasOwnProperty.call(childNode, 'range');
+          const itemHasRange =
+            typeof item === 'object' &&
+            item !== null &&
+            Object.prototype.hasOwnProperty.call(item, 'range');
+          const childNodeHasRange =
+            typeof childNode === 'object' &&
+            childNode !== null &&
+            Object.prototype.hasOwnProperty.call(childNode, 'range');
           if (
             item &&
             childNode &&
@@ -279,7 +294,10 @@ export function getPathFromAncestors(
             (item as any).range &&
             (childNode as any).range
           ) {
-            return (item as any).range[0] === (childNode as any).range[0] && (item as any).range[1] === (childNode as any).range[1];
+            return (
+              (item as any).range[0] === (childNode as any).range[0] &&
+              (item as any).range[1] === (childNode as any).range[1]
+            );
           }
 
           return false;
