@@ -52,7 +52,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'apps-section-1',
-        label: null,
         items: [
           {
             id: 'service-inventory',
@@ -90,7 +89,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'infrastructure-section-1',
-        label: null,
         items: [
           {
             id: 'inventory',
@@ -128,7 +126,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'ml-section-1',
-        label: null,
         items: [
           { id: 'overview', label: 'Overview', href: '/ml/overview' },
           {

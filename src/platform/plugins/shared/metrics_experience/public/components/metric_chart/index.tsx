@@ -41,12 +41,12 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     if (!isSupported) return '';
     return createESQLQuery({
       metricName: metric.name,
-      timeSeriesMetric: metric.time_series_metric,
+      timeSeriesMetric: metric.instrument,
       index: metric.index,
       dimensions,
       filters,
     });
-  }, [isSupported, metric.name, metric.time_series_metric, metric.index, dimensions, filters]);
+  }, [isSupported, metric.name, metric.instrument, metric.index, dimensions, filters]);
 
   const {
     data: queryData,
@@ -55,7 +55,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
   } = useMetricDataQuery({
     metricName: isSupported ? metric.name : '',
     timeRange,
-    timeSeriesMetric: metric.time_series_metric,
+    timeSeriesMetric: metric.instrument,
     index: metric.index,
     dimensions,
     filters,

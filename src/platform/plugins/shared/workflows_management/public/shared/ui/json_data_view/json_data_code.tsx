@@ -23,6 +23,7 @@ export const JsonDataCode = ({ json }: JsonDataCodeProps) => {
     <JSONCodeEditorCommonMemoized
       jsonValue={formattedJson}
       onEditorDidMount={() => {}}
+      height="100%"
       hasLineNumbers
       enableFindAction
     />

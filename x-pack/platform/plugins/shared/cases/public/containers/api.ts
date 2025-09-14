@@ -27,6 +27,7 @@ import type {
   UserActionInternalFindResponse,
   CaseSummaryResponse,
   InferenceConnectorsResponse,
+  FindCasesContainingAllAlertsResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -72,6 +73,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -111,6 +113,7 @@ import {
   constructCustomFieldsFilter,
   decodeCaseSummaryResponse,
   decodeInferenceConnectorsResponse,
+  decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
@@ -219,6 +222,20 @@ export const getInferenceConnectors = async (
     }
   );
   return decodeInferenceConnectorsResponse(response);
+};
+
+export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+  const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
+    `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        alertIds,
+        caseIds,
+      }),
+    }
+  );
+  return decodeFindAllAttachedAlertsResponse(response);
 };
 
 export const findCaseUserActions = async (

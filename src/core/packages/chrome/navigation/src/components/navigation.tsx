@@ -175,7 +175,7 @@ export const Navigation = ({
                   data-test-subj="sideNavMoreMenuItem"
                   isActive={overflowMenuItems.some((item) => item.id === sidePanelContent?.id)}
                   isCollapsed={isCollapsed}
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   hasContent
                   href=""
                   id="more-menu"
@@ -193,8 +193,14 @@ export const Navigation = ({
               {(closePopover) =>
                 isCollapsed ? (
                   <NestedSecondaryMenu>
-                    <NestedSecondaryMenu.Panel id="main" title="More">
-                      <NestedSecondaryMenu.Section hasGap label={null}>
+                    <NestedSecondaryMenu.Panel
+                      id="main"
+                      title={i18n.translate(
+                        'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
+                        { defaultMessage: 'More' }
+                      )}
+                    >
+                      <NestedSecondaryMenu.Section hasGap>
                         {overflowMenuItems.map((item) => {
                           const hasSubItems = getHasSubmenu(item);
 
@@ -252,8 +258,12 @@ export const Navigation = ({
                     ))}
                   </NestedSecondaryMenu>
                 ) : (
-                  <SecondaryMenu title="More">
-                    <SecondaryMenu.Section hasGap label={null}>
+                  <SecondaryMenu
+                    title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
+                      defaultMessage: 'More',
+                    })}
+                  >
+                    <SecondaryMenu.Section hasGap>
                       {overflowMenuItems.map((item) => (
                         <SideNav.PrimaryMenuItem
                           key={item.id}

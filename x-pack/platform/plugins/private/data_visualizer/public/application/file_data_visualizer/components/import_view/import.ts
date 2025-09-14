@@ -6,10 +6,7 @@
  */
 
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type {
-  FindFileStructureResponse,
-  IngestPipeline,
-} from '@kbn/file-upload-plugin/common/types';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
