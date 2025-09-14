@@ -339,6 +339,12 @@ describe('WorkflowExecutionRuntimeManager', () => {
           step_id: 'node3',
           step_execution_id: 'testWorkflowWxecutionId_firstScope_secondScope_node3',
         },
+        labels: {
+          connector_type: 'unknown',
+          step_id: 'node3',
+          step_name: 'node3',
+          step_type: 'unknown',
+        },
       });
     });
 
@@ -442,6 +448,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
             step_id: 'node1',
             step_execution_id: 'testWorkflowWxecutionId_firstScope_secondScope_node1',
           },
+          labels: {
+            connector_type: 'unknown',
+            execution_time_ms: 0,
+            step_id: 'node1',
+            step_name: 'node1',
+            step_type: 'unknown',
+          },
         });
       });
     });
@@ -480,7 +493,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('should log successful step execution', async () => {
         await underTest.finishStep('node1');
-        expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'node1' failed`, {
+        expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'node1' failed: Step execution failed`, {
           event: {
             action: 'step-complete',
             category: ['workflow', 'step'],
@@ -490,6 +503,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
           workflow: {
             step_id: 'node1',
             step_execution_id: 'testWorkflowWxecutionId_firstScope_secondScope_node1',
+          },
+          labels: {
+            connector_type: 'unknown',
+            execution_time_ms: 0,
+            step_id: 'node1',
+            step_name: 'node1',
+            step_type: 'unknown',
+          },
+          error: {
+            message: 'Step execution failed',
+            stack_trace: undefined,
+            type: 'WorkflowStepError',
           },
         });
       });
@@ -535,12 +560,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
       const error = new Error('Step execution failed');
       await underTest.failStep(stepId, error);
 
-      expect(workflowLogger.logError).toHaveBeenCalledWith(`Step 'node1' failed`, error, {
+      expect(workflowLogger.logError).toHaveBeenCalledWith(`Step 'node1' failed: Step execution failed`, error, {
         event: { action: 'step-fail', category: ['workflow', 'step'] },
         tags: ['workflow', 'step', 'fail'],
         workflow: {
           step_execution_id: 'testWorkflowWxecutionId_firstScope_secondScope_node1',
           step_id: 'node1',
+        },
+        labels: {
+          connector_type: 'unknown',
+          step_id: 'node1',
+          step_name: 'node1',
+          step_type: 'unknown',
         },
       });
     });
