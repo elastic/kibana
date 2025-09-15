@@ -42,12 +42,12 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
     });
   },
   getDisplayName: () =>
-    i18n.translate('controls.optionsListcontrol.displayNameAriaLabel', {
+    i18n.translate('controls.createControlAction.displayNameAriaLabel', {
       defaultMessage: 'Control',
     }),
 
   getDisplayNameTooltip: () =>
-    i18n.translate('controls.optionsListcontrol.tooltip', {
+    i18n.translate('controls.createControlAction.tooltip', {
       defaultMessage: 'Add a control to your dashboard.',
     }),
 });

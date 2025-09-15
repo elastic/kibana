@@ -9,11 +9,11 @@
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { dataViewsService } from '../services/kibana_services';
 import { RANGE_SLIDER_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
 import { createDataControlOfType } from './create_control_action';
-import type { RangesliderControlState } from '../controls/data_controls/range_slider/types';
 import { RangeSliderEditorOptions } from '../controls/data_controls/range_slider/components/editor/range_slider_editor_options';
 import { RangeSliderStrings } from '../controls/data_controls/range_slider/range_slider_strings';
 
@@ -22,11 +22,11 @@ const isFieldCompatible = (field: DataViewField) => {
 };
 
 export const createRangeSliderControlAction =
-  (): CreateControlTypeAction<RangesliderControlState> => {
+  (): CreateControlTypeAction<RangeSliderControlState> => {
     return {
       id: RANGE_SLIDER_ACTION,
       type: RANGE_SLIDER_CONTROL,
-      order: 0,
+      order: 1,
       getIconType: () => 'controlsHorizontal',
       getDisplayName: RangeSliderStrings.control.getDisplayName,
       isCompatible: async ({ state: { dataViewId, fieldName } }) => {

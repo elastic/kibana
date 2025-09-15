@@ -21,22 +21,20 @@ export const RangeSliderEditorOptions = ({
   const [step, setStep] = useState(initialState.step ?? 1);
 
   return (
-    <>
-      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
-        <EuiFieldNumber
-          compressed
-          value={step}
-          onChange={(event) => {
-            const newStep = event.target.valueAsNumber;
-            setStep(newStep);
-            updateState({ step: newStep });
-            setControlEditorValid(newStep > 0);
-          }}
-          min={0}
-          isInvalid={step === undefined || step <= 0}
-          data-test-subj="rangeSliderControl__stepAdditionalSetting"
-        />
-      </EuiFormRow>
-    </>
+    <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
+      <EuiFieldNumber
+        compressed
+        value={step}
+        onChange={(event) => {
+          const newStep = event.target.valueAsNumber;
+          setStep(newStep);
+          updateState({ step: newStep });
+          setControlEditorValid(newStep > 0);
+        }}
+        min={0}
+        isInvalid={step === undefined || step <= 0}
+        data-test-subj="rangeSliderControl__stepAdditionalSetting"
+      />
+    </EuiFormRow>
   );
 };

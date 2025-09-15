@@ -12,11 +12,7 @@ import { BehaviorSubject, combineLatest, debounceTime, first, map, merge, skip }
 
 import type { Filter, RangeFilterParams } from '@kbn/es-query';
 import { buildRangeFilter } from '@kbn/es-query';
-import {
-  fetch$,
-  titleComparators,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { fetch$, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
@@ -86,7 +82,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
-            ...titleComparators,
             ...editorComparators,
             ...defaultDataControlComparators,
             value: 'referenceEquality',
