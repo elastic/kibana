@@ -24,5 +24,8 @@
     "@kbn/scout-oblt",
     "@kbn/alerting-plugin",
     "@kbn/alerting-comparators",
+    "@kbn/inference-common",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/alerts-ui-shared",
   ]
 }
