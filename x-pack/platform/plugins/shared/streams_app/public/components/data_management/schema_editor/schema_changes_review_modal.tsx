@@ -27,6 +27,7 @@ import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from './types';
 import { FIELD_TYPE_MAP } from './constants';
@@ -113,20 +114,47 @@ export function SchemaChangesReviewModal({
     simulate();
   }, [changes, streamsRepositoryClient, signal, stream]);
 
+  const confirmChangesTitle = i18n.translate(
+    'xpack.streams.schemaEditor.confirmChangesModal.title',
+    {
+      defaultMessage: 'Confirm changes',
+    }
+  );
+
   return (
-    <EuiModal onClose={onClose} maxWidth={600} aria-label="Confirm changes">
+    <EuiModal onClose={onClose} maxWidth={600} aria-label={confirmChangesTitle}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Confirm changes</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{confirmChangesTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut title="Schema edits affect all dependent streams." iconType="info" />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
+            {
+              defaultMessage: 'Schema edits affect all dependent streams.',
+            }
+          )}
+          iconType="info"
+        />
         <EuiSpacer size="m" />
-        <EuiText>The fields below will be updated.</EuiText>
+        <EuiText>
+          {i18n.translate(
+            'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
+            {
+              defaultMessage: 'The fields below will be updated.',
+            }
+          )}
+        </EuiText>
         <EuiSpacer size="m" />
         {hasSimulationErrors && (
           <>
             <EuiCallOut
-              title="Some fields are failing when simulating ingestion."
+              title={i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.simulationErrorCalloutTitle',
+                {
+                  defaultMessage: 'Some fields are failing when simulating ingestion.',
+                }
+              )}
               iconType="warning"
               color="warning"
             >
@@ -140,11 +168,17 @@ export function SchemaChangesReviewModal({
           columns={[
             {
               field: 'name',
-              name: 'Name',
+              name: i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.tableColumnName',
+                { defaultMessage: 'Name' }
+              ),
             },
             {
               field: 'type',
-              name: 'Type',
+              name: i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.tableColumnType',
+                { defaultMessage: 'Type' }
+              ),
               render: (type: FieldDefinitionConfig['type'] | undefined, field: SchemaField) => {
                 if (!type || field.status === 'unmapped')
                   return (
@@ -169,7 +203,12 @@ export function SchemaChangesReviewModal({
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose}>
+          <FormattedMessage
+            id="xpack.streams.schemaEditor.confirmChangesModal.cancelButton"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
         <EuiButton
           fill
           color="primary"
@@ -177,7 +216,7 @@ export function SchemaChangesReviewModal({
           isLoading={loading}
           disabled={isSimulating || hasSimulationErrors}
         >
-          Confirm changes
+          {confirmChangesTitle}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
