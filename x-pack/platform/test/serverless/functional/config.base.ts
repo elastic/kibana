@@ -19,6 +19,7 @@ export function createTestConfig<
 >(options: CreateTestConfigOptions<TServices, TPageObjects>) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
+    const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
 
     return {
       ...svlSharedConfig.getAll(),
@@ -26,8 +27,10 @@ export function createTestConfig<
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
-      dockerServers: defineDockerServersConfig({
-        registry: packageRegistryDocker,
+      ...(enableFleetDockerRegistry && {
+        dockerServers: defineDockerServersConfig({
+          registry: packageRegistryDocker,
+        }),
       }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
@@ -43,7 +46,7 @@ export function createTestConfig<
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
-          ...(dockerRegistryPort
+          ...(enableFleetDockerRegistry && dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
         ],
