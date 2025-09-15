@@ -70,10 +70,13 @@ export const OverallUploadStatus: FC = () => {
       : []),
     {
       title: existingIndexName
-        ? i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
-            defaultMessage: 'Uploading files to { existingIndexName }',
-            values: { existingIndexName },
-          })
+        ? i18n.translate(
+            'xpack.dataVisualizer.file.overallUploadStatus.uploadingFilesExistingIndex',
+            {
+              defaultMessage: 'Uploading files to { existingIndexName }',
+              values: { existingIndexName },
+            }
+          )
         : i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
             defaultMessage: 'Uploading files',
           }),
