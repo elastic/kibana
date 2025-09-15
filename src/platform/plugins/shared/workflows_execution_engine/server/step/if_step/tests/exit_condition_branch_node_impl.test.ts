@@ -17,14 +17,8 @@ describe('ExitConditionBranchNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let workflowGraphMock: WorkflowGraph;
   let impl: ExitConditionBranchNodeImpl;
-  let goToStep: jest.Mock<any, any, any>;
-  let exitScope: jest.Mock<any, any, any>;
-  let getDirectSuccessors: jest.Mock<any, any, any>;
 
   beforeEach(() => {
-    goToStep = jest.fn();
-    exitScope = jest.fn();
-    getDirectSuccessors = jest.fn();
     step = {
       id: 'testStep',
       type: 'exit-then-branch',
@@ -32,17 +26,14 @@ describe('ExitConditionBranchNodeImpl', () => {
       stepType: 'if',
       startNodeId: 'startBranchNode',
     };
-    wfExecutionRuntimeManagerMock = {
-      goToStep,
-      exitScope,
-    } as any;
+    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManagerMock.navigateToNode = jest.fn();
+    wfExecutionRuntimeManagerMock.exitScope = jest.fn();
 
-    workflowGraphMock = {
-      getDirectSuccessors,
-    } as any;
+    workflowGraphMock = {} as unknown as WorkflowGraph;
     impl = new ExitConditionBranchNodeImpl(step, workflowGraphMock, wfExecutionRuntimeManagerMock);
 
-    getDirectSuccessors.mockReturnValue([
+    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
       {
         id: 'exitIfNode',
         type: 'exit-if',
@@ -51,7 +42,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if there are multiple successors', async () => {
-    getDirectSuccessors.mockReturnValue([
+    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
       { id: 'exitIfNode1', type: 'exit-if' },
       { id: 'exitIfNode2', type: 'exit-if' },
     ]);
@@ -62,7 +53,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if no successors', async () => {
-    getDirectSuccessors.mockReturnValue([]);
+    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([]);
 
     await expect(impl.run()).rejects.toThrow(
       `ExitConditionBranchNode with id ${step.id} must have exactly one successor, but found 0.`
@@ -70,7 +61,9 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if successor is not exit-if', async () => {
-    getDirectSuccessors.mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
+    workflowGraphMock.getDirectSuccessors = jest
+      .fn()
+      .mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
       `ExitConditionBranchNode with id ${step.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
     );

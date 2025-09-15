@@ -20,13 +20,14 @@ describe('ExitIfNodeImpl', () => {
     step = {
       id: 'testStep',
       type: 'exit-if',
+      stepId: 'testStep',
+      stepType: 'if',
       startNodeId: 'enterIfNode',
     };
-    wfExecutionRuntimeManagerMock = {
-      goToNextStep: jest.fn(),
-      finishStep: jest.fn(),
-      exitScope: jest.fn(),
-    } as any;
+    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
+    wfExecutionRuntimeManagerMock.finishStep = jest.fn();
+    wfExecutionRuntimeManagerMock.exitScope = jest.fn();
     impl = new ExitIfNodeImpl(step, wfExecutionRuntimeManagerMock);
   });
 
@@ -38,7 +39,7 @@ describe('ExitIfNodeImpl', () => {
   it('should finish enterIfNode', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledTimes(1);
-    expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledWith('enterIfNode');
+    expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledWith();
   });
 
   it('should go to the next step', async () => {

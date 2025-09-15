@@ -34,8 +34,8 @@ describe('HttpStepImpl', () => {
     mockWorkflowRuntime = {
       startStep: jest.fn(),
       finishStep: jest.fn(),
-      setStepResult: jest.fn(),
-      goToNextStep: jest.fn(),
+      setCurrentStepResult: jest.fn(),
+      navigateToNextNode: jest.fn(),
     } as any;
 
     mockWorkflowLogger = {
@@ -49,6 +49,8 @@ describe('HttpStepImpl', () => {
     mockStep = {
       id: 'test-http-step',
       type: 'http',
+      stepId: 'test-http-step',
+      stepType: 'http',
       configuration: {
         name: 'test-http-step',
         type: 'http',
@@ -238,9 +240,9 @@ describe('HttpStepImpl', () => {
 
       await httpStep.run();
 
-      expect(mockWorkflowRuntime.startStep).toHaveBeenCalledWith('test-http-step');
+      expect(mockWorkflowRuntime.startStep).toHaveBeenCalledWith();
       expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith('test-http-step');
+      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
   });

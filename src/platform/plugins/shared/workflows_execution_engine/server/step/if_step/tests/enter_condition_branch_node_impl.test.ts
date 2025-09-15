@@ -19,10 +19,9 @@ describe('EnterConditionBranchNodeImpl', () => {
   } as any;
 
   beforeEach(() => {
-    wfExecutionRuntimeManagerMock = {
-      goToNextStep: jest.fn(),
-      enterScope: jest.fn(),
-    } as any;
+    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
+    wfExecutionRuntimeManagerMock.enterScope = jest.fn();
     impl = new EnterConditionBranchNodeImpl(conditionBranchNode, wfExecutionRuntimeManagerMock);
   });
 

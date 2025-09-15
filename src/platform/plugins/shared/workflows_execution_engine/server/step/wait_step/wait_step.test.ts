@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WaitGraphNode } from '@kbn/workflows';
+import type { WaitGraphNode, WaitStep } from '@kbn/workflows';
 import { WaitStepImpl } from './wait_step';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -32,31 +32,31 @@ describe('WaitStepImpl', () => {
   beforeEach(() => {
     node = {
       id: 'wait-step',
+      type: 'wait',
+      stepId: 'wait-step',
+      stepType: 'wait',
       configuration: {
         with: {
           duration: '1s', // 1 second
         },
-      },
-    } as any;
+      } as WaitStep,
+    };
 
-    workflowRuntime = {
-      startStep: jest.fn(),
-      finishStep: jest.fn(),
-      setWaitStep: jest.fn(),
-      getStepState: jest.fn(),
-      setStepState: jest.fn(),
-      goToNextStep: jest.fn(),
-      getWorkflowExecution: jest.fn(),
-    } as unknown as WorkflowExecutionRuntimeManager;
+    workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
+    workflowRuntime.startStep = jest.fn();
+    workflowRuntime.finishStep = jest.fn();
+    workflowRuntime.setWaitStep = jest.fn();
+    workflowRuntime.setCurrentStepState = jest.fn();
+    workflowRuntime.getCurrentStepState = jest.fn();
+    workflowRuntime.navigateToNextNode = jest.fn();
+    workflowRuntime.getWorkflowExecution = jest.fn();
 
-    workflowLogger = {
-      logInfo: jest.fn(),
-      logDebug: jest.fn(),
-    } as unknown as IWorkflowEventLogger;
+    workflowLogger = {} as unknown as IWorkflowEventLogger;
+    workflowLogger.logInfo = jest.fn();
+    workflowLogger.logDebug = jest.fn();
 
-    workflowTaskManager = {
-      scheduleResumeTask: jest.fn(),
-    } as unknown as WorkflowTaskManager;
+    workflowTaskManager = {} as unknown as WorkflowTaskManager;
+    workflowTaskManager.scheduleResumeTask = jest.fn();
 
     underTest = new WaitStepImpl(node, workflowRuntime, workflowLogger, workflowTaskManager);
   });
@@ -102,12 +102,12 @@ describe('WaitStepImpl', () => {
       node.configuration.with.duration = '5s';
       const runPromise = underTest.handleShortDuration();
       await jest.advanceTimersByTimeAsync(0);
-      expect(workflowRuntime.startStep).toHaveBeenCalledWith(node.id);
+      expect(workflowRuntime.startStep).toHaveBeenCalledWith();
 
       await jest.advanceTimersByTimeAsync(5000);
       await runPromise;
 
-      expect(workflowRuntime.finishStep).toHaveBeenCalledWith(node.id);
+      expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
     });
 
     it('should go to the next node', async () => {
@@ -160,17 +160,17 @@ describe('WaitStepImpl', () => {
         });
       });
 
-      it('should call getStepState with node id one time', async () => {
+      it('should call getCurrentStepState one time', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith(node.id);
+        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith();
         expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledTimes(1);
       });
 
       it('should start the step', async () => {
         node.configuration.with.duration = '10s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.startStep).toHaveBeenCalledWith(node.id);
+        expect(workflowRuntime.startStep).toHaveBeenCalledWith();
         expect(workflowRuntime.finishStep).not.toHaveBeenCalled();
       });
 
@@ -186,7 +186,7 @@ describe('WaitStepImpl', () => {
       it('should set step state with resume task ID', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(node.id, {
+        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({
           resumeExecutionTaskId: 'resume-task-1',
         });
       });
@@ -226,13 +226,13 @@ describe('WaitStepImpl', () => {
       it('should reset step state', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith('wait-step', undefined);
+        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(undefined);
       });
 
       it('should finish the step', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.finishStep).toHaveBeenCalledWith(node.id);
+        expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
       });
 
       it('should log finish wait', async () => {
