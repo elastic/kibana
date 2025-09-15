@@ -7,10 +7,8 @@
 
 import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiText,
@@ -43,6 +41,7 @@ import { getSuggestions } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import type { SearchBarProps } from './types';
+import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_animation';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -87,12 +86,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
-
-  // These hooks are used when on chromeStyle set to 'project'
-  const [isVisible, setIsVisible] = useState(false);
-  const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
@@ -102,12 +97,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
-  const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
-  const styles = css({
+  // Highlight animation hook
+  const { isHighlighted, triggerHighlight } = useHighlightAnimation(chromeStyle === 'project');
+
+  const defaultStyles = css({
     [useEuiBreakpoint(['m', 'l'])]: {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
     },
@@ -115,6 +112,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
     },
   });
+  const projectStyles = css({
+    width: 300,
+  });
+  const baseStyles = chromeStyle === 'project' ? projectStyles : defaultStyles;
+  const highlightStyles = getSearchHighlightStyles(euiTheme, colorMode);
+  const styles = css([baseStyles, highlightStyles]);
   // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
@@ -245,16 +248,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
         reportEvent.shortcutUsed();
-        if (chromeStyle === 'project' && !isVisible) {
-          visibilityButtonRef.current?.click();
-        } else if (searchRef) {
+        if (searchRef) {
           searchRef.focus();
         } else if (buttonRef) {
           (buttonRef.children[0] as HTMLButtonElement).click();
         }
       }
     },
-    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
+    [buttonRef, searchRef, reportEvent]
   );
 
   const onChange = useCallback(
@@ -332,55 +333,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const clearField = () => setSearchValue('');
 
-  const keyboardShortcutTooltip = `${i18nStrings.keyboardShortcutTooltip.prefix}: ${
-    isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
-  }`;
-
   useEvent('keydown', onKeyDown);
 
-  if (chromeStyle === 'project' && !isVisible) {
-    return (
-      <EuiHeaderSectionItemButton
-        aria-label={i18nStrings.showSearchAriaText}
-        buttonRef={visibilityButtonRef}
-        color="text"
-        data-test-subj="nav-search-reveal"
-        onClick={() => {
-          setIsVisible(true);
-        }}
-      >
-        <EuiIcon type="search" size="m" />
-      </EuiHeaderSectionItemButton>
-    );
-  }
+  // In project chrome style, render the input immediately (no reveal button)
 
-  const getAppendForChromeStyle = () => {
-    if (chromeStyle === 'project') {
-      return (
-        <EuiButtonIcon
-          aria-label={i18nStrings.closeSearchAriaText}
-          color="text"
-          data-test-subj="nav-search-conceal"
-          iconType="cross"
-          onClick={() => {
-            reportEvent.searchBlur();
-            setIsVisible(false);
-          }}
-        />
-      );
-    }
-
-    if (showAppend) {
-      return (
-        <EuiFormLabel
-          title={keyboardShortcutTooltip}
-          css={{ fontFamily: euiTheme.font.familyCode }}
-        >
-          {isMac ? '⌘/' : '^/'}
-        </EuiFormLabel>
-      );
-    }
-  };
+  const highlightClassName = isHighlighted ? 'search-highlighted' : undefined;
 
   return (
     <EuiSelectableTemplateSitewide
@@ -389,6 +346,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       onChange={onChange}
       options={options}
       css={styles}
+      className={highlightClassName}
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
@@ -411,14 +369,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         onFocus: () => {
           reportEvent.searchFocus();
           setInitialLoad(true);
-          setShowAppend(false);
+          triggerHighlight();
         },
         onBlur: () => {
           reportEvent.searchBlur();
-          setShowAppend(!searchValue.length);
         },
         fullWidth: true,
-        append: getAppendForChromeStyle(),
       }}
       errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
       emptyMessage={<EmptyMessage />}
