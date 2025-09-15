@@ -9,7 +9,7 @@ import type { IconType } from '@elastic/eui';
 import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { QualityIndicators } from '@kbn/data-quality/common';
+import type { QualityIndicators } from '../../common';
 
 export function QualityIndicator({
   quality,
