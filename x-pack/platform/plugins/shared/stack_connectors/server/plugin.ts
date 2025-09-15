@@ -7,8 +7,17 @@
 
 import type { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { registerConnectorTypes } from './connector_types';
-import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
+import {
+  validSlackApiChannelsRoute,
+  getWellKnownEmailServiceRoute,
+  getWebhookSecretHeadersKeyRoute,
+} from './routes';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
@@ -17,7 +26,9 @@ export interface ConnectorsPluginsSetup {
 }
 
 export interface ConnectorsPluginsStart {
-  actions: ActionsPluginSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStartContract;
+  spaces: SpacesPluginSetup;
 }
 
 export class StackConnectorsPlugin
@@ -38,8 +49,10 @@ export class StackConnectorsPlugin
     const { actions } = plugins;
 
     const awsSesConfig = actions.getActionsConfigurationUtilities().getAwsSesConfig();
+
     getWellKnownEmailServiceRoute(router, awsSesConfig);
     validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
+    getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
 
     registerConnectorTypes({
       actions,
