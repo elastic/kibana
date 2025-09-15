@@ -692,3 +692,11 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+
+  - trigger: kibana-backstage-catalog-sync
+    label: ':catalog: Backstage catalog sync'
+    async: true
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+      env:
+        BASE: main

@@ -1,0 +1,43 @@
+# ==============================================================
+# Backstage Catalog Sync Pipeline
+# ==============================================================
+# Pipeline: Sync Kibana packages to elastic/catalog-info (Backstage)
+# Description: Scans Kibana packages and updates catalog-info repo with Backstage component YAMLs.
+# Trigger: manual or via upstream meta pipeline (configure in Buildkite UI)
+# ==============================================================
+#
+
+steps:
+  - label: ':gear: Generate catalog components from Kibana packages'
+    key: generate_components
+    commands:
+      - set -euo pipefail
+      - ts-node .buildkite/pipelines/catalog/generate_kibana_catalog_components.ts
+      - cd ..
+      - echo "Archiving directory catalog-info/locations/kibana"
+      - tar -czf kibana-package-catalog-entries.tgz -C "catalog-info/locations/kibana" .
+    artifact_paths:
+      - kibana-package-catalog-entries.tgz
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+
+  - label: ':key: Clone & Commit to catalog-info'
+    key: commit_catalog
+    commands:
+      - set -euo pipefail
+      - buildkite-agent artifact download kibana-package-catalog-entries.tgz .
+      - git clone https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/catalog-info.git ../catalog-info
+      - rm -rf ../catalog-info/locations/kibana # clean old entries
+      - mkdir -p ../catalog-info/locations/kibana # ensure dir exists
+      - tar -xzf kibana-package-catalog-entries.tgz -C ../catalog-info/locations/kibana # extract new entries
+      - ts-node .buildkite/pipelines/catalog/compare-and-commit-catalog-changes.ts # compare, commit, and create/update PR
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
