@@ -30,7 +30,7 @@ export class EndpointAppContentServicesNotStartedError extends EndpointError {
 }
 
 export class EndpointAuthorizationError extends EndpointError {
-  constructor(meta?: unknown, customMessage?: string) {
-    super(customMessage || ENDPOINT_AUTHZ_ERROR_MESSAGE, meta);
+  constructor(meta?: unknown) {
+    super(ENDPOINT_AUTHZ_ERROR_MESSAGE, meta);
   }
 }

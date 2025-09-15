@@ -803,13 +803,6 @@ describe('MS Defender response actions client', () => {
         response: originalActionSearchResponse,
       });
 
-      // Mock empty search results for checking already canceled actions
-      const emptyCancelSearchResponse = generator.toEsSearchResponse([]);
-      applyEsClientSearchMock({
-        esClientMock: clientConstructorOptionsMock.esClient,
-        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-        response: emptyCancelSearchResponse,
-      });
     });
 
     it('should send cancel request to Microsoft Defender with expected parameters', async () => {
@@ -925,35 +918,6 @@ describe('MS Defender response actions client', () => {
       ).rejects.toThrow('action_id is required in parameters');
     });
 
-    it('should throw error when target action has already been canceled', async () => {
-      const generator = new EndpointActionGenerator('seed');
-      const canceledActionResponse = generator.generateResponseEsHit({
-        EndpointActions: {
-          action_id: 'already-canceled-action',
-          data: { command: 'isolate' },
-        },
-        error: {
-          message:
-            'Response action was canceled by [admin] (Microsoft Defender for Endpoint machine action ID: some-id)',
-        },
-      });
-
-      applyEsClientSearchMock({
-        esClientMock: clientConstructorOptionsMock.esClient,
-        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-        response: generator.toEsSearchResponse([canceledActionResponse]),
-      });
-
-      await expect(
-        msClientMock.cancel({
-          endpoint_ids: ['1-2-3'],
-          comment: 'cancel test comment',
-          parameters: { action_id: 'already-canceled-action' },
-        })
-      ).rejects.toThrow(
-        'Unable to cancel action [already-canceled-action]. Action has already been cancelled.'
-      );
-    });
 
     it('should throw error when external action ID cannot be resolved', async () => {
       // Mock empty search results for original action
@@ -1030,6 +994,31 @@ describe('MS Defender response actions client', () => {
       ).rejects.toThrow('Microsoft Defender cancel API error');
     });
 
+    it('should handle MDE error when action status is not Pending or InProgress', async () => {
+      const mdeError = new Error(
+        'Attempt to send [cancelAction] to Microsoft Defender for Endpoint failed: Status code: 400. Message: API Error: [Bad Request] Request failed with status code 400\n' +
+        'URL called:[post] https://api.securitycenter.windows.com/api/machineactions/357dd251-e714-4a6e-b00a-93c06d87aaff/cancel\n' +
+        'Response body: {"error":{"code":"BadRequest","message":"Canceled machine action status must be Pending or InProgress, Current Status: Failed, machineActionId: 357dd251-e714-4a6e-b00a-93c06d87aaff","target":"|00-fdaabbeb2ebe3146b47f958d7b671dcd-e13c20d6f3402a0d-01.8c111081_1.1."}}'
+      );
+
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION) {
+          throw mdeError;
+        }
+        return responseActionsClientMock.createConnectorActionExecuteResponse();
+      });
+
+      await expect(
+        msClientMock.cancel({
+          endpoint_ids: ['1-2-3'],
+          comment: 'cancel test comment',
+          parameters: { action_id: 'original-action-id' },
+        })
+      ).rejects.toThrow(
+        'Attempt to send [cancelAction] to Microsoft Defender for Endpoint failed: Status code: 400. Message: API Error: [Bad Request] Request failed with status code 400'
+      );
+    });
+
     it('should handle missing machine action ID in cancel response', async () => {
       responseActionsClientMock.setConnectorActionsClientExecuteResponse(
         connectorActionsMock,
@@ -1052,49 +1041,6 @@ describe('MS Defender response actions client', () => {
       );
     });
 
-    it('should handle ES client errors when checking for already canceled actions', async () => {
-      const generator = new EndpointActionGenerator('seed');
-
-      // Mock the original action lookup to return a valid action with machineActionId
-      applyEsClientSearchMock({
-        esClientMock: clientConstructorOptionsMock.esClient,
-        index: ENDPOINT_ACTIONS_INDEX,
-        response: generator.toEsSearchResponse([
-          generator.generateActionEsHit<
-            undefined,
-            {},
-            MicrosoftDefenderEndpointActionRequestCommonMeta
-          >({
-            agent: { id: 'agent-uuid-1' },
-            EndpointActions: {
-              action_id: 'original-action-id',
-              data: { command: 'isolate' },
-              input_type: 'microsoft_defender_endpoint',
-            },
-            meta: { machineActionId: 'external-machine-action-id-123' },
-          }),
-        ]),
-      });
-
-      // Mock the canceled actions check to throw an error (simulating ES failure)
-      applyEsClientSearchMock({
-        esClientMock: clientConstructorOptionsMock.esClient,
-        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-        response: () => {
-          throw new Error('ES search error for canceled actions');
-        },
-      });
-
-      // Should not throw - method gracefully handles ES errors when checking for cancellation
-      const result = await msClientMock.cancel({
-        endpoint_ids: ['1-2-3'],
-        comment: 'cancel test comment',
-        parameters: { action_id: 'original-action-id' },
-      });
-
-      expect(result).toBeDefined();
-      expect(result.id).toBeDefined();
-    });
 
     it('should handle ES client errors when resolving external action ID', async () => {
       const generator = new EndpointActionGenerator('seed');
@@ -1139,11 +1085,6 @@ describe('MS Defender response actions client', () => {
                 msLogIndexEsHit,
               ])
             );
-          }
-
-          // Return empty for cancelled action check
-          if (searchRequest.index === ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN) {
-            return Promise.resolve(generator.toEsSearchResponse([]));
           }
 
           // Throw error specifically for original action lookup
@@ -1842,72 +1783,6 @@ describe('MS Defender response actions client', () => {
         );
       });
 
-      describe('cancel action with already canceled target', () => {
-        it('should reject cancel request when target action was already canceled', async () => {
-          const generator = new EndpointActionGenerator('seed');
-          const canceledActionResponse = generator.generateResponseEsHit({
-            EndpointActions: {
-              action_id: 'target-action-id-123',
-              data: { command: 'isolate' },
-            },
-            error: {
-              message:
-                'Response action was canceled by [admin] (Microsoft Defender for Endpoint machine action ID: some-id)',
-            },
-          });
-
-          applyEsClientSearchMock({
-            esClientMock: clientConstructorOptionsMock.esClient,
-            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-            response: generator.toEsSearchResponse([canceledActionResponse]),
-          });
-
-          await expect(
-            msClientMock.cancel({
-              endpoint_ids: ['1-2-3'],
-              comment: 'test comment',
-              parameters: { action_id: 'target-action-id-123' },
-            })
-          ).rejects.toThrow(
-            'Unable to cancel action [target-action-id-123]. Action has already been cancelled.'
-          );
-
-          expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith(
-            {
-              index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-              query: {
-                bool: {
-                  filter: [{ terms: { action_id: ['target-action-id-123'] } }],
-                },
-              },
-              size: 10000,
-            },
-            { ignore: [404] }
-          );
-        });
-
-        it('should allow cancel request when target action has no cancel records', async () => {
-          // Mock empty search results - no cancel records found
-          const generator = new EndpointActionGenerator('seed');
-          const emptySearchResponse = generator.toEsSearchResponse([]);
-
-          applyEsClientSearchMock({
-            esClientMock: clientConstructorOptionsMock.esClient,
-            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-            response: emptySearchResponse,
-          });
-
-          await expect(
-            msClientMock.cancel({
-              endpoint_ids: ['1-2-3'],
-              comment: 'test comment',
-              parameters: { action_id: 'target-action-id-123' },
-            })
-          ).rejects.not.toThrow(
-            'Unable to cancel action [target-action-id-123]. Action has already been cancelled.'
-          );
-        });
-      });
 
       it('should generate success response for cancel action with Cancelled status', async () => {
         const expectedResult: LogsEndpointActionResponse = {

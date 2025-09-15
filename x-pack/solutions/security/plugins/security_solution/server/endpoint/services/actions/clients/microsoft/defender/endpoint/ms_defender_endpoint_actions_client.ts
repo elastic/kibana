@@ -392,31 +392,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       };
     }
 
-    // Cancel action specific validation
-    if (payload.command === 'cancel') {
-      const actionId = (payload.parameters as ResponseActionCancelParameters)?.id;
-      if (actionId) {
-        try {
-          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(actionId);
-
-          if (actionAlreadyCanceled) {
-            return {
-              isValid: false,
-              error: new ResponseActionsClientError(
-                `Unable to cancel action [${actionId}]. Action has already been cancelled.`,
-                409
-              ),
-            };
-          }
-        } catch (error) {
-          return {
-            isValid: false,
-            error,
-          };
-        }
-      }
-    }
-
     return super.validateRequest(payload);
   }
 
@@ -1061,34 +1036,5 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return agentResponse;
-  }
-
-  /**
-   * Check if the target action has already been successfully canceled.
-   */
-  private async checkForAlreadyCanceledAction(targetActionId: string): Promise<boolean> {
-    try {
-      this.log.debug(
-        `Checking response index for cancellation messages for action ${targetActionId}`
-      );
-
-      // Fetch all response documents for the target action
-      const responseDocuments = await this.fetchActionResponseEsDocs(targetActionId);
-
-      // Check if any response document contains a cancellation error message
-      for (const [agentId, responseDoc] of Object.entries(responseDocuments)) {
-        if (responseDoc.error?.message?.includes('Response action was canceled by')) {
-          this.log.debug(
-            `Action ${targetActionId} shows cancellation in response index for agent ${agentId}`
-          );
-          return true;
-        }
-      }
-
-      return false;
-    } catch (error) {
-      this.log.warn(`Error checking response index for cancellation: ${error.message}`);
-      return false;
-    }
   }
 }
