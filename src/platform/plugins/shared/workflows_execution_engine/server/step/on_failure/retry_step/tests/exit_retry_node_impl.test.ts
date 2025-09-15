@@ -22,7 +22,7 @@ describe('ExitRetryNodeImpl', () => {
     node = {
       id: 'exit-retry-1',
       type: 'exit-retry',
-      stepId: 'exit-retry-1',
+      stepId: 'test-retry-step',
       stepType: 'retry',
       startNodeId: 'enter-retry-1',
     };
@@ -62,7 +62,7 @@ describe('ExitRetryNodeImpl', () => {
     it('should log debug message', async () => {
       await underTest.run();
       expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Exiting retry step enter-retry-1 after 2 attempts.`
+        `Exiting retry step test-retry-step after 2 attempts.`
       );
     });
 
