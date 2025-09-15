@@ -100,10 +100,6 @@ export const useBulkAlertActionItems = ({
         refresh
       ) => {
         try {
-          if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
-            return;
-          }
-
           let ids: string[] | undefined = items.map((item) => item._id);
           let query: Record<string, unknown> | undefined;
 
@@ -111,6 +107,13 @@ export const useBulkAlertActionItems = ({
             const timeFilter = buildTimeRangeFilter(from, to);
             query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
             ids = undefined;
+          }
+
+          if (status === 'closed' && !(await promptAlertCloseConfirmation(ids ? {ids} : {query: JSON.stringify(query)}))) {
+            return;
+          }
+
+          if (isSelectAllChecked) {
             startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
           } else if (items.length > 1) {
             startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });

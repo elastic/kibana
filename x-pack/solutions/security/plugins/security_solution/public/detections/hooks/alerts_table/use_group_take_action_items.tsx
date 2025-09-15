@@ -151,7 +151,7 @@ export const useGroupTakeActionsItems = ({
       tableId: string;
       selectedGroup: string;
     }) => {
-      if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+      if (status === 'closed' && query && !(await promptAlertCloseConfirmation({query}))) {
         return;
       }
       if (query) {

@@ -15,6 +15,8 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set'
 import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
@@ -22,6 +24,7 @@ import {
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../../common/lib/kibana';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { fetchQueryAlerts } from '../containers/detection_engine/alerts/api';
 
 const DO_NOT_SHOW_AGAIN_SETTING_KEY = 'securitySolution.alertCloseInfoModal.doNotShowAgain';
 
@@ -34,7 +37,7 @@ const learnMoreLink = (
 const restartSuppressionMessageComponent = (
   <FormattedMessage
     id="xpack.securitySolution.alert.closeInfoModal.restartSuppressionMessage"
-    defaultMessage="Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. {link}."
+    defaultMessage="Some alerts being closed are currently subject to suppression. Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. {link}."
     values={{
       link: learnMoreLink,
     }}
@@ -44,12 +47,45 @@ const restartSuppressionMessageComponent = (
 const continueSuppressionMessageComponent = (
   <FormattedMessage
     id="xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage"
-    defaultMessage="Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. {link}."
+    defaultMessage="Some alerts being closed are currently subject to suppression. Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. {link}."
     values={{
       link: learnMoreLink,
     }}
   />
 );
+
+const hasAlertsInSuppressionWindow = async (params: { query?: string, ids?: string[] }) => {
+  let query
+  if (params.ids && params.ids.length > 0) {
+    query = {
+      bool: {
+        filter: [{
+          "ids": {
+            "values": params.ids
+          }
+        }]
+      }
+    }
+  } else if (params.query) {
+    query = JSON.parse(params.query)
+  } else {
+    throw new Error("either query or a non empty list of alert ids must be defined")
+  }
+
+  const boolFilters = get(query, 'bool.filter', [])
+  query.bool?.filter.push({
+    "exists": {
+      "field": "kibana.alert.rule.parameters.alert_suppression.duration.value"
+    }
+  })
+
+  set(query, 'bool.filter', boolFilters)
+
+  const abortCtrl = new AbortController();
+  const results = await fetchQueryAlerts({ query: { query, size: 0 }, signal: abortCtrl.signal })
+
+  return results.hits.total.value > 0
+}
 
 const AlertCloseConfirmationModal = ({
   onConfirmationResult,
@@ -77,13 +113,13 @@ const AlertCloseConfirmationModal = ({
   const { title, message } =
     currentSettingValue === SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
       ? {
-          title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
-          message: continueSuppressionMessageComponent,
-        }
+        title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
+        message: continueSuppressionMessageComponent,
+      }
       : {
-          title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
-          message: restartSuppressionMessageComponent,
-        };
+        title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
+        message: restartSuppressionMessageComponent,
+      };
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
@@ -110,29 +146,42 @@ const AlertCloseConfirmationModal = ({
 };
 
 export const useAlertCloseInfoModal = () => {
-  const advancedSettingEnabled = useIsExperimentalFeatureEnabled(
+  const experimentalFeatureEnabled = useIsExperimentalFeatureEnabled(
     'continueSuppressionWindowAdvancedSettingEnabled'
   );
   const [shouldShowModal, setShouldShowModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [resolveUserConfirmation, setUserConfirmationResolver] = useState<
     (shouldContinue: boolean) => void
   >(() => () => false);
   const { overlays, services } = useKibana();
   const { storage } = services;
 
-  const promptAlertCloseConfirmation = useCallback((): Promise<boolean> => {
-    if (!advancedSettingEnabled) {
-      return Promise.resolve(true);
+  const promptAlertCloseConfirmation = useCallback(async (params: { query?: string, ids?: string[] }): Promise<boolean> => {
+    try {
+      if (!experimentalFeatureEnabled) {
+        return Promise.resolve(true);
+      }
+
+      if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
+        return Promise.resolve(true);
+      }
+
+      if (!(await hasAlertsInSuppressionWindow(params))) {
+        return Promise.resolve(true)
+      }
+
+      return new Promise((resolvePromise) => {
+        setUserConfirmationResolver(() => resolvePromise);
+        setShouldShowModal(true);
+      });
+    } catch (error) {
+      // We do not want to break alert closure. If the endpoint breaks somehow,
+      // users should still be able to close alerts.
+      return Promise.resolve(true)
     }
 
-    if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
-      return Promise.resolve(true);
-    }
-    setShouldShowModal(true);
-    return new Promise((resolvePromise) => {
-      setUserConfirmationResolver(() => resolvePromise);
-    });
-  }, [storage, advancedSettingEnabled]);
+  }, [storage, experimentalFeatureEnabled]);
 
   const handleConfirmationResult = useCallback(
     (isConfirmed: boolean) => {
@@ -143,19 +192,21 @@ export const useAlertCloseInfoModal = () => {
   );
 
   useEffect(() => {
-    if (shouldShowModal) {
+    if (shouldShowModal && !isModalOpen) {
+      setIsModalOpen(true);
       const modalRef = overlays.openModal(
         <KibanaContextProvider services={services}>
           <AlertCloseConfirmationModal
             onConfirmationResult={(result) => {
               modalRef.close();
+              setIsModalOpen(false);
               handleConfirmationResult(result);
             }}
           />
         </KibanaContextProvider>
       );
     }
-  }, [shouldShowModal, overlays, services, handleConfirmationResult]);
+  }, [shouldShowModal, overlays, services, isModalOpen, handleConfirmationResult]);
 
   return {
     promptAlertCloseConfirmation,
