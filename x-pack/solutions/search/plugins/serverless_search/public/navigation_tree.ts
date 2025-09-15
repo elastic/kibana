@@ -88,9 +88,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           },
           {
             children: [
-              { link: 'onechat:conversations' },
-              { link: 'onechat:tools' },
-              { link: 'onechat:agents' },
+              { link: 'agent_builder:conversations' },
+              { link: 'agent_builder:tools' },
+              { link: 'agent_builder:agents' },
             ],
             iconV2: 'comment',
             id: 'agent_builder',
@@ -112,13 +112,13 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             renderAs: 'accordion',
             children: [
               {
-                link: 'onechat:conversations',
+                link: 'agent_builder:conversations',
               },
               {
-                link: 'onechat:agents',
+                link: 'agent_builder:agents',
               },
               {
-                link: 'onechat:tools',
+                link: 'agent_builder:tools',
               },
             ],
             sideNavVersion: 'v1',
@@ -386,6 +386,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     title: 'AI',
                     children: [
                       { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+                      { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
                       {
                         link: 'management:observabilityAiAssistantManagement',
                         breadcrumbStatus: 'hidden',
