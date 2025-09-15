@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
@@ -13,22 +12,23 @@ import type {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiText,
-  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
+import React, { useMemo } from 'react';
+import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
-import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
-import { useDeleteAgent } from '../../../context/delete_agent_context';
+import { appPaths } from '../../../utils/app_paths';
+import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../agent_avatar';
 
 const columnNames = {
@@ -96,15 +96,13 @@ export const AgentsList: React.FC = () => {
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
       field: 'labels',
       name: columnNames.labels,
-      render: (labels?: string[]) => (
-        <EuiFlexGroup direction="row" wrap>
-          {labels?.map((label) => (
-            <EuiFlexItem key={label} grow={false}>
-              <EuiBadge>{label}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
+      render: (labels?: string[]) => {
+        if (!labels) {
+          return null;
+        }
+
+        return <Labels labels={labels} />;
+      },
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
