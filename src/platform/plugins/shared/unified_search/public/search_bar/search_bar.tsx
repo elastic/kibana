@@ -526,7 +526,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     }
   };
 
-  private showBackgroundSearchCreatedToast(name: string) {
+  private showBackgroundSearchCreatedToast(name: string | undefined) {
+    if (!name) return;
+
     const toast = this.services.notifications.toasts.addSuccess({
       title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.toast.title', {
         defaultMessage: 'Background search created',
@@ -561,8 +563,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     query?: QT | Query | undefined;
   }) => {
     if (!this.isDirty()) {
-      const { formattedName } = await this.services.data.search.session.save();
-      this.showBackgroundSearchCreatedToast(formattedName);
+      const searchSession = await this.services.data.search.session.save();
+      this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
       return;
     }
 
@@ -573,8 +575,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       .subscribe(async (newSessionId) => {
         if (currentSessionId === newSessionId) return;
         subscription.unsubscribe();
-        const { formattedName } = await this.services.data.search.session.save();
-        this.showBackgroundSearchCreatedToast(formattedName);
+        const searchSession = await this.services.data.search.session.save();
+        this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
       });
 
     this.onQueryBarSubmit(payload);

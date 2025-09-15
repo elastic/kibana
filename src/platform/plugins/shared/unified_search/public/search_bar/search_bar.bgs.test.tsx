@@ -37,7 +37,22 @@ const setup = ({
 } = {}) => {
   const startMock = coreMock.createStart();
 
-  const save = jest.fn().mockResolvedValue({ formattedName: SAVED_SEARCH_NAME });
+  const save = jest.fn().mockResolvedValue({
+    id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+    type: 'search-session',
+    attributes: {
+      name: SAVED_SEARCH_NAME,
+      appId: 'my_app_id',
+      locatorId: 'my_locator_id',
+      idMapping: {},
+      sessionId: 'session_id',
+      created: new Date().toISOString(),
+      expires: new Date().toISOString(),
+      version: '8.0.0',
+    },
+    references: [],
+  });
+
   const getSessionObservable = new BehaviorSubject<string | undefined>(undefined);
 
   const search = searchServiceMock.createStartContract({
