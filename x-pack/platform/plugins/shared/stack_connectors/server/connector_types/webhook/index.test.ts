@@ -91,6 +91,7 @@ describe('secrets validation', () => {
       key: null,
       pfx: null,
       clientSecret: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
@@ -111,6 +112,7 @@ describe('secrets validation', () => {
       pfx: null,
       user: null,
       clientSecret: null,
+      secretHeaders: null,
     });
   });
 
@@ -122,6 +124,7 @@ describe('secrets validation', () => {
       pfx: null,
       user: null,
       clientSecret: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -132,6 +135,7 @@ describe('secrets validation', () => {
       user: null,
       password: null,
       clientSecret: null,
+      secretHeaders: null,
     };
 
     expect(
@@ -147,6 +151,7 @@ describe('secrets validation', () => {
       crt: null,
       key: null,
       clientSecret: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -157,6 +162,7 @@ describe('secrets validation', () => {
       crt: null,
       key: null,
       clientSecret: null,
+      secretHeaders: null,
     };
 
     expect(
@@ -484,6 +490,7 @@ describe('execute()', () => {
         crt: null,
         pfx: null,
         clientSecret: null,
+        secretHeaders: null,
       },
       params: { body: 'some data' },
       configurationUtilities,
@@ -502,6 +509,105 @@ describe('execute()', () => {
       data: 'some data',
       headers: {
         Authorization: 'Basic YWJjOjEyMw==',
+        aheader: 'a value',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
+  });
+
+  test('execute with secret headers and basic auth', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: { secretKey: 'secretValue' },
+        clientSecret: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    delete requestMock.mock.calls[0][0].configurationUtilities;
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorUsageCollector: {
+        usage: {
+          requestBodyBytes: 0,
+        },
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'Basic YWJjOjEyMw==',
+        aheader: 'a value',
+        secretKey: 'secretValue',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
+  });
+
+  test('execute with secret headers and basic auth when header keys overlap', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: { Authorization: 'secretAuthorizationValue' },
+        clientSecret: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    delete requestMock.mock.calls[0][0].configurationUtilities;
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorUsageCollector: {
+        usage: {
+          requestBodyBytes: 0,
+        },
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'secretAuthorizationValue',
         aheader: 'a value',
       },
       logger: expect.any(Object),
@@ -533,6 +639,7 @@ describe('execute()', () => {
         user: null,
         pfx: null,
         clientSecret: null,
+        secretHeaders: null,
       },
       params: { body: 'some data' },
       configurationUtilities,
@@ -759,6 +866,7 @@ describe('execute()', () => {
         crt: null,
         pfx: null,
         clientSecret: null,
+        secretHeaders: null,
       },
       params: { body: 'some data' },
       configurationUtilities,
@@ -786,6 +894,7 @@ describe('execute()', () => {
       crt: null,
       key: null,
       clientSecret: null,
+      secretHeaders: null,
     };
     await connectorType.executor({
       actionId: 'some-id',
@@ -927,6 +1036,7 @@ describe('execute()', () => {
         crt: null,
         pfx: null,
         clientSecret: null,
+        secretHeaders: null,
       },
       params: { body: 'some data' },
       configurationUtilities,
@@ -963,6 +1073,7 @@ describe('execute()', () => {
           password: null,
           crt: null,
           pfx: null,
+          secretHeaders: null,
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -1003,6 +1114,7 @@ describe('execute()', () => {
           password: null,
           crt: null,
           pfx: null,
+          secretHeaders: null,
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -1039,6 +1151,7 @@ describe('execute()', () => {
           password: null,
           crt: null,
           pfx: null,
+          secretHeaders: null,
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -1080,6 +1193,7 @@ describe('execute()', () => {
         password: null,
         crt: null,
         pfx: null,
+        secretHeaders: null,
       },
       configurationUtilities,
       logger: mockedLogger,

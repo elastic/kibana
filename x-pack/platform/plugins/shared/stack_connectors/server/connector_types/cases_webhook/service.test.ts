@@ -62,6 +62,7 @@ const secrets = {
   key: null,
   pfx: null,
   clientSecret: null,
+  secretHeaders: null,
 };
 const defaultSSLOverrides = {};
 const actionId = '1234';
@@ -80,6 +81,7 @@ const sslSecrets = {
   user: null,
   pfx: null,
   clientSecret: null,
+  secretHeaders: null,
 };
 let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -191,6 +193,59 @@ describe('Cases webhook service', () => {
       expect(axios.create).toHaveBeenCalledWith({
         headers: {
           ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('adds the secret headers correctly', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { secretKey: 'secretValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+          secretKey: 'secretValue',
+        },
+      });
+    });
+
+    it('secretHeaders should override configHeaders when keys overlap', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { Authorization: 'secretAuthorizationValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          Authorization: 'secretAuthorizationValue',
           'content-type': 'application/json',
           foo: 'bar',
         },

@@ -211,6 +211,8 @@ const PageContentComponent: React.FC<PageContentProps> = ({
     selectedFilters.length,
   ]);
 
+  console.log({ ruleTypeIds });
+
   return (
     <>
       <EuiPageTemplate.Header

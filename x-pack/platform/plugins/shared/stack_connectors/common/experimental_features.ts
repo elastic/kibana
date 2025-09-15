@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
   inferenceConnectorOff: false,
   crowdstrikeConnectorRTROn: true,
   microsoftDefenderEndpointOn: true,
-  isWebhookAuth2ClientCredentialsOn: false,
+  isWebhookAuth2ClientCredentialsOn: true,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

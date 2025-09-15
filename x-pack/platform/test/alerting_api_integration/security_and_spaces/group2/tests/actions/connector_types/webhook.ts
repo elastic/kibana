@@ -9,17 +9,16 @@ import type httpProxy from 'http-proxy';
 import type http from 'http';
 import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
+import type { OAuth2Server } from '@kbn/alerting-api-integration-helpers/get_auth_server';
+import { getOAuth2Server } from '@kbn/alerting-api-integration-helpers/get_auth_server';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import type { OAuth2Server } from '@kbn/alerting-api-integration-helpers/get_auth_server';
-import { getOAuth2Server } from '@kbn/alerting-api-integration-helpers/get_auth_server';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
@@ -358,6 +357,135 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling webhook, retry later/);
       expect(result.service_message).to.eql('[500] Internal Server Error');
+    });
+
+    it('sends both config and secret headers in the webhook request', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          connector_type_id: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+            secretHeaders: {
+              secret: 'secretValue',
+            },
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              config: 'configValue',
+            },
+          },
+        })
+        .expect(200);
+
+      // execute the connector
+      const actionId = createdAction.id;
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${actionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'success_config_secret_headers',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+    });
+
+    describe('getWebhookSecretHeadersKeyRoute', () => {
+      it('returns only secret headers keys for the webhook connector', async () => {
+        const { body: webhookConnector } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Webhook action',
+            connector_type_id: '.webhook',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+              secretHeaders: {
+                secretKey1: 'secretValue1',
+                secretKey2: 'secretValue2',
+                secretKey3: 'secretValue3',
+              },
+            },
+            config: {
+              url: webhookSimulatorURL,
+            },
+          })
+          .expect(200);
+
+        const connectorId = webhookConnector.id;
+
+        // get secret headers from getWebhookSecretHeadersKeyRoute
+        const { body: result } = await supertest
+          .get(`/internal/stack_connectors/${connectorId}/secret_headers`)
+          .set('kbn-xsrf', 'test')
+          .expect(200);
+
+        expect(result).to.eql(['secretKey1', 'secretKey2', 'secretKey3']);
+      });
+
+      it('returns empty array if no secret headers provided', async () => {
+        const { body: webhookConnector } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Webhook action',
+            connector_type_id: '.webhook',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
+            config: {
+              url: webhookSimulatorURL,
+            },
+          })
+          .expect(200);
+
+        const connectorId = webhookConnector.id;
+
+        const { body: result } = await supertest
+          .get(`/internal/stack_connectors/${connectorId}/secret_headers`)
+          .set('kbn-xsrf', 'test')
+          .expect(200);
+
+        expect(result).to.eql([]);
+      });
+
+      it('rejects non-webhook connector types', async () => {
+        const { body: emailConnector } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'An email action',
+            connector_type_id: '.email',
+            config: {
+              service: '__json',
+              from: 'bob@example.com',
+              hasAuth: true,
+            },
+            secrets: {
+              user: 'bob',
+              password: 'supersecret',
+            },
+          })
+          .expect(200);
+
+        const connectorId = emailConnector.id;
+
+        const { body: result } = await supertest
+          .get(`/internal/stack_connectors/${connectorId}/secret_headers`)
+          .set('kbn-xsrf', 'test')
+          .expect(400);
+
+        expect(result.message).to.match(/Connector must be a webhook or cases webhook/);
+      });
     });
 
     describe('OAuth2 client credentials', () => {

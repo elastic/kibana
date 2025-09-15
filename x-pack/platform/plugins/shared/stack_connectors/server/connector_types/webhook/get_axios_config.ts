@@ -8,7 +8,10 @@
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import axios from 'axios';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  combineHeadersWithBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from '@kbn/actions-plugin/server/lib';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/logging/src/logger';
 import type { SSLSettings, Services } from '@kbn/actions-plugin/server/types';
@@ -102,10 +105,11 @@ const getDefaultAxiosConfig = async ({ config, secrets }: GetDefaultAxiosConfig)
     ca,
   });
 
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
   const headersWithAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    headers: mergedHeaders,
   });
 
   return { axiosInstance, headers: headersWithAuth, sslOverrides };

@@ -26,6 +26,8 @@ export const authTypeSchema = schema.maybe(
 
 export const hasAuthSchema = schema.boolean({ defaultValue: true });
 
+const HeadersSchema = schema.recordOf(schema.string(), schema.string());
+
 export const AuthConfiguration = {
   hasAuth: hasAuthSchema,
   authType: authTypeSchema,
@@ -49,6 +51,7 @@ export const SecretConfiguration = {
   key: schema.nullable(schema.string()),
   pfx: schema.nullable(schema.string()),
   clientSecret: schema.nullable(schema.string()),
+  secretHeaders: schema.nullable(HeadersSchema),
 };
 
 export const SecretConfigurationSchemaValidation = {

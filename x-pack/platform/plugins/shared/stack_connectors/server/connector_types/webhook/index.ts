@@ -22,7 +22,6 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { SSLCertType } from '../../../common/auth/constants';
@@ -245,7 +244,6 @@ export async function executor(
   }
 
   const { axiosInstance, headers, sslOverrides } = axiosConfig;
-
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
