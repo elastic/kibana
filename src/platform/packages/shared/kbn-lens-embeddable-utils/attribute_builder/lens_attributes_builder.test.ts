@@ -36,7 +36,6 @@ const mockDataView = {
 const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
   customLabel: false,
   dataType: 'number',
-  filter: undefined,
   isBucketed: false,
   label: formula,
   operationType: 'formula',
@@ -45,11 +44,8 @@ const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
       id: 'percent',
     },
     formula,
-    isFormulaBroken: true,
   } as any,
-  reducedTimeRange: undefined,
   references: [],
-  timeScale: undefined,
 });
 
 const getHistogramLayer = (interval: string, includeEmptyRows?: boolean) => ({
