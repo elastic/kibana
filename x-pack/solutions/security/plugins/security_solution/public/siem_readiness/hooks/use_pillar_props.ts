@@ -16,17 +16,17 @@ export const usePillarProps = () => {
     visibility: {
       value: 'visibility',
       displayName: 'Visibility',
-      color: '#61A2FF',
+      color: euiTheme.colors.vis.euiColorVisBehindText2,
     },
     detection: {
       value: 'detection',
       displayName: 'Detection',
-      color: '#FF61A2',
+      color: euiTheme.colors.vis.euiColorVisBehindText4,
     },
     response: {
       value: 'response',
       displayName: 'Response',
-      color: '#61FFB8',
+      color: euiTheme.colors.vis.euiColorVisBehindText0,
     },
   };
 
