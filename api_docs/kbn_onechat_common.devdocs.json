@@ -4209,7 +4209,7 @@
           "\nID of the onechat default conversational agent"
         ],
         "signature": [
-          "\"default\""
+          "\"elastic-ai-agent\""
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
