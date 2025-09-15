@@ -15,6 +15,7 @@ export interface PackagePolicyPackage {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   requires_root?: boolean;
   type?: string;
+  fips_compatible?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {

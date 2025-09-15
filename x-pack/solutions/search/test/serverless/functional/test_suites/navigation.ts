@@ -26,8 +26,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('navigation', function () {
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
-      await svlCommonPage.loginWithRole('developer');
-      await svlSearchNavigation.navigateToLandingPage();
+      await svlCommonPage.loginWithRole('admin');
+      await svlSearchNavigation.navigateToElasticsearchHome();
     });
     after(async () => {
       await esArchiver.unload(archiveEmptyIndex);
@@ -39,106 +39,165 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
+      const isV2 = await solutionNavigation.sidenav.isV2();
 
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       // Should default to Homepage
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Home' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists(
+        isV2 ? { text: 'Elasticsearch' } : { text: 'Home' }
+      );
       await testSubjects.existOrFail(`search-homepage`);
 
       // Check Side Nav Links
       const sideNavCases: Array<{
-        deepLinkId: AppDeepLinkId;
+        link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         breadcrumbs: string[];
         pageTestSubject: string;
-      }> = [
-        {
-          deepLinkId: 'searchHomepage',
-          breadcrumbs: ['Home'],
-          pageTestSubject: 'search-homepage',
-        },
-        {
-          deepLinkId: 'discover',
-          breadcrumbs: ['Discover'],
-          pageTestSubject: 'queryInput',
-        },
-        {
-          deepLinkId: 'dashboards',
-          breadcrumbs: ['Dashboards'],
-          pageTestSubject: 'dashboardLandingPage',
-        },
-        {
-          deepLinkId: 'elasticsearchIndexManagement',
-          breadcrumbs: ['Build', 'Index Management', 'Indices'],
-          pageTestSubject: 'elasticsearchIndexManagement',
-        },
-        {
-          deepLinkId: 'searchPlayground',
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsListPage',
-        },
-        {
-          deepLinkId: 'searchSynonyms',
-          breadcrumbs: ['Relevance', 'Synonyms'],
-          pageTestSubject: 'searchSynonymsOverviewPage',
-        },
-        {
-          deepLinkId: 'searchQueryRules',
-          breadcrumbs: ['Relevance', 'Query rules'],
-          pageTestSubject: 'queryRulesBasePage',
-        },
-        {
-          deepLinkId: 'searchInferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
-        },
-        {
-          deepLinkId: 'dev_tools:console',
-          breadcrumbs: ['Developer Tools'],
-          pageTestSubject: 'console',
-        },
-      ];
+      }> = isV2
+        ? [
+            {
+              link: { deepLinkId: 'searchHomepage' },
+              breadcrumbs: ['Elasticsearch'],
+              pageTestSubject: 'search-homepage',
+            },
+            {
+              link: { navId: 'agent_builder' },
+              breadcrumbs: ['Agent Chat'],
+              pageTestSubject: 'onechatPageConversations',
+            },
+            {
+              link: { deepLinkId: 'agent_builder:tools' },
+              breadcrumbs: ['Tools'],
+              pageTestSubject: 'kbnAppWrapper visibleChrome',
+            },
+            {
+              link: { deepLinkId: 'agent_builder:agents' },
+              breadcrumbs: ['Agents'],
+              pageTestSubject: 'kbnAppWrapper visibleChrome',
+            },
+            {
+              link: { deepLinkId: 'discover' },
+              breadcrumbs: ['Discover'],
+              pageTestSubject: 'queryInput',
+            },
+            {
+              link: { deepLinkId: 'discover' },
+              breadcrumbs: ['Discover'],
+              pageTestSubject: 'queryInput',
+            },
+            {
+              link: { deepLinkId: 'dashboards' },
+              breadcrumbs: ['Dashboards'],
+              pageTestSubject: 'dashboardLandingPage',
+            },
+            {
+              link: { deepLinkId: 'searchPlayground' },
+              breadcrumbs: ['Build', 'Playground'],
+              pageTestSubject: 'playgroundsListPage',
+            },
+            {
+              link: { deepLinkId: 'searchSynonyms' },
+              breadcrumbs: ['Relevance', 'Synonyms'],
+              pageTestSubject: 'searchSynonymsOverviewPage',
+            },
+            {
+              link: { deepLinkId: 'searchQueryRules' },
+              breadcrumbs: ['Relevance', 'Query rules'],
+              pageTestSubject: 'queryRulesBasePage',
+            },
+            {
+              link: { deepLinkId: 'dev_tools:console' },
+              breadcrumbs: ['Developer Tools'],
+              pageTestSubject: 'console',
+            },
+          ]
+        : [
+            {
+              link: { deepLinkId: 'searchHomepage' },
+              breadcrumbs: ['Home'],
+              pageTestSubject: 'search-homepage',
+            },
+            {
+              link: { deepLinkId: 'discover' },
+              breadcrumbs: ['Discover'],
+              pageTestSubject: 'queryInput',
+            },
+            {
+              link: { deepLinkId: 'dashboards' },
+              breadcrumbs: ['Dashboards'],
+              pageTestSubject: 'dashboardLandingPage',
+            },
+            {
+              link: { deepLinkId: 'elasticsearchIndexManagement' },
+              breadcrumbs: ['Build', 'Index Management', 'Indices'],
+              pageTestSubject: 'elasticsearchIndexManagement',
+            },
+            {
+              link: { deepLinkId: 'searchPlayground' },
+              breadcrumbs: ['Build', 'Playground'],
+              pageTestSubject: 'playgroundsListPage',
+            },
+            {
+              link: { deepLinkId: 'searchSynonyms' },
+              breadcrumbs: ['Relevance', 'Synonyms'],
+              pageTestSubject: 'searchSynonymsOverviewPage',
+            },
+            {
+              link: { deepLinkId: 'searchQueryRules' },
+              breadcrumbs: ['Relevance', 'Query rules'],
+              pageTestSubject: 'queryRulesBasePage',
+            },
+            {
+              link: { deepLinkId: 'searchInferenceEndpoints' },
+              breadcrumbs: ['Relevance', 'Inference endpoints'],
+              pageTestSubject: 'inferenceEndpointsPage',
+            },
+            {
+              link: { deepLinkId: 'dev_tools:console' },
+              breadcrumbs: ['Developer Tools'],
+              pageTestSubject: 'console',
+            },
+          ];
 
       for (const testCase of sideNavCases) {
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: testCase.deepLinkId,
-        });
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.clickLink(testCase.link);
+        await solutionNavigation.sidenav.expectLinkActive(testCase.link);
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
         await testSubjects.existOrFail(testCase.pageTestSubject);
       }
 
-      // Open Project Settings
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      // check Project Settings
-      // > Trained Models
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:trained_models',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:trained_models',
-      });
-      // > Management
-      await solutionNavigation.sidenav.clickLink({ navId: 'management' });
-      await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
-      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+      if (!isV2) {
+        // Open Project Settings
+        await solutionNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+        // check Project Settings
+        // > Trained Models
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'management:trained_models',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'management:trained_models',
+        });
+        // > Management
+        await solutionNavigation.sidenav.clickLink({ navId: 'management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+        await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
-      // navigate back to serverless search overview
-      await svlCommonNavigation.clickLogo();
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'searchHomepage',
-      });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
-      await testSubjects.existOrFail(`search-homepage`);
+        // navigate back to serverless search overview
+        await svlCommonNavigation.clickLogo();
+        await svlCommonNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'searchHomepage',
+        });
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
+        await testSubjects.existOrFail(`search-homepage`);
+      }
 
       await expectNoPageReload();
     });
@@ -153,25 +212,31 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'Build',
-        'Index Management',
-        'Indices',
-      ]);
+      const isV2 = await solutionNavigation.sidenav.isV2();
+      if (!isV2) {
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+          'Build',
+          'Index Management',
+          'Indices',
+        ]);
+      }
     });
 
     it('navigate management', async () => {
-      await svlCommonNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
-      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+      const isV2 = await solutionNavigation.sidenav.isV2();
+      if (!isV2) {
+        await svlCommonNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+        await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+        await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
-      await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
+        await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+        await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
+      }
     });
 
     it('navigate using search', async () => {
@@ -207,31 +272,40 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // Verify all expected top-level links exist
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
-
-      await solutionNavigation.sidenav.expectLinkMissing({ text: 'Billing and subscription' }); // Billing is not shown for developer role
 
       if (isV1) {
+        // All these items have been moved to sub menus in the footer
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
         // v2 ignores sections
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       }
 
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      await solutionNavigation.sidenav.expectSectionOpen(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
+      if (isV2) {
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Admin and Settings' });
+      }
+
       if (isV1) {
+        await solutionNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+        await solutionNavigation.sidenav.expectSectionOpen(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+
         await solutionNavigation.sidenav.expectOnlyDefinedLinks([
           'search_project_nav',
           'home',
@@ -250,30 +324,27 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'management:trained_models',
           'management',
           'cloudLinkDeployment',
-          // 'cloudLinkBilling', // Billing is not shown for developer role
         ]);
       } else {
         // in v2 we don't have "sections" and order is different because items under "more" are in the end
         await solutionNavigation.sidenav.expectOnlyDefinedLinks(
           [
             // home:
-            'home',
-
+            'searchHomepage',
             // main;
+            'agent_builder',
             'discover',
             'dashboards',
-            'elasticsearchIndexManagement',
             'searchPlayground',
             'searchSynonyms',
             'searchQueryRules',
-            'searchInferenceEndpoints',
-
+            'machine_learning',
+            'maps',
+            'visualize',
             // footer:
             'dev_tools',
-            'management:trained_models',
-            'management',
-            'cloudLinkDeployment',
-            // 'cloudLinkBilling', // Billing is not shown for developer role
+            'ingest_and_data',
+            'admin_and_settings',
           ],
           { checkOrder: false }
         );
