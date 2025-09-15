@@ -23,7 +23,7 @@ const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.
 const logsDescription = i18n.translate(
   'unifiedDocViewer.observability.traces.section.logs.description',
   {
-    defaultMessage: 'Correlated logs that occurred during the span',
+    defaultMessage: 'Correlated logs that occurred during the span.',
   }
 );
 
@@ -77,11 +77,11 @@ export function TraceContextLogEvents({
                 icon: 'discoverApp',
                 label: i18n.translate(
                   'unifiedDocViewer.observability.traces.docViewerOverview.logs.openInDiscover',
-                  { defaultMessage: 'Open in discover' }
+                  { defaultMessage: 'Open in Discover' }
                 ),
                 ariaLabel: i18n.translate(
                   'unifiedDocViewer.observability.traces.docViewerOverview.logs.openInDiscover',
-                  { defaultMessage: 'Open in discover link' }
+                  { defaultMessage: 'Open in Dscover link' }
                 ),
                 href: openInDiscoverLink,
                 dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
