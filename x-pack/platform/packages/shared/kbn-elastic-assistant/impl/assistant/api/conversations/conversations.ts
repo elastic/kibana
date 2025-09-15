@@ -49,12 +49,22 @@ export const getConversationById = async ({
 
     return response as Conversation;
   } catch (error) {
-    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-      title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
-        defaultMessage: 'Error fetching conversation by id {id}',
-        values: { id },
-      }),
-    });
+    // Check if this is a 403 Forbidden error
+    if (error.response?.status === 403) {
+      toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+        title: i18n.translate('xpack.elasticAssistant.conversations.accessDeniedError', {
+          defaultMessage: 'Access denied to conversation',
+        }),
+      });
+    } else {
+      // For other errors (like 404), show the generic error message
+      toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+        title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
+          defaultMessage: 'Error fetching conversation by id {id}',
+          values: { id },
+        }),
+      });
+    }
     throw error;
   }
 };
