@@ -31,7 +31,6 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -170,7 +169,6 @@ export const createTabsStorageManager = ({
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
       globalState: tabState.globalState,
-      controlGroupState: tabState.controlGroupState,
     };
   };
 
@@ -202,16 +200,12 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
-    const controlGroupState = getDefinedStateOnly(
-      tabStateInStorage.controlGroupState || defaultTabState.controlGroupState
-    );
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
       initialAppState: appState,
       globalState: globalState || {},
-      controlGroupState,
     };
   };
 
