@@ -67,9 +67,6 @@ export const defaultConfig: ScoutServerConfig = {
       `cluster.service.slow_task_logging_threshold=15s`,
       `cluster.service.slow_task_thread_dump_timeout=5s`,
       `serverless.search.enable_replicas_for_instant_failover=true`,
-      ...(dockerRegistryPort
-        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
-        : []),
     ],
     ssl: true, // SSL is required for SAML realm
   },
@@ -153,6 +150,9 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      ...(dockerRegistryPort
+        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+        : []),
     ],
   },
 };
