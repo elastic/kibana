@@ -13,6 +13,7 @@ import type {
   OTelCollectorPipelineID,
 } from '../../../common/types';
 import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
+import { FleetError } from '../../errors';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
