@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
@@ -262,6 +262,9 @@ export const getEsConversationSchemaMock = (
     default_system_prompt_id: 'prompt-1',
     model: 'test',
     provider: 'Azure OpenAI',
+  },
+  summary: {
+    content: 'test',
   },
   category: 'assistant',
   users: [
