@@ -31,12 +31,12 @@ export type {
   DashboardFilter,
   DashboardQuery,
 } from './types';
+export { serviceDefinition } from './cm_services';
 export {
-  serviceDefinition,
   dashboardAttributesSchema,
   dashboardAPIGetResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,
-} from './cm_services';
+} from './schema';
 export { savedObjectToItem } from './transform_utils';
 export { transformDashboardIn } from './transforms';

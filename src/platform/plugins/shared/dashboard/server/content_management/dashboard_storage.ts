@@ -286,7 +286,6 @@ export class DashboardStorage {
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-
     const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {

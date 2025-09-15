@@ -23,7 +23,7 @@ import {
   dashboardAPICreateResultSchema,
   dashboardListResultAPISchema,
   dashboardUpdateResultSchema,
-} from '../content_management/v1/cm_services';
+} from '../content_management/v1/schema';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
