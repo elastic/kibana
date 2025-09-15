@@ -34,7 +34,7 @@ export const registerApp = ({
         id: 'conversations',
         path: '/conversations',
         title: i18n.translate('xpack.onechat.chat.conversationsTitle', {
-          defaultMessage: 'Conversations',
+          defaultMessage: 'Agent Chat',
         }),
       },
       {
