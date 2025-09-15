@@ -10,7 +10,7 @@ import { dsl as genericDsl } from '../../common/data/dsl_queries';
 
 export const dsl = {
   matchTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'original_dashboard.title': title } };
+    return { match: { 'elastic_dashboard.title': title } };
   },
 
   isInstalled(): QueryDslQueryContainer {
@@ -20,11 +20,11 @@ export const dsl = {
     return { bool: { must_not: dsl.isInstalled() } };
   },
 
-  isInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullyTranslated(), dsl.isNotInstalled()];
+  isInstallable(): QueryDslQueryContainer {
+    return { bool: { must: [genericDsl.isFullOrPartiallyTranslated(), dsl.isNotInstalled()] } };
   },
 
-  isNotInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
+  isNotInstallable(): QueryDslQueryContainer {
+    return { bool: { should: [genericDsl.isNotFullOrPartiallyTranslated(), dsl.isInstalled()] } };
   },
 };

@@ -21,6 +21,13 @@ export const COLUMN_STATUS = i18n.translate(
   }
 );
 
+export const COLUMN_TAGS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.tagsLabel',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
 export const COLUMN_UPDATED = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.tableColumn.updatedLabel',
   {

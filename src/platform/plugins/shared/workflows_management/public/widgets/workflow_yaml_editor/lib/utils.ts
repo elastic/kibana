@@ -45,39 +45,13 @@ export function navigateToErrorPosition(
   editor.revealLineInCenter(lineNumber);
 }
 
-export function getHighlightStepDecorations(
-  model: monaco.editor.ITextModel,
-  range: monaco.IRange
-): monaco.editor.IModelDeltaDecoration[] {
-  const rangeBefore = new monaco.Range(0, 0, range.startLineNumber, range.startColumn);
-  const rangeAfter = new monaco.Range(
-    range.endLineNumber,
-    range.endColumn,
-    model.getLineCount(),
-    0
-  );
-  return [
-    {
-      range: rangeBefore,
-      options: {
-        inlineClassName: 'dimmed',
-        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      },
-    },
-    {
-      range: rangeAfter,
-      options: {
-        inlineClassName: 'dimmed',
-        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      },
-    },
-  ];
-}
+// REMOVED: getHighlightStepDecorations - no longer needed
+// All step highlighting is now handled by UnifiedActionsProvider
 
 export function getMonacoRangeFromYamlNode(
   model: monaco.editor.ITextModel,
   node: Node
-): monaco.IRange | null {
+): monaco.Range | null {
   const [startOffset, _, endOffset] = node.range ?? [];
   if (!startOffset || !endOffset) {
     return null;

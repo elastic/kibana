@@ -19,6 +19,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { waitFor } from '@testing-library/dom';
 import { act } from '@testing-library/react';
+import type { SerializedStyles } from '@emotion/react';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
 jest.mock('@kbn/monaco', () => ({
@@ -35,6 +36,16 @@ jest.mock('@kbn/monaco', () => ({
     validate: async () => mockValidate(),
   },
 }));
+
+jest.mock('./custom_commands', () => {
+  return {
+    useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
+    useLookupIndexCommand: jest.fn().mockReturnValue({
+      lookupIndexBadgeStyle: {} as SerializedStyles,
+      addLookupIndicesDecorator: jest.fn(),
+    }),
+  };
+});
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};

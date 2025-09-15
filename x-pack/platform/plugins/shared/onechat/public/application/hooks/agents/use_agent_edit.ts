@@ -7,12 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  ToolType,
-  type AgentDefinition,
-  type ToolSelection,
-  defaultAgentToolIds,
-} from '@kbn/onechat-common';
+import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/onechat-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
@@ -25,7 +20,6 @@ export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
-    type: ToolType.builtin,
     tool_ids: [...defaultAgentToolIds],
   },
 ];

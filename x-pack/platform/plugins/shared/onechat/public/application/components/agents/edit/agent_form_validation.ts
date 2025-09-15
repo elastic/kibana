@@ -60,6 +60,10 @@ export const agentFormSchema = z.object({
     .optional(),
   configuration: z.object({
     instructions: z.string().optional(),
-    tools: z.array(z.any()),
+    tools: z.array(
+      z.object({
+        tool_ids: z.array(z.string()),
+      })
+    ),
   }),
 });

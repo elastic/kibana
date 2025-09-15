@@ -133,6 +133,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       <SecuritySolutionPageWrapper>
         <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
           <HeaderButtons
+            migrationType="rule"
             migrationsStats={ruleMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}

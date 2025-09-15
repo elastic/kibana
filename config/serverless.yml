@@ -16,8 +16,6 @@ xpack.fleet.internal.registry.spec.max: '3.4'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
-  onechat:
-    hidden: true
   dashboard:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.

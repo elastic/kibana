@@ -530,12 +530,12 @@
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.SecondaryMenuSection.label",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "label",
             "description": [],
             "signature": [
-              "string | null"
+              "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,

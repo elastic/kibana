@@ -4859,12 +4859,44 @@
               "MetricField",
               "[]; total: number; page: number; }>; postData: (params: { esql: string; filters: { value: string; field: string; }[]; from: string; to: string; }, signal?: AbortSignal | null | undefined) => Promise<{ data: { key: Record<string, string>; data: { x: number; y: number; }[]; }[] | { x: number; y: ",
               "FieldValue",
-              "; }[]; esql: string; hasDimensions: boolean; }>; } | undefined"
+              "; }[]; esql: string; hasDimensions: boolean; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.MetricsContextService.isMetricsIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "isMetricsIndexPattern",
+            "description": [],
+            "signature": [
+              "(indexPattern: string) => boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.MetricsContextService.isMetricsIndexPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

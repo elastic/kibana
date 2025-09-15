@@ -164,6 +164,8 @@ export function getExpressionType(
 
 // #region signature matching
 
+// THESE types are types that now do not need implicit casting to string
+// ToDo: Check where it is being used and fix the usage to remove the need for this
 export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
   'date',
   'date_nanos',

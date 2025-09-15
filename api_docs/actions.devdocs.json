@@ -1955,7 +1955,7 @@
               "ConnectorUsageCollector",
               ") => Promise<",
               "AxiosResponse",
-              "<R, any>>"
+              "<R, any, {}>>"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,

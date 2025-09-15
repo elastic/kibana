@@ -20,6 +20,7 @@
       "inference",
       "kibanaUtils",
       "lens",
+      "management",
       "share"
     ],
     "requiredBundles": [

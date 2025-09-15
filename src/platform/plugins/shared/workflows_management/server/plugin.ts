@@ -97,7 +97,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           };
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflowToRun, spaceId, inputs);
+          return await this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
         };
       };
 
@@ -118,7 +118,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           description: 'Executes workflows on a scheduled basis',
           timeout: '5m',
           maxAttempts: 3,
-          createTaskRunner: ({ taskInstance }) => {
+          createTaskRunner: ({ taskInstance, fakeRequest }) => {
             // Capture the plugin instance in a closure
             const plugin = this;
             // Use a factory pattern to get dependencies when the task runs
@@ -133,7 +133,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
                   workflowsService: plugin.workflowsService!,
                   workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
                   actionsClient: plugin.unsecureActionsClient!,
-                })({ taskInstance });
+                })({ taskInstance, fakeRequest });
 
                 return taskRunner.run();
               },
@@ -203,7 +203,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
-    this.logger.debug('Workflows Management: Started');
+    this.logger.info('Workflows Management: Started');
 
     return {};
   }

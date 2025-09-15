@@ -65,16 +65,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             },
             {
               link: { navId: 'agent_builder' },
-              breadcrumbs: ['Conversations'],
+              breadcrumbs: ['Agent Chat'],
               pageTestSubject: 'onechatPageConversations',
             },
             {
-              link: { deepLinkId: 'onechat:tools' },
+              link: { deepLinkId: 'agent_builder:tools' },
               breadcrumbs: ['Tools'],
               pageTestSubject: 'kbnAppWrapper visibleChrome',
             },
             {
-              link: { deepLinkId: 'onechat:agents' },
+              link: { deepLinkId: 'agent_builder:agents' },
               breadcrumbs: ['Agents'],
               pageTestSubject: 'kbnAppWrapper visibleChrome',
             },
@@ -283,7 +283,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
         // v2 ignores sections
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
@@ -325,7 +324,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'management:trained_models',
           'management',
           'cloudLinkDeployment',
-          'cloudLinkBilling',
         ]);
       } else {
         // in v2 we don't have "sections" and order is different because items under "more" are in the end

@@ -24,6 +24,16 @@ export const dsl = {
   isNotPartiallyTranslated(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isPartiallyTranslated() } };
   },
+  isFullOrPartiallyTranslated(): QueryDslQueryContainer {
+    return {
+      terms: {
+        translation_result: [MigrationTranslationResult.FULL, MigrationTranslationResult.PARTIAL],
+      },
+    };
+  },
+  isNotFullOrPartiallyTranslated(): QueryDslQueryContainer {
+    return { bool: { must_not: dsl.isFullOrPartiallyTranslated() } };
+  },
   isUntranslatable(): QueryDslQueryContainer {
     return { term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE } };
   },

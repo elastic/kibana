@@ -281,6 +281,7 @@ describe('FORK Autocomplete', () => {
 
         test('lookup join after command name', async () => {
           await forkExpectSuggestions('FROM a | FORK (LOOKUP JOIN ', [
+            '', // This is the default text that the "Create lookup index" suggestions has if no index name provided.
             'join_index ',
             'join_index_with_alias ',
             'lookup_index ',

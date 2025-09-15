@@ -53,16 +53,5 @@ describe('FUSE', () => {
 
       expect(errors.length > 0).toBe(true);
     });
-
-    it('when FUSE is invoked with arguments', () => {
-      const text = `FROM search-movies METADATA _score, _id, _index
-                    | FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
-                              ( WHERE title:"Shakespeare" | SORT _score)
-                    | FUSE text`;
-
-      const { errors } = parse(text);
-
-      expect(errors.length > 0).toBe(true);
-    });
   });
 });
