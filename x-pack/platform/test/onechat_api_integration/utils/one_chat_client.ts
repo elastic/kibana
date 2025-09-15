@@ -15,13 +15,16 @@ import type { Conversation } from '@kbn/onechat-common';
 export function createOneChatApiClient(supertest: Agent) {
   return {
     async converse(payload: ChatRequestBodyPayload): Promise<ChatResponse> {
-      const res = await supertest.post('/api/chat/converse').set('kbn-xsrf', 'true').send(payload);
+      const res = await supertest
+        .post('/api/agent_builder/converse')
+        .set('kbn-xsrf', 'true')
+        .send(payload);
       return res.body;
     },
 
     async getConversation(conversationId: string): Promise<Conversation> {
       const res = await supertest
-        .get(`/api/chat/conversations/${conversationId}`)
+        .get(`/api/agent_builder/conversations/${conversationId}`)
         .set('kbn-xsrf', 'true');
       return res.body;
     },

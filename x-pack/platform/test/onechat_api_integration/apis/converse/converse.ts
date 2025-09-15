@@ -23,16 +23,16 @@ export default function ({ getService }: OneChatFtrProviderContext) {
   const log = getService('log');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe('POST /api/chat/converse', function () {
+  describe('POST /api/agent_builder/converse', function () {
     let llmProxy: LlmProxy;
     let connectorId: string;
 
-    beforeEach(async () => {
+    before(async () => {
       llmProxy = await createLlmProxy(log);
       connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
     });
 
-    afterEach(async () => {
+    after(async () => {
       llmProxy.close();
       await deleteActionConnector(getService, { actionId: connectorId });
     });
@@ -42,7 +42,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
       let body: ChatResponse;
 
-      beforeEach(async () => {
+      before(async () => {
         void llmProxy.interceptors.toolChoice({
           name: 'set_title',
           response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
