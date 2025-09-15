@@ -6,6 +6,7 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
 
 export class ChatDataRegistryPlugin
@@ -16,6 +17,7 @@ export class ChatDataRegistryPlugin
       id: 'chatDataRegistry',
       title: 'Chat Data Registry',
       appRoute: '/app/chat-data-registry',
+      category: DEFAULT_APP_CATEGORIES.chat,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         return renderApp(params);
