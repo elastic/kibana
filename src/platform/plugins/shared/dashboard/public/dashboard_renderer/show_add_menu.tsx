@@ -171,7 +171,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         {
           name: getAddESQLControlButtonTitle(),
           icon: 'empty',
-          'data-test-subj': 'controls-create-esql-button',
+          'data-test-subj': 'esql-control-create-button',
           onClick: async () => {
             try {
               const variablesInParent = apiPublishesESQLVariables(dashboardApi)
