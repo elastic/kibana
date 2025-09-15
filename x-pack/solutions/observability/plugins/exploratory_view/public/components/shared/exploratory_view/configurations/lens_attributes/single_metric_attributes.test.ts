@@ -76,9 +76,6 @@ describe('SingleMetricAttributes', () => {
                     label: 'Page load time',
                     operationType: 'median',
                     sourceField: 'transaction.duration.us',
-                    params: {
-                      emptyAsNull: true,
-                    },
                   },
                 },
                 incompleteColumns: {},

@@ -10,7 +10,7 @@ import type {
   CountIndexPatternColumn,
   MetricState,
   OperationType,
-  FormBasedLayer,
+  PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -51,7 +51,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.visualization = this.getMetricState();
   }
 
-  getSingleMetricLayer(): FormBasedLayer | undefined {
+  getSingleMetricLayer(): PersistedIndexPatternLayer | undefined {
     const { seriesConfig, selectedMetricField, operationType, dataView, name } =
       this.layerConfigs[0];
 
@@ -80,7 +80,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
             format,
             filter: columnFilter,
           }),
-          indexPatternId: dataView.id!,
         };
       }
 
@@ -107,7 +106,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
             columnLabel,
             columnFilter,
           }),
-          indexPatternId: dataView.id!,
         };
       }
 
@@ -135,8 +133,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         },
         columnOrder: [this.columnId],
         incompleteColumns: {},
-        indexPatternId: dataView.id!,
-      } satisfies FormBasedLayer;
+      } satisfies PersistedIndexPatternLayer;
     }
   }
 

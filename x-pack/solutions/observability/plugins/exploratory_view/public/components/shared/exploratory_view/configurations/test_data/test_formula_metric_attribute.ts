@@ -54,7 +54,6 @@ export const sampleMetricFormulaAttribute = {
                 references: [],
               },
             },
-            indexPatternId: 'apm-*',
           },
         },
       },
