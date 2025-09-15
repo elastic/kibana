@@ -7,7 +7,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -56,5 +56,9 @@ function DiscoverFlyoutStreamFieldContent({
 
   if (!value || error) return <span>-</span>;
 
-  return <EuiLink href={locator.getRedirectUrl({ name: value })}>{value}</EuiLink>;
+  return (
+    <EuiLink href={locator.getRedirectUrl({ name: value })}>
+      <EuiText size="xs">{value}</EuiText>
+    </EuiLink>
+  );
 }
