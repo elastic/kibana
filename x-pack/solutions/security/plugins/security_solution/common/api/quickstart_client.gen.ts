@@ -399,6 +399,8 @@ import type {
   CreateDashboardMigrationDashboardsRequestBodyInput,
   DeleteDashboardMigrationRequestParamsInput,
   GetAllDashboardMigrationsStatsResponse,
+  GetAllTranslationStatsDashboardMigrationRequestParamsInput,
+  GetAllTranslationStatsDashboardMigrationResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
   GetDashboardMigrationDashboardsRequestQueryInput,
@@ -1490,6 +1492,28 @@ finalize it.
     return this.kbnClient
       .request<GetAllStatsRuleMigrationResponse>({
         path: '/internal/siem_migrations/rules/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+   */
+  async getAllTranslationStatsDashboardMigration(
+    props: GetAllTranslationStatsDashboardMigrationProps
+  ) {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetAllTranslationStatsDashboardMigration`
+    );
+    return this.kbnClient
+      .request<GetAllTranslationStatsDashboardMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/translation_stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -3203,6 +3227,9 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
+}
+export interface GetAllTranslationStatsDashboardMigrationProps {
+  params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;

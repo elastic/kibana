@@ -22,19 +22,8 @@ import type { ICommandCallbacks, ICommandContext } from '../../../commands_regis
 import { Location, getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
-import type {
-  FunctionDefinition,
-  FunctionParameterType,
-  Signature,
-  SupportedDataType,
-} from '../../types';
-import {
-  getExpressionType,
-  getParamAtPosition,
-  getSignaturesWithMatchingArity,
-  matchesArity,
-} from '../expressions';
-import { isArrayType } from '../operators';
+import type { FunctionDefinition, SupportedDataType } from '../../types';
+import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
 
 export function validateFunction({
@@ -131,15 +120,12 @@ class FunctionValidator {
       return;
     }
 
-    // Begin signature validation
-    const A = getSignaturesWithMatchingArity(this.definition, this.fn);
-
-    if (!A.length) {
-      this.report(errors.noMatchingCallSignature(this.fn, this.definition, this.argTypes));
-      return;
-    }
-
-    const S = getSignaturesMatchingTypes(A, this.argTypes, this.argLiteralsMask);
+    const S = getMatchingSignatures(
+      this.definition.signatures,
+      this.argTypes,
+      this.argLiteralsMask,
+      true
+    );
 
     if (!S.length) {
       this.report(errors.noMatchingCallSignature(this.fn, this.definition, this.argTypes));
@@ -252,89 +238,6 @@ class FunctionValidator {
   }
 }
 
-export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
-  'date',
-  'date_nanos',
-  'date_period',
-  'time_duration',
-  'version',
-  'ip',
-  'boolean',
-];
-
-/**
- * Returns a signature matching the given types if it exists
- * @param definition
- * @param types
- */
-function getSignaturesMatchingTypes(
-  signatures: Signature[],
-  givenTypes: Array<SupportedDataType | 'unknown'>,
-  // a boolean array indicating which args are literals
-  literalMask: boolean[]
-): Signature[] {
-  return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
-      return false;
-    }
-
-    return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
-      return argMatchesParamType(givenType, expectedType, literalMask[index]);
-    });
-  });
-}
-
-/**
- * Checks if the given type matches the expected parameter type
- *
- * @param givenType
- * @param expectedType
- * @param givenIsLiteral
- */
-function argMatchesParamType(
-  givenType: SupportedDataType | 'unknown',
-  expectedType: FunctionParameterType,
-  givenIsLiteral: boolean
-): boolean {
-  if (givenType === expectedType) return true;
-
-  if (expectedType === 'any') return true;
-
-  if (givenType === 'param') return true;
-
-  if (givenType === 'unknown') return true;
-
-  // all ES|QL functions accept null, but this is not reflected
-  // in our function definitions so we let it through here
-  if (givenType === 'null') return true;
-
-  // all functions accept keywords for text parameters
-  if (bothStringTypes(givenType, expectedType)) return true;
-
-  if (
-    givenIsLiteral &&
-    givenType === 'keyword' &&
-    PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
-  )
-    return true;
-
-  return false;
-}
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
 /**
  * Identifies the location ID of the function's position
  */
@@ -384,11 +287,4 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
     return removeInlineCasts(arg.value);
   }
   return arg;
-}
-
-/**
- * Given an array type for example `string[]` it will return `string`
- */
-function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }

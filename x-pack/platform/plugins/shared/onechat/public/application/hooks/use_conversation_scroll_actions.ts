@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const DISTANCE_FROM_BOTTOM_THRESHOLD = 50; // pixels
 const SCROLL_POSITION_CHECK_INTERVAL = 1500; // milliseconds
+const DEBOUNCE_DELAY = 20; // milliseconds
 
 const scrollToMostRecentRound = ({
   position,
@@ -45,6 +46,30 @@ const scrollToMostRecentRoundBottom = () => {
   scrollToMostRecentRound({ position: 'end' });
 };
 
+const checkScrollPosition = (
+  scrollContainer: HTMLDivElement,
+  setShowScrollButton: (show: boolean) => void
+) => {
+  const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+  const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+  setShowScrollButton(distanceFromBottom > DISTANCE_FROM_BOTTOM_THRESHOLD);
+};
+
+const createDebouncedCheckScrollPosition = (
+  scrollContainer: HTMLDivElement,
+  setShowScrollButton: (show: boolean) => void
+) => {
+  let debounceTimeout: NodeJS.Timeout;
+
+  return () => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(
+      () => checkScrollPosition(scrollContainer, setShowScrollButton),
+      DEBOUNCE_DELAY
+    );
+  };
+};
+
 export const useConversationScrollActions = ({
   isResponseLoading,
   conversationId,
@@ -59,23 +84,24 @@ export const useConversationScrollActions = ({
   useEffect(() => {
     if (!scrollContainer) return;
 
-    const checkScrollPosition = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+    const debouncedCheckScrollPosition = createDebouncedCheckScrollPosition(
+      scrollContainer,
+      setShowScrollButton
+    );
 
-      setShowScrollButton(distanceFromBottom > DISTANCE_FROM_BOTTOM_THRESHOLD);
-    };
-
-    scrollContainer.addEventListener('scroll', checkScrollPosition);
+    scrollContainer.addEventListener('scroll', debouncedCheckScrollPosition);
 
     // Set up interval for streaming check (only when response is loading)
     let interval: NodeJS.Timeout | undefined;
     if (isResponseLoading) {
-      interval = setInterval(checkScrollPosition, SCROLL_POSITION_CHECK_INTERVAL);
+      interval = setInterval(
+        () => checkScrollPosition(scrollContainer, setShowScrollButton),
+        SCROLL_POSITION_CHECK_INTERVAL
+      );
     }
 
     return () => {
-      scrollContainer.removeEventListener('scroll', checkScrollPosition);
+      scrollContainer.removeEventListener('scroll', debouncedCheckScrollPosition);
       if (interval) clearInterval(interval);
     };
   }, [isResponseLoading, conversationId, scrollContainer]);
