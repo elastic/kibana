@@ -190,7 +190,8 @@ export const FilesPreview: FC = () => {
       {filePreviewItems.map((filePreviewItem, i) => {
         const tabs: EuiTabbedContentTab[] = [];
 
-        if (filePreviewItem.filePreview.sampleDocs || filePreviewItem.filePreview.errors) {
+        if (filePreviewItem.filePreview.sampleDocs?.length) {
+          // Hide the File Preview tab if ingest pipeline didn't produce any results
           tabs.push({
             id: 'previewDoc',
             name: (
