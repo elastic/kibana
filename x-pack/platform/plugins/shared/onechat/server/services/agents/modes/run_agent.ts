@@ -26,7 +26,7 @@ export interface RunAgentParams {
    * Selection of tools which will be exposed to the agent.
    * Defaults to exposing all available tools.
    */
-  toolSelection?: ToolSelection;
+  toolSelection?: ToolSelection[];
   /**
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */

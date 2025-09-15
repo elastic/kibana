@@ -17,8 +17,8 @@ import { ToolsFlatView } from './tools_flat_view';
 interface ToolsSelectionProps {
   tools: ToolDefinition[];
   toolsLoading: boolean;
-  selectedTools: ToolSelection;
-  onToolsChange: (tools: ToolSelection) => void;
+  selectedTools: ToolSelection[];
+  onToolsChange: (tools: ToolSelection[]) => void;
   disabled?: boolean;
   showActiveOnly?: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
@@ -41,7 +41,9 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
     if (showActiveOnly) {
       result = tools.filter((tool) => {
-        return selectedTools.tool_ids.includes(tool.id) || selectedTools.tool_ids.includes('*');
+        return selectedTools.some((selection) => {
+          return selection.tool_ids.includes(tool.id) || selection.tool_ids.includes('*');
+        });
       });
     }
 

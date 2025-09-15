@@ -18,9 +18,11 @@ import { searchParamNames } from '../../search_param_names';
 
 export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
-const defaultToolSelection: ToolSelection = {
-  tool_ids: [...defaultAgentToolIds],
-};
+const defaultToolSelection: ToolSelection[] = [
+  {
+    tool_ids: [...defaultAgentToolIds],
+  },
+];
 
 const emptyState = (): AgentEditState => ({
   id: '',

@@ -15,7 +15,7 @@ export const createDefaultAgentDefinition = (): AgentDefinition => {
     name: 'Elastic AI Agent',
     description: 'Elastic AI Agent',
     configuration: {
-      tools: { tool_ids: [...defaultAgentToolIds] },
+      tools: [{ tool_ids: [...defaultAgentToolIds] }],
     },
   };
 };

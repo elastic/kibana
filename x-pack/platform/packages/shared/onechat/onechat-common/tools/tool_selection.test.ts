@@ -47,7 +47,7 @@ describe('filterToolsBySelection', () => {
   ];
 
   it('should filter tools by specific tool_ids', () => {
-    const toolSelection: ToolSelection = { tool_ids: ['toolA', 'toolC'] };
+    const toolSelection: ToolSelection[] = [{ tool_ids: ['toolA', 'toolC'] }];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
       {
@@ -60,19 +60,19 @@ describe('filterToolsBySelection', () => {
   });
 
   it('should filter tools by allToolsSelectionWildcard', () => {
-    const toolSelection: ToolSelection = { tool_ids: [allToolsSelectionWildcard] };
+    const toolSelection: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual(tools);
   });
 
   it('should return an empty array if no tools match the selection', () => {
-    const toolSelection: ToolSelection = { tool_ids: ['nonExistentTool'] };
+    const toolSelection: ToolSelection[] = [{ tool_ids: ['nonExistentTool'] }];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([]);
   });
 
   it('should handle multiple tool ids in selection', () => {
-    const toolSelection: ToolSelection = { tool_ids: ['toolA', 'toolB'] };
+    const toolSelection: ToolSelection[] = [{ tool_ids: ['toolA', 'toolB'] }];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
       {
@@ -80,6 +80,19 @@ describe('filterToolsBySelection', () => {
       },
       {
         id: 'toolB',
+      },
+    ]);
+  });
+
+  it('should handle multiple selections', () => {
+    const toolSelection: ToolSelection[] = [{ tool_ids: ['toolA'] }, { tool_ids: ['toolC'] }];
+    const result = filterToolsBySelection(tools, toolSelection);
+    expect(result).toEqual([
+      {
+        id: 'toolA',
+      },
+      {
+        id: 'toolC',
       },
     ]);
   });

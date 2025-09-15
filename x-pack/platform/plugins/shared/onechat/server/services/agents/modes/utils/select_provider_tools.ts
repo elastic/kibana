@@ -16,7 +16,7 @@ export const selectProviderTools = async ({
   request,
 }: {
   provider: ToolProvider;
-  selection: ToolSelection;
+  selection: ToolSelection[];
   request: KibanaRequest;
 }): Promise<ExecutableTool[]> => {
   const tools = await provider.list({ request });

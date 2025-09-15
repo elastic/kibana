@@ -9,14 +9,14 @@ import type { ToolSelection, ToolSelectionRelevantFields } from '@kbn/onechat-co
 import { allToolsSelectionWildcard, toolMatchSelection } from '@kbn/onechat-common';
 
 /**
- * Check if a specific tool is selected based on the current tool selection.
+ * Check if a specific tool is selected based on the current tool selections.
  * This uses existing onechat-common utilities for consistent logic.
  */
 export const isToolSelected = (
   tool: ToolSelectionRelevantFields,
-  selectedTools: ToolSelection
+  selectedTools: ToolSelection[]
 ): boolean => {
-  return toolMatchSelection(tool, selectedTools);
+  return selectedTools.some((selection) => toolMatchSelection(tool, selection));
 };
 
 /**
@@ -25,42 +25,65 @@ export const isToolSelected = (
 export const toggleToolSelection = (
   toolId: string,
   allAvailableTools: ToolSelectionRelevantFields[],
-  selectedTools: ToolSelection
-): ToolSelection => {
+  selectedTools: ToolSelection[]
+): ToolSelection[] => {
   const currentTool: ToolSelectionRelevantFields = {
     id: toolId,
   };
 
   const isCurrentlySelected = isToolSelected(currentTool, selectedTools);
-  const currentToolIds = [...selectedTools.tool_ids];
 
   if (isCurrentlySelected) {
     // Check if this tool is selected via wildcard
-    const hasWildcardSelection = currentToolIds.includes(allToolsSelectionWildcard);
+    const wildcardSelection = selectedTools.find((selection) =>
+      selection.tool_ids.includes(allToolsSelectionWildcard)
+    );
 
-    if (hasWildcardSelection) {
+    if (wildcardSelection) {
       // Replace wildcard with individual tool selections (excluding the one being toggled off)
       const otherToolIds = allAvailableTools
         .filter((tool) => tool.id !== toolId)
         .map((tool) => tool.id);
 
-      return {
-        tool_ids: otherToolIds,
-      };
+      const otherSelections = selectedTools.filter(
+        (selection) => !selection.tool_ids.includes(allToolsSelectionWildcard)
+      );
+
+      if (otherToolIds.length > 0) {
+        return [...otherSelections, { tool_ids: otherToolIds }];
+      }
+      return otherSelections;
     } else {
       // Remove from individual selections
-      const newToolIds = currentToolIds.filter((id) => id !== toolId);
-      return {
-        tool_ids: newToolIds,
-      };
+      return selectedTools
+        .map((selection) => {
+          if (selection.tool_ids.includes(toolId)) {
+            const newToolIds = selection.tool_ids.filter((id) => id !== toolId);
+            return newToolIds.length > 0 ? { ...selection, tool_ids: newToolIds } : null;
+          }
+          return selection;
+        })
+        .filter(Boolean) as ToolSelection[];
     }
   } else {
-    // Add the tool to selection if not already present
-    if (!currentToolIds.includes(toolId)) {
-      return {
-        tool_ids: [...currentToolIds, toolId],
-      };
+    // Add the tool to selection
+    const existingSelection = selectedTools.find(
+      (selection) => !selection.tool_ids.includes(allToolsSelectionWildcard)
+    );
+
+    if (existingSelection && !existingSelection.tool_ids.includes(toolId)) {
+      // Add to existing non-wildcard selection
+      return selectedTools.map((selection) =>
+        selection === existingSelection
+          ? { ...selection, tool_ids: [...selection.tool_ids, toolId] }
+          : selection
+      );
+    } else {
+      // Create new selection
+      const otherSelections = selectedTools.filter(
+        (selection) => !selection.tool_ids.includes(toolId)
+      );
+      return [...otherSelections, { tool_ids: [toolId] }];
     }
-    return selectedTools;
   }
 };

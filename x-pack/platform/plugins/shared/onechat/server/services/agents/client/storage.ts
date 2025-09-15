@@ -41,7 +41,7 @@ export interface AgentProperties {
   avatar_symbol?: string;
   configuration: {
     instructions?: string;
-    tools: ToolSelection;
+    tools: ToolSelection[];
   };
   created_at: string;
   updated_at: string;

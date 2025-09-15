@@ -17,7 +17,7 @@ export const allToolsSelectionWildcard = '*';
 /**
  * Constant tool selection to select all tools
  */
-export const allToolsSelection: ToolSelection = { tool_ids: [allToolsSelectionWildcard] };
+export const allToolsSelection: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
 
 /**
  * Represents a tool selection based on individual tool IDs
@@ -48,13 +48,15 @@ export const isValidToolSelection = (toolSelection: ToolSelection): boolean => {
 };
 
 /**
- * Returns all tools matching the provided tool selection.
+ * Returns all tools matching at least one of the provided tool selections.
  */
 export const filterToolsBySelection = <TType extends ToolSelectionRelevantFields>(
   tools: TType[],
-  toolSelection: ToolSelection
+  toolSelection: ToolSelection[]
 ): TType[] => {
-  return tools.filter((tool) => toolMatchSelection(tool, toolSelection));
+  return tools.filter((tool) =>
+    toolSelection.some((selection) => toolMatchSelection(tool, selection))
+  );
 };
 
 /**

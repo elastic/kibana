@@ -21,7 +21,7 @@ import { isToolSelected } from '../../../utils/tool_selection_utils';
 
 interface ToolsFlatViewProps {
   tools: ToolDefinition[];
-  selectedTools: ToolSelection;
+  selectedTools: ToolSelection[];
   onToggleTool: (toolId: string) => void;
   disabled: boolean;
   pageIndex: number;
@@ -52,7 +52,7 @@ const ToolDetailsColumn: React.FC<ToolDetailsColumnProps> = ({ tool }) => {
 };
 
 const createCheckboxColumn = (
-  selectedTools: ToolSelection,
+  selectedTools: ToolSelection[],
   onToggleTool: (toolId: string) => void,
   disabled: boolean
 ) => ({

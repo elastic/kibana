@@ -23,7 +23,7 @@ export const ensureValidId = (id: string) => {
 export interface ValidateToolSelectionParams {
   toolRegistry: ToolRegistry;
   request: KibanaRequest;
-  toolSelection: ToolSelection;
+  toolSelection: ToolSelection[];
 }
 
 export async function validateToolSelection({
@@ -32,17 +32,19 @@ export async function validateToolSelection({
 }: ValidateToolSelectionParams): Promise<string[]> {
   const errors: string[] = [];
 
-  const { tool_ids: toolIds } = toolSelection;
+  for (const selection of toolSelection) {
+    const { tool_ids: toolIds } = selection;
 
-  for (const toolId of toolIds) {
-    if (toolId === allToolsSelectionWildcard) {
-      // Wildcard selection is valid as long as tools exist
-      continue;
-    } else {
-      // Specific tool selection - check if tool exists
-      const exists = await toolRegistry.has(toolId);
-      if (!exists) {
-        errors.push(`Tool id '${toolId}' does not exist.`);
+    for (const toolId of toolIds) {
+      if (toolId === allToolsSelectionWildcard) {
+        // Wildcard selection is valid as long as tools exist
+        continue;
+      } else {
+        // Specific tool selection - check if tool exists
+        const exists = await toolRegistry.has(toolId);
+        if (!exists) {
+          errors.push(`Tool id '${toolId}' does not exist.`);
+        }
       }
     }
   }

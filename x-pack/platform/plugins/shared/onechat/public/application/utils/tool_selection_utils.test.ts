@@ -24,14 +24,14 @@ describe('tool_selection_utils', () => {
 
   describe('isToolSelected', () => {
     it('should return true when tool is individually selected', () => {
-      const selectedTools: ToolSelection = { tool_ids: ['tool1'] };
+      const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1'] }];
 
       expect(isToolSelected(mockTools[0], selectedTools)).toBe(true);
       expect(isToolSelected(mockTools[1], selectedTools)).toBe(false);
     });
 
     it('should return true when tool is selected via wildcard', () => {
-      const selectedTools: ToolSelection = { tool_ids: [allToolsSelectionWildcard] };
+      const selectedTools: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
 
       expect(isToolSelected(mockTools[0], selectedTools)).toBe(true);
       expect(isToolSelected(mockTools[1], selectedTools)).toBe(true);
@@ -41,29 +41,32 @@ describe('tool_selection_utils', () => {
 
   describe('toggleToolSelection', () => {
     it('should add tool to empty selection', () => {
-      const selectedTools: ToolSelection = { tool_ids: [] };
+      const selectedTools: ToolSelection[] = [{ tool_ids: [] }];
       const result = toggleToolSelection('tool1', mockTools, selectedTools);
 
-      expect(result.tool_ids).toContain('tool1');
+      expect(result).toHaveLength(1);
+      expect(result[0].tool_ids).toContain('tool1');
     });
 
     it('should remove tool from selection', () => {
-      const selectedTools: ToolSelection = { tool_ids: ['tool1', 'tool2'] };
+      const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
       const result = toggleToolSelection('tool1', mockTools, selectedTools);
 
-      expect(result.tool_ids).not.toContain('tool1');
-      expect(result.tool_ids).toContain('tool2');
+      expect(result).toHaveLength(1);
+      expect(result[0].tool_ids).not.toContain('tool1');
+      expect(result[0].tool_ids).toContain('tool2');
     });
 
     it('should handle wildcard selection correctly', () => {
-      const selectedTools: ToolSelection = { tool_ids: [allToolsSelectionWildcard] };
+      const selectedTools: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
       const result = toggleToolSelection('tool1', mockTools, selectedTools);
 
       // Should remove tool1 and include other available tools
-      expect(result.tool_ids).not.toContain('tool1');
-      expect(result.tool_ids).toContain('tool2');
-      expect(result.tool_ids).toContain('tool3');
-      expect(result.tool_ids).not.toContain(allToolsSelectionWildcard);
+      expect(result).toHaveLength(1);
+      expect(result[0].tool_ids).not.toContain('tool1');
+      expect(result[0].tool_ids).toContain('tool2');
+      expect(result[0].tool_ids).toContain('tool3');
+      expect(result[0].tool_ids).not.toContain(allToolsSelectionWildcard);
     });
   });
 });

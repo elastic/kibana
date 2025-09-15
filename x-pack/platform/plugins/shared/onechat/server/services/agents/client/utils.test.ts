@@ -37,7 +37,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: { tool_ids: ['nonexistent'] },
+      toolSelection: [{ tool_ids: ['nonexistent'] }],
     });
     expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
   });
@@ -47,7 +47,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: { tool_ids: ['*'] },
+      toolSelection: [{ tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -57,7 +57,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: { tool_ids: ['toolA'] },
+      toolSelection: [{ tool_ids: ['toolA'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -67,7 +67,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: { tool_ids: ['toolA', 'toolB'] },
+      toolSelection: [{ tool_ids: ['toolA', 'toolB'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -77,7 +77,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: { tool_ids: ['toolA', 'nonexistent'] },
+      toolSelection: [{ tool_ids: ['toolA', 'nonexistent'] }],
     });
     expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
     expect(errors).toHaveLength(1);
@@ -88,7 +88,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: { tool_ids: [] },
+      toolSelection: [{ tool_ids: [] }],
     });
     expect(errors).toHaveLength(0);
   });
