@@ -226,6 +226,20 @@ export const INVALID_JSON = i18n.translate(
   }
 );
 
+export const INVALID_INPUT_EMPTY = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsEmptyErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON, cannot be empty',
+  }
+);
+
+export const INVALID_INPUT_ARRAY = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsArrayErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON, cannot be an array',
+  }
+);
+
 export const ADDITIONAL_FIELDS = i18n.translate(
   'xpack.stackConnectors.components.additionalFieldsTitle',
   {

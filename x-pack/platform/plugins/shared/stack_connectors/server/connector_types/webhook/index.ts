@@ -24,6 +24,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
@@ -38,8 +39,8 @@ import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
 import { AuthType } from '../../../common/auth/constants';
-import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 import { getAxiosConfig } from './get_axios_config';
+import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
 export const ConnectorTypeId = '.webhook';
 
@@ -84,12 +85,7 @@ function renderParameterTemplates(
   };
 }
 
-function validateConnectorTypeConfig(
-  configObject: ConnectorTypeConfigType,
-  validatorServices: ValidatorServices
-) {
-  const { configurationUtilities } = validatorServices;
-  const configuredUrl = configObject.url;
+function validateUrl(configuredUrl: string) {
   try {
     new URL(configuredUrl);
   } catch (err) {
@@ -102,7 +98,12 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
 
+function ensureUriAllowed(
+  configuredUrl: string,
+  configurationUtilities: ActionsConfigurationUtilities
+) {
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
@@ -115,7 +116,9 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
 
+function validateAuthType(configObject: ConnectorTypeConfigType) {
   if (Boolean(configObject.authType) && !configObject.hasAuth) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
@@ -124,7 +127,12 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
 
+function validateCertType(
+  configObject: ConnectorTypeConfigType,
+  configurationUtilities: ActionsConfigurationUtilities
+) {
   if (configObject.certType === SSLCertType.PFX) {
     const webhookSettings = configurationUtilities.getWebhookSettings();
     if (!webhookSettings.ssl.pfx.enabled) {
@@ -139,26 +147,38 @@ function validateConnectorTypeConfig(
       );
     }
   }
+}
 
+function validateAdditionalFields(configObject: ConnectorTypeConfigType) {
   if (configObject.additionalFields) {
     try {
       const parsedAdditionalFields = JSON.parse(configObject.additionalFields);
 
-      if (typeof parsedAdditionalFields !== 'object' || Array.isArray(parsedAdditionalFields)) {
+      if (
+        typeof parsedAdditionalFields !== 'object' ||
+        Array.isArray(parsedAdditionalFields) ||
+        Object.keys(parsedAdditionalFields).length === 0
+      ) {
         throw new Error(ADDITIONAL_FIELD_CONFIG_ERROR);
       }
     } catch (e) {
       throw new Error(ADDITIONAL_FIELD_CONFIG_ERROR);
     }
   }
+}
 
+function validateOAuth2(configObject: ConnectorTypeConfigType) {
   if (
     configObject.authType === AuthType.OAuth2ClientCredentials &&
     (!configObject.accessTokenUrl || !configObject.clientId)
   ) {
     const missingFields = [];
-    if (!configObject.accessTokenUrl) missingFields.push('Access Token URL (accessTokenUrl)');
-    if (!configObject.clientId) missingFields.push('Client ID (clientId)');
+    if (!configObject.accessTokenUrl) {
+      missingFields.push('Access Token URL (accessTokenUrl)');
+    }
+    if (!configObject.clientId) {
+      missingFields.push('Client ID (clientId)');
+    }
 
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.oauth2ConfigurationError', {
@@ -169,6 +189,21 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
+
+function validateConnectorTypeConfig(
+  configObject: ConnectorTypeConfigType,
+  validatorServices: ValidatorServices
+) {
+  const { configurationUtilities } = validatorServices;
+  const configuredUrl = configObject.url;
+
+  validateUrl(configuredUrl);
+  ensureUriAllowed(configuredUrl, configurationUtilities);
+  validateAuthType(configObject);
+  validateCertType(configObject, configurationUtilities);
+  validateAdditionalFields(configObject);
+  validateOAuth2(configObject);
 }
 
 // action executor
@@ -197,11 +232,16 @@ export async function executor(
     logger,
   });
 
-  if (!axiosConfig) {
+  if (axiosConfigError) {
     logger.error(
-      `ConnectorId "${actionId}": error "${axiosConfigError?.message ?? 'unknown error'}"`
+      `ConnectorId "${actionId}": error "${
+        axiosConfigError.message ?? 'unknown error - couldnt load axios config'
+      }"`
     );
-    return errorResultRequestFailed(actionId, axiosConfigError?.message ?? 'unknown error');
+    return errorResultRequestFailed(
+      actionId,
+      axiosConfigError.message ?? 'unknown error - couldnt load axios config'
+    );
   }
 
   const { axiosInstance, headers, sslOverrides } = axiosConfig;

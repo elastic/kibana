@@ -61,8 +61,10 @@ export const SecretConfigurationSchemaValidation = {
       !secrets.key &&
       !secrets.pfx &&
       !secrets.clientSecret
-    )
+    ) {
       return;
+    }
+
     if (
       secrets.password &&
       secrets.user &&
@@ -70,12 +72,18 @@ export const SecretConfigurationSchemaValidation = {
       !secrets.key &&
       !secrets.pfx &&
       !secrets.clientSecret
-    )
+    ) {
       return;
-    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx && !secrets.clientSecret)
+    }
+
+    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx && !secrets.clientSecret) {
       return;
-    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx && !secrets.clientSecret)
+    }
+
+    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx && !secrets.clientSecret) {
       return;
+    }
+
     if (
       !secrets.password &&
       !secrets.user &&
@@ -83,8 +91,9 @@ export const SecretConfigurationSchemaValidation = {
       !secrets.key &&
       !secrets.pfx &&
       secrets.clientSecret
-    )
+    ) {
       return;
+    }
 
     return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
       defaultMessage:

@@ -89,10 +89,9 @@ const getOAuth2AxiosConfig = async ({
 interface GetDefaultAxiosConfig {
   config: ConnectorTypeConfigType;
   secrets: ConnectorTypeSecretsType;
-  headers: Record<string, string> | null;
 }
-const getDefaultAxiosConfig = async ({ config, secrets, headers }: GetDefaultAxiosConfig) => {
-  const { hasAuth, authType, verificationMode, ca } = config;
+const getDefaultAxiosConfig = async ({ config, secrets }: GetDefaultAxiosConfig) => {
+  const { hasAuth, authType, verificationMode, ca, headers } = config;
 
   const axiosInstance = axios.create();
   const { basicAuth, sslOverrides } = buildConnectorAuth({
@@ -147,7 +146,7 @@ export const getAxiosConfig = async ({
         secrets,
       });
     } else {
-      axiosConfig = await getDefaultAxiosConfig({ config, secrets, headers: config.headers });
+      axiosConfig = await getDefaultAxiosConfig({ config, secrets });
     }
 
     return [axiosConfig, null];

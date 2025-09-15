@@ -86,7 +86,7 @@ describe('getAxiosConfig', () => {
     jest.clearAllMocks();
   });
 
-  it('should add the delete token interceptor when the status is 401 but succeeds', async () => {
+  it('should delete the token when the status is 401 but succeeds', async () => {
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('fakeToken');
     server.respondWith('GET', 'https://example.com/oauth/token', [
       401,
@@ -117,7 +117,7 @@ describe('getAxiosConfig', () => {
     });
   });
 
-  it('should add the delete token interceptor when the request fails', async () => {
+  it('should delete the token when the request fails', async () => {
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('fakeToken');
     server.respondWith('GET', 'https://example.com/oauth/token', [
       401,

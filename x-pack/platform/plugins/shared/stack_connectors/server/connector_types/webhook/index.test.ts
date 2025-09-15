@@ -339,20 +339,94 @@ describe('config validation', () => {
     );
   });
 
-  test('throws if required OAuth2 config is missing', async () => {
-    const config = {
-      method: 'post',
-      url: 'https://test.com',
-      hasAuth: true,
-      authType: AuthType.OAuth2ClientCredentials,
-      // missing accessTokenUrl, clientId
-    };
+  describe('OAuth2 Client Credentials', () => {
+    test('throws if required OAuth2 config is missing', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        // missing accessTokenUrl, clientId
+      };
 
-    expect(() => {
-      validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
-    );
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
+      );
+    });
+
+    test('throws when additionalFields is no valid JSON', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: 'http://fake.test',
+        clientId: 'fake-client-id',
+        additionalFields: 'invalid-json',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+      );
+    });
+
+    test('throws when additionalFields is "null"', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: 'http://fake.test',
+        clientId: 'fake-client-id',
+        additionalFields: 'null',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+      );
+    });
+
+    test('throws when additionalFields is empty', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: 'http://fake.test',
+        clientId: 'fake-client-id',
+        additionalFields: '{}',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+      );
+    });
+
+    test('throws when additionalFields is an array', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: 'http://fake.test',
+        clientId: 'fake-client-id',
+        additionalFields: '[]',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+      );
+    });
   });
 });
 

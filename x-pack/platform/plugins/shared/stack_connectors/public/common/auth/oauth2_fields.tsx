@@ -6,7 +6,11 @@
  */
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  getFieldValidityAndErrorMessage,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { AdditionalFields } from '../components/additional_fields';
@@ -22,9 +26,19 @@ export const jsonValidator = ({ value }: { value: string | null | undefined }) =
   }
   try {
     const parsedValue = JSON.parse(value);
-    if (typeof parsedValue !== 'object' || Array.isArray(parsedValue)) {
+
+    if (typeof parsedValue !== 'object') {
       return { message: i18n.INVALID_JSON };
     }
+
+    if (Array.isArray(parsedValue)) {
+      return { message: i18n.INVALID_INPUT_ARRAY };
+    }
+
+    if (parsedValue === null || Object.keys(parsedValue).length === 0) {
+      return { message: i18n.INVALID_INPUT_EMPTY };
+    }
+
     return undefined;
   } catch (e) {
     return { message: i18n.INVALID_JSON };
@@ -32,17 +46,16 @@ export const jsonValidator = ({ value }: { value: string | null | undefined }) =
 };
 
 interface AdditionalFieldsWrapperProps {
-  field: {
-    value: string | null | undefined;
-    setValue: (value: string | null) => void;
-    errors?: Array<{ message: string; [key: string]: any }>;
-  };
-  readOnly?: boolean;
-  isOptionalField?: boolean;
+  field: FieldHook<string | null>;
+  readOnly: boolean;
+  isOptionalField: boolean;
+  helpText: string;
 }
-
 const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.memo(
-  ({ field: { value, setValue, errors }, readOnly, isOptionalField }) => {
+  ({ field, readOnly, isOptionalField }) => {
+    const { value, setValue } = field;
+    const { errorMessage } = getFieldValidityAndErrorMessage(field);
+
     const handleAdditionalFieldsChange = useCallback(
       (json: string | null) => {
         setValue(json);
@@ -50,12 +63,11 @@ const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.me
       [setValue]
     );
 
-    const errorsProp = errors && errors.length > 0 ? [errors[0].message] : [];
     return (
       <AdditionalFields
         value={value}
         onChange={handleAdditionalFieldsChange}
-        errors={errorsProp}
+        errors={errorMessage ? [errorMessage] : undefined}
         isOptionalField={isOptionalField}
         readOnly={readOnly}
         helpText={i18n.ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT}

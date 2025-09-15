@@ -77,7 +77,11 @@ describe('jsonValidator', () => {
 
   it('returns undefined for valid JSON object', () => {
     expect(jsonValidator({ value: '{"foo":"bar"}' })).toBeUndefined();
-    expect(jsonValidator({ value: '{}' })).toBeUndefined();
+  });
+
+  it('returns error for empty JSON object', () => {
+    expect(jsonValidator({ value: '{}' })).toEqual({ message: i18n.INVALID_INPUT_EMPTY });
+    expect(jsonValidator({ value: 'null' })).toEqual({ message: i18n.INVALID_INPUT_EMPTY });
   });
 
   it('returns error for invalid JSON', () => {
@@ -86,13 +90,16 @@ describe('jsonValidator', () => {
   });
 
   it('returns error for JSON array', () => {
-    expect(jsonValidator({ value: '["foo","bar"]' })).toEqual({ message: i18n.INVALID_JSON });
-    expect(jsonValidator({ value: '[]' })).toEqual({ message: i18n.INVALID_JSON });
+    expect(jsonValidator({ value: '["foo","bar"]' })).toEqual({
+      message: i18n.INVALID_INPUT_ARRAY,
+    });
+    expect(jsonValidator({ value: '[]' })).toEqual({ message: i18n.INVALID_INPUT_ARRAY });
   });
 
   it('returns error for JSON number or string', () => {
     expect(jsonValidator({ value: '"foo"' })).toEqual({ message: i18n.INVALID_JSON });
     expect(jsonValidator({ value: '123' })).toEqual({ message: i18n.INVALID_JSON });
     expect(jsonValidator({ value: 'true' })).toEqual({ message: i18n.INVALID_JSON });
+    expect(jsonValidator({ value: 'undefined' })).toEqual({ message: i18n.INVALID_JSON });
   });
 });

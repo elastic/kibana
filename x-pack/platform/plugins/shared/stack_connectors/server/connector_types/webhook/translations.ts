@@ -11,6 +11,6 @@ export const ADDITIONAL_FIELD_CONFIG_ERROR = i18n.translate(
   'xpack.stackConnectors.webhook.additionalFieldsConfigurationError',
   {
     defaultMessage:
-      'error validation webhook action config: additionalFields must be an JSON object.',
+      'error validation webhook action config: additionalFields must be a non-empty JSON object.',
   }
 );
