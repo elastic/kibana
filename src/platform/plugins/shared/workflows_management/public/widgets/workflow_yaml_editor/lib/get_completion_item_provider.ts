@@ -907,32 +907,29 @@ function getRequiredParamsForConnector(
  * Uses a simple consistent kind - CSS specificity will handle the custom icons
  */
 function getConnectorCompletionKind(connectorType: string): monaco.languages.CompletionItemKind {
-  // Keep existing special cases for backward compatibility
-  if (connectorType.startsWith('elasticsearch.')) {
-    return monaco.languages.CompletionItemKind.Struct;
+  // Map specific connector types to appropriate icons
+  if (connectorType === 'slack') {
+    return monaco.languages.CompletionItemKind.Event; // Will use custom Slack logo
   }
-  if (connectorType.startsWith('kibana.')) {
-    return monaco.languages.CompletionItemKind.Module;
+  if (connectorType.startsWith('elasticsearch')) {
+    return monaco.languages.CompletionItemKind.Struct; // Will use custom Elasticsearch logo
   }
-  if (connectorType === 'slack' || connectorType === '.slack') {
-    return monaco.languages.CompletionItemKind.Event;
+  if (connectorType.startsWith('kibana')){
+    return monaco.languages.CompletionItemKind.Module; // Will use custom Kibana logo
   }
-  if (connectorType === 'inference' || connectorType === '.inference') {
-    return monaco.languages.CompletionItemKind.Snippet;
+  if (connectorType === 'console') {
+    return monaco.languages.CompletionItemKind.Variable; // Will use custom Console icon
   }
-  
-  // For all other connectors, use a consistent kind
-  // CSS specificity will override the default icon
+  if (connectorType.startsWith('inference')) {
+    return monaco.languages.CompletionItemKind.Snippet; // Will use custom HTTP icon
+  }
+
+  if (connectorType === 'http') {
+    return monaco.languages.CompletionItemKind.Reference; // Will use custom HTTP icon
+  }
   return monaco.languages.CompletionItemKind.Function;
 }
 
-/**
- * Get CSS class name for a connector type to enable dynamic icon styling
- */
-function getConnectorCssClass(connectorType: string): string {
-  const cssClassName = connectorType.replace(/[^a-zA-Z0-9]/g, '-');
-  return `connector-${cssClassName}`;
-}
 
 /**
  * Get connector type suggestions with better grouping and filtering
