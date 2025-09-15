@@ -9,7 +9,18 @@ import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import type { RenameProcessor } from '../../../../types/processors';
 import { conditionToESQL } from '../condition_to_esql';
+import { buildIgnoreMissingFilter, buildOverrideFilter } from './common';
 
+/**
+ * Converts a Streamlang RenameProcessor into a list of ES|QL AST commands.
+ *
+ * Filters applied for Ingest Pipeline parity:
+ * - When `ignore_missing: false`: `WHERE NOT(source_field IS NULL)` filters missing source fields
+ * - When `override: false`: `WHERE target_field IS NULL` filters existing target fields
+ *
+ * Ingest Pipeline throws errors ("field doesn't exist" / "field already exists"),
+ * while ES|QL uses filtering to exclude such documents entirely.
+ */
 export function convertRenameProcessorToESQL(processor: RenameProcessor): ESQLAstCommand[] {
   const {
     from,
@@ -21,25 +32,39 @@ export function convertRenameProcessorToESQL(processor: RenameProcessor): ESQLAs
   const fromColumn = Builder.expression.column(from);
   const toColumn = Builder.expression.column(to);
 
+  const commands: ESQLAstCommand[] = [];
+
+  // Add missing field filter if needed (ignore_missing = false)
+  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  if (missingFieldFilter) {
+    commands.push(missingFieldFilter);
+  }
+
+  // Add override filter if needed (override = false)
+  const overrideFilter = buildOverrideFilter(to, override);
+  if (overrideFilter) {
+    commands.push(overrideFilter);
+  }
+
   // Use the simple RENAME command only for the most basic case (no ignore_missing, no where, and override is true).
   if (!ignore_missing && override && !where) {
-    return [
+    commands.push(
       Builder.command({
         name: 'rename',
         args: [Builder.expression.func.binary('as', [fromColumn, toColumn])],
-      }),
-    ];
+      })
+    );
+    return commands;
   }
 
   const conditions = [];
+
+  // ignore_missing and override conditions are handled by WHERE to filter out documents
+  // this is to be consistent with Ingest Pipeline behavior where such documents are skipped/errored out
+  // Processor's `if` condition is handled here as part of the CASE expression below
+
   if (where) {
     conditions.push(conditionToESQL(where));
-  }
-  if (!override) {
-    conditions.push(conditionToESQL({ field: to, exists: false }));
-  }
-  if (!ignore_missing) {
-    conditions.push(conditionToESQL({ field: from, exists: true }));
   }
 
   const finalCondition =
@@ -58,5 +83,6 @@ export function convertRenameProcessorToESQL(processor: RenameProcessor): ESQLAs
 
   const dropCommand = Builder.command({ name: 'drop', args: [fromColumn] });
 
-  return [evalCommand, dropCommand];
+  commands.push(evalCommand, dropCommand);
+  return commands;
 }

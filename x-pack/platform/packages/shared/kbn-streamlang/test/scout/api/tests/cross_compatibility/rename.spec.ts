@@ -51,7 +51,7 @@ streamlangApiTest.describe(
       );
 
       streamlangApiTest(
-        'should not touch existing fields when override is false',
+        'should not process the document when override is false and target field exists',
         async ({ testBed, esql }) => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
@@ -75,8 +75,10 @@ streamlangApiTest.describe(
           await testBed.ingest('esql-rename-no-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-rename-no-override', query);
 
-          expect(ingestResult.length).toBe(0); // Did not override
-          expect(esqlResult.documents[0]['host.renamed']).toEqual('old-host');
+          expect(ingestResult).toHaveLength(0);
+
+          // ES|QL too should have filtered out the document as target field exists and override is false
+          expect(esqlResult.documents).toHaveLength(0);
         }
       );
 
@@ -114,9 +116,7 @@ streamlangApiTest.describe(
           }
         );
       });
-    });
 
-    streamlangApiTest.describe('Incompatible', () => {
       streamlangApiTest(
         'should be handled by both ingest and ES|QL when field is missing and ignore_missing is false',
         async ({ testBed, esql }) => {
@@ -146,11 +146,12 @@ streamlangApiTest.describe(
 
           expect(ingestResult.length).toBe(0); // Did not ingest, errored out
 
-          // Here ES|QL transpiler silently ignores the error to not break the whole pipeline
-          expect(esqlResult.documents.length).toBe(2); // mapping doc + actual doc
-          expect(esqlResult.documents[1]['host.renamed']).toBeNull();
+          // Es|QL too should have filtered out the actual doc as 'host.original' is missing and ignore_missing is false
+          expect(esqlResult.documents).toHaveLength(0); // Mapping doc also filtered out because host.rename is non null
         }
       );
     });
+
+    streamlangApiTest.describe('Incompatible', () => {});
   }
 );

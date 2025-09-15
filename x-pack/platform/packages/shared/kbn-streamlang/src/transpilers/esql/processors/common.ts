@@ -99,6 +99,35 @@ export function buildIgnoreMissingFilter(
   });
 }
 
+/**
+ * Creates a WHERE command to filter out documents with existing target fields when `override: false`.
+ * This simulates Ingest Pipeline's "field [field] already exists" error behavior by pre-filtering documents.
+ *
+ * Behavioral Context:
+ * - ignore_failure is implicitly false (not supported in Streamlang DSL yet)
+ * - When ignore_failure = false, override = false make Ingest Pipeline fail if target field already exists
+ * - ES|QL uses WHERE filtering to exclude documents with existing target fields
+ * - This aligns the behavior between Ingest Pipeline errors and ES|QL filtering
+ *
+ * @param targetField - The target field name to check for existence
+ * @param override - If false, returns WHERE command to filter existing target fields
+ * @returns WHERE command if filtering needed, undefined otherwise
+ */
+export function buildOverrideFilter(
+  targetField: string,
+  override: boolean
+): ESQLAstCommand | undefined {
+  if (override) {
+    return undefined; // No filtering needed when override = true
+  }
+
+  const toColumn = Builder.expression.column(targetField);
+  return Builder.command({
+    name: 'where',
+    args: [Builder.expression.func.postfix('IS NULL', toColumn)],
+  });
+}
+
 export function buildWhereCondition(
   fromField: string,
   ignoreMissing: boolean,

@@ -60,17 +60,16 @@ streamlangApiTest.describe(
         // Add `mappingDoc` to address ES|QL limitation that any column used as operand must be available as a column (pre-mapped)
         const mappingDoc = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
         const docWithMissingSource = { host: { renamed: 'old-host-1' } };
-        const docWithMissingTarget = { host: { original: 'new-host-2' } };
+        const docWithMissingTarget = { host: { original: 'new-host-2' } }; // Should only pass through filter
         const docWithMissingFields = { message: 'message-3' };
         const docs = [mappingDoc, docWithMissingSource, docWithMissingTarget, docWithMissingFields];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
+        // ES|QL filters out documents failing the ignore_missing and override checks
+        expect(esqlResult.documents).toHaveLength(1);
         expect(esqlResult.columnNames).not.toContain('host.original'); // Should have been dropped/renamed
-        expect(esqlResult.documents[0]['host.renamed']).toEqual('old-host-0'); // Should not override (override is false)
-        expect(esqlResult.documents[1]['host.renamed']).toEqual('old-host-1'); // Should not override (override is false)
-        expect(esqlResult.documents[2]['host.renamed']).toEqual('new-host-2'); // Should rename as host.original existed
-        expect(esqlResult.documents[3]['host.renamed']).toBeNull(); // ES|QL design that column can't be non-existent
+        expect(esqlResult.documents[0]['host.renamed']).toEqual('new-host-2'); // Should rename as host.original existed
       }
     );
 
@@ -95,8 +94,8 @@ streamlangApiTest.describe(
 
         const docWithFields = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
         const docWithMissingSource = { host: { renamed: 'old-host-1' } };
-        const docWithMissingTarget = { host: { original: 'new-host-2' } };
-        const docWithMissingFields = {};
+        const docWithMissingTarget = { host: { original: 'new-host-2' } }; // Should pass through filter
+        const docWithMissingFields = { host: {} }; // Should pass through filter
         const docs = [
           docWithFields,
           docWithMissingSource,
@@ -106,11 +105,10 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
+        expect(esqlResult.documents).toHaveLength(2);
         expect(esqlResult.columnNames).not.toContain('host.original'); // Should have been dropped/renamed
-        expect(esqlResult.documents[0]['host.renamed']).toEqual('old-host-0'); // Should not override (override is false)
-        expect(esqlResult.documents[1]['host.renamed']).toEqual('old-host-1'); // Should not override (override is false)
-        expect(esqlResult.documents[2]['host.renamed']).toEqual('new-host-2'); // Should rename as host.original existed
-        expect(esqlResult.documents[3]['host.renamed']).toBeNull(); // ignore_missing is true and source field is missing
+        expect(esqlResult.documents[0]['host.renamed']).toEqual('new-host-2'); // renamed
+        expect(esqlResult.documents[1]['host.renamed']).toBeNull(); // source field is missing
       }
     );
 
@@ -134,9 +132,9 @@ streamlangApiTest.describe(
         const { query } = transpile(streamlangDSL);
 
         const docWithFields = { host: { original: 'test-host', renamed: 'old-host' } };
-        const docWithMissingSource = { host: { renamed: 'old-value' } };
-        const docWithMissingTarget = { host: { original: 'new-host' } };
-        const docWithMissingFields = { message: 'some_value' };
+        const docWithMissingSource = { host: { renamed: 'old-value' } }; // should be dropped
+        const docWithMissingTarget = { host: { original: 'new-host' } }; // Should rename as host.original exists
+        const docWithMissingFields = { message: 'some_value' }; // should be dropped
         const docs = [
           docWithFields,
           docWithMissingSource,
@@ -146,11 +144,9 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
+        expect(esqlResult.documents).toHaveLength(2);
         expect(esqlResult.columnNames).not.toContain('host.original'); // Should have been dropped/renamed
-        expect(esqlResult.documents[0]['host.renamed']).toEqual('test-host'); // Should override old value
-        expect(esqlResult.documents[1]['host.renamed']).toBeNull(); // override is true but ignore_missing is false
-        expect(esqlResult.documents[2]['host.renamed']).toEqual('new-host'); // Should rename as host.original existed
-        expect(esqlResult.documents[3]['host.renamed']).toBeNull(); // override is true but ignore_missing is false
+        expect(esqlResult.documents[1]['host.renamed']).toEqual('new-host'); // Should rename as host.original exists
       }
     );
 
