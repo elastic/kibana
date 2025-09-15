@@ -9,6 +9,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -27,11 +29,7 @@ export const PrivateLocationSchema = schema.object({
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      minSize: 1,
-    })
-  ),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -49,19 +47,54 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   handler: async (routeContext) => {
     const { response, request, server } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+    const location = request.body as PrivateLocationObject;
+    const agentPolicy = await server.fleet?.agentPolicyService.get(
+      internalSOClient,
+      location.agentPolicyId,
+      false,
+      {
+        spaceId: ALL_SPACES_ID,
+      }
+    );
+
+    if (!agentPolicy) {
+      return response.badRequest({
+        body: {
+          message: `Agent policy with id ${location.agentPolicyId} not found, this should never happen`,
+        },
+      });
+    }
+
+    const agentPolicySpaces =
+      agentPolicy.space_ids && agentPolicy.space_ids.length > 0
+        ? agentPolicy.space_ids
+        : [DEFAULT_SPACE_ID];
+
+    const newId = uuidV4();
+    const repo = new PrivateLocationRepository(routeContext);
+    const formattedLocation = toSavedObjectContract({
+      ...location,
+      id: newId,
+      spaces: repo.getLocationSpaces({ agentPolicySpaces, locationSpaces: location.spaces }),
+    });
+
+    if (!formattedLocation.spaces!.every((s) => agentPolicySpaces.includes(s))) {
+      return response.badRequest({
+        body: {
+          message: `Invalid spaces. Private location spaces [${location.spaces?.join(
+            ', '
+          )}] must be fully contained within agent policy ${
+            location.agentPolicyId
+          } spaces [${agentPolicySpaces.join(', ')}].`,
+        },
+      });
+    }
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const repo = new PrivateLocationRepository(routeContext);
-
-    const invalidError = await repo.validatePrivateLocation();
+    const invalidError = await repo.validatePrivateLocation({ agentPolicySpaces });
     if (invalidError) {
       return invalidError;
     }
-
-    const location = request.body as PrivateLocationObject;
-    const newId = uuidV4();
-    const formattedLocation = toSavedObjectContract({ ...location, id: newId });
-    const { spaces } = location;
 
     try {
       const result = await repo.createPrivateLocation(formattedLocation, newId);
@@ -69,13 +102,6 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       return toClientContract(result);
     } catch (error) {
       if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
-        if (spaces?.includes('*')) {
-          return response.badRequest({
-            body: {
-              message: `You do not have permission to create a location in all spaces.`,
-            },
-          });
-        }
         return response.customError({
           statusCode: error.output.statusCode,
           body: {

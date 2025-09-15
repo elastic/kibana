@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -25,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
-import { selectAgentPolicies } from '../../../state/agent_policies';
+import { useSpaceAgentPolicies } from '../../../hooks/use_space_agent_policies';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
@@ -36,7 +35,7 @@ export const PolicyHostsField = ({
   privateLocations: PrivateLocation[];
   isDisabled?: boolean;
 }) => {
-  const { data } = useSelector(selectAgentPolicies);
+  const { spacePolicies: data } = useSpaceAgentPolicies();
   const { basePath } = useSyntheticsSettingsContext();
 
   const {
