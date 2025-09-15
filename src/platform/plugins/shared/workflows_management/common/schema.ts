@@ -152,11 +152,104 @@ function generateKibanaConnectors(): ConnectorContract[] {
   return GENERATED_KIBANA_CONNECTORS;
 }
 
+/**
+ * Convert dynamic connector data from actions client to ConnectorContract format
+ */
+export function convertDynamicConnectorsToContracts(
+  connectorTypes: Record<string, {
+    actionTypeId: string;
+    displayName: string;
+    instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
+    enabled?: boolean;
+    enabledInConfig?: boolean;
+    enabledInLicense?: boolean;
+    minimumLicenseRequired?: string;
+  }>
+): ConnectorContract[] {
+  return Object.values(connectorTypes).map((connectorType) => {
+    try {
+      // Create connector ID schema with available instances
+      // If no instances exist, use a generic string schema
+      const connectorIdSchema = connectorType.instances.length > 0 
+        ? z.enum([connectorType.instances[0].id, ...connectorType.instances.slice(1).map(i => i.id)] as [string, ...string[]])
+        : z.string();
+
+      return {
+        type: connectorType.actionTypeId,
+        paramsSchema: z.any(), // Generic schema for now - can be enhanced later
+        connectorIdRequired: true, // Most dynamic connectors require an ID
+        connectorId: connectorIdSchema,
+        outputSchema: z.any(), // Generic output schema for now
+        description: `${connectorType.displayName} connector${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
+      };
+    } catch (error) {
+      console.warn(`Error processing connector type ${connectorType.actionTypeId}:`, error);
+      // Return a basic connector contract as fallback
+      return {
+        type: connectorType.actionTypeId,
+        paramsSchema: z.any(),
+        connectorIdRequired: true,
+        connectorId: z.string(),
+        outputSchema: z.any(),
+        description: `${connectorType.displayName || connectorType.actionTypeId} connector`,
+      };
+    }
+  });
+}
+
+// Global cache for all connectors (static + generated + dynamic)
+let allConnectorsCache: ConnectorContract[] | null = null;
+
+/**
+ * Add dynamic connectors to the global cache
+ * Call this when dynamic connector data is fetched from the API
+ */
+export function addDynamicConnectorsToCache(
+  dynamicConnectorTypes: Record<string, {
+    actionTypeId: string;
+    displayName: string;
+    instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
+    enabled?: boolean;
+    enabledInConfig?: boolean;
+    enabledInLicense?: boolean;
+    minimumLicenseRequired?: string;
+  }>
+) {
+  // Get base connectors if cache is empty
+  if (allConnectorsCache === null) {
+    const elasticsearchConnectors = generateElasticsearchConnectors();
+    const kibanaConnectors = generateKibanaConnectors();
+    allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
+  }
+  
+  // Convert dynamic connectors to ConnectorContract format
+  const dynamicConnectors = convertDynamicConnectorsToContracts(dynamicConnectorTypes);
+  
+  // Get existing connector types to avoid duplicates
+  const existingTypes = new Set(allConnectorsCache.map(c => c.type));
+  
+  // Add only new dynamic connectors
+  const newDynamicConnectors = dynamicConnectors.filter(c => !existingTypes.has(c.type));
+  
+  if (newDynamicConnectors.length > 0) {
+    allConnectorsCache.push(...newDynamicConnectors);
+    console.debug(`Added ${newDynamicConnectors.length} new dynamic connectors to cache`);
+  }
+}
+
 // Combine static connectors with dynamic Elasticsearch and Kibana connectors
 export function getAllConnectors(): ConnectorContract[] {
+  // Return cached connectors if available
+  if (allConnectorsCache !== null) {
+    return allConnectorsCache;
+  }
+  
+  // Initialize cache with static and generated connectors
   const elasticsearchConnectors = generateElasticsearchConnectors();
   const kibanaConnectors = generateKibanaConnectors();
-  return [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
+  allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
+  
+  return allConnectorsCache;
 }
 
 export const getOutputSchemaForStepType = (stepType: string) => {
@@ -180,15 +273,52 @@ export const getOutputSchemaForStepType = (stepType: string) => {
   return z.any();
 };
 
-// Dynamic schemas that include all connectors (static + Elasticsearch)
+/**
+ * Get all connectors including dynamic ones from actions client
+ */
+export function getAllConnectorsWithDynamic(
+  dynamicConnectorTypes?: Record<string, {
+    actionTypeId: string;
+    displayName: string;
+    instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
+    enabled?: boolean;
+    enabledInConfig?: boolean;
+    enabledInLicense?: boolean;
+    minimumLicenseRequired?: string;
+  }>
+): ConnectorContract[] {
+  const staticAndGeneratedConnectors = getAllConnectors();
+  
+  // Graceful fallback if dynamic connectors are not available
+  if (!dynamicConnectorTypes || Object.keys(dynamicConnectorTypes).length === 0) {
+    console.debug('Dynamic connectors not available, using static connectors only');
+    return staticAndGeneratedConnectors;
+  }
+  
+  try {
+    const dynamicConnectors = convertDynamicConnectorsToContracts(dynamicConnectorTypes);
+    
+    // Filter out any duplicates (dynamic connectors override static ones with same type)
+    const staticConnectorTypes = new Set(staticAndGeneratedConnectors.map(c => c.type));
+    const uniqueDynamicConnectors = dynamicConnectors.filter(c => !staticConnectorTypes.has(c.type));
+    
+    console.debug(`Added ${uniqueDynamicConnectors.length} dynamic connectors to schema`);
+    return [...staticAndGeneratedConnectors, ...uniqueDynamicConnectors];
+  } catch (error) {
+    console.error('Error processing dynamic connectors, falling back to static connectors:', error);
+    return staticAndGeneratedConnectors;
+  }
+}
+
+// Dynamic schemas that include all connectors (static + Elasticsearch + dynamic)
 // These use lazy loading to keep large generated files out of the main bundle
-export const getWorkflowZodSchema = () => {
-  const allConnectors = getAllConnectors();
+export const getWorkflowZodSchema = (dynamicConnectorTypes?: Record<string, any>) => {
+  const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
 
-export const getWorkflowZodSchemaLoose = () => {
-  const allConnectors = getAllConnectors();
+export const getWorkflowZodSchemaLoose = (dynamicConnectorTypes?: Record<string, any>) => {
+  const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
 };
 

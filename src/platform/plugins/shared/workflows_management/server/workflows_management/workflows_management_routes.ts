@@ -10,6 +10,7 @@
 import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
@@ -28,11 +29,15 @@ import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
 import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
 
+// Note: Display names are now fetched dynamically from the actions plugin
+
 export function defineRoutes(
   router: IRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
-  spaces: SpacesServiceStart
+  spaces: SpacesServiceStart,
+  getActionsClient: () => Promise<import('@kbn/actions-plugin/server').IUnsecuredActionsClient>,
+  getActionsClientWithRequest: (request: import('@kbn/core/server').KibanaRequest) => Promise<any>
 ) {
   router.get(
     {
@@ -145,6 +150,93 @@ export function defineRoutes(
       }
     }
   );
+  
+  // Get available connectors for dynamic schema generation
+  router.get(
+    {
+      path: '/api/workflows/connectors',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const spaceId = spaces.getSpaceId(request);
+        const actionsClient = await getActionsClient();
+        const actionsClientWithRequest = await getActionsClientWithRequest(request);
+        
+        // Get both connectors and action types
+        const [connectors, actionTypes] = await Promise.all([
+          actionsClient.getAll(spaceId),
+          actionsClientWithRequest.listTypes({ includeSystemActionTypes: false })
+        ]);
+        
+        // Note: We now get display names directly from actionTypes, no need for the map
+        
+        // Initialize connectorsByType with ALL available action types
+        const connectorsByType: Record<string, {
+          actionTypeId: string;
+          displayName: string;
+          instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
+          enabled: boolean;
+          enabledInConfig: boolean;
+          enabledInLicense: boolean;
+          minimumLicenseRequired: string;
+        }> = {};
+        
+        // First, add all action types (even those without instances)
+        actionTypes.forEach((actionType: any) => {
+          connectorsByType[actionType.id] = {
+            actionTypeId: actionType.id,
+            displayName: actionType.name,
+            instances: [],
+            enabled: actionType.enabled,
+            enabledInConfig: actionType.enabledInConfig,
+            enabledInLicense: actionType.enabledInLicense,
+            minimumLicenseRequired: actionType.minimumLicenseRequired,
+          };
+        });
+        
+        // Then, populate instances for action types that have connectors
+        connectors.forEach((connector: FindActionResult) => {
+          if (connectorsByType[connector.actionTypeId]) {
+            connectorsByType[connector.actionTypeId].instances.push({
+              id: connector.id,
+              name: connector.name,
+              isPreconfigured: connector.isPreconfigured,
+              isDeprecated: connector.isDeprecated,
+            });
+          }
+        });
+
+        return response.ok({ 
+          body: {
+            connectorTypes: connectorsByType,
+            totalConnectors: connectors.length,
+          }
+        });
+      } catch (error) {
+        logger.error(`Failed to fetch connectors: ${error.message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  
   router.post(
     {
       path: '/api/workflows/search',

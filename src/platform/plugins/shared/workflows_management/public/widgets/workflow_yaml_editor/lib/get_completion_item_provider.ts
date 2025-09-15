@@ -33,14 +33,9 @@ import {
 } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
-// Global cache for connectors (they don't change during runtime)
-let allConnectorsCache: any[] | null = null;
-
+// Use the global connector cache - no need for local caching
 function getCachedAllConnectors(): any[] {
-  if (allConnectorsCache === null) {
-    allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
-  }
-  return allConnectorsCache;
+  return getAllConnectors();
 }
 
 // Cache for built-in step types extracted from schema
@@ -659,7 +654,7 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
   }
 
   try {
-    const allConnectors = getCachedAllConnectors();
+        const allConnectors = getCachedAllConnectors();
     const connector = allConnectors.find((c: any) => c.type === connectorType);
 
     if (!connector || !connector.paramsSchema) {
@@ -813,7 +808,7 @@ function getRequiredParamsForConnector(
   connectorType: string
 ): Array<{ name: string; example?: string; defaultValue?: string }> {
   // Get all connectors (both static and generated)
-  const allConnectors = getCachedAllConnectors();
+        const allConnectors = getCachedAllConnectors();
 
   // Find the connector by type
   const connector = allConnectors.find((c: any) => c.type === connectorType);
@@ -907,32 +902,36 @@ function getRequiredParamsForConnector(
 /**
  * Get appropriate Monaco completion kind for different connector types
  */
+/**
+ * Get the appropriate Monaco completion item kind for a connector type
+ * Uses a simple consistent kind - CSS specificity will handle the custom icons
+ */
 function getConnectorCompletionKind(connectorType: string): monaco.languages.CompletionItemKind {
-  // Map specific connector types to appropriate icons
-  if (connectorType === 'slack') {
-    return monaco.languages.CompletionItemKind.Event; // Will use custom Slack logo
+  // Keep existing special cases for backward compatibility
+  if (connectorType.startsWith('elasticsearch.')) {
+    return monaco.languages.CompletionItemKind.Struct;
   }
-  if (connectorType.startsWith('elasticsearch')) {
-    return monaco.languages.CompletionItemKind.Struct; // Will use custom Elasticsearch logo
+  if (connectorType.startsWith('kibana.')) {
+    return monaco.languages.CompletionItemKind.Module;
   }
-  if (connectorType.startsWith('kibana')) {
-    return monaco.languages.CompletionItemKind.Module; // Will use custom Kibana logo
+  if (connectorType === 'slack' || connectorType === '.slack') {
+    return monaco.languages.CompletionItemKind.Event;
   }
-
-  if (connectorType.startsWith('inference')) {
-    return monaco.languages.CompletionItemKind.Snippet; // Will use custom HTTP icon
+  if (connectorType === 'inference' || connectorType === '.inference') {
+    return monaco.languages.CompletionItemKind.Snippet;
   }
-
-  if (connectorType === 'http') {
-    return monaco.languages.CompletionItemKind.Reference; // Will use custom HTTP icon
-  }
-
-  if (connectorType === 'console') {
-    return monaco.languages.CompletionItemKind.Variable; // Will use custom console icon
-  }
-
-  // Default fallback
+  
+  // For all other connectors, use a consistent kind
+  // CSS specificity will override the default icon
   return monaco.languages.CompletionItemKind.Function;
+}
+
+/**
+ * Get CSS class name for a connector type to enable dynamic icon styling
+ */
+function getConnectorCssClass(connectorType: string): string {
+  const cssClassName = connectorType.replace(/[^a-zA-Z0-9]/g, '-');
+  return `connector-${cssClassName}`;
 }
 
 /**
@@ -959,7 +958,7 @@ function getConnectorTypeSuggestions(
   const builtInStepTypes = getBuiltInStepTypesFromSchema();
 
   // Get all connectors
-  const allConnectors = getCachedAllConnectors();
+        const allConnectors = getCachedAllConnectors();
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
@@ -976,20 +975,29 @@ function getConnectorTypeSuggestions(
       endColumn: Math.max(range.endColumn, 1000),
     };
 
+    // Find display name for this connector type - only for dynamic connectors
+    const connector = allConnectors.find((c: any) => c.type === connectorType);
+    
+    // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
+    const isDynamicConnector = !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
+    const displayName = isDynamicConnector && connector?.description
+      ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
+      : connectorType;
+
     return {
-      label: connectorType,
-      kind: getConnectorCompletionKind(connectorType), // Use custom icon mapping
-      insertText: simpleText,
+      label: displayName, // Show display name for dynamic connectors, technical name for ES/Kibana
+      kind: getConnectorCompletionKind(connectorType), // Use consistent kind
+      insertText: simpleText, // Still insert the actual actionTypeId
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: extendedRange,
+      detail: connectorType, // Show the actual type as detail
       documentation: connectorType.startsWith('elasticsearch.')
         ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
         : connectorType.startsWith('kibana.')
         ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-        : `Workflow connector - ${connectorType}`,
+        : connector?.description || `Workflow connector - ${connectorType}`,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
-      detail: 'Insert connector with parameters',
       preselect: false,
     };
   };

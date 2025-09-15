@@ -12,6 +12,7 @@ import { jsx } from '@emotion/react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +25,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
-import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose, addDynamicConnectorsToCache } from '../../../../common/schema';
+import { useAvailableConnectors } from '../../../hooks/use_available_connectors';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -43,6 +45,7 @@ import {
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
+
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
@@ -190,32 +193,242 @@ const getTriggerNodesWithType = (yamlDocument: YAML.Document): any[] => {
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
 const useWorkflowJsonSchema = () => {
-  // Generate JSON schema dynamically to include all current connectors
+  const { data: connectorsData } = useAvailableConnectors();
+  
+  // Generate JSON schema dynamically to include all current connectors (static + dynamic)
   // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
-      const zodSchema = getWorkflowZodSchema();
+      const zodSchema = getWorkflowZodSchema(connectorsData?.connectorTypes);
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
-      // Post-process to improve validation messages and reduce duplicate suggestions
-      const processedSchema = improveTypeFieldDescriptions(jsonSchema);
+      // Post-process to improve validation messages and add display names for connectors
+      const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
 
       return processedSchema ?? null;
     } catch (error) {
       // console.error('🚨 Schema generation failed:', error);
       return null;
     }
-  }, []);
+  }, [connectorsData?.connectorTypes]);
 };
 
 /**
- * Since we implemented custom error formatting at the validation level,
- * we no longer need to modify the schema. The full validation works with
- * user-friendly error messages.
+ * Enhance the JSON schema to show display names for connector types
+ * This improves the Monaco YAML autocompletion experience
  */
-function improveTypeFieldDescriptions(schema: any): any {
-  // Return schema as-is - custom error formatter handles user experience
-  return schema;
+function improveTypeFieldDescriptions(schema: any, connectorsData?: any): any {
+  if (!schema || !connectorsData?.connectorTypes) {
+    return schema;
+  }
+
+  // Create a mapping from actionTypeId to display name
+  const typeToDisplayName: Record<string, string> = {};
+  Object.values(connectorsData.connectorTypes).forEach((connector: any) => {
+    typeToDisplayName[connector.actionTypeId] = connector.displayName;
+  });
+
+  // Recursively enhance the schema to add titles for connector types
+  function enhanceSchema(obj: any): any {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(enhanceSchema);
+    }
+
+    const enhanced = { ...obj };
+
+    // Look for discriminated union schemas with connector types
+    if (enhanced.anyOf || enhanced.oneOf) {
+      const unionArray = enhanced.anyOf || enhanced.oneOf;
+      const enhancedUnion = unionArray.map((item: any) => {
+        if (item.properties?.type?.const && typeToDisplayName[item.properties.type.const]) {
+          return {
+            ...item,
+            title: typeToDisplayName[item.properties.type.const],
+            properties: {
+              ...item.properties,
+              type: {
+                ...item.properties.type,
+                title: typeToDisplayName[item.properties.type.const],
+                description: `${typeToDisplayName[item.properties.type.const]} connector`
+              }
+            }
+          };
+        }
+        return enhanceSchema(item);
+      });
+      
+      if (enhanced.anyOf) {
+        enhanced.anyOf = enhancedUnion;
+      } else {
+        enhanced.oneOf = enhancedUnion;
+      }
+    }
+
+    // Recursively enhance nested objects
+    Object.keys(enhanced).forEach(key => {
+      if (key !== 'anyOf' && key !== 'oneOf') {
+        enhanced[key] = enhanceSchema(enhanced[key]);
+      }
+    });
+
+    return enhanced;
+  }
+
+  return enhanceSchema(schema);
+}
+
+/**
+ * Inject dynamic CSS for connector icons in Monaco autocompletion
+ * This creates CSS rules for each connector type to show custom icons
+ */
+function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, services: any) {
+  console.log('🎯 injectDynamicConnectorIcons called with:', Object.keys(connectorTypes).length, 'connectors');
+  
+  const styleId = 'dynamic-connector-icons';
+  
+  // Remove existing dynamic styles
+  const existingStyle = document.getElementById(styleId);
+  if (existingStyle) {
+    existingStyle.remove();
+  }
+
+  // Generate CSS for each connector type
+  let css = '';
+  
+  Object.values(connectorTypes).forEach((connector: any) => {
+    const connectorType = connector.actionTypeId;
+    const displayName = connector.displayName;
+    
+    // Skip if we already have hardcoded CSS for this connector
+    if (['slack', 'elasticsearch', 'kibana', 'inference'].some(type => connectorType.includes(type))) {
+      return;
+    }
+    
+    // Generate CSS rule for this connector - try multiple targeting strategies
+    const iconBase64 = getConnectorIconBase64(connectorType, services);
+    
+    // Only inject CSS if we successfully generated an icon
+    if (iconBase64) {
+      css += `
+        /* Strategy 1: Target by aria-label content */
+        .monaco-list .monaco-list-row[aria-label*="${connectorType}"] .suggest-icon:before,
+        .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before {
+          background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
+          background-size: 16px 16px !important;
+          background-repeat: no-repeat !important;
+          background-position: center !important;
+          content: " " !important;
+          width: 16px !important;
+          height: 16px !important;
+          display: block !important;
+        }
+        
+        /* Strategy 2: Target by detail text (fallback) */
+        .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before {
+          background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
+        }
+      `;
+    }
+  });
+
+  // Inject the CSS
+  if (css) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = css;
+    document.head.appendChild(style);
+    console.log('✅ Dynamic connector CSS injected:', css.length, 'characters');
+  }
+}
+
+
+/**
+ * Get icon class from action type registry if available
+ */
+function getConnectorIconFromRegistry(connectorType: string, services: any): string | React.ComponentType | null {
+  try {
+    // Try to access triggersActionsUi from services
+    if (services.triggersActionsUi?.actionTypeRegistry) {
+      const registry = services.triggersActionsUi.actionTypeRegistry;
+      if (registry.has(connectorType)) {
+        return registry.get(connectorType).iconClass;
+      }
+    }
+  } catch (error) {
+    console.warn('🔍 Failed to access action type registry for', connectorType, ':', error);
+  }
+  return null;
+}
+
+/**
+ * Map connector types to EUI icon types (fallback)
+ */
+function getEuiIconType(connectorType: string): string {
+  const iconMap: Record<string, string> = {
+    '.email': 'email',
+    '.teams': 'logoMicrosoftTeams',
+    '.jira': 'logoAtlassian',
+    '.webhook': 'logoWebhook',
+    '.slack': 'logoSlack',
+    'elasticsearch.search': 'logoElasticsearch',
+    'elasticsearch.index': 'indexOpen',
+    'kibana.dashboard': 'logoKibana',
+    'kibana.lens': 'lensApp',
+    'http': 'globe',
+    'console': 'console',
+    'inference': 'machineLearningApp',
+    'foreach': 'refresh',
+    'if': 'branch',
+    'parallel': 'list',
+    'merge': 'merge',
+    'wait': 'clock',
+    // Add more mappings as needed
+  };
+  
+  return iconMap[connectorType] || 'apps'; // Default icon
+}
+
+/**
+ * Get base64 encoded SVG icon for a connector type using action registry or EUI icons
+ */
+function getConnectorIconBase64(connectorType: string, services: any): string {
+  console.log('🔍 getConnectorIconBase64 called for:', connectorType);
+  
+  try {
+    // First try to get from action type registry (official icons)
+    const registryIcon = getConnectorIconFromRegistry(connectorType, services);
+    
+    if (registryIcon && typeof registryIcon === 'string') {
+      // Use the official EUI icon from the registry
+      const iconElement = React.createElement(EuiIcon, { type: registryIcon, size: 'm' });
+      const svgString = renderToStaticMarkup(iconElement);
+      const base64 = btoa(svgString);
+      console.log('🔍 Generated icon from registry for', connectorType, 'using iconType:', registryIcon);
+      return base64;
+    }
+    
+    // If registry icon is a React component, we can't easily convert it to base64
+    // so fall back to our EUI mapping
+    if (registryIcon && typeof registryIcon !== 'string') {
+      console.log('🔍 Registry has custom component for', connectorType, ', falling back to EUI mapping');
+    }
+    
+    // Fallback to our EUI mapping
+    const iconType = getEuiIconType(connectorType);
+    const iconElement = React.createElement(EuiIcon, { type: iconType, size: 'm' });
+    const svgString = renderToStaticMarkup(iconElement);
+    const base64 = btoa(svgString);
+    console.log('🔍 Generated fallback EUI icon for', connectorType, 'using iconType:', iconType);
+    return base64;
+  } catch (error) {
+    console.warn('🔍 Failed to generate icon for', connectorType, ':', error);
+    // Fallback to empty string if icon generation fails
+    return '';
+  }
 }
 
 export interface WorkflowYAMLEditorProps {
@@ -260,11 +473,22 @@ export const WorkflowYAMLEditor = ({
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { http, notifications },
+    services: { http, notifications, ...otherServices },
   } = useKibana<CoreStart>();
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
+  const { data: connectorsData } = useAvailableConnectors();
+  
+  // Add dynamic connectors to cache when data is fetched
+  useEffect(() => {
+    if (connectorsData?.connectorTypes) {
+      addDynamicConnectorsToCache(connectorsData.connectorTypes);
+      // Inject dynamic CSS for connector icons
+      injectDynamicConnectorIcons(connectorsData.connectorTypes, { ...otherServices, http, notifications });
+    }
+  }, [connectorsData?.connectorTypes, otherServices, http, notifications]);
+  
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas: SchemasSettings[] = useMemo(() => {
     return [
@@ -308,8 +532,8 @@ export const WorkflowYAMLEditor = ({
 
   // Memoize the schema to avoid re-generating it on every render
   const workflowYamlSchemaLoose = useMemo(() => {
-    return getWorkflowZodSchemaLoose(); // Now uses lazy loading
-  }, []);
+    return getWorkflowZodSchemaLoose(connectorsData?.connectorTypes); // Now uses lazy loading with dynamic connectors
+  }, [connectorsData?.connectorTypes]);
 
   const changesHighlightDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
@@ -1048,7 +1272,7 @@ export const WorkflowYAMLEditor = ({
   };
 
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose); // Use memoized schema
+    return getCompletionItemProvider(workflowYamlSchemaLoose);
   }, [workflowYamlSchemaLoose]);
 
   useEffect(() => {
@@ -1138,25 +1362,25 @@ export const WorkflowYAMLEditor = ({
         /* FOR SHADOW ICONS */
 
         .connector-inline-highlight.connector-elasticsearch::after {
-          background-image: url("data:image/svg+xml;base64,PHN2ZyBkYXRhLXR5cGU9ImxvZ29FbGFzdGljIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSIgdmlld0JveD0iMCAwIDMyIDMyIj4KPHBhdGggZD0iTTI3LjU2NDggMTEuMjQyNUMzMi42NjU0IDEzLjE4MiAzMi40MzczIDIwLjYzNzggMjcuMzE5NyAyMi4zNjk0TDI3LjE1NzYgMjIuNDI0MUwyNi45OTA2IDIyLjM4NTFMMjEuNzEwMyAyMS4xNDY4TDIxLjQ0MjcgMjEuMDg0M0wyMS4zMTU4IDIwLjg0MDFMMTkuOTE1NCAxOC4xNDk3TDE5LjY5ODYgMTcuNzMyN0wyMC4wNTExIDE3LjQyMjJMMjYuOTU1NCAxMS4zNTI4TDI3LjIyNjkgMTEuMTEzNkwyNy41NjQ4IDExLjI0MjVaIiBmaWxsPSIjMEI2NEREIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNMjIuMDQ3MiAyMS4yMzlMMjYuODQ3IDIyLjM2NEwyNy4xNjI1IDIyLjQzODJMMjcuMjczOCAyMi43NDE5TDI3LjMzOTIgMjIuOTMyNEMyNy45NjE1IDI0Ljg5NjIgMjcuMDc5NyAyNi43MTE3IDI1LjY4NjkgMjcuNzI5MkMyNC4yNTI4IDI4Ljc3NjcgMjIuMTc3NSAyOS4wNDg4IDIwLjUwNTIgMjcuNzUwN0wyMC4yMTUyIDI3LjUyNjFMMjAuMjgzNiAyNy4xNjQ4TDIxLjMyMDcgMjEuNzEwN0wyMS40Mzc5IDIxLjA5NjRMMjIuMDQ3MiAyMS4yMzlaIiBmaWxsPSIjOUFEQzMwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNNS4wMTA3NCA5LjYyOTk3TDEwLjI3NzMgMTAuODg0OUwxMC41NTk2IDEwLjk1MjJMMTAuNjgxNiAxMS4yMTU5TDExLjkxNyAxMy44NjUzTDEyLjEwMzUgMTQuMjY2N0wxMS43NzY0IDE0LjU2MzZMNS4wNDI5NyAyMC42NjQyTDQuNzcwNTEgMjAuOTEyMkw0LjQyNTc4IDIwLjc4MDRDMS45Mzg5IDE5LjgzMDMgMC43MjA0MDcgMTcuNDU1OCAwLjc1MTk1MyAxNS4xNTM0QzAuNzgzNjg2IDEyLjg0NTMgMi4wNzMwNSAxMC41MDk0IDQuNjgzNTkgOS42NDQ2Mkw0Ljg0NTcgOS41OTA5MUw1LjAxMDc0IDkuNjI5OTdaIiBmaWxsPSIjMUJBOUY1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNNi4yODEwMSA0LjMxOTgyQzcuNjk3MjMgMy4yMzk0IDkuNzYxMzUgMi45MzM0IDExLjUwMjcgNC4yNTE0NkwxMS43OTk2IDQuNDc3MDVMMTEuNzI5MiA0Ljg0MzI2TDEwLjY3NzUgMTAuMzE2OUwxMC41NTkzIDEwLjkzMjFMOS45NDk5NSAxMC43ODc2TDUuMTUwMTUgOS42NTA4OEw0LjgzMzc0IDkuNTc1NjhMNC43MjMzOSA5LjI3MDAyQzQuMDE1MDcgNy4zMDI5NSA0Ljg3MjYzIDUuMzk0MjkgNi4yODEwMSA0LjMxOTgyWiIgZmlsbD0iI0YwNEU5OCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPHBhdGggZD0iTTEyLjQ2NjEgMTQuNDMzMUwxOS40OTYzIDE3LjY0NEwxOS42ODM4IDE3LjczTDE5Ljc3ODYgMTcuOTEyNkwyMS4zMzQyIDIwLjg5NzlMMjEuNDI5OSAyMS4wODI1TDIxLjM5MDkgMjEuMjg3NkwyMC4yMjQ5IDI3LjM4OTJMMjAuMjAxNCAyNy41MTEyTDIwLjEzMzEgMjcuNjEzOEMxNy40NTM0IDMxLjU3MiAxMy4yMzA1IDMyLjMyNDUgOS44NjQ1IDMwLjg3MzVDNi41MDkzMiAyOS40MjcyIDQuMDMwNyAyNS44MDQ0IDQuNzM5NSAyMS4xMzgyTDQuNzcxNzMgMjAuOTI3Mkw0LjkyOTkzIDIwLjc4MzdMMTEuODEzNyAxNC41MzQ3TDEyLjEwNjcgMTQuMjY5TDEyLjQ2NjEgMTQuNDMzMVoiIGZpbGw9IiMwMkJDQjciIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS4yIi8+CjxwYXRoIGQ9Ik0xMS44OTIzIDQuNDEwMjJDMTQuNDM4MSAwLjY3NjQyNiAxOC43NDEgMC4xMDUzMDMgMjIuMTMzNSAxLjUzOTEyQzI1LjUyNjMgMi45NzMwMiAyOC4xMjMxIDYuNDU5NzkgMjcuMjM2MSAxMC45MDI0TDI3LjE5NyAxMS4xMDE2TDI3LjA0MzcgMTEuMjM1NEwxOS45NzgzIDE3LjQ0ODNMMTkuNjg1MyAxNy43MDYxTDE5LjMzMTggMTcuNTQzTDEyLjMyOTggMTQuMzMyMUwxMi4xMjg3IDE0LjI0MDNMMTIuMDM0OSAxNC4wMzkxTDEwLjY1NSAxMS4wNTE4TDEwLjU3NCAxMC44NzUxTDEwLjYxMTEgMTAuNjg0NkwxMS43OTk2IDQuNjMyODdMMTEuODIzIDQuNTExNzhMMTEuODkyMyA0LjQxMDIyWiIgZmlsbD0iI0ZFQzUxNCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPC9zdmc+");
+          background-image: url("data:image/svg+xml;base64,%BASE64%");
           background-size: contain;
           background-repeat: no-repeat;
         }
 
         .connector-inline-highlight.connector-slack::after {
-          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIj4KICAgIDxwYXRoIGZpbGw9IiNFMDFFNUEiIGQ9Ik02LjgxMjkwMzIzIDMuNDA2NDUxNjFDNi44MTI5MDMyMyA1LjIzODcwOTY4IDUuMzE2MTI5MDMgNi43MzU0ODM4NyAzLjQ4Mzg3MDk3IDYuNzM1NDgzODcgMS42NTE2MTI5IDYuNzM1NDgzODcuMTU0ODM4NzEgNS4yMzg3MDk2OC4xNTQ4Mzg3MSAzLjQwNjQ1MTYxLjE1NDgzODcxIDEuNTc0MTkzNTUgMS42NTE2MTI5LjA3NzQxOTM1NDggMy40ODM4NzA5Ny4wNzc0MTkzNTQ4TDYuODEyOTAzMjMuMDc3NDE5MzU0OCA2LjgxMjkwMzIzIDMuNDA2NDUxNjF6TTguNDkwMzIyNTggMy40MDY0NTE2MUM4LjQ5MDMyMjU4IDEuNTc0MTkzNTUgOS45ODcwOTY3Ny4wNzc0MTkzNTQ4IDExLjgxOTM1NDguMDc3NDE5MzU0OCAxMy42NTE2MTI5LjA3NzQxOTM1NDggMTUuMTQ4Mzg3MSAxLjU3NDE5MzU1IDE1LjE0ODM4NzEgMy40MDY0NTE2MUwxNS4xNDgzODcxIDExLjc0MTkzNTVDMTUuMTQ4Mzg3MSAxMy41NzQxOTM1IDEzLjY1MTYxMjkgMTUuMDcwOTY3NyAxMS44MTkzNTQ4IDE1LjA3MDk2NzcgOS45ODcwOTY3NyAxNS4wNzA5Njc3IDguNDkwMzIyNTggMTMuNTc0MTkzNSA4LjQ5MDMyMjU4IDExLjc0MTkzNTVMOC40OTAzMjI1OCAzLjQwNjQ1MTYxeiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAxNi43NzQpIi8+CiAgICA8cGF0aCBmaWxsPSIjMzZDNUYwIiBkPSJNMTEuODE5MzU0OCA2LjgxMjkwMzIzQzkuOTg3MDk2NzcgNi44MTI5MDMyMyA4LjQ5MDMyMjU4IDUuMzE2MTI5MDMgOC40OTAzMjI1OCAzLjQ4Mzg3MDk3IDguNDkwMzIyNTggMS42NTE2MTI5IDkuOTg3MDk2NzcuMTU0ODM4NzEgMTEuODE5MzU0OC4xNTQ4Mzg3MSAxMy42NTE2MTI5LjE1NDgzODcxIDE1LjE0ODM4NzEgMS42NTE2MTI5IDE1LjE0ODM4NzEgMy40ODM4NzA5N0wxNS4xNDgzODcxIDYuODEyOTAzMjMgMTEuODE5MzU0OCA2LjgxMjkwMzIzek0xMS44MTkzNTQ4IDguNDkwMzIyNThDMTMuNjUxNjEyOSA4LjQ5MDMyMjU4IDE1LjE0ODM4NzEgOS45ODcwOTY3NyAxNS4xNDgzODcxIDExLjgxOTM1NDggMTUuMTQ4Mzg3MSAxMy42NTE2MTI5IDEzLjY1MTYxMjkgMTUuMTQ4Mzg3MSAxMS44MTkzNTQ4IDE1LjE0ODM4NzFMMy40ODM4NzA5NyAxNS4xNDgzODcxQzEuNjUxNjEyOSAxNS4xNDgzODcxLjE1NDgzODcxIDEzLjY1MTYxMjkuMTU0ODM4NzEgMTEuODE5MzU0OC4xNTQ4Mzg3MSA5Ljk4NzA5Njc3IDEuNjUxNjEyOSA4LjQ5MDMyMjU4IDMuNDgzODcwOTcgOC40OTAzMjI1OEwxMS44MTkzNTQ4IDguNDkwMzIyNTh6Ii8+CiAgICA8cGF0aCBmaWxsPSIjMkVCNjdEIiBkPSJNOC40MTI5MDMyMyAxMS44MTkzNTQ4QzguNDEyOTAzMjMgOS45ODcwOTY3NyA5LjkwOTY3NzQyIDguNDkwMzIyNTggMTEuNzQxOTM1NSA4LjQ5MDMyMjU4IDEzLjU3NDE5MzUgOC40OTAzMjI1OCAxNS4wNzA5Njc3IDkuOTg3MDk2NzcgMTUuMDcwOTY3NyAxMS44MTkzNTQ4IDE1LjA3MDk2NzcgMTMuNjUxNjEyOSAxMy41NzQxOTM1IDE1LjE0ODM4NzEgMTEuNzQxOTM1NSAxNS4xNDgzODcxTDguNDEyOTAzMjMgMTUuMTQ4Mzg3MSA4LjQxMjkwMzIzIDExLjgxOTM1NDh6TTYuNzM1NDgzODcgMTEuODE5MzU0OEM2LjczNTQ4Mzg3IDEzLjY1MTYxMjkgNS4yMzg3MDk2OCAxNS4xNDgzODcxIDMuNDA2NDUxNjEgMTUuMTQ4Mzg3MSAxLjU3NDE5MzU1IDE1LjE0ODM4NzEuMDc3NDE5MzU0OCAxMy42NTE2MTI5LjA3NzQxOTM1NDggMTEuODE5MzU0OEwuMDc3NDE5MzU0OCAzLjQ4Mzg3MDk3Qy4wNzc0MTkzNTQ4IDEuNjUxNjEyOSAxLjU3NDE5MzU1LjE1NDgzODcxIDMuNDA2NDUxNjEuMTU0ODM4NzEgNS4yMzg3MDk2OC4xNTQ4Mzg3MSA2LjczNTQ4Mzg3IDEuNjUxNjEyOSA2LjczNTQ4Mzg3IDMuNDgzODcwOTdMNi43MzU0ODM4NyAxMS44MTkzNTQ4eiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTYuNzc0KSIvPgogICAgPHBhdGggZmlsbD0iI0VDQjIyRSIgZD0iTTMuNDA2NDUxNjEgOC40MTI5MDMyM0M1LjIzODcwOTY4IDguNDEyOTAzMjMgNi43MzU0ODM4NyA5LjkwOTY3NzQyIDYuNzM1NDgzODcgMTEuNzQxOTM1NSA2LjczNTQ4Mzg3IDEzLjU3NDE5MzUgNS4yMzg3MDk2OCAxNS4wNzA5Njc3IDMuNDA2NDUxNjEgMTUuMDcwOTY3NyAxLjU3NDE5MzU1IDE1LjA3MDk2NzcuMDc3NDE5MzU0OCAxMy41NzQxOTM1LjA3NzQxOTM1NDggMTEuNzQxOTM1NUwuMDc3NDE5MzU0OCA4LjQxMjkwMzIzIDMuNDA2NDUxNjEgOC40MTI5MDMyM3pNMy40MDY0NTE2MSA2LjczNTQ4Mzg3QzEuNTc0MTkzNTUgNi43MzU0ODM4Ny4wNzc0MTkzNTQ4IDUuMjM4NzA5NjguMDc3NDE5MzU0OCAzLjQwNjQ1MTYxLjA3NzQxOTM1NDggMS41NzQxOTM1NSAxLjU3NDE5MzU1LjA3NzQxOTM1NDggMy40MDY0NTE2MS4wNzc0MTkzNTQ4TDExLjc0MTkzNTUuMDc3NDE5MzU0OEMxMy41NzQxOTM1LjA3NzQxOTM1NDggMTUuMDcwOTY3NyAxLjU3NDE5MzU1IDE1LjA3MDk2NzcgMy40MDY0NTE2MSAxNS4wNzA5Njc3IDUuMjM4NzA5NjggMTMuNTc0MTkzNSA2LjczNTQ4Mzg3IDExLjc0MTkzNTUgNi43MzU0ODM4N0wzLjQwNjQ1MTYxIDYuNzM1NDgzODd6IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNi43NzQgMTYuNzc0KSIvPgogIDwvZz4KPC9zdmc+Cg==");
+          background-image: url("data:image/svg+xml;base64,%BASE64%");
           background-size: contain;
           background-repeat: no-repeat;
         }
 
         .connector-inline-highlight.connector-kibana::after {
-          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQpIj4KICAgIDxwb2x5Z29uIGZpbGw9IiNGMDRFOTgiIHBvaW50cz0iMCAwIDAgMjguNzg5IDI0LjkzNSAuMDE3Ii8+CiAgICA8cGF0aCBjbGFzcz0iZXVpSWNvbl9fZmlsbE5lZ2F0aXZlIiBkPSJNMCwxMiBMMCwyOC43ODkgTDExLjkwNiwxNS4wNTEgQzguMzY4LDEzLjExNSA0LjMxNywxMiAwLDEyIi8+CiAgICA8cGF0aCBmaWxsPSIjMDBCRkIzIiBkPSJNMTQuNDc4NSwxNi42NjQgTDIuMjY3NSwzMC43NTQgTDEuMTk0NSwzMS45OTEgTDI0LjM4NjUsMzEuOTkxIEMyMy4xMzQ1LDI1LjY5OSAxOS41MDM1LDIwLjI3MiAxNC40Nzg1LDE2LjY2NCIvPgogIDwvZz4KPC9zdmc+Cg==");
+          background-image: url("data:image/svg+xml;base64,%BASE64%");
           background-size: contain;
           background-repeat: no-repeat;
         }
 
         .connector-inline-highlight.connector-inference::after {
-          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMiAuNWEuNS41IDAgMCAwLTEgMGMwIC40Mi0uMTMgMS4wNjEtLjUwNiAxLjU4M0MxMC4xMzcgMi41NzkgOS41MzcgMyA4LjUgM2EuNS41IDAgMCAwIDAgMWMxLjAzNyAwIDEuNjM3LjQyIDEuOTk0LjkxN0MxMC44NyA1LjQ0IDExIDYuMDggMTEgNi41YS41LjUgMCAwIDAgMSAwYzAtLjQyLjEzLTEuMDYxLjUwNi0xLjU4My4zNTctLjQ5Ni45NTctLjkxNyAxLjk5NC0uOTE3YS41LjUgMCAwIDAgMC0xYy0xLjAzNyAwLTEuNjM3LS40Mi0xLjk5NC0uOTE3QTIuODUyIDIuODUyIDAgMCAxIDEyIC41Wm0uNTg0IDNhMy4xIDMuMSAwIDAgMS0uODktLjgzMyAzLjQwNyAzLjQwNyAwIDAgMS0uMTk0LS4zMDIgMy40MDcgMy40MDcgMCAwIDEtLjE5NC4zMDIgMy4xIDMuMSAwIDAgMS0uODkuODMzIDMuMSAzLjEgMCAwIDEgLjg5LjgzM2MuMDcuMDk5LjEzNi4yLjE5NC4zMDIuMDU5LS4xMDIuMTIzLS4yMDMuMTk0LS4zMDJhMy4xIDMuMSAwIDAgMSAuODktLjgzM1pNNiAzLjVhLjUuNSAwIDAgMC0xIDB2LjAwNmExLjk4NCAxLjk4NCAwIDAgMS0uMDA4LjE3MyA1LjY0IDUuNjQgMCAwIDEtLjA2My41MiA1LjY0NSA1LjY0NSAwIDAgMS0uNTAxIDEuNTc3Yy0uMjgzLjU2Ni0uNyAxLjExNy0xLjMxNSAxLjUyN0MyLjUwMSA3LjcxIDEuNjYzIDggLjUgOGEuNS41IDAgMCAwIDAgMWMxLjE2MyAwIDIuMDAxLjI5IDIuNjEzLjY5Ny42MTYuNDEgMS4wMzIuOTYgMS4zMTUgMS41MjcuMjg0LjU2Ny40MjggMS4xNC41IDEuNTc3YTUuNjQ1IDUuNjQ1IDAgMCAxIC4wNzIuNjkzdi4wMDVhLjUuNSAwIDAgMCAxIC4wMDF2LS4wMDZhMS45OTUgMS45OTUgMCAwIDEgLjAwOC0uMTczIDYuMTQgNi4xNCAwIDAgMSAuMDYzLS41MmMuMDczLS40MzYuMjE3LTEuMDEuNTAxLTEuNTc3LjI4My0uNTY2LjctMS4xMTcgMS4zMTUtMS41MjdDOC40OTkgOS4yOSA5LjMzNyA5IDEwLjUgOWEuNS41IDAgMCAwIDAtMWMtMS4xNjMgMC0yLjAwMS0uMjktMi42MTMtLjY5Ny0uNjE2LS40MS0xLjAzMi0uOTYtMS4zMTUtMS41MjdhNS42NDUgNS42NDUgMCAwIDEtLjUtMS41NzdBNS42NCA1LjY0IDAgMCAxIDYgMy41MDZWMy41Wm0xLjk4OSA1YTQuNzE3IDQuNzE3IDAgMCAxLS42NTctLjM2NWMtLjc5MS0uNTI4LTEuMzEyLTEuMjI3LTEuNjU0LTEuOTExYTUuOTQzIDUuOTQzIDAgMCAxLS4xNzgtLjM5MWMtLjA1My4xMy0uMTEyLjI2LS4xNzguMzktLjM0Mi42ODUtLjg2MyAxLjM4NC0xLjY1NCAxLjkxMmE0LjcxOCA0LjcxOCAwIDAgMS0uNjU3LjM2NWMuMjM2LjEwOC40NTQuMjMuNjU3LjM2NS43OTEuNTI4IDEuMzEyIDEuMjI3IDEuNjU0IDEuOTExLjA2Ni4xMzEuMTI1LjI2Mi4xNzguMzkxLjA1My0uMTMuMTEyLS4yNi4xNzgtLjM5LjM0Mi0uNjg1Ljg2My0xLjM4NCAxLjY1NC0xLjkxMi4yMDMtLjEzNS40MjEtLjI1Ny42NTctLjM2NVpNMTIuNSA5YS41LjUgMCAwIDEgLjUuNWMwIC40Mi4xMyAxLjA2MS41MDYgMS41ODMuMzU3LjQ5Ni45NTcuOTE3IDEuOTk0LjkxN2EuNS41IDAgMCAxIDAgMWMtMS4wMzcgMC0xLjYzNy40Mi0xLjk5NC45MTdBMi44NTIgMi44NTIgMCAwIDAgMTMgMTUuNWEuNS41IDAgMCAxLTEgMGMwLS40Mi0uMTMtMS4wNjEtLjUwNi0xLjU4My0uMzU3LS40OTYtLjk1Ny0uOTE3LTEuOTk0LS45MTdhLjUuNSAwIDAgMSAwLTFjMS4wMzcgMCAxLjYzNy0uNDIgMS45OTQtLjkxN0EyLjg1MiAyLjg1MiAwIDAgMCAxMiA5LjVhLjUuNSAwIDAgMSAuNS0uNVptLjE5NCAyLjY2N2MuMjMuMzIuNTI0LjYwNy44OS44MzNhMy4xIDMuMSAwIDAgMC0uODkuODMzIDMuNDIgMy40MiAwIDAgMC0uMTk0LjMwMiAzLjQyIDMuNDIgMCAwIDAtLjE5NC0uMzAyIDMuMSAzLjEgMCAwIDAtLjg5LS44MzMgMy4xIDMuMSAwIDAgMCAuODktLjgzM2MuMDctLjA5OS4xMzYtLjIuMTk0LS4zMDIuMDU5LjEwMi4xMjMuMjAzLjE5NC4zMDJaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==");
+          background-image: url("data:image/svg+xml;base64,%BASE64%");
           background-size: contain;
           background-repeat: no-repeat;
         }
