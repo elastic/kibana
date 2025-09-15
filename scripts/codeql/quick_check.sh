@@ -80,12 +80,12 @@ if [ -n "$QUERY_DIR" ]; then
     docker run $PLATFORM_FLAG --rm \
         -v "${DATABASE_PATH}":/workspace/shared \
         -v "${QUERY_DIR}":/workspace/queries $DOCKER_IMAGE \
-        "codeql database analyze --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif /workspace/shared/codeql-db /workspace/queries"
+        "codeql database analyze /workspace/shared/codeql-db /workspace/queries --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif"
 else
     # Use default CodeQL queries
     docker run $PLATFORM_FLAG --rm \
         -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
-        "codeql database analyze --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif /workspace/shared/codeql-db javascript-security-and-quality.qls --download githubsecuritylab/codeql-javascript-queries"
+        "codeql database analyze /workspace/shared/codeql-db javascript-security-and-quality.qls githubsecuritylab/codeql-javascript-queries --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif --download"
 fi
 
 if [ $? -ne 0 ]; then
