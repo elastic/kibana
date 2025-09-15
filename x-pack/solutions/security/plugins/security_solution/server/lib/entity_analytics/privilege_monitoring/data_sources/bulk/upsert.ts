@@ -29,6 +29,7 @@ export const bulkUpsertOperationsFactory =
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
     dataClient.log('info', `Building bulk operations for ${users.length} users`);
+    const now = new Date().toISOString();
     for (const user of users) {
       if (user.existingUserId) {
         // Update user with painless script
@@ -41,6 +42,7 @@ export const bulkUpsertOperationsFactory =
           {
             script: {
               source: `
+              boolean userModified = false;
               if (ctx._source.labels == null) {
                 ctx._source.labels = new HashMap();
               }
@@ -49,15 +51,29 @@ export const bulkUpsertOperationsFactory =
               }
               if (!ctx._source.labels.source_ids.contains(params.source_id)) {
                 ctx._source.labels.source_ids.add(params.source_id);
+                userModified = true;
+              }
+              if (ctx._source.labels.sources == null) {
+                ctx._source.labels.sources = new ArrayList();
               }
               if (!ctx._source.labels.sources.contains("index")) {
                 ctx._source.labels.sources.add("index");
+                userModified = true;
               }
 
-              ctx._source.user.is_privileged = true;
+              if (ctx._source.user.is_privileged != true) {
+                ctx._source.user.is_privileged = true;
+                userModified = true;
+              }
+              
+              if (userModified) {
+                ctx._source['@timestamp'] = params.now;
+                ctx._source.event.ingested = params.now;
+              }
             `,
               params: {
                 source_id: user.sourceId,
+                now,
               },
             },
           }
@@ -68,6 +84,7 @@ export const bulkUpsertOperationsFactory =
         ops.push(
           { index: { _index: userIndexName } },
           {
+            '@timestamp': now,
             user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],

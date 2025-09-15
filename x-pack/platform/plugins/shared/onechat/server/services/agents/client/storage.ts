@@ -17,6 +17,7 @@ const storageSettings = {
   name: agentsIndexName,
   schema: {
     properties: {
+      id: types.keyword({}),
       name: types.keyword({}),
       type: types.keyword({}),
       description: types.text({}),
@@ -31,6 +32,7 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface AgentProperties {
+  id: string;
   name: string;
   type: AgentType;
   description: string;
