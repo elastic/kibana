@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders DashboardSaveModal 1`] = `
-<SavedObjectSaveModal
+<Component
   description="dash description"
   initialCopyOnSave={true}
   objectType="dashboard"
-  onClose={[Function]}
+  onClose={[MockFunction]}
   onSave={[Function]}
   options={
     <React.Fragment>

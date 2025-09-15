@@ -18,18 +18,25 @@ import {
 } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
-import './pipeline_editor.scss';
-
 interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    container: css`
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    `,
+  };
+};
 
 export const PipelineEditor: React.FunctionComponent<Props> = ({ onLoadJson }) => {
   const {
     state: { processors: allProcessors },
   } = usePipelineProcessorsContext();
 
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
 
   const {
     state: { processors, onFailure },
@@ -61,12 +68,7 @@ export const PipelineEditor: React.FunctionComponent<Props> = ({ onLoadJson }) =
         <EuiFlexItem grow={false}>
           <ProcessorsHeader onLoadJson={onLoadJson} hasProcessors={processors.length > 0} />
         </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
-          `}
-          grow={false}
-        >
+        <EuiFlexItem css={styles.container} grow={false}>
           {content}
         </EuiFlexItem>
       </EuiFlexGroup>
