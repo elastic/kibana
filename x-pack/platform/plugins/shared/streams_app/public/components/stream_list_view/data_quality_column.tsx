@@ -23,7 +23,7 @@ export function DataQualityColumn({
 }) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
-  const totalDocsQueryFetch = useStreamsAppFetch(
+  const docsQueryFetch = useStreamsAppFetch(
     async ({ signal, timeState: { start, end } }) => {
       return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
@@ -89,9 +89,7 @@ export function DataQualityColumn({
     }
   );
 
-  const docCount = totalDocsQueryFetch?.value
-    ? Number(totalDocsQueryFetch.value?.values?.[0]?.[0])
-    : 0;
+  const docCount = docsQueryFetch?.value ? Number(docsQueryFetch.value?.values?.[0]?.[0]) : 0;
   const degradedDocCount = degradedDocsQueryFetch?.value
     ? Number(degradedDocsQueryFetch.value?.values?.[0]?.[0])
     : 0;
@@ -99,13 +97,15 @@ export function DataQualityColumn({
     ? Number(failedDocsQueryFetch.value.values?.[0]?.[0])
     : 0;
 
+  const totalDocs = docCount + degradedDocCount + failedDocCount;
+
   const degradedPercentage = calculatePercentage({
-    totalDocs: docCount,
+    totalDocs,
     count: degradedDocCount,
   });
 
   const failedPercentage = calculatePercentage({
-    totalDocs: docCount,
+    totalDocs,
     count: failedDocCount,
   });
 
@@ -121,7 +121,7 @@ export function DataQualityColumn({
     good: i18n.translate('xpack.streams.dataQualityBadge.good', { defaultMessage: 'Good' }),
   };
 
-  return totalDocsQueryFetch.loading ||
+  return docsQueryFetch.loading ||
     failedDocsQueryFetch?.loading ||
     degradedDocsQueryFetch.loading ? (
     <EuiLoadingSpinner />

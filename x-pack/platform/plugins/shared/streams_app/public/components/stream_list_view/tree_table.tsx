@@ -148,7 +148,7 @@ export function StreamsTreeTable({
             ) : null,
         },
         {
-          field: 'dataQiulity',
+          field: 'dataQuality',
           name: DATA_QUALITY_COLUMN_HEADER,
           width: '150px',
           sortable: false,
@@ -160,7 +160,6 @@ export function StreamsTreeTable({
                 considerFailedQuality={
                   item.can_read_failure_store && item.data_stream?.failure_store?.enabled
                 }
-                numDataPoints={25}
               />
             ) : null,
         },
