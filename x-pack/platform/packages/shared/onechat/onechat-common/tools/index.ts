@@ -14,9 +14,10 @@ export {
   editableToolTypes,
 } from './constants';
 export {
+  type ByIdsToolSelection,
   type ToolSelection,
   type ToolSelectionRelevantFields,
-  isValidToolSelection,
+  isByIdsToolSelection,
   toolMatchSelection,
   filterToolsBySelection,
   allToolsSelectionWildcard,

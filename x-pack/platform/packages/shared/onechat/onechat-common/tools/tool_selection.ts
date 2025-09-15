@@ -27,13 +27,13 @@ export const allToolsSelection: ToolSelection[] = [{ tool_ids: [allToolsSelectio
  * @example
  * ```ts
  * // select all available tools
- * const allTools: ToolSelection = { tool_ids: ['*'] }
+ * const allTools: ByIdsToolSelection = { tool_ids: ['*'] }
  *
  * // select toolA and toolB
- * const toolAB: ToolSelection = { tool_ids: ['toolA', 'toolB'] }
+ * const toolAB: ByIdsToolSelection = { tool_ids: ['toolA', 'toolB'] }
  * ```
  */
-export interface ToolSelection {
+export interface ByIdsToolSelection {
   /**
    * List of individual tool ids to select.
    */
@@ -41,9 +41,16 @@ export interface ToolSelection {
 }
 
 /**
- * Check if a given {@link ToolSelection} is valid
+ * All possible subtypes for tool selection - for now there is only one.
  */
-export const isValidToolSelection = (toolSelection: ToolSelection): boolean => {
+export type ToolSelection = ByIdsToolSelection;
+
+/**
+ * Check if a given {@link ToolSelection} is a {@link ByIdsToolSelection}
+ */
+export const isByIdsToolSelection = (
+  toolSelection: ToolSelection
+): toolSelection is ByIdsToolSelection => {
   return 'tool_ids' in toolSelection && Array.isArray(toolSelection.tool_ids);
 };
 
