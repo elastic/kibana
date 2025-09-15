@@ -13,14 +13,13 @@ import {
   EuiIcon,
   EuiText,
   EuiLoadingSpinner,
-  EuiSelectableTemplateSitewide,
-  euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
   useEuiBreakpoint,
   mathWithUnits,
   useEuiMinBreakpoint,
+  EuiPopover,
+  EuiFieldSearch,
 } from '@elastic/eui';
-import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
@@ -42,8 +41,11 @@ import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import type { SearchBarProps } from './types';
 import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_animation';
-import { getOverlayBackdropStyles, getOverlaySearchStyles } from './overlay_styles';
+import { getOverlayBackdropStyles } from './overlay_styles';
 import { VersionSelectorPanel, type DesignVersion } from './version_selector_panel';
+import { CustomSearchList } from './custom_search_list';
+import { addCustomComponent, createDemoCustomComponent } from './custom_components_utils';
+
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -104,9 +106,19 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
   const [isOverlayMode, setIsOverlayMode] = useState(false);
   const [designVersion, setDesignVersion] = useState<DesignVersion>('regular-user');
+  const [customComponents, setCustomComponents] = useState<React.ReactNode[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Highlight animation hook
   const { isHighlighted, triggerHighlight } = useHighlightAnimation(chromeStyle === 'project');
+
+  // Add demo custom components
+  useEffect(() => {
+    if (searchValue === '' && customComponents.length === 0) {
+      const demoComponent = createDemoCustomComponent('demo-custom');
+      addCustomComponent(demoComponent, setCustomComponents);
+    }
+  }, [searchValue, customComponents.length]);
 
   const defaultStyles = css({
     [useEuiBreakpoint(['m', 'l'])]: {
@@ -124,7 +136,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   
   // Overlay styles
   const overlayBackdropStyles = getOverlayBackdropStyles(euiTheme);
-  const overlaySearchStyles = getOverlaySearchStyles(euiTheme, highlightStyles);
 
   const styles = css([baseStyles, highlightStyles]);
   // Initialize searchableTypes data
@@ -143,7 +154,16 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     setIsLoading(true);
   }, [searchValue]);
 
-  // When overlay mode is activated, ensure popover shows immediately
+  // Control popover visibility
+  useEffect(() => {
+    if (initialLoad && (options.length > 0 || customComponents.length > 0)) {
+      setIsPopoverOpen(true);
+    } else {
+      setIsPopoverOpen(false);
+    }
+  }, [initialLoad, options.length, customComponents.length]);
+
+  // When overlay mode is activated, ensure popover shows immediately and focus input
   useEffect(() => {
     if (isOverlayMode && chromeStyle === 'project') {
       // Ensure we have initial load set and trigger search if no options
@@ -156,8 +176,16 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         setOptions([]);
         setIsLoading(false);
       }
+      
+      // Focus the search input and trigger highlight animation when overlay opens
+      setTimeout(() => {
+        if (searchRef) {
+          searchRef.focus();
+          triggerHighlight(); // Trigger highlight animation for overlay mode
+        }
+      }, 100);
     }
-  }, [isOverlayMode, chromeStyle, initialLoad, options.length, isLoading]);
+  }, [isOverlayMode, chromeStyle, initialLoad, options.length, isLoading, searchRef, triggerHighlight]);
 
   const loadSuggestions = useCallback(
     (term: string) => {
@@ -371,25 +399,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [buttonRef, searchRef, reportEvent, isOverlayMode, closeOverlay]
   );
 
-  const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
-      let selectedRank: number | null = null;
-      const selected = selection.find(({ checked }, rank) => {
-        const isChecked = checked === 'on';
-        if (isChecked) {
-          selectedRank = rank + 1;
-        }
-        return isChecked;
-      });
-
-      if (!selected) {
-        return;
-      }
-
-      const selectedLabel = selected.label ?? null;
+  const handleOptionClick = useCallback(
+    (option: EuiSelectableTemplateSitewideOption, event: React.MouseEvent) => {
+      const selectedLabel = option.label ?? null;
+      const selectedRank = options.findIndex(opt => opt.key === option.key) + 1;
 
       // @ts-ignore - ts error is "union type is too complex to express"
-      const { url, type, suggestion } = selected;
+      const { url, type, suggestion } = option;
 
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)
@@ -401,7 +417,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       // errors in tracking should not prevent selection behavior
       try {
         if (type === 'application') {
-          const key = selected.key ?? 'unknown';
+          const key = option.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
           reportEvent.navigateToApplication({
             application,
@@ -441,12 +457,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
       
-      // Close overlay after navigation
+      // Close overlay/popover after navigation
       if (isOverlayMode) {
         setIsOverlayMode(false);
       }
+      setIsPopoverOpen(false);
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue, isOverlayMode]
+    [reportEvent, navigateToUrl, searchRef, searchValue, isOverlayMode, options]
   );
 
   const clearField = () => setSearchValue('');
@@ -457,35 +474,18 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const highlightClassName = isHighlighted ? 'search-highlighted' : undefined;
 
-  const renderSearchComponent = (isOverlay = false) => (
-    <EuiSelectableTemplateSitewide
-      isLoading={isLoading}
-      isPreFiltered
-      onChange={onChange}
-      options={options}
-      css={isOverlay ? overlaySearchStyles : styles}
-      className={highlightClassName}
-      popoverButtonBreakpoints={isOverlay ? [] : ['xs', 's']}
-      singleSelection={true}
-      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
-      colorModes={chromeStyle !== 'project' ? { search: 'dark', popover: 'global' } : undefined}
-      searchable={true}
-      listProps={{
-        className: 'eui-yScroll',
-        css: css`
-          max-block-size: 75vh;
-        `,
-      }}
-      searchProps={{
-        autoFocus: chromeStyle === 'project',
-        value: searchValue,
-        onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
-        'data-test-subj': 'nav-search-input',
-        inputRef: setSearchRef,
-        compressed: isOverlay ? false : true,
-        'aria-label': i18nStrings.placeholderText,
-        placeholder: i18nStrings.placeholderText,
-        onFocus: () => {
+  const renderSearchComponent = (isOverlay = false) => {
+    const searchInput = (
+      <EuiFieldSearch
+        autoFocus={chromeStyle === 'project' && isOverlay}
+        value={searchValue}
+        onInput={(e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value)}
+        data-test-subj="nav-search-input"
+        inputRef={setSearchRef}
+        compressed={isOverlay ? false : true}
+        aria-label={i18nStrings.placeholderText}
+        placeholder={i18nStrings.placeholderText}
+        onFocus={() => {
           reportEvent.searchFocus();
           setInitialLoad(true);
           triggerHighlight();
@@ -495,41 +495,141 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             if (!initialLoad) {
               setInitialLoad(true);
             }
+          } else {
+            // For non-project chrome, open popover on focus
+            setIsPopoverOpen(true);
           }
-        },
-        onBlur: (e) => {
+        }}
+        onBlur={(e) => {
           reportEvent.searchBlur();
-          // Delay closing overlay to allow for clicks on search results
+          // Delay closing overlay/popover to allow for clicks on search results
           setTimeout(() => {
             if (isOverlayMode && !e.currentTarget.contains(document.activeElement)) {
               setIsOverlayMode(false);
             }
+            // For non-project chrome, close popover on blur if no results are being interacted with
+            if (chromeStyle !== 'project' && !e.currentTarget.contains(document.activeElement)) {
+              const popover = document.querySelector('[data-test-subj="nav-search-popover"]');
+              if (popover && !popover.contains(document.activeElement)) {
+                setIsPopoverOpen(false);
+              }
+            }
           }, 150);
-        },
-        fullWidth: true,
-      }}
-      errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
-      emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
-      popoverProps={{
-        zIndex: isOverlay ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.navigation),
-        'data-test-subj': 'nav-search-popover',
-        panelClassName: 'navSearch__panel',
-        repositionOnScroll: !isOverlay,
-        popoverRef: setButtonRef,
-        panelStyle: { marginTop: '6px' },
-        hasArrow: false,
-        anchorPosition: isOverlay ? 'downCenter' : undefined,
-        isOpen: isOverlay ? true : undefined,
-      }}
-      popoverButton={
-        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
-          <EuiIcon type="search" size="m" />
-        </EuiHeaderSectionItemButton>
+        }}
+        fullWidth={true}
+        css={css`
+          .euiFormControlLayout {
+            ${isOverlay ? `
+              border-radius: ${euiTheme.border.radius.medium};
+              box-shadow: 0 6px 36px -4px rgba(69, 90, 100, 0.3), 0 24px 64px -8px rgba(69, 90, 100, 0.3);
+              background-color: ${euiTheme.colors.backgroundBasePlain};
+            ` : ''}
+          }
+          ${highlightStyles}
+        `}
+        className={highlightClassName}
+      />
+    );
+
+    const listContent = (() => {
+      if (searchCharLimitExceeded) {
+        return <SearchCharLimitExceededMessage {...props} />;
       }
-      popoverFooter={<PopoverFooter isMac={isMac} />}
-    />
-  );
+      
+      if (!initialLoad || (!options.length && !customComponents.length && isLoading)) {
+        return <EmptyMessage />;
+      }
+      
+      if (!options.length && !customComponents.length) {
+        return <PopoverPlaceholder basePath={props.basePathUrl} />;
+      }
+
+      return (
+        <CustomSearchList
+          options={options}
+          searchValue={searchValue}
+          onOptionClick={handleOptionClick}
+          isLoading={isLoading}
+          customComponents={customComponents}
+          emptyMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
+        />
+      );
+    })();
+
+    const popoverContent = (
+      <div
+        css={css`
+          width: 600px;
+          max-width: 90vw;
+        `}
+      >
+        {listContent}
+        <PopoverFooter isMac={isMac} />
+      </div>
+    );
+
+    // For project chrome style, handle overlay mode differently
+    if (chromeStyle === 'project') {
+      return isOverlay ? (
+        <div
+          css={css`
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            ${highlightStyles}
+          `}
+          className={highlightClassName}
+        >
+          {searchInput}
+          <div
+            css={css`
+              position: absolute;
+              top: 100%;
+              left: 0;
+              right: 0;
+              z-index: ${Number(euiTheme.levels.modal) + 1};
+              margin-top: 8px;
+              border-radius: ${euiTheme.border.radius.medium};
+              box-shadow: 0 6px 36px -4px rgba(69, 90, 100, 0.3), 0 24px 64px -8px rgba(69, 90, 100, 0.3);
+              background-color: ${euiTheme.colors.backgroundBasePlain};
+            `}
+          >
+            {popoverContent}
+          </div>
+        </div>
+      ) : (
+        <div css={highlightStyles} className={highlightClassName}>
+          {searchInput}
+        </div>
+      );
+    }
+
+    // For non-project chrome styles, use regular popover
+    return (
+      <EuiPopover
+        button={
+          <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
+            <EuiIcon type="search" size="m" />
+          </EuiHeaderSectionItemButton>
+        }
+        isOpen={isPopoverOpen && !isOverlay}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        zIndex={Number(euiTheme.levels.navigation)}
+        data-test-subj="nav-search-popover"
+        panelClassName="navSearch__panel"
+        repositionOnScroll={true}
+        popoverRef={setButtonRef}
+        panelStyle={{ marginTop: '6px' }}
+        hasArrow={false}
+        css={styles}
+        className={highlightClassName}
+      >
+        {searchInput}
+        {popoverContent}
+      </EuiPopover>
+    );
+  };
 
   return (
     <>
