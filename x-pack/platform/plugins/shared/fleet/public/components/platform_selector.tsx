@@ -49,6 +49,7 @@ interface Props {
   fullCopyButton?: boolean;
   fleetServerHost?: string;
   onCopy?: () => void;
+  hasCloudbeatIntegration?: boolean;
 }
 
 export const PlatformSelector: React.FunctionComponent<Props> = ({
@@ -62,6 +63,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   fleetServerHost,
   fullCopyButton,
   onCopy,
+  hasCloudbeatIntegration,
 }) => {
   const { platform, setPlatform } = usePlatform();
   const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
@@ -128,6 +130,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       })}
       color="warning"
       iconType="warning"
+    />
+  );
+
+  const cloudbeatUnsupportedPlatformCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.cloudbeatUnsupportedPlatformCallout', {
+        defaultMessage:
+          'Cloudbeat only supports Linux and Kubernetes platforms. This platform is not supported and the agent will not function correctly.',
+      })}
+      color="danger"
+      iconType="error"
     />
   );
 
@@ -214,7 +227,13 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
+        {hasCloudbeatIntegration && ['mac_aarch64', 'mac_x86_64', 'windows', 'windows_msi', 'deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
+          <>
+            {cloudbeatUnsupportedPlatformCallout}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {!hasCloudbeatIntegration && ['mac_aarch64', 'mac_x86_64'].includes(platform) &&
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
             cloudSecurityIntegration?.integrationType ===

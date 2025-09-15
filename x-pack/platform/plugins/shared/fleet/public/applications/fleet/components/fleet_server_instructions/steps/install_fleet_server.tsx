@@ -130,6 +130,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         hasK8sIntegration={false}
         hasK8sIntegrationMultiPage={false}
         hasFleetServer={true}
+        hasCloudbeatIntegration={false}
       />
     </>
   );
