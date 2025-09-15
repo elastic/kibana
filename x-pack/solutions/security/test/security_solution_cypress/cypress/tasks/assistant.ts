@@ -293,7 +293,8 @@ export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted')
 
 export const shareConversationWithUser = (user: string) => {
   // Clear the input first to ensure clean state
-  cy.get(USER_PROFILES_SEARCH).find('input').clear().type(user);
+  cy.get(USER_PROFILES_SEARCH).find('input').clear();
+  cy.get(USER_PROFILES_SEARCH).find('input').type(user);
 
   // Wait for the user profile options to load after typing with explicit timeout
   cy.get(USER_PROFILES_SEARCH)
