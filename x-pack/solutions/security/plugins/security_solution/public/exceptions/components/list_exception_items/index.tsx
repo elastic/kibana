@@ -22,7 +22,6 @@ import { getFormattedComments } from '../../utils/ui.helpers';
 import { LinkToRuleDetails } from '../link_to_rule_details';
 import { ExceptionsUtility } from '../exceptions_utility';
 import * as i18n from '../../translations/list_exception_items';
-import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 import { ShowValueListModal } from '../../../value_list/components/show_value_list_modal';
 
 interface ListExceptionItemsProps {
@@ -60,8 +59,6 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   onPaginationChange,
   onCreateExceptionListItem,
 }) => {
-  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
-
   const editButtonText = useMemo(() => {
     return listType === ExceptionListTypeEnum.ENDPOINT
       ? i18n.EXCEPTION_ITEM_CARD_EDIT_ENDPOINT_LABEL
@@ -80,7 +77,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         viewerStatus={viewerStatus as ViewerStatus}
         listType={listType as ExceptionListTypeEnum}
         ruleReferences={ruleReferences}
-        isReadOnly={isReadOnly || !canWriteEndpointExceptions}
+        isReadOnly={isReadOnly}
         exceptions={exceptions}
         emptyViewerTitle={emptyViewerTitle}
         emptyViewerBody={emptyViewerBody}
