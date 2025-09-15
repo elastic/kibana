@@ -29,6 +29,16 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
       });
     },
+    async navigateToElasticsearchHome(expectRedirect: boolean = false) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('searchHomepage', {
+          shouldLoginIfPrompted: false,
+        });
+        if (!expectRedirect) {
+          await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
+        }
+      });
+    },
     async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('elasticsearchStart', {
