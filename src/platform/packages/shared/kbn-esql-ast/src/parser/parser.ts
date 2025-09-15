@@ -358,6 +358,7 @@ export class Parser {
             endColumn: 0,
             message: `Invalid query [${this.src}]`,
             severity: 'error',
+            code: 'parseError',
           },
         ],
         tokens: [],
