@@ -100,6 +100,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
+            spaceBefore: null,
             children: [
               {
                 id: 'apm',
@@ -201,6 +202,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
+            spaceBefore: null,
             iconV2: 'storage',
             children: [
               {
@@ -265,6 +267,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
+            spaceBefore: null,
             iconV2: 'info',
             renderAs: 'panelOpener',
             children: [
@@ -334,6 +337,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.otherTools', {
               defaultMessage: 'Other tools',
             }),
+            spaceBefore: null,
             renderAs: 'panelOpener',
             children: [
               {
