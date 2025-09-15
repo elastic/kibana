@@ -263,7 +263,7 @@ export const getControlButtonTitle = () =>
 
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Filter control',
+    defaultMessage: 'Control',
   });
 
 export const getAddESQLControlButtonTitle = () =>

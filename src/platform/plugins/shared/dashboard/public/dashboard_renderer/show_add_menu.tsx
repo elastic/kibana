@@ -65,6 +65,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
   const panels = [
     {
       id: 0,
+      initialFocusedItemIndex: 0,
       items: [
         {
           name: getCreateVisualizationButtonTitle(),
@@ -156,37 +157,19 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
     {
       id: 1,
       title: getControlButtonTitle(),
-      initialFocusedItemIndex: 1,
+      initialFocusedItemIndex: 0,
       items: [
         {
           name: getAddControlButtonTitle(),
-          icon: 'plusInCircle',
+          icon: 'empty',
           onClick: () => {
             controlGroupApi?.openAddDataControlFlyout({ onSave });
             closePopover();
           },
         },
         {
-          name: getAddTimeSliderControlButtonTitle(),
-          icon: 'timeslider',
-          onClick: async () => {
-            controlGroupApi?.addNewPanel({
-              panelType: TIME_SLIDER_CONTROL,
-              serializedState: {
-                rawState: {
-                  grow: true,
-                  width: 'large',
-                  id: uuidv4(),
-                },
-              },
-            });
-            dashboardApi.scrollToTop();
-            closePopover();
-          },
-        },
-        {
           name: getAddESQLControlButtonTitle(),
-          icon: 'plusInCircle',
+          icon: 'empty',
           onClick: async () => {
             try {
               const variablesInParent = apiPublishesESQLVariables(dashboardApi)
@@ -216,6 +199,24 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
               // eslint-disable-next-line no-console
               console.error('Error getting ESQL control trigger', e);
             }
+            closePopover();
+          },
+        },
+        {
+          name: getAddTimeSliderControlButtonTitle(),
+          icon: 'empty',
+          onClick: async () => {
+            controlGroupApi?.addNewPanel({
+              panelType: TIME_SLIDER_CONTROL,
+              serializedState: {
+                rawState: {
+                  grow: true,
+                  width: 'large',
+                  id: uuidv4(),
+                },
+              },
+            });
+            dashboardApi.scrollToTop();
             closePopover();
           },
         },
