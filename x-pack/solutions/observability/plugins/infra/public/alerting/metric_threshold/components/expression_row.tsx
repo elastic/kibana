@@ -267,10 +267,6 @@ export const ExpressionRow = ({
                 <EuiSpacer size={'xs'} />
                 <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                   <EuiButtonEmpty
-                    aria-label={i18n.translate(
-                      'xpack.infra.expressionRow.addwarningthresholdButton.ariaLabel',
-                      { defaultMessage: 'Add warning threshold' }
-                    )}
                     data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
                     flush={'left'}

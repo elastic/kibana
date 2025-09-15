@@ -28,9 +28,10 @@ export const CopyToClipboardButton: FunctionComponent<CopyToClipboardButtonProps
           {...rest}
         >
           {children ??
-            i18n.translate('xpack.observability.copyToClipboardButton.copyToClipboardButtonLabel', {
-              defaultMessage: 'Copy to clipboard',
-            })}
+            i18n.translate(
+              'xpack.observability_onboarding.copyToClipboardButton.copyToClipboardButtonLabel',
+              { defaultMessage: 'Copy to clipboard' }
+            )}
         </EuiButton>
       )}
     </EuiCopy>

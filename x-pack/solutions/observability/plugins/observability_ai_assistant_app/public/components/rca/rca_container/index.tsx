@@ -109,7 +109,7 @@ export function RootCauseAnalysisContainer({
       }}
       iconType="crossInCircle"
     >
-      {i18n.translate('xpack.observability.rca.clearButtonLabel', {
+      {i18n.translate('xpack.observabilityAiAssistant.rca.clearButtonLabel', {
         defaultMessage: 'Clear',
       })}
     </EuiButton>
@@ -125,7 +125,7 @@ export function RootCauseAnalysisContainer({
       }}
       iconType="refresh"
     >
-      {i18n.translate('xpack.observability.rca.restartButtonLabel', {
+      {i18n.translate('xpack.observabilityAiAssistant.rca.restartButtonLabel', {
         defaultMessage: 'Restart',
       })}
     </EuiButton>
@@ -151,7 +151,7 @@ export function RootCauseAnalysisContainer({
   } else if (error) {
     elements.push(
       <RootCauseAnalysisStepItem
-        label={i18n.translate('xpack.observability.rca.analysisError', {
+        label={i18n.translate('xpack.observabilityAiAssistant.rca.analysisError', {
           defaultMessage: 'Failed to complete analysis: {errorMessage}',
           values: {
             errorMessage: error.message,
@@ -178,7 +178,7 @@ export function RootCauseAnalysisContainer({
               font-weight: ${theme.euiTheme.font.weight.bold};
             `}
           >
-            {i18n.translate('xpack.observability.rca.analysisCompleted', {
+            {i18n.translate('xpack.observabilityAiAssistant.rca.analysisCompleted', {
               defaultMessage: 'Completed analysis',
             })}
           </EuiText>
@@ -235,7 +235,7 @@ function getLoadingLabel(events?: RootCauseAnalysisEvent[]) {
       return (
         <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
           <EuiText size="s">
-            {i18n.translate('xpack.observability.rca.investigatingEntitiesTextLabel', {
+            {i18n.translate('xpack.observabilityAiAssistant.rca.investigatingEntitiesTextLabel', {
               defaultMessage: 'Investigating entities',
             })}
           </EuiText>
@@ -260,13 +260,13 @@ function getLoadingLabel(events?: RootCauseAnalysisEvent[]) {
     }
 
     if (pendingToolCalls[0]?.function.name === RCA_END_PROCESS_TOOL_NAME) {
-      return i18n.translate('xpack.observability.rca.finalizingReport', {
+      return i18n.translate('xpack.observabilityAiAssistant.rca.finalizingReport', {
         defaultMessage: 'Finalizing report',
       });
     }
   }
 
-  return i18n.translate('xpack.observability.rca.analysisLoadingLabel', {
+  return i18n.translate('xpack.observabilityAiAssistant.rca.analysisLoadingLabel', {
     defaultMessage: 'Thinking...',
   });
 }
@@ -274,7 +274,7 @@ function getLoadingLabel(events?: RootCauseAnalysisEvent[]) {
 function getToolResponseErrorItem(response: ToolErrorMessage['response']) {
   return (
     <RootCauseAnalysisStepItem
-      label={i18n.translate('xpack.observability.rca.toolResponseError', {
+      label={i18n.translate('xpack.observabilityAiAssistant.rca.toolResponseError', {
         defaultMessage: 'Failed to execute task: {errorMessage}',
         values: {
           errorMessage: response.error.message,
@@ -327,7 +327,7 @@ function getObservationItem(
       break;
 
     case 'error':
-      content = i18n.translate('xpack.observability.rca.failedObservation', {
+      content = i18n.translate('xpack.observabilityAiAssistant.rca.failedObservation', {
         defaultMessage: 'Failed to generate observations',
       });
       break;

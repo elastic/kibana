@@ -38,7 +38,7 @@ export function Header() {
           <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
             <h1>
               <FormattedMessage
-                id="xpack.observability.experimentalOnboardingFlow.addObservabilityDataTitleLabel"
+                id="xpack.observability_onboarding.experimentalOnboardingFlow.addObservabilityDataTitleLabel"
                 defaultMessage="Add Observability data"
               />
             </h1>
@@ -46,7 +46,7 @@ export function Header() {
           <EuiSpacer size="s" />
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.observability.experimentalOnboardingFlow.startIngestingDataIntoTextLabel"
+              id="xpack.observability_onboarding.experimentalOnboardingFlow.startIngestingDataIntoTextLabel"
               defaultMessage="Start ingesting Observability data into Elastic. Return to this page at any time by clicking Add data."
             />
           </EuiText>

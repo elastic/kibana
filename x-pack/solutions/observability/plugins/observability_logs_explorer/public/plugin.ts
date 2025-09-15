@@ -25,7 +25,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const title = i18n.translate('xpack.observability.appTitle', {
+    const title = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
       defaultMessage: 'Logs explorer',
     });
 

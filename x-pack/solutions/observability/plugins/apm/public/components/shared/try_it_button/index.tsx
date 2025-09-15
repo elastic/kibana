@@ -172,9 +172,6 @@ export function TryItButton({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={hideThisContent}>
           <EuiButtonIcon
-            aria-label={i18n.translate('xpack.apm.hideThisButton.[objectObject]Button.ariaLabel', {
-              defaultMessage: '[object Object]',
-            })}
             data-test-subj="apmHideThisButtonButton"
             iconType="cross"
             onClick={() => {

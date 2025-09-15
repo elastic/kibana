@@ -23,9 +23,12 @@ import type {
 } from '../plugin';
 import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
 
-export const onBoardingTitle = i18n.translate('xpack.observability.breadcrumbs.onboarding', {
-  defaultMessage: 'Onboarding',
-});
+export const onBoardingTitle = i18n.translate(
+  'xpack.observability_onboarding.breadcrumbs.onboarding',
+  {
+    defaultMessage: 'Onboarding',
+  }
+);
 
 export const breadcrumbsApp = {
   id: 'observabilityOnboarding',

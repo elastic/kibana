@@ -171,7 +171,7 @@ test.describe('Onboarding UI Validation', () => {
     { tag: ['@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       await test.step('hides Application tile in logs-essentials tier', async () => {
-        await expect(pageObjects.onboarding.applicationUseCaseTile).toBeHidden();
+        await expect(pageObjects.onboarding.applicationUseCaseTile).not.toBeVisible();
       });
     }
   );

@@ -86,9 +86,12 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       return hasBeenOpened
         ? service.start({ signal }).catch((error) => {
             notifications.toasts.addError(error, {
-              title: i18n.translate('xpack.observability.navControl.initFailureErrorTitle', {
-                defaultMessage: 'Failed to initialize Observability AI Assistant',
-              }),
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.navControl.initFailureErrorTitle',
+                {
+                  defaultMessage: 'Failed to initialize Observability AI Assistant',
+                }
+              ),
             });
 
             setHasBeenOpened(false);
@@ -143,14 +146,16 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   return (
     <>
       <EuiToolTip
-        content={i18n.translate('xpack.observability.navControl.openTheAIAssistantPopoverLabel', {
-          defaultMessage: 'Keyboard shortcut Ctrl ;',
-        })}
+        content={i18n.translate(
+          'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
+          { defaultMessage: 'Keyboard shortcut Ctrl ;' }
+        )}
       >
         <EuiButtonBasicOrEmpty
-          aria-label={i18n.translate('xpack.observability.navControl.assistantNavLinkAriaLabel', {
-            defaultMessage: 'Open the AI Assistant',
-          })}
+          aria-label={i18n.translate(
+            'xpack.observabilityAiAssistant.navControl.assistantNavLinkAriaLabel',
+            { defaultMessage: 'Open the AI Assistant' }
+          )}
           data-test-subj="observabilityAiAssistantAppNavControlButton"
           onClick={() => {
             service.conversations.openNewConversation({
@@ -162,7 +167,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           iconType={AssistantIcon}
           isLoading={chatService.loading}
         >
-          {i18n.translate('xpack.observability.navControl.assistantNavLink', {
+          {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
             defaultMessage: 'AI Assistant',
           })}
         </EuiButtonBasicOrEmpty>

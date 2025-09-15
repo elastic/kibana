@@ -328,10 +328,6 @@ const CreateJobTab = (props: CreateJobTab) => {
               <>
                 {props.hasHostJobs && (
                   <EuiButtonEmpty
-                    aria-label={i18n.translate(
-                      'xpack.infra.createJobTab.recreatejobsButton.ariaLabel',
-                      { defaultMessage: 'Recreate jobs' }
-                    )}
                     data-test-subj="infraCreateJobTabRecreateJobsButton"
                     onClick={props.createHosts}
                   >
@@ -378,10 +374,6 @@ const CreateJobTab = (props: CreateJobTab) => {
                 <>
                   {props.hasK8sJobs && (
                     <EuiButtonEmpty
-                      aria-label={i18n.translate(
-                        'xpack.infra.createJobTab.recreatejobsButton.ariaLabel',
-                        { defaultMessage: 'Recreate jobs' }
-                      )}
                       data-test-subj="infraCreateJobTabRecreateJobsButton"
                       onClick={props.createK8s}
                     >

@@ -144,10 +144,6 @@ function BottomSection({
         <EuiFlexItem style={{ alignItems: 'center' }}>
           <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
             <EuiButtonEmpty
-              aria-label={i18n.translate(
-                'xpack.apm.bottomSection.createcustomlinkButton.ariaLabel',
-                { defaultMessage: 'Create custom link' }
-              )}
               data-test-subj="apmBottomSectionCreateCustomLinkButton"
               isDisabled={!canSave}
               iconType="plusInCircle"
@@ -170,9 +166,6 @@ function BottomSection({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButtonEmpty
-            aria-label={i18n.translate('xpack.apm.bottomSection.button.ariaLabel', {
-              defaultMessage: '',
-            })}
             data-test-subj="apmBottomSectionButton"
             iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
             onClick={toggleShowAll}

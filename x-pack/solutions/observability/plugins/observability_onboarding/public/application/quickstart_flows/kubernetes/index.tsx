@@ -21,7 +21,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 export const KubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability.autoDetectPanel.breadcrumbs.k8s', {
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
       defaultMessage: 'Kubernetes: Logs & Metrics',
     }),
   });
@@ -51,7 +51,7 @@ export const KubernetesPanel: React.FC = () => {
   const steps = [
     {
       title: i18n.translate(
-        'xpack.observability.experimentalOnboardingFlow.kubernetes.installStepTitle',
+        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.installStepTitle',
         {
           defaultMessage: 'Install standalone Elastic Agent on your Kubernetes cluster',
         }
@@ -79,7 +79,7 @@ export const KubernetesPanel: React.FC = () => {
     },
     {
       title: i18n.translate(
-        'xpack.observability.experimentalOnboardingFlow.kubernetes.monitorStepTitle',
+        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.monitorStepTitle',
         {
           defaultMessage: 'Monitor your Kubernetes cluster',
         }

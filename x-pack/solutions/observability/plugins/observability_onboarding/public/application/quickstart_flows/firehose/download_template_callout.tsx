@@ -14,7 +14,7 @@ import { FIREHOSE_CLOUDFORMATION_TEMPLATE_URL } from '../../../../common/aws_fir
 export function DownloadTemplateCallout() {
   return (
     <FormattedMessage
-      id="xpack.observability.firehosePanel.downloadTemplateDescription"
+      id="xpack.observability_onboarding.firehosePanel.downloadTemplateDescription"
       defaultMessage="{downloadLink} to review the default settings. If needed, you can modify the default settings and use the template with your existing IaC setup."
       values={{
         downloadLink: (
@@ -24,7 +24,7 @@ export function DownloadTemplateCallout() {
             download={true}
           >
             {i18n.translate(
-              'xpack.observability.firehosePanel.downloadCloudFormationTemplateButtonLabel',
+              'xpack.observability_onboarding.firehosePanel.downloadCloudFormationTemplateButtonLabel',
               { defaultMessage: 'Download the CloudFormation template' }
             )}
           </EuiLink>

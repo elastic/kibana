@@ -62,9 +62,6 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
         })}
         button={
           <EuiButtonEmpty
-            aria-label={i18n.translate('xpack.infra.filterAction.button.ariaLabel', {
-              defaultMessage: '',
-            })}
             data-test-subj="hostsViewTableSelectHostsFilterButton"
             size="xs"
             flush="left"
@@ -77,9 +74,6 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
         }
       >
         <EuiButtonEmpty
-          aria-label={i18n.translate('xpack.infra.filterAction.addfilterButton.ariaLabel', {
-            defaultMessage: 'Add filter',
-          })}
           data-test-subj="hostsViewTableAddFilterButton"
           iconType="filter"
           onClick={onAddFilterClick}

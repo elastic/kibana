@@ -46,17 +46,20 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
         title={
           <h2>
             {i18n.translate(
-              'xpack.observability.autoDetectPanel.h2.contactYourAdministratorForLabel',
+              'xpack.observability_onboarding.autoDetectPanel.h2.contactYourAdministratorForLabel',
               { defaultMessage: 'Contact your administrator for access' }
             )}
           </h2>
         }
         body={
           <p>
-            {i18n.translate('xpack.observability.autoDetectPanel.p.toInstallIntegrationsAndLabel', {
-              defaultMessage:
-                'To install integrations and ingest data, you need additional privileges.',
-            })}
+            {i18n.translate(
+              'xpack.observability_onboarding.autoDetectPanel.p.toInstallIntegrationsAndLabel',
+              {
+                defaultMessage:
+                  'To install integrations and ingest data, you need additional privileges.',
+              }
+            )}
           </p>
         }
       />
@@ -69,17 +72,21 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
       iconType="error"
       title={
         <h2>
-          {i18n.translate('xpack.observability.autoDetectPanel.h2.unableToInitiateDataLabel', {
-            defaultMessage: 'Unable to load content',
-          })}
+          {i18n.translate(
+            'xpack.observability_onboarding.autoDetectPanel.h2.unableToInitiateDataLabel',
+            { defaultMessage: 'Unable to load content' }
+          )}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('xpack.observability.autoDetectPanel.p.thereWasAProblemLabel', {
-            defaultMessage:
-              'There was a problem loading the application. Retry or contact your administrator for help.',
-          })}
+          {i18n.translate(
+            'xpack.observability_onboarding.autoDetectPanel.p.thereWasAProblemLabel',
+            {
+              defaultMessage:
+                'There was a problem loading the application. Retry or contact your administrator for help.',
+            }
+          )}
         </p>
       }
       actions={
@@ -90,9 +97,10 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
           data-test-subj="observabilityOnboardingAutoDetectPanelGoBackButton"
           onClick={onRetryClick}
         >
-          {i18n.translate('xpack.observability.autoDetectPanel.backToSelectionButtonLabel', {
-            defaultMessage: 'Retry',
-          })}
+          {i18n.translate(
+            'xpack.observability_onboarding.autoDetectPanel.backToSelectionButtonLabel',
+            { defaultMessage: 'Retry' }
+          )}
         </EuiButton>
       }
     />

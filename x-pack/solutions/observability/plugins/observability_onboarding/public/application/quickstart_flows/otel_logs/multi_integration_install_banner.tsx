@@ -33,8 +33,7 @@ export function MultiIntegrationInstallBanner() {
     return (
       <EuiFlexItem>
         <EuiCallOut
-          announceOnMount
-          title={i18n.translate('xpack.observability.otelLogs.status.failed', {
+          title={i18n.translate('xpack.observability_onboarding.otelLogs.status.failed', {
             defaultMessage: 'Integration installation failed',
           })}
           color="warning"
@@ -43,7 +42,7 @@ export function MultiIntegrationInstallBanner() {
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              {i18n.translate('xpack.observability.otelLogs.status.failedDetails', {
+              {i18n.translate('xpack.observability_onboarding.otelLogs.status.failedDetails', {
                 defaultMessage: 'Incoming data might not be indexed correctly. Details:',
               })}
             </EuiFlexItem>

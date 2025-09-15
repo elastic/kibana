@@ -60,13 +60,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const applicationUseCaseOption: UseCaseOption = {
     id: 'application',
     label: i18n.translate(
-      'xpack.observability.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
+      'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
       { defaultMessage: 'Application' }
     ),
-    description: i18n.translate('xpack.observability.onboardingFlowForm.applicationDescription', {
-      defaultMessage:
-        'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
-    }),
+    description: i18n.translate(
+      'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
+      {
+        defaultMessage:
+          'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
+      }
+    ),
     logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
   };
 
@@ -74,33 +77,39 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     {
       id: 'host',
       label: i18n.translate(
-        'xpack.observability.experimentalOnboardingFlow.euiCheckableCard.hostLabel',
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.hostLabel',
         { defaultMessage: 'Host' }
       ),
       description: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.onboardingFlowForm.hostDescription', {
+        ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
             defaultMessage:
               'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
           })
-        : i18n.translate('xpack.observability.logsEssential.onboardingFlowForm.hostDescription', {
-            defaultMessage:
-              'Ingest and analyze logs on your host such as OS, service, application and other logs',
-          }),
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
+            {
+              defaultMessage:
+                'Ingest and analyze logs on your host such as OS, service, application and other logs',
+            }
+          ),
       logos: ['opentelemetry', 'apache', 'mysql'],
     },
     {
       id: 'kubernetes',
       label: i18n.translate(
-        'xpack.observability.experimentalOnboardingFlow.euiCheckableCard.kubernetesLabel',
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.kubernetesLabel',
         { defaultMessage: 'Kubernetes' }
       ),
       description: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.onboardingFlowForm.kubernetesDescription', {
-            defaultMessage:
-              'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage:
+                'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.onboardingFlowForm.kubernetesDescription',
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
             {
               defaultMessage: 'Observe logs from your Kubernetes environments',
             }
@@ -111,12 +120,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     {
       id: 'cloud',
       label: i18n.translate(
-        'xpack.observability.experimentalOnboardingFlow.euiCheckableCard.cloudLabel',
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.cloudLabel',
         { defaultMessage: 'Cloud' }
       ),
-      description: i18n.translate('xpack.observability.onboardingFlowForm.cloudDescription', {
-        defaultMessage: 'Ingest telemetry data from the Cloud for your applications and services',
-      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.onboardingFlowForm.cloudDescription',
+        {
+          defaultMessage: 'Ingest telemetry data from the Cloud for your applications and services',
+        }
+      ),
       logos: ['azure', 'aws', 'gcp'],
     },
   ];
@@ -199,7 +211,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       <EuiTitle size="s" id={categorySelectorTitleId}>
         <strong>
           {i18n.translate(
-            'xpack.observability.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
+            'xpack.observability_onboarding.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
             {
               defaultMessage: 'What do you want to monitor?',
             }
@@ -256,8 +268,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                         {option.showIntegrationsBadge && (
                           <EuiBadge color="hollow">
                             <FormattedMessage
-                              id="xpack.observability.experimentalOnboardingFlow.form.addIntegrations"
                               defaultMessage="+ Integrations"
+                              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
                               description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
                             />
                           </EuiBadge>
@@ -320,27 +332,27 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             <strong>
               {searchParams.get('category') === 'kubernetes'
                 ? i18n.translate(
-                    'xpack.observability.experimentalOnboardingFlow.kubernetesPackagesTitle',
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Kubernetes cluster using:',
                     }
                   )
                 : searchParams.get('category') === 'application'
                 ? i18n.translate(
-                    'xpack.observability.experimentalOnboardingFlow.applicationPackagesTitle',
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Application using:',
                     }
                   )
                 : searchParams.get('category') === 'cloud'
                 ? i18n.translate(
-                    'xpack.observability.experimentalOnboardingFlow.cloudPackagesTitle',
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
                     {
                       defaultMessage: 'Select your Cloud provider:',
                     }
                   )
                 : i18n.translate(
-                    'xpack.observability.experimentalOnboardingFlow.hostPackagesTitle',
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Host using:',
                     }
@@ -357,7 +369,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <EuiText size="s" color="subdued">
           <strong>
             <FormattedMessage
-              id="xpack.observability.experimentalOnboardingFlow.form.searchPromptText"
+              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
               defaultMessage="Search through other ways of ingesting data:"
             />
           </strong>

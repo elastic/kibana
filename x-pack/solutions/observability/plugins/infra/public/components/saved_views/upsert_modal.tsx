@@ -102,13 +102,7 @@ export const UpsertViewModal = ({
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty
-          aria-label={i18n.translate('xpack.infra.upsertViewModal.cancelButton.ariaLabel', {
-            defaultMessage: 'Cancel',
-          })}
-          data-test-subj="infraSavedViewCreateModalCancelButton"
-          onClick={onClose}
-        >
+        <EuiButtonEmpty data-test-subj="infraSavedViewCreateModalCancelButton" onClick={onClose}>
           <FormattedMessage
             defaultMessage="Cancel"
             id="xpack.infra.waffle.savedViews.cancelButton"

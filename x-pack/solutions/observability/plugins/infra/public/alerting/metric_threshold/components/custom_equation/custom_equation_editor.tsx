@@ -164,10 +164,6 @@ export const CustomEquationEditor = ({
       {metricRows}
       <EuiFlexGroup>
         <EuiButtonEmpty
-          aria-label={i18n.translate(
-            'xpack.infra.customEquationEditor.addaggregation/fieldButton.ariaLabel',
-            { defaultMessage: 'Add aggregation/field' }
-          )}
           data-test-subj="infraCustomEquationEditorAddAggregationFieldButton"
           color={'primary'}
           flush={'left'}

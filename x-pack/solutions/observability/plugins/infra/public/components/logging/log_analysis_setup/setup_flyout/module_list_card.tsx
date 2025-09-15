@@ -91,10 +91,6 @@ export const LogAnalysisModuleListCard: React.FC<{
           <>
             <EuiSpacer size="xs" />
             <EuiButtonEmpty
-              aria-label={i18n.translate(
-                'xpack.infra.logAnalysisModuleListCard.viewinMachineLearningButton.ariaLabel',
-                { defaultMessage: 'View in Machine Learning' }
-              )}
               data-test-subj="infraLogAnalysisModuleListCardViewInMachineLearningButton"
               onClick={navigateToMlApp}
             >

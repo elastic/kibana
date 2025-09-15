@@ -24,7 +24,7 @@ export const KubernetesPage = () => {
         <CustomHeader
           logo="kubernetes"
           headlineCopy={i18n.translate(
-            'xpack.observability.experimentalOnboardingFlow.customHeader.kubernetes.text',
+            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.kubernetes.text',
             {
               defaultMessage: 'Monitor your Kubernetes Cluster with standalone Elastic Agent',
             }
@@ -32,14 +32,14 @@ export const KubernetesPage = () => {
           captionCopy={
             metricsOnboardingEnabled
               ? i18n.translate(
-                  'xpack.observability.experimentalOnboardingFlow.customHeader.kubernetes.caption.description',
+                  'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.kubernetes.caption.description',
                   {
                     defaultMessage:
                       'This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host.',
                   }
                 )
               : i18n.translate(
-                  'xpack.observability.logsEssential.experimentalOnboardingFlow.customHeader.kubernetes.caption.description',
+                  'xpack.observability_onboarding.logsEssential.experimentalOnboardingFlow.customHeader.kubernetes.caption.description',
                   {
                     defaultMessage:
                       'This installation is tailored for configuring and collecting logs by deploying a new Elastic Agent within your host.',

@@ -9,8 +9,6 @@ import React from 'react';
 
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import userEvent from '@testing-library/user-event';
-
 import type {
   UninstallToken,
   UninstallTokenMetadata,
@@ -33,6 +31,7 @@ import type { RequestError } from '../../hooks';
 
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 import type { UninstallCommandTarget } from './types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
   useGetUninstallToken: jest.fn(),

@@ -26,9 +26,6 @@ export const SelectWithPlaceholder = (props: EuiSelectProps & { placeholder?: st
   const placeholder = props.placeholder || DEFAULT_PLACEHOLDER;
   return (
     <EuiSelect
-      aria-label={i18n.translate('xpack.apm.selectWithPlaceholder.select.ariaLabel', {
-        defaultMessage: '',
-      })}
       data-test-subj="apmSelectWithPlaceholderSelect"
       {...props}
       options={[{ text: placeholder, value: NO_SELECTION }, ...(props.options || [])]}

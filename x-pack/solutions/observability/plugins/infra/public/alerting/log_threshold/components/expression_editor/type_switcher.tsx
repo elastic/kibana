@@ -88,9 +88,6 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSelect
-                aria-label={i18n.translate('xpack.infra.typeSwitcher.select.ariaLabel', {
-                  defaultMessage: '',
-                })}
                 data-test-subj="infraTypeSwitcherSelect"
                 compressed
                 value={thresholdType}

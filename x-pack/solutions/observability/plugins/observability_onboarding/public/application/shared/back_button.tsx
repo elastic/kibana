@@ -25,7 +25,7 @@ export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) 
         {children
           ? children
           : i18n.translate(
-              'xpack.observability.experimentalOnboardingFlow.button.backToSelectionLabel',
+              'xpack.observability_onboarding.experimentalOnboardingFlow.button.backToSelectionLabel',
               { defaultMessage: 'Back to selection' }
             )}
       </EuiButtonEmpty>

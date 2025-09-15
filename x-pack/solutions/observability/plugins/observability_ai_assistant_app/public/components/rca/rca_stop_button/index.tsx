@@ -18,7 +18,7 @@ export function RootCauseAnalysisStopButton({ onClick }: { onClick: () => void }
       iconType="stopFilled"
       color="text"
     >
-      {i18n.translate('xpack.observability.rca.stopAnalysisButtonLabel', {
+      {i18n.translate('xpack.observabilityAiAssistant.rca.stopAnalysisButtonLabel', {
         defaultMessage: 'Stop',
       })}
     </EuiButton>

@@ -41,21 +41,25 @@ import { usePricingFeature } from '../shared/use_pricing_feature';
 const OPTIONS = [
   {
     id: CreateStackOption.AWS_CONSOLE_UI,
-    label: i18n.translate('xpack.observability.firehosePanel.createStackAWSConsoleOptionLabel', {
-      defaultMessage: 'Via AWS Console',
-    }),
+    label: i18n.translate(
+      'xpack.observability_onboarding.firehosePanel.createStackAWSConsoleOptionLabel',
+      {
+        defaultMessage: 'Via AWS Console',
+      }
+    ),
   },
   {
     id: CreateStackOption.AWS_CLI,
-    label: i18n.translate('xpack.observability.firehosePanel.createStackAWSCLIOptionLabel', {
-      defaultMessage: 'Via AWS CLI',
-    }),
+    label: i18n.translate(
+      'xpack.observability_onboarding.firehosePanel.createStackAWSCLIOptionLabel',
+      { defaultMessage: 'Via AWS CLI' }
+    ),
   },
 ];
 
 export function FirehosePanel() {
   useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability.autoDetectPanel.breadcrumbs.firehose', {
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
       defaultMessage: 'AWS Firehose',
     }),
   });
@@ -124,7 +128,7 @@ export function FirehosePanel() {
 
   const steps = [
     {
-      title: i18n.translate('xpack.observability.firehosePanel.prerequisitesTitle', {
+      title: i18n.translate('xpack.observability_onboarding.firehosePanel.prerequisitesTitle', {
         defaultMessage: 'Prerequisites',
       }),
       children: (
@@ -132,13 +136,13 @@ export function FirehosePanel() {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.observability.firehosePanel.prerequisitesDescription"
+                id="xpack.observability_onboarding.firehosePanel.prerequisitesDescription"
                 defaultMessage="You must have an active AWS account and the necessary permissions to create delivery streams."
               />
             </p>
             <p>
               <FormattedMessage
-                id="xpack.observability.firehosePanel.prerequisitesDocumentation"
+                id="xpack.observability_onboarding.firehosePanel.prerequisitesDocumentation"
                 defaultMessage="{documentationLink} for more info."
                 values={{
                   documentationLink: (
@@ -148,9 +152,10 @@ export function FirehosePanel() {
                       external
                       target="_blank"
                     >
-                      {i18n.translate('xpack.observability.firehosePanel.documentationLinkLabel', {
-                        defaultMessage: 'Check the documentation',
-                      })}
+                      {i18n.translate(
+                        'xpack.observability_onboarding.firehosePanel.documentationLinkLabel',
+                        { defaultMessage: 'Check the documentation' }
+                      )}
                     </EuiLink>
                   ),
                 }}
@@ -162,12 +167,12 @@ export function FirehosePanel() {
     },
     {
       title: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.firehosePanel.createDeliveryStreamTitle', {
+        ? i18n.translate('xpack.observability_onboarding.firehosePanel.createDeliveryStreamTitle', {
             defaultMessage:
               'Create a Firehose delivery stream to ingest CloudWatch logs and metrics',
           })
         : i18n.translate(
-            'xpack.observability.logsEssential.firehosePanel.createDeliveryStreamTitle',
+            'xpack.observability_onboarding.logsEssential.firehosePanel.createDeliveryStreamTitle',
             {
               defaultMessage: 'Create a Firehose delivery stream to ingest CloudWatch logs',
             }
@@ -185,7 +190,7 @@ export function FirehosePanel() {
             <>
               <EuiButtonGroup
                 legend={i18n.translate(
-                  'xpack.observability.firehosePanel.createStackOptionsLegend',
+                  'xpack.observability_onboarding.firehosePanel.createStackOptionsLegend',
                   {
                     defaultMessage: 'Select a preferred option to create a CloudFormation stack',
                   }

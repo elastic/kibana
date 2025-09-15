@@ -18,7 +18,6 @@ import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from '../../common/services/agent_policy_config';
-
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { appContextService } from './app_context';
 

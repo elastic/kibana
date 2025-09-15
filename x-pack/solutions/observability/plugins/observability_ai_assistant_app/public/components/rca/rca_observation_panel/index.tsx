@@ -42,7 +42,7 @@ export function RootCauseAnalysisObservationPanel({
             `}
           >
             <h2>
-              {i18n.translate('xpack.observability.rca.observationPanelTitle', {
+              {i18n.translate('xpack.observabilityAiAssistant.rca.observationPanelTitle', {
                 defaultMessage: 'Observations',
               })}
             </h2>

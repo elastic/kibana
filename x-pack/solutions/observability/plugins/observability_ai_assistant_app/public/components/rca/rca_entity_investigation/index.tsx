@@ -27,9 +27,12 @@ export function RootCauseAnalysisEntityInvestigation({
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate('xpack.observability.rootCauseAnalysisEntityInvestigation.title', {
-                defaultMessage: 'Investigation',
-              })}
+              {i18n.translate(
+                'xpack.observabilityAiAssistant.rootCauseAnalysisEntityInvestigation.title',
+                {
+                  defaultMessage: 'Investigation',
+                }
+              )}
             </h2>
           </EuiTitle>
           <EuiFlexItem grow={false}>

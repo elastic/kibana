@@ -64,7 +64,7 @@ export function CreateStackCommandSnippet({
       external
       target="_blank"
     >
-      {i18n.translate('xpack.observability.firehosePanel.awsCLIInstallGuideLinkLabel', {
+      {i18n.translate('xpack.observability_onboarding.firehosePanel.awsCLIInstallGuideLinkLabel', {
         defaultMessage: 'AWS CLI',
       })}
     </EuiLink>
@@ -76,14 +76,14 @@ export function CreateStackCommandSnippet({
         <p>
           {metricsOnboardingEnabled && (
             <FormattedMessage
-              id="xpack.observability.firehosePanel.createFirehoseStreamDescription"
+              id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamDescription"
               defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack from our template that includes a Firehose delivery, backup S3 bucket, CloudWatch subscription filter and metrics stream along with required IAM roles."
               values={{ awsCLIInstallGuideLink }}
             />
           )}
           {!metricsOnboardingEnabled && (
             <FormattedMessage
-              id="xpack.observability.logsEssential.firehosePanel.createFirehoseStreamDescription"
+              id="xpack.observability_onboarding.logsEssential.firehosePanel.createFirehoseStreamDescription"
               defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack from our template that includes a Firehose delivery, backup S3 bucket and CloudWatch subscription filter along with required IAM roles."
               values={{ awsCLIInstallGuideLink }}
             />
@@ -115,7 +115,7 @@ export function CreateStackCommandSnippet({
       <EuiAccordion
         id={stackStatusAccordionId}
         buttonContent={i18n.translate(
-          'xpack.observability.firehosePanel.stackStatusAccordionButtonLabel',
+          'xpack.observability_onboarding.firehosePanel.stackStatusAccordionButtonLabel',
           {
             defaultMessage: 'Check status of the CloudFormation stack',
           }

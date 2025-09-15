@@ -50,7 +50,7 @@ export function RootCauseAnalysisCallout({
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
-                    {i18n.translate('xpack.observability.rca.calloutTitle', {
+                    {i18n.translate('xpack.observabilityAiAssistant.rca.calloutTitle', {
                       defaultMessage: 'AI-assisted root cause analysis',
                     })}
                   </h2>
@@ -59,7 +59,7 @@ export function RootCauseAnalysisCallout({
             </EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiText size="m">
-                {i18n.translate('xpack.observability.rca.calloutText', {
+                {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
                   defaultMessage: `Start an automated investigation that will analyze
               log patterns, SLOs and alerts for entities and provide an evidence-
               based root cause analysis of issues in your system.`,
@@ -82,7 +82,7 @@ export function RootCauseAnalysisCallout({
                 />
                 <EuiFormLabel htmlFor={checkboxId}>
                   {i18n.translate(
-                    'xpack.observability.rootCauseAnalysisCallout.keepAnalysisRunningInFormLabelLabel',
+                    'xpack.observabilityAiAssistant.rootCauseAnalysisCallout.keepAnalysisRunningInFormLabelLabel',
                     { defaultMessage: 'Keep analysis running in background' }
                   )}
                 </EuiFormLabel>
@@ -93,7 +93,7 @@ export function RootCauseAnalysisCallout({
                 fill
                 onClick={onClick}
               >
-                {i18n.translate('xpack.observability.rca.calloutText', {
+                {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
                   defaultMessage: 'Start analysis',
                 })}
               </EuiButton>

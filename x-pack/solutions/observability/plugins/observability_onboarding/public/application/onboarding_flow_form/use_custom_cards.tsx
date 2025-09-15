@@ -54,16 +54,19 @@ export function useCustomCards(
     id: 'firehose-quick-start',
     name: 'firehose-quick-start',
     type: 'virtual',
-    title: i18n.translate('xpack.observability.packageList.uploadFileTitle', {
+    title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
       defaultMessage: 'AWS Firehose',
     }),
     description: metricsOnboardingEnabled
-      ? i18n.translate('xpack.observability.packageList.uploadFileDescription', {
+      ? i18n.translate('xpack.observability_onboarding.packageList.uploadFileDescription', {
           defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
         })
-      : i18n.translate('xpack.observability.logsEssential.packageList.uploadFileDescription', {
-          defaultMessage: 'Collect logs from Amazon Web Services (AWS).',
-        }),
+      : i18n.translate(
+          'xpack.observability_onboarding.logsEssential.packageList.uploadFileDescription',
+          {
+            defaultMessage: 'Collect logs from Amazon Web Services (AWS).',
+          }
+        ),
     categories: ['observability'],
     icons: [
       {
@@ -83,21 +86,27 @@ export function useCustomCards(
       name: 'auto-detect-logs-virtual',
       type: 'virtual',
       title: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.autoDetectTitle', {
-            defaultMessage: 'Elastic Agent: Logs & Metrics',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectTitle',
+            {
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.autoDetectTitle',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.autoDetectTitle',
             {
               defaultMessage: 'Elastic Agent: Logs',
             }
           ),
       description: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.autoDetectDescription', {
-            defaultMessage: 'Scan your host for log files, metrics, auto-install integrations',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectDescription',
+            {
+              defaultMessage: 'Scan your host for log files, metrics, auto-install integrations',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.autoDetectDescription',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.autoDetectDescription',
             {
               defaultMessage: 'Scan your host for log files and auto-install integrations',
             }
@@ -131,22 +140,25 @@ export function useCustomCards(
       name: 'custom-logs-virtual',
       type: 'virtual',
       title: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.logsOtelTitle', {
+        ? i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle', {
             defaultMessage: 'OpenTelemetry: Logs & Metrics',
           })
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.logsOtelTitle',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.logsOtelTitle',
             {
               defaultMessage: 'OpenTelemetry: Logs',
             }
           ),
       description: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.logsOtelDescription', {
-            defaultMessage:
-              'Collect logs and host metrics with the Elastic Distro for OTel Collector',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.logsOtelDescription',
+            {
+              defaultMessage:
+                'Collect logs and host metrics with the Elastic Distro for OTel Collector',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.logsOtelDescription',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.logsOtelDescription',
             {
               defaultMessage: 'Collect logs with the Elastic Distro for OTel Collector',
             }
@@ -180,21 +192,27 @@ export function useCustomCards(
       name: 'kubernetes-quick-start',
       type: 'virtual',
       title: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.kubernetesTitle', {
-            defaultMessage: 'Elastic Agent: Logs & Metrics',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesTitle',
+            {
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.kubernetesTitle',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.kubernetesTitle',
             {
               defaultMessage: 'Elastic Agent: Logs',
             }
           ),
       description: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.kubernetesDescription', {
-            defaultMessage: 'Collect logs and metrics from Kubernetes using Elastic Agent',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesDescription',
+            {
+              defaultMessage: 'Collect logs and metrics from Kubernetes using Elastic Agent',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.kubernetesDescription',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.kubernetesDescription',
             {
               defaultMessage: 'Collect logs from Kubernetes using Elastic Agent',
             }
@@ -221,25 +239,28 @@ export function useCustomCards(
       name: 'otel-kubernetes-virtual',
       type: 'virtual',
       title: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability.useCustomCardsForCategory.kubernetesOtelTitle', {
-            defaultMessage: 'OpenTelemetry: Full Observability',
-          })
+        ? i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
+            {
+              defaultMessage: 'OpenTelemetry: Full Observability',
+            }
+          )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.kubernetesOtelTitle',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.kubernetesOtelTitle',
             {
               defaultMessage: 'OpenTelemetry: Logs',
             }
           ),
       description: metricsOnboardingEnabled
         ? i18n.translate(
-            'xpack.observability.useCustomCardsForCategory.kubernetesOtelDescription',
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage:
                 'Collect logs, traces and metrics with the Elastic Distro for OTel Collector',
             }
           )
         : i18n.translate(
-            'xpack.observability.logsEssential.useCustomCardsForCategory.kubernetesOtelDescription',
+            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage: 'Collect logs with the Elastic Distro for OTel Collector',
             }
@@ -264,12 +285,15 @@ export function useCustomCards(
     {
       id: 'apm-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.useCustomCardsForCategory.apmTitle', {
+      title: i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.apmTitle', {
         defaultMessage: 'Elastic APM',
       }),
-      description: i18n.translate('xpack.observability.useCustomCardsForCategory.apmDescription', {
-        defaultMessage: 'Collect distributed traces from your applications with Elastic APM',
-      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.apmDescription',
+        {
+          defaultMessage: 'Collect distributed traces from your applications with Elastic APM',
+        }
+      ),
       name: 'apm',
       categories: ['observability'],
       icons: [
@@ -285,11 +309,14 @@ export function useCustomCards(
     {
       id: 'otel-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.useCustomCardsForCategory.apmOtelTitle', {
-        defaultMessage: 'OpenTelemetry',
-      }),
+      title: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelTitle',
+        {
+          defaultMessage: 'OpenTelemetry',
+        }
+      ),
       description: i18n.translate(
-        'xpack.observability.useCustomCardsForCategory.apmOtelDescription',
+        'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelDescription',
         {
           defaultMessage: 'Collect distributed traces with OpenTelemetry',
         }
@@ -309,11 +336,14 @@ export function useCustomCards(
     {
       id: 'synthetics-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.useCustomCardsForCategory.syntheticsTitle', {
-        defaultMessage: 'Synthetic monitor',
-      }),
+      title: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.syntheticsTitle',
+        {
+          defaultMessage: 'Synthetic monitor',
+        }
+      ),
       description: i18n.translate(
-        'xpack.observability.useCustomCardsForCategory.syntheticsDescription',
+        'xpack.observability_onboarding.useCustomCardsForCategory.syntheticsDescription',
         {
           defaultMessage: 'Monitor endpoints, pages, and user journeys',
         }
@@ -336,11 +366,11 @@ export function useCustomCards(
     {
       id: 'azure-logs-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.useCustomCardsForCategory.azureTitle', {
+      title: i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.azureTitle', {
         defaultMessage: 'Azure',
       }),
       description: i18n.translate(
-        'xpack.observability.useCustomCardsForCategory.azureDescription',
+        'xpack.observability_onboarding.useCustomCardsForCategory.azureDescription',
         {
           defaultMessage: 'Collect logs from Microsoft Azure',
         }
@@ -357,12 +387,15 @@ export function useCustomCards(
     {
       id: 'aws-logs-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.useCustomCardsForCategory.awsTitle', {
+      title: i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.awsTitle', {
         defaultMessage: 'AWS',
       }),
-      description: i18n.translate('xpack.observability.useCustomCardsForCategory.awsDescription', {
-        defaultMessage: 'Collect logs from Amazon Web Services (AWS)',
-      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsDescription',
+        {
+          defaultMessage: 'Collect logs from Amazon Web Services (AWS)',
+        }
+      ),
       name: 'aws',
       categories: ['observability'],
       icons: [],
@@ -375,12 +408,15 @@ export function useCustomCards(
     {
       id: 'gcp-logs-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.useCustomCardsForCategory.gcpTitle', {
+      title: i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.gcpTitle', {
         defaultMessage: 'Google Cloud Platform',
       }),
-      description: i18n.translate('xpack.observability.useCustomCardsForCategory.gcpDescription', {
-        defaultMessage: 'Collect logs from Google Cloud Platform',
-      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.gcpDescription',
+        {
+          defaultMessage: 'Collect logs from Google Cloud Platform',
+        }
+      ),
       name: 'gcp',
       categories: ['observability'],
       icons: [],
@@ -393,13 +429,16 @@ export function useCustomCards(
     {
       id: 'upload-file-virtual',
       type: 'virtual',
-      title: i18n.translate('xpack.observability.packageList.uploadFileTitle', {
+      title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
         defaultMessage: 'Upload a file',
       }),
-      description: i18n.translate('xpack.observability.packageList.uploadFileDescription', {
-        defaultMessage:
-          'Upload data from a CSV, TSV, JSON or other log file to Elasticsearch for analysis.',
-      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.packageList.uploadFileDescription',
+        {
+          defaultMessage:
+            'Upload data from a CSV, TSV, JSON or other log file to Elasticsearch for analysis.',
+        }
+      ),
       name: 'upload-file',
       categories: ['observability'],
       icons: [

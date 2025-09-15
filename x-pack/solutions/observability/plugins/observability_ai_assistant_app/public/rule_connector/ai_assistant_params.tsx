@@ -97,7 +97,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
     <>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.observability.alertConnector.selectLlmConnector', {
+        label={i18n.translate('xpack.observabilityAiAssistant.alertConnector.selectLlmConnector', {
           defaultMessage: 'Connector',
         })}
       >
@@ -123,9 +123,12 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.observability.alertConnector.messageTextAreaFieldLabel', {
-              defaultMessage: 'On status changes',
-            })}
+            label={i18n.translate(
+              'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
+              {
+                defaultMessage: 'On status changes',
+              }
+            )}
           >
             <EuiComboBox
               fullWidth
@@ -149,9 +152,12 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.observability.alertConnector.messageTextAreaFieldLabel', {
-              defaultMessage: 'Message',
-            })}
+            label={i18n.translate(
+              'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
+              {
+                defaultMessage: 'Message',
+              }
+            )}
           >
             <EuiFlexItem grow={false}>
               <EuiTextArea
@@ -180,7 +186,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             onClick={handleRemovePrompt}
           >
             <FormattedMessage
-              id="xpack.observability.alertConnector.removePromptButtonLabel"
+              id="xpack.observabilityAiAssistant.alertConnector.removePromptButtonLabel"
               defaultMessage="Remove Prompt"
             />
           </EuiButton>
@@ -195,7 +201,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             onClick={handleAddPrompt}
           >
             <FormattedMessage
-              id="xpack.observability.alertConnector.addPromptButtonLabel"
+              id="xpack.observabilityAiAssistant.alertConnector.addPromptButtonLabel"
               defaultMessage="Add Prompt"
             />
           </EuiButton>

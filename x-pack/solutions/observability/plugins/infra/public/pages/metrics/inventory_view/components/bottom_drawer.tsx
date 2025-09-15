@@ -89,9 +89,6 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={i18n.translate('xpack.infra.bottomDrawer.button.ariaLabel', {
-                defaultMessage: '',
-              })}
               aria-expanded={isOpen}
               iconType={isOpen ? 'arrowDown' : 'arrowRight'}
               onClick={onClick}

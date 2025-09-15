@@ -38,10 +38,13 @@ export function AutoRefreshCallout() {
           <EuiIcon type="timeRefresh" size="m" />
           <EuiText size="s">
             <p id={messageId}>
-              {i18n.translate('xpack.observability.firehosePanel.autorefreshCalloutLabel', {
-                defaultMessage: 'Auto-refreshing every {intervalSeconds} s',
-                values: { intervalSeconds: Math.round(HAS_DATA_FETCH_INTERVAL / 1000) },
-              })}
+              {i18n.translate(
+                'xpack.observability_onboarding.firehosePanel.autorefreshCalloutLabel',
+                {
+                  defaultMessage: 'Auto-refreshing every {intervalSeconds} s',
+                  values: { intervalSeconds: Math.round(HAS_DATA_FETCH_INTERVAL / 1000) },
+                }
+              )}
             </p>
           </EuiText>
         </EuiFlexGroup>

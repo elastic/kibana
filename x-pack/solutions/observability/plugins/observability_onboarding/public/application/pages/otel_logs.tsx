@@ -24,7 +24,7 @@ export const OtelLogsPage = () => {
         <CustomHeader
           logo="opentelemetry"
           headlineCopy={i18n.translate(
-            'xpack.observability.experimentalOnboardingFlow.customHeader.otel.text',
+            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.text',
             {
               defaultMessage: 'OpenTelemetry',
             }
@@ -32,14 +32,14 @@ export const OtelLogsPage = () => {
           captionCopy={
             metricsOnboardingEnabled
               ? i18n.translate(
-                  'xpack.observability.experimentalOnboardingFlow.customHeader.otel.description',
+                  'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
                   {
                     defaultMessage:
                       'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
                   }
                 )
               : i18n.translate(
-                  'xpack.observability.logsEssential.experimentalOnboardingFlow.customHeader.otel.description',
+                  'xpack.observability_onboarding.logsEssential.experimentalOnboardingFlow.customHeader.otel.description',
                   {
                     defaultMessage:
                       'Collect logs using the Elastic distribution of the OTel collector.',

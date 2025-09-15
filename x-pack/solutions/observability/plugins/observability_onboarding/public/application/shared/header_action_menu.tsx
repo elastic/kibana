@@ -40,7 +40,7 @@ export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, t
           color="warning"
           iconType="editorComment"
         >
-          {i18n.translate('xpack.observability.header.feedback', {
+          {i18n.translate('xpack.observability_onboarding.header.feedback', {
             defaultMessage: 'Give feedback',
           })}
         </EuiButton>

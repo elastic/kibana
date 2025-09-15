@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, PropsWithChildren } from 'react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LogEntryCategoriesSetupView } from './log_entry_categories_setup_view';
 import { LogEntryRateSetupView } from './log_entry_rate_setup_view';
@@ -99,10 +98,6 @@ const LogAnalysisSetupFlyoutSubPage: FC<
     {onViewModuleList ? (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          aria-label={i18n.translate(
-            'xpack.infra.logAnalysisSetupFlyoutSubPage.allMachineLearningjobsButton.ariaLabel',
-            { defaultMessage: 'All Machine Learning jobs' }
-          )}
           data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
           flush="left"
           iconSide="left"
