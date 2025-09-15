@@ -194,6 +194,7 @@ export const createMockEventLoopMonitor = (
     percentiles: {
       50: 2000000,
       75: 3000000,
+      90: 4000000,
       95: 4000000,
       99: 4500000,
     },
