@@ -18,8 +18,8 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
-  styleEntityNodeMiddleShape,
-  styleEntityNodeBottomShape,
+  middleEntityNodeShapeStyle,
+  bottomEntityNodeShapeStyle,
 } from './styles';
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
@@ -90,7 +90,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeBottomShape(strokeColor)}
+              css={bottomEntityNodeShapeStyle(strokeColor)}
             />
           )}
           {showStackedShape(count) && (
@@ -98,7 +98,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeMiddleShape(strokeColor)}
+              css={middleEntityNodeShapeStyle(strokeColor)}
             />
           )}
           <DiamondShape fill={fillColor} stroke={strokeColor} />

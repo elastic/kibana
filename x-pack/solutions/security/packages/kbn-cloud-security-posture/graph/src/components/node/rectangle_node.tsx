@@ -17,8 +17,8 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
-  styleEntityNodeMiddleShape,
-  styleEntityNodeBottomShape,
+  middleEntityNodeShapeStyle,
+  bottomEntityNodeShapeStyle,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
@@ -90,7 +90,7 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeBottomShape(strokeColor)}
+              css={bottomEntityNodeShapeStyle(strokeColor)}
             />
           )}
           {showStackedShape(count) && (
@@ -98,7 +98,7 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeMiddleShape(strokeColor)}
+              css={middleEntityNodeShapeStyle(strokeColor)}
             />
           )}
           <RectangleShape fill={fillColor} stroke={strokeColor} />

@@ -19,7 +19,7 @@ import {
 import {
   LabelNodeContainer,
   LabelShape,
-  LabelShapeDoubleStroke,
+  LabelStackedShape,
   HandleStyleOverride,
   LabelShapeOnHover,
   NodeButton,
@@ -121,7 +121,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             </div>
           </LabelShape>
           {showStackedShape(numEvents + numAlerts) && (
-            <LabelShapeDoubleStroke
+            <LabelStackedShape
               data-test-subj={TEST_SUBJ_STACKED_SHAPE}
               borderColor={transparentize(borderColor, 0.5)}
             />

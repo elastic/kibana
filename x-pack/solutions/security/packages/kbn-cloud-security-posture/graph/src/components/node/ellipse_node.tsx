@@ -17,8 +17,8 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
-  styleEntityNodeMiddleShape,
-  styleEntityNodeBottomShape,
+  middleEntityNodeShapeStyle,
+  bottomEntityNodeShapeStyle,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
@@ -90,7 +90,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeBottomShape(strokeColor)}
+              css={bottomEntityNodeShapeStyle(strokeColor)}
             />
           )}
           {showStackedShape(count) && (
@@ -98,7 +98,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeMiddleShape(strokeColor)}
+              css={middleEntityNodeShapeStyle(strokeColor)}
             />
           )}
           <EllipseShape fill={fillColor} stroke={strokeColor} />

@@ -127,7 +127,7 @@ export const LabelShape = styled(EuiText, {
   `};
 `;
 
-export const LabelShapeDoubleStroke = styled.div<{ borderColor: string }>`
+export const LabelStackedShape = styled.div<{ borderColor: string }>`
   position: absolute;
   width: 100%;
   height: 100%;
@@ -432,7 +432,7 @@ export const ToolTipButton = (props: PropsWithChildren) => {
   );
 };
 
-export const styleEntityNodeMiddleShape = (strokeColor: string) => {
+export const middleEntityNodeShapeStyle = (strokeColor: string) => {
   return {
     transform: 'scale(0.9) translateY(7px)',
     transformOrigin: 'center',
@@ -440,7 +440,7 @@ export const styleEntityNodeMiddleShape = (strokeColor: string) => {
   };
 };
 
-export const styleEntityNodeBottomShape = (strokeColor: string) => {
+export const bottomEntityNodeShapeStyle = (strokeColor: string) => {
   return {
     transform: 'scale(0.8) translateY(16px)',
     transformOrigin: 'center',
