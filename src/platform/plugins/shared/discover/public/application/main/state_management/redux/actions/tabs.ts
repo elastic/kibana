@@ -29,7 +29,11 @@ import {
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
 } from '../runtime_state';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+} from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
@@ -289,7 +293,7 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
   (dispatch, getState) => {
     const currentState = getState();
 
-    if (restoreTabId === currentState.tabs.unsafeCurrentId) {
+    if (restoreTabId === currentState.tabs.unsafeCurrentId || restoreTabId === NEW_TAB_ID) {
       return;
     }
 
@@ -316,6 +320,46 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
         items,
         selectedItem: selectedItem || currentTab,
       })
+    );
+  };
+
+export const openInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      tabLabel?: string;
+      appState?: TabState['initialAppState'];
+      globalState?: TabState['globalState'];
+      searchSessionId?: string;
+    }
+  ]
+> =
+  ({ tabLabel, appState, globalState, searchSessionId }) =>
+  (dispatch, getState) => {
+    const initialAppState = appState ? cloneDeep(appState) : undefined;
+    const initialGlobalState = globalState ? cloneDeep(globalState) : {};
+    const currentState = getState();
+    const currentTabs = selectAllTabs(currentState);
+
+    const newDefaultTab: TabState = {
+      ...DEFAULT_TAB_STATE,
+      ...createTabItem(currentTabs),
+      initialAppState,
+      globalState: initialGlobalState,
+    };
+
+    if (tabLabel) {
+      newDefaultTab.label = tabLabel;
+    }
+
+    if (searchSessionId) {
+      newDefaultTab.dataRequestParams = {
+        ...newDefaultTab.dataRequestParams,
+        searchSessionId,
+      };
+    }
+
+    return dispatch(
+      updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
     );
   };
 

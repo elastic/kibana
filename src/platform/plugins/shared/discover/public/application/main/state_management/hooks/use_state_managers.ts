@@ -41,7 +41,7 @@ export const useStateManagers = ({
     TABS_ENABLED_FEATURE_FLAG_KEY,
     false
   );
-  // syncing with the _t part URL
+  // syncing with the _tabs part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
       urlStateStorage,
@@ -63,13 +63,13 @@ export const useStateManagers = ({
 
   useEffect(() => {
     const stopUrlSync = tabsStorageManager.startUrlSync({
-      // if `_t` in URL changes (for example via browser history), try to restore the previous state
+      // if `_tabs` in URL changes (for example via browser history), try to restore the previous state
       onChanged: (urlState) => {
         const { tabId: restoreTabId } = urlState;
         if (restoreTabId) {
           internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
         } else {
-          // if tabId is not present in `_t`, clear all tabs
+          // if tabId is not present in `_tabs`, clear all tabs
           internalState.dispatch(internalStateActions.clearAllTabs());
         }
       },

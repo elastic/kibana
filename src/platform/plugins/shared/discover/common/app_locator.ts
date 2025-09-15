@@ -13,7 +13,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { VIEW_MODE } from './constants';
+import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -64,6 +64,19 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Background search session id
    */
   searchSessionId?: string;
+
+  /**
+   * Optionally set Discover tab ID.
+   * Use `new` as value to indicate that a new tab should be created.
+   * Once created, the new tab will have a unique id which can be referenced too if necessary.
+   */
+  tabId?: string | typeof NEW_TAB_ID;
+
+  /**
+   * Optional label for the tab, used when `tabId` is `new` to set the initial label of the newly created tab.
+   * If not provided, a default label will be assigned.
+   */
+  tabLabel?: string;
 
   /**
    * Columns displayed in the table

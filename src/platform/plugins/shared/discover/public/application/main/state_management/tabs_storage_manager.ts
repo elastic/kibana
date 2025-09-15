@@ -16,7 +16,7 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { TABS_STATE_URL_KEY, NEW_TAB_ID } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
@@ -57,7 +57,14 @@ export interface TabsInternalStatePayload {
 }
 
 export interface TabsUrlState {
-  tabId?: string; // syncing the selected tab id with the URL
+  /**
+   * Syncing the selected tab id with the URL
+   */
+  tabId?: string;
+  /**
+   * (Optional) Label for the tab, used when creating a new tab via locator URL.
+   */
+  tabLabel?: string;
 }
 
 export interface TabsStorageManager {
@@ -140,8 +147,8 @@ export const createTabsStorageManager = ({
     };
   };
 
-  const getSelectedTabIdFromURL = () => {
-    return (urlStateStorage.get(TABS_STATE_URL_KEY) as TabsUrlState)?.tabId;
+  const getTabsStateFromURL = () => {
+    return urlStateStorage.get(TABS_STATE_URL_KEY) as TabsUrlState;
   };
 
   const pushSelectedTabIdToUrl = async (selectedTabId: string) => {
@@ -359,7 +366,8 @@ export const createTabsStorageManager = ({
     persistedDiscoverSession,
     defaultTabState,
   }) => {
-    const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
+    const tabsStateFromURL = getTabsStateFromURL();
+    const selectedTabId = enabled ? tabsStateFromURL?.tabId : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
@@ -389,6 +397,25 @@ export const createTabsStorageManager = ({
     );
 
     if (enabled && selectedTabId) {
+      if (selectedTabId === NEW_TAB_ID) {
+        // append a new tab if requested via URL
+
+        const newTab = {
+          ...defaultTabState,
+          ...createTabItem(openTabs),
+        };
+
+        if (tabsStateFromURL?.tabLabel) {
+          newTab.label = tabsStateFromURL.tabLabel;
+        }
+
+        return {
+          allTabs: [...openTabs, newTab],
+          selectedTabId: newTab.id,
+          recentlyClosedTabs: closedTabs,
+        };
+      }
+
       // restore previously opened tabs
       if (openTabs.find((tab) => tab.id === selectedTabId)) {
         return {
@@ -414,17 +441,21 @@ export const createTabsStorageManager = ({
       }
     }
 
-    const defaultTab = persistedTabs
-      ? persistedTabs[0]
-      : {
-          ...defaultTabState,
-          ...createTabItem([]),
-        };
-    const allTabs = persistedTabs ?? [defaultTab];
+    const newDefaultTab = {
+      ...defaultTabState,
+      ...createTabItem([]),
+    };
+    let allTabs = [newDefaultTab];
+    let selectedTab = newDefaultTab;
+
+    if (persistedTabs?.length) {
+      allTabs = persistedTabs;
+      selectedTab = persistedTabs[0];
+    }
 
     return {
       allTabs,
-      selectedTabId: defaultTab.id,
+      selectedTabId: selectedTab.id,
       recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
     };
   };
