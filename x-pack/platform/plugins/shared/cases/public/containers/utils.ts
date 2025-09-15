@@ -7,7 +7,7 @@
 
 import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
+import { identity, pipe as v2Pipe } from 'fp-ts/function';
 import { pipe } from 'fp-ts/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
@@ -25,6 +25,7 @@ import type {
   CaseResolveResponse,
   CaseSummaryResponse,
   CaseUserActionStatsResponse,
+  FindCasesContainingAllAlertsResponse,
   InferenceConnectorsResponse,
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
@@ -32,6 +33,7 @@ import {
   CaseResolveResponseRt,
   CaseSummaryResponseRt,
   CaseUserActionStatsResponseRt,
+  FindCasesContainingAllAlertsResponseRt,
   InferenceConnectorsResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/types/api';
@@ -107,6 +109,14 @@ export const decodeCaseSummaryResponse = (respCase?: CaseSummaryResponse) =>
 export const decodeInferenceConnectorsResponse = (respCase?: InferenceConnectorsResponse) =>
   pipe(
     InferenceConnectorsResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+export const decodeFindAllAttachedAlertsResponse = (
+  respCase?: FindCasesContainingAllAlertsResponse
+) =>
+  v2Pipe(
+    FindCasesContainingAllAlertsResponseRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 

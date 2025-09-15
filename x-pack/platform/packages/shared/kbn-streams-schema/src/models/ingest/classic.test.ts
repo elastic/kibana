@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emptyAssets } from '../../helpers/empty_assets';
 import { ClassicStream } from './classic';
 
 describe('ClassicStream', () => {
@@ -112,8 +113,7 @@ describe('ClassicStream', () => {
           text_structure: true,
         },
         data_stream_exists: true,
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
       expect(ClassicStream.GetResponse.is(val)).toBe(true);
@@ -156,8 +156,6 @@ describe('ClassicStream', () => {
   describe('UpsertRequest', () => {
     it.each([
       {
-        dashboards: [],
-        queries: [],
         stream: {
           description: '',
           ingest: {
@@ -170,6 +168,7 @@ describe('ClassicStream', () => {
             classic: {},
           },
         },
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val)).toBe(true);

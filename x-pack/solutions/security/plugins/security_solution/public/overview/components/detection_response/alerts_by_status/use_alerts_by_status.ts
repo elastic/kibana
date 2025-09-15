@@ -42,12 +42,14 @@ export const getAlertsByStatusQuery = ({
   to,
   entityFilter,
   runtimeMappings,
+  includeRelatedIntegrationPackage = false,
 }: {
   from: string;
   to: string;
   entityFilter?: EntityFilter;
   additionalFilters?: ESBoolQuery[];
   runtimeMappings?: Record<string, unknown>;
+  includeRelatedIntegrationPackage?: boolean;
 }) => ({
   size: 0,
   query: {
@@ -80,6 +82,13 @@ export const getAlertsByStatusQuery = ({
         },
       },
     },
+    ...(includeRelatedIntegrationPackage && {
+      relatedIntegrationPackage: {
+        terms: {
+          field: 'kibana.alert.rule.parameters.related_integrations.package',
+        },
+      },
+    }),
   },
   ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
 });
@@ -110,6 +119,11 @@ export const parseAlertsData = (
   }, {});
 };
 
+/* Checks if the Alerts is related to any 3rd party integrations or not */
+export const has3PAlerts = (IntegrationPackageList: string[]): boolean => {
+  return IntegrationPackageList?.some((item) => item !== 'endpoint');
+};
+
 export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
@@ -119,12 +133,14 @@ export interface UseAlertsByStatusProps {
   from: string;
   to: string;
   runtimeMappings?: Record<string, unknown>;
+  includeRelatedIntegrationPackage?: boolean;
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
   items: ParsedAlertsData;
   isLoading: boolean;
   updatedAt: number;
+  alertHas3rdPartyData: boolean;
 };
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
@@ -136,6 +152,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   to,
   from,
   runtimeMappings,
+  includeRelatedIntegrationPackage,
 }) => {
   const dispatch = useDispatch();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
@@ -174,6 +191,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       entityFilter,
       additionalFilters,
       runtimeMappings,
+      includeRelatedIntegrationPackage,
     }),
     indexName: signalIndexName,
     skip,
@@ -188,6 +206,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
         entityFilter,
         additionalFilters,
         runtimeMappings,
+        includeRelatedIntegrationPackage,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -215,7 +234,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     }),
     [request, response]
   );
-
+  const alertHas3rdPartyData = has3PAlerts(
+    (data?.aggregations?.relatedIntegrationPackage?.buckets.map((item) => item.key) as string[]) ||
+      []
+  );
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -225,5 +247,5 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     loading: isLoading,
   });
 
-  return { items, isLoading, updatedAt };
+  return { items, isLoading, updatedAt, alertHas3rdPartyData };
 };
