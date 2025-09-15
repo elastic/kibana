@@ -7,19 +7,19 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import {
   defineDockerServersConfig,
-  fleetPackageRegistryDockerImage,
+  dockerRegistryPort,
   kbnTestConfig,
+  packageRegistryDocker,
 } from '@kbn/test';
-import path from 'path';
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
 import supertest from 'supertest';
 import type { UrlObject } from 'url';
 import { format } from 'url';
-import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import type {
@@ -105,26 +105,10 @@ export function createTestConfig(
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
 
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-    const packageRegistryConfig = path.join(
-      __dirname,
-      '../../resources/package_registry_config.yml'
-    );
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
+        registry: packageRegistryDocker,
       }),
       testFiles: [require.resolve('../tests')],
       servers,
@@ -223,6 +207,9 @@ export function createTestConfig(
             ? Object.entries(kibanaConfig).map(([key, value]) =>
                 Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
               )
+            : []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
         ],
       },

@@ -14,11 +14,12 @@ import {
 } from '@kbn/mock-idp-utils';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import {
-  fleetPackageRegistryDockerImage,
+  packageRegistryDocker,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
   defineDockerServersConfig,
+  dockerRegistryPort,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
@@ -51,20 +52,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
 
-    const packageRegistryConfig = path.join(
-      __dirname,
-      '../../resources/package_registry_config.yml'
-    );
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
@@ -95,15 +82,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       servers,
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
+        registry: packageRegistryDocker,
       }),
       testFiles: options.testFiles,
       security: { disableTestUser: true },

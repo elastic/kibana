@@ -5,35 +5,25 @@
  * 2.0.
  */
 
+import Fs from 'fs';
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
-import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  esTestConfig,
-  kbnTestConfig,
-  kibanaTestSuperuserServerless,
-  getDockerFileMountPath,
-} from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
-import path from 'path';
-import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  defineDockerServersConfig,
+  dockerRegistryPort,
+  esTestConfig,
+  getDockerFileMountPath,
+  kbnTestConfig,
+  kibanaTestSuperuserServerless,
+  packageRegistryDocker,
+} from '@kbn/test';
 import { services as svlServices } from './services';
 
 export default async () => {
-  const packageRegistryConfig = path.join(__dirname, '../../resources/package_registry_config.yml');
-  const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-  /**
-   * This is used by CI to set the docker registry port
-   * you can also define this environment variable locally when running tests which
-   * will spin up a local docker package registry locally for you
-   * if this is defined it takes precedence over the `packageRegistryOverride` variable
-   */
-  const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
   const servers = {
     kibana: {
       ...kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless),
@@ -59,15 +49,7 @@ export default async () => {
   return {
     servers,
     dockerServers: defineDockerServersConfig({
-      registry: {
-        enabled: !!dockerRegistryPort,
-        image: fleetPackageRegistryDockerImage,
-        portInContainer: 8080,
-        port: dockerRegistryPort,
-        args: dockerArgs,
-        waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-      },
+      registry: packageRegistryDocker,
     }),
     browser: {
       acceptInsecureCerts: true,
@@ -177,6 +159,9 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
+        ...(dockerRegistryPort
+          ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+          : []),
       ],
     },
 

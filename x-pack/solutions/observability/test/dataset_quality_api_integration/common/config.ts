@@ -13,8 +13,7 @@ import {
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
-import path from 'path';
+import { defineDockerServersConfig, dockerRegistryPort, packageRegistryDocker } from '@kbn/test';
 import supertest from 'supertest';
 import type { UrlObject } from 'url';
 import { format } from 'url';
@@ -89,15 +88,9 @@ export function createTestConfig(
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const packageRegistryConfig = path.join(
-      __dirname,
-      '../../resources/package_registry_config.yml'
-    );
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
-
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     const services = xPackAPITestsConfig.get('services');
     const servers = xPackAPITestsConfig.get('servers');
@@ -105,28 +98,12 @@ export function createTestConfig(
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
 
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve('../tests')],
       servers,
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
+        registry: packageRegistryDocker,
       }),
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],
       services: {

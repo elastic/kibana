@@ -17,23 +17,12 @@ import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
-import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
+import { packageRegistryDocker, defineDockerServersConfig, dockerRegistryPort } from '@kbn/test';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
-
-const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-/**
- * This is used by CI to set the docker registry port
- * you can also define this environment variable locally when running tests which
- * will spin up a local docker package registry locally for you
- * if this is defined it takes precedence over the `packageRegistryOverride` variable
- */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
 // if config is executed on CI or locally
 const isRunOnCI = process.env.CI;
@@ -60,15 +49,7 @@ const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${server
 export const defaultConfig: ScoutServerConfig = {
   servers,
   dockerServers: defineDockerServersConfig({
-    registry: {
-      enabled: !!dockerRegistryPort,
-      image: fleetPackageRegistryDockerImage,
-      portInContainer: 8080,
-      port: dockerRegistryPort,
-      args: dockerArgs,
-      waitForLogLine: 'package manifests loaded',
-      waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-    },
+    registry: packageRegistryDocker,
   }),
   esTestCluster: {
     from: 'snapshot',
@@ -93,6 +74,9 @@ export const defaultConfig: ScoutServerConfig = {
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+      ...(dockerRegistryPort
+        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+        : []),
     ],
     ssl: false,
   },

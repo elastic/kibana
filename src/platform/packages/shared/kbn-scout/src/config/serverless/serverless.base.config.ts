@@ -7,31 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve, join } from 'path';
-import { format as formatUrl } from 'url';
-import Fs from 'fs';
-
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
-import {
-  fleetPackageRegistryDockerImage,
-  defineDockerServersConfig,
-  getDockerFileMountPath,
-} from '@kbn/test';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  defineDockerServersConfig,
+  dockerRegistryPort,
+  getDockerFileMountPath,
+  packageRegistryDocker,
+} from '@kbn/test';
+import Fs from 'fs';
+import { resolve } from 'path';
+import { format as formatUrl } from 'url';
 import type { ScoutServerConfig } from '../../types';
-import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../constants';
-
-const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-/**
- * This is used by CI to set the docker registry port
- * you can also define this environment variable locally when running tests which
- * will spin up a local docker package registry locally for you
- * if this is defined it takes precedence over the `packageRegistryOverride` variable
- */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+import { JWKS_PATH, SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH } from '../constants';
 
 const servers = {
   elasticsearch: {
@@ -55,15 +44,7 @@ export const defaultConfig: ScoutServerConfig = {
   serverless: true,
   servers,
   dockerServers: defineDockerServersConfig({
-    registry: {
-      enabled: !!dockerRegistryPort,
-      image: fleetPackageRegistryDockerImage,
-      portInContainer: 8080,
-      port: dockerRegistryPort,
-      args: dockerArgs,
-      waitForLogLine: 'package manifests loaded',
-      waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-    },
+    registry: packageRegistryDocker,
   }),
   esTestCluster: {
     from: 'serverless',
@@ -72,7 +53,6 @@ export const defaultConfig: ScoutServerConfig = {
       'xpack.security.authc.realms.file.file1.order=-100',
       `xpack.security.authc.realms.native.native1.enabled=false`,
       `xpack.security.authc.realms.native.native1.order=-97`,
-
       'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
       `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
       `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
@@ -87,6 +67,9 @@ export const defaultConfig: ScoutServerConfig = {
       `cluster.service.slow_task_logging_threshold=15s`,
       `cluster.service.slow_task_thread_dump_timeout=5s`,
       `serverless.search.enable_replicas_for_instant_failover=true`,
+      ...(dockerRegistryPort
+        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+        : []),
     ],
     ssl: true, // SSL is required for SAML realm
   },

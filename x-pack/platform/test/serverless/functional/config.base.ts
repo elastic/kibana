@@ -5,25 +5,13 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { defineDockerServersConfig, dockerRegistryPort, packageRegistryDocker } from '@kbn/test';
 import { resolve } from 'path';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
-import { join } from 'path';
+import type { CreateTestConfigOptions } from '../shared/types';
 import { pageObjects } from './page_objects';
 import { services } from './services';
-import type { CreateTestConfigOptions } from '../shared/types';
-
-const packageRegistryConfig = join(__dirname, '../../resources/package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-/**
- * This is used by CI to set the docker registry port
- * you can also define this environment variable locally when running tests which
- * will spin up a local docker package registry locally for you
- * if this is defined it takes precedence over the `packageRegistryOverride` variable
- */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
 export function createTestConfig<
   TServices extends {} = typeof services,
@@ -39,15 +27,7 @@ export function createTestConfig<
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
+        registry: packageRegistryDocker,
       }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
@@ -63,6 +43,9 @@ export function createTestConfig<
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,

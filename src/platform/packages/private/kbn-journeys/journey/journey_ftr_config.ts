@@ -9,19 +9,19 @@
 
 import Path from 'path';
 
-import { v4 as uuidV4 } from 'uuid';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  type FtrConfigProviderContext,
   type FtrConfigProvider,
+  type FtrConfigProviderContext,
   defineDockerServersConfig,
-  fleetPackageRegistryDockerImage,
+  dockerRegistryPort,
+  packageRegistryDocker,
 } from '@kbn/test';
-import path from 'path';
+import { v4 as uuidV4 } from 'uuid';
 import { services } from '../services';
 import type { AnyStep } from './journey';
-import type { JourneyConfig } from './journey_config';
 import { JOURNEY_APM_CONFIG } from './journey_apm_config';
+import type { JourneyConfig } from './journey_config';
 
 export function makeFtrConfigProvider(
   config: JourneyConfig<any>,
@@ -64,30 +64,11 @@ export function makeFtrConfigProvider(
       journeyName: config.getName(),
     };
 
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-    const packageRegistryConfig = path.join(__dirname, '../fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
     return {
       ...baseConfig,
 
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
+        registry: packageRegistryDocker,
       }),
 
       mochaOpts: {
@@ -120,6 +101,9 @@ export function makeFtrConfigProvider(
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
           '--coreApp.allowDynamicConfigOverrides=true',
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
 
         env: {
