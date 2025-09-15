@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { isCondition } from '@kbn/streamlang';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
@@ -118,6 +118,10 @@ const SamplePreviewPanel = () => {
     ? Number.NaN
     : parseFloat(approximateMatchingPercentage!);
 
+  const [sorting, setSorting] = useState();
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
   let content: React.ReactNode | null = null;
 
   if (isLoadingDocuments && !hasDocuments) {
@@ -171,7 +175,14 @@ const SamplePreviewPanel = () => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <PreviewTable documents={documents} />
+        <PreviewTable
+          documents={documents}
+          sorting={sorting}
+          setSorting={setSorting}
+          toolbarVisibility={true}
+          displayColumns={visibleColumns}
+          setVisibleColumns={setVisibleColumns}
+        />
       </EuiFlexItem>
     );
   }
