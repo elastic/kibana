@@ -113,7 +113,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     },
   });
   const projectStyles = css({
-    width: 300,
+    width: 260,
   });
   const baseStyles = chromeStyle === 'project' ? projectStyles : defaultStyles;
   const highlightStyles = getSearchHighlightStyles(euiTheme, colorMode);
