@@ -58,7 +58,8 @@ export const listStreamsRoute = createServerRoute({
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
-        can_read_failure_store: failureStorePrivileges.index?.[stream.name]?.[FAILURE_STORE_PRIVILEGE],
+        can_read_failure_store:
+          failureStorePrivileges.index?.[stream.name]?.[FAILURE_STORE_PRIVILEGE],
       });
       return acc;
     }, []);

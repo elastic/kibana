@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { QualityIndicators } from '@kbn/data-quality/common';
 import { _IGNORED } from './es_fields';
 import type { DataStreamType } from './types';
-import { QualityIndicators } from '@kbn/data-quality/common';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
 export const DATASET_QUALITY_ALL_SIGNALS_ID = 'datasetQuality:all-signals-available';

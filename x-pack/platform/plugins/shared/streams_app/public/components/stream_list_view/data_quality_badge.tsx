@@ -34,7 +34,9 @@ export const DataQualityBadge = ({ quality }: { quality: QualityIndicators }) =>
 
   const qualityTexts: Record<QualityIndicators, string> = {
     poor: i18n.translate('xpack.streams.dataQualityBadge.poor', { defaultMessage: 'Poor' }),
-    degraded: i18n.translate('xpack.streams.dataQualityBadge.degraded', { defaultMessage: 'Degraded' }),
+    degraded: i18n.translate('xpack.streams.dataQualityBadge.degraded', {
+      defaultMessage: 'Degraded',
+    }),
     good: i18n.translate('xpack.streams.dataQualityBadge.good', { defaultMessage: 'Good' }),
   };
 

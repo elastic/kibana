@@ -26,10 +26,6 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../hooks/use_kibana';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
@@ -89,8 +85,6 @@ export function StreamsTreeTable({
       direction: sortDirection,
     },
   };
-  
-  
 
   return (
     <EuiInMemoryTable<TableRow>

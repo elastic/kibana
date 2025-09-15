@@ -43,26 +43,28 @@ export function DataQualityColumn({
   );
 
   // Only fetch failed documents if we need to consider them for quality calculation
-  const failedDocsQueryFetch = considerFailedQuality ? useStreamsAppFetch(
-    async ({ signal, timeState: { start, end } }) => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_failed_doc_count_for_stream',
-            query: `FROM ${indexPattern}::failures | STATS failed_doc_count = count(*)`,
-            start,
-            end,
-          },
+  const failedDocsQueryFetch = considerFailedQuality
+    ? useStreamsAppFetch(
+        async ({ signal, timeState: { start, end } }) => {
+          return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+            params: {
+              body: {
+                operationName: 'get_failed_doc_count_for_stream',
+                query: `FROM ${indexPattern}::failures | STATS failed_doc_count = count(*)`,
+                start,
+                end,
+              },
+            },
+            signal,
+          });
         },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, indexPattern],
-    {
-      withTimeRange: true,
-      disableToastOnError: true,
-    }
-  ) : undefined;
+        [streamsRepositoryClient, indexPattern],
+        {
+          withTimeRange: true,
+          disableToastOnError: true,
+        }
+      )
+    : undefined;
 
   const degradedDocsQueryFetch = useStreamsAppFetch(
     async ({ signal, timeState: { start, end } }) => {
@@ -85,9 +87,15 @@ export function DataQualityColumn({
     }
   );
 
-  const docCount = totalDocsQueryFetch?.value ? Number(totalDocsQueryFetch.value?.values?.[0]?.[0]) : 0;
-  const degradedDocCount = degradedDocsQueryFetch?.value ? Number(degradedDocsQueryFetch.value?.values?.[0]?.[0]) : 0;
-  const failedDocCount = failedDocsQueryFetch?.value ? Number(failedDocsQueryFetch.value.values?.[0]?.[0]) : 0;
+  const docCount = totalDocsQueryFetch?.value
+    ? Number(totalDocsQueryFetch.value?.values?.[0]?.[0])
+    : 0;
+  const degradedDocCount = degradedDocsQueryFetch?.value
+    ? Number(degradedDocsQueryFetch.value?.values?.[0]?.[0])
+    : 0;
+  const failedDocCount = failedDocsQueryFetch?.value
+    ? Number(failedDocsQueryFetch.value.values?.[0]?.[0])
+    : 0;
 
   const degradedPercentage = calculatePercentage({
     totalDocs: docCount,

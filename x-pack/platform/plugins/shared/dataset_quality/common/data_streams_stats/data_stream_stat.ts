@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { QualityIndicators, mapPercentageToQuality } from '@kbn/data-quality/common';
+import type { QualityIndicators } from '@kbn/data-quality/common';
+import { mapPercentageToQuality } from '@kbn/data-quality/common';
 import { DEFAULT_DATASET_QUALITY, DEFAULT_QUALITY_DOC_STATS } from '../constants';
 import type { DataStreamType } from '../types';
 import { indexNameToDataStreamParts } from '../utils';
