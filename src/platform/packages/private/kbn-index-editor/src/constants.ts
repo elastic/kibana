@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function useWorkflowJsonSchema() {
-  return {
-    data: {},
-  };
-}
+export const ROW_PLACEHOLDER_PREFIX = 'row-placeholder-';
+export const COLUMN_PLACEHOLDER_PREFIX = 'column-placeholder-';
+
+export const INDEX_NAME_INVALID_CHARS = ['\\', '/', '*', '?', ' ', '<', '>', '|', ':', '#'];
+export const INDEX_NAME_INVALID_START_CHARS = ['-', '_', '+', '.'];
