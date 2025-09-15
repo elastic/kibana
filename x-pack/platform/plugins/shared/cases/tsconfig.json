@@ -96,15 +96,12 @@
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
     "@kbn/cases-ai",
-    "@kbn/cell-actions",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/data-views-plugin",
     "@kbn/discover-utils",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
-    "@kbn/unified-data-table",
-    "@kbn/unified-doc-viewer-plugin"
   ],
   "exclude": [
     "target/**/*"
