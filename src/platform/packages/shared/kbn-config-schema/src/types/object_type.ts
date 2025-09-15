@@ -42,12 +42,17 @@ export type ObjectTypeOrLazyType<
 
 /**
  * @internal
- *
- * Need to avoid circular ref
  */
 type TypeOf<RT extends TypeOrLazyType> = RT extends () => TypeOrLazyType<infer V, infer D>
   ? Type<V, D>['_output']
   : never;
+
+type TypeOfOutput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> =
+  RT extends ObjectTypeOrLazyType<infer V, infer D>
+    ? ObjectResultType<V>
+    : RT extends TypeOrLazyType<infer V, infer D>
+    ? Type<V, D>['_output']
+    : never;
 
 /**
  * @internal
@@ -95,11 +100,9 @@ type RequiredProperties<Base extends ObjectProps<Props>> = Pick<
 >;
 
 export type ObjectResultType<P extends ObjectProps<Props>> = {
-  [K in keyof OptionalProperties<P>]?: TypeOf<P[K]>;
+  [K in keyof OptionalProperties<P>]?: TypeOfOutput<P[K]>;
 } & {
-  [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P>>]: TypeOf<P[K]>;
-} & {
-  [K in keyof DefaultProperties<P>]?: TypeOf<P[K]>;
+  [K in keyof RequiredProperties<P>]: TypeOfOutput<P[K]>;
 };
 
 export type TypeOfDefault<RT extends TypeOrLazyType> = RT extends TypeOrLazyType<infer V, infer D>

@@ -9,9 +9,14 @@
 
 import { get } from 'lodash';
 import { expectType } from 'tsd';
-import type { TypeOf } from './type_of';
+import type { TypeOf, TypeOfOutput } from './type_of';
 import { offeringBasedSchema, schema } from '../..';
 import type { ObjectProps, Props } from './object_type';
+
+const types = {
+  string: 'some-string',
+  number: 123,
+};
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -157,7 +162,7 @@ test('object within object with key without defaultValue', () => {
 });
 
 describe('#validate', () => {
-  test('is called after all content is processed', () => {
+  test('should be called after all content is processed', () => {
     const mockValidate = jest.fn();
 
     const type = schema.object(
@@ -178,6 +183,52 @@ describe('#validate', () => {
         bar: 'baz',
       },
     });
+  });
+  test('should not be called if validation fails', () => {
+    const mockValidate = jest.fn();
+
+    const type = schema.object(
+      {
+        bar: schema.string(),
+      },
+      {
+        validate: mockValidate,
+      }
+    );
+
+    expect(() => {
+      type.validate({});
+    }).toThrowError('expected value of type [string] but got [undefined]');
+
+    expect(mockValidate).not.toHaveBeenCalled();
+  });
+  test('should be called with validated schema object', () => {
+    type MySchemaOutput = TypeOfOutput<typeof mySchema>;
+    const mySchema = schema.object(
+      {
+        str: schema.string(),
+        num: schema.number({ defaultValue: types.number }),
+        strMaybe: schema.maybe(schema.string()),
+        obj: schema.object({
+          str: schema.string(),
+          num: schema.number({ defaultValue: types.number }),
+          strMaybe: schema.maybe(schema.string()),
+        }),
+      },
+      {
+        validate: (type) => {
+          expectType<MySchemaOutput>(type);
+          expectType<typeof type.num>(types.number);
+          expectType<typeof type.str>(types.string);
+          expectType<typeof type.strMaybe>(types.string);
+          expectType<typeof type.strMaybe>(undefined);
+          expectType<typeof type.obj.num>(types.number);
+          expectType<typeof type.obj.str>(types.string);
+          expectType<typeof type.obj.strMaybe>(types.string);
+          expectType<typeof type.obj.strMaybe>(undefined);
+        },
+      }
+    );
   });
 });
 
@@ -987,11 +1038,6 @@ describe('#extendsDeep', () => {
 });
 
 describe('#defaultValue', () => {
-  const types = {
-    string: 'some-string',
-    number: 123,
-  };
-
   test('should enforce properties in object default', () => {
     const simpleProps = {
       str: schema.string(),

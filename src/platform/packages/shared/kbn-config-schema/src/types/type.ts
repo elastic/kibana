@@ -47,7 +47,15 @@ export interface TypeOptions<
   D extends DefaultValue<T | unknown>,
   M extends Record<string, any> = {}
 > {
+  /**
+   * Default value of type
+   */
   defaultValue?: D;
+  /**
+   * Supplemental validation, only called if primary validation is successful.
+   *
+   * @returns {string | void} a string error message if the validation failed, or `undefined` if successful.
+   */
   validate?: (value: T) => string | void;
   meta?: TypeMeta & M;
 }
