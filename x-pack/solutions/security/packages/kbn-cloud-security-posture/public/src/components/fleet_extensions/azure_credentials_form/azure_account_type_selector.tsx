@@ -107,11 +107,11 @@ export const AzureAccountTypeSelect = ({
         disabled={disabled}
         idSelected={getAzureAccountType(input) || ''}
         options={azureAccountTypeOptions}
-        onChange={(accountType) => {
+        onChange={(newAccountType) => {
           updatePolicy({
             updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
               'azure.account_type': {
-                value: accountType,
+                value: newAccountType,
                 type: 'text',
               },
             }),

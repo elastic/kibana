@@ -89,9 +89,6 @@ const getCloudConnectorRemoteRoleTemplate: (
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
 
-  // TODO change the ProviderAccountTypeInputNames to use the CloudProviders type
-  const typedProvider = provider as CloudProviders;
-
   const defaultAccountType =
     provider === AWS_PROVIDER
       ? AWS_SINGLE_ACCOUNT
@@ -100,11 +97,10 @@ const getCloudConnectorRemoteRoleTemplate: (
       : AZURE_SINGLE_ACCOUNT;
 
   const accountType =
-    input?.streams?.[0]?.vars?.[ProviderAccountTypeInputNames[typedProvider]]?.value ??
+    input?.streams?.[0]?.vars?.[ProviderAccountTypeInputNames[provider]]?.value ??
     defaultAccountType;
 
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
   if (!hostProvider || (provider === 'aws' && hostProvider !== provider)) return undefined;
 
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
@@ -129,9 +125,15 @@ const getCloudConnectorRemoteRoleTemplate: (
       : undefined;
 
   if (templateUrlFieldName) {
-    return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
+    const templateUrl = getTemplateUrlFromPackageInfo(
+      packageInfo,
+      templateName,
+      templateUrlFieldName
+    )
       ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
       ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+
+    return templateUrl;
   }
 
   return undefined;
@@ -292,7 +294,7 @@ const buildCloudSetupState = ({
     cloudConnectorsFeatureEnabled,
   });
 
-  return {
+  const cloudSetupContextValues = {
     getCloudSetupProviderByInputType,
     config,
     showCloudTemplates: config.showCloudTemplates,
@@ -324,6 +326,8 @@ const buildCloudSetupState = ({
     templateInputOptions,
     templateName: config.policyTemplate,
   };
+
+  return cloudSetupContextValues;
 };
 
 interface CloudSetupContextValue {

@@ -27,6 +27,7 @@ export const AWS_INPUT_TEST_SUBJECTS = {
   TEMP_ACCESS_SESSION_TOKEN: 'awsTemporaryKeysSessionToken',
   SHARED_CREDENTIALS_FILE: 'awsSharedCredentialFile',
   SHARED_CREDENTIALS_PROFILE_NAME: 'awsCredentialProfileName',
+  EXTERNAL_ID: 'passwordInput-external-id',
 };
 
 export const GCP_PROVIDER_TEST_SUBJ = 'cloudSetupGcpTestId';
