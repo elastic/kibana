@@ -9,7 +9,7 @@ import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_eng
 import { ThreeWayDiffOutcome } from '../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff_outcome';
 import type { BasicRuleFieldsDiff, RuleUpdateTelemetryDraft } from './update_rule_telemetry';
 import {
-  buildRuleUpdateTelemetryDraft,
+  createRuleUpdateTelemetryDraft,
   sendRuleUpdateTelemetryEvents,
 } from './update_rule_telemetry';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
@@ -50,16 +50,16 @@ describe('telemetry for rule update', () => {
         },
       };
 
-      const draft = buildRuleUpdateTelemetryDraft({
+      const draft = createRuleUpdateTelemetryDraft({
         calculatedRuleDiff: diff,
         ruleId: 'r-1',
         ruleName: 'Rule 1',
-        hasMissingBaseVersion: false,
+        hasBaseVersion: false,
       });
 
       expect(draft.ruleId).toBe('r-1');
       expect(draft.ruleName).toBe('Rule 1');
-      expect(draft.hasMissingBaseVersion).toBe(false);
+      expect(draft.hasBaseVersion).toBe(false);
 
       expect(draft.updatedFieldsTotal.sort()).toEqual(
         ['fieldA', 'fieldB', 'fieldC', 'fieldD'].sort()
@@ -92,16 +92,16 @@ describe('telemetry for rule update', () => {
         },
       };
 
-      const draft = buildRuleUpdateTelemetryDraft({
+      const draft = createRuleUpdateTelemetryDraft({
         calculatedRuleDiff: diff,
         ruleId: 'abc-123',
         ruleName: 'Test rule',
-        hasMissingBaseVersion: true,
+        hasBaseVersion: true,
       });
 
       expect(draft.ruleId).toBe('abc-123');
       expect(draft.ruleName).toBe('Test rule');
-      expect(draft.hasMissingBaseVersion).toBe(true);
+      expect(draft.hasBaseVersion).toBe(true);
       expect(draft.updatedFieldsTotal).toEqual(['name']);
     });
 
@@ -121,11 +121,11 @@ describe('telemetry for rule update', () => {
         },
       };
 
-      const draft = buildRuleUpdateTelemetryDraft({
+      const draft = createRuleUpdateTelemetryDraft({
         calculatedRuleDiff: diff,
         ruleId: 'r-1',
         ruleName: 'Rule 1',
-        hasMissingBaseVersion: false,
+        hasBaseVersion: false,
       });
 
       expect(draft.updatedFieldsTotal).toEqual([]);

@@ -26,30 +26,17 @@ import type {
 } from '../diagnostic/health_diagnostic_service.types';
 
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
+import type { RuleUpdateTelemetry } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
 
-export const DETECTION_RULE_UPDATE_EVENT: EventTypeOpts<{
-  ruleId: string;
-  ruleName: string;
-  hasMissingBaseVersion: boolean;
-  finalResult: 'SUCCESS' | 'SKIP' | 'ERROR';
-  updatedFieldsSummary: {
-    count: number;
-    nonSolvableConflictsCount: number;
-    solvableConflictsCount: number;
-    noConflictsCount: number;
-  };
-  updatedFieldsTotal: string[];
-  updatedFieldsWithNonSolvableConflicts: string[];
-  updatedFieldsWithSolvableConflicts: string[];
-  updatedFieldsWithNoConflicts: string[];
-}> = {
+// Telemetry event that is sent for each rule that is updated during a prebuilt rule upgrade
+export const DETECTION_RULE_UPDATE_EVENT: EventTypeOpts<RuleUpdateTelemetry> = {
   eventType: 'detection_rule_update',
   schema: {
     ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
     ruleName: { type: 'keyword', _meta: { description: 'Rule name' } },
-    hasMissingBaseVersion: {
+    hasBaseVersion: {
       type: 'boolean',
-      _meta: { description: 'True if base version is missing for this rule' },
+      _meta: { description: 'True if base version exists for this rule' },
     },
     finalResult: {
       type: 'keyword',

@@ -45,7 +45,7 @@ import { getPossibleUpgrades } from '../../logic/utils';
 import type { RuleUpdateTelemetryDraft } from './update_rule_telemetry';
 import {
   sendRuleUpdateTelemetryEvents,
-  buildRuleUpdateTelemetryDraft,
+  createRuleUpdateTelemetryDraft,
 } from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
@@ -186,11 +186,11 @@ export const performRuleUpgradeHandler = async (
 
             ruleUpdateTelemetryDraftsMap.set(
               targetRule.rule_id,
-              buildRuleUpdateTelemetryDraft({
+              createRuleUpdateTelemetryDraft({
                 calculatedRuleDiff: ruleDiff.fields,
                 ruleId: targetVersion.rule_id,
                 ruleName: targetVersion.name,
-                hasMissingBaseVersion: baseVersion == null,
+                hasBaseVersion: baseVersion == null,
               })
             );
             return;

@@ -23,7 +23,7 @@ type UpdateRuleFinalResult = 'SUCCESS' | 'SKIP' | 'ERROR';
 export interface RuleUpdateTelemetryDraft {
   ruleId: string;
   ruleName: string;
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
   updatedFieldsSummary: {
     count: number;
     nonSolvableConflictsCount: number;
@@ -44,46 +44,50 @@ interface BuildRuleUpdateTelemetryDraftParams {
   calculatedRuleDiff: BasicRuleFieldsDiff;
   ruleId: string;
   ruleName: string;
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
 }
 
-export function buildRuleUpdateTelemetryDraft({
+export function createRuleUpdateTelemetryDraft({
   calculatedRuleDiff,
   ruleId,
   ruleName,
-  hasMissingBaseVersion,
+  hasBaseVersion,
 }: BuildRuleUpdateTelemetryDraftParams): RuleUpdateTelemetryDraft {
   const updatedFieldsTotal: string[] = [];
   const updatedFieldsWithNonSolvableConflicts: string[] = [];
   const updatedFieldsWithSolvableConflicts: string[] = [];
   const updatedFieldsWithNoConflicts: string[] = [];
 
-  for (const [fieldName, diff] of Object.entries(calculatedRuleDiff)) {
-    if (fieldName !== 'version') {
-      const isUpdatableOutcome =
-        diff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueSameUpdate ||
-        diff.diff_outcome === ThreeWayDiffOutcome.StockValueCanUpdate ||
-        diff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
-        diff.diff_outcome === ThreeWayDiffOutcome.MissingBaseCanUpdate;
-
-      if (isUpdatableOutcome) {
-        updatedFieldsTotal.push(fieldName);
-
-        switch (diff.conflict) {
-          case ThreeWayDiffConflict.NON_SOLVABLE:
-            updatedFieldsWithNonSolvableConflicts.push(fieldName);
-            break;
-          case ThreeWayDiffConflict.SOLVABLE:
-            updatedFieldsWithSolvableConflicts.push(fieldName);
-            break;
-          case ThreeWayDiffConflict.NONE:
-          default:
-            updatedFieldsWithNoConflicts.push(fieldName);
-            break;
-        }
-      }
+  Object.entries(calculatedRuleDiff).forEach(([fieldName, diff]) => {
+    if (fieldName === 'version') {
+      return;
     }
-  }
+
+    const isUpdatableOutcome =
+      diff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueSameUpdate ||
+      diff.diff_outcome === ThreeWayDiffOutcome.StockValueCanUpdate ||
+      diff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+      diff.diff_outcome === ThreeWayDiffOutcome.MissingBaseCanUpdate;
+
+    if (isUpdatableOutcome) {
+      return;
+    }
+
+    updatedFieldsTotal.push(fieldName);
+
+    switch (diff.conflict) {
+      case ThreeWayDiffConflict.NON_SOLVABLE:
+        updatedFieldsWithNonSolvableConflicts.push(fieldName);
+        break;
+      case ThreeWayDiffConflict.SOLVABLE:
+        updatedFieldsWithSolvableConflicts.push(fieldName);
+        break;
+      case ThreeWayDiffConflict.NONE:
+      default:
+        updatedFieldsWithNoConflicts.push(fieldName);
+        break;
+    }
+  });
 
   const nonSolvableConflictCount = updatedFieldsWithNonSolvableConflicts.length;
   const solvableConflictCount = updatedFieldsWithSolvableConflicts.length;
@@ -92,7 +96,7 @@ export function buildRuleUpdateTelemetryDraft({
   return {
     ruleId,
     ruleName,
-    hasMissingBaseVersion,
+    hasBaseVersion,
     updatedFieldsSummary: {
       count: updatedFieldsTotal.length,
       nonSolvableConflictsCount: nonSolvableConflictCount,

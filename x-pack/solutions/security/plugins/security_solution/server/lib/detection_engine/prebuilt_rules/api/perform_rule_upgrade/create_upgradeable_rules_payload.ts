@@ -25,7 +25,7 @@ import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getValueForField } from './get_value_for_field';
 import {
-  buildRuleUpdateTelemetryDraft,
+  createRuleUpdateTelemetryDraft,
   type RuleUpdateTelemetryDraft,
 } from './update_rule_telemetry';
 
@@ -112,11 +112,11 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
 
-            const ruleUpdateTelemetryDraft = buildRuleUpdateTelemetryDraft({
+            const ruleUpdateTelemetryDraft = createRuleUpdateTelemetryDraft({
               calculatedRuleDiff,
               ruleId,
               ruleName: upgradeableRule.target.name,
-              hasMissingBaseVersion: upgradeableRule.base == null,
+              hasBaseVersion: upgradeableRule.base != null,
             });
             processedRules.ruleUpdateTelemetryDrafts.push(ruleUpdateTelemetryDraft);
 
