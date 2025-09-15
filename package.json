@@ -775,6 +775,7 @@
     "@kbn/oidc-provider-plugin": "link:x-pack/platform/test/security_api_integration/plugins/oidc_provider",
     "@kbn/onechat-browser": "link:x-pack/platform/packages/shared/onechat/onechat-browser",
     "@kbn/onechat-common": "link:x-pack/platform/packages/shared/onechat/onechat-common",
+    "@kbn/onechat-esql-gen": "link:x-pack/platform/packages/shared/onechat/onechat-esql-gen",
     "@kbn/onechat-genai-utils": "link:x-pack/platform/packages/shared/onechat/onechat-genai-utils",
     "@kbn/onechat-plugin": "link:x-pack/platform/plugins/shared/onechat",
     "@kbn/onechat-server": "link:x-pack/platform/packages/shared/onechat/onechat-server",

@@ -1,0 +1,9 @@
+<directives>
+
+    You should only use the commands and functions present in the syntax definition,
+    and follow the syntax as described in the documentation and its examples. Do not try to guess
+    new functions or commands based on other query languages. Do not nest <source_command>.
+
+            Note: Unless specified otherwise, full text search should be done using MATCH
+
+</directives>
