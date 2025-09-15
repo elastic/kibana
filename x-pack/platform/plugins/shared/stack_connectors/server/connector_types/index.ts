@@ -7,6 +7,7 @@
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
+import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
@@ -77,6 +78,16 @@ export type {
   OpsgenieCreateAlertParams,
 } from './opsgenie';
 
+export type {
+  JiraServiceManagementActionConfig,
+  JiraServiceManagementActionSecrets,
+  JiraServiceManagementActionParams,
+  JiraServiceManagementCloseAlertSubActionParams,
+  JiraServiceManagementCreateAlertSubActionParams,
+  JiraServiceManagementCloseAlertParams,
+  JiraServiceManagementCreateAlertParams,
+} from './jira-service-management';
+
 export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -108,6 +119,7 @@ export function registerConnectorTypes({
   actions.registerType(getTorqConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
+  actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());

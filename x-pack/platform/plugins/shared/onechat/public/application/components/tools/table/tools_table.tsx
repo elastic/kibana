@@ -8,7 +8,6 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
@@ -64,7 +63,7 @@ export const OnechatToolsTable = memo(() => {
         showPerPageOptions: false,
       }}
       selection={{
-        selectable: isEsqlTool,
+        selectable: (tool) => !tool.readonly,
         onSelectionChange: (selectedItems: ToolDefinitionWithSchema[]) => {
           setSelectedTools(selectedItems);
         },

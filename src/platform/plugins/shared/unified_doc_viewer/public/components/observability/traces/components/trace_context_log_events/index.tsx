@@ -24,7 +24,7 @@ const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.
 const logsDescription = i18n.translate(
   'unifiedDocViewer.observability.traces.section.logs.description',
   {
-    defaultMessage: 'Correlated logs that occurred during the span',
+    defaultMessage: 'Correlated logs that occurred during the span.',
   }
 );
 

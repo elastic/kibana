@@ -6,10 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { listSearchSources } from '@kbn/onechat-genai-utils';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
-import type { BulkDeleteToolResponse, BulkDeleteToolResult } from '../../../common/http_api/tools';
+import type {
+  BulkDeleteToolResponse,
+  BulkDeleteToolResult,
+  ResolveSearchSourcesResponse,
+} from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
+import { internalApiPath } from '../../../common/constants';
 
 export function registerInternalToolsRoutes({
   router,
@@ -21,7 +27,7 @@ export function registerInternalToolsRoutes({
   // bulk delete tools
   router.post(
     {
-      path: '/internal/chat/tools/_bulk_delete',
+      path: `${internalApiPath}/tools/_bulk_delete`,
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
@@ -58,6 +64,51 @@ export function registerInternalToolsRoutes({
       return response.ok<BulkDeleteToolResponse>({
         body: {
           results,
+        },
+      });
+    })
+  );
+
+  // resolve search sources (internal)
+  router.get(
+    {
+      path: '/internal/chat/tools/_resolve_search_sources',
+      validate: {
+        query: schema.object({
+          pattern: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+      const { pattern } = request.query;
+
+      const {
+        indices,
+        aliases,
+        data_streams: dataStreams,
+      } = await listSearchSources({
+        pattern,
+        includeHidden: false,
+        includeKibanaIndices: false,
+        excludeIndicesRepresentedAsAlias: true,
+        excludeIndicesRepresentedAsDatastream: true,
+        esClient,
+      });
+
+      const results = [
+        ...indices.map((i) => ({ type: 'index' as const, name: i.name })),
+        ...aliases.map((a) => ({ type: 'alias' as const, name: a.name })),
+        ...dataStreams.map((d) => ({ type: 'data_stream' as const, name: d.name })),
+      ];
+      return response.ok<ResolveSearchSourcesResponse>({
+        body: {
+          results,
+          total: results.length,
         },
       });
     })
