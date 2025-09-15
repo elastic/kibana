@@ -7,10 +7,17 @@
 
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
-import type { Resolver } from 'react-hook-form';
+import { useCallback } from 'react';
+import type { Resolver, ResolverOptions } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
-import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
-import { useEsqlToolFormValidationResolver } from '../../components/tools/form/validation/esql_tool_form_validation';
+import type {
+  EsqlToolFormData,
+  IndexSearchToolFormData,
+  ToolFormData,
+} from '../../components/tools/form/types/tool_form_types';
+import { esqlFormValidationSchema } from '../../components/tools/form/validation/esql_tool_form_validation';
+import { useIndexSearchToolFormValidationResolver } from '../../components/tools/form/validation/index_search_tool_form_validation';
+import { zodResolver } from '../../utils/zod_resolver';
 
 const getDefaultValues = (toolType: ToolType): ToolFormData => {
   switch (toolType) {
@@ -23,6 +30,14 @@ const getDefaultValues = (toolType: ToolType): ToolFormData => {
         params: [],
         type: ToolType.esql,
       };
+    case ToolType.index_search:
+      return {
+        toolId: '',
+        description: '',
+        labels: [],
+        type: ToolType.index_search,
+        pattern: '',
+      };
     default:
       return {
         toolId: '',
@@ -33,14 +48,43 @@ const getDefaultValues = (toolType: ToolType): ToolFormData => {
   }
 };
 
-export const useToolForm = (tool?: ToolDefinitionWithSchema) => {
-  const esqlResolver = useEsqlToolFormValidationResolver();
+export const useToolForm = (tool?: ToolDefinitionWithSchema, initialToolType?: ToolType) => {
+  const esqlResolver = zodResolver(esqlFormValidationSchema);
+  const indexSearchResolver = useIndexSearchToolFormValidationResolver();
 
-  const toolType = tool?.type ?? ToolType.esql;
+  const toolType = tool?.type ?? initialToolType ?? ToolType.esql;
+
+  const dynamicResolver: Resolver<ToolFormData> = useCallback(
+    async (data, context, options) => {
+      const currentType = data.type || toolType;
+
+      switch (currentType) {
+        case ToolType.esql:
+          return esqlResolver(
+            data as EsqlToolFormData,
+            context,
+            options as ResolverOptions<EsqlToolFormData>
+          );
+        case ToolType.index_search:
+          return indexSearchResolver(
+            data as IndexSearchToolFormData,
+            context,
+            options as ResolverOptions<IndexSearchToolFormData>
+          );
+        default:
+          // For builtin tools or unknown types, just return valid
+          return {
+            values: data,
+            errors: {},
+          };
+      }
+    },
+    [esqlResolver, indexSearchResolver, toolType]
+  );
 
   const form = useForm<ToolFormData>({
     defaultValues: getDefaultValues(toolType),
-    resolver: toolType === ToolType.esql ? (esqlResolver as Resolver<ToolFormData>) : undefined,
+    resolver: dynamicResolver,
     mode: 'onBlur',
   });
   return form;
