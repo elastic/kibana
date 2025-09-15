@@ -312,6 +312,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
           body: await taskManager.runSoon(CAI_SCHEDULER_TASK_ID),
         });
       } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: CAI_SCHEDULER_TASK_ID, error: `${err}` } });
       }
     }
@@ -350,6 +351,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
           }),
         });
       } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
@@ -376,6 +378,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { taskManager }] = await core.getStartServices();
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
