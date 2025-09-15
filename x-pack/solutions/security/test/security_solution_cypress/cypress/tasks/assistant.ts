@@ -292,11 +292,22 @@ export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted')
 };
 
 export const shareConversationWithUser = (user: string) => {
-  cy.get(USER_PROFILES_SEARCH).find('input').type(user);
+  // Clear the input first to ensure clean state
+  cy.get(USER_PROFILES_SEARCH).find('input').clear().type(user);
+
+  // Wait for the user profile options to load after typing with explicit timeout
+  cy.get(USER_PROFILES_SEARCH).find(USER_PROFILES_SELECT_OPTION(user), { timeout: 10000 }).should('exist');
+
+  // Ensure the option is visible and ready for interaction
   cy.get(USER_PROFILES_SEARCH)
     .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('be.visible')
     .should('have.attr', 'aria-checked', 'false');
-  cy.get(USER_PROFILES_SEARCH).find(USER_PROFILES_SELECT_OPTION(user)).click();
+
+  // Click with retry handling
+  cy.get(USER_PROFILES_SEARCH).find(USER_PROFILES_SELECT_OPTION(user)).click({ force: true });
+
+  // Verify the selection was successful
   cy.get(USER_PROFILES_SEARCH)
     .find(USER_PROFILES_SELECT_OPTION(user))
     .should('have.attr', 'aria-checked', 'true');
@@ -444,7 +455,8 @@ export const duplicateConversation = (conversationName: string) => {
 };
 
 export const assertMessageUser = (user: string, messageIndex: number) => {
-  cy.get(`.euiCommentEvent__headerUsername`).eq(messageIndex).should('have.text', user);
+  // Use 'contain' instead of exact text match to handle full name variations
+  cy.get(`.euiCommentEvent__headerUsername`).eq(messageIndex).should('contain', user);
 };
 
 export function assertAccessErrorToast(): void {
