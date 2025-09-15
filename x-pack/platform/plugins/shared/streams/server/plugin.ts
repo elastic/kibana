@@ -175,10 +175,13 @@ export class StreamsPlugin
               contentService.getClient(),
             ]);
 
-          const queryClient = await queryService.getClientWithRequest({
-            request,
-            assetClient,
-          });
+          const [queryClient, uiSettingsClient] = await Promise.all([
+            queryService.getClientWithRequest({
+              request,
+              assetClient,
+            }),
+            coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
+          ]);
 
           const streamsClient = await streamsService.getClientWithRequest({
             request,
@@ -202,6 +205,7 @@ export class StreamsPlugin
             contentClient,
             queryClient,
             licensing,
+            uiSettingsClient,
           };
         },
       },

@@ -17,6 +17,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
 export const getSystemRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/systems/{systemName}',
@@ -33,10 +34,13 @@ export const getSystemRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string(), systemName: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{ system: System }> => {
-    const { systemClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ system: System }> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name, systemName } = params.path;
 
@@ -67,10 +71,18 @@ export const deleteSystemRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string(), systemName: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<StorageClientDeleteResponse> => {
-    const { systemClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<StorageClientDeleteResponse> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name, systemName } = params.path;
 
@@ -103,10 +115,18 @@ export const updateSystemRoute = createServerRoute({
       filter: conditionSchema,
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<StorageClientIndexResponse> => {
-    const { systemClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<StorageClientIndexResponse> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name, systemName },
@@ -142,10 +162,18 @@ export const listSystemsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{ systems: System[] }> => {
-    const { systemClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ systems: System[] }> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
 
@@ -196,10 +224,18 @@ export const bulkSystemsRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<StorageClientBulkResponse> => {
-    const { systemClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<StorageClientBulkResponse> => {
+    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name },

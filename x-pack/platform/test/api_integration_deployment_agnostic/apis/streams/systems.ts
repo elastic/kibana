@@ -207,5 +207,66 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
     });
+
+    describe('requires significant events setting', () => {
+      beforeEach(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+        });
+      });
+
+      afterEach(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+        });
+        await clearAllSystems();
+      });
+
+      it('GET system returns 403', async () => {
+        const res = await apiClient.fetch('GET /internal/streams/{name}/systems/{systemName}', {
+          params: { path: { name: STREAM_NAME, systemName: 'nope' } },
+        });
+        expect(res.status).to.be(403);
+      });
+
+      it('DELETE system returns 403', async () => {
+        const res = await apiClient.fetch('DELETE /internal/streams/{name}/systems/{systemName}', {
+          params: { path: { name: STREAM_NAME, systemName: 'nope' } },
+        });
+        expect(res.status).to.be(403);
+      });
+
+      it('PUT system returns 403', async () => {
+        const res = await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
+          params: {
+            path: { name: STREAM_NAME, systemName: 'nope' },
+            body: { description: 'x', filter: { always: {} } },
+          },
+        });
+        expect(res.status).to.be(403);
+      });
+
+      it('GET systems list returns 403', async () => {
+        const res = await apiClient.fetch('GET /internal/streams/{name}/systems', {
+          params: { path: { name: STREAM_NAME } },
+        });
+        expect(res.status).to.be(403);
+      });
+
+      it('POST bulk returns 403', async () => {
+        const res = await apiClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
+          params: {
+            path: { name: STREAM_NAME },
+            body: {
+              operations: [
+                { index: { system: { name: 'a', description: 'A', filter: { always: {} } } } },
+                { delete: { system: { name: 'a' } } },
+              ],
+            },
+          },
+        });
+        expect(res.status).to.be(403);
+      });
+    });
   });
 }
