@@ -67,12 +67,14 @@ export const createNavigationTree = ({
           },
           {
             link: 'observability-overview:alerts',
+            iconV2: 'warning',
           },
           ...(isCasesAvailable
             ? [
                 {
                   link: 'observability-overview:cases' as const,
                   renderAs: 'item' as const,
+                  iconV2: 'casesApp',
                   children: [
                     {
                       link: 'observability-overview:cases_configure' as const,
@@ -89,12 +91,7 @@ export const createNavigationTree = ({
               defaultMessage: 'SLOs',
             }),
             link: 'slo',
-          },
-          {
-            link: 'observabilityAIAssistant',
-            title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
-              defaultMessage: 'AI Assistant',
-            }),
+            iconV2: 'visGauge',
           },
           ...(streamsAvailable
             ? [
@@ -120,6 +117,8 @@ export const createNavigationTree = ({
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
+            iconV2: 'spaces',
+            spaceBefore: null,
             children: [
               {
                 id: 'apm',
@@ -181,6 +180,8 @@ export const createNavigationTree = ({
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
+            iconV2: 'storage',
+            spaceBefore: null,
             children: [
               {
                 children: [
@@ -200,13 +201,22 @@ export const createNavigationTree = ({
             ],
           },
           {
+            link: 'observabilityAIAssistant',
+            title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+              defaultMessage: 'AI Assistant',
+            }),
+          },
+          {
             id: 'machine_learning-landing',
             renderAs: 'panelOpener',
             title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
+            iconV2: 'info',
             children: [
               {
+                id: 'category-ml_overview',
+                title: '',
                 children: [
                   {
                     link: 'ml:overview',
@@ -289,6 +299,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
               defaultMessage: 'Other tools',
             }),
+            spaceBefore: null,
             renderAs: 'panelOpener',
             children: [
               {
@@ -335,124 +346,130 @@ export const createNavigationTree = ({
             icon: 'editorCodeBlock',
           },
           {
+            id: 'ingest_and_manage_data',
+            title: i18n.translate('xpack.serverlessObservability.nav.ingestAndManageData', {
+              defaultMessage: 'Ingest and manage data',
+            }),
+            renderAs: 'panelOpener',
+            spaceBefore: null,
+            icon: 'info',
+            children: [
+              {
+                title: 'Ingest and integrations',
+                children: [
+                  { link: 'integrations' },
+                  { link: 'fleet' },
+                  { link: 'management:ingest_pipelines' },
+                  { link: 'management:pipelines' },
+                  { link: 'management:content_connectors' },
+                ],
+              },
+              {
+                title: 'Indices, data streams, and roll ups',
+                children: [
+                  { link: 'management:index_management' },
+                  { link: 'management:index_lifecycle_management' },
+                  { link: 'management:snapshot_restore' },
+                  { link: 'management:transform' },
+                  { link: 'management:rollup_jobs' },
+                  { link: 'management:data_quality' },
+                ],
+              },
+            ],
+          },
+          {
             id: 'project_settings_project_nav',
-            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings', {
-              defaultMessage: 'Project settings',
+            title: i18n.translate('xpack.serverlessObservability.nav.adminAndSettings', {
+              defaultMessage: 'Admin and Settings',
             }),
             icon: 'gear',
             breadcrumbStatus: 'hidden',
-            renderAs: 'accordion',
+            renderAs: 'panelOpener',
             spaceBefore: null,
             children: [
               {
-                id: 'management',
-                title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
-                  defaultMessage: 'Management',
-                }),
-                spaceBefore: null,
-                renderAs: 'panelOpener',
+                id: 'cloud_link_org_settings',
+                title: '',
                 children: [
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.data', {
-                      defaultMessage: 'Data',
-                    }),
-                    breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:index_management', breadcrumbStatus: 'hidden' },
-                      { link: 'management:transform', breadcrumbStatus: 'hidden' },
-                      { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
-                      { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
-                      { link: 'management:jobsListLink', breadcrumbStatus: 'hidden' },
-                      { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
-                      { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
-                      { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
-                      { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
-                    ],
-                  },
-                  {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.access', {
-                      defaultMessage: 'Access',
-                    }),
-                    breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
-                      { link: 'management:roles', breadcrumbStatus: 'hidden' },
-                      {
-                        cloudLink: 'userAndRoles',
-                        title: i18n.translate(
-                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
-                          { defaultMessage: 'Manage organization members' }
-                        ),
-                      },
-                    ],
-                  },
-                  {
+                    cloudLink: 'billingAndSub',
                     title: i18n.translate(
-                      'xpack.serverlessObservability.nav.mngt.alertsAndInsights',
-                      {
-                        defaultMessage: 'Alerts and insights',
-                      }
+                      'xpack.serverlessObservability.nav.projectSettings.organizationSettings',
+                      { defaultMessage: 'Billing and subscription [external]' }
                     ),
-                    breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
-                      { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
-                    ],
                   },
                   {
-                    title: 'Machine Learning',
-                    children: [
-                      { link: 'management:overview' },
-                      { link: 'management:anomaly_detection' },
-                      { link: 'management:analytics' },
-                      { link: 'management:trained_models' },
-                      { link: 'management:supplied_configurations' },
-                    ],
-                  },
-                  {
-                    title: 'AI',
-                    children: [
-                      {
-                        link: 'management:genAiSettings',
-                        breadcrumbStatus: 'hidden',
-                      },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
-                  },
-                  {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
-                      defaultMessage: 'Content',
-                    }),
-                    breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:spaces', breadcrumbStatus: 'hidden' },
-                      { link: 'management:objects', breadcrumbStatus: 'hidden' },
-                      { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
-                      { link: 'management:reporting', breadcrumbStatus: 'hidden' },
-                      { link: 'management:tags', breadcrumbStatus: 'hidden' },
-                    ],
-                  },
-                  {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.other', {
-                      defaultMessage: 'Other',
-                    }),
-                    breadcrumbStatus: 'hidden',
-                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
+                    cloudLink: 'performance',
                   },
                 ],
               },
               {
-                link: 'integrations',
+                id: 'access',
+                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.access', {
+                  defaultMessage: 'Access',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
               },
               {
-                link: 'fleet',
+                id: 'alerts_and_insights',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.projectSettings.alertsAndInsights',
+                  {
+                    defaultMessage: 'Alerts and insights',
+                  }
+                ),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'observability-overview:alerts' },
+                  { link: 'observability-overview:rules' },
+                  { link: 'management:triggersActionsConnectors' },
+                ],
               },
               {
-                id: 'cloudLinkBilling',
-                cloudLink: 'billingAndSub',
+                id: 'machine_learning',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.projectSettings.machineLearning',
+                  {
+                    defaultMessage: 'Machine Learning',
+                  }
+                ),
+                breadcrumbStatus: 'hidden',
+                children: [{ link: 'management:trained_models' }],
+              },
+              {
+                id: 'data',
+                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.data', {
+                  defaultMessage: 'Data',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [{ link: 'management:data_usage' }],
+              },
+              {
+                id: 'content',
+                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {
+                  defaultMessage: 'Content',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:dataViews' },
+                  { link: 'management:spaces' },
+                  { link: 'management:objects' },
+                  { link: 'management:filesManagement' },
+                  { link: 'management:reporting' },
+                  { link: 'management:tags' },
+                ],
+              },
+              {
+                id: 'other',
+                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.other', {
+                  defaultMessage: 'Other',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:settings' },
+                  { link: 'management:observabilityAiAssistantManagement' },
+                ],
               },
             ],
           },
