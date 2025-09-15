@@ -69,13 +69,14 @@ const formatResult = (item: DashboardItem) => {
     updatedBy,
     error,
     managed,
+    version,
     ...rest
   } = item;
   return {
     id,
     type,
     data: { ...attributes, ...rest },
-    meta: { createdAt, updatedAt, createdBy, updatedBy, error, managed },
+    meta: { createdAt, updatedAt, createdBy, updatedBy, error, managed, version },
   };
 };
 
