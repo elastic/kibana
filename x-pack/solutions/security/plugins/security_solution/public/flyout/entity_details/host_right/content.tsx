@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -49,6 +50,7 @@ export const HostPanelContent = ({
 
   return (
     <FlyoutBody>
+      <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary

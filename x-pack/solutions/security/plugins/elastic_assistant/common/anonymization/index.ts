@@ -113,6 +113,13 @@ export const DEFAULT_ALLOW = [
   'user.risk.calculated_level',
   'user.risk.calculated_score_norm',
   'user.target.name',
+  'vulnerability.category',
+  'vulnerability.classification',
+  'vulnerability.description',
+  'vulnerability.enumeration',
+  'vulnerability.report_id',
+  'vulnerability.scanner.vendor',
+  'vulnerability.severity',
 ];
 
 /** By default, these fields will be anonymized */

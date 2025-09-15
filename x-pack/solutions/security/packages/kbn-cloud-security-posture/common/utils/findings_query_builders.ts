@@ -12,9 +12,9 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_EXTENDED_VULN_RETENTION_POLICY,
   LATEST_FINDINGS_RETENTION_POLICY,
-} from '@kbn/cloud-security-posture-common';
-import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { UseCspOptions } from '../types';
+} from '..';
+import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
+import type { UseCspOptions } from '../types/findings';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
 interface AggregationBucket {
@@ -80,7 +80,7 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query, sort }: UseCspOptions,
+  { query, sort }: Pick<UseCspOptions, 'query' | 'sort'>,
   rulesStates: CspBenchmarkRulesStates,
   isPreview = false
 ) => {
