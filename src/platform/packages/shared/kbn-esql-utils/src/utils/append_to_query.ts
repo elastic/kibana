@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, mutate, BasicPrettyPrinter, type FunctionParameterType } from '@kbn/esql-ast';
-import { PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils';
+import { parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { sanitazeESQLInput } from './sanitaze_input';
+
+const PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING = [
+  'date',
+  'date_nanos',
+  'version',
+  'ip',
+  'boolean',
+  'number',
+  'string',
+];
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
 // in these cases a base query such as "from index // comment" will result in errors or wrong data if we don't append in a new line
@@ -49,12 +58,7 @@ export function appendWhereClauseToESQLQuery(
 
   // Casting to string: There are some field types that need
   // to cast in string first otherwise ES will fail
-  if (
-    fieldType !== 'string' &&
-    fieldType !== 'number' &&
-    (fieldType === undefined ||
-      !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType as FunctionParameterType))
-  ) {
+  if (fieldType === undefined || !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType)) {
     fieldName = `${fieldName}::string`;
   }
 

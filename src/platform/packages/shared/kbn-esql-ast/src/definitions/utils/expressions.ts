@@ -176,16 +176,6 @@ export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameter
   'boolean',
 ];
 
-export const PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
-  'date',
-  'date_nanos',
-  'date_period',
-  'time_duration',
-  'version',
-  'ip',
-  'boolean',
-];
-
 /**
  * Returns all signatures matching the given types and arity
  * @param definition
