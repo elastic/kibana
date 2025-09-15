@@ -28,30 +28,28 @@ import { validateStepNameUniqueness } from '../../common/lib/validate_step_names
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { LogSearchResult } from './lib/workflow_logger';
-import type { WorkflowsService } from './workflows_management_service';
+import type {
+  SearchWorkflowExecutionsParams,
+  WorkflowsService,
+} from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
   page: number;
   createdBy?: string[];
-  enabled?: boolean;
+  enabled?: boolean[];
   query?: string;
   _full?: boolean;
 }
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
-  stepId?: string;
+  stepExecutionId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-}
-
-export interface GetStepExecutionParams {
-  executionId: string;
-  stepId: string;
 }
 
 export interface WorkflowExecutionLogEntry {
@@ -75,7 +73,7 @@ export interface WorkflowExecutionLogsDto {
 
 export interface GetStepExecutionParams {
   executionId: string;
-  stepId: string;
+  id: string;
 }
 
 export interface GetExecutionLogsParams {
@@ -92,7 +90,7 @@ export interface GetStepLogsParams {
   offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  stepId: string;
+  stepExecutionId: string;
 }
 
 export class WorkflowsManagementApi {
@@ -167,7 +165,8 @@ export class WorkflowsManagementApi {
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    request: KibanaRequest
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {
@@ -176,14 +175,19 @@ export class WorkflowsManagementApi {
       inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
+      workflow,
+      context,
+      request
+    );
     return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
     workflowYaml: string,
     inputs: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
 
@@ -218,16 +222,17 @@ export class WorkflowsManagementApi {
         yaml: workflowYaml,
         isTestRun: true,
       },
-      context
+      context,
+      request
     );
     return executeResponse.workflowExecutionId;
   }
 
   public async getWorkflowExecutions(
-    workflowId: string,
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.getWorkflowExecutions(workflowId, spaceId);
+    return await this.workflowsService.getWorkflowExecutions(params, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -242,11 +247,11 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
     let result: LogSearchResult;
-    if (params.stepId) {
+    if (params.stepExecutionId) {
       result = await this.workflowsService.getStepLogs(
         {
           executionId: params.executionId,
-          stepId: params.stepId,
+          stepExecutionId: params.stepExecutionId,
           limit: params.limit,
           offset: params.offset,
           sortField: params.sortField,
