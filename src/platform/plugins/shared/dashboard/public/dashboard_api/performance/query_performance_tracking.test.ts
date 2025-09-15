@@ -42,7 +42,7 @@ describe('startQueryPerformanceTracking', () => {
     jest.resetAllMocks();
   });
 
-  const setChildrenStatus = (children: { [key: string]: unknown }, status: PhaseEventType) => {
+  const setChildrenStatus = (children: {}, status: PhaseEventType) => {
     for (const child of Object.values(children)) {
       if (apiPublishesPhaseEvents(child)) {
         (child.phase$ as BehaviorSubject<PhaseEvent>).next({
