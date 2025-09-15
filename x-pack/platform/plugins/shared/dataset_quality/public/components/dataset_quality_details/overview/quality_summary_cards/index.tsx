@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DatasetQualityIndicator, QualityPercentageIndicator } from '@kbn/data-quality/public';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewPanelDatasetQualityIndicatorFailedDocs,
@@ -18,7 +19,6 @@ import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_
 import { useQualityIssuesDocsChart } from '../../../../hooks/use_quality_issues_docs_chart';
 import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_quality_details_state';
 import { useFailureStoreModal } from '../../../../hooks/use_failure_store_modal';
-import { DatasetQualityIndicator, QualityPercentageIndicator } from '../../../quality_indicator';
 import { Card } from './card';
 
 const degradedDocTooltip = (

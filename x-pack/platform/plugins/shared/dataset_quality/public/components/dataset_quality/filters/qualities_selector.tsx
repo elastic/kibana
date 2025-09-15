@@ -11,7 +11,7 @@ import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components
 import type { QualityIndicators } from '@kbn/data-quality/common';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { QualityIndicator } from '../../quality_indicator';
+import { QualityIndicator } from '@kbn/data-quality/public';
 
 const qualitiesSelectorLabel = i18n.translate('xpack.datasetQuality.qualitiesSelectorLabel', {
   defaultMessage: 'Qualities',

@@ -6,3 +6,4 @@
  */
 
 export * from './url_schema';
+export * from './quality_indicator';
