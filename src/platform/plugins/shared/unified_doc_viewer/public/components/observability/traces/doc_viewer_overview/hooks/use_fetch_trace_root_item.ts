@@ -27,7 +27,7 @@ interface GetRootTransactionParams {
   indexPattern: string;
 }
 
-async function getTraceRootSpan({ data, signal, traceId, indexPattern }: GetRootTransactionParams) {
+async function getTraceRootItem({ data, signal, traceId, indexPattern }: GetRootTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -86,7 +86,7 @@ const useFetchTraceRootItem = ({ traceId }: UseRootTransactionParams) => {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await getTraceRootSpan({ data, signal, traceId, indexPattern })
+          ? await getTraceRootItem({ data, signal, traceId, indexPattern })
           : undefined;
 
         const fields = result?.rawResponse.hits.hits[0]?.fields;
