@@ -138,30 +138,28 @@ function getUsedIndexPatterns({
 }
 
 function expandFormulaColumns(
-  state: { layers: Record<string, FormBasedLayer> },
+  state: { layers: Record<string, FormBasedLayer> } | undefined,
   {
     indexPatterns,
     dateRange,
   }: { indexPatterns: Record<string, IndexPattern>; dateRange?: DateRange }
-): {
-  layers: Record<string, FormBasedLayer>;
-} {
-  if (!hasStateFormulaColumn(state)) {
+) {
+  if (!state || !hasStateFormulaColumn(state)) {
     return state;
   }
-  const layers = state.layers;
-  for (const layerId of Object.keys(state.layers)) {
-    const layer = state.layers[layerId];
+  const layers = structuredClone(state.layers);
+  for (const layerId of Object.keys(layers)) {
+    const layer = layers[layerId];
     const formulaColumns = getFormulaColumnsFromLayer(layer);
     for (const [columnId, column] of formulaColumns) {
       const { layer: newLayer } = insertOrReplaceFormulaColumn(columnId, column, layer, {
         indexPattern: indexPatterns[layer.indexPatternId],
         dateRange,
       });
-      state.layers[layerId] = newLayer;
+      layers[layerId] = newLayer;
     }
   }
-  return { layers };
+  return { ...state, layers };
 }
 
 export function loadInitialState({
@@ -184,7 +182,7 @@ export function loadInitialState({
   dateRange?: DateRange;
 }): FormBasedPrivateState {
   const injectedState = createStateFromPersisted({ persistedState, references });
-  const state = expandFormulaColumns(injectedState ?? { layers: {} }, { indexPatterns, dateRange });
+  const state = expandFormulaColumns(injectedState, { indexPatterns, dateRange });
   const { usedPatterns, allIndexPatternIds: indexPatternIds } = getUsedIndexPatterns({
     state,
     defaultIndexPatternId,
@@ -210,6 +208,7 @@ export function loadInitialState({
   }
 
   return {
+    layers: {},
     ...state,
     currentIndexPatternId,
   };
