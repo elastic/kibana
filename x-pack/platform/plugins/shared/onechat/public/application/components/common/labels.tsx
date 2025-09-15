@@ -52,8 +52,7 @@ const ViewMorePopover: React.FC<{ labels: string[] }> = ({ labels }) => {
         >
           <FormattedMessage
             id="xpack.onechat.labels.viewMore.buttonLabel"
-            defaultMessage="View more ({numLabels})"
-            values={{ numLabels: labels.length }}
+            defaultMessage="View more"
           />
         </EuiButtonEmpty>
       }
