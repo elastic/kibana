@@ -162,6 +162,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         {
           name: getAddControlButtonTitle(),
           icon: 'empty',
+          'data-test-subj': 'controls-create-button',
           onClick: () => {
             controlGroupApi?.openAddDataControlFlyout({ onSave });
             closePopover();
@@ -170,6 +171,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         {
           name: getAddESQLControlButtonTitle(),
           icon: 'empty',
+          'data-test-subj': 'controls-create-esql-button',
           onClick: async () => {
             try {
               const variablesInParent = apiPublishesESQLVariables(dashboardApi)
