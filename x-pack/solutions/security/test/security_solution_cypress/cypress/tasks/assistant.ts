@@ -296,7 +296,9 @@ export const shareConversationWithUser = (user: string) => {
   cy.get(USER_PROFILES_SEARCH).find('input').clear().type(user);
 
   // Wait for the user profile options to load after typing with explicit timeout
-  cy.get(USER_PROFILES_SEARCH).find(USER_PROFILES_SELECT_OPTION(user), { timeout: 10000 }).should('exist');
+  cy.get(USER_PROFILES_SEARCH)
+    .find(USER_PROFILES_SELECT_OPTION(user), { timeout: 10000 })
+    .should('exist');
 
   // Ensure the option is visible and ready for interaction
   cy.get(USER_PROFILES_SEARCH)
