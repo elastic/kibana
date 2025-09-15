@@ -334,7 +334,6 @@ export const dashboardAttributesSchemaRequest =
 export const dashboardAttributesSchema = schema.object({
   ...searchResultsAttributes,
   ...dashboardAdditionalAttributes,
-  version: schema.string(),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
