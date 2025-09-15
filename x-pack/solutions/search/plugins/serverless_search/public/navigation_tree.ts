@@ -87,18 +87,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             sideNavVersion: 'v1',
           },
           {
-            children: [
-              { link: 'agent_builder:conversations' },
-              { link: 'agent_builder:tools' },
-              { link: 'agent_builder:agents' },
-            ],
-            iconV2: 'comment',
-            id: 'agent_builder',
-            renderAs: 'panelOpener',
-            sideNavVersion: 'v2',
-            title: AGENTS_TITLE,
-          },
-          {
             link: 'discover',
           },
           {
@@ -122,6 +110,18 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               },
             ],
             sideNavVersion: 'v1',
+          },
+          {
+            children: [
+              { link: 'agent_builder:conversations' },
+              { link: 'agent_builder:tools' },
+              { link: 'agent_builder:agents' },
+            ],
+            iconV2: 'comment',
+            id: 'agent_builder',
+            renderAs: 'panelOpener',
+            sideNavVersion: 'v2',
+            title: AGENTS_TITLE,
           },
           {
             id: 'build',
@@ -506,6 +506,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 breadcrumbStatus: 'hidden',
                 children: [
                   { link: 'management:settings', breadcrumbStatus: 'hidden' },
+                  { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
                   {
                     link: 'management:observabilityAiAssistantManagement',
                     breadcrumbStatus: 'hidden',
