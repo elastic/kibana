@@ -250,7 +250,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: JSON.stringify({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
