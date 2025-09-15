@@ -126,7 +126,7 @@ class SecurityBrowserFieldsManager {
         return cachedResult;
       }
       // If the browser fields for this indexPatterns are not cached, build them
-      const result = SecurityBrowserFieldsManager.buildBrowserFields(fields);
+      const result = buildBrowserFields(fields);
       this.dataViewIndexPatternsToBrowserFieldsCache.set(indexPatterns, result);
       return result;
     }
