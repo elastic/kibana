@@ -96,6 +96,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             onClick={() => {
               if (typeof onManageRules === 'function') onManageRules();
             }}
+            disabled={isReadonly}
           >
             {i18n.EXCEPTION_LIST_HEADER_LINK_RULES_BUTTON}
           </EuiButton>
