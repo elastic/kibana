@@ -42,6 +42,7 @@ import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import type { SearchBarProps } from './types';
 import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_animation';
+import { getOverlayBackdropStyles, getOverlaySearchStyles } from './overlay_styles';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -100,6 +101,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const UNKNOWN_TAG_ID = '__unknown__';
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
+  const [isOverlayMode, setIsOverlayMode] = useState(false);
 
   // Highlight animation hook
   const { isHighlighted, triggerHighlight } = useHighlightAnimation(chromeStyle === 'project');
@@ -113,10 +115,15 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     },
   });
   const projectStyles = css({
-    width: 260,
+    width: 240,
   });
   const baseStyles = chromeStyle === 'project' ? projectStyles : defaultStyles;
   const highlightStyles = getSearchHighlightStyles(euiTheme, colorMode);
+  
+  // Overlay styles
+  const overlayBackdropStyles = getOverlayBackdropStyles(euiTheme);
+  const overlaySearchStyles = getOverlaySearchStyles(euiTheme, highlightStyles);
+
   const styles = css([baseStyles, highlightStyles]);
   // Initialize searchableTypes data
   useEffect(() => {
@@ -133,6 +140,22 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   useEffect(() => {
     setIsLoading(true);
   }, [searchValue]);
+
+  // When overlay mode is activated, ensure popover shows immediately
+  useEffect(() => {
+    if (isOverlayMode && chromeStyle === 'project') {
+      // Ensure we have initial load set and trigger search if no options
+      if (!initialLoad) {
+        setInitialLoad(true);
+      }
+      // If we don't have any options yet, set some placeholder to show popover
+      if (!options.length && !isLoading) {
+        // Set empty options to trigger popover display
+        setOptions([]);
+        setIsLoading(false);
+      }
+    }
+  }, [isOverlayMode, chromeStyle, initialLoad, options.length, isLoading]);
 
   const loadSuggestions = useCallback(
     (term: string) => {
@@ -243,8 +266,21 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [searchValue, loadSuggestions, searchableTypes, initialLoad]
   );
 
+  const closeOverlay = useCallback(() => {
+    setIsOverlayMode(false);
+    if (searchRef) {
+      searchRef.blur();
+    }
+  }, [searchRef]);
+
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOverlayMode) {
+        event.preventDefault();
+        closeOverlay();
+        return;
+      }
+      
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
         reportEvent.shortcutUsed();
@@ -255,7 +291,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         }
       }
     },
-    [buttonRef, searchRef, reportEvent]
+    [buttonRef, searchRef, reportEvent, isOverlayMode, closeOverlay]
   );
 
   const onChange = useCallback(
@@ -327,8 +363,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         clearField();
         searchRef.dispatchEvent(blurEvent);
       }
+      
+      // Close overlay after navigation
+      if (isOverlayMode) {
+        setIsOverlayMode(false);
+      }
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue, isOverlayMode]
   );
 
   const clearField = () => setSearchValue('');
@@ -339,18 +380,19 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const highlightClassName = isHighlighted ? 'search-highlighted' : undefined;
 
-  return (
+  const renderSearchComponent = (isOverlay = false) => (
     <EuiSelectableTemplateSitewide
       isLoading={isLoading}
       isPreFiltered
       onChange={onChange}
       options={options}
-      css={styles}
+      css={isOverlay ? overlaySearchStyles : styles}
       className={highlightClassName}
-      popoverButtonBreakpoints={['xs', 's']}
+      popoverButtonBreakpoints={isOverlay ? [] : ['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
       colorModes={chromeStyle !== 'project' ? { search: 'dark', popover: 'global' } : undefined}
+      searchable={true}
       listProps={{
         className: 'eui-yScroll',
         css: css`
@@ -363,16 +405,29 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
-        compressed: true,
+        compressed: isOverlay ? false : true,
         'aria-label': i18nStrings.placeholderText,
         placeholder: i18nStrings.placeholderText,
         onFocus: () => {
           reportEvent.searchFocus();
           setInitialLoad(true);
           triggerHighlight();
+          if (chromeStyle === 'project') {
+            setIsOverlayMode(true);
+            // Force initial load to show popover immediately
+            if (!initialLoad) {
+              setInitialLoad(true);
+            }
+          }
         },
-        onBlur: () => {
+        onBlur: (e) => {
           reportEvent.searchBlur();
+          // Delay closing overlay to allow for clicks on search results
+          setTimeout(() => {
+            if (isOverlayMode && !e.currentTarget.contains(document.activeElement)) {
+              setIsOverlayMode(false);
+            }
+          }, 150);
         },
         fullWidth: true,
       }}
@@ -380,12 +435,15 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       emptyMessage={<EmptyMessage />}
       noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
       popoverProps={{
-        zIndex: Number(euiTheme.levels.navigation),
+        zIndex: isOverlay ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.navigation),
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
-        repositionOnScroll: true,
+        repositionOnScroll: !isOverlay,
         popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
+        hasArrow: false,
+        anchorPosition: isOverlay ? 'downCenter' : undefined,
+        isOpen: isOverlay ? true : undefined,
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
@@ -394,5 +452,28 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }
       popoverFooter={<PopoverFooter isMac={isMac} />}
     />
+  );
+
+  return (
+    <>
+      {/* Header search - hidden when overlay is active */}
+      <div style={{ visibility: isOverlayMode ? 'hidden' : 'visible' }}>
+        {renderSearchComponent(false)}
+      </div>
+      
+      {/* Overlay search */}
+      {isOverlayMode && (
+        <div
+          css={overlayBackdropStyles}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeOverlay();
+            }
+          }}
+        >
+          {renderSearchComponent(true)}
+        </div>
+      )}
+    </>
   );
 };
