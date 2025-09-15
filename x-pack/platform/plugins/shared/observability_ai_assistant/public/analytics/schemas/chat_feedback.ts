@@ -9,8 +9,14 @@ import type { EventTypeOpts } from '@kbn/core/public';
 import type { Conversation } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
+import {
+  type Connector,
+  type Scope,
+  connectorSchema,
+  scopeSchema,
+} from '../../../common/analytics';
 
-export interface ChatFeedback {
+export interface ChatFeedback extends Connector, Scope {
   feedback: Feedback;
   conversation: Omit<Omit<Conversation, 'messages' | 'systemMessage'>, 'conversation'> & {
     conversation: Omit<Conversation['conversation'], 'title'>;
@@ -93,5 +99,9 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
         },
       },
     },
+    connector: {
+      properties: connectorSchema,
+    },
+    scopes: scopeSchema,
   },
 };

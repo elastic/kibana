@@ -51,6 +51,7 @@ import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { deserializeMessage } from '../utils/deserialize_message';
 import { useKibana } from '../hooks/use_kibana';
 import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
+import { useScopes } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -151,6 +152,8 @@ export function ChatBody({
     false
   );
 
+  const scopes = useScopes();
+  
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
     initialMessages,
@@ -218,11 +221,15 @@ export function ChatBody({
         conversation: { id, last_updated: lastUpdated },
       };
 
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
+
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
           feedback,
           conversation: conversationWithoutMessagesAndTitle,
+          connector,
+          scopes,
         },
       });
     }
