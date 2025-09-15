@@ -10,9 +10,10 @@ import { css } from '@emotion/react';
 import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { useToolsActions } from '../../context/tools_table_provider';
+import { useToolsActions } from '../../context/tools_provider';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
+import { McpConnectionButton } from './mcp_server/mcp_connection_button';
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
@@ -35,6 +36,7 @@ export const OnechatTools = () => {
           >
             <EuiText size="s">{labels.tools.newToolButton}</EuiText>
           </EuiButton>,
+          <McpConnectionButton key="mcp-server-connection-button" />,
         ]}
       />
       <KibanaPageTemplate.Section>
