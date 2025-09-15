@@ -8,43 +8,27 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiPanel,
-  EuiIcon,
-  EuiSuperSelect,
-  useEuiTheme,
-  EuiFormRow,
-} from '@elastic/eui';
-import {
-  UseArray,
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   ToggleField,
-  TextField,
   CardRadioGroupField,
   HiddenField,
   FilePickerField,
   SelectField,
-  PasswordField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
+import { HeadersFields } from './headers_fields';
 
 import * as i18n from './translations';
-import { fa } from '@faker-js/faker/.';
 
 interface Props {
   readOnly: boolean;
@@ -65,14 +49,9 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
       'config.verificationMode',
       '__internal__.hasHeaders',
       '__internal__.hasCA',
-      // __internal__.headers -> to save the headers
       '__internal__.headers',
     ],
   });
-
-  const { euiTheme } = useEuiTheme();
-
-  console.log('__internal__: ', __internal__);
 
   const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
@@ -90,37 +69,6 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
   const hasCADefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.ca') ||
     getFieldDefaultValue('config.verificationMode') === 'none';
-
-  const headerTypeOptions = [
-    {
-      value: 'config',
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="controls" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span>{i18n.CONFIG_OPTION}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': 'option-config',
-    },
-    {
-      value: 'secret',
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="lock" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span>{i18n.SECRET_OPTION}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': 'option-secret',
-    },
-  ];
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
@@ -183,187 +131,9 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
           },
         }}
       />
-      {hasHeaders && (
-        <UseArray path="__internal__.headers" initialNumberOfItems={1}>
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                <EuiSpacer size="m" />
-                <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
-                  <h5>{i18n.HEADERS_TITLE}</h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <span>{i18n.HEADERS_SUBTITLE}</span>
-                {/* <EuiSpacer size="m" /> */}
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      iconType="plusInCircle"
-                      onClick={addItem}
-                      data-test-subj="webhookAddHeaderButton"
-                    >
-                      {i18n.ADD_BUTTON}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
 
-                <EuiSpacer size="s" />
+      {hasHeaders && <HeadersFields readOnly={readOnly} />}
 
-                {items.map((item) => {
-                  const headerTypeValue = item?.path
-                    ? getFieldDefaultValue(`${item.path}.type`)
-                    : headerTypeOptions[0].value;
-
-                  return (
-                    <EuiFlexGroup key={item.id}>
-                      <EuiPanel
-                        hasBorder={true}
-                        hasShadow={false}
-                        css={{
-                          marginBottom: '20px',
-                          background:
-                            headerTypeValue === 'secret'
-                              ? euiTheme.colors.backgroundBaseSubdued
-                              : euiTheme.colors.backgroundBasePlain,
-                          display: 'flex',
-                          flexDirection: 'column',
-                        }}
-                      >
-                        {/* Header Key */}
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <UseField
-                              path={`${item.path}.key`}
-                              config={{
-                                label: i18n.KEY_LABEL,
-                              }}
-                              component={TextField}
-                              componentProps={{
-                                euiFieldProps: {
-                                  readOnly,
-                                  ['data-test-subj']: 'webhookHeadersKeyInput',
-                                },
-                              }}
-                            />
-                          </EuiFlexItem>
-                          {/* Header Value */}
-                          <EuiFlexItem>
-                            {headerTypeValue === 'secret' ? (
-                              <UseField
-                                path={`${item.path}.value`}
-                                config={{
-                                  label: i18n.VALUE_LABEL,
-                                  validations: [
-                                    {
-                                      validator: emptyField(i18n.SECRET_HEADER_MISSING_VALUE_ERROR),
-                                    },
-                                  ],
-                                }}
-                                component={PasswordField}
-                                componentProps={{
-                                  euiFieldProps: {
-                                    readOnly,
-                                    'data-test-subj': 'webhookHeadersSecretValueInput',
-                                    type: 'dual',
-                                  },
-                                }}
-                              />
-                            ) : (
-                              <UseField
-                                path={`${item.path}.value`}
-                                config={{ label: i18n.VALUE_LABEL }}
-                                component={TextField}
-                                componentProps={{
-                                  euiFieldProps: {
-                                    readOnly,
-                                    ['data-test-subj']: 'webhookHeadersValueInput',
-                                  },
-                                }}
-                              />
-                            )}
-                          </EuiFlexItem>
-
-                          {/* <EuiFlexItem grow={false}>
-                            <UseField
-                              path={`${item.path}.value`}
-                              config={{ label: i18n.VALUE_LABEL }}
-                              component={({ field }) => {
-                                const type = getFieldDefaultValue(`${item.path}.type`);
-                                const isSecret = type === 'secret';
-                                const Component = isSecret ? PasswordField : TextField;
-                                return (
-                                  <Component
-                                    {...field}
-                                    componentProps={{
-                                      euiFieldProps: {
-                                        readOnly,
-                                        'data-test-subj': isSecret
-                                          ? 'webhookHeadersSecretValueInput'
-                                          : 'webhookHeadersValueInput',
-                                        type: isSecret ? 'dual' : 'text',
-                                      },
-                                    }}
-                                    config={{
-                                      label: i18n.VALUE_LABEL,
-                                      validations: isSecret
-                                        ? [
-                                            {
-                                              validator: emptyField(
-                                                i18n.SECRET_HEADER_MISSING_VALUE_ERROR
-                                              ),
-                                            },
-                                          ]
-                                        : [],
-                                    }}
-                                  />
-                                );
-                              }}
-                            />
-                          </EuiFlexItem> */}
-
-                          <EuiFlexItem grow={false}>
-                            <UseField
-                              path={`${item.path}.type`}
-                              config={{
-                                defaultValue: headerTypeOptions[0].value,
-                              }}
-                              component={({ field }) => (
-                                <EuiFormRow label={i18n.HEADER_TYPE_LABEL}>
-                                  <EuiSuperSelect
-                                    options={headerTypeOptions}
-                                    valueOfSelected={field.value}
-                                    onChange={(val) => field.setValue(val)}
-                                    hasDividers
-                                    fullWidth
-                                    data-test-subj="webhookHeaderTypeSelect"
-                                    // css={{ marginTop: '20px', minWidth: '120px' }}
-                                  />
-                                </EuiFormRow>
-                              )}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              color="danger"
-                              onClick={() => removeItem(item.id)}
-                              iconType="minusInCircle"
-                              aria-label={i18n.DELETE_BUTTON}
-                              css={{
-                                marginTop: '28px',
-                                background: euiTheme.colors.backgroundBaseDanger,
-                              }}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                    </EuiFlexGroup>
-                  );
-                })}
-              </>
-            );
-          }}
-        </UseArray>
-      )}
       <EuiSpacer size="m" />
       <UseField
         path="__internal__.hasCA"

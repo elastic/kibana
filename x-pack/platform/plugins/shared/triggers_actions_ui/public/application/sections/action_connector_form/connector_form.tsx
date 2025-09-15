@@ -239,6 +239,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
       },
       { runDeserializer: false }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secretHeaders, __internal__]);
 
   useEffect(() => {
