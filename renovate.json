@@ -4694,7 +4694,7 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:all-open"
+        "backport:skip"
       ],
       "enabled": true
     }
