@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useState, type ComponentProps } from 'react';
+import React, {
+  useMemo,
+  useCallback,
+  useState,
+  useRef,
+  type ComponentProps,
+  Fragment,
+} from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiBadge,
-  EuiPopover,
   EuiPanel,
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextTruncate,
   EuiContextMenu,
-  EuiButtonIcon,
+  EuiWrappingPopover,
 } from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
@@ -61,7 +67,6 @@ interface ESQLDataCascadeProps extends ComponentProps<typeof UnifiedDataTable> {
   cascadeGroups: string[];
   defaultFilters?: Filter[];
   viewModeToggle?: React.ReactElement;
-  // dataView: DataView;
   // stateContainer: DiscoverStateContainer;
 }
 
@@ -109,20 +114,23 @@ const contextRowActions: NonNullable<EuiContextMenuPanelDescriptor['items']> = [
       defaultMessage: 'View docs in new tab',
     }),
     icon: 'popout',
-    onClick(this: ESQLDataGroupNode) {},
+    onClick(this: ESQLDataGroupNode) {
+      // const discoverLink = services.locator.getRedirectUrl({
+      //   query,
+      //   timeRange: executeContext.timeRange,
+      //   hideChart: false,
+      // });
+      // window.open(discoverLink, '_blank');
+    },
   },
 ];
 
 function ContextMenu({
   row,
   contextActions,
-  openPopoverRowId,
-  setOpenPopoverRowId,
 }: {
   row: ESQLDataGroupNode;
   contextActions: NonNullable<EuiContextMenuPanelDescriptor['items']>;
-  openPopoverRowId: string | null;
-  setOpenPopoverRowId: (id: string | null) => void;
 }) {
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
@@ -139,26 +147,7 @@ function ContextMenu({
     [row, contextActions]
   );
 
-  return (
-    <EuiPopover
-      id={'contextMenuPopoverId'}
-      button={
-        <EuiButtonIcon
-          size="s"
-          color="text"
-          iconType="boxesVertical"
-          onClick={() => setOpenPopoverRowId(row.id)}
-          aria-label="row context menu button"
-        />
-      }
-      isOpen={openPopoverRowId === row.id}
-      closePopover={() => setOpenPopoverRowId(null)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenu initialPanelId={panels[0].id} panels={panels} />
-    </EuiPopover>
-  );
+  return <EuiContextMenu initialPanelId={panels[0].id} panels={panels} />;
 }
 
 const ESQLDataCascadeLeafCell = React.memo(
@@ -191,14 +180,12 @@ const ESQLDataCascadeLeafCell = React.memo(
       [cellData]
     );
 
-    // console.log('props received:: %o \n', props);
-
     return (
       <EuiPanel paddingSize="s">
         <UnifiedDataTable
           {...props}
-          ariaLabelledBy="data-cascade-leaf-cell"
           enableInTableSearch
+          ariaLabelledBy="data-cascade-leaf-cell"
           rows={cellData}
           loadingState={DataLoadingState.loaded}
           columns={[]} // only allow filter in to modify this
@@ -231,7 +218,8 @@ export const ESQLDataCascade = ({
   const { data, expressions } = useDiscoverServices();
   const { scopedProfilesManager } = useScopedServices();
 
-  const [openPopoverRowId, setOpenPopoverRowId] = useState<string | null>(null);
+  const popoverRef = useRef<HTMLButtonElement | null>(null);
+  const [popoverRowData, setPopoverRowData] = useState<ESQLDataGroupNode | null>(null);
 
   const queryMeta = useMemo(() => {
     return getESQLStatsQueryMeta((query as AggregateQuery).esql);
@@ -328,94 +316,155 @@ export const ESQLDataCascade = ({
     [dataView, props, queryMeta]
   );
 
+  const renderRowActionPopover = useCallback(() => {
+    return popoverRowData ? (
+      <EuiWrappingPopover
+        button={popoverRef.current!}
+        isOpen={popoverRowData !== null}
+        closePopover={() => setPopoverRowData(null)}
+        panelPaddingSize="none"
+      >
+        <ContextMenu row={popoverRowData!} contextActions={contextRowActions} />
+      </EuiWrappingPopover>
+    ) : null;
+  }, [popoverRowData]);
+
+  const rowContextActionClickHandler = useCallback(
+    function showPopover(this: ESQLDataGroupNode, e: React.MouseEvent<HTMLButtonElement>) {
+      popoverRef.current = e.currentTarget;
+      setPopoverRowData(this);
+    },
+    [setPopoverRowData]
+  );
+
+  const tableHeading = useCallback(
+    () => <React.Fragment>{viewModeToggle}</React.Fragment>,
+    [viewModeToggle]
+  );
+
+  const cascadeGroupData = useMemo(
+    () =>
+      (initialData ?? []).map((datum) => ({
+        id: datum.id,
+        ...datum.flattened,
+      })),
+    [initialData]
+  );
+
+  const onCascadeGroupingChange = useCallback(() => {}, []);
+
+  const rowActions = useCallback<
+    NonNullable<
+      ComponentProps<typeof DataCascadeRow<ESQLDataGroupNode, DataTableRecord>>['rowHeaderActions']
+    >
+  >(
+    ({ row }) => {
+      return [
+        {
+          iconType: 'boxesVertical',
+          'aria-label': `${row.original.id}-row-actions`,
+          'data-test-subj': 'dscCascadeRowContextActionButton',
+          onClick: rowContextActionClickHandler.bind(row.original),
+        },
+      ];
+    },
+    [rowContextActionClickHandler]
+  );
+
+  const rowHeaderMeta = useCallback<
+    NonNullable<
+      ComponentProps<
+        typeof DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
+      >['rowHeaderMetaSlots']
+    >
+  >(
+    ({ row }) =>
+      queryMeta.appliedFunctions.map(({ identifier, operator }) => {
+        // maybe use operator to determine what meta component to render
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <FormattedMessage
+              id="discover.esql_data_cascade.grouping.function"
+              defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
+              values={{
+                identifier,
+                identifierValue: Number.isFinite(Number(row.original[identifier]))
+                  ? Math.round(Number(row.original[identifier])).toLocaleString()
+                  : (row.original[identifier] as string),
+                bold: (chunks) => (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" textAlign="right">
+                      <p>{chunks}</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                ),
+                badge: (chunks) => (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{chunks}</EuiBadge>
+                  </EuiFlexItem>
+                ),
+              }}
+            />
+          </EuiFlexGroup>
+        );
+      }),
+    [queryMeta.appliedFunctions]
+  );
+
+  const rowHeaderTitle = useCallback<
+    NonNullable<
+      ComponentProps<
+        typeof DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
+      >['rowHeaderTitleSlot']
+    >
+  >(
+    ({ row }) => {
+      const type = queryMeta.groupByFields.find(
+        (field) => field.field === cascadeGroups[row.depth]
+      )!.type;
+
+      if (/categorize/i.test(type)) {
+        return (
+          <React.Fragment>
+            {getPatternCellRenderer(
+              // @ts-expect-error - necessary to match the data shape expectation
+              { flattened: row.original },
+              cascadeGroups[row.depth],
+              false,
+              48
+            )}
+          </React.Fragment>
+        );
+      }
+
+      return (
+        <EuiText size="s">
+          <EuiTextTruncate text={row.original[cascadeGroups[row.depth]] as string} width={400}>
+            {(truncatedText) => {
+              return <h4>{truncatedText}</h4>;
+            }}
+          </EuiTextTruncate>
+        </EuiText>
+      );
+    },
+    [cascadeGroups, queryMeta.groupByFields]
+  );
+
   return (
     <div css={styles.wrapper}>
+      <Fragment>{renderRowActionPopover()}</Fragment>
       <DataCascade<ESQLDataGroupNode>
         size="s"
         overscan={15}
-        data={(initialData ?? []).map((datum) => ({
-          id: datum.id,
-          ...datum.flattened,
-        }))}
+        data={cascadeGroupData}
         cascadeGroups={cascadeGroups}
-        tableTitleSlot={() => <React.Fragment>{viewModeToggle}</React.Fragment>}
-        onCascadeGroupingChange={() => {}}
+        tableTitleSlot={tableHeading}
+        onCascadeGroupingChange={onCascadeGroupingChange}
       >
         <DataCascadeRow<ESQLDataGroupNode>
-          rowHeaderTitleSlot={({ row }) => {
-            const type = queryMeta.groupByFields.find(
-              (field) => field.field === cascadeGroups[row.depth]
-            )!.type;
-
-            if (/categorize/i.test(type)) {
-              return (
-                <React.Fragment>
-                  {getPatternCellRenderer(
-                    // @ts-expect-error - necessary to match the data shape expectation
-                    { flattened: row.original },
-                    cascadeGroups[row.depth],
-                    false,
-                    48
-                  )}
-                </React.Fragment>
-              );
-            }
-
-            return (
-              <EuiText size="s">
-                <EuiTextTruncate
-                  text={row.original[cascadeGroups[row.depth]] as string}
-                  width={400}
-                >
-                  {(truncatedText) => {
-                    return <h4>{truncatedText}</h4>;
-                  }}
-                </EuiTextTruncate>
-              </EuiText>
-            );
-          }}
-          rowHeaderMetaSlots={({ row }) =>
-            queryMeta.appliedFunctions.map(({ identifier, operator }) => {
-              // maybe use operator to determine what meta component to render
-              return (
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <FormattedMessage
-                    id="discover.esql_data_cascade.grouping.function"
-                    defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
-                    values={{
-                      identifier,
-                      identifierValue: Number.isFinite(Number(row.original[identifier]))
-                        ? Math.round(Number(row.original[identifier])).toLocaleString()
-                        : (row.original[identifier] as string),
-                      bold: (chunks) => (
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" textAlign="right">
-                            <p>{chunks}</p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      ),
-                      badge: (chunks) => (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge color="hollow">{chunks}</EuiBadge>
-                        </EuiFlexItem>
-                      ),
-                    }}
-                  />
-                </EuiFlexGroup>
-              );
-            })
-          }
-          rowHeaderActions={({ row }) => {
-            return [
-              <ContextMenu
-                key={`${row.id}-context-menu`}
-                row={row.original as ESQLDataGroupNode}
-                contextActions={contextRowActions}
-                openPopoverRowId={openPopoverRowId}
-                setOpenPopoverRowId={setOpenPopoverRowId}
-              />,
-            ];
-          }}
+          rowHeaderTitleSlot={rowHeaderTitle}
+          rowHeaderMetaSlots={rowHeaderMeta}
+          rowHeaderActions={rowActions}
           onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
         >
           <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
