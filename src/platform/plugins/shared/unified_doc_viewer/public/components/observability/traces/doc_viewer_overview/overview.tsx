@@ -113,13 +113,11 @@ export function Overview({
               docId={docId}
             />
           ) : null}
-          <Errors
-            traceId={traceId}
-            spanId={spanId}
-            transactionId={transactionId}
-            serviceName={flattenedHit[SERVICE_NAME]}
-          />
           {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
+          <EuiSpacer size="m" />
+          {docId ? (
+            <Errors traceId={traceId} spanId={spanId} transactionId={transactionId} />
+          ) : null}
           <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
         </div>
       </TraceRootItemProvider>

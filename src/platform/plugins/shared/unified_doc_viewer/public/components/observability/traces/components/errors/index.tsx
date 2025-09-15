@@ -32,14 +32,13 @@ export interface Props {
   traceId: string;
   transactionId?: string;
   spanId?: string;
-  serviceName?: string;
 }
 
 const sorting: EuiInMemoryTableProps['sorting'] = {
   sort: { field: 'lastSeen', direction: 'desc' as const },
 };
 
-export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
+export function Errors({ transactionId, traceId, spanId }: Props) {
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.errors });
 
