@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FieldDefinition } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
@@ -35,6 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
+  const status = 'enabled' as RoutingStatus;
 
   interface Resources {
     indices: string[];
@@ -222,6 +223,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'attributes.log.logger',
             eq: 'nginx',
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -236,6 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'log.logger',
             eq: 'nginx',
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body, 409);
         expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
@@ -268,21 +271,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx.access',
           },
           where: { field: 'severity_text', eq: 'info' },
+          status,
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
+      const accessLogDoc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: JSON.stringify({
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          message: 'test',
+        }),
+      };
+
       it('Index an Nginx access log message, should goto logs.nginx.access', async () => {
-        const doc = {
-          '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: JSON.stringify({
-            'log.level': 'info',
-            'log.logger': 'nginx',
-            message: 'test',
-          }),
-        };
-        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
+        const result = await indexAndAssertTargetStream(
+          esClient,
+          'logs.nginx.access',
+          accessLogDoc
+        );
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           body: { text: 'test' },
@@ -294,12 +303,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('Does not index to logs.nginx.access if routing is disabled', async () => {
+        await putStream(apiClient, 'logs.nginx', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [],
+              },
+              wired: {
+                fields: {},
+                routing: [
+                  {
+                    destination: 'logs.nginx.access',
+                    where: { field: 'severity_text', eq: 'info' },
+                    status: 'disabled',
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        await indexAndAssertTargetStream(esClient, 'logs.nginx', accessLogDoc);
+      });
+
       it('Fork logs to logs.nginx.error with invalid condition', async () => {
         const body = {
           stream: {
             name: 'logs.nginx.error',
           },
           where: { field: 'attributes.log', eq: 'error' },
+          status,
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -332,6 +369,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.number-test',
           },
           where: { field: 'attributes.code', gte: '500' },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -367,6 +405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               { field: 'body.text', contains: 400 },
             ],
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -402,6 +441,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             ],
           },
+          status,
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -426,8 +466,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should allow to update field type to incompatible type', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -473,8 +512,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should not allow to update field type to system', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -536,6 +574,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ).to.eql([
           {
             destination: 'logs.nginx.error',
+            status: 'enabled',
             where: {
               field: 'attributes.log',
               eq: 'error',
@@ -584,12 +623,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
-
-        await esClient.indices.deleteDataStream({ name: 'logs.invalid_pipeline' });
-        await esClient.indices.deleteIndexTemplate({ name: 'logs.invalid_pipeline@stream' });
-        await esClient.cluster.deleteComponentTemplate({
-          name: 'logs.invalid_pipeline@stream.layer',
-        });
       });
 
       it('inherit fields', async () => {
@@ -598,8 +631,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'attributes.bar': { type: 'long' },
         };
         await putStream(apiClient, 'logs.one', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -613,8 +645,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, 'logs.one.two.three', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -647,8 +678,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           index,
           {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -664,50 +694,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('reports when it fails to create a stream', async () => {
-        const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          stream: {
-            description: 'Should cause a failure due to invalid ingest pipeline',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: {
-                steps: [
-                  {
-                    action: 'manual_ingest_pipeline',
-                    processors: [
-                      {
-                        set: {
-                          field: 'fails',
-                          value: 'whatever',
-                          fail: 'because this property is not valid',
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-              wired: {
-                fields: {},
-                routing: [],
-              },
-            },
-          },
-        };
-
-        const response = await putStream(apiClient, 'logs.invalid_pipeline', body, 500);
-
-        expect((response as any).message).to.contain('Failed to change state:');
-        expect((response as any).message).to.contain(
-          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
-        );
-      });
-
       it('does not allow super deeply nested streams', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {

@@ -217,7 +217,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         currentUser: coreContext.security.authc.getCurrentUser(),
         spaceId: getSpaceId(),
         dependencies: {
-          inferenceClient: startPlugins.inference.getClient({ request }),
+          inferenceService: startPlugins.inference,
           rulesClient,
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
@@ -280,6 +280,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           auditLogger: coreStart.security.audit.asScoped(request),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
+          experimentalFeatures: options.config.experimentalFeatures,
         });
       }),
       getMonitoringEntitySourceDataClient: memoize(() => {
@@ -336,6 +337,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             clusterClient: coreContext.elasticsearch.client,
             uiSettingsClient: coreContext.uiSettings.client,
+            usageCollection: options.plugins.usageCollection,
+            coreStartPromise: core.getStartServices(),
           })
       ),
       getMlAuthz: memoize(() => {

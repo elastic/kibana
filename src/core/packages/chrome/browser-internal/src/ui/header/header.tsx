@@ -47,7 +47,7 @@ import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_me
 import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
-import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
+import { HeaderPageAnnouncer } from './header_page_announcer';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -103,13 +103,6 @@ export function Header({
 
   return (
     <>
-      <ScreenReaderRouteAnnouncements
-        breadcrumbs$={observables.breadcrumbs$}
-        customBranding$={customBranding$}
-        appId$={application.currentAppId$}
-      />
-      <SkipToMainContent />
-
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
@@ -120,6 +113,10 @@ export function Header({
             sections={[
               {
                 items: [
+                  <HeaderPageAnnouncer
+                    breadcrumbs$={observables.breadcrumbs$}
+                    customBranding$={customBranding$}
+                  />,
                   <HeaderLogo
                     href={homeHref}
                     forceNavigation$={observables.forceAppSwitcherNavigation$}

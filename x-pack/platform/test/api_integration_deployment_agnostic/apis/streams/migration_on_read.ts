@@ -164,6 +164,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
             field: 'resource.attributes.host.name',
             eq: 'myHost',
           },
+          status: 'enabled',
         },
       ],
       fields: {

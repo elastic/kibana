@@ -141,6 +141,8 @@ import {
 } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
+import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
+import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -233,7 +235,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
-    productFeaturesService.init(plugins.features);
+    productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
@@ -310,7 +312,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       productFeaturesService,
     });
 
-    productFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -636,9 +637,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
+    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolEnabled
+      ? assistantTools
+      : assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID);
+
+    plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      defendInsightsPolicyResponseFailure:
+        config.experimentalFeatures.defendInsightsPolicyResponseFailure,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -656,6 +663,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
+      licenseService,
     });
 
     this.endpointAppContextService.start({
@@ -744,6 +752,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         .catch(() => {}); // it shouldn't refuse, but just in case
     }
 
+    let queryConfig: TelemetryQueryConfiguration | undefined;
+
+    if (this.config.telemetry?.queryConfig !== undefined) {
+      queryConfig = {
+        pageSize: this.config.telemetry.queryConfig.pageSize ?? 500,
+        maxResponseSize: this.config.telemetry.queryConfig.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
+        maxCompressedResponseSize:
+          this.config.telemetry.queryConfig.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
+      };
+    }
+
     this.telemetryReceiver
       .start(
         core,
@@ -751,7 +770,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         DEFAULT_ALERTS_INDEX,
         this.endpointAppContextService,
         exceptionListClient,
-        packageService
+        packageService,
+        queryConfig
       )
       .catch(() => {});
 

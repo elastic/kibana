@@ -89,6 +89,13 @@ export const getNavigationTreeDefinition = ({
                   icon,
                   renderAs: 'home',
                   sideNavVersion: 'v2',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
+                    );
+                  },
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -114,13 +121,13 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'onechat:conversations' },
-                    { link: 'onechat:tools' },
-                    { link: 'onechat:agents' },
+                    { link: 'agent_builder:conversations' },
+                    { link: 'agent_builder:tools' },
+                    { link: 'agent_builder:agents' },
                   ],
-                  id: 'chat',
+                  id: 'agent_builder',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
-                    defaultMessage: 'Chat',
+                    defaultMessage: 'Agents',
                   }),
                   renderAs: 'accordion',
                 },
@@ -140,10 +147,6 @@ export const getNavigationTreeDefinition = ({
                     {
                       breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
-                    },
-                    {
-                      link: 'enterpriseSearchContent:connectors',
-                      iconV2: 'link' /* TODO: review icon */,
                     },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -309,6 +312,7 @@ export const getNavigationTreeDefinition = ({
                         {
                           children: [
                             { link: 'management:genAiSettings' },
+                            { link: 'management:agentBuilder' },
                             { link: 'management:aiAssistantManagementSelection' },
                           ],
                           title: 'AI',

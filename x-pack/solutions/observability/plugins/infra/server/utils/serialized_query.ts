@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { JsonObject } from '@kbn/utility-types';
+import type { estypes } from '@elastic/elasticsearch';
 
 export const parseFilterQuery = (
   filterQuery: string | null | undefined
-): JsonObject | undefined => {
+): { bool: estypes.QueryDslBoolQuery } | undefined => {
   try {
     if (filterQuery) {
       const parsedFilterQuery = JSON.parse(filterQuery);

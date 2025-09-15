@@ -114,7 +114,10 @@ interface CreateAgentPolicyParams {
   spaceId: string;
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  /** Pass force to all following calls: package install, policy creation */
   force?: boolean;
+  /** Pass force only to package policy creation */
+  forcePackagePolicyCreation?: boolean;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -129,6 +132,7 @@ export async function createAgentPolicyWithPackages({
   user,
   authorizationHeader,
   force,
+  forcePackagePolicyCreation,
 }: CreateAgentPolicyParams) {
   const logger = appContextService.getLogger().get('createAgentPolicyWithPackages');
 
@@ -192,7 +196,7 @@ export async function createAgentPolicyWithPackages({
         spaceId,
         user,
         authorizationHeader,
-        force,
+        force: force || forcePackagePolicyCreation,
       }
     );
   }
@@ -209,7 +213,7 @@ export async function createAgentPolicyWithPackages({
         spaceId,
         user,
         authorizationHeader,
-        force,
+        force: force || forcePackagePolicyCreation,
       }
     );
   }

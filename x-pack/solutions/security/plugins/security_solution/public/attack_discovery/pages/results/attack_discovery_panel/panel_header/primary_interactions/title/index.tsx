@@ -28,7 +28,6 @@ import { AccordionButton } from '../accordion_button';
 import { Badges } from '../badges';
 import { DetailsFlyout } from '../../../../../settings_flyout/schedule/details_flyout';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../../../../../use_kibana_feature_flags';
 import { isAttackDiscoveryAlert } from '../../../../../utils/is_attack_discovery_alert';
 
 interface Props {
@@ -53,7 +52,6 @@ const TitleComponent: React.FC<Props> = ({
   showAnonymized = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const htmlId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryAccordion',
@@ -122,19 +120,17 @@ const TitleComponent: React.FC<Props> = ({
         responsive={false}
         wrap={true}
       >
-        {attackDiscoveryAlertsEnabled && (
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              checked={isSelected}
-              css={css`
-                display: inline;
-              `}
-              data-test-subj="attackDiscoveryCheckbox"
-              id={checkboxId}
-              onChange={onCheckboxChange}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            checked={isSelected}
+            css={css`
+              display: inline;
+            `}
+            data-test-subj="attackDiscoveryCheckbox"
+            id={checkboxId}
+            onChange={onCheckboxChange}
+          />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiAccordion

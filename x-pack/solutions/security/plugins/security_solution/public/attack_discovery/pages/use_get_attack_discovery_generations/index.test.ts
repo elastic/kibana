@@ -13,7 +13,6 @@ import React from 'react';
 
 import { useGetAttackDiscoveryGenerations, useInvalidateGetAttackDiscoveryGenerations } from '.';
 import { ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS } from './translations';
-import * as useKibanaFeatureFlagsModule from '../use_kibana_feature_flags';
 
 const mockAddError = jest.fn();
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
@@ -27,10 +26,6 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   get mockAddError() {
     return mockAddError;
   },
-}));
-
-jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn(),
 }));
 
 const mockHttp: HttpSetup = {
@@ -54,9 +49,6 @@ describe('useGetAttackDiscoveryGenerations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useKibanaFeatureFlagsModule.useKibanaFeatureFlags as jest.Mock).mockReturnValue({
-      attackDiscoveryAlertsEnabled: true,
-    });
     queryClient = new QueryClient();
   });
 

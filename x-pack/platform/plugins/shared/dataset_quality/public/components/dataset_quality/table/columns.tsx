@@ -28,7 +28,7 @@ import React from 'react';
 import {
   BYTE_NUMBER_FORMAT,
   DEGRADED_DOCS_QUERY,
-  WARNING_QUALITY_MINIMUM_PERCENTAGE,
+  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   FAILURE_STORE_SELECTOR,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
@@ -144,10 +144,10 @@ const datasetQualityColumnTooltip = (
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
-              quality="warning"
+              quality="degraded"
               description={` ${degradedDocsDescription(
                 'Degraded',
-                WARNING_QUALITY_MINIMUM_PERCENTAGE,
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
                 ' greater than'
               )}`}
             />
@@ -157,7 +157,7 @@ const datasetQualityColumnTooltip = (
               quality="good"
               description={` ${degradedDocsDescription(
                 'Good',
-                WARNING_QUALITY_MINIMUM_PERCENTAGE
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE
               )}`}
             />
           </EuiFlexItem>
@@ -480,7 +480,7 @@ const RedirectLink = ({
 }) => {
   const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat,
+    dataStreamStat: `${dataStreamStat.rawName},${dataStreamStat.rawName}${FAILURE_STORE_SELECTOR}`,
     sendTelemetry,
     timeRangeConfig: timeRange,
   });

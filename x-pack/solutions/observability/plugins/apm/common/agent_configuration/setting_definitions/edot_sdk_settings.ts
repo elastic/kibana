@@ -73,6 +73,36 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     ],
   },
   {
+    key: 'opamp_polling_interval',
+    type: 'duration',
+    defaultValue: '30s',
+    min: '1s',
+    label: i18n.translate('xpack.apm.agentConfig.pollingInterval.label', {
+      defaultMessage: 'OpAMP HTTP polling interval',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.pollingInterval.description', {
+      defaultMessage:
+        'The default interval between checking the collector for new changes to config.\n' +
+        'Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery.',
+    }),
+    includeAgents: ['opentelemetry/java/elastic'],
+  },
+  {
+    key: 'sampling_rate',
+    type: 'float',
+    defaultValue: '1.0',
+    label: i18n.translate('xpack.apm.agentConfig.samplingRate.label', {
+      defaultMessage: 'Sampling rate',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.samplingRate.description', {
+      defaultMessage:
+        'By default, the agent will sample every span in every trace (e.g. request to your service). ' +
+        'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
+        'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
+    }),
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/python/elastic'],
+  },
+  {
     key: 'send_traces',
     type: 'boolean',
     defaultValue: 'true',
@@ -84,7 +114,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the traces exporter to send or discard traces. When set to false, all traces will be discarded so there will be no traces sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'send_metrics',
@@ -98,7 +128,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the metrics exporter to send or discard metrics. When set to false, all metrics will be discarded so there will be no metrics sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'send_logs',
@@ -112,6 +142,6 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the logs exporter to send or discard logs. When set to false, all logs (that are normally sent by the agent) will be discarded so there will be no logs sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
 ];

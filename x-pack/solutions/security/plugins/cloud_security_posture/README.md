@@ -15,12 +15,12 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 ### Tests
 
 1. Unit Tests (Jest) - located in sibling files to the source code
-1. [API Integration Tests](../../../../test/api_integration/apis/cloud_security_posture/config.ts)
-1. [Telemetry Integration Tests](../../../../test/cloud_security_posture_api/config.ts)
-1. [End-to-End Tests](../../../../test/cloud_security_posture_functional/config.ts)
-1. [Serverless API Integration tests](../../../../test_serverless/api_integration/test_suites/security/config.ts)
-1. [Serverless End-to-End Tests](../../../../test_serverless/functional/test_suites/security/config.ts)
-1. [Cypress End-to-End Tests](../../../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
+1. [API Integration Tests](../../test/api_integration/apis/cloud_security_posture/config.ts)
+1. [Telemetry Integration Tests](../../test/cloud_security_posture_api/config.ts)
+1. [End-to-End Tests](../../test/cloud_security_posture_functional/config.ts)
+1. [Serverless API Integration tests](../../test/serverless/api_integration/configs/config.ts)
+1. [Serverless End-to-End Tests](../../test/serverless/functional/configs/config.ts)
+1. [Cypress End-to-End Tests](../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
 
 ### Tools
 
@@ -66,7 +66,7 @@ Run [**API Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutoria
 
 ```bash
 yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
-yarn test:ftr --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+yarn test:ftr --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 yarn test:ftr --config x-pack/solutions/security/test/serverless/api_integration/configs/config.ts --include-tag=cloud_security_posture
 ```
 
@@ -77,7 +77,7 @@ yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_fun
 yarn test:ftr --config x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.ts
 ```
 
-Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/test/security_solution_cypress/cypress):
+Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/test/security_solution_cypress/cypress):
 
 > **Note**
 >
@@ -99,8 +99,8 @@ For example,
 run ESS (stateful) api integration tests:
 
 ```bash
-yarn test:ftr:server --config x-pack/test/api_integration/config.ts
-yarn test:ftr:runner --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+yarn test:ftr:server --config x-pack/solutions/security/test/api_integration/config.ts
+yarn test:ftr:runner --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 ```
 
 run ESS (stateful) telemetry integration tests:
@@ -163,7 +163,7 @@ Unlike FTR where we have to set server and runner separately, Cypress handles ev
 
 ### Troubleshooting
 
-If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/test/functional/config.base.js` file.
+If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/solutions/security/test/functional/config.base.js` file.
 
 Example:
 

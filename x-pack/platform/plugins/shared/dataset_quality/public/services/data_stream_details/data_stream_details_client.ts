@@ -16,6 +16,8 @@ import type {
   FailedDocsErrorsResponse,
   IntegrationDashboardsResponse,
   UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
 import {
   checkAndLoadIntegrationResponseRt,
@@ -29,6 +31,8 @@ import {
   integrationDashboardsRT,
   qualityIssueBaseRT,
   updateFieldLimitResponseRt,
+  updateFailureStoreResponseRt,
+  getNonAggregatableDatasetsRt,
 } from '../../../common/api_types';
 import type {
   DataStreamDetails,
@@ -40,6 +44,7 @@ import type {
   GetDataStreamDetailsResponse,
   GetDataStreamFailedDocsDetailsParams,
   GetDataStreamFailedDocsErrorsParams,
+  GetDataStreamNonAggregatableParams,
   GetDataStreamSettingsParams,
   GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
@@ -307,6 +312,55 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       dataStreamRolloverResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode rollover response: ${message}"`)
+    )(response);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
+    )(response);
+  }
+
+  public async getNonAggregatableDatasets(
+    params: GetDataStreamNonAggregatableParams
+  ): Promise<NonAggregatableDatasets> {
+    const response = await this.http
+      .get<NonAggregatableDatasets>(
+        `/internal/dataset_quality/data_streams/${params.dataStream}/non_aggregatable`,
+        { query: { start: params.start, end: params.end } }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to fetch non-aggregatable datasets: ${error}`, error);
+      });
+
+    return decodeOrThrow(
+      getNonAggregatableDatasetsRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode non-aggregatable datasets response: ${message}`)
     )(response);
   }
 }

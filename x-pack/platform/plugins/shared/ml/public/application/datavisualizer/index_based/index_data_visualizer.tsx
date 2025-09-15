@@ -28,6 +28,7 @@ import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
+import { PageTitle } from '../../components/page_title';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -196,9 +197,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         <>
           <MlPageHeader>
             <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
-              <FormattedMessage
-                id="xpack.ml.dataVisualizer.pageHeader"
-                defaultMessage="Data Visualizer"
+              <PageTitle
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.dataVisualizer.pageHeader"
+                    defaultMessage="Data Visualizer"
+                  />
+                }
               />
               {esql ? (
                 <>

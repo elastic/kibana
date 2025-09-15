@@ -20,6 +20,8 @@ import {
   getIndexPatternClearButton,
   getRuleIndexInput,
   selectEqlRuleType,
+  fillAboutRuleMinimumAndContinue,
+  skipScheduleRuleAction,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -104,7 +106,14 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
+      cy.intercept('GET', '/internal/data_views/fields?pattern=endgame-*').as('indexLoaded');
+
       getRuleIndexInput().type('endgame-*{enter}');
+
+      // verify that validation kicked off and internal form data is updated with new index,
+      // otherwise EQL validation request can be triggered without correct index
+      cy.wait('@indexLoaded');
+      cy.contains('An EQL query is required');
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
@@ -121,8 +130,8 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       );
       continueFromDefineStep();
 
-      fillAboutRuleAndContinue(rule);
-      fillScheduleRuleAndContinue(rule);
+      fillAboutRuleMinimumAndContinue(rule);
+      skipScheduleRuleAction();
       createRuleWithNonBlockingErrors();
     });
 
@@ -144,8 +153,8 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       );
       continueFromDefineStep();
 
-      fillAboutRuleAndContinue(rule);
-      fillScheduleRuleAndContinue(rule);
+      fillAboutRuleMinimumAndContinue(rule);
+      skipScheduleRuleAction();
       createRuleWithNonBlockingErrors();
     });
 

@@ -12,7 +12,13 @@ export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
-export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
+export {
+  type RoutingDefinition,
+  routingStatus,
+  type RoutingStatus,
+  isRoutingEnabled,
+  routingDefinitionListSchema,
+} from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';
 
@@ -98,3 +104,5 @@ export type {
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
+
+export { emptyAssets } from './src/helpers/empty_assets';

@@ -53,6 +53,7 @@ import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerTestHealthDiagnosticRoute } from '../lib/telemetry/routes';
 import type { HealthDiagnosticService } from '../lib/telemetry/diagnostic/health_diagnostic_service.types';
+import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -139,6 +140,8 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, logger });
+
+  registerSiemReadinessRoutes({ router, logger });
 
   // TODO: just to test the PR, remove
   registerTestHealthDiagnosticRoute(router, logger, healthDiagnostic);

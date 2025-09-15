@@ -17,14 +17,16 @@ interface GenerateReroutePipelineParams {
 export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
-    processors: definition.ingest.wired.routing.map((child) => {
-      return {
-        reroute: {
-          destination: child.destination,
-          if: conditionToPainless(child.where),
-        },
-      };
-    }),
+    processors: definition.ingest.wired.routing
+      .filter((child) => child.status !== 'disabled')
+      .map((child) => {
+        return {
+          reroute: {
+            destination: child.destination,
+            if: conditionToPainless(child.where),
+          },
+        };
+      }),
     _meta: {
       description: `Reroute pipeline for the ${definition.name} stream`,
       managed: true,

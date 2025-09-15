@@ -119,8 +119,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/230988
-    describe.skip('User instruction management', () => {
+    describe('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
@@ -139,10 +138,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function setUserInstructionContent(content?: string) {
         const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
-        await editor.clearValue();
-        if (content) {
-          await editor.type(content);
-        }
+        await retry.try(async () => {
+          await editor.clearValue();
+          if (content) {
+            await editor.type(content);
+          }
+          const actualValue = await editor.getAttribute('value');
+          if (actualValue !== (content ?? '')) {
+            throw new Error(
+              `Expected editor value to be "${content ?? ''}" but found "${actualValue}"`
+            );
+          }
+        });
       }
 
       before(async () => {
@@ -172,7 +179,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const instruction = 'Always respond in a formal tone';
         await setUserInstructionContent(instruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+        await retry.waitFor('save button to be enabled after typing instruction', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+          return await saveButton.isEnabled();
+        });
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+        await saveButton.click();
 
         // Re-open to verify content was saved
         await openUserInstructionFlyout();
@@ -185,7 +197,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const originalInstruction = 'Original instruction';
         await setUserInstructionContent(originalInstruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+        await retry.waitFor('save button to be enabled after typing instruction', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+          return await saveButton.isEnabled();
+        });
+
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+        await saveButton.click();
 
         // Make changes but cancel
         await openUserInstructionFlyout();
@@ -200,8 +218,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/231420
-    describe.skip('Bulk import knowledge base entries', () => {
+    describe('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
@@ -239,6 +256,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         try {
           await common.setFileInputPath(tempFilePath);
+          // Wait for the file to be processed and save button to be enabled
+          await retry.waitFor('save button to be enabled after file upload', async () => {
+            const saveButton = await testSubjects.find(
+              ui.pages.kbManagementTab.bulkImportSaveButton
+            );
+            return await saveButton.isEnabled();
+          });
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
           throw error;

@@ -8123,6 +8123,137 @@
               }
             }
           }
+        },
+        "metricsExperience": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -9662,6 +9793,12 @@
                       "description": "The 75th accumulated percentile distribution in ms"
                     }
                   },
+                  "90": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 90th accumulated percentile distribution in ms"
+                    }
+                  },
                   "95": {
                     "type": "long",
                     "_meta": {
@@ -10101,6 +10238,12 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
+          }
+        },
+        "securitySolution:suppressionBehaviorOnAlertClosure": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
           }
         },
         "xpackReporting:customPdfLogo": {
@@ -10787,25 +10930,7 @@
             }
           }
         },
-        "onechat:mcp:enabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "onechat:a2a:enabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "onechat:ui:enabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "onechat:api:enabled": {
+        "agentBuilder:enabled": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -11042,22 +11167,34 @@
             "description": "Enable the new logs overview component."
           }
         },
-        "observability:enableStreamsUI": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Enable Streams UI."
-          }
-        },
         "observability:streamsEnableSignificantEvents": {
           "type": "boolean",
           "_meta": {
             "description": "Enable significant events in streams."
           }
         },
+        "observability:streamsEnableGroupStreams": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable Group streams in Streams"
+          }
+        },
         "observability:enableDiagnosticMode": {
           "type": "boolean",
           "_meta": {
             "description": "Enable diagnostic mode"
+          }
+        },
+        "genAiSettings:defaultAIConnector": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default AI connector"
+          }
+        },
+        "genAiSettings:defaultAIConnectorOnly": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Restrict to default AI connector only"
           }
         }
       }

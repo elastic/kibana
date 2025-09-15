@@ -28,6 +28,7 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedQualityIssue,
+    view,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -103,6 +104,11 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
   );
 
+  const canUserManageFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]
+      ?.canManageFailureStore
+  );
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -160,8 +166,30 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+    }) => {
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        data: {
+          ...dataStreamDetails,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
+        },
+      });
+    },
+    [dataStreamDetails, service]
+  );
+
   const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
   const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+  const defaultRetentionPeriod = dataStreamDetails?.defaultRetentionPeriod;
+  const customRetentionPeriod = dataStreamDetails?.customRetentionPeriod;
 
   return {
     service,
@@ -180,6 +208,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     loadingState,
     updateTimeRange,
+    updateFailureStore,
     dataStreamSettings,
     integrationDetails,
     canUserAccessDashboards,
@@ -189,5 +218,9 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    view,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    canUserManageFailureStore,
   };
 };

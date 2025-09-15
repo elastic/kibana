@@ -46,6 +46,23 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+    env:
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
@@ -90,6 +107,7 @@ steps:
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
+    depends_on: build
     retry:
       automatic:
         - exit_status: '-1'
@@ -105,6 +123,7 @@ steps:
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
+    depends_on: build
     retry:
       automatic:
         - exit_status: '-1'

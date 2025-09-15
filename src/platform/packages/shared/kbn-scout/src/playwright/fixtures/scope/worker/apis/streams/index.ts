@@ -11,6 +11,7 @@ import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { IngestStream } from '@kbn/streams-schema/src/models/ingest';
 import { type Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type { ScoutSpaceParallelFixture } from '../../scout_space';
@@ -18,7 +19,12 @@ import type { ScoutSpaceParallelFixture } from '../../scout_space';
 export interface StreamsApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
-  forkStream: (streamName: string, destination: string, condition: Condition) => Promise<void>;
+  forkStream: (
+    streamName: string,
+    destination: string,
+    condition: Condition,
+    status?: RoutingStatus
+  ) => Promise<void>;
   getStreamDefinition: (streamName: string) => Promise<IngestStream.all.GetResponse>;
   deleteStream: (streamName: string) => Promise<void>;
   updateStream: (streamName: string, updateBody: { ingest: Ingest }) => Promise<void>;
@@ -59,13 +65,19 @@ export const getStreamsApiService = ({
         });
       });
     },
-    forkStream: async (streamName: string, newStreamName: string, condition: Condition) => {
+    forkStream: async (
+      streamName: string,
+      newStreamName: string,
+      condition: Condition,
+      status: RoutingStatus = 'enabled'
+    ) => {
       await measurePerformanceAsync(log, 'streamsApi.createRoutingRule', async () => {
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}/api/streams/${streamName}/_fork`,
           body: {
             where: condition,
+            status,
             stream: {
               name: newStreamName,
             },

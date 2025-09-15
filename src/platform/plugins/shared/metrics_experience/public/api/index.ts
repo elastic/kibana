@@ -30,11 +30,6 @@ export type MetricsExperienceRepositoryClient = RouteRepositoryClient<
   MetricsExperienceRepositoryClientOptions
 >['fetch'];
 
-export type AutoAbortedMetricsExperienceRepositoryClient = RouteRepositoryClient<
-  MetricsExperienceRouteRepository,
-  Omit<MetricsExperienceRepositoryClientOptions, 'signal'>
->;
-
 export type MetricsExperienceRepositoryEndpoint = keyof MetricsExperienceRouteRepository;
 
 export type APIReturnType<TEndpoint extends MetricsExperienceRepositoryEndpoint> = ReturnOf<
@@ -42,11 +37,65 @@ export type APIReturnType<TEndpoint extends MetricsExperienceRepositoryEndpoint>
   TEndpoint
 >;
 
-export type StreamsAPIClientRequestParamsOf<TEndpoint extends MetricsExperienceRepositoryEndpoint> =
-  ClientRequestParamsOf<MetricsExperienceRouteRepository, TEndpoint>;
+export type MetricsExperienceAPIClientRequestParamsOf<
+  TEndpoint extends MetricsExperienceRepositoryEndpoint
+> = ClientRequestParamsOf<MetricsExperienceRouteRepository, TEndpoint>;
 
-export function createMetricsExperienceRepositoryClient(
-  core: CoreStart | CoreSetup
-): MetricsExperienceRepositoryClient {
-  return createRepositoryClient(core).fetch;
+export type MetricsExperienceClient = ReturnType<typeof createMetricsExperienceClient>;
+export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
+  const request = createRepositoryClient(core).fetch as MetricsExperienceRepositoryClient;
+
+  return {
+    getDimensions: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/dimensions'>['params']['query'],
+      signal?: AbortSignal | null
+    ) =>
+      request('GET /internal/metrics_experience/dimensions', {
+        params: {
+          query: params,
+        },
+        signal,
+      }),
+    getFields: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/fields'>['params']['query'],
+      signal?: AbortSignal | null
+    ) =>
+      request('GET /internal/metrics_experience/fields', {
+        params: {
+          query: params,
+        },
+        signal,
+      }),
+
+    postData: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/data'>['params']['body'],
+      signal?: AbortSignal | null
+    ) =>
+      request('POST /internal/metrics_experience/data', {
+        params: {
+          body: params,
+        },
+        signal,
+      }),
+    getIndexPatternMetadata(
+      {
+        indexPattern,
+        from,
+        to,
+      }: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['path'] &
+        MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['query'],
+      signal?: AbortSignal | null
+    ) {
+      return request('GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}', {
+        params: {
+          path: { indexPattern },
+          query: {
+            from,
+            to,
+          },
+        },
+        signal,
+      });
+    },
+  };
 }

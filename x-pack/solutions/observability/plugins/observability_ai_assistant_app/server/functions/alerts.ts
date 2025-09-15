@@ -123,6 +123,7 @@ export function registerAlertsFunction({
               stream: true,
             });
           },
+          logger: resources.logger,
         });
 
         return {

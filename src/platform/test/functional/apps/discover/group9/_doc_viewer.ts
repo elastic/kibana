@@ -193,6 +193,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
 
+        // Clear any unexpected active type filters
+        const filterToggle = await testSubjects.find(
+          'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+        );
+        if ((await filterToggle.getVisibleText()) !== '0') {
+          await discover.openFilterByFieldTypeInDocViewer();
+          await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+          await discover.closeFilterByFieldTypeInDocViewer();
+        }
+
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const numberFieldsCount = 6;
 

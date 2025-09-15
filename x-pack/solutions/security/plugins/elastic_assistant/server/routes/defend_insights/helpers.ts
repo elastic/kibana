@@ -13,7 +13,6 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ApiConfig,
@@ -24,26 +23,27 @@ import type {
   DefendInsightsResponse,
   Replacements,
 } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Moment } from 'moment';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import moment from 'moment';
+import { ActionsClientLlm } from '@kbn/langchain/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Moment } from 'moment';
-import moment from 'moment';
-import { ActionsClientLlm } from '@kbn/langchain/server';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { AIAssistantKnowledgeBaseDataClient } from '../../ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
 import type { CallbackIds, GetRegisteredTools } from '../../services/app_context';
-import { appContextService } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import { appContextService } from '../../services/app_context';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
@@ -84,6 +84,24 @@ export function isDefendInsightsEnabled({
   });
 
   return assistantContext.getRegisteredFeatures(pluginName).defendInsights;
+}
+
+export function isDefendInsightsPolicyResponseFailureEnabled({
+  request,
+  logger,
+  assistantContext,
+}: {
+  request: KibanaRequest;
+  logger: Logger;
+  assistantContext: ElasticAssistantApiRequestHandlerContext;
+}): boolean {
+  const pluginName = getPluginNameFromRequest({
+    request,
+    logger,
+    defaultPluginName: DEFAULT_PLUGIN_NAME,
+  });
+
+  return assistantContext.getRegisteredFeatures(pluginName).defendInsightsPolicyResponseFailure;
 }
 
 export function getAssistantTool(
@@ -278,6 +296,8 @@ const extractInsightsForTelemetryReporting = (
   switch (insightType) {
     case DefendInsightType.Enum.incompatible_antivirus:
       return insights.map((insight) => insight.group);
+    case DefendInsightType.Enum.policy_response_failure:
+      return insights.map((insight) => insight.group);
     default:
       return [];
   }
@@ -428,6 +448,7 @@ export const invokeDefendInsightsGraph = async ({
   start,
   end,
   savedObjectsClient,
+  kbDataClient,
 }: {
   insightType: DefendInsightType;
   endpointIds: string[];
@@ -445,6 +466,7 @@ export const invokeDefendInsightsGraph = async ({
   start?: string;
   end?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
 }): Promise<{
   anonymizedEvents: Document[];
   insights: DefendInsights | null;
@@ -495,6 +517,7 @@ export const invokeDefendInsightsGraph = async ({
     endpointIds,
     anonymizationFields,
     esClient,
+    kbDataClient,
     llm,
     logger,
     onNewReplacements,

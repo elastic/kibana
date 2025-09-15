@@ -102,7 +102,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             children: [
               {
                 id: 'apm',
-                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:service-map',
@@ -523,8 +522,8 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
-    map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))
-  ),
+  navigationTree$: (
+    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const })
+  ).pipe(map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))),
   dataTestSubj: 'observabilitySideNav',
 });

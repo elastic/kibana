@@ -8,24 +8,19 @@
  */
 
 import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
-import { EsqlQuery, walk, esqlCommandRegistry } from '@kbn/esql-ast';
-import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ICommandCallbacks,
 } from '@kbn/esql-ast/src/commands_registry/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
+import { getColumnsByTypeHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import {
-  retrieveFields,
-  retrieveFieldsFromStringSources,
-  retrievePolicies,
-  retrievePoliciesFields,
-  retrieveSources,
-} from './resources';
+import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
+import { getSubqueriesToValidate } from './helpers';
 
 /**
  * ES|QL validation public API
@@ -80,7 +75,7 @@ export async function validateQuery(
  * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
@@ -110,60 +105,60 @@ async function validateAst(
   const parsingResult = EsqlQuery.fromSrc(queryString);
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
+  const [sources, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(rootCommands, callbacks),
-    // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, rootCommands, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(rootCommands, callbacks),
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
 
-  if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(
-      rootCommands,
-      availablePolicies,
-      callbacks
-    );
-    fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
-  }
+  const sourceQuery = queryString.split('|')[0];
+  const sourceFields = await getColumnsByTypeHelper(
+    EsqlQuery.fromSrc(sourceQuery).ast,
+    sourceQuery,
+    callbacks
+  ).getColumnMap();
 
-  if (rootCommands.some(({ name }) => ['grok', 'dissect'].includes(name))) {
-    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
-      queryString,
-      rootCommands,
-      callbacks
-    );
-    fieldsFromGrokOrDissect.forEach((value, key) => {
-      // if the field is already present, do not overwrite it
-      // Note: this can also overlap with some userDefinedColumns
-      if (!availableFields.has(key)) {
-        availableFields.set(key, value);
-      }
-    });
-  }
-
-  const userDefinedColumns = collectUserDefinedColumns(rootCommands, availableFields, queryString);
-  messages.push(...validateUnsupportedTypeFields(availableFields, rootCommands));
-
-  const references: ReferenceMaps = {
-    sources,
-    fields: availableFields,
-    policies: availablePolicies,
-    userDefinedColumns,
-    query: queryString,
-    joinIndices: joinIndices?.indices || [],
-  };
+  messages.push(
+    ...validateUnsupportedTypeFields(
+      sourceFields as Map<string, ESQLFieldWithMetadata>,
+      rootCommands
+    )
+  );
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
-  for (const [_, command] of rootCommands.entries()) {
-    const commandMessages = validateCommand(command, references, rootCommands, {
-      ...callbacks,
-      hasMinimumLicenseRequired,
-    });
+
+  /**
+   * Even though we are validating single commands, we work with subqueries.
+   *
+   * The reason is that building the list of columns available in each command requires
+   * the full command subsequence that precedes that command.
+   */
+  const subqueries = getSubqueriesToValidate(rootCommands);
+  for (const subquery of subqueries) {
+    const { getColumnMap } = getColumnsByTypeHelper(subquery, queryString, callbacks);
+    const availableColumns = await getColumnMap();
+
+    const references: ReferenceMaps = {
+      sources,
+      columns: availableColumns,
+      policies: availablePolicies,
+      query: queryString,
+      joinIndices: joinIndices?.indices || [],
+    };
+
+    const commandMessages = validateCommand(
+      subquery.commands[subquery.commands.length - 1],
+      references,
+      rootCommands,
+      {
+        ...callbacks,
+        hasMinimumLicenseRequired,
+      }
+    );
     messages.push(...commandMessages);
   }
 
@@ -222,9 +217,8 @@ function validateCommand(
   }
 
   const context = {
-    fields: references.fields,
+    columns: references.columns,
     policies: references.policies,
-    userDefinedColumns: references.userDefinedColumns,
     sources: [...references.sources].map((source) => ({
       name: source,
     })),

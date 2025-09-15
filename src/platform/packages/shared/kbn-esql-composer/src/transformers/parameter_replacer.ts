@@ -89,7 +89,7 @@ export class ParameterReplacer {
   private replaceColumnExpression(node: ESQLColumn, parent?: ESQLProperNode): ESQLColumn {
     return Builder.expression.column({
       ...node,
-      args: node.args.map((arg) =>
+      args: node.args.flatMap((arg) =>
         isParamLiteral(arg) ? (this.buildReplacementAstNode(arg, parent) as ESQLIdentifier) : arg
       ),
     });
@@ -108,7 +108,7 @@ export class ParameterReplacer {
   private buildReplacementAstNode(
     node: ESQLParamLiteral | ESQLLiteral,
     parent?: ESQLProperNode
-  ): ESQLAstBaseItem {
+  ): ESQLAstBaseItem | ESQLAstBaseItem[] {
     if (!isParamLiteral(node)) {
       return node;
     }
@@ -119,13 +119,24 @@ export class ParameterReplacer {
       return node;
     }
 
+    if (node.paramKind === '??') {
+      return String(value)
+        .split('.')
+        .map((name) => Builder.identifier({ name }));
+    }
+
     if (
-      node.paramKind === '??' ||
-      (parent &&
-        node.paramKind === '?' &&
-        isFunctionExpression(parent) &&
-        parent.subtype === 'variadic-call')
+      parent &&
+      node.paramKind === '?' &&
+      isFunctionExpression(parent) &&
+      parent.subtype === 'variadic-call'
     ) {
+      if (parent.name === 'bucket' && node.type === 'literal') {
+        return Builder.expression.literal.string(String(value), {
+          unquoted: String(value).match(/^now\(\)/i) !== null,
+        });
+      }
+
       return Builder.identifier(String(value));
     }
 

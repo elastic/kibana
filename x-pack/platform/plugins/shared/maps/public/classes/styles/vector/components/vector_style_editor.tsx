@@ -77,8 +77,8 @@ interface Props {
 
 interface State {
   styleFields: StyleField[];
-  defaultDynamicProperties: VectorStylePropertiesDescriptor;
-  defaultStaticProperties: VectorStylePropertiesDescriptor;
+  defaultDynamicProperties: Required<VectorStylePropertiesDescriptor>;
+  defaultStaticProperties: Required<VectorStylePropertiesDescriptor>;
   supportedFeatures: VECTOR_SHAPE_TYPE[];
   selectedFeature: VECTOR_SHAPE_TYPE;
   styleFieldsHelper?: StyleFieldsHelper;
