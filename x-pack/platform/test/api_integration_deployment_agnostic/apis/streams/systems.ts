@@ -8,22 +8,28 @@
 import expect from '@kbn/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { emptyAssets, type System } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { disableStreams, enableStreams, putStream } from './helpers/requests';
+import { disableStreams, enableStreams, putStream, deleteStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
   const samlAuth = getService('samlAuth');
+  const esClient = getService('es');
+  const retry = getService('retry');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Systems', function () {
     const STREAM_NAME = 'logs.systems-test';
 
-    const createSystem = async (systemName: string, body: { description: string; filter: any }) => {
+    const createSystem = async (
+      systemName: string,
+      body: { description: string; filter: Condition }
+    ) => {
       return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
         params: {
           path: { name: STREAM_NAME, systemName },
@@ -32,7 +38,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     };
 
-    const updateSystem = async (systemName: string, body: { description: string; filter: any }) => {
+    const updateSystem = async (
+      systemName: string,
+      body: { description: string; filter: Condition }
+    ) => {
       return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
         params: {
           path: { name: STREAM_NAME, systemName },
@@ -64,7 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const systems = await listSystems();
       if (!systems.length) return;
       const operations = systems.map((s) => ({ delete: { system: { name: s.name } } }));
-      await bulkOps(operations as Array<{ delete: { system: { name: string } } }>);
+      await bulkOps(operations);
     };
 
     before(async () => {
@@ -161,7 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('bulk operations', () => {
       beforeEach(async () => {
         const bulkCreate = await bulkOps([
-          { index: { system: { name: 's1', description: 'one', filter: { always: {} } } as any } },
+          { index: { system: { name: 's1', description: 'one', filter: { always: {} } } } },
           {
             index: {
               system: {
@@ -204,6 +213,54 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('lists updated set of systems', async () => {
           const systems = await listSystems();
           expect(systems.map((s: System) => s.name).sort()).to.eql(['s2', 's3']);
+        });
+      });
+    });
+
+    describe('systems are removed when stream is deleted', () => {
+      beforeEach(async () => {
+        const bulkCreate = await bulkOps([
+          { index: { system: { name: 'sd1', description: 'one', filter: { always: {} } } } },
+          { index: { system: { name: 'sd2', description: 'two', filter: { always: {} } } } },
+        ]);
+        expect(bulkCreate.status).to.be(200);
+        const systems = await listSystems();
+        expect(systems.map((s: System) => s.name).sort()).to.eql(['sd1', 'sd2']);
+      });
+
+      afterEach(async () => {
+        // Recreate the stream for subsequent tests
+        await putStream(apiClient, STREAM_NAME, {
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              wired: { routing: [], fields: {} },
+            },
+          },
+          ...emptyAssets,
+        });
+        await clearAllSystems();
+      });
+
+      it('deletes all systems documents belonging to the stream', async () => {
+        await deleteStream(apiClient, STREAM_NAME);
+
+        // Verify via ES that no docs remain in the systems index for this stream
+        await retry.tryForTime(10000, async () => {
+          const res = await esClient.search({
+            index: '.kibana_streams_systems',
+            size: 0,
+            track_total_hits: true,
+            query: { term: { 'stream.name': STREAM_NAME } },
+          });
+          const totalVal = res.hits.total
+            ? typeof res.hits.total === 'number'
+              ? res.hits.total
+              : res.hits.total.value
+            : 0;
+          expect(totalVal).to.be(0);
         });
       });
     });
