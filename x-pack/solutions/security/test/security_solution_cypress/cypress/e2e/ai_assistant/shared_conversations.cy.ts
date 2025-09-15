@@ -38,6 +38,8 @@ import {
   toggleConversationSideMenu,
   typeAndSendMessage,
   selectGlobal,
+  assertAccessErrorToast,
+  assertGenericConversationErrorToast,
 } from '../../tasks/assistant';
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
@@ -295,6 +297,24 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
     });
     assertConversationTitle(mockConvo1.title);
+  });
+
+  it('Visiting a URL with the assistant param shows access error when user does not have access to the conversation', () => {
+    cy.clearCookies();
+
+    // Login as elastic user who should have access to shared conversations
+    loginSecondaryUser(isServerless, secondaryUser);
+
+    cy.location('origin').then((origin) => {
+      visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
+    });
+    assertAccessErrorToast();
+
+    cy.location('origin').then((origin) => {
+      visit(`${origin}/app/security/get_started?assistant=does-not-exist`);
+    });
+
+    assertGenericConversationErrorToast();
   });
 });
 
