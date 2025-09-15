@@ -17,12 +17,11 @@ import {
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/one_chat_client';
-import { toolCallMock } from '../../utils/llm_proxy/mocks';
 import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
+import { setupEsqlScenario } from '../../utils/llm_proxy/scenarios';
 
 export default function ({ getService }: OneChatFtrProviderContext) {
   const supertest = getService('supertest');
-
   const log = getService('log');
   const synthtrace = getService('synthtrace');
   const oneChatApiClient = createOneChatApiClient(supertest);
@@ -34,9 +33,9 @@ export default function ({ getService }: OneChatFtrProviderContext) {
     let queryResult: QueryResult;
     let tabularDataResult: TabularDataResult;
 
-    const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
-    const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
     const USER_PROMPT = 'Please find a single trace with `service.name:java-backend`';
+    const MOCKED_LLM_TITLE = 'Mocked conversation title';
+    const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
     const MOCKED_ESQL_QUERY =
       'FROM traces-apm-default\n| WHERE service.name == "java-backend"\n| LIMIT 100';
 
@@ -48,68 +47,11 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       await generateApmData(apmSynthtraceEsClient);
 
-      // mock title
-      void llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
-      });
-
-      // intercept the user message and respond with tool call to "platform_core_search"
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage.includes(USER_PROMPT);
-        },
-        response: toolCallMock('platform_core_search', {
-          query: 'service.name:java-backend',
-        }),
-      });
-
-      void llmProxy.interceptors.toolChoice({
-        name: 'select_resources',
-        response: toolCallMock('select_resources', {
-          targets: [
-            {
-              reason: "The query 'service.name:java-backend' suggests a search related to APM data",
-              type: 'data_stream',
-              name: 'traces-apm-default',
-            },
-          ],
-        }),
-      });
-
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage.startsWith('Execute the following user query:');
-        },
-        response: toolCallMock('natural_language_search', {
-          query: 'service.name:java-backend',
-          index: 'metrics-apm.transaction.1m-default',
-        }),
-      });
-
-      void void llmProxy.interceptors.toolChoice({
-        name: 'structuredOutput',
-        response: toolCallMock('structuredOutput', { commands: ['WHERE'] }),
-      });
-
-      void llmProxy.interceptors.toolMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.documentation;
-        },
-        response: `Here's the ES|QL query:\`\`\`esql${MOCKED_ESQL_QUERY}\`\`\``,
-      });
-
-      void llmProxy.interceptors.toolMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.results;
-        },
-        response: MOCKED_LLM_RESPONSE,
+      void setupEsqlScenario(llmProxy, log, {
+        userPrompt: USER_PROMPT,
+        title: MOCKED_LLM_TITLE,
+        finalLlmResponse: MOCKED_LLM_RESPONSE,
+        esqlQuery: MOCKED_ESQL_QUERY,
       });
 
       body = await oneChatApiClient.converse({
@@ -135,7 +77,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       await apmSynthtraceEsClient.clean();
     });
 
-    it.only('sends the correct esql query to the LLM', () => {
+    it('sends the correct esql query to the LLM', () => {
       expect(queryResult.type).to.be('query');
       // @ts-expect-error
       expect(queryResult.data.esql).to.be(MOCKED_ESQL_QUERY);
