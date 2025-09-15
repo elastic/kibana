@@ -19,24 +19,17 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
-import { useLogReadinessTask, READINESS_TASKS } from '@kbn/siem-readiness';
-import { useGetLatestTasks } from '../hooks/use_get_latest_tasks';
-
-const PILLARS = [
-  { value: '', inputDisplay: 'All Categories' },
-  { value: 'visibility', inputDisplay: 'Visibility', badgeColor: '#61A2FF' },
-  { value: 'detection', inputDisplay: 'Detection', badgeColor: '#EE72A6' },
-  { value: 'response', inputDisplay: 'Response', badgeColor: '#16C5C0' },
-];
+import { useReadinessTasks, READINESS_TASKS } from '@kbn/siem-readiness';
+import { usePillarProps } from '../hooks/use_pillar_props';
 
 const PANEL_HEIGHT = 600; // px, adjust as needed
 
 export const ReadinessTasksTable: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<string>('');
 
+  const { pillars } = usePillarProps();
   const { euiTheme } = useEuiTheme();
-  const { getLatestTasks } = useGetLatestTasks();
-  const { logReadinessTask } = useLogReadinessTask();
+  const { logReadinessTask, getLatestTasks } = useReadinessTasks();
 
   const handleLogTask = useCallback(
     async (task: SiemReadinessTask) => {
@@ -45,10 +38,25 @@ export const ReadinessTasksTable: React.FC = () => {
     [logReadinessTask]
   );
 
+  const selectOptions = useMemo(
+    () => [
+      { value: '', inputDisplay: 'All Categories' },
+      ...Object.values(pillars).map((pillar) => ({
+        value: pillar.value,
+        inputDisplay: pillar.displayName,
+      })),
+    ],
+    [pillars]
+  );
+
   // Filter and sort tasks
-  const filteredTasks = READINESS_TASKS.filter(
-    (task: ReadinessTaskConfig) => !selectedPillar || task.pillar === selectedPillar
-  ).sort((a: ReadinessTaskConfig, b: ReadinessTaskConfig) => a.order - b.order);
+  const filteredTasks = useMemo(
+    () =>
+      READINESS_TASKS.filter(
+        (task: ReadinessTaskConfig) => !selectedPillar || task.pillar === selectedPillar
+      ).sort((a: ReadinessTaskConfig, b: ReadinessTaskConfig) => a.order - b.order),
+    [selectedPillar]
+  );
 
   const readinessTasksActionsMap: Record<
     ReadinessTaskId,
@@ -99,7 +107,7 @@ export const ReadinessTasksTable: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperSelect
-              options={PILLARS}
+              options={selectOptions}
               valueOfSelected={selectedPillar}
               onChange={(value) => setSelectedPillar(value)}
               placeholder="Categories"
@@ -114,7 +122,7 @@ export const ReadinessTasksTable: React.FC = () => {
           const taskData = getLatestTasks.data?.find(
             (latestTaskData) => latestTaskData.task_id === task.id
           );
-          const pillar = PILLARS.find((p) => p.value === task.pillar);
+          const taskPillar = pillars[task.pillar];
 
           return (
             <EuiAccordion
@@ -136,7 +144,7 @@ export const ReadinessTasksTable: React.FC = () => {
               }}
               extraAction={
                 <div style={{ paddingRight: euiTheme.size.base }}>
-                  <EuiBadge color={pillar?.badgeColor}>{pillar?.inputDisplay}</EuiBadge>
+                  <EuiBadge color={taskPillar?.color}>{taskPillar?.displayName}</EuiBadge>
                   <EuiBadge color={taskData?.status === 'completed' ? 'success' : 'warning'}>
                     {taskData?.status || 'incomplete'}
                   </EuiBadge>

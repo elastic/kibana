@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { POST_SIEM_READINESS_TASK_API_PATH } from './constants';
+import type { TaskSource } from '@kbn/security-solution-plugin/server/lib/siem_readiness/routes/get_latest_readiness_tasks';
+import {
+  GET_LATEST_SIEM_READINESS_TASKS_API_PATH,
+  POST_SIEM_READINESS_TASK_API_PATH,
+} from './constants';
 import type { SiemReadinessTask } from './types';
 import { validateTask } from './validate_task';
 
-/**
- * Hook for logging SIEM readiness tasks via API endpoint
- * @param options - TanStack mutation options
- * @returns Mutation hook for logging readiness tasks
- */
-export const useLogReadinessTask = (
-  options?: UseMutationOptions<void, unknown, SiemReadinessTask>
-) => {
+const GET_LATEST_TASKS_QUERY_KEY = ['latest-readiness-tasks'];
+
+export const useReadinessTasks = () => {
   const { http } = useKibana<CoreStart>().services;
 
   const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>(
@@ -29,11 +28,16 @@ export const useLogReadinessTask = (
       await http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
         body: JSON.stringify(task),
       });
-    },
-    options
+    }
   );
+
+  const getLatestTasks = useQuery({
+    queryKey: GET_LATEST_TASKS_QUERY_KEY,
+    queryFn: () => http.get<TaskSource[]>(GET_LATEST_SIEM_READINESS_TASKS_API_PATH),
+  });
 
   return {
     logReadinessTask,
+    getLatestTasks,
   };
 };
