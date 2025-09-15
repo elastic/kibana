@@ -78,7 +78,7 @@ export function createGenerateIndexRecordsStream({
               { name: dataStream },
               headers
             );
-            const template = await getIndexTemplate(client, dataStreams[0].template);
+            const template = await getIndexTemplate(client, dataStreams[0].template, log);
 
             seenDatastreams.add(dataStream);
             stats.archivedIndex(dataStream, { template });
