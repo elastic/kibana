@@ -8,7 +8,7 @@
  */
 
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -47,6 +47,13 @@ export const TabsView = (props: SingleTabViewProps) => {
     () => <SingleTabView key={currentTabId} {...props} />,
     [currentTabId, props]
   );
+
+  useEffect(() => {
+    return () => {
+      // clear session when navigating away from discover main
+      services.data.search.session.clear();
+    };
+  }, [services.data.search.session]);
 
   return (
     <UnifiedTabs

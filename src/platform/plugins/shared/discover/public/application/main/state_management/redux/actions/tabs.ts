@@ -185,6 +185,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         services.data.query.queryString.setQuery(
           query ?? services.data.query.queryString.getDefaultQuery()
         );
+        services.data.search.session.start();
 
         nextTabStateContainer.actions.initializeAndSync();
       } else {

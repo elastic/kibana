@@ -560,7 +560,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     dateRange: TimeRange;
     query?: QT | Query | undefined;
   }) => {
-    if (!this.isDirty()) {
+    if (!this.isDirty() && this.props.isLoading) {
       const { formattedName } = await this.services.data.search.session.save();
       this.showBackgroundSearchCreatedToast(formattedName);
       return;

@@ -291,7 +291,8 @@ export const QueryBarTopRow = React.memo(
     const canSendToBackground =
       props.isDirty ||
       backgroundSearchState === SearchSessionState.Loading ||
-      backgroundSearchState === SearchSessionState.Completed;
+      backgroundSearchState === SearchSessionState.Completed ||
+      backgroundSearchState === SearchSessionState.None;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
