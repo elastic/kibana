@@ -100,7 +100,6 @@ export async function setupIntegrationEnvironment() {
   const testHttpConfig = { requiredPrivileges: ['myapp'] };
   const myFileKind = {
     id: fileKind,
-    // Allow MIME types used in existing tests, so we can test validation with forbidden types
     allowedMimeTypes: [
       'image/png',
       'image/jpeg',

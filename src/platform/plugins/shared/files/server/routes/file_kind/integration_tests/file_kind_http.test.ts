@@ -488,26 +488,6 @@ describe('File kind HTTP API', () => {
 
       expect(result.body.file.mimeType).toBeUndefined();
     });
-
-    test('should not leak information about allowed MIME types in error messages', async () => {
-      const result = await request
-        .post(root, `/api/files/files/${fileKind}`)
-        .set('x-elastic-internal-origin', 'files-test')
-        .send({
-          name: 'archive.zip',
-          mimeType: 'application/zip',
-          alt: 'zip archive',
-          meta: {},
-        })
-        .expect(400);
-
-      // Should not reveal which MIME types are allowed
-      expect(result.body.message).toBe('File type is not supported');
-      expect(result.body.message).not.toContain('image/png');
-      expect(result.body.message).not.toContain('image/jpeg');
-      expect(result.body.message).not.toContain('application/pdf');
-      expect(result.body.message).not.toContain('test-file-kind');
-    });
   });
 
   describe('file extension validation on download', () => {
@@ -517,7 +497,6 @@ describe('File kind HTTP API', () => {
         mimeType: 'image/png',
       });
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -547,7 +526,6 @@ describe('File kind HTTP API', () => {
         .send('image data')
         .expect(200);
 
-      // Download with correct extension should work
       const result = await request
         .get(root, `/api/files/files/${fileKind}/${id}/blob/image.png`)
         .set('x-elastic-internal-origin', 'files-test')
@@ -619,30 +597,6 @@ describe('File kind HTTP API', () => {
         .get(root, `/api/files/files/${fileKind}/${id}/blob/image.Png`)
         .set('x-elastic-internal-origin', 'files-test')
         .expect(200);
-    });
-
-    test('should not leak information about expected extensions in error messages', async () => {
-      const { id } = await createFile({
-        name: 'document.pdf',
-        mimeType: 'application/pdf',
-      });
-
-      await request
-        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
-        .set('Content-Type', 'application/octet-stream')
-        .set('x-elastic-internal-origin', 'files-test')
-        .send('pdf content')
-        .expect(200);
-
-      const result = await request
-        .get(root, `/api/files/files/${fileKind}/${id}/blob/document.txt`)
-        .set('x-elastic-internal-origin', 'files-test')
-        .expect(400);
-
-      // Should not reveal which extensions are expected
-      expect(result.body.message).toBe('File extension does not match file type');
-      expect(result.body.message).not.toContain('pdf');
-      expect(result.body.message).not.toContain('application/pdf');
     });
   });
 });

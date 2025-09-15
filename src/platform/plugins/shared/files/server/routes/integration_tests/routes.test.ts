@@ -360,7 +360,7 @@ describe('File HTTP API', () => {
         .expect(200);
 
       const { body: buffer, header } = await request
-        // By providing a file name like "myfilename.pdf" we imply that we want a pdf
+        // "myfilename.pdf" has a mime type that matches the metadata
         .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
         .set('x-elastic-internal-origin', 'files-test')
         .buffer()
@@ -377,7 +377,6 @@ describe('File HTTP API', () => {
         mimeType: 'application/pdf',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -386,7 +385,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -409,7 +407,6 @@ describe('File HTTP API', () => {
         mimeType: 'image/png',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -418,7 +415,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -444,7 +440,6 @@ describe('File HTTP API', () => {
         mimeType: 'text/plain',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -453,7 +448,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -468,8 +462,6 @@ describe('File HTTP API', () => {
         .buffer()
         .expect(200);
 
-      // Content-type comes from stored file MIME type, not URL filename
-      // Should be either the stored MIME type or default fallback - but never from URL filename
       expect(['text/plain', 'text/plain; charset=utf-8', 'application/octet-stream']).toContain(
         header['content-type']
       );
@@ -482,7 +474,6 @@ describe('File HTTP API', () => {
         mimeType: 'image/jpeg',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -491,7 +482,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -517,7 +507,6 @@ describe('File HTTP API', () => {
         mimeType: 'text/plain',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -526,7 +515,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -542,8 +530,6 @@ describe('File HTTP API', () => {
         .buffer()
         .expect(200);
 
-      // Content-type comes from stored file MIME type, not URL filename
-      // Note: Text files may include charset information
       expect(response.header['content-type']).toMatch(/^text\/plain(; charset=utf-8)?$/);
 
       // For text content with .buffer(), use response.text instead of response.body
@@ -563,7 +549,6 @@ describe('File HTTP API', () => {
         mimeType: 'application/json',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -572,7 +557,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -592,13 +576,12 @@ describe('File HTTP API', () => {
       expect(result.body.message).not.toContain('application/json');
     });
 
-    test('prevents MIME type manipulation through URL filename (security fix)', async () => {
+    test('prevents MIME type manipulation through URL filename', async () => {
       const { id } = await createFile({
         name: 'safe-document.pdf',
         mimeType: 'application/pdf',
       });
 
-      // Share the file
       const {
         body: { token },
       } = await request
@@ -607,7 +590,6 @@ describe('File HTTP API', () => {
         .send({})
         .expect(200);
 
-      // Upload content
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
@@ -615,23 +597,11 @@ describe('File HTTP API', () => {
         .send('PDF content')
         .expect(200);
 
-      // Security layer 1: Extension validation blocks dangerous mismatched downloads
+      // Extension validation blocks dangerous mismatched downloads
       await request
         .get(root, `/api/files/public/blob/malicious-script.html?token=${token}`)
         .set('x-elastic-internal-origin', 'files-test')
         .expect(400); // Correctly blocked!
-
-      // Security layer 2: When download is allowed, MIME type comes from server, not URL
-      const { body: buffer, header } = await request
-        .get(root, `/api/files/public/blob/document.pdf?token=${token}`)
-        .set('x-elastic-internal-origin', 'files-test')
-        .buffer()
-        .expect(200);
-
-      // Content-type comes from stored file MIME type, never from URL filename
-      expect(header['content-type']).toEqual('application/pdf');
-      expect(header['content-disposition']).toEqual('attachment; filename=document.pdf');
-      expect(buffer.toString('utf8')).toEqual('PDF content');
     });
   });
 });

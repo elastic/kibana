@@ -24,7 +24,7 @@ type ResultOrHttpError =
 export async function getById(
   fileService: FileServiceStart,
   id: string,
-  fileKind: string
+  _fileKind: string
 ): Promise<ResultOrHttpError> {
   let result: undefined | File;
   try {
@@ -57,7 +57,6 @@ export function validateMimeType(
   }
 
   const allowedMimeTypes = fileKind.allowedMimeTypes;
-
   if (!allowedMimeTypes || allowedMimeTypes.length === 0) {
     return;
   }
