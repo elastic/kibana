@@ -8,10 +8,10 @@
  */
 import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   extractEsqlVariables,
@@ -59,7 +59,6 @@ export const useESQLVariables = ({
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
   const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
-  const initialSavedSearch = useObservable(stateContainer.savedSearchState.getInitial$());
 
   const savedSearchState = useSavedSearch();
 
@@ -71,15 +70,11 @@ export const useESQLVariables = ({
 
     // Handling the reset unsaved changes badge
     const savedSearchResetSubsciption = stateContainer.savedSearchState
-      .getHasReset$()
-      .subscribe((hasReset) => {
-        if (hasReset) {
-          const savedControlGroupState = parseControlGroupJson(
-            initialSavedSearch?.controlGroupJson
-          );
-          controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
-          stateContainer.savedSearchState.getHasReset$().next(false);
-        }
+      .getInitial$()
+      .pipe(skip(1)) // Skip the initial emission since it's a BehaviorSubject
+      .subscribe((initialSavedSearch) => {
+        const savedControlGroupState = parseControlGroupJson(initialSavedSearch?.controlGroupJson);
+        controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
       });
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
@@ -112,7 +107,6 @@ export const useESQLVariables = ({
     controlGroupApi,
     currentEsqlVariables,
     dispatch,
-    initialSavedSearch?.controlGroupJson,
     isEsqlMode,
     setControlGroupState,
     setEsqlVariables,

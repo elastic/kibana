@@ -84,11 +84,6 @@ export interface DiscoverSavedSearchContainer {
    */
   getHasChanged$: () => BehaviorSubject<boolean>;
   /**
-   * Get an BehaviorSubject containing the state if the saved search has been reset to its initial state
-   * Can be used to track if the saved search has been reset
-   */
-  getHasReset$: () => BehaviorSubject<boolean>;
-  /**
    * Get the current state of the saved search
    */
   getState: () => SavedSearch;
@@ -138,7 +133,6 @@ export function getSavedSearchContainer({
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
-  const hasReset$ = new BehaviorSubject(false);
   const set = (savedSearch: SavedSearch) => {
     addLog('[savedSearch] set', savedSearch);
     hasChanged$.next(false);
@@ -150,7 +144,6 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getHasChanged$ = () => hasChanged$;
-  const getHasReset$ = () => hasReset$;
   const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
 
@@ -263,7 +256,6 @@ export function getSavedSearchContainer({
     initUrlTracking,
     getCurrent$,
     getHasChanged$,
-    getHasReset$,
     getId,
     getInitial$,
     getState,
