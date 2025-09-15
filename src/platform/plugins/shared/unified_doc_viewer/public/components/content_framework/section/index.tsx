@@ -160,7 +160,7 @@ export function ContentFrameworkSection({
           </EuiPanel>
         </>
       </EuiAccordion>
-      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="s" />}
+      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
     </>
   );
 }
