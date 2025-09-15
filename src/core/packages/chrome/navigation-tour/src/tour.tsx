@@ -10,40 +10,30 @@
 import React from 'react';
 import { EuiTourStep, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import type { TourStep } from '../state';
-import { getNavigationTourStateMachine } from '../services';
+import type { TourManager } from './tour_manager';
 
-interface NavigationTourProps {
-  steps?: TourStep[];
-  onTourComplete?: () => void;
-  onTourSkipped?: () => void;
+export interface TourProps {
+  tourManager: TourManager;
 }
 
-export const NavigationTour: React.FC<NavigationTourProps> = ({
-  onTourComplete,
-  onTourSkipped,
-}) => {
-  const tourStateMachine = getNavigationTourStateMachine();
-  const state = useObservable(tourStateMachine.state$);
+export const Tour: React.FC<TourProps> = ({ tourManager }) => {
+  const state = useObservable(tourManager.state$);
 
   if (!state) return null;
 
   const handleNext = () => {
-    tourStateMachine.nextStep();
+    tourManager.nextStep();
   };
 
   const handleSkip = () => {
-    tourStateMachine.skipTour();
-    onTourSkipped?.();
+    tourManager.skipTour();
   };
 
   const handleFinish = () => {
-    tourStateMachine.finishTour();
-    onTourComplete?.();
+    tourManager.finishTour();
   };
 
-  // Don't render if tour is not active
-  if (!state.isActive) return null;
+  if (state.status !== 'active') return null;
 
   const currentStep = state.steps[state.currentStepIndex];
   if (!currentStep) return null;
@@ -54,13 +44,13 @@ export const NavigationTour: React.FC<NavigationTourProps> = ({
       isStepOpen={true}
       title={currentStep.title}
       anchor={currentStep.target}
-      onFinish={tourStateMachine.isLastStep() ? handleFinish : handleNext}
-      step={state.currentStepIndex + 1 + state.globalStepOffset}
-      stepsTotal={state.globalStepsTotal}
+      onFinish={tourManager.isLastStep() ? handleFinish : handleNext}
+      step={state.currentStepIndex + 1}
+      stepsTotal={state.steps.length}
       content={currentStep.content}
       anchorPosition={'leftCenter'}
       footerAction={
-        tourStateMachine.isLastStep() ? (
+        tourManager.isLastStep() ? (
           <EuiButton size="s" color="success" onClick={handleFinish}>
             Finish tour
           </EuiButton>

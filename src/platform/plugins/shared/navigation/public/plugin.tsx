@@ -119,7 +119,14 @@ export class NavigationPublicPlugin
     }
 
     if (spaces?.solutionViewTourManager) {
-      const tourManager = new SolutionNavigationTourManager(spaces.solutionViewTourManager);
+      const { project } = core.chrome as InternalChromeStart;
+
+      const tourManager = new SolutionNavigationTourManager({
+        navigationTourManager: project.navigationTourManager,
+        spacesSolutionViewTourManager: spaces.solutionViewTourManager,
+        userProfiles: core.userProfile,
+        capabilities: core.application.capabilities,
+      });
       void tourManager.startTour();
     }
 

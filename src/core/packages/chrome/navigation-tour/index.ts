@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { NavigationTour } from './src/components';
-export { startNavigationTour } from './src/services';
-export type { TourStep, TourState } from './src/state';
+export { Tour as NavigationTour, type TourProps as NavigationTourProps } from './src/tour';
+export { TourManager as NavigationTourManager } from './src/tour_manager';

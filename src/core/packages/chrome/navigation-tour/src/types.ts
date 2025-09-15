@@ -7,4 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { NavigationTour } from './navigation_tour';
+import type { ElementTarget } from '@elastic/eui';
+import type { ReactNode } from 'react';
+
+export interface TourStep {
+  id: string;
+  title: ReactNode;
+  content: ReactNode;
+  target: ElementTarget;
+}
+
+export interface TourState {
+  status: 'idle' | 'active' | 'completed' | 'skipped';
+  currentStepIndex: number;
+  steps: TourStep[];
+}

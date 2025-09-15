@@ -87,7 +87,7 @@ export const SolutionViewTour: FC<Props> = ({
       maxWidth={360}
       onFinish={onFinishTour}
       step={1}
-      stepsTotal={4}
+      stepsTotal={1}
       repositionOnScroll
       title={i18n.translate('xpack.spaces.navControl.tour.title', {
         defaultMessage: 'This space uses the {solution} solution view',
@@ -97,14 +97,9 @@ export const SolutionViewTour: FC<Props> = ({
       footerAction={[
         <EuiButtonEmpty size="s" color="text" onClick={onFinishTour} data-test-subj="closeTourBtn">
           {i18n.translate('xpack.spaces.navControl.tour.closeBtn', {
-            defaultMessage: 'Skip tour',
+            defaultMessage: 'Close',
           })}
         </EuiButtonEmpty>,
-        <EuiButton size="s" color="success" onClick={onFinishTour} data-test-subj="nextTourBtn">
-          {i18n.translate('xpack.spaces.navControl.tour.nextBtn', {
-            defaultMessage: 'Next',
-          })}
-        </EuiButton>,
       ]}
       panelProps={{
         'data-test-subj': 'spaceSolutionTour',

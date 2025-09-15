@@ -20,7 +20,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
+import { NavigationTour, NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
@@ -42,6 +42,9 @@ export interface ChromeNavigationProps {
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
+  // tour
+  navigationTourManager: NavigationTourManager;
+
   // other state that might be needed later
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   isFeedbackBtnVisible$: Observable<boolean>;
@@ -61,14 +64,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
 
   return (
     <>
-      <NavigationTour
-        onTourComplete={() => {
-          alert('Tour completed; Never showing again');
-        }}
-        onTourSkipped={() => {
-          alert('Tour skipped; Never showing again');
-        }}
-      />
+      <NavigationTour tourManager={props.navigationTourManager} />
       <RedirectNavigationAppLinks application={props.application}>
         <NavigationComponent
           items={navItems}

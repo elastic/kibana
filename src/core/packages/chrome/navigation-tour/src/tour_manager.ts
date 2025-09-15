@@ -7,38 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { ReactNode } from 'react';
-import type { ElementTarget } from '@elastic/eui';
-
-export interface TourStep {
-  id: string;
-  title: ReactNode;
-  content: ReactNode;
-  target: ElementTarget;
-}
-
-export interface TourState {
-  isActive: boolean;
-  currentStepIndex: number;
-  steps: TourStep[];
-  isCompleted: boolean;
-  isSkipped: boolean;
-  globalStepOffset: number;
-  globalStepsTotal: number;
-}
+import { BehaviorSubject, first, firstValueFrom, map } from 'rxjs';
+import type { TourState } from './types';
+import { tourSteps } from './tour_config';
 
 const initialState: TourState = {
-  isActive: false,
+  status: 'idle',
   currentStepIndex: 0,
-  steps: [],
-  isCompleted: false,
-  isSkipped: false,
-  globalStepOffset: 0,
-  globalStepsTotal: 0,
+  steps: tourSteps,
 };
 
-export class TourStateMachine {
+export class TourManager {
   private _state$ = new BehaviorSubject<TourState>(initialState);
 
   public readonly state$ = this._state$.asObservable();
@@ -46,27 +25,26 @@ export class TourStateMachine {
     return this._state$.value;
   }
 
-  startTour(
-    steps: TourStep[],
-    options?: {
-      globalStepOffset?: number;
-    }
-  ): void {
+  startTour(): void {
     this._state$.next({
-      isActive: true,
-      currentStepIndex: 0,
-      steps,
-      isCompleted: false,
-      isSkipped: false,
-      globalStepOffset: options?.globalStepOffset ?? 0,
-      globalStepsTotal: steps.length + (options?.globalStepOffset ?? 0),
+      ...this.state,
+      status: 'active',
     });
+  }
+
+  async waitForTourEnd(): Promise<void> {
+    return firstValueFrom(
+      this.state$.pipe(
+        first((state) => state.status === 'completed' || state.status === 'skipped'),
+        map(() => void 0)
+      )
+    );
   }
 
   nextStep(): void {
     const currentState = this._state$.value;
 
-    if (!currentState.isActive) return;
+    if (currentState.status !== 'active') return;
 
     const nextIndex = currentState.currentStepIndex + 1;
 
@@ -85,8 +63,7 @@ export class TourStateMachine {
 
     this._state$.next({
       ...currentState,
-      isActive: false,
-      isSkipped: true,
+      status: 'skipped',
     });
   }
 
@@ -95,23 +72,12 @@ export class TourStateMachine {
 
     this._state$.next({
       ...currentState,
-      isActive: false,
-      isCompleted: true,
+      status: 'completed',
     });
   }
 
   reset(): void {
     this._state$.next(initialState);
-  }
-
-  getCurrentStep(): TourStep | null {
-    const currentState = this._state$.value;
-
-    if (!currentState.isActive || currentState.steps.length === 0) {
-      return null;
-    }
-
-    return currentState.steps[currentState.currentStepIndex] || null;
   }
 
   isLastStep(): boolean {
