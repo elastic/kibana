@@ -154,11 +154,21 @@ export const createUpdateSuccessToaster = (
     className: 'eui-textBreakWord',
   };
 
-  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
-    return {
-      ...toast,
-      title: i18n.SYNC_CASE(caseAfterUpdate.title),
-    };
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    ((value?.syncAlerts && caseHasAlerts) || value?.extractObservables)
+  ) {
+    if (value?.extractObservables !== caseBeforeUpdate.settings.extractObservables) {
+      return {
+        ...toast,
+        title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
+      };
+    } else {
+      return {
+        ...toast,
+        title: i18n.SYNC_CASE(caseAfterUpdate.title),
+      };
+    }
   }
 
   if (valueToUpdateIsStatus(key, value) && caseHasAlerts && caseBeforeUpdate.settings.syncAlerts) {

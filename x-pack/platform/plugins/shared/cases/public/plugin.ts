@@ -40,6 +40,7 @@ import type {
 import { registerSystemActions } from './components/system_actions';
 import { registerAnalytics } from './analytics';
 import { useRemoveAlertFromCaseModal } from './components/case_view/use_remove_alert_from_case_modal';
+import { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 
 /**
  * @public
@@ -205,6 +206,7 @@ export class CasesUiPlugin
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
+        getObservablesFromEcs,
       },
     };
   }

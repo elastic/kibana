@@ -154,6 +154,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -211,6 +212,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "medium",
@@ -272,6 +274,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -339,6 +342,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -401,6 +405,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -446,6 +451,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -495,6 +501,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -548,6 +555,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -630,6 +638,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -700,6 +709,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -761,6 +771,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -845,6 +856,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -904,6 +916,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -968,6 +981,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",

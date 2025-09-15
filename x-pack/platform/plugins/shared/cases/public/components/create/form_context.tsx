@@ -12,7 +12,7 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/types/api';
+import type { CasePostRequest, ObservablePost } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
@@ -21,6 +21,7 @@ import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_ca
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
+import { bulkPostObservables } from '../../containers/api';
 
 interface Props {
   afterCaseCreated?: (
@@ -33,6 +34,7 @@ interface Props {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
   currentConfiguration: CasesConfigurationUI;
   selectedOwner: string;
+  observables?: ObservablePost[];
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -43,6 +45,7 @@ export const FormContext: React.FC<Props> = ({
   initialValue,
   currentConfiguration,
   selectedOwner,
+  observables,
 }) => {
   const { appId } = useApplication();
   const { data: connectors = [] } = useGetSupportedActionConnectors();
@@ -67,6 +70,12 @@ export const FormContext: React.FC<Props> = ({
             caseOwner: theCase.owner,
             attachments,
           });
+        }
+
+        if (theCase && Array.isArray(observables) && observables.length > 0) {
+          if (data.settings.extractObservables) {
+            await bulkPostObservables({ observables }, theCase.id);
+          }
         }
 
         if (afterCaseCreated && theCase) {
@@ -94,6 +103,7 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       createAttachments,
       pushCaseToExternalService,
+      observables,
     ]
   );
 
