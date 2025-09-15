@@ -218,7 +218,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           externalCustomRenderers={externalCustomRenderers}
           renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
           isPlainRecord
-          isSortEnabled
+          isSortEnabled={false} // Sort is temporarily disabled, see https://github.com/elastic/kibana/issues/235070
           showMultiFields={false}
           showColumnTokens
           showTimeCol
