@@ -1258,37 +1258,5 @@
     "title",
     "version"
   ],
-  "workchat_agent": [
-    "access_control",
-    "access_control.public",
-    "agent_id",
-    "agent_name",
-    "configuration",
-    "description",
-    "last_updated",
-    "user_id",
-    "user_name"
-  ],
-  "workchat_conversation": [
-    "access_control",
-    "access_control.public",
-    "agent_id",
-    "conversation_id",
-    "events",
-    "last_updated",
-    "title",
-    "user_id",
-    "user_name"
-  ],
-  "workchat_integration": [
-    "configuration",
-    "created_at",
-    "created_by",
-    "description",
-    "integration_id",
-    "name",
-    "type",
-    "updated_at"
-  ],
   "workplace_search_telemetry": []
 }
