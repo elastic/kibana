@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const labels = {
   conversations: {
-    title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Conversations' }),
+    title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
   },
   tools: {
     // Landing page
@@ -34,6 +34,12 @@ export const labels = {
       defaultMessage: 'Edit index search tool',
     }),
 
+    editToolContextMenuButtonLabel: i18n.translate(
+      'xpack.onechat.tools.editToolContextMenuButtonLabel',
+      {
+        defaultMessage: 'Edit tool context menu',
+      }
+    ),
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
@@ -227,5 +233,10 @@ export const labels = {
         defaultMessage: 'Optional',
       }),
     },
+  },
+  management: {
+    agentBuilder: i18n.translate('xpack.onechat.management.agentBuilder.title', {
+      defaultMessage: 'Agent Builder',
+    }),
   },
 };
