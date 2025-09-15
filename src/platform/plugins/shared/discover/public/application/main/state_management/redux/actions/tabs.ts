@@ -307,6 +307,8 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
   (dispatch, getState) => {
     const currentState = getState();
 
+    // Restoring the 'new' tab ID is a no-op because it represents a placeholder for creating new tabs,
+    // not an actual tab that can be restored.
     if (restoreTabId === currentState.tabs.unsafeCurrentId || restoreTabId === NEW_TAB_ID) {
       return;
     }
