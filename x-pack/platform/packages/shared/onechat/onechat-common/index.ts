@@ -39,6 +39,7 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  type IndexSearchToolDefinitionWithSchema,
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
@@ -77,6 +78,7 @@ export {
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,

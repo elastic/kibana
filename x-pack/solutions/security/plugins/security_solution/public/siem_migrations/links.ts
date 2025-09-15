@@ -21,7 +21,7 @@ const subLinks: LinkItem[] = [
   {
     id: SecurityPageName.siemMigrationsRules,
     title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationRules.title', {
-      defaultMessage: 'Rules migrations',
+      defaultMessage: 'Translated rules',
     }),
     description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.description', {
       defaultMessage:
@@ -37,7 +37,7 @@ const subLinks: LinkItem[] = [
   {
     id: SecurityPageName.siemMigrationsDashboards,
     title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationDashboards.title', {
-      defaultMessage: 'Dashboards migrations',
+      defaultMessage: 'Translated dashboards',
     }),
     description: i18n.translate(
       'xpack.securitySolution.appLinks.siemMigrationsDashboards.description',
@@ -53,6 +53,12 @@ const subLinks: LinkItem[] = [
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
+    isBeta: true,
+    betaOptions: {
+      text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsDashboards.badge', {
+        defaultMessage: 'Technical Preview',
+      }),
+    },
   },
 ];
 
