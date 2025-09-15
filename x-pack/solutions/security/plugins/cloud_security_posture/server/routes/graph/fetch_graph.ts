@@ -214,8 +214,8 @@ ${
 // but it flattens the data and we lose the structure
 | EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
 | EVAL docData = CONCAT("{",
-    "\\"_id\\":\\"", _id, "\\"",
-    ",\\"id\\":\\"", event.id, "\\"",
+    "\\"id\\":\\"", _id, "\\"",
+    CASE (event.id IS NOT NULL AND event.id != "", CONCAT(",\\"event\\":","{","\\"id\\":\\"", event.id, "\\"","}"), ""),
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
     ${
