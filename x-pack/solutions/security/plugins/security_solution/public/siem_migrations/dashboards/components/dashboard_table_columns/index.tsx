@@ -9,4 +9,5 @@ export * from './constants';
 
 export * from './name';
 export * from './status';
+export * from './tags';
 export * from './updated';

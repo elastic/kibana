@@ -10,9 +10,13 @@ import type { TableColumn } from '../components/dashboard_table_columns';
 import {
   createNameColumn,
   createStatusColumn,
+  createTagsColumn,
   createUpdatedColumn,
 } from '../components/dashboard_table_columns';
 
 export const useMigrationDashboardsTableColumns = (): TableColumn[] => {
-  return useMemo(() => [createNameColumn(), createUpdatedColumn(), createStatusColumn()], []);
+  return useMemo(
+    () => [createNameColumn(), createUpdatedColumn(), createStatusColumn(), createTagsColumn()],
+    []
+  );
 };

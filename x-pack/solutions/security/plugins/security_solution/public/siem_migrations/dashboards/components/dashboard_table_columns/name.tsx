@@ -19,7 +19,7 @@ interface NameProps {
 }
 
 const Name = ({ dashboard }: NameProps) => {
-  const title = dashboard.original_dashboard.title;
+  const title = dashboard.elastic_dashboard?.title ?? dashboard.original_dashboard.title;
   if (dashboard.status === SiemMigrationStatus.FAILED) {
     return (
       <EuiText data-test-subj="dashboardNameFailed" color="danger" size="s">
@@ -49,7 +49,7 @@ const Name = ({ dashboard }: NameProps) => {
 
 export const createNameColumn = (): TableColumn => {
   return {
-    field: 'original_dashboard.title',
+    field: 'elastic_dashboard.title',
     name: i18n.COLUMN_NAME,
     render: (_, dashboard: DashboardMigrationDashboard) => <Name dashboard={dashboard} />,
     sortable: true,
