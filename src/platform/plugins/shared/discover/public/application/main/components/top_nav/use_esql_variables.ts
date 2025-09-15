@@ -14,61 +14,14 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
+  extractEsqlVariables,
   internalStateActions,
+  parseControlGroupJson,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
-
-/**
- * @param panels - The control panels state, which may be null.
- * @description Extracts ESQL variables from the control panels state.
- * Each ESQL control panel is expected to have a `variableName`, `variableType`, and `selectedOptions`.
- * Returns an array of `ESQLControlVariable` objects.
- * If `panels` is null or empty, it returns an empty array.
- * @returns An array of ESQLControlVariable objects.
- */
-const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
-): ESQLControlVariable[] => {
-  if (!panels || Object.keys(panels).length === 0) {
-    return [];
-  }
-  const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
-    if (panel.type === ESQL_CONTROL) {
-      acc.push({
-        key: panel.variableName,
-        type: panel.variableType,
-        // If the selected option is not a number, keep it as a string
-        value: isNaN(Number(panel.selectedOptions?.[0]))
-          ? panel.selectedOptions?.[0]
-          : Number(panel.selectedOptions?.[0]),
-      });
-    }
-    return acc;
-  }, []);
-
-  return variables;
-};
-
-/**
- * Parses a JSON string into a ControlPanelsState object.
- * If the JSON is invalid or null, it returns an empty object.
- *
- * @param jsonString - The JSON string to parse.
- * @returns A ControlPanelsState object or an empty object if parsing fails.
- */
-
-const parseControlGroupJson = (
-  jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
-  try {
-    return jsonString ? JSON.parse(jsonString) : {};
-  } catch (e) {
-    return {};
-  }
-};
 
 /**
  * Custom hook to manage ESQL variables in the control group for Discover.

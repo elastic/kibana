@@ -18,7 +18,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
-import { createTabItem } from './redux/utils';
+import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
 
@@ -198,12 +198,20 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
+    const controlGroupState = internalState?.controlGroupJson
+      ? parseControlGroupJson(internalState.controlGroupJson)
+      : undefined;
+    const esqlVariables = controlGroupState
+      ? extractEsqlVariables(controlGroupState)
+      : defaultTabState.esqlVariables;
+
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
       initialAppState: appState,
       globalState: globalState || {},
+      esqlVariables,
     };
   };
 

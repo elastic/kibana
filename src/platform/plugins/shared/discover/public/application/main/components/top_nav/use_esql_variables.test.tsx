@@ -157,7 +157,9 @@ describe('useESQLVariables', () => {
             );
           }
           if (action.type === 'internalState/setEsqlVariables') {
-            expect(action.payload).toEqual(mockNewVariables);
+            expect((action.payload as { esqlVariables: unknown }).esqlVariables).toEqual(
+              mockNewVariables
+            );
           }
         });
       });
@@ -332,7 +334,10 @@ describe('useESQLVariables', () => {
           (call) => (call[0] as { type: string }).type === 'internalState/setEsqlVariables'
         );
         expect(setEsqlVariablesCall).toBeTruthy();
-        expect((setEsqlVariablesCall![0] as unknown as { payload: unknown }).payload).toEqual([
+        expect(
+          (setEsqlVariablesCall![0] as unknown as { payload: { esqlVariables: unknown } }).payload
+            .esqlVariables
+        ).toEqual([
           {
             key: 'numericVar',
             type: 'values',
@@ -369,7 +374,10 @@ describe('useESQLVariables', () => {
           (call) => (call[0] as { type: string }).type === 'internalState/setEsqlVariables'
         );
         expect(setEsqlVariablesCall).toBeTruthy();
-        expect((setEsqlVariablesCall![0] as unknown as { payload: unknown }).payload).toEqual([
+        expect(
+          (setEsqlVariablesCall![0] as unknown as { payload: { esqlVariables: unknown } }).payload
+            .esqlVariables
+        ).toEqual([
           {
             key: 'textVar',
             type: 'values',
