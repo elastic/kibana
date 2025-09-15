@@ -1349,6 +1349,24 @@ export const getSavedObjectTypes = (
           updated_at: { type: 'date' },
         },
       },
+      modelVersions: {
+        1: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                name: { type: 'keyword' },
+                namespace: { type: 'keyword' },
+                cloudProvider: { type: 'keyword' },
+                vars: { type: 'flattened' },
+                packagePolicyCount: { type: 'integer' },
+                created_at: { type: 'date' },
+                updated_at: { type: 'date' },
+              },
+            },
+          ],
+        },
+      },
     },
   };
 };

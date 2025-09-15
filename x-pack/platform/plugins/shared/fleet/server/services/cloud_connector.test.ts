@@ -113,8 +113,7 @@ describe('CloudConnectorService', () => {
               }),
             }),
           }),
-        }),
-        { namespace: '*' } // Should include namespace in options
+        })
       );
 
       expect(result).toEqual({

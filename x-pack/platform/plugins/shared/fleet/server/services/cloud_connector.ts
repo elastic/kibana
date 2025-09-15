@@ -87,8 +87,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        cloudConnectorAttributes,
-        { namespace }
+        cloudConnectorAttributes
       );
 
       logger.info('Successfully created cloud connector');

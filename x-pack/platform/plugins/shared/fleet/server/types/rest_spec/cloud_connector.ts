@@ -43,6 +43,7 @@ export const CreateCloudConnectorRequestSchema = {
 export const CreateCloudConnectorResponseSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
+  namespace: schema.maybe(schema.string()),
   cloudProvider: schema.string(),
   vars: schema.recordOf(schema.string(), schema.any()),
   packagePolicyCount: schema.number(),
@@ -61,6 +62,7 @@ export const GetCloudConnectorsResponseSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
     name: schema.string(),
+    namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
     vars: schema.recordOf(schema.string(), schema.any()),
     packagePolicyCount: schema.number(),

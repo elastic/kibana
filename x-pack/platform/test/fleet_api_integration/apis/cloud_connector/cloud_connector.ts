@@ -32,7 +32,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/cloud_connectors', () => {
       it('should create an AWS cloud connector successfully', async () => {
-        const { body } = await supertest
+        const response = await supertest
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -50,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
+        const body = response.body;
 
         expect(body).to.have.property('id');
         expect(body.name).to.equal('arn:aws:iam::123456789012:role/test-role');
@@ -59,6 +60,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.packagePolicyCount).to.equal(1);
         expect(body).to.have.property('created_at');
         expect(body).to.have.property('updated_at');
+        expect(body).to.have.property('namespace');
+        expect(body.namespace).to.equal('*');
       });
 
       it('should return 400 when external_id is missing for AWS', async () => {
