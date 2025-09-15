@@ -2146,11 +2146,11 @@ export const addCrowdStrikeIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
+                value: '30m',
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               batch_size: {
@@ -2219,7 +2219,7 @@ export const addCrowdStrikeIntegrationToAgentPolicy = async ({
             },
           },
           {
-            enabled: true,
+            enabled: false,
             data_stream: {
               type: 'logs',
               dataset: 'crowdstrike.vulnerability',

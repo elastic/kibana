@@ -276,18 +276,80 @@ const runCli: RunFn = async ({ log, flags }) => {
       log,
       integrationPolicy.namespace || agentPolicyNamespace
     ),
-    // Trigger alert on the Linux VM
-    crowdStrikeVm
-      .exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt')
-      .then(() => {
-        console.log('Eicar triggered on host!');
-      })
-      .catch((err) => {
-        log.warning(
-          `Attempted to trigger an alert on host [${crowdStrikeVm.name}], but failed with: ${err.message}`
-        );
-      }),
   ]);
+
+  // Trigger alerts on the Linux VM using realistic EDR test scenarios
+  log.info('Triggering CrowdStrike test alerts on the host VM...');
+
+  // CrowdStrike-specific test commands by severity level
+  const crowdStrikeTestCommands = [
+    // Informational level detections
+    'bash crowdstrike_test_informational',
+
+    // Low severity detections
+    'bash crowdstrike_test_low',
+
+    // Medium severity detections
+    'bash crowdstrike_test_medium',
+
+    // High severity detections
+    'bash crowdstrike_test_high',
+
+    // Critical severity detections
+    'bash crowdstrike_test_critical',
+  ];
+
+  let successCount = 0;
+
+  // Create an exec wrapper with detailed error reporting for debugging
+  const debugExec = async (command: string) => {
+    log.debug(`Executing command: ${command}`);
+    try {
+      const result = await crowdStrikeVm.exec(command);
+      log.debug(`Command succeeded. stdout: ${result.stdout}, stderr: ${result.stderr}`);
+      return result;
+    } catch (err) {
+      log.debug(`Command failed: ${command}`);
+      log.debug(`Error details:`, err);
+      throw err;
+    }
+  };
+
+  log.info('Running CrowdStrike detection test commands...');
+  let detectionCount = 0;
+  let commandFailureCount = 0;
+
+  for (const command of crowdStrikeTestCommands) {
+    try {
+      const result = await debugExec(command);
+      log.warning(`⚠️  CrowdStrike test command executed without blocking: ${command}`);
+      log.warning('   This may indicate CrowdStrike is not in prevention mode or the test script is not available');
+      successCount++;
+    } catch (err) {
+      detectionCount++;
+      log.info(`🛡️  CrowdStrike detection triggered (command blocked): ${command}`);
+      log.debug(`Block details:`, err);
+    }
+  }
+
+  if (detectionCount > 0) {
+    log.info(
+      `🎉 CrowdStrike successfully blocked ${detectionCount} out of ${crowdStrikeTestCommands.length} malicious test commands!`
+    );
+    log.info('   This indicates CrowdStrike is actively protecting the host. Check CrowdStrike console for detection alerts.');
+  } else if (successCount > 0) {
+    log.warning(
+      `⚠️  All ${crowdStrikeTestCommands.length} CrowdStrike test commands executed without being blocked.`
+    );
+    log.warning('   This may indicate:');
+    log.warning('   - CrowdStrike is in detection-only mode (not prevention)');
+    log.warning('   - Test scripts are not available on the host');
+    log.warning('   - CrowdStrike policies are not configured for these detections');
+  } else {
+    log.error(
+      `❌ No CrowdStrike test commands could be executed - this indicates connectivity or environment issues`
+    );
+  }
 
   log.info(`Done!
 

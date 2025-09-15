@@ -20,12 +20,8 @@ export const createDetectionEngineCrowdStrikeRuleIfNeeded = async (
   const ruleName = 'Promote CrowdStrike alerts';
   const tag = 'dev-script-run-crowdstrike-host';
   const indexNamespace = namespace ? `-${namespace}` : '';
-  const index = [
-    `logs-crowdstrike.alert${indexNamespace}*`,
-    `logs-crowdstrike.detection${indexNamespace}*`,
-    `logs-crowdstrike.fdr${indexNamespace}*`,
-  ];
-  const ruleQueryValue = 'crowdstrike.event.aid:* OR crowdstrike.detection.aid:*';
+  const index = [`*crowdstrike.alert${indexNamespace}*`];
+  const ruleQueryValue = 'device.id: *';
 
   const { data } = await findRules(kbnClient, {
     filter: `alert.attributes.tags:("${tag}")`,
@@ -44,7 +40,10 @@ export const createDetectionEngineCrowdStrikeRuleIfNeeded = async (
   const createdRule = await createRule(kbnClient, {
     index,
     query: ruleQueryValue,
-    from: 'now-3660s',
+    from: 'now-360s',
+    meta: {
+      from: '90m',
+    },
     name: ruleName,
     description: `Created by dev script located at: ${__filename}`,
     tags: [tag],
