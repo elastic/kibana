@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FC, ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -50,6 +51,7 @@ export const MultiSelectPicker: FC<{
 }> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const popoverTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (searchTerm === '') {
@@ -106,8 +108,9 @@ export const MultiSelectPicker: FC<{
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle paddingSize="s">
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
           <EuiFieldSearch
             compressed
             onChange={(e) => setSearchTerm(e.target.value)}

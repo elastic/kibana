@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiLink,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
@@ -24,6 +25,8 @@ export const FunctionHelpPopover = memo(() => {
     services: { docLinks },
   } = useMlKibana();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const popoverTitleId = useGeneratedHtmlId();
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -231,8 +234,9 @@ export const FunctionHelpPopover = memo(() => {
       panelPaddingSize="none"
       closePopover={closeHelp}
       initialFocus="#mlAdFunctionsHelpTableId"
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
         <FormattedMessage
           id="xpack.ml.anomalyDetection.functions.popoverTitle"
           defaultMessage="Function reference"
