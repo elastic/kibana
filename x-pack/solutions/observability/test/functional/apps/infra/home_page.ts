@@ -166,8 +166,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Persist after refresh
         await browser.refresh();
-        await pageObjects.infraHome.waitForLoading();
-
+        await pageObjects.header.awaitGlobalLoadingIndicatorHidden();
         expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
 
         await pageObjects.infraHome.clickDismissKubernetesTourButton();
