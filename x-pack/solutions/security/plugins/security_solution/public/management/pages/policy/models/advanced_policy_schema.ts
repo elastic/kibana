@@ -981,7 +981,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_shared_dirty_scan',
       {
         defaultMessage:
-          "Instead of ignoring regions with just no 'Private_Dirty' bytes, ignore regions with the combination of no 'Private_Dirty' bytes, no 'Shared_Dirty' bytes and is file-backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.',
+          "Instead of ignoring regions with just no 'Private_Dirty' bytes, ignore regions with the combination of no 'Private_Dirty' bytes, no 'Shared_Dirty' bytes and is file-backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.",
       }
     ),
   },
@@ -1152,7 +1152,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          "Control whether kprobes or eBPF are used to gather data. Options are 'kprobe', 'ebpf', or 'auto'. 'auto' uses eBPF if possible, otherwise it uses 'kprobe'. Default: auto.',
+          "Control whether kprobes or eBPF are used to gather data. Options are 'kprobe', 'ebpf', or 'auto'. 'auto' uses eBPF if possible, otherwise it uses 'kprobe'. Default: auto.",
       }
     ),
   },
@@ -1696,7 +1696,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_am_images',
       {
         defaultMessage:
-          "Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the 'Microsoft-Windows-Security-Mitigations/Kernel Mode' event log. Default: true."
+          "Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the 'Microsoft-Windows-Security-Mitigations/Kernel Mode' event log.  Default: true.",
       }
     ),
   },
