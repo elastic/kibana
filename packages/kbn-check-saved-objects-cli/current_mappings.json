@@ -2854,27 +2854,6 @@
       }
     }
   },
-  "onechat_workflow": {
-    "dynamic": false,
-    "properties": {
-      "access_control": {
-        "properties": {
-          "public": {
-            "type": "boolean"
-          }
-        }
-      },
-      "categories": {
-        "type": "keyword"
-      },
-      "user_id": {
-        "type": "keyword"
-      },
-      "workflow_id": {
-        "type": "keyword"
-      }
-    }
-  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
