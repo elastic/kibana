@@ -27,6 +27,14 @@ const fullScreenButtonLabel = i18n.translate(
   { defaultMessage: 'Expand trace timeline' }
 );
 
+const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.description', {
+  defaultMessage: 'Timeline of all spans in the trace, including their duration and hierarchy.',
+});
+
+const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
+  defaultMessage: 'Trace',
+});
+
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
@@ -63,9 +71,8 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
       ) : null}
       <ContentFrameworkSection
         id="trace-waterfall"
-        title={i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
-          defaultMessage: 'Trace',
-        })}
+        title={sectionTitle}
+        description={sectionTip}
         actions={[
           {
             icon: 'fullScreen',
