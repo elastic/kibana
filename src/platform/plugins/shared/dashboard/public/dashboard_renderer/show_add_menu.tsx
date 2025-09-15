@@ -207,6 +207,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         {
           name: getAddTimeSliderControlButtonTitle(),
           icon: 'empty',
+          'data-test-subj': 'controls-create-timeslider-button',
           onClick: async () => {
             controlGroupApi?.addNewPanel({
               panelType: TIME_SLIDER_CONTROL,
