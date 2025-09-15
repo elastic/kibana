@@ -98,6 +98,7 @@ export const getRuleTypesInternalResponseBodySchema = schema.arrayOf(
         },
       }
     ),
+    auto_recover_alerts: schema.maybe(schema.boolean()),
     category: schema.string({
       meta: {
         description:

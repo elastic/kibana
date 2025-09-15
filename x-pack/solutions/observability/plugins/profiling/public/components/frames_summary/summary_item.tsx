@@ -102,7 +102,7 @@ export function SummaryItem({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={titleHint}>
-                    <EuiIcon type="questionInCircle" />
+                    <EuiIcon type="question" />
                   </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>

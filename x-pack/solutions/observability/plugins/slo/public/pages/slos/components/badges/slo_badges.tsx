@@ -11,8 +11,9 @@ import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
+import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
 import { BurnRateRuleParams } from '../../../../typings';
-import { SloTagsList } from '../common/slo_tags_list';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloRemoteBadge } from './slo_remote_badge';
 import { SloRulesBadge } from './slo_rules_badge';
@@ -35,8 +36,16 @@ export function SloBadges({
   slo,
   onClickRuleBadge,
 }: SloBadgesProps) {
+  const { onStateChange } = useUrlSearchState();
+
+  const handleTagClick = (tag: string) => {
+    onStateChange({
+      kqlQuery: `slo.tags: "${tag}"`,
+    });
+  };
+
   return (
-    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
+    <EuiFlexGroup direction="row" responsive gutterSize="s" alignItems="center" wrap>
       {isLoading ? (
         <LoadingBadges />
       ) : (
@@ -48,7 +57,7 @@ export function SloBadges({
           <SloTimeWindowBadge slo={slo} />
           <SloRemoteBadge slo={slo} />
           <SloRulesBadge rules={rules} onClick={onClickRuleBadge} isRemote={!!slo.remote} />
-          <SloTagsList tags={slo.tags} numberOfTagsToDisplay={1} color="default" ignoreEmpty />
+          <SloTagsBadge slo={slo} onClick={handleTagClick} />
         </>
       )}
     </EuiFlexGroup>

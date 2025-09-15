@@ -6,34 +6,38 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { KPIsSection } from './kpis_section';
 import { ALERTS_BY_HOST_PANEL } from './alerts_progress_bar_by_host_name_panel';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
 jest.mock('../../../../common/hooks/use_selector');
-
-const dataView: DataView = createStubDataView({ spec: {} });
+jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
 
 describe('<KPIsSection />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSummaryChartData as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: false,
+    });
+  });
+
   it('should render all components', async () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       meta: {},
     });
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <KPIsSection dataView={dataView} />
-        </TestProviders>
-      );
+    const { getByTestId } = render(
+      <TestProviders>
+        <KPIsSection signalIndexName="test" />
+      </TestProviders>
+    );
 
-      expect(getByTestId('severty-level-panel')).toBeInTheDocument();
-      expect(getByTestId('alerts-by-rule-panel')).toBeInTheDocument();
-      expect(getByTestId(ALERTS_BY_HOST_PANEL)).toBeInTheDocument();
-    });
+    expect(getByTestId('severty-level-panel')).toBeInTheDocument();
+    expect(getByTestId('alerts-by-rule-panel')).toBeInTheDocument();
+    expect(getByTestId(ALERTS_BY_HOST_PANEL)).toBeInTheDocument();
   });
 });

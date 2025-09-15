@@ -86,4 +86,13 @@ describe('convertRulesFilterToKQL', () => {
 
     expect(kql).toBe('NOT alert.attributes.params.type: ("machine_learning" OR "saved_query")');
   });
+
+  it('handles presence of "includeRuleTypes" properly', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      includeRuleTypes: ['query', 'eql'],
+    });
+
+    expect(kql).toBe('alert.attributes.params.type: ("query" OR "eql")');
+  });
 });

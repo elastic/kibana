@@ -277,6 +277,8 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
+      excludeAlertStatuses,
+      excludeAlertTags,
       alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
@@ -314,6 +316,8 @@ export const runTask = async ({
           runtimeMappings,
           weights: [],
           alertSampleSizePerShard,
+          excludeAlertStatuses,
+          excludeAlertTags,
         });
         const tookMs = Date.now() - now;
 

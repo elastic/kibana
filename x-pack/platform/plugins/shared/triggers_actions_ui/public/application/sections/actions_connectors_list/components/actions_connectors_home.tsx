@@ -171,7 +171,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       key="documentation-button"
       target="_blank"
       href={docLinks.links.alerting.actionTypes}
-      iconType="help"
+      iconType="question"
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"

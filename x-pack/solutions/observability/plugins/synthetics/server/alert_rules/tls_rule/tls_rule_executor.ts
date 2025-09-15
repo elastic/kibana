@@ -14,15 +14,16 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { MonitorConfigRepository } from '../../services/monitor_config_repository';
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
+import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import {
   CertResult,
   ConfigKey,
@@ -30,7 +31,6 @@ import {
   Ping,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { SyntheticsEsClient } from '../../lib';
 import { queryFilterMonitors } from '../status_rule/queries/filter_monitors';
@@ -44,10 +44,10 @@ export class TLSRuleExecutor {
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+  monitorConfigRepository: MonitorConfigRepository;
   logger: Logger;
   spaceId: string;
   ruleName: string;
-  monitorConfigRepository: MonitorConfigRepository;
 
   constructor(
     previousStartedAt: Date | null,
@@ -67,13 +67,13 @@ export class TLSRuleExecutor {
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
-    this.logger = server.logger;
-    this.spaceId = spaceId;
-    this.ruleName = ruleName;
     this.monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       server.encryptedSavedObjects.getClient()
     );
+    this.logger = server.logger;
+    this.spaceId = spaceId;
+    this.ruleName = ruleName;
   }
 
   debug(message: string) {
@@ -81,9 +81,9 @@ export class TLSRuleExecutor {
   }
 
   async getMonitors() {
-    const HTTP_OR_TCP = `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
+    const HTTP_OR_TCP = `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
 
-    const baseFilter = `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
+    const baseFilter = `${syntheticsMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
 
     const configIds = await queryFilterMonitors({
       spaceId: this.spaceId,
@@ -125,29 +125,17 @@ export class TLSRuleExecutor {
       )} | parsed location filter is ${JSON.stringify(locationIds)} `
     );
 
-    const {
-      allIds,
-      enabledMonitorQueryIds,
-      monitorLocationIds,
-      monitorLocationsMap,
-      projectMonitorsCount,
-      monitorQueryIdToConfigIdMap,
-    } = processMonitors(this.monitors);
+    const { enabledMonitorQueryIds } = processMonitors(this.monitors);
 
     return {
       enabledMonitorQueryIds,
-      monitorLocationIds,
-      allIds,
-      monitorLocationsMap,
-      projectMonitorsCount,
-      monitorQueryIdToConfigIdMap,
     };
   }
 
   async getExpiredCertificates() {
     const { enabledMonitorQueryIds } = await this.getMonitors();
 
-    const dynamicSettings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    const dynamicSettings = await getSyntheticsDynamicSettings(this.soClient);
 
     const expiryThreshold =
       this.params.certExpirationThreshold ??

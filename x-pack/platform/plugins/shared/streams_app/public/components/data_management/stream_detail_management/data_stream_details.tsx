@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiHealth, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiHealth, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { LocatorPublic } from '@kbn/share-plugin/public';
@@ -36,7 +36,7 @@ function DataStreamHealth({ health }: { health?: HealthStatus }) {
   if (!health) {
     return '-';
   }
-  return <EuiHealth color={healthToColor(health)}>{health}</EuiHealth>;
+  return <EuiHealth color={healthToColor(health)}>{health.toLowerCase()}</EuiHealth>;
 }
 
 export function DataStreamDetails({
@@ -50,42 +50,51 @@ export function DataStreamDetails({
       hasBorder
       className={css`
         min-width: 500px;
+        max-height: 100px;
       `}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailView.dataStream', {
-            defaultMessage: 'Data stream',
-          })}
-        </EuiText>
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.dataStreamName', {
-                defaultMessage: 'Name',
-              })}
-            </EuiText>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.dataStream', {
+              defaultMessage: 'Data stream',
+            })}
+          </p>
+        </EuiTitle>
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.dataStreamName', {
+                  defaultMessage: 'Name',
+                })}
+              </p>
+            </EuiTitle>
             <EuiLink onClick={() => onFlyoutOpen(dataStream?.name || '')}>
               {dataStream ? dataStream.name : '-'}
               <ManagedBadge meta={dataStream?._meta} />
             </EuiLink>
           </EuiFlexGroup>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.health', {
-                defaultMessage: 'Health',
-              })}
-            </EuiText>
-            <EuiText size="s">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.health', {
+                  defaultMessage: 'Health',
+                })}
+              </p>
+            </EuiTitle>
+            <EuiText size="xs">
               <DataStreamHealth health={dataStream?.status} />
             </EuiText>
           </EuiFlexGroup>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.numberOfIndices', {
-                defaultMessage: 'Indices',
-              })}
-            </EuiText>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.numberOfIndices', {
+                  defaultMessage: 'Indices',
+                })}
+              </p>
+            </EuiTitle>
             <EuiLink
               href={
                 (dataStream &&
@@ -99,12 +108,14 @@ export function DataStreamDetails({
               {dataStream?.indices?.length || '-'}
             </EuiLink>
           </EuiFlexGroup>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.indexMode', {
-                defaultMessage: 'Index mode',
-              })}
-            </EuiText>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.indexMode', {
+                  defaultMessage: 'Index mode',
+                })}
+              </p>
+            </EuiTitle>
             <EuiText size="s">
               {/* index_mode is a new property and not part of the typing yet */}
               {(dataStream as { index_mode?: string } | undefined)?.index_mode || '-'}

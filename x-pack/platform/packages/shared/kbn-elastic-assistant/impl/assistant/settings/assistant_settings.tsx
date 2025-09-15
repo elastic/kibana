@@ -142,7 +142,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         const { success: systemPromptSuccess, conversationUpdates } =
           await saveSystemPromptSettings();
         if (systemPromptSuccess) {
-          saveResult = await saveConversationsSettings(conversationUpdates);
+          saveResult = await saveConversationsSettings({ bulkActions: conversationUpdates });
         } else {
           saveResult = false;
         }

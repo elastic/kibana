@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { DEFAULT_DIAGNOSTIC_INDEX, TELEMETRY_CHANNEL_TIMELINE } from '../constants';
 import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
+import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
   const taskName = 'Security Solution Diagnostic Timeline telemetry';
@@ -35,52 +36,55 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
       const trace = taskMetricsService.start(taskType);
       const fetcher = new TelemetryTimelineFetcher(receiver);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         let counter = 0;
 
         const { rangeFrom, rangeTo } = ranges(taskExecutionPeriod);
 
-        const alerts = await receiver.fetchTimelineAlerts(
+        const alerts = receiver.fetchTimelineAlerts(
           DEFAULT_DIAGNOSTIC_INDEX,
           rangeFrom,
-          rangeTo
+          rangeTo,
+          telemetryConfiguration.query_config
         );
 
-        log.l('found alerts to process', { length: alerts.length });
+        for await (const page of alerts) {
+          log.debug('found alerts to process', { length: page.length } as LogMeta);
 
-        for (const alert of alerts) {
-          const result = await fetcher.fetchTimeline(alert);
+          for (const alert of page) {
+            const result = await fetcher.fetchTimeline(alert);
 
-          sender.getTelemetryUsageCluster()?.incrementCounter({
-            counterName: 'telemetry_timeline_diagnostic',
-            counterType: 'timeline_diagnostic_node_count',
-            incrementBy: result.nodes,
-          });
+            sender.getTelemetryUsageCluster()?.incrementCounter({
+              counterName: 'telemetry_timeline_diagnostic',
+              counterType: 'timeline_diagnostic_node_count',
+              incrementBy: result.nodes,
+            });
 
-          sender.getTelemetryUsageCluster()?.incrementCounter({
-            counterName: 'telemetry_timeline_diagnostic',
-            counterType: 'timeline_diagnostic_event_count',
-            incrementBy: result.events,
-          });
+            sender.getTelemetryUsageCluster()?.incrementCounter({
+              counterName: 'telemetry_timeline_diagnostic',
+              counterType: 'timeline_diagnostic_event_count',
+              incrementBy: result.events,
+            });
 
-          if (result.timeline) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
-            counter += 1;
-          } else {
-            log.debug('no events in timeline');
+            if (result.timeline) {
+              await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
+              counter += 1;
+            } else {
+              log.debug('no events in timeline');
+            }
           }
         }
 
-        log.l('Concluding timeline task.', { counter });
+        log.debug('Concluding timeline task.', { counter } as LogMeta);
 
         await taskMetricsService.end(trace);
 
         return counter;
-      } catch (err) {
-        logger.error('could not complete task', { error: err });
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        logger.error('could not complete task', { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

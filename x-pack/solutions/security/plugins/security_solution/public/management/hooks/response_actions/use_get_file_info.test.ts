@@ -30,8 +30,7 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/218159
-describe.skip('When using the `useGetFileInfo()` hook', () => {
+describe('When using the `useGetFileInfo()` hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetFileInfo>,
     ReturnType<typeof useGetFileInfo>
@@ -66,7 +65,7 @@ describe.skip('When using the `useGetFileInfo()` hook', () => {
         file_id: '123.agent-a',
       }),
     });
-  });
+  }, 10000);
 
   it('should allow specific agent id to be set on input', async () => {
     await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock, 'agent-a'));
@@ -78,7 +77,7 @@ describe.skip('When using the `useGetFileInfo()` hook', () => {
         file_id: '123.agent-a',
       }),
     });
-  });
+  }, 10000);
 
   it('should allow custom options ot be used', async () => {
     await renderReactQueryHook(() =>
@@ -96,5 +95,5 @@ describe.skip('When using the `useGetFileInfo()` hook', () => {
         retry: false,
       })
     );
-  });
+  }, 10000);
 });

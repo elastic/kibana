@@ -49,6 +49,7 @@ export const config: PluginConfigDescriptor = {
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -294,6 +295,7 @@ export const config: PluginConfigDescriptor = {
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

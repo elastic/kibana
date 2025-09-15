@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import { EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -35,6 +36,26 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const tabs = {
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+            defaultMessage:
+              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data retention',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    },
     route: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -47,8 +68,8 @@ export function WiredStreamDetailManagement({
       content: (
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     },
     schemaEditor: {
@@ -57,14 +78,6 @@ export function WiredStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
-      }),
-    },
-    lifecycle: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
       }),
     },
   };

@@ -7,7 +7,10 @@
 
 import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
-import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
+import {
+  OBSERVABILITY_PROJECT_SETTINGS,
+  OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS,
+} from '@kbn/serverless-observability-settings';
 import type {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
@@ -27,7 +30,11 @@ export class ServerlessObservabilityPlugin
   constructor(_initializerContext: PluginInitializerContext) {}
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
-    pluginsSetup.serverless.setupProjectSettings(OBSERVABILITY_PROJECT_SETTINGS);
+    pluginsSetup.serverless.setupProjectSettings([
+      ...OBSERVABILITY_PROJECT_SETTINGS,
+      ...(pluginsSetup.observabilityAIAssistant ? OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS : []),
+    ]);
+
     return {};
   }
 

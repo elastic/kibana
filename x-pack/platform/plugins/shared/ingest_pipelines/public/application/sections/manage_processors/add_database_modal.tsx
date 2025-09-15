@@ -23,6 +23,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+
 import type { GeoipDatabase } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import {
@@ -34,6 +35,12 @@ import {
   getAddDatabaseSuccessMessage,
   addDatabaseErrorTitle,
 } from './constants';
+
+const styles = {
+  modal: css`
+    width: 500px;
+  `,
+};
 
 export const AddDatabaseModal = ({
   closeModal,
@@ -103,9 +110,7 @@ export const AddDatabaseModal = ({
 
   return (
     <EuiModal
-      css={css`
-        width: 500px;
-      `}
+      css={styles.modal}
       aria-labelledby={ADD_DATABASE_MODAL_TITLE_ID}
       onClose={closeModal}
       initialFocus={'[data-test-subj="databaseTypeSelect"]'}
@@ -159,7 +164,7 @@ export const AddDatabaseModal = ({
                     defaultMessage="Add your MaxMind license token to the keystore"
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               >
                 <p>
                   <FormattedMessage
@@ -181,7 +186,7 @@ export const AddDatabaseModal = ({
                     defaultMessage="Add your IP Info license token to the keystore"
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               >
                 <p>
                   <FormattedMessage

@@ -498,6 +498,16 @@ This change updates all instances of `vulnerability.package` to the ECS standard
 ====
 
 // ESQL
+
+[discrete]
+[[breaking-213916]]
+.Change to variable syntax in {esql} queries. (8.19)
+[%collapsible]
+====
+*Details* +
+Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?`. View {kibana-pull}213916[#213916].
+====
+      
 [discrete]
 [[breaking-182074]]
 .[ES|QL] Renamed an advanced setting to enable {esql}. (8.14)

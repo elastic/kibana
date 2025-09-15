@@ -79,6 +79,7 @@ export const StatusFilterButton: React.FC<StatusFilterButtonProps> = React.memo(
         }}
         isSelected={isPopoverOpen}
         hasActiveFilters={status !== undefined}
+        numActiveFilters={status ? 1 : 0}
         data-test-subj="statusFilterButton"
       >
         {i18n.STATUS_BUTTON_TITLE}

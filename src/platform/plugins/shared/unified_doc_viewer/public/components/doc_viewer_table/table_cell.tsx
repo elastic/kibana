@@ -49,13 +49,15 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
       return null;
     }
 
-    const { flattenedValue, name, dataViewField, ignoredReason, fieldType } = row;
+    const { flattenedValue, name, displayNameOverride, dataViewField, ignoredReason, fieldType } =
+      row;
 
     if (columnId === 'name') {
       return (
         <div>
           <FieldName
             fieldName={name}
+            displayNameOverride={displayNameOverride}
             fieldType={fieldType}
             fieldMapping={dataViewField}
             scripted={dataViewField?.scripted}

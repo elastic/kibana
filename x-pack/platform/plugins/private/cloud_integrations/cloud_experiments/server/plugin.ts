@@ -20,7 +20,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
-import { registerUsageCollector } from './usage';
+import { getAllFlags, registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
 
 interface CloudExperimentsPluginSetupDeps {
@@ -79,6 +79,12 @@ export class CloudExperimentsPlugin
     const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider();
     if (launchDarklyOpenFeatureProvider) {
       core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
+      core.featureFlags.setInitialFeatureFlagsGetter(async () => {
+        const launchDarklyClient = launchDarklyOpenFeatureProvider.getClient();
+        const context = OpenFeature.getContext();
+        const { flags } = await getAllFlags(launchDarklyClient, context);
+        return flags;
+      });
     }
 
     registerUsageCollector(deps.usageCollection, () => ({

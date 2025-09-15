@@ -14,11 +14,16 @@ export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IEvent } from '../generated/schemas';
-import type { AggregateOptionsType, FindOptionsType } from './event_log_client';
+import type {
+  AggregateOptionsType,
+  FindOptionsSearchAfterType,
+  FindOptionsType,
+} from './event_log_client';
 import type {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
   InternalFields,
+  QueryEventsBySavedObjectSearchAfterResult,
 } from './es/cluster_client_adapter';
 
 export type {
@@ -85,11 +90,18 @@ export interface IEventLogClient {
   findEventsByDocumentIds(
     docs: Array<{ _id: string; _index: string }>
   ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>>;
+  findEventsBySavedObjectIdsSearchAfter(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsSearchAfterType>,
+    legacyIds?: string[]
+  ): Promise<QueryEventsBySavedObjectSearchAfterResult>;
+  closePointInTime(pitId: string): Promise<void>;
   refreshIndex(): Promise<void>;
 }
 
 export interface IEventLogger {
-  logEvent(properties: IEvent): void;
+  logEvent(properties: IEvent, id?: string): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
   updateEvents(

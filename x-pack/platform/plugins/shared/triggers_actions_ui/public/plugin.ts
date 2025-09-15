@@ -205,6 +205,8 @@ export class Plugin
     const ruleTypeRegistry = this.ruleTypeRegistry;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      enabledEmailServices: plugins.actions.enabledEmailServices,
+      isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });

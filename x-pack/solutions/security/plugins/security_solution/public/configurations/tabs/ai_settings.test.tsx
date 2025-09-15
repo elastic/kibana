@@ -16,6 +16,9 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 
 const mockNavigateTo = jest.fn();
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 describe('AISettings', () => {
   beforeEach(() => {
@@ -26,6 +29,13 @@ describe('AISettings', () => {
           navigateToApp: jest.fn(),
           capabilities: {
             securitySolutionAssistant: { 'ai-assistant': true },
+          },
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
           },
         },
         data: { dataViews: {} },
@@ -71,6 +81,13 @@ describe('AISettings', () => {
           navigateToApp: mockNavigateToApp,
           capabilities: {
             securitySolutionAssistant: { 'ai-assistant': false },
+          },
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
           },
         },
         data: { dataViews: {} },

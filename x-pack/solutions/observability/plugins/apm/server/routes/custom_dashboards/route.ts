@@ -14,8 +14,6 @@ import { getCustomDashboards } from './get_custom_dashboards';
 import { getServicesWithDashboards } from './get_services_with_dashboards';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { rangeRt } from '../default_api_types';
-import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
-import { getEntitiesWithDashboards } from './get_entities_with_dashboards';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/custom-dashboard',
@@ -59,18 +57,12 @@ const serviceDashboardsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({
-        checkFor: t.union([t.literal('entities'), t.literal('services')]),
-      }),
-    ]),
+    query: rangeRt,
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
-    const { context, params, request } = resources;
-    const coreContext = await context.core;
-    const { start, end, checkFor } = params.query;
+    const { context, params } = resources;
+    const { start, end } = params.query;
 
     const { serviceName } = params.path;
 
@@ -83,21 +75,6 @@ const serviceDashboardsRoute = createApmServerRoute({
     const allLinkedCustomDashboards = await getCustomDashboards({
       savedObjectsClient,
     });
-
-    if (checkFor === 'entities') {
-      const entitiesESClient = await createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      });
-
-      const entitiesWithDashboards = await getEntitiesWithDashboards({
-        entitiesESClient,
-        allLinkedCustomDashboards,
-        serviceName,
-      });
-
-      return { serviceDashboards: entitiesWithDashboards };
-    }
 
     const servicesWithDashboards = await getServicesWithDashboards({
       apmEventClient,

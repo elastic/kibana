@@ -36,8 +36,6 @@ describe('entity risk score calculation route', () => {
   let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     getStartServicesMock = jest.fn().mockResolvedValue([
       {},
       {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -12,7 +13,7 @@ import { logQueryRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import type { SignalSource } from '../types';
 
-interface FetchedDocument {
+export interface FetchedDocument {
   fields: estypes.SearchHit['fields'];
   _source?: SignalSource;
   _index: estypes.SearchHit['_index'];
@@ -25,6 +26,8 @@ interface FetchSourceDocumentsArgs {
   index: string[];
   results: Array<Record<string, string | null>>;
   loggedRequests?: RulePreviewLoggedRequest[];
+  hasLoggedRequestsReachedLimit: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 /**
  * fetches source documents by list of their ids
@@ -37,6 +40,8 @@ export const fetchSourceDocuments = async ({
   esClient,
   index,
   loggedRequests,
+  hasLoggedRequestsReachedLimit,
+  runtimeMappings,
 }: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
@@ -64,16 +69,21 @@ export const fetchSourceDocuments = async ({
     query: idsQuery.query,
     _source: true,
     fields: ['*'],
+    size: ids.length,
+    runtime_mappings: runtimeMappings,
   };
   const ignoreUnavailable = true;
 
   if (loggedRequests) {
     loggedRequests.push({
-      request: logQueryRequest(searchBody, { index, ignoreUnavailable }),
+      request: hasLoggedRequestsReachedLimit
+        ? undefined
+        : logQueryRequest(searchBody, { index, ignoreUnavailable }),
       description: i18n.FIND_SOURCE_DOCUMENTS_REQUEST_DESCRIPTION,
     });
   }
 
+  const searchStart = performance.now();
   const response = await esClient.search<SignalSource>({
     index,
     body: searchBody,
@@ -81,7 +91,9 @@ export const fetchSourceDocuments = async ({
   });
 
   if (loggedRequests) {
-    loggedRequests[loggedRequests.length - 1].duration = response.took;
+    loggedRequests[loggedRequests.length - 1].duration = Math.round(
+      performance.now() - searchStart
+    );
   }
 
   return response.hits.hits.reduce<Record<string, FetchedDocument>>((acc, hit) => {

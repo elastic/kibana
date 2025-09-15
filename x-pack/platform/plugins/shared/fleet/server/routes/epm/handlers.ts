@@ -111,7 +111,11 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+  const flattenedRes = res
+    // exclude the security_ai_prompts package from being shown in Kibana UI
+    // https://github.com/elastic/kibana/pull/227308
+    .filter((pkg) => pkg.id !== 'security_ai_prompts')
+    .map((pkg) => soToInstallationInfo(pkg)) as PackageList;
   const body: GetPackagesResponse = {
     items: flattenedRes,
     response: res,
@@ -583,6 +587,7 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+    return response.ok({ body });
   } else if (format === 'yml' || format === 'yaml') {
     body = await getTemplateInputs(
       soClient,
@@ -592,8 +597,10 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+
+    return response.ok({ body, headers: { 'content-type': 'text/yaml;charset=utf-8' } });
   }
-  return response.ok({ body });
+  throw new FleetError(`Fleet error template format not supported ${format}`);
 };
 
 // Don't expose the whole SO in the API response, only selected fields

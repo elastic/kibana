@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToken,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +37,24 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
     <EuiDataGridToolbarControl
       data-test-subj="aiopsEmbeddableSelectFieldButton"
       onClick={() => togglePopover()}
+      aria-haspopup="dialog"
+      aria-expanded={showPopover}
+      aria-label={
+        selectedField
+          ? i18n.translate(
+              'xpack.aiops.logCategorization.embeddableMenu.selectedFieldButtonAriaLabel',
+              {
+                defaultMessage: 'Selected field: {fieldName}',
+                values: { fieldName: selectedField?.name },
+              }
+            )
+          : i18n.translate(
+              'xpack.aiops.logCategorization.embeddableMenu.noSelectedFieldButtonAriaLabel',
+              {
+                defaultMessage: 'Select field',
+              }
+            )
+      }
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
@@ -72,23 +91,26 @@ export const FieldSelector: FC<Props> = ({
     () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
     [fields]
   );
-
-  const label = i18n.translate(
-    'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
-    {
-      defaultMessage: 'Selected field',
-    }
-  );
+  const fieldId = useGeneratedHtmlId({ prefix: 'fieldSelector', suffix: 'select' });
 
   return (
     <>
       {WarningComponent !== undefined ? <WarningComponent /> : null}
 
-      <EuiFormRow fullWidth data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow" label={label}>
+      <EuiFormRow
+        fullWidth
+        data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
+        label={i18n.translate(
+          'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
+          {
+            defaultMessage: 'Selected field',
+          }
+        )}
+        id={fieldId}
+      >
         <EuiSuperSelect
           fullWidth
           compressed
-          aria-label={label}
           options={fieldOptions}
           disabled={fields.length === 0}
           valueOfSelected={selectedField ?? undefined}

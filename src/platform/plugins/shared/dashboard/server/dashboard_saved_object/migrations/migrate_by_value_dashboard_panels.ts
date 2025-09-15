@@ -19,8 +19,8 @@ import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from './utils';
-import type { SavedDashboardPanel } from '..';
+} from './dashboard_panel_converters';
+import { SavedDashboardPanel } from '../schema/v2';
 
 interface ValueOrReferenceInput {
   attributes?: Serializable;
@@ -75,9 +75,9 @@ export const migrateByValueDashboardPanels =
         });
         // Convert the embeddable state back into the panel shape
         newPanels.push({
-          ...convertPanelStateToSavedDashboardPanel(panel.panelIndex, {
+          ...convertPanelStateToSavedDashboardPanel({
             ...originalPanelState,
-            explicitInput: { ...migratedInput },
+            explicitInput: { ...migratedInput, id: migratedInput.id as string },
           }),
           version,
         });

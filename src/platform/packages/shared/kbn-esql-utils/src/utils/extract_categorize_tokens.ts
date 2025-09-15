@@ -17,6 +17,9 @@
 export function extractCategorizeTokens(regexString: string) {
   let cleanedString = regexString;
 
+  // Remove backslashes
+  cleanedString = cleanedString.replace(/\\/g, '');
+
   // Strip leading '.*?'
   if (cleanedString.startsWith('.*?')) {
     cleanedString = cleanedString.substring('.*?'.length);

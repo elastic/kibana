@@ -1,6 +1,6 @@
 # MV_MAX
 
-MV_MAX function converts a multivalued expression into a single valued column containing the maximum value.
+Converts a multivalued expression into a single-valued column containing the maximum value.
 
 ## Syntax
 
@@ -8,21 +8,26 @@ MV_MAX function converts a multivalued expression into a single valued column co
 
 ### Parameters
 
-#### field
+#### `field`
 
-A multivalue expression.
+Multivalue expression.
 
 ## Examples
-
-The following example demonstrates the use of MV_MAX function:
 
 ```esql
 ROW a=[3, 5, 1]
 | EVAL max_a = MV_MAX(a)
 ```
 
-**Retrieving the max value from a multivalued field**
+Finds the maximum value in the multivalued column `a`, resulting in `max_a = 5`.
+
 ```esql
 FROM bag_of_numbers
 | EVAL max = MV_MAX(numbers)
 ```
+
+Finds the maximum value in the column `a` by comparing the strings' UTF-8 representations, resulting in `max_a = "zoo"`.
+
+## Supported Types
+
+This function can be used with any column type, including `keyword` columns. For `keyword` columns, it picks the last string by comparing their UTF-8 representation byte by byte.

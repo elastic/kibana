@@ -40,6 +40,10 @@ describe('AssetCriticalityMigrationClient', () => {
 
     (AssetCriticalityDataClient as jest.Mock).mockImplementation(() => assetCriticalityDataClient);
 
+    assetCriticalityDataClient.getIndex.mockImplementation(
+      () => '.asset-criticality.asset-criticality-default'
+    );
+
     migrationClient = new AssetCriticalityMigrationClient({ logger, auditLogger, esClient });
   });
 

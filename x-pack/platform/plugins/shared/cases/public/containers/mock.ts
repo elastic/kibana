@@ -987,8 +987,11 @@ export const findCaseUserActionsResponse: InternalFindCaseUserActions = {
 
 export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
   total: 20,
+  totalDeletions: 0,
   totalComments: 10,
+  totalCommentDeletions: 0,
   totalOtherActions: 10,
+  totalOtherActionDeletions: 0,
 };
 
 // components tests

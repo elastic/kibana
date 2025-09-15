@@ -56,7 +56,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
               flush="right"
               href={links.painlessExecuteAPI}
               target="_blank"
-              iconType="help"
+              iconType="question"
             >
               {i18n.translate('xpack.painlessLab.flyoutDocLink', {
                 defaultMessage: 'API documentation',

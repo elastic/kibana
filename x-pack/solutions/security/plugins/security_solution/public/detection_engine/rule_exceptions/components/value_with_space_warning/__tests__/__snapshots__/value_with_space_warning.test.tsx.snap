@@ -140,7 +140,7 @@ Object {
         >
           <span
             color="warning"
-            data-euiicon-type="iInCircle"
+            data-euiicon-type="info"
             data-test-subj="value_with_space_warning_tooltip"
           />
         </span>
@@ -156,7 +156,7 @@ Object {
       >
         <span
           color="warning"
-          data-euiicon-type="iInCircle"
+          data-euiicon-type="info"
           data-test-subj="value_with_space_warning_tooltip"
         />
       </span>

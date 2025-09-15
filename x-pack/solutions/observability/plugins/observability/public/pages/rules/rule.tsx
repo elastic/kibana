@@ -25,11 +25,11 @@ export function RulePage() {
     application,
     notifications,
     charts,
+    serverless,
     settings,
     data,
     dataViews,
     unifiedSearch,
-    serverless,
     actionTypeRegistry,
     ruleTypeRegistry,
     chrome,
@@ -105,7 +105,6 @@ export function RulePage() {
         ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.LOGS}
-        isServerless={!!serverless}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

@@ -147,7 +147,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   <span>
                     &nbsp;
                     <EuiToolTip content={packagePolicy.description}>
-                      <EuiIcon type="help" />
+                      <EuiIcon type="question" />
                     </EuiToolTip>
                   </span>
                 ) : null}
@@ -177,7 +177,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
                         defaultMessage="Shared"
                       />{' '}
-                      <EuiIcon type="iInCircle" />
+                      <EuiIcon type="info" />
                     </EuiText>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -284,7 +284,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiIconTip
                 content="Namespace defined in parent agent policy"
                 position="right"
-                type="iInCircle"
+                type="info"
                 color="subdued"
               />
             </>
@@ -318,7 +318,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     }
                   )}
                   position="right"
-                  type="iInCircle"
+                  type="info"
                   color="subdued"
                 />
               </>
@@ -339,7 +339,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     }
                   )}
                   position="right"
-                  type="iInCircle"
+                  type="info"
                   color="subdued"
                 />
               </>

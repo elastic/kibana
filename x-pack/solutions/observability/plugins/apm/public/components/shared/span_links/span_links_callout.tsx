@@ -19,7 +19,7 @@ export function SpanLinksCallout({ dismissCallout }: Props) {
       title={i18n.translate('xpack.apm.spanLinks.callout.title', {
         defaultMessage: 'Span links',
       })}
-      iconType="iInCircle"
+      iconType="info"
     >
       <p>
         <FormattedMessage

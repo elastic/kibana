@@ -42,6 +42,7 @@ describe('TabbedModal', () => {
 
         return (
           <EuiFieldText
+            data-test-subj="log-user-input-field"
             placeholder="Placeholder text"
             value={state.inputText}
             onChange={onChange}
@@ -57,10 +58,28 @@ describe('TabbedModal', () => {
       },
     };
 
-    it('renders the modal component', async () => {
+    it("when a single tab definition is passed it simply renders it's content into the modal component without tabs", async () => {
       render(
         <TabbedModal
           tabs={[tabDefinition]}
+          defaultSelectedTabId="logUserInput"
+          onClose={modalOnCloseHandler}
+        />
+      );
+
+      expect(screen.queryByText(tabDefinition.name)).not.toBeInTheDocument();
+
+      expect(screen.getByTestId('log-user-input-field')).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId(tabDefinition.modalActionBtn!.dataTestSubj));
+
+      expect(mockedHandlerFn).toHaveBeenCalled();
+    });
+
+    it('renders the tabbed modal with tabs for tab definition with length greater than 1', async () => {
+      render(
+        <TabbedModal
+          tabs={[tabDefinition, { ...tabDefinition, id: 'anotherTab', name: 'another tab' }]}
           defaultSelectedTabId="logUserInput"
           onClose={modalOnCloseHandler}
         />

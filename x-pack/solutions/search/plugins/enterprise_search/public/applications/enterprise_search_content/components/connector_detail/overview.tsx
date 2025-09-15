@@ -52,7 +52,7 @@ export const ConnectorDetailOverview: React.FC = () => {
           EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(connector.service_type) && (
             <>
               <EuiCallOut
-                iconType="iInCircle"
+                iconType="info"
                 color="warning"
                 title={i18n.translate(
                   'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
@@ -94,7 +94,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {!!connector && !connector.index_name && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             color="danger"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.title',
@@ -136,7 +136,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {!!connector?.index_name && !indexData && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
               {

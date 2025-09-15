@@ -6,17 +6,15 @@
  */
 
 import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { StreamsConfig } from '../../../../../common/config';
 import { StreamsPluginStartDependencies } from '../../../../types';
+import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
 import { AssetClient } from '../asset_client';
 import { QueryClient } from './query_client';
-import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
 
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger,
-    private readonly config: StreamsConfig
+    private readonly logger: Logger
   ) {}
 
   async getClientWithRequest({
@@ -31,11 +29,13 @@ export class QueryService {
     const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
     const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
-    return new QueryClient({
-      assetClient,
-      rulesClient,
-      config: this.config,
-      logger: this.logger,
-    });
+    return new QueryClient(
+      {
+        assetClient,
+        rulesClient,
+        logger: this.logger,
+      },
+      true
+    );
   }
 }

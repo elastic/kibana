@@ -35,7 +35,7 @@ export const ParametersTab: FunctionComponent = () => {
                 id="xpack.painlessLab.parametersFieldLabel"
                 defaultMessage="Parameters (JSON)"
               />{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
+              <EuiIcon type="question" color="subdued" />
             </span>
           </EuiToolTip>
         }

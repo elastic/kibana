@@ -11,9 +11,13 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   start: schema.string(),
   end: schema.string(),
   statuses: schema.maybe(schema.arrayOf(schema.string())),
+  hasUnfilledIntervals: schema.maybe(schema.boolean()),
+  hasInProgressIntervals: schema.maybe(schema.boolean()),
+  hasFilledIntervals: schema.maybe(schema.boolean()),
 });
 
 export const getRuleIdsWithGapsResponseSchema = schema.object({
   total: schema.number(),
   ruleIds: schema.arrayOf(schema.string()),
+  latestGapTimestamp: schema.maybe(schema.number()),
 });

@@ -173,7 +173,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             promptGroupId,
             savedObjectsClient,
           });
-          const toolInstance = assistantTool.getTool({ ...assistantToolParams, description });
+          const toolInstance = await assistantTool.getTool({ ...assistantToolParams, description });
 
           const { currentInsight, defendInsightId } = await createDefendInsight(
             endpointIds,

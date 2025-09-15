@@ -22,13 +22,11 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
-import type {
-  RuleMigrationAllIntegrationsStats,
-  RuleMigrationRule,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
+  type RuleMigrationAllIntegrationsStats,
+  type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
@@ -39,7 +37,7 @@ export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
-export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export interface RuleMigrationGetRulesOptions {

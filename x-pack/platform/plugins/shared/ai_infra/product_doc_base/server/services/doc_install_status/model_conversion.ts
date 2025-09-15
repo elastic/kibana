@@ -22,5 +22,6 @@ export const soToModel = (
       ? new Date(so.attributes.last_installation_date)
       : undefined,
     lastInstallationFailureReason: so.attributes.last_installation_failure_reason,
+    inferenceId: so.attributes.inference_id,
   };
 };

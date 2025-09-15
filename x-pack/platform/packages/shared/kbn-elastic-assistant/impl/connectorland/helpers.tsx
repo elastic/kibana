@@ -13,6 +13,7 @@ import type {
 
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { PRECONFIGURED_CONNECTOR } from './translations';
+import { AIConnector } from './connector_selector';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 export enum OpenAiProviderType {
@@ -27,6 +28,18 @@ export interface GenAiConfig {
   defaultModel?: string;
 }
 
+export interface AiConfigCatchAll {
+  apiProvider?: OpenAiProviderType;
+  apiUrl?: string;
+  defaultModel?: string;
+  // inference fields
+  providerConfig?: {
+    model_id?: string;
+  };
+  model_id?: string;
+  url?: string;
+}
+
 /**
  * Returns the GenAiConfig for a given ActionConnector. Note that if the connector is preconfigured,
  * the config MAY be undefined if exposeConfig: true is absent
@@ -34,15 +47,25 @@ export interface GenAiConfig {
  * @param connector
  */
 export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig => {
-  const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
-  const { apiProvider, apiUrl, defaultModel } = config ?? {};
-  return {
+  const config = (connector as ActionConnectorProps<AiConfigCatchAll, unknown>)?.config;
+  const {
     apiProvider,
     apiUrl,
+    defaultModel,
+    providerConfig,
+    model_id: modelId,
+    url,
+  } = config ?? {};
+
+  return {
+    apiProvider,
+    apiUrl: apiUrl ?? url,
     defaultModel:
-      apiProvider === OpenAiProviderType.AzureAi
+      (apiProvider === OpenAiProviderType.AzureAi
         ? getAzureApiVersionParameter(apiUrl ?? '')
-        : defaultModel,
+        : defaultModel) ??
+      providerConfig?.model_id ??
+      modelId,
   };
 };
 
@@ -71,3 +94,9 @@ export const getConnectorTypeTitle = (
 
   return actionType;
 };
+
+export const isElasticManagedLlmConnector = (
+  connector:
+    | { actionTypeId: AIConnector['actionTypeId']; isPreconfigured: AIConnector['isPreconfigured'] }
+    | undefined
+) => connector?.actionTypeId === '.inference' && connector?.isPreconfigured;

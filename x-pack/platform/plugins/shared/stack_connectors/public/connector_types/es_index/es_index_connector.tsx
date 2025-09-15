@@ -234,7 +234,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                   />
                   <EuiIconTip
                     position="right"
-                    type="questionInCircle"
+                    type="question"
                     content={translations.SHOW_TIME_FIELD_TOGGLE_TOOLTIP}
                   />
                 </>

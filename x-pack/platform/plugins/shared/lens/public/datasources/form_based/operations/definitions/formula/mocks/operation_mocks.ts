@@ -42,7 +42,6 @@ export function createOperationDefinitionMock<T extends GenericIndexPatternColum
     dataType,
     operationType: operation,
     isBucketed,
-    scale,
     timeScale,
   };
   const sharedDefinitionParams = {

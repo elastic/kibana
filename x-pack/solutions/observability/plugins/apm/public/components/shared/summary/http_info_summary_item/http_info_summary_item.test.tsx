@@ -6,100 +6,60 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { screen } from '@testing-library/react';
 import { HttpInfoSummaryItem } from '.';
 import * as exampleTransactions from '../__fixtures__/transactions';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { renderWithTheme } from '../../../../utils/test_helpers';
 
 describe('HttpInfoSummaryItem', () => {
-  describe('render', () => {
-    const transaction = exampleTransactions.httpOk;
-    const url = 'https://example.com';
-    const method = 'get';
-    const props = { transaction, url, method, status: 100 };
+  const transaction = exampleTransactions.httpOk;
+  const url = 'https://example.com';
+  const method = 'get';
+  const baseProps = { transaction, url, method };
 
-    it('renders', () => {
-      expect(() =>
-        shallow(<HttpInfoSummaryItem {...props} />, {
-          wrappingComponent: EuiThemeProvider,
-        })
-      ).not.toThrowError();
-    });
+  it('renders with base props', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={100} />);
+    expect(screen.getByTestId('apmHttpInfoUrl')).toBeInTheDocument();
+  });
 
-    it('renders empty component if no url is provided', () => {
-      const component = shallow(<HttpInfoSummaryItem url="" />, {
-        wrappingComponent: EuiThemeProvider,
-      });
-      expect(component.isEmptyRender()).toBeTruthy();
-    });
+  it('does not render when url is empty', () => {
+    const { container } = renderWithTheme(<HttpInfoSummaryItem url="" />);
+    expect(container).toBeEmptyDOMElement();
+  });
 
-    describe('with status code 100', () => {
-      it('shows a success color', () => {
-        const wrapper = mount(<HttpInfoSummaryItem {...props} />, {
-          wrappingComponent: EuiThemeProvider,
-        });
+  it('renders status code 100', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={100} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveTextContent('100');
+  });
 
-        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(100);
-      });
-    });
+  it('renders status code 200', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={200} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveTextContent('200');
+  });
 
-    describe('with status code 200', () => {
-      it('shows a success color', () => {
-        const p = { ...props, status: 200 };
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
-          wrappingComponent: EuiThemeProvider,
-        });
+  it('renders status code 301', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={301} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveTextContent('301');
+  });
 
-        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(200);
-      });
-    });
+  it('renders status code 404', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={404} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveTextContent('404');
+  });
 
-    describe('with status code 301', () => {
-      it('shows a warning color', () => {
-        const p = { ...props, status: 301 };
+  it('renders status code 502', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={502} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveTextContent('502');
+  });
 
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
-          wrappingComponent: EuiThemeProvider,
-        });
-
-        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(301);
-      });
-    });
-
-    describe('with status code 404', () => {
-      it('shows a error color', () => {
-        const p = { ...props, status: 404 };
-
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
-          wrappingComponent: EuiThemeProvider,
-        });
-
-        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(404);
-      });
-    });
-
-    describe('with status code 502', () => {
-      it('shows a error color', () => {
-        const p = { ...props, status: 502 };
-
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
-          wrappingComponent: EuiThemeProvider,
-        });
-
-        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(502);
-      });
-    });
-
-    describe('with some other status code', () => {
-      it('shows the default color', () => {
-        const p = { ...props, status: 700 };
-
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
-          wrappingComponent: EuiThemeProvider,
-        });
-
-        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(700);
-      });
-    });
+  it('renders unknown status code', () => {
+    renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={700} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveTextContent('700');
   });
 });

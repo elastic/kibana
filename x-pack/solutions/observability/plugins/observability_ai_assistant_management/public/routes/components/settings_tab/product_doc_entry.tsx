@@ -5,53 +5,69 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
-import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
-import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
+import { UseProductDoc } from '../../../hooks/use_product_doc';
 
-export function ProductDocEntry() {
+const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {
+  installing: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
+    { defaultMessage: 'Installing...' }
+  ),
+  uninstalling: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallingText',
+    { defaultMessage: 'Uninstalling...' }
+  ),
+  installed: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
+    { defaultMessage: 'Uninstall' }
+  ),
+  uninstalled: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
+    { defaultMessage: 'Install' }
+  ),
+  loading: i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.loadingText', {
+    defaultMessage: 'Loading...',
+  }),
+};
+
+export function ProductDocEntry({
+  knowledgeBase,
+  productDoc,
+  currentlyDeployedInferenceId,
+}: {
+  knowledgeBase: UseKnowledgeBaseResult;
+  productDoc: UseProductDoc;
+  currentlyDeployedInferenceId: string | undefined;
+}) {
   const { overlays } = useKibana().services;
 
-  const [isInstalled, setInstalled] = useState<boolean>(true);
-  const [isInstalling, setInstalling] = useState<boolean>(false);
+  const canInstallProductDoc =
+    currentlyDeployedInferenceId !== undefined &&
+    !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel || knowledgeBase.isPolling) &&
+    knowledgeBase.status?.value?.kbState === KnowledgeBaseState.READY;
 
-  const { mutateAsync: installProductDoc } = useInstallProductDoc();
-  const { mutateAsync: uninstallProductDoc } = useUninstallProductDoc();
-  const { status, isLoading: isStatusLoading } = useGetProductDocStatus();
-
-  useEffect(() => {
-    if (status) {
-      setInstalled(status.overall === 'installed');
-    }
-  }, [status]);
+  const { status, isLoading: isStatusLoading, installProductDoc, uninstallProductDoc } = productDoc;
 
   const onClickInstall = useCallback(() => {
-    setInstalling(true);
-    installProductDoc().then(
-      () => {
-        setInstalling(false);
-        setInstalled(true);
-      },
-      () => {
-        setInstalling(false);
-        setInstalled(false);
-      }
-    );
-  }, [installProductDoc]);
+    if (!currentlyDeployedInferenceId) {
+      throw new Error('Inference ID is required to install product documentation');
+    }
+    installProductDoc(currentlyDeployedInferenceId);
+  }, [installProductDoc, currentlyDeployedInferenceId]);
 
   const onClickUninstall = useCallback(() => {
     overlays
@@ -72,33 +88,26 @@ export function ProductDocEntry() {
         }
       )
       .then((confirmed) => {
-        if (confirmed) {
-          uninstallProductDoc().then(() => {
-            setInstalling(false);
-            setInstalled(false);
-          });
+        if (confirmed && currentlyDeployedInferenceId) {
+          uninstallProductDoc(currentlyDeployedInferenceId);
         }
       });
-  }, [overlays, uninstallProductDoc]);
+  }, [overlays, uninstallProductDoc, currentlyDeployedInferenceId]);
+
+  const buttonText = useMemo(() => {
+    if (!status || status === 'error' || !canInstallProductDoc) {
+      return statusToButtonTextMap.uninstalled;
+    }
+    if (isStatusLoading && status !== 'installing' && status !== 'uninstalling') {
+      return statusToButtonTextMap.loading;
+    }
+    return statusToButtonTextMap[status];
+  }, [status, isStatusLoading, canInstallProductDoc]);
+
+  const isLoading = isStatusLoading || status === 'installing' || status === 'uninstalling';
 
   const content = useMemo(() => {
-    if (isStatusLoading) {
-      return <></>;
-    }
-    if (isInstalling) {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-          <EuiLoadingSpinner size="m" />
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.observabilityAiAssistantManagement.settingsPage.installingText"
-              defaultMessage="Installing..."
-            />
-          </EuiText>
-        </EuiFlexGroup>
-      );
-    }
-    if (isInstalled) {
+    if (status === 'installed') {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -115,28 +124,46 @@ export function ProductDocEntry() {
               onClick={onClickUninstall}
               color="warning"
             >
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
-                { defaultMessage: 'Uninstall' }
-              )}
+              {buttonText}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     }
+
+    const installButton = (
+      <EuiButton
+        data-test-subj="settingsTabInstallProductDocButton"
+        onClick={onClickInstall}
+        disabled={!canInstallProductDoc}
+        isLoading={isLoading}
+      >
+        {buttonText}
+      </EuiButton>
+    );
+
     return (
       <EuiFlexGroup justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="settingsTabInstallProductDocButton" onClick={onClickInstall}>
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
-              { defaultMessage: 'Install' }
-            )}
-          </EuiButton>
+          {canInstallProductDoc ? (
+            installButton
+          ) : (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
+                {
+                  defaultMessage: 'Knowledge Base has to be installed first.',
+                }
+              )}
+            >
+              {installButton}
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isInstalled, isInstalling, isStatusLoading, onClickInstall, onClickUninstall]);
+  }, [canInstallProductDoc, onClickInstall, onClickUninstall, status, buttonText, isLoading]);
 
   return (
     <EuiDescribedFormGroup

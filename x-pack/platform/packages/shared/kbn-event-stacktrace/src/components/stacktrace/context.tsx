@@ -44,6 +44,7 @@ export function Context({ stackframe, codeLanguage }: Props) {
         highlight: `${highlightedLine}`,
       }}
       transparentBackground
+      data-test-subj="stacktraceContext"
     >
       {lines}
     </EuiCodeBlock>

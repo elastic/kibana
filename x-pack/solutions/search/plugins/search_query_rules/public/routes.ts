@@ -7,3 +7,4 @@
 
 export const ROOT_PATH = '/';
 export const QUERY_RULESET_DETAIL_PATH = `${ROOT_PATH}ruleset/:rulesetId`;
+export const CREATE_QUERY_RULESET_PATH = `${ROOT_PATH}ruleset/:rulesetId/create`;

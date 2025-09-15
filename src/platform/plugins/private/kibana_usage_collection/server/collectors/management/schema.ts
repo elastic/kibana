@@ -472,10 +472,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:entityCentricExperience': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -502,6 +498,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
     },
+  },
+  'ai:anonymizationSettings': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'observability:logSources': {
     type: 'array',
@@ -650,6 +650,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'genAiSettings:defaultAIConnector': {
+    type: 'keyword',
+    _meta: {
+      description: 'Default AI connector',
+    },
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    type: 'boolean',
+    _meta: {
+      description: 'Restrict to default AI connector only',
+    },
+  },
   'observability:searchExcludedDataTiers': {
     type: 'array',
     items: {
@@ -661,6 +673,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
+    },
+  },
+  'observability:enableDiagnosticMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable diagnostic mode',
     },
   },
 };

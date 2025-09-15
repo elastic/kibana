@@ -113,6 +113,21 @@ export async function updateDataRetention(
   });
 }
 
+export async function updateDSFailureStore(
+  dataStreams: string[],
+  data: {
+    dsFailureStore: boolean;
+  }
+) {
+  const body = { dsFailureStore: data.dsFailureStore, dataStreams };
+
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/configure_failure_store`,
+    method: 'put',
+    body,
+  });
+}
+
 export async function loadIndices() {
   const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
   return response.data ? response.data : response;

@@ -27,6 +27,7 @@ const ruleTypes: string[] = [
   'xpack.ml.anomaly_detection_alert',
   'xpack.ml.anomaly_detection_jobs_health',
   'slo.rules.burnRate',
+  'streams.rules.esql',
   'observability.rules.custom_threshold',
   'xpack.uptime.alerts.monitorStatus',
   'xpack.uptime.alerts.tlsCertificate',
@@ -55,6 +56,7 @@ const ruleTypes: string[] = [
   'apm.anomaly',
   'apm.error_rate',
   'apm.transaction_error_rate',
+  'attack-discovery',
   'siem.eqlRule',
   'siem.esqlRule',
   'siem.savedQueryRule',
@@ -64,6 +66,7 @@ const ruleTypes: string[] = [
   'siem.thresholdRule',
   'siem.newTermsRule',
   'siem.notifications',
+  'datasetQuality.degradedDocs',
 ];
 
 describe('Alert as data fields checks', () => {

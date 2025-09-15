@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "test_helpers/**/*",
+    "storybook/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-analytics-browser",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/intercepts-plugin",
+    "@kbn/i18n-react",
+    "@kbn/cloud-plugin",
+    "@kbn/core-analytics-browser-mocks"
+  ],
+  "exclude": ["target/**/*"]
+}

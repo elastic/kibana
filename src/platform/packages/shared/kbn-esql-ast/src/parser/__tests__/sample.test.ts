@@ -10,75 +10,35 @@
 import { Parser } from '../parser';
 
 describe('SAMPLE', () => {
-  describe('correctly formatted', () => {
-    test('without seed', () => {
-      const text = `
+  test('correctly formatted', () => {
+    const text = `
         FROM employees
         | SAMPLE 0.25
         `;
-      const { ast, errors } = Parser.parse(text);
+    const { ast, errors } = Parser.parse(text);
 
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {},
-        {
-          type: 'command',
-          name: 'sample',
-          args: [
-            {
-              type: 'literal',
-              literalType: 'double',
-              value: 0.25,
-            },
-          ],
-        },
-      ]);
-    });
-
-    test('with seed', () => {
-      const text = `
-        FROM employees
-        | SAMPLE 0.25 123
-        `;
-      const { ast, errors } = Parser.parse(text);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {},
-        {
-          type: 'command',
-          name: 'sample',
-          args: [
-            {
-              type: 'literal',
-              literalType: 'double',
-              value: 0.25,
-            },
-            {
-              type: 'literal',
-              literalType: 'integer',
-              value: 123,
-            },
-          ],
-        },
-      ]);
-    });
+    expect(errors.length).toBe(0);
+    expect(ast).toMatchObject([
+      {},
+      {
+        type: 'command',
+        name: 'sample',
+        args: [
+          {
+            type: 'literal',
+            literalType: 'double',
+            value: 0.25,
+          },
+        ],
+      },
+    ]);
   });
 
   describe('errors', () => {
     it('wrong data type for probability', () => {
       const { errors } = Parser.parse(`
         FROM employees
-        | SAMPLE 25
-        `);
-
-      expect(errors.length).toBe(1);
-    });
-
-    it('wrong data type for seed', () => {
-      const { errors } = Parser.parse(`
-        FROM employees
-        | SAMPLE .25 .123
+        | SAMPLE test
         `);
 
       expect(errors.length).toBe(1);
@@ -87,7 +47,7 @@ describe('SAMPLE', () => {
     it('command with no args', () => {
       const { errors } = Parser.parse(`
         FROM employees
-        | SAMPLE 
+        | SAMPLE
         `);
 
       expect(errors.length).toBe(1);

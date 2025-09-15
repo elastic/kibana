@@ -25,6 +25,9 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
+
+const mockSetSelectedSettingsTab = jest.fn();
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -34,7 +37,12 @@ const mockContext = {
   assistantFeatures: { assistantModelEvaluation: true },
   assistantAvailability: {
     isAssistantEnabled: true,
+    isAssistantManagementEnabled: true,
+    hasConnectorsAllPrivilege: true,
   },
+  selectedSettingsTab: null,
+  setSelectedSettingsTab: mockSetSelectedSettingsTab,
+  navigateToApp: jest.fn(),
 };
 
 const mockDataViews = {
@@ -47,6 +55,7 @@ const testProps = {
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONNECTORS_TAB,
+  settings: {} as SettingsStart,
 };
 jest.mock('../../assistant_context');
 
@@ -104,6 +113,34 @@ describe('AssistantSettingsManagement', () => {
     });
 
     expect(queryByTestId(`bottom-bar`)).not.toBeInTheDocument();
+  });
+
+  describe('useEffect behavior', () => {
+    it('calls onTabChange and clears contextSettingsTab when contextSettingsTab is set', () => {
+      const contextWithTab = {
+        ...mockContext,
+        selectedSettingsTab: SYSTEM_PROMPTS_TAB,
+      };
+      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithTab);
+
+      render(<AssistantSettingsManagement {...testProps} />, { wrapper });
+
+      expect(onTabChange).toHaveBeenCalledWith(SYSTEM_PROMPTS_TAB);
+      expect(mockSetSelectedSettingsTab).toHaveBeenCalledWith(null);
+    });
+
+    it('does not call onTabChange when contextSettingsTab is null', () => {
+      const contextWithoutTab = {
+        ...mockContext,
+        selectedSettingsTab: null,
+      };
+      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithoutTab);
+
+      render(<AssistantSettingsManagement {...testProps} />, { wrapper });
+
+      expect(onTabChange).not.toHaveBeenCalled();
+      expect(mockSetSelectedSettingsTab).not.toHaveBeenCalled();
+    });
   });
 
   describe.each([

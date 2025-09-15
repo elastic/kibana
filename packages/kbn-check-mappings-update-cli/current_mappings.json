@@ -2500,6 +2500,27 @@
       }
     }
   },
+  "intercept_interaction_record": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "intercept_trigger_record": {
+    "dynamic": false,
+    "properties": {
+      "firstRegisteredAt": {
+        "type": "date"
+      },
+      "installedOn": {
+        "type": "keyword"
+      },
+      "recurrent": {
+        "type": "boolean"
+      },
+      "triggerAfter": {
+        "type": "text"
+      }
+    }
+  },
   "inventory-view": {
     "dynamic": false,
     "properties": {}
@@ -2946,6 +2967,9 @@
       "index_name": {
         "type": "keyword"
       },
+      "inference_id": {
+        "type": "keyword"
+      },
       "installation_status": {
         "type": "keyword"
       },
@@ -3029,6 +3053,14 @@
       },
       "unInstallCount": {
         "type": "long"
+      }
+    }
+  },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
       }
     }
   },
@@ -3634,6 +3666,139 @@
             "type": "text"
           }
         }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "origin": {
+        "type": "keyword"
+      },
+      "project_id": {
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        },
+        "type": "keyword"
+      },
+      "schedule": {
+        "properties": {
+          "number": {
+            "type": "integer"
+          }
+        }
+      },
+      "tags": {
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        },
+        "type": "keyword"
+      },
+      "throttling": {
+        "properties": {
+          "label": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "urls": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
+  },
+  "synthetics-monitor-multi-space": {
+    "dynamic": false,
+    "properties": {
+      "alert": {
+        "properties": {
+          "status": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "tls": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "config_id": {
+        "type": "keyword"
+      },
+      "custom_heartbeat_id": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "hash": {
+        "type": "keyword"
+      },
+      "hosts": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "journey_id": {
+        "type": "keyword"
+      },
+      "locations": {
+        "properties": {
+          "id": {
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            },
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "label": {
+            "type": "text"
+          }
+        }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
       },
       "name": {
         "fields": {

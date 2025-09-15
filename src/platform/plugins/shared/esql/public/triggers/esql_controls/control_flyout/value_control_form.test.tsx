@@ -8,12 +8,13 @@
  */
 
 import React from 'react';
-import { render, within, fireEvent } from '@testing-library/react';
+import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
+import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
@@ -293,6 +294,33 @@ describe('ValueControlForm', () => {
         // identifiers dropdown should be rendered
         const identifiersOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
         expect(identifiersOptionsDropdown).toBeInTheDocument();
+      });
+
+      it('should call getESQLResults with the provided timeRange when query is submitted', async () => {
+        const mockTimeRange = { from: '2023-01-01', to: '2023-01-02' };
+
+        render(
+          <IntlProvider locale="en">
+            <ESQLControlsFlyout
+              initialVariableType={ESQLVariableType.VALUES}
+              queryString="FROM foo | WHERE field =="
+              onSaveControl={jest.fn()}
+              closeFlyout={jest.fn()}
+              onCancelControl={jest.fn()}
+              search={searchMock}
+              esqlVariables={[]}
+              timeRange={mockTimeRange}
+            />
+          </IntlProvider>
+        );
+
+        await waitFor(() => {
+          expect(getESQLResults).toHaveBeenCalledWith(
+            expect.objectContaining({
+              timeRange: mockTimeRange,
+            })
+          );
+        });
       });
     });
   });

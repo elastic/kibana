@@ -91,7 +91,7 @@ export const ActionStatusesPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -117,7 +117,7 @@ export const ActionStatusesPanel = () => {
                 defaultMessage: 'Last executed',
               }
             )}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),

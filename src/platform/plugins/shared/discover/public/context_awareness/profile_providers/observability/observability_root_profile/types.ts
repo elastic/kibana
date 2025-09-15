@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RootProfileProvider } from '../../..';
+import type { RootProfileProvider, SolutionType } from '../../..';
 
 export interface ObservabilityRootProfileContext {
   allLogsIndexPattern: string | undefined;
+  solutionType: SolutionType.Observability;
 }
 
 export type ObservabilityRootProfileProvider = RootProfileProvider<ObservabilityRootProfileContext>;

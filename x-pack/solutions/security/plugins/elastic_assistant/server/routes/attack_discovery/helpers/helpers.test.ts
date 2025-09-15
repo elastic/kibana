@@ -320,10 +320,10 @@ describe('helpers', () => {
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
         actionTypeId: '.gen-ai',
         alertsContextCount: 2,
-        alertsCount: 8,
+        alertsCount: 18,
         configuredAlertsCount: 10,
         dateRangeDuration: 24,
-        discoveriesGenerated: 1,
+        discoveriesGenerated: 2,
         durationMs: 0,
         hasFilter: false,
         isDefaultDateRange: true,
@@ -360,10 +360,10 @@ describe('helpers', () => {
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
         actionTypeId: '.gen-ai',
         alertsContextCount: 2,
-        alertsCount: 8,
+        alertsCount: 18,
         configuredAlertsCount: 10,
         dateRangeDuration: 168,
-        discoveriesGenerated: 1,
+        discoveriesGenerated: 2,
         durationMs: 0,
         hasFilter: false,
         isDefaultDateRange: false,
@@ -400,10 +400,10 @@ describe('helpers', () => {
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
         actionTypeId: '.gen-ai',
         alertsContextCount: 2,
-        alertsCount: 8,
+        alertsCount: 18,
         configuredAlertsCount: 10,
         dateRangeDuration: 24,
-        discoveriesGenerated: 1,
+        discoveriesGenerated: 2,
         durationMs: 0,
         hasFilter: true,
         isDefaultDateRange: true,
@@ -437,6 +437,41 @@ describe('helpers', () => {
         'attack_discovery_error',
         expect.any(Object)
       );
+    });
+
+    it('still reports telemetry when getAttackDiscovery returns null', async () => {
+      getAttackDiscovery.mockResolvedValue(null);
+      updateAttackDiscovery.mockResolvedValue({});
+
+      await updateAttackDiscoveries({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        executionUuid: 'attack-discovery-id',
+        authenticatedUser: mockAuthenticatedUser,
+        dataClient: mockDataClient,
+        hasFilter: false,
+        end: 'now',
+        latestReplacements: mockReplacements,
+        logger: mockLogger,
+        size: 10,
+        start: 'now-24h',
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 18,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 2,
+        durationMs: 0,
+        hasFilter: false,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
+      });
     });
   });
 });

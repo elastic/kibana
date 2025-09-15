@@ -27,9 +27,10 @@ const FTR_SERVERLESS_API_INTEGRATION =
   'x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture';
 
 // FTRs
-const FTR_API_INTEGRATION = 'x-pack/test/api_integration/apis/cloud_security_posture';
-const FTR_CSP_API = 'x-pack/test/cloud_security_posture_api';
-const FTR_CSP_FUNCTIONAL = 'x-pack/test/cloud_security_posture_functional';
+const FTR_API_INTEGRATION =
+  'x-pack/solutions/security/test/api_integration/apis/cloud_security_posture';
+const FTR_CSP_API = 'x-pack/solutions/security/test/cloud_security_posture_api';
+const FTR_CSP_FUNCTIONAL = 'x-pack/solutions/security/test/cloud_security_posture_functional';
 
 // Unit tests
 const UNIT_TEST_CSP = 'x-pack/solutions/security/plugins/cloud_security_posture';

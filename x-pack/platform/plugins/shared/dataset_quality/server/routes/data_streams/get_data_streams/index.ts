@@ -30,10 +30,14 @@ export async function getDataStreams(options: {
 
   const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
     esClient,
-    datasetNames.join(',')
+    datasetNames
   );
 
-  if (!datasetUserPrivileges.canMonitor) {
+  const canMonitor = Object.values(datasetUserPrivileges.datasetsPrivilages).some(
+    (privileges) => privileges.canMonitor
+  );
+
+  if (!canMonitor) {
     return {
       dataStreams: [],
       datasetUserPrivileges,
@@ -68,10 +72,34 @@ export async function getDataStreams(options: {
       canMonitor: dataStreamsPrivileges[dataStream.name].monitor,
       canReadFailureStore: dataStreamsPrivileges[dataStream.name][FAILURE_STORE_PRIVILEGE],
     },
+    hasFailureStore: dataStream.failure_store?.enabled,
   }));
 
   return {
     dataStreams: mappedDataStreams,
     datasetUserPrivileges,
+  };
+}
+
+export async function getDatasetTypesPrivileges(options: {
+  esClient: ElasticsearchClient;
+  types: DataStreamType[];
+}) {
+  const { esClient, types } = options;
+
+  const datasetNames = types.map((type) =>
+    streamPartsToIndexPattern({
+      typePattern: type,
+      datasetPattern: '*-*',
+    })
+  );
+
+  const { datasetsPrivilages } = await datasetQualityPrivileges.getDatasetPrivileges(
+    esClient,
+    datasetNames
+  );
+
+  return {
+    datasetsPrivilages,
   };
 }

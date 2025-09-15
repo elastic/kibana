@@ -205,21 +205,77 @@ export const denormalizeInterval = (interval: Interval): StringInterval => {
 };
 
 /**
- * Clips an interval to ensure it falls within the given boundary range.
- * If there's no overlap, returns null.
+ * Conveninence function that clips an `Interval` given an `Interval` boundary
  */
 export const clipInterval = (interval: Interval, boundary: Interval): Interval | null => {
-  const gte = interval.gte.getTime();
-  const lte = interval.lte.getTime();
-  const boundaryGte = boundary.gte.getTime();
-  const boundaryLte = boundary.lte.getTime();
+  const clipped = clipDateInterval(interval.gte, interval.lte, boundary.gte, boundary.lte);
 
-  const clippedGte = Math.max(gte, boundaryGte);
-  const clippedLte = Math.min(lte, boundaryLte);
-
-  if (clippedGte >= clippedLte) {
+  if (clipped === null) {
     return null;
   }
 
-  return { gte: new Date(clippedGte), lte: new Date(clippedLte) };
+  return { gte: clipped.start, lte: clipped.end };
+};
+
+/**
+ * Clips an date interval to ensure it falls within the given boundary range.
+ * If there's no overlap, returns null.
+ */
+export const clipDateInterval = (
+  start: Date,
+  end: Date,
+  boundaryStart: Date,
+  boundaryEnd: Date
+) => {
+  const clippedStart = Math.max(start.getTime(), boundaryStart.getTime());
+  const clippedEnd = Math.min(end.getTime(), boundaryEnd.getTime());
+
+  if (clippedStart >= clippedEnd) {
+    return null;
+  }
+
+  return { start: new Date(clippedStart), end: new Date(clippedEnd) };
+};
+
+/**
+ * Clamps the list `intervals` (in ascending order) to the dates provided in the `range`
+ * @param intervals
+ * @param boundary
+ * @returns
+ */
+export const clampIntervals = (intervals: Interval[], boundary: Interval) => {
+  const clampedIntervals = [];
+  const { gte: start, lte: end } = boundary;
+
+  const boundaryStartTime = start.getTime();
+  const boundaryEndTime = end.getTime();
+
+  for (const { gte, lte } of intervals) {
+    const intervalStart = gte.getTime();
+    const intervalEnd = lte.getTime();
+    // If the interval ends before the range starts, skip it
+    if (intervalEnd < boundaryStartTime) {
+      continue;
+    }
+
+    // If the interval starts after the range ends, stop processing (since the list is sorted)
+    if (intervalStart > boundaryEndTime) {
+      break;
+    }
+
+    const clamped = {
+      gte: new Date(intervalStart < boundaryStartTime ? boundaryStartTime : intervalStart),
+      lte: new Date(intervalEnd > boundaryEndTime ? boundaryEndTime : intervalEnd),
+    };
+
+    // Atter clamping the intervals the limits cannot be the same
+    if (clamped.gte.getTime() >= clamped.lte.getTime()) {
+      continue;
+    }
+
+    // Clamp the interval to the range
+    clampedIntervals.push(clamped);
+  }
+
+  return clampedIntervals;
 };

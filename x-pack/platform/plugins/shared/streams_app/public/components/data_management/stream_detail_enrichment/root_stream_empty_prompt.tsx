@@ -14,7 +14,7 @@ export const RootStreamEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
       titleSize="xs"
-      icon={<AssetImage type="noResults" />}
+      icon={<AssetImage type="processorsCannotBeAddedToRootStreams" />}
       title={
         <h2>
           {i18n.translate(

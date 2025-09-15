@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useEffect,
+  type KeyboardEvent,
+  type FC,
+  type PropsWithChildren,
+} from 'react';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -21,6 +30,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
+import { Global } from '@emotion/react';
 import {
   monaco,
   CODE_EDITOR_DEFAULT_THEME_ID,
@@ -35,6 +45,8 @@ import {
 } from './react_monaco_editor';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
+import { useContextMenuUtils } from './use_context_menu_utils';
+import type { ContextMenuAction } from './use_context_menu_utils';
 
 import { PlaceholderWidget } from './placeholder_widget';
 import { styles } from './editor.styles';
@@ -162,6 +174,17 @@ export interface CodeEditorProps {
    * Custom CSS class to apply to the container
    */
   classNameCss?: Interpolation<Theme>;
+
+  /**
+   * Enables a custom context menu with Cut, Copy, Paste actions. Disabled by default.
+   */
+  enableCustomContextMenu?: boolean;
+
+  /**
+   * If the custom context menu is enable through {@link enableCustomContextMenu},
+   * this prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions.
+   */
+  customContextMenuActions?: ContextMenuAction[];
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -195,8 +218,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableFindAction,
   dataTestSubj,
   classNameCss,
+  enableCustomContextMenu = false,
+  customContextMenuActions = [],
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -452,20 +478,41 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         });
       }
 
+      if (enableCustomContextMenu) {
+        registerContextMenuActions({
+          editor,
+          enableWriteActions: !isReadOnly,
+          customActions: customContextMenuActions,
+        });
+      }
+
       editorDidMount?.(editor);
       setEditor(editor);
     },
-    [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
+    [
+      editorDidMount,
+      onBlurMonaco,
+      onKeydownMonaco,
+      readOnlyMessage,
+      enableCustomContextMenu,
+      registerContextMenuActions,
+      isReadOnly,
+      customContextMenuActions,
+    ]
   );
 
   const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
     (editor) => {
+      if (enableCustomContextMenu) {
+        unregisterContextMenuActions();
+      }
+
       editorWillUnmount?.();
 
       const model = editor.getModel();
       model?.dispose();
     },
-    [editorWillUnmount]
+    [editorWillUnmount, enableCustomContextMenu, unregisterContextMenuActions]
   );
 
   useEffect(() => {
@@ -502,7 +549,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       className="kibanaCodeEditor"
     >
       {accessibilityOverlayEnabled && renderPrompt()}
-
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
           <div
@@ -523,43 +569,47 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
-          {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
-          <MonacoEditor
-            theme={theme}
-            language={languageId}
-            value={value}
-            onChange={onChange}
-            width={isFullScreen ? '100vw' : width}
-            height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
-            editorWillMount={_editorWillMount}
-            editorDidMount={_editorDidMount}
-            editorWillUnmount={_editorWillUnmount}
-            options={{
-              padding: allowFullScreen || isCopyable ? { top: 24 } : {},
-              renderLineHighlight: 'none',
-              scrollBeyondLastLine: false,
-              minimap: {
-                enabled: false,
-              },
-              scrollbar: {
-                useShadows: false,
-                // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
-                // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
-                // outer scrollbars.
-                alwaysConsumeMouseWheel: false,
-              },
-              wordBasedSuggestions: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-              matchBrackets: 'never',
-              fontFamily: 'Roboto Mono',
-              fontSize: isFullScreen ? 16 : 12,
-              lineHeight: isFullScreen ? 24 : 21,
-              // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
-              'bracketPairColorization.enabled': false,
-              ...options,
-            }}
-          />
+          <UseBug223981FixRepositionSuggestWidget editor={_editor}>
+            {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
+            <MonacoEditor
+              theme={theme}
+              language={languageId}
+              value={value}
+              onChange={onChange}
+              width={isFullScreen ? '100vw' : width}
+              height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
+              editorWillMount={_editorWillMount}
+              editorDidMount={_editorDidMount}
+              editorWillUnmount={_editorWillUnmount}
+              options={{
+                padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+                renderLineHighlight: 'none',
+                scrollBeyondLastLine: false,
+                minimap: {
+                  enabled: false,
+                },
+                scrollbar: {
+                  useShadows: false,
+                  // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+                  // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+                  // outer scrollbars.
+                  alwaysConsumeMouseWheel: false,
+                },
+                wordBasedSuggestions: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                matchBrackets: 'never',
+                fontFamily: 'Roboto Mono',
+                fontSize: isFullScreen ? 16 : 12,
+                lineHeight: isFullScreen ? 24 : 21,
+                contextmenu: enableCustomContextMenu,
+                fixedOverflowWidgets: true,
+                // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+                'bracketPairColorization.enabled': false,
+                ...options,
+              }}
+            />
+          </UseBug223981FixRepositionSuggestWidget>
         </UseBug177756ReBroadcastMouseDown>
       </FullScreenDisplay>
     </div>
@@ -696,6 +746,64 @@ const useFitToContent = ({
       editor.layout(); // reset the layout that was controlled by the fitToContent
     };
   }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
+};
+
+/**
+ * @description See {@link https://github.com/elastic/kibana/issues/223981} for the rationale behind this bug fix implementation
+ */
+const UseBug223981FixRepositionSuggestWidget: FC<
+  PropsWithChildren<{ editor: monaco.editor.IStandaloneCodeEditor | null }>
+> = ({ children, editor }) => {
+  const { euiTheme } = useEuiTheme();
+  const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
+
+  useEffect(() => {
+    // @ts-expect-errors -- "widget" is not part of the TS interface but does exist
+    const suggestionWidget = editor?.getContribution('editor.contrib.suggestController')?.widget
+      ?.value;
+
+    // The "onDidShow" and "onDidHide" is not documented so we guard from possible changes in the underlying lib
+    if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+      let $suggestWidgetNode: HTMLElement | null = null;
+
+      // add a className that hides the suggestion widget by default so we might be to correctly position the suggestion widget,
+      // then make it visible
+      ($suggestWidgetNode = suggestionWidget.element?.domNode)?.classList?.add(
+        suggestWidgetModifierClassName
+      );
+
+      let originalTopPosition: string | null = null;
+
+      suggestionWidget.onDidShow(() => {
+        if ($suggestWidgetNode) {
+          originalTopPosition = $suggestWidgetNode.style.top;
+          const headerOffset = `var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))`;
+          $suggestWidgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset} + ${euiTheme.size.m}))`;
+          $suggestWidgetNode.classList.remove(suggestWidgetModifierClassName);
+        }
+      });
+      suggestionWidget.onDidHide(() => {
+        if ($suggestWidgetNode) {
+          $suggestWidgetNode.classList.add(suggestWidgetModifierClassName);
+          $suggestWidgetNode.style.top = originalTopPosition ?? '';
+        }
+      });
+    }
+  }, [editor, euiTheme.size.m]);
+
+  return (
+    <React.Fragment>
+      <Global
+        // @ts-expect-error -- it's necessary that we apply the important modifier
+        styles={{
+          [`.${suggestWidgetModifierClassName}`]: {
+            visibility: 'hidden !important',
+          },
+        }}
+      />
+      <React.Fragment>{children}</React.Fragment>
+    </React.Fragment>
+  );
 };
 
 const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {

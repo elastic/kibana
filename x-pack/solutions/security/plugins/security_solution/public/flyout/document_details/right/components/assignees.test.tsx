@@ -45,7 +45,7 @@ const renderAssignees = (
   eventId = 'event-1',
   alertAssignees = ['user-id-1'],
   onAssigneesUpdated = jest.fn(),
-  isPreview = false
+  showAssignees = true
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
   (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
@@ -58,7 +58,7 @@ const renderAssignees = (
         eventId={eventId}
         assignedUserIds={alertAssignees}
         onAssigneesUpdated={onAssigneesUpdated}
-        isPreview={isPreview}
+        showAssignees={showAssignees}
       />
     </TestProviders>
   );
@@ -165,13 +165,13 @@ describe('<Assignees />', () => {
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
   });
 
-  it('should render empty tag in preview mode', () => {
+  it('should render empty tag in when showAssignees is false', () => {
     const assignees = ['user-id-1', 'user-id-2'];
     const { getByTestId, queryByTestId } = renderAssignees(
       'test-event',
       assignees,
       jest.fn(),
-      true
+      false
     );
 
     expect(queryByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeInTheDocument();

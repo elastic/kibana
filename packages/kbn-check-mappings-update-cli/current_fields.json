@@ -753,6 +753,13 @@
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
+  "intercept_interaction_record": [],
+  "intercept_trigger_record": [
+    "firstRegisteredAt",
+    "installedOn",
+    "recurrent",
+    "triggerAfter"
+  ],
   "inventory-view": [],
   "kql-telemetry": [],
   "legacy-url-alias": [
@@ -885,6 +892,7 @@
   ],
   "product-doc-install-status": [
     "index_name",
+    "inference_id",
     "installation_status",
     "last_installation_date",
     "product_name",
@@ -914,6 +922,9 @@
   "sample-data-telemetry": [
     "installCount",
     "unInstallCount"
+  ],
+  "scheduled_report": [
+    "createdBy"
   ],
   "search": [
     "description",
@@ -1106,6 +1117,35 @@
     "locations",
     "locations.id",
     "locations.label",
+    "maintenance_windows",
+    "name",
+    "origin",
+    "project_id",
+    "schedule",
+    "schedule.number",
+    "tags",
+    "throttling",
+    "throttling.label",
+    "type",
+    "urls"
+  ],
+  "synthetics-monitor-multi-space": [
+    "alert",
+    "alert.status",
+    "alert.status.enabled",
+    "alert.tls",
+    "alert.tls.enabled",
+    "config_id",
+    "custom_heartbeat_id",
+    "enabled",
+    "hash",
+    "hosts",
+    "id",
+    "journey_id",
+    "locations",
+    "locations.id",
+    "locations.label",
+    "maintenance_windows",
     "name",
     "origin",
     "project_id",

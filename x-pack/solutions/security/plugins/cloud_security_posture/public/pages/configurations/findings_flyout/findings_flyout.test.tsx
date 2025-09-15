@@ -49,11 +49,6 @@ describe('<FindingsFlyout/>', () => {
       });
     });
 
-    it('displays missing info callout when data source is not CSP', () => {
-      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
-      getByText('Some fields not provided by Wiz');
-    });
-
     it('does not display missing info callout when data source is CSP', () => {
       const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
@@ -74,19 +69,57 @@ describe('<FindingsFlyout/>', () => {
       });
     });
 
-    it('displays missing info callout when data source is not CSP', async () => {
-      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
-      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
-
-      getByText('Some fields not provided by Wiz');
-    });
-
     it('does not display missing info callout when data source is CSP', async () => {
       const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
+    });
+
+    it('does not display evidence field when result.evidence and resource.raw are missing', () => {
+      const { queryByText } = render(
+        <TestComponent
+          finding={{
+            ...mockFindingsHit,
+            result: { ...mockFindingsHit.result, evidence: undefined },
+            rule: {
+              ...mockFindingsHit.rule,
+              // resource.raw is only shown for CIS GCP rules
+              benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+            },
+            resource: {
+              ...mockFindingsHit.resource,
+              raw: undefined,
+            },
+          }}
+        />
+      );
+      const missingEvidenceTitle = queryByText('Evidence');
+      expect(missingEvidenceTitle).toBeNull();
+    });
+
+    it('displays evidence field when it exists', () => {
+      const { getByText } = render(<TestComponent finding={mockFindingsHit} />);
+      const evidenceTitle = getByText('Evidence');
+      expect(evidenceTitle).toBeInTheDocument();
+    });
+
+    it('displays evidence as resource.raw for CIS_GCP when evidence field does not exists', () => {
+      const { getByText } = render(
+        <TestComponent
+          finding={{
+            ...mockFindingsHit,
+            result: { ...mockFindingsHit.result, evidence: undefined },
+            rule: {
+              ...mockFindingsHit.rule,
+              benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+            },
+          }}
+        />
+      );
+      const evidenceTitle = getByText('Evidence');
+      expect(evidenceTitle).toBeInTheDocument();
     });
   });
 

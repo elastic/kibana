@@ -22,12 +22,14 @@ export type {
 
 export type {
   ShareContext,
-  ShareMenuProvider,
   ShareMenuItemLegacy,
-  ShareMenuItemV2,
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
   BrowserUrlService,
+  ExportShare,
+  ExportShareConfig,
+  ExportShareDerivatives,
+  RegisterShareIntegrationArgs,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';
@@ -41,3 +43,5 @@ export type { DownloadableContent } from './lib/download_as';
 export function plugin(ctx: PluginInitializerContext) {
   return new SharePlugin(ctx);
 }
+
+export { useShareTypeContext } from './components/context';

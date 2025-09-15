@@ -20,7 +20,6 @@ import {
 } from '@kbn/discover-utils';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -50,6 +49,7 @@ export const useTopNavLinks = ({
   adHocDataViews,
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
+  hasShareIntegration,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -59,6 +59,7 @@ export const useTopNavLinks = ({
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
+  hasShareIntegration: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const [newSearchUrl, setNewSearchUrl] = useState<string | undefined>(undefined);
@@ -109,9 +110,8 @@ export const useTopNavLinks = ({
 
       if (
         services.triggersActionsUi &&
-        services.capabilities.management?.insightsAndAlerting?.triggersActions &&
         !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
+        discoverParams.authorizedRuleTypeIds.length
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,
@@ -143,12 +143,21 @@ export const useTopNavLinks = ({
           discoverParams,
           services,
           stateContainer: state,
+          hasIntegrations: hasShareIntegration,
         });
-        items.push(shareAppMenuItem);
+        items.push(...shareAppMenuItem);
       }
 
       return items;
-    }, [discoverParams, state, services, defaultMenu, onOpenInspector, newSearchUrl]);
+    }, [
+      discoverParams,
+      state,
+      services,
+      defaultMenu,
+      onOpenInspector,
+      newSearchUrl,
+      hasShareIntegration,
+    ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
   const appMenuRegistry = useMemo(() => {

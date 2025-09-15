@@ -15,9 +15,9 @@ import {
 /*
  * This rule is used inside json root to start an esql highlighting sequence
  */
-export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
+export const buildEsqlStartRule = (tripleQuotes: boolean, esqlRoot: string = 'esql_root') => {
   return [
-    /("query")(\s*?)(:)(\s*?)(""")/,
+    tripleQuotes ? /("query")(\s*?)(:)(\s*?)(""")/ : /("query")(\s*?)(:)(\s*?)(")/,
     [
       'variable',
       'whitespace',
@@ -25,7 +25,7 @@ export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
       'whitespace',
       {
         token: 'punctuation',
-        next: `@${esqlRoot}`,
+        next: tripleQuotes ? `@${esqlRoot}_triple_quotes` : `@${esqlRoot}_single_quotes`,
       },
     ],
   ];
@@ -39,10 +39,24 @@ export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
 export const buildEsqlRules = (esqlRoot: string = 'esql_root') => {
   const { root, comment, numbers, strings } = esqlLexerRules.tokenizer;
   return {
-    [esqlRoot]: [
+    [`${esqlRoot}_triple_quotes`]: [
       // the rule to end esql highlighting and get back to the previous tokenizer state
       [
         /"""/,
+        {
+          token: 'punctuation',
+          next: '@pop',
+        },
+      ],
+      ...root,
+      ...numbers,
+      ...strings,
+    ],
+    [`${esqlRoot}_single_quotes`]: [
+      [/@escapes/, 'string.escape'],
+      // the rule to end esql highlighting and get back to the previous tokenizer state
+      [
+        /"/, // Unescaped quote
         {
           token: 'punctuation',
           next: '@pop',

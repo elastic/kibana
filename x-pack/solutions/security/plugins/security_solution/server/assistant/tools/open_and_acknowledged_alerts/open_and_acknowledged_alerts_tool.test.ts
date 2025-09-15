@@ -137,7 +137,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   });
   describe('getTool', () => {
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+      const tool: DynamicTool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -145,7 +145,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         request,
         size: request.body.size,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       await tool.func('');
 
@@ -235,7 +235,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
     });
 
     it('includes citations', async () => {
-      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+      const tool: DynamicTool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -243,7 +243,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         request,
         size: request.body.size,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       (esClient.search as jest.Mock).mockResolvedValue({
         hits: {
@@ -265,8 +265,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
     });
 
-    it('returns null when alertsIndexPattern is undefined', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when alertsIndexPattern is undefined', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -279,8 +279,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null when size is undefined', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when size is undefined', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -293,8 +293,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null when size out of range', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when size out of range', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -307,8 +307,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns a tool instance with the expected tags', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns a tool instance with the expected tags', async () => {
+      const tool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -316,7 +316,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         request,
         size: request.body.size,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       expect(tool.tags).toEqual(['alerts', 'open-and-acknowledged-alerts']);
     });

@@ -16,8 +16,7 @@ import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { GridData } from '../../../common/content_management/v2/types';
-import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
-import { DashboardLayout } from '../../dashboard_api/types';
+import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
@@ -111,7 +110,6 @@ export const DashboardGrid = ({
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
-            id: widget.id,
             gridData: {
               i: widget.id,
               y: widget.row,

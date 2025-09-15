@@ -1,128 +1,129 @@
 [[whats-new]]
-== What's new in 8.18
+== What's new in 8.19
 
-Here are the highlights of what's new and improved in 8.18.
+Here are the highlights of what's new and improved in 8.19.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.17/whats-new.html[8.17] | {kibana-ref-all}/8.16/whats-new.html[8.16] | {kibana-ref-all}/8.15/whats-new.html[8.15] | {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+Previous versions: {kibana-ref-all}/8.18/whats-new.html[8.18] | {kibana-ref-all}/8.17/whats-new.html[8.17] | {kibana-ref-all}/8.16/whats-new.html[8.16] | {kibana-ref-all}/8.15/whats-new.html[8.15] | {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
 === Discover and ES|QL
 
 [discrete]
-==== In-table search and highlight
+==== Spot patterns in your logs instantly with ML-powered CATEGORIZE
 
-This release introduces an in-table search feature that scans beyond what’s currently visible, making it easier to find logs, transaction IDs, and other records in large data sets. Inspired by your browser’s native search, this new box sits at the top of the Discover table and supports keyboard navigation for navigating through matches. It’s available across Kibana wherever the Discover table is embedded. 
+You can now easily spot patterns in your logs with CATEGORIZE in ES|QL, which automatically groups recurring log patterns and surfaces meaningful insights directly in Discover.
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt30bf5f8b9a45ab74/67c234a787966d9fbc994ce0/in-table-search-demo.gif[Using the in-table search and navigating through the matches]
+This ML-powered feature helps you detect anomalies, common error messages, and repeating behavior across large volumes of data without writing complex queries. The new table rendering presents patterns in a clear and contextual way, making it easy to scan, interpret, and act on what you see. 
 
-[discrete]
-==== Renaming Saved search to Discover session
+Whether you're troubleshooting issues or monitoring system behavior, CATEGORIZE speeds up your log analysis and gives you ML-powered insights in just a few clicks without any special setup. 
 
-We’ve changed Saved search to Discover session for improved clarity and to better reflect Discover’s expanding capabilities. With this updated terminology, we’re setting the stage for more powerful data exploration with Discover. 
+image::images/categorize-esql.png[CATEGORIZE in ES|QL]
 
-image::images/open-discover-session.png[Open Discover session flyout, width=90%]
 
 [discrete]
-==== Elastic AI Assistant for logs in Discover
+==== Smarter ES|QL suggestions, tailored to your context
 
-The Elastic AI Assistant is now available in the log details flyout in Discover, offering instant highlights for logs that match a logs profile and include a message field. With AI-driven context and prompts, you can diagnose issues and uncover opportunities faster, saving time and improving overall efficiency. 
+We've made getting started with ES|QL a whole lot easier and smarter. Building on the static Recommended Queries feature introduced in 8.16, we're now moving towards context-aware query suggestions that adapt to what you're working on. 
 
-image::images/ai-assistant-for-logs-discover.png[Elastic AI Assistant in the log details flyout, width=100%]
+The ES|QL editor now suggests relevant ES|QL queries based on your current solution area (like Observability or Security) and the data source you're querying. Whether you're exploring logs, building alerts, or creating dashboards, the suggestions match your task and data. 
 
-[discrete]
-==== Support for LOOKUP JOIN in the ES|QL editor
+These context-aware suggestions help you write better queries faster, without needing to know the syntax upfront. 
 
-We’ve introduced support for the LOOKUP JOIN command to enable a smooth autocomplete experience and client-side validation. The editor now suggests lookup mode indices and join condition fields, letting you craft accurate ES|QL queries more quickly and keep your data exploration flowing. 
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte43a30a93241d650/67c23670045f5839e5bfd1e4/lookup-join-demo.gif[Using the LOOKUP JOIN command to autocomplete an ES|QL query]
+image::images/esql-smart-help.png[ES|QL smart suggestions, width=50%]
 
 [discrete]
-==== KQL and Lucene query translation into ES|QL
+==== Unified Trace experience in Discover
 
-Moving from Discover’s data view mode to ES|QL mode is now easier than ever. Your existing KQL or Lucene query is automatically carried over and translated into ES|QL, saving time and preserving context. This enhancement keeps you focused on uncovering insights instead of re-rentering queries. 
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6e2ccb4a24507225/67c244de39a3cace2a10fccb/transition-to-esql-demo.gif[Query is copied over when switching to ES|QL]
+We've brought distributed tracing front and center in the new trace experience in Discover. When you open a trace or span document, you'll see key service and span attributes presented clearly, with improved formatting for duration and latency. A compact waterfall chart is now embedded right in the flyout, letting you instantly visualize trace timing and dependencies without leaving the page. You can expand the chart for a detailed view, complete with direct links to related errors and full APM context. The interface is optimized for OTel fields, supports fast filtering with ES|QL, and has been streamlined for clarity and speed. All of this makes troubleshooting complex, distributed systems in Discover faster and more intuitive than ever. 
 
 [discrete]
-=== Dashboards
+=== Dashboards and Visualizations
 
 [discrete]
-==== Dashboard ES|QL controls
+==== Collapsible sections in dashboards
 
-preview:[]
+You can now organize your dashboards into sections. These collapsible rows enable you to create fewer and more powerful dashboards by grouping relevant content. You can load dashboards faster by saving with sections collapsed, because only content that's expanded gets loaded.
 
-You can now bind controls to your ES|QL visualizations in dashboards. When creating a visualization, the ES|QL autocomplete will prompt control insertion for field values, field names, and function configuration. This enables controls that only apply to a specific panel, and exposes visualization configuration such as date histogram interval controls to dashboard users.
+image::images/collapsible_sections.gif[Collapsible sections in dashboards]
 
-Check out the following examples:
-
-* Integrate filtering into your ES|QL experience
-
-[source,esql]
--------------------
-| WHERE field == ?value
--------------------
-
-* Fields in controls for dynamic group by
-
-[source,esql]
--------------------
-| STATS count=COUNT(*) BY ?field
--------------------
-
-* Variable time ranges? Bind function configuration settings to a control
-
-[source,esql]
--------------------
-| BUCKET(@timestamp, ?interval),
--------------------
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte42dfaa404bfc2d6/67d2e31e2e4dc59da190d78f/dashboard-esql-controls.gif[Editing ES|QL controls from a dashboard]
 
 [discrete]
-==== Dashboard layout engine with improved performance and usability 
+==== ES|QL controls and variables, create from anywhere
 
-We’ve rebuilt the Dashboard layout engine for faster authoring and improved performance. The new engine makes resize events behave more predictably, allows drag-and-drop of panels above and below the visible part of the dashboard, and improves browser performance to create a more responsive experience. Read more about the engineering behind this engine in our https://www.elastic.co/search-labs/blog/kibana-dashboard-build-layout[blog post]. 
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltdefc1239170c7d95/67c239a724e52cd96fe6ed11/dashboard-layout-engine.gif[Dragging and dropping a dashboard panel below the visible part of the dashboard]
+We've improved ES|QL variables and dashboard controls in this release. You can now create variables and controls before using them in visualizations. It's simpler to create a new control by just typing `?` in your ES|QL query, enabling you to use controls in more places. You can also substitute variables for function names, field names, field values, and ES|QL configurations all at the same time. The controls editing experience is enhanced, featuring better handling of common situations such as no data returning from a query.
 
 [discrete]
-=== Managing {kib} and data
+==== Compare by trend in metric visualizations
+
+With this release, you can enable a new **Compare to** option in metric visualizations, which dynamically compares the value of the secondary metric to the primary metrics. This makes it easy for you to visually spot values that are improving. 
+
+image::images/compare_to_metric.png[Compare to metric visualization]
 
 [discrete]
-==== File uploader enhancements
+==== New visual options for Lens tables
 
-You can now access the file uploader via a flyout on the Search Overview page and Search Playground. This release also adds support for uploading multiple files with a single action. 
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt0957c51279df4bec/67c23ac28c6f4e7a59b7f3c6/file-uploader-enhancements-8.18.gif[Uploading multiple files with the file uploader]
+You can now render tables in Lens in **Compact** or **Expanded** mode depending on your visual preference. 
 
 [discrete]
-=== Alerting, cases, and connectors
+==== View chart configuration for read-only dashboards
+
+As a non-admin dashboard viewer, you can now view and temporarily adjust dashboard panel configuration, improving your ability to search for similar data in other places in Kibana.
 
 [discrete]
-==== Case templates are Generally Available
+==== Globe projection in Maps
 
-Case templates are now Generally Available. Case templates provide useful starting points for investigations in both Security and Observability. Add templates in Case Settings and leverage them as a starting point in any new case.
+The Elastic Basemaps Service now provides an accurate globe projection when you zoom out.
 
-image::images/add-template-flyout.png[The Add template flyout in Case Settings, width=90%]
-
-[discrete]
-==== Case observables 
-
-Case observables enable structured data collection. You can now add common observables to any case out of the box and extend the types of observable case data to include custom options.
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte7a98f828a3667e2/687aa2916629b610cac5bcbf/globe_maps.gif[Maps globe projection]
 
 [discrete]
-==== Certified for ServiceNow Xanadu release
-
-The Service Now connector is certified for the Xanadu release. 
+=== Kibana Alerting and Cases
 
 [discrete]
-==== Assign users to a case
+==== One Click Monitoring: Create Alerting rules from visualizations
 
-You can now enable a role to assign users to a case. 
+You no longer need to go from page to page to create alerting rules from a data point of interest in visualizations. You can now right-click on a data point from any visualization and use the newly introduced **Add alert rule** option to create an alerting rule with an ES|QL query automatically generated to tailor alerting rules with minimal manual input.
+
+This context-aware rule creation shortcut helps you improve monitoring while staying informed by data. 
+
+image::images/alerting_rules_from_visualizations.png[One Click Monitoring: Create Alerting rules from visualizations]
 
 [discrete]
-==== Attach file API
+==== Alerts panel in dashboards
 
-You can now manage case attachments programmatically with new CRUD operations on the case attachments API. Check out the https://www.elastic.co/docs/api/doc/kibana/operation/operation-addcasefiledefaultspace[API documentation] to learn more. 
+You can now include Alerts tables as panels in dashboards. Alerts panels provide real-time visibility into system-triggered alerts alongside other visualizations. You can correlate alerts with other dashboard components, such as logs, metrics, Discover sessions, or Lens visualizations, without needing to switch contexts.
+
+image::images/alerts_panel_dashboard.png[Alerts panel in Dashboards]
+
+[discrete]
+==== Alerts history clean-up available in Technical Preview
+
+You can now manually trigger alerts deletion in bulk. This new feature starts a cleanup task that runs asynchronously in the background. You can specify a threshold for alert age or duration and choose to delete active alerts, inactive alerts, or both. This feature is currently only available under Stack Management.
+
+image::images/cleanup_alerts.png[Alerts history clean-up available in Technical Preview]
+
+[discrete]
+==== Maintenance windows public APIs
+
+Maintenance windows now have public HTTP APIs, enabling programmatic management. You can leverage these APIs to perform Create, Read, Update, and Delete (CRUD) operations on maintenance windows, giving you greater control.
+
+[discrete]
+
+
+[discrete]
+==== ES|QL rule type ungrouped alerts
+
+We're introducing an ungrouped alerts option to configure alerts for the ES|QL rule type. The ES|QL rule type now allows you to generate an alert for each row in the query results using a unique alert identifier.
+
+[discrete]
+=== Kibana Reporting
+
+[discrete]
+==== Scheduled exports
+
+Kibana's reporting feature now enables you to schedule one-time or recurring exports in PDF, PNG, and CSV formats. This allows you to easily capture and share snapshots of dashboard visualizations or Discover results. With scheduled exports, you can configure your export settings once and Kibana will automatically generate exports on a regular schedule. With proper permissions, you can also schedule exports to be shared with others through email, streamlining your export process.
+
+image::images/scheduled_exports.png[Scheduled exports, width=35%]
+  

@@ -30,7 +30,7 @@ interface InMemoryPagination {
   pageIndex: number;
 }
 
-interface ServerSidePagination {
+export interface ServerSidePagination {
   totalItemCount: number;
   pageSize: number;
   pageSizeOptions: number[];

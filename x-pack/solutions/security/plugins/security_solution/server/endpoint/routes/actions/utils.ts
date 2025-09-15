@@ -83,7 +83,7 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
-    microsoft_defender_endpoint: false,
+    microsoft_defender_endpoint: true,
   },
 });
 
@@ -141,6 +141,10 @@ export const ensureUserHasAuthzToFilesForAction = async (
 
     case 'running-processes':
       hasAuthzToCommand = userAuthz.canGetRunningProcesses;
+      break;
+
+    case 'runscript':
+      hasAuthzToCommand = userAuthz.canWriteExecuteOperations;
       break;
   }
 

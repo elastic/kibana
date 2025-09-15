@@ -17,7 +17,7 @@ export interface UseGetIntegrationFromRuleIdParams {
    */
   packages: PackageListItem[];
   /**
-   * Id of the rule. This should be the value from the signal.rule.id field
+   * Id of the rule. This should be the value from the signal.rule.rule_id field
    */
   ruleId: string | string[];
   /**
@@ -34,19 +34,20 @@ export interface UseGetIntegrationFromRuleIdResult {
 }
 
 /**
- * Hook that returns a package (integration) from a ruleId (value for the signal.rule.id field), a list of rules and packages.
- * This hook is used in the GroupedAlertTable's accordion when grouping by signal.rule.id, to render the title as well as statistics.
+ * Hook that returns a package (integration) from a ruleId (value for the signal.rule.rule_id field), a list of rules and packages.
+ * This hook is used in the GroupedAlertTable's accordion when grouping by signal.rule.rule_id (to render the title and statistics)
+ * as well as the Integration column cell renderer.
  */
 export const useGetIntegrationFromRuleId = ({
   packages,
   ruleId,
   rules = EMPTY_ARRAY,
 }: UseGetIntegrationFromRuleIdParams): UseGetIntegrationFromRuleIdResult => {
-  // From the ruleId (which should be a value for a signal.rule.id field) we find the rule
+  // From the ruleId (which should be a value for a signal.rule.rule_id field) we find the rule
   // of the same id, which we then use its name to match a package's name.
   const integration: PackageListItem | undefined = useMemo(() => {
     const signalRuleId = Array.isArray(ruleId) ? ruleId[0] : ruleId;
-    const rule = rules.find((r: RuleResponse) => r.id === signalRuleId);
+    const rule = rules.find((r: RuleResponse) => r.rule_id === signalRuleId);
     if (!rule) {
       return undefined;
     }

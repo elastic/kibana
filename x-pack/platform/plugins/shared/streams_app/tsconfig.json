@@ -10,9 +10,12 @@
     "public/**/*.json",
     "server/**/*",
     ".storybook/**/*",
-    "ui_tests/**/*"
+    "test/scout/**/*"
   ],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/streams-plugin",
@@ -70,6 +73,11 @@
     "@kbn/content-packs-schema",
     "@kbn/charts-theme",
     "@kbn/grok-ui",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/test",
+    "@kbn/zod",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/field-types",
+    "@kbn/field-formats-plugin",
   ]
 }

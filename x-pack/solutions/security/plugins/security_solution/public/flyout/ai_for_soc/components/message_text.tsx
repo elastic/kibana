@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { CustomCodeBlock } from '../../../assistant/get_comments/custom_codeblock/custom_code_block';
-import { customCodeBlockLanguagePlugin } from '../../../assistant/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
+import { CustomCodeBlock } from '@kbn/elastic-assistant/impl/get_comments/custom_codeblock/custom_code_block';
+import { customCodeBlockLanguagePlugin } from '@kbn/elastic-assistant/impl/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
 
 export const MESSAGE_TEXT_TEST_ID = 'ai-for-soc-alert-flyout-message-text';
 

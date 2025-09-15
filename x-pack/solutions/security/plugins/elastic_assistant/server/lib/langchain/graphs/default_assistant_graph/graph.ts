@@ -24,7 +24,6 @@ import { stepRouter } from './nodes/step_router';
 import { modelInput } from './nodes/model_input';
 import { runAgent } from './nodes/run_agent';
 import { executeTools } from './nodes/execute_tools';
-import { generateChatTitle } from './nodes/generate_chat_title';
 import { getPersistedConversation } from './nodes/get_persisted_conversation';
 import { persistConversationChanges } from './nodes/persist_conversation_changes';
 import { respond } from './nodes/respond';
@@ -37,7 +36,7 @@ export interface GetDefaultAssistantGraphParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
-  createLlmInstance: () => BaseChatModel;
+  createLlmInstance: () => Promise<BaseChatModel>;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   signal?: AbortSignal;
@@ -87,15 +86,6 @@ export const getDefaultAssistantGraph = ({
           conversationsDataClient: dataClients?.conversationsDataClient,
         })
       )
-      .addNode(NodeType.GENERATE_CHAT_TITLE, (state: AgentState) =>
-        generateChatTitle({
-          ...nodeParams,
-          state,
-          model: createLlmInstance(),
-          telemetryParams,
-          telemetry,
-        })
-      )
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
           ...nodeParams,
@@ -123,22 +113,19 @@ export const getDefaultAssistantGraph = ({
           telemetry,
         })
       )
-      .addNode(NodeType.RESPOND, (state: AgentState) =>
-        respond({ ...nodeParams, config: { signal }, state, model: createLlmInstance() })
-      )
+      .addNode(NodeType.RESPOND, async (state: AgentState) => {
+        const model = await createLlmInstance();
+        return respond({ ...nodeParams, config: { signal }, state, model });
+      })
+      .addEdge(NodeType.GET_PERSISTED_CONVERSATION, NodeType.PERSIST_CONVERSATION_CHANGES)
+      .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addNode(NodeType.MODEL_INPUT, (state: AgentState) => modelInput({ ...nodeParams, state }))
       .addEdge(START, NodeType.MODEL_INPUT)
       .addEdge(NodeType.RESPOND, END)
-      .addEdge(NodeType.GENERATE_CHAT_TITLE, NodeType.PERSIST_CONVERSATION_CHANGES)
-      .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addEdge(NodeType.TOOLS, NodeType.AGENT)
       .addConditionalEdges(NodeType.MODEL_INPUT, stepRouter, {
         [NodeType.GET_PERSISTED_CONVERSATION]: NodeType.GET_PERSISTED_CONVERSATION,
         [NodeType.AGENT]: NodeType.AGENT,
-      })
-      .addConditionalEdges(NodeType.GET_PERSISTED_CONVERSATION, stepRouter, {
-        [NodeType.PERSIST_CONVERSATION_CHANGES]: NodeType.PERSIST_CONVERSATION_CHANGES,
-        [NodeType.GENERATE_CHAT_TITLE]: NodeType.GENERATE_CHAT_TITLE,
       })
       .addConditionalEdges(NodeType.AGENT, stepRouter, {
         [NodeType.RESPOND]: NodeType.RESPOND,

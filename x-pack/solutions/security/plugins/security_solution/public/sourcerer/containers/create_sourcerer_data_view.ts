@@ -11,6 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../store/model';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
+import {
+  DEFAULT_SECURITY_DATA_VIEW,
+  DEFAULT_SECURITY_ALERT_DATA_VIEW,
+} from '../../data_view_manager/components/data_view_picker/translations';
 
 export interface GetSourcererDataView {
   signal?: AbortSignal;
@@ -19,23 +23,31 @@ export interface GetSourcererDataView {
   };
   dataViewService: DataViewsServicePublic;
   dataViewId: string | null;
+  alertDataViewId?: string;
+  signalIndexName?: string;
 }
 
 export interface SecurityDataView {
   defaultDataView: KibanaDataView;
+  alertDataView: KibanaDataView;
   kibanaDataViews: Array<Omit<KibanaDataView, 'fields'>>;
 }
 
+// eslint-disable-next-line complexity
 export const createSourcererDataView = async ({
   body,
   dataViewService,
   dataViewId,
+  alertDataViewId,
+  signalIndexName,
 }: GetSourcererDataView): Promise<SecurityDataView | undefined> => {
   if (dataViewId === null) {
     return;
   }
   let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
   const siemDataViewExist = allDataViews.find((dv) => dv.id === dataViewId);
+  const alertDataViewExist =
+    alertDataViewId && allDataViews.find((dv) => dv.id === alertDataViewId);
 
   const { patternList } = body;
   const patternListFormatted = ensurePatternFormat(patternList);
@@ -50,6 +62,7 @@ export const createSourcererDataView = async ({
           id: dataViewId,
           title: patternListAsTitle,
           timeFieldName: DEFAULT_TIME_FIELD,
+          name: DEFAULT_SECURITY_DATA_VIEW,
         },
         // Override property - if a data view exists with the security solution pattern
         // delete it and replace it with our data view
@@ -84,6 +97,43 @@ export const createSourcererDataView = async ({
     };
   }
 
+  let alertOnlyDataView: DataViewType;
+  let alertDataView: KibanaDataView;
+  if (signalIndexName && alertDataViewId && alertDataViewExist === undefined) {
+    try {
+      alertOnlyDataView = await dataViewService.createAndSave(
+        {
+          allowNoIndex: true,
+          id: alertDataViewId,
+          title: signalIndexName,
+          timeFieldName: DEFAULT_TIME_FIELD,
+          name: DEFAULT_SECURITY_ALERT_DATA_VIEW,
+        },
+        // Override property - if a data view exists with the security solution pattern
+        // delete it and replace it with our data view
+        true
+      );
+    } catch (err) {
+      const error = transformError(err);
+      if (err.name === 'DuplicateDataViewError' || error.statusCode === 409) {
+        alertOnlyDataView = await dataViewService.get(alertDataViewId);
+      } else {
+        throw error;
+      }
+    }
+    alertDataView = {
+      id: alertOnlyDataView.id ?? alertDataViewId,
+      patternList: alertOnlyDataView.title.split(','),
+      title: alertOnlyDataView.title,
+    };
+  } else {
+    alertDataView = {
+      id: alertDataViewId ?? '',
+      patternList: signalIndexName ? [signalIndexName] : [],
+      title: signalIndexName ?? '',
+    };
+  }
+
   if (allDataViews.some((dv) => dv.id === dataViewId)) {
     allDataViews = allDataViews.map((v) =>
       v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
@@ -108,5 +158,6 @@ export const createSourcererDataView = async ({
             title: dv.title,
           }
     ),
+    alertDataView,
   };
 };

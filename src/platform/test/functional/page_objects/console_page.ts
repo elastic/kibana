@@ -85,19 +85,32 @@ export class ConsolePageObject extends FtrService {
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.getTextArea();
     await textArea.type(letter);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
+    await this.retry.waitFor(
+      'autocomplete to be visible',
+      async () => await this.isAutocompleteVisible()
+    );
   }
 
   public async isAutocompleteVisible() {
     const element = await this.find.byClassName('suggest-widget').catch(() => null);
     if (!element) return false;
 
-    const attribute = await element.getAttribute('style');
-    return !attribute?.includes('display: none;');
+    return await element.isDisplayed();
   }
 
   public async getAutocompleteSuggestion(index: number) {
+    await this.retry.waitFor(
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
+    );
+
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
+
+    await this.retry.waitFor(
+      'verify suggestions widget to be displayed',
+      async () => await suggestionsWidget.isDisplayed()
+    );
+
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const suggestion = suggestions[index];
     if (!suggestion) {
@@ -105,6 +118,18 @@ export class ConsolePageObject extends FtrService {
     }
     const label = await suggestion.findByClassName('label-name');
     return label.getVisibleText();
+  }
+
+  public async getAllAutocompleteSuggestions() {
+    const suggestionsWidget = await this.find.byClassName('suggest-widget');
+    const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
+    const labels = await Promise.all(
+      suggestions.map(async (suggestion) => {
+        const label = await suggestion.findByClassName('label-name');
+        return label.getVisibleText();
+      })
+    );
+    return labels;
   }
 
   public async pressUp(shift: boolean = false) {
@@ -334,12 +359,9 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleConfigButton');
   }
 
-  public async toggleA11yOverlaySetting() {
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableA11yOverlay');
-      await toggle.click();
-    });
+  public async toggleA11yOverlaySetting(enabled: boolean) {
+    await this.testSubjects.waitForEnabled('enableA11yOverlay');
+    await this.testSubjects.setEuiSwitch('enableA11yOverlay', enabled ? 'check' : 'uncheck');
   }
 
   public async addNewVariable({ name, value }: { name: string; value: string }) {

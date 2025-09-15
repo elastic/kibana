@@ -117,9 +117,10 @@ const registerCustomThresholdRuleAction = (
             }}
             consumer={AlertConsumers.LOGS}
             validConsumers={[
-              AlertConsumers.INFRASTRUCTURE,
               AlertConsumers.LOGS,
+              AlertConsumers.INFRASTRUCTURE,
               AlertConsumers.OBSERVABILITY,
+              AlertConsumers.STACK_ALERTS,
             ]}
             ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
             initialValues={{

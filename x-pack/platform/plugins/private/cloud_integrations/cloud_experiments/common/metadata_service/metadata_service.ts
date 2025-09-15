@@ -181,7 +181,7 @@ export class MetadataService {
    * Schedules a timer that calls `fn` to update the {@link FlatMetadata} until `untilFn` returns true.
    * @param fn Method to calculate the dynamic metadata.
    * @param untilFn Method that returns true when the scheduler should stop calling fn (potentially because the dynamic value is not expected to change anymore).
-   * @private
+   * @internal
    */
   private scheduleUntil(
     fn: () => Partial<FlatMetadata> | Promise<Partial<FlatMetadata>>,

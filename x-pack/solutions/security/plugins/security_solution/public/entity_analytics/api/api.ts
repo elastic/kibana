@@ -50,8 +50,10 @@ import {
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
-import type { ListEntitiesResponse } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
-import { type ListEntitiesRequestQuery } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import {
+  type ListEntitiesRequestQuery,
+  type ListEntitiesResponse,
+} from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -299,13 +301,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
-    const updateSavedObjectConfiguration = (params: {}) => {
+    const updateSavedObjectConfiguration = (params: {}) =>
       http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify(params),
       });
-    };
 
     return {
       fetchRiskScorePreview,

@@ -100,9 +100,12 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
-      return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID:
+      return [
+        ...aggMetrics,
+        getTermAggregation('resourceName', VULNERABILITY_FIELDS.RESOURCE_NAME),
+      ];
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
         getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),

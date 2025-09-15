@@ -24,7 +24,7 @@ export interface AppParams extends ManagementAppMountParams {
 }
 
 export async function mountManagementSection(
-  { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
+  { http, getStartServices }: CoreSetup<StartDependencies>,
   params: AppParams
 ) {
   const { element, setBreadcrumbs, history, license, config } = params;
@@ -40,7 +40,7 @@ export async function mountManagementSection(
     documentation: documentationService,
     api: apiService,
     fileReader: fileReaderService,
-    notifications,
+    notifications: coreStart.notifications,
     history,
     uiSettings: coreStart.uiSettings,
     settings: coreStart.settings,

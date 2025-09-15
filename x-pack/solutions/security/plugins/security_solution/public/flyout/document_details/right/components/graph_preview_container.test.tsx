@@ -319,7 +319,7 @@ describe('<GraphPreviewContainer />', () => {
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
       ...mockContextValue,
-      isPreview: true,
+      isRulePreview: true,
     });
 
     // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component

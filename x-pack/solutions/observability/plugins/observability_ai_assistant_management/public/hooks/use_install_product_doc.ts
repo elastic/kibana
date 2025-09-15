@@ -20,13 +20,13 @@ export function useInstallProductDoc() {
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-
-  return useMutation<PerformInstallResponse, ServerError, void>(
+  return useMutation<PerformInstallResponse, ServerError, string>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
-    () => {
-      return productDocBase!.installation.install();
+    (inferenceId: string) => {
+      return productDocBase!.installation.install({ inferenceId });
     },
     {
+      networkMode: 'always',
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(

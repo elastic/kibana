@@ -31,6 +31,12 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
   const history = useHistory<LocationState>();
 
   const locationSearchParams = useMemo(() => {
+    // Note:
+    // No need to decode the search params as URLSearchParams
+    // does that automatically upon reading them
+    //
+    // For the context on why this note exists
+    // see: https://github.com/elastic/kibana/issues/234500
     return new URLSearchParams(history.location.search);
   }, [history.location.search]);
 
@@ -109,7 +115,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
             flush="right"
             href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

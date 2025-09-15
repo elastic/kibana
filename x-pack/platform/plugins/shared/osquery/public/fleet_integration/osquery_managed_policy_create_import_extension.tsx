@@ -392,7 +392,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCallOut title="No agents in the policy" color="warning" iconType="help">
+              <EuiCallOut title="No agents in the policy" color="warning" iconType="question">
                 <p>
                   {i18n.translate(
                     'xpack.osquery.fleetIntegration.osqueryConfig.noAgentsWarningMessage',

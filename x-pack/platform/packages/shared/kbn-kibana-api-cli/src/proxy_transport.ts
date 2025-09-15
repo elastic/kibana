@@ -26,7 +26,12 @@ export function createProxyTransport({
 }): typeof Transport {
   return class ProxyTransport extends Transport {
     constructor(options: TransportOptions) {
-      super(options);
+      super({
+        ...options,
+        // the elastic-x-product headers cause issues w/ the proxy transport,
+        // as the returned headers are from the proxy endpoint and not ES
+        productCheck: undefined,
+      });
     }
 
     request<TResponse = unknown>(
@@ -84,7 +89,7 @@ export function createProxyTransport({
 
           if (statusCode >= 400) {
             throw new errors.ResponseError({
-              statusCode: response.statusCode,
+              statusCode,
               body: response.body,
               meta: response.meta,
               warnings: response.warnings,

@@ -1,117 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
-<EuiDescriptionList
-  columnWidths={
-    Array [
-      15,
-      85,
-    ]
-  }
-  listItems={
-    Array [
-      Object {
-        "description": "responsetimes",
-        "title": <Memo(MemoizedFormattedMessage)
-          defaultMessage="Job ID"
-          id="xpack.ml.ruleEditor.detectorDescriptionList.jobIdTitle"
-        />,
-      },
-      Object {
-        "description": "mean response time",
-        "title": <Memo(MemoizedFormattedMessage)
-          defaultMessage="Detector"
-          id="xpack.ml.ruleEditor.detectorDescriptionList.detectorTitle"
-        />,
-      },
-      Object {
-        "description": <Memo(MemoizedFormattedMessage)
-          defaultMessage="actual {actual}, typical {typical}"
-          id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
-          values={
-            Object {
-              "actual": <AnomalyValueDisplay
-                function="mean"
-                record={
-                  Object {
-                    "actual": Array [
-                      50,
-                    ],
-                    "source": Object {
-                      "function": "mean",
-                    },
-                    "typical": Array [
-                      1.23,
-                    ],
-                  }
-                }
-                value={
-                  Array [
-                    50,
-                  ]
-                }
-              />,
-              "typical": <AnomalyValueDisplay
-                function="mean"
-                record={
-                  Object {
-                    "actual": Array [
-                      50,
-                    ],
-                    "source": Object {
-                      "function": "mean",
-                    },
-                    "typical": Array [
-                      1.23,
-                    ],
-                  }
-                }
-                value={
-                  Array [
-                    1.23,
-                  ]
-                }
-              />,
-            }
-          }
-        />,
-        "title": <Memo(MemoizedFormattedMessage)
-          defaultMessage="Selected anomaly"
-          id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyTitle"
-        />,
-      },
-    ]
-  }
-  type="column"
-/>
+<dl
+  class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"
+  data-type="column"
+  style="grid-template-columns: 15fr 85fr;"
+>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Job ID
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    responsetimes
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Detector
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    mean response time
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Selected anomaly
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    actual 
+    <span
+      data-test-subj="mockAnomalyValueDisplay"
+    >
+      50
+    </span>
+    , typical 
+    <span
+      data-test-subj="mockAnomalyValueDisplay"
+    >
+      1.23
+    </span>
+  </dd>
+</dl>
 `;
 
 exports[`DetectorDescriptionList render for population detector with no anomaly values 1`] = `
-<EuiDescriptionList
-  columnWidths={
-    Array [
-      15,
-      85,
-    ]
-  }
-  listItems={
-    Array [
-      Object {
-        "description": "population",
-        "title": <Memo(MemoizedFormattedMessage)
-          defaultMessage="Job ID"
-          id="xpack.ml.ruleEditor.detectorDescriptionList.jobIdTitle"
-        />,
-      },
-      Object {
-        "description": "count by status over clientip",
-        "title": <Memo(MemoizedFormattedMessage)
-          defaultMessage="Detector"
-          id="xpack.ml.ruleEditor.detectorDescriptionList.detectorTitle"
-        />,
-      },
-    ]
-  }
-  type="column"
-/>
+<dl
+  class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"
+  data-type="column"
+  style="grid-template-columns: 15fr 85fr;"
+>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Job ID
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    population
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Detector
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    count by status over clientip
+  </dd>
+</dl>
 `;

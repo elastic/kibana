@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-object-test-plugin",
+  "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "savedObjectTestPlugin",
+    "server": true,
+    "browser": false
+  }
+}

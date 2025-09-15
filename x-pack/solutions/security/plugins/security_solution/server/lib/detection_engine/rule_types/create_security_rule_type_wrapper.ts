@@ -47,6 +47,7 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
+import { sendGapDetectedTelemetryEvent } from './utils/telemetry/send_gap_detected_telemetry_event';
 import type { RuleParams } from '../rule_schema';
 import {
   SECURITY_FROM,
@@ -374,6 +375,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
             gap,
+            originalFrom,
+            originalTo,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -393,13 +396,23 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
             const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
+            if (analytics) {
+              sendGapDetectedTelemetryEvent({
+                analytics,
+                interval,
+                gapDuration: remainingGap,
+                originalFrom,
+                originalTo,
+                ruleParams: params,
+              });
+            }
             wrapperErrors.push(gapErrorMessage);
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: gapErrorMessage,
               metrics: {
                 executionGap: remainingGap,
-                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+                gapRange: gap,
               },
             });
           }
@@ -559,7 +572,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
-                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+                  gapRange: gap,
                   frozenIndicesQueriedCount,
                 },
                 userError: result.userError,

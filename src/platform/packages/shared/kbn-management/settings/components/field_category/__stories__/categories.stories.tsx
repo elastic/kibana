@@ -41,14 +41,9 @@ export default {
 } as Meta<typeof Component>;
 
 const CategoriesComponent = (params: Params) => {
-  const {
-    onClearQuery,
-    isSavingEnabled,
-    onFieldChange,
-    unsavedChanges,
-    categorizedFields,
-    categoryCounts,
-  } = useCategoryStory(params);
+  const { isSavingEnabled, onFieldChange, unsavedChanges, categorizedFields, categoryCounts } =
+    useCategoryStory(params);
+  const onClearQuery = () => {};
 
   return (
     <FieldCategoryProvider

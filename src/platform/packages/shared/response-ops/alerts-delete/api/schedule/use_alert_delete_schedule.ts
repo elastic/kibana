@@ -15,7 +15,7 @@ import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 
 export interface UseAlertDeleteScheduleParams {
   services: { http: HttpStart };
-  onSuccess: () => void;
+  onSuccess: (message?: string) => void;
   onError: (error: IHttpFetchError<ResponseErrorBody>) => void;
 }
 export const useAlertDeleteSchedule = ({

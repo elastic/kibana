@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
-.buildkite/scripts/copy_es_snapshot_cache.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
 
 export JOB=kibana-observability-plugin
 

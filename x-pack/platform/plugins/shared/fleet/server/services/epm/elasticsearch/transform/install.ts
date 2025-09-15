@@ -43,6 +43,7 @@ import type {
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 import { isUserSettingsTemplate } from '../template/utils';
+import { STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS } from '../../../../constants';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
@@ -532,10 +533,16 @@ const installTransformsAssets = async (
               componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
-                // @ts-expect-error data_stream property is not needed here
+                // @ts-expect-error `data_stream` property is not needed/allowed for transform index templates
                 indexTemplate: {
                   template: {
-                    settings: undefined,
+                    settings: {
+                      index: {
+                        mapping: {
+                          ignore_malformed: true,
+                        },
+                      },
+                    },
                     mappings: undefined,
                   },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
@@ -545,7 +552,10 @@ const installTransformsAssets = async (
                       ?.get('destinationIndex').index,
                   ],
                   _meta: destinationIndexTemplate._meta,
-                  composed_of: Object.keys(componentTemplates),
+                  composed_of: [
+                    ...Object.keys(componentTemplates),
+                    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+                  ],
                   ignore_missing_component_templates:
                     Object.keys(componentTemplates).filter(isUserSettingsTemplate),
                 },

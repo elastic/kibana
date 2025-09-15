@@ -29,14 +29,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'src/platform/test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'src/platform/test/**/screenshots/session/*.png'
   buildkite-agent artifact upload 'src/platform/test/functional/failure_debug/html/*.html'
-  buildkite-agent artifact upload 'x-pack/test/**/screenshots/diff/*.png'
-  buildkite-agent artifact upload 'x-pack/test/**/screenshots/failure/*.png'
-  buildkite-agent artifact upload 'x-pack/test/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'x-pack/test_serverless/**/screenshots/failure/*.png'
-  buildkite-agent artifact upload 'x-pack/test_serverless/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'x-pack/test_serverless/**/failure_debug/html/*.html'
-  buildkite-agent artifact upload 'x-pack/test/functional/apps/reporting/reports/session/*.pdf'
-  buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
+  buildkite-agent artifact upload 'x-pack/platform/test/**/screenshots/diff/*.png'
+  buildkite-agent artifact upload 'x-pack/platform/test/**/screenshots/failure/*.png'
+  buildkite-agent artifact upload 'x-pack/platform/test/**/screenshots/session/*.png'
+  buildkite-agent artifact upload 'x-pack/platform/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
   buildkite-agent artifact upload '.es/es*.log'
@@ -55,6 +51,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+  fi
+
+  if [[ -d 'target/agent_diagnostics' ]]; then
+    buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
   fi
 
 fi

@@ -240,7 +240,7 @@ export class Execution<
   /**
    * Keeping track of any child executions
    * Needed to cancel child executions in case parent execution is canceled
-   * @private
+   * @internal
    */
   private readonly childExecutions: Execution[] = [];
   private cacheTimeout: number = 30000;

@@ -40,6 +40,7 @@ export const PreferCSSAttributeForEuiComponents: Rule.RuleModule = {
             ))
           ) {
             context.report({
+              // @ts-expect-error typescript upgrade v5.4.5
               node: styleAttrNode?.parent! as Node,
               messageId: 'preferCSSAttributeForEuiComponents',
               fix(fixer) {

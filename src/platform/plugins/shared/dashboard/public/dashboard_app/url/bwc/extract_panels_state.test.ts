@@ -11,46 +11,8 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
-  describe('>= 8.18 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
-      const dashboardState = extractPanelsState({
-        panels: [
-          {
-            panelConfig: {
-              timeRange: {
-                from: 'now-7d/d',
-                to: 'now',
-              },
-            },
-            gridData: {},
-            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-            title: 'Custom title',
-            type: 'map',
-          },
-        ],
-      });
-      expect(dashboardState.panels).toEqual({
-        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
-          explicitInput: {
-            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            timeRange: {
-              from: 'now-7d/d',
-              to: 'now',
-            },
-            title: 'Custom title',
-          },
-          gridData: {},
-          type: 'map',
-          panelRefName: undefined,
-          version: undefined,
-        },
-      });
-    });
-  });
-
-  describe('< 8.17 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
+  describe('< 8.19 panels state', () => {
+    test('should move id and title to panelConfig', () => {
       const dashboardState = extractPanelsState({
         panels: [
           {
@@ -68,9 +30,9 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState.panels).toEqual({
-        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
-          explicitInput: {
+      expect(dashboardState.panels).toEqual([
+        {
+          panelConfig: {
             savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             timeRange: {
               from: 'now-7d/d',
@@ -78,12 +40,44 @@ describe('extractPanelsState', () => {
             },
             title: 'Custom title',
           },
+          panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
           gridData: {},
           type: 'map',
-          panelRefName: undefined,
-          version: undefined,
         },
+      ]);
+    });
+  });
+
+  describe('< 8.17 panels state', () => {
+    test('should convert embeddableConfig to panelConfig', () => {
+      const dashboardState = extractPanelsState({
+        panels: [
+          {
+            embeddableConfig: {
+              timeRange: {
+                from: 'now-7d/d',
+                to: 'now',
+              },
+            },
+            gridData: {},
+            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            type: 'map',
+          },
+        ],
       });
+      expect(dashboardState.panels).toEqual([
+        {
+          panelConfig: {
+            timeRange: {
+              from: 'now-7d/d',
+              to: 'now',
+            },
+          },
+          panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+          gridData: {},
+          type: 'map',
+        },
+      ]);
     });
   });
 

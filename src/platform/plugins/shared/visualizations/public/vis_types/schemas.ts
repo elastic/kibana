@@ -11,7 +11,7 @@ import _, { defaults } from 'lodash';
 import { AggGroupNames, AggParam } from '@kbn/data-plugin/public';
 import type { ISchemas, Schema } from './types';
 
-/** @private **/
+/** @internal **/
 export class Schemas implements ISchemas {
   all: Schema[] = [];
   [AggGroupNames.Buckets]: Schema[] = [];

@@ -39,7 +39,6 @@ import { getOperationSupportMatrix } from '../../../dimension_panel/operation_su
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 import { IndexPattern } from '../../../../../types';
-import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';
 
@@ -316,7 +315,6 @@ describe('terms', () => {
               operationType: 'max',
               sourceField: 'price',
               isBucketed: false,
-              scale: 'ratio',
             },
             orderBy: {
               type: 'custom',
@@ -2424,7 +2422,6 @@ describe('terms', () => {
                 dataType: 'number',
                 operationType: 'median',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: 'bytes',
               },
             },
@@ -2488,7 +2485,6 @@ describe('terms', () => {
                 dataType: 'number',
                 operationType: 'median',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: 'bytes',
               },
             },
@@ -2556,7 +2552,6 @@ describe('terms', () => {
                 dataType: 'number',
                 operationType: 'median',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: 'bytes',
               },
             },
@@ -2638,7 +2633,6 @@ describe('terms', () => {
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
               },
             },
@@ -2731,7 +2725,6 @@ describe('terms', () => {
               otherBucket: true,
               size: 5,
             },
-            scale: 'ordinal',
             sourceField: 'bytes',
           } as TermsIndexPatternColumn,
         },
@@ -3271,11 +3264,11 @@ describe('terms', () => {
     it('reports correct number of values', () => {
       const termsSize = 5;
 
-      const withoutOther = cloneDeep(layer.columns.col1 as TermsIndexPatternColumn);
+      const withoutOther = structuredClone(layer.columns.col1 as TermsIndexPatternColumn);
       withoutOther.params.size = termsSize;
       withoutOther.params.otherBucket = false;
 
-      const withOther = cloneDeep(withoutOther);
+      const withOther = structuredClone(withoutOther);
       withOther.params.otherBucket = true;
 
       expect(termsOperation.getMaxPossibleNumValues!(withoutOther)).toBe(termsSize);

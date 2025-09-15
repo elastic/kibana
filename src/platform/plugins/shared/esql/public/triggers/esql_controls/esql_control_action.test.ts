@@ -16,6 +16,7 @@ import { CreateESQLControlAction } from './esql_control_action';
 describe('update ES|QL query action', () => {
   const dataMock = dataPluginMock.createStartContract();
   const searchMock = dataMock.search.search;
+  const timefilterMock = dataMock.query.timefilter.timefilter;
   const core = coreMock.createStart();
   const coreStart = {
     ...core,
@@ -28,7 +29,11 @@ describe('update ES|QL query action', () => {
   } as CoreStart;
   describe('compatibility check', () => {
     it('is compatible if queryString is given', async () => {
-      const createControlAction = new CreateESQLControlAction(coreStart, searchMock);
+      const createControlAction = new CreateESQLControlAction(
+        coreStart,
+        searchMock,
+        timefilterMock
+      );
       const isCompatible = await createControlAction.isCompatible({
         queryString: 'FROM index',
         variableType: ESQLVariableType.FIELDS,
@@ -48,7 +53,11 @@ describe('update ES|QL query action', () => {
           },
         },
       } as CoreStart;
-      const createControlAction = new CreateESQLControlAction(coreStartESQLDidabled, searchMock);
+      const createControlAction = new CreateESQLControlAction(
+        coreStartESQLDidabled,
+        searchMock,
+        timefilterMock
+      );
       const isCompatible = await createControlAction.isCompatible({
         queryString: '',
         variableType: ESQLVariableType.FIELDS,
@@ -59,7 +68,11 @@ describe('update ES|QL query action', () => {
     });
 
     it('is incompatible if variableType is invalid', async () => {
-      const createControlAction = new CreateESQLControlAction(coreStart, searchMock);
+      const createControlAction = new CreateESQLControlAction(
+        coreStart,
+        searchMock,
+        timefilterMock
+      );
       const isCompatible = await createControlAction.isCompatible({
         queryString: 'FROM index',
         variableType: 'INVALID_TYPE' as ESQLVariableType,

@@ -9,7 +9,7 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Rule Management - Security Solution Cypress Tests"
 
-cd x-pack/test/security_solution_cypress
+cd x-pack/solutions/security/test/security_solution_cypress
 
 set +e
 BK_ANALYTICS_API_KEY=$(vault_get security-solution-ci sec-sol-cypress-bk-api-key)

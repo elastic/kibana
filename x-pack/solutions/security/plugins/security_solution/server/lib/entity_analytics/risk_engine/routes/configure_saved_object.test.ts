@@ -24,8 +24,6 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
   let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();

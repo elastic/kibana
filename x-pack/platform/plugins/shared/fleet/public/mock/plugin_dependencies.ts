@@ -14,6 +14,8 @@ import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { logsDataAccessPluginMock } from '@kbn/logs-data-access-plugin/public/mocks';
 
 export const createSetupDepsMock = () => {
   const cloud = cloudMock.createSetup();
@@ -35,5 +37,7 @@ export const createStartDepsMock = () => {
     customIntegrations: customIntegrationsMock.createStart(),
     share: sharePluginMock.createStartContract(),
     cloud: cloudMock.createStart(),
+    embeddable: embeddablePluginMock.createStartContract(),
+    logsDataAccess: logsDataAccessPluginMock.createStartContract(),
   };
 };

@@ -52,6 +52,7 @@ interface BuildNewAlertOpts<
   runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ export const buildNewAlert = <
   timestamp,
   payload,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildNewAlertOpts<
   AlertData,
   LegacyState,
@@ -109,7 +111,7 @@ export const buildNewAlert = <
               [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
             }
           : {}),
-        [SPACE_IDS]: rule[SPACE_IDS],
+        [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
         [VERSION]: kibanaVersion,
         [TAGS]: Array.from(
           new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])

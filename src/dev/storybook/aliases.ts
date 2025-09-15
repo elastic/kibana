@@ -40,8 +40,6 @@ export const storybookAliases = {
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/platform/plugins/shared/home/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
-  inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
-  investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
@@ -52,7 +50,6 @@ export const storybookAliases = {
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
-  observability_inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',

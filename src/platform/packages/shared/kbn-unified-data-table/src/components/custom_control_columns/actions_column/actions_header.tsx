@@ -8,7 +8,7 @@
  */
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { EuiIconTip, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import ColumnHeaderTruncateContainer from '../../column_header_truncate_container';
@@ -16,7 +16,6 @@ import ColumnHeaderTruncateContainer from '../../column_header_truncate_containe
 export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   const textRef = useRef<HTMLSpanElement>(null);
   const [showText, setShowText] = useState(false);
-  const { euiTheme } = useEuiTheme();
 
   useLayoutEffect(() => {
     if (!textRef.current) return;
@@ -29,39 +28,37 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   });
 
   return (
-    <div css={{ padding: euiTheme.size.xs }}>
-      <ColumnHeaderTruncateContainer>
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('unifiedDataTable.actionsColumnHeader', {
-              defaultMessage: 'Actions column',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-        {showText ? (
-          <span data-test-subj="unifiedDataTable_actionsColumnHeaderText">{actionsText}</span>
-        ) : (
-          <EuiIconTip
-            iconProps={{
-              'data-test-subj': 'unifiedDataTable_actionsColumnHeaderIcon',
-            }}
-            type="iInCircle"
-            content={actionsText}
-          />
-        )}
-        {/* Hidden measurement span */}
-        <span
-          ref={textRef}
-          css={css`
-            position: absolute;
-            visibility: hidden;
-            white-space: nowrap;
-            pointer-events: none;
-          `}
-        >
-          {actionsText}
+    <ColumnHeaderTruncateContainer>
+      <EuiScreenReaderOnly>
+        <span>
+          {i18n.translate('unifiedDataTable.actionsColumnHeader', {
+            defaultMessage: 'Actions column',
+          })}
         </span>
-      </ColumnHeaderTruncateContainer>
-    </div>
+      </EuiScreenReaderOnly>
+      {showText ? (
+        <span data-test-subj="unifiedDataTable_actionsColumnHeaderText">{actionsText}</span>
+      ) : (
+        <EuiIconTip
+          iconProps={{
+            'data-test-subj': 'unifiedDataTable_actionsColumnHeaderIcon',
+          }}
+          type="info"
+          content={actionsText}
+        />
+      )}
+      {/* Hidden measurement span */}
+      <span
+        ref={textRef}
+        css={css`
+          position: absolute;
+          visibility: hidden;
+          white-space: nowrap;
+          pointer-events: none;
+        `}
+      >
+        {actionsText}
+      </span>
+    </ColumnHeaderTruncateContainer>
   );
 };

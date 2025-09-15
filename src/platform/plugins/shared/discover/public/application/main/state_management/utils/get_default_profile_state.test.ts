@@ -31,6 +31,7 @@ describe('getDefaultProfileState', () => {
           columns: false,
           rowHeight: false,
           breakdownField: true,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -44,6 +45,36 @@ describe('getDefaultProfileState', () => {
           columns: false,
           rowHeight: false,
           breakdownField: true,
+          hideChart: false,
+        },
+        dataView: emptyDataView,
+      }).getPreFetchState();
+      expect(appState).toEqual(undefined);
+    });
+
+    it('should return expected hideChart', () => {
+      let appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+          hideChart: true,
+        },
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        hideChart: true,
+      });
+      appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+          hideChart: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -60,6 +91,7 @@ describe('getDefaultProfileState', () => {
           columns: true,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -86,6 +118,7 @@ describe('getDefaultProfileState', () => {
           columns: true,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -115,6 +148,7 @@ describe('getDefaultProfileState', () => {
           columns: false,
           rowHeight: true,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -134,6 +168,7 @@ describe('getDefaultProfileState', () => {
           columns: false,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

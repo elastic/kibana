@@ -16,7 +16,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
@@ -102,7 +102,11 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       const { CreateESQLControlAction } = await import(
         './triggers/esql_controls/esql_control_action'
       );
-      const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+      const createESQLControlAction = new CreateESQLControlAction(
+        core,
+        data.search.search,
+        data.query.timefilter.timefilter
+      );
       return createESQLControlAction;
     });
 
@@ -137,7 +141,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       activeSolutionId: SolutionId
     ) => {
       const result = await core.http.get(
-        `/internal/esql_registry/extensions/${activeSolutionId}/${queryString}`
+        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryString}`
       );
       return result;
     };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import set from 'set-value';
+import { set } from '@kbn/safer-lodash-set';
 
 /**
  * Set path in obj. Behaves like lodash `set`

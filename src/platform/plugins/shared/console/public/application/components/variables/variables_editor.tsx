@@ -26,7 +26,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import { NotificationsSetup } from '@kbn/core/public';
+import { NotificationsStart } from '@kbn/core/public';
 import { useServicesContext } from '../../contexts';
 import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
@@ -45,7 +45,7 @@ const sendToBrowserClipboard = async (text: string) => {
   throw new Error('Could not copy to clipboard!');
 };
 
-const copyToClipboard = async (text: string, notifications: NotificationsSetup) => {
+const copyToClipboard = async (text: string, notifications: Pick<NotificationsStart, 'toasts'>) => {
   try {
     await sendToBrowserClipboard(text);
 

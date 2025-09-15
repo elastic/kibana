@@ -137,7 +137,7 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
     {postureType === VULN_MGMT_POLICY_TEMPLATE && (
       <>
         <EuiCallOut
-          iconType="iInCircle"
+          iconType="info"
           color="primary"
           data-test-subj="additionalChargeCalloutTestSubj"
           title={

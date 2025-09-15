@@ -28,9 +28,10 @@ describe('<ManagePrivateLocations />', () => {
     });
     jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
       loading: false,
-      onSubmit: jest.fn(),
+      onCreateLocationAPI: jest.fn(),
+      onEditLocationAPI: jest.fn(),
       privateLocations: [],
-      onDelete: jest.fn(),
+      onDeleteLocationAPI: jest.fn(),
       deleteLoading: false,
       createLoading: false,
     });
@@ -60,7 +61,7 @@ describe('<ManagePrivateLocations />', () => {
             error: null,
           },
           privateLocations: {
-            isCreatePrivateLocationFlyoutVisible: false,
+            isPrivateLocationFlyoutVisible: false,
           },
         },
       });
@@ -95,7 +96,7 @@ describe('<ManagePrivateLocations />', () => {
             error: null,
           },
           privateLocations: {
-            isCreatePrivateLocationFlyoutVisible: false,
+            isPrivateLocationFlyoutVisible: false,
           },
         },
       });
@@ -125,7 +126,8 @@ describe('<ManagePrivateLocations />', () => {
 
       jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
         loading: false,
-        onSubmit: jest.fn(),
+        onCreateLocationAPI: jest.fn(),
+        onEditLocationAPI: jest.fn(),
         privateLocations: [
           {
             label: privateLocationName,
@@ -134,7 +136,7 @@ describe('<ManagePrivateLocations />', () => {
             isServiceManaged: false,
           },
         ],
-        onDelete: jest.fn(),
+        onDeleteLocationAPI: jest.fn(),
         deleteLoading: false,
         createLoading: false,
       });
@@ -146,7 +148,7 @@ describe('<ManagePrivateLocations />', () => {
             error: null,
           },
           privateLocations: {
-            isCreatePrivateLocationFlyoutVisible: false,
+            isPrivateLocationFlyoutVisible: false,
           },
         },
       });

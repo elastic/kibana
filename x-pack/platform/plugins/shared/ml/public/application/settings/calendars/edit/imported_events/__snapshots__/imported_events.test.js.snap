@@ -1,60 +1,364 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ImportedEvents Renders imported events 1`] = `
-<Fragment>
-  <EuiSpacer
-    size="s"
+<div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiFlexItem>
-    <EuiText>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiText emotion-euiText-m"
+    >
       <h4>
-        <MemoizedFormattedMessage
-          defaultMessage="Events to import: {eventsCount}"
-          id="xpack.ml.calendarsEdit.importedEvents.eventsToImportTitle"
-          values={
-            Object {
-              "eventsCount": 1,
-            }
-          }
-        />
+        Events to import: 1
       </h4>
-    </EuiText>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EventsTable
-      eventsList={
-        Array [
-          Object {
-            "calendar_id": "test-calendar",
-            "description": "test description",
-            "end_time": 1486657800000,
-            "event_id": "test-event-one",
-            "start_time": 1486656600000,
-          },
-        ]
-      }
-      onDeleteClick={[MockFunction]}
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
     />
-  </EuiFlexItem>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiCheckbox
-      checked={false}
-      id="ml-include-past-events"
-      label={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Include past events"
-          id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
+    <div
+      class="euiBasicTable"
+      data-test-subj="mlCalendarEventsTable"
+    >
+      <table
+        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
+      >
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
         />
-      }
-      onChange={[MockFunction]}
-    />
-  </EuiFlexItem>
-</Fragment>
+        <thead>
+          <tr>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_description_0"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              >
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Description"
+                    >
+                      Description
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              aria-sort="ascending"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_start_time_1"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              >
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Start"
+                    >
+                      <span>
+                        Start
+                      </span>
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortUp"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_end_time_2"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              >
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="End"
+                    >
+                      <span>
+                        End
+                      </span>
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <td
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell__3"
+              role="columnheader"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                />
+              </div>
+            </td>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
+        >
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            data-test-subj="mlCalendarEventListRow row-test description"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              scope="row"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  test description
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                2017-02-09 11:10:00
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                2017-02-09 11:30:00
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <button
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-danger"
+                  data-test-subj="mlCalendarEventDeleteButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      Delete
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiPopover emotion-euiPopover-inline-block"
+            >
+              <button
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+                data-test-subj="tablePaginationPopoverButton"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    Rows per page
+                    : 
+                    5
+                  </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <nav
+              aria-label="Pagination for table: "
+              class="euiPagination emotion-euiPagination"
+            >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                class="emotion-euiScreenReaderOnly"
+                role="status"
+              >
+                Page 1 of 1
+              </span>
+              <button
+                aria-label="Previous page"
+                class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+                data-test-subj="pagination-button-previous"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowLeft"
+                />
+              </button>
+              <ul
+                class="euiPagination__list emotion-euiPagination__list"
+              >
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-controls="__table_generated-id"
+                    aria-current="page"
+                    aria-label="Page 1 of 1"
+                    class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+                    data-test-subj="pagination-button-0"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    >
+                      <span
+                        class="eui-textTruncate euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page"
+                class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+                data-test-subj="pagination-button-next"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                />
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
+    >
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="empty"
+        />
+        <input
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="ml-include-past-events"
+          type="checkbox"
+        />
+      </div>
+      <label
+        class="euiCheckbox__label emotion-euiCheckbox__label"
+        for="ml-include-past-events"
+      >
+        Include past events
+      </label>
+    </div>
+  </div>
+</div>
 `;

@@ -380,7 +380,7 @@ exports[`Should render warning when some features failed import 1`] = `
   <EuiCallOut
     color="warning"
     data-test-subj="fileUploadStatusCallout"
-    iconType="help"
+    iconType="question"
     title="File upload complete with failures"
   >
     <p>

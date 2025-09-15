@@ -18,7 +18,7 @@ import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 export const pricingProductsSchema = schema.oneOf([
   schema.object({
     name: schema.literal('observability'),
-    tier: schema.oneOf([schema.literal('complete'), schema.literal('essentials')]),
+    tier: schema.oneOf([schema.literal('complete'), schema.literal('logs_essentials')]),
   }),
   schema.object({
     name: schema.literal('ai_soc'),

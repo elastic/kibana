@@ -101,6 +101,42 @@ describe('EventLogger', () => {
     expect(timeStampValue).toBeLessThanOrEqual(dateEnd);
   });
 
+  test('method logEvent() passes through doc ID if defined', async () => {
+    service.registerProviderActions('test-provider', ['test-action-1']);
+    eventLogger = service.getLogger({
+      event: { provider: 'test-provider', action: 'test-action-1' },
+    });
+
+    const dateStart = new Date().valueOf();
+    eventLogger.logEvent({}, 'abc');
+    const event = await waitForLogEvent(systemLogger);
+    const dateEnd = new Date().valueOf();
+
+    expect(event).toMatchObject({
+      id: 'abc',
+      event: {
+        provider: 'test-provider',
+        action: 'test-action-1',
+      },
+      '@timestamp': expect.stringMatching(/.*/),
+      ecs: {
+        version: ECS_VERSION,
+      },
+      kibana: {
+        server_uuid: '424-24-2424',
+        version: '1.0.1',
+      },
+    });
+
+    const $timeStamp = event!['@timestamp']!;
+    const timeStamp = new Date($timeStamp);
+    expect(timeStamp).not.toBeNaN();
+
+    const timeStampValue = timeStamp.valueOf();
+    expect(timeStampValue).toBeGreaterThanOrEqual(dateStart);
+    expect(timeStampValue).toBeLessThanOrEqual(dateEnd);
+  });
+
   test('method logEvent() merges event data', async () => {
     service.registerProviderActions('test-provider', ['a', 'b']);
     eventLogger = service.getLogger({

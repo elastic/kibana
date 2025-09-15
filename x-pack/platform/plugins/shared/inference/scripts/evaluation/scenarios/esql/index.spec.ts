@@ -176,6 +176,30 @@ const buildTestDefinitions = (): Section[] => {
       title: 'ES|QL commands and functions usage',
       tests: [
         {
+          title: 'using LOOKUP JOIN',
+          question: `
+          The user is working with both the "records" and "threats" indices. "threats" has the field "source.ip", "threat_level", "threat_type". "records" has the field "source.ip", "action", "timestamp".
+
+          Generate a query returning the 10 logs where threat_level is "high" or "medium", ordered by timestamp from most recent to oldest,
+          show only the source.ip, action, threat_level, and threat_type fields.
+
+          You should use the LOOKUP JOIN function to answer this question.
+
+          The relevant fields are:
+          - source.ip: keyword
+          - action: keyword
+          - threat_level: keyword
+          - threat_type: keyword
+          - timestamp: datetime
+          `,
+          expected: `FROM records
+          | LOOKUP JOIN threats ON source.ip
+          | WHERE threat_level IN ("high", "medium")
+          | SORT timestamp
+          | KEEP source.ip, action, threat_level, threat_type
+          | LIMIT 10`,
+        },
+        {
           title: 'using FLOOR and CEIL',
           question: `
           The user is visualizing the "paris_distance" index.

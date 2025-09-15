@@ -209,7 +209,7 @@ describe('builds navigation tree', () => {
               children: [
                 {
                   ...panelOpenerNode,
-                  href: '/foo/bar', // Panel opener with a link should not be converted to accordion
+                  href: '/foo/bar', // Panel opener with a link should also be converted to accordion when side nav is collapsed
                 },
               ],
             },
@@ -220,7 +220,7 @@ describe('builds navigation tree', () => {
 
       const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
 
-      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      expect(accordionButtonLabel).toEqual(['Group 1', 'Nested Group 1']);
       unmount();
     }
   });

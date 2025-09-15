@@ -123,6 +123,10 @@ Array [
     "taskType": "actions:.xmatters",
   },
   Object {
+    "cost": 1,
+    "taskType": "actions:.xsoar",
+  },
+  Object {
     "cost": 10,
     "taskType": "alerting:siem.indicatorRule",
   },

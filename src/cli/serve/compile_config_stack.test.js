@@ -255,7 +255,7 @@ describe('pricing tiers configuration', () => {
         pricing: {
           tiers: {
             enabled: true,
-            products: [{ name: 'observability', tier: 'essentials' }],
+            products: [{ name: 'observability', tier: 'logs_essentials' }],
           },
         },
         serverless: 'oblt',
@@ -270,7 +270,7 @@ describe('pricing tiers configuration', () => {
       'serverless.yml',
       'serverless.oblt.yml',
       'kibana.yml',
-      'serverless.oblt.essentials.yml',
+      'serverless.oblt.logs_essentials.yml',
     ]);
   });
 
@@ -318,7 +318,7 @@ describe('pricing tiers configuration', () => {
         pricing: {
           tiers: {
             enabled: true,
-            products: [{ name: 'observability', tier: 'essentials' }],
+            products: [{ name: 'observability', tier: 'logs_essentials' }],
           },
         },
       },
@@ -328,7 +328,7 @@ describe('pricing tiers configuration', () => {
       'serverless.yml',
       'serverless.oblt.yml',
       'kibana.yml',
-      'serverless.oblt.essentials.yml',
+      'serverless.oblt.logs_essentials.yml',
     ]);
   });
 
@@ -371,7 +371,7 @@ describe('pricing tiers configuration', () => {
         pricing: {
           tiers: {
             enabled: false,
-            products: [{ name: 'observability', tier: 'essentials' }],
+            products: [{ name: 'observability', tier: 'logs_essentials' }],
           },
         },
         serverless: 'oblt',
@@ -413,7 +413,7 @@ describe('pricing tiers configuration', () => {
             enabled: true,
             products: [
               { name: 'observability', tier: 'complete' },
-              { name: 'observability', tier: 'essentials' },
+              { name: 'observability', tier: 'logs_essentials' },
             ],
           },
         },

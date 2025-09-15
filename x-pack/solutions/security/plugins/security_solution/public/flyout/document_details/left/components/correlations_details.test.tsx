@@ -27,8 +27,9 @@ import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_re
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -43,11 +44,8 @@ jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../../shared/hooks/use_fetch_related_cases');
-
-jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
-  useTimelineDataFilters: jest.fn(),
-}));
-const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
+jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const renderCorrelationDetails = () => {
   return render(
@@ -68,7 +66,12 @@ const NO_DATA_MESSAGE = 'No correlations data available.';
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
+    (useEnableExperimental as jest.Mock).mockReturnValue({
+      newDataViewPickerEnabled: true,
+    });
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      indexPatterns: ['index'],
+    });
   });
 
   it('renders all sections', () => {

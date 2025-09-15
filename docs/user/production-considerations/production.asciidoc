@@ -50,6 +50,9 @@ logging:
 Settings that must be the same:
 [source,js]
 --------
+elasticsearch.username // If not using `elasticsearch.serviceAccountToken`.
+elasticsearch.password // If not using `elasticsearch.serviceAccountToken`.
+
 xpack.security.encryptionKey //decrypting session information
 xpack.security.authc.* // authentication configuration
 xpack.security.session.* // session configuration
@@ -97,8 +100,8 @@ In kibana.yml:
 [source,js]
 --------
 elasticsearch.hosts:
-  - http://elasticsearch1:9200
-  - http://elasticsearch2:9200
+  - <ES_HOST_1>:9200
+  - <ES_HOST_2>:9200
 --------
 
 Related configurations include `elasticsearch.sniffInterval`, `elasticsearch.sniffOnStart`, and `elasticsearch.sniffOnConnectionFault`.

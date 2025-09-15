@@ -17,7 +17,7 @@ function PageNotFound() {
     <ObservabilityPageTemplate data-test-subj="pageNotFound">
       <EuiCallOut
         color="warning"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage id="xpack.slo.notFoundPage.title" defaultMessage="Page Not Found" />
         }

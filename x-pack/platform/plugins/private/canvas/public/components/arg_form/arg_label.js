@@ -35,7 +35,7 @@ export const ArgLabel = (props) => {
           label={
             <EuiToolTip content={help}>
               <span>
-                {label} <EuiIcon type="iInCircle" color="subdued" />
+                {label} <EuiIcon type="info" color="subdued" />
               </span>
             </EuiToolTip>
           }

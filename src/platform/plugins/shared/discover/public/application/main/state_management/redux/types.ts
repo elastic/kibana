@@ -32,5 +32,6 @@ export interface DiscoverInternalState {
     columns: boolean;
     rowHeight: boolean;
     breakdownField: boolean;
+    hideChart: boolean;
   };
 }

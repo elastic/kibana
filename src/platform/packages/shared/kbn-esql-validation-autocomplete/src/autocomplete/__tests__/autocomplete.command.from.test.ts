@@ -110,6 +110,7 @@ describe('autocomplete.suggest', () => {
         const recommendedQueries = getRecommendedQueries({
           fromCommand: '',
           timeField: 'dateField',
+          categorizationField: 'textField',
         });
         const { assertSuggestions } = await setup();
         const expected = [

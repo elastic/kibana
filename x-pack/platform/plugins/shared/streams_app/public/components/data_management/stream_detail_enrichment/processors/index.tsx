@@ -6,6 +6,7 @@
  */
 
 import {
+  DraggableProvidedDragHandleProps,
   EuiButton,
   EuiForm,
   EuiSpacer,
@@ -43,7 +44,7 @@ import {
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
   useSimulatorSelector,
   StreamEnrichmentContextType,
   useGetStreamEnrichmentState,
@@ -60,7 +61,7 @@ export function AddProcessorPanel() {
 
   const { addProcessor } = useStreamEnrichmentEvents();
 
-  const processorRef = useStreamsEnrichmentSelector((state) =>
+  const processorRef = useStreamEnrichmentSelector((state) =>
     state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))
   );
   const processorMetrics = useSimulatorSelector(
@@ -68,7 +69,7 @@ export function AddProcessorPanel() {
   );
   const getEnrichmentState = useGetStreamEnrichmentState();
 
-  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
   const isOpen = Boolean(processorRef);
   const defaultValuesGetter = useCallback(
@@ -129,20 +130,31 @@ export function AddProcessorPanel() {
     addProcessor(draftProcessor);
   };
 
-  const buttonContent = isOpen ? (
-    i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.addingProcessor',
-      { defaultMessage: 'Adding processor' }
-    )
-  ) : (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiIcon type="plus" />
-      {i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorAction',
-        { defaultMessage: 'Add a processor' }
-      )}
-    </EuiFlexGroup>
-  );
+  if (!isOpen) {
+    return (
+      <EuiPanel
+        hasBorder
+        css={css`
+          border: ${euiTheme.border.thin};
+          box-shadow: none !important; // override default EuiPanel shadow on hover
+          transform: none !important; // override default EuiPanel transform on hover
+        `}
+        onClick={handleOpen}
+        type="button"
+        paddingSize="m"
+      >
+        <EuiPanel hasShadow={false} color="transparent" paddingSize="xs">
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiIcon type="plus" />
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorAction',
+              { defaultMessage: 'Add a processor' }
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+    );
+  }
 
   return (
     <EuiPanel
@@ -152,43 +164,41 @@ export function AddProcessorPanel() {
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};
       `}
+      type="button"
     >
       <EuiAccordion
         id="add-processor-accordion"
-        arrowProps={{
-          css: { display: 'none' },
-        }}
-        buttonContent={buttonContent}
-        buttonElement="div"
-        forceState={isOpen ? 'open' : 'closed'}
-        onToggle={handleOpen}
+        arrowDisplay="none"
+        buttonContent={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.addingProcessor',
+          { defaultMessage: 'Adding processor' }
+        )}
+        forceState="open"
         extraAction={
-          isOpen ? (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty
-                data-test-subj="streamsAppAddProcessorPanelCancelButton"
-                onClick={handleCancel}
-                size="s"
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
-                  { defaultMessage: 'Cancel' }
-                )}
-              </EuiButtonEmpty>
-              <EuiButton
-                data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
-                size="s"
-                fill
-                onClick={methods.handleSubmit(handleSubmit)}
-                disabled={!methods.formState.isValid && methods.formState.isSubmitted}
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmAddProcessor',
-                  { defaultMessage: 'Add processor' }
-                )}
-              </EuiButton>
-            </EuiFlexGroup>
-          ) : null
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiButtonEmpty
+              data-test-subj="streamsAppAddProcessorPanelCancelButton"
+              onClick={handleCancel}
+              size="s"
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
+                { defaultMessage: 'Cancel' }
+              )}
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
+              size="s"
+              fill
+              onClick={methods.handleSubmit(handleSubmit)}
+              disabled={!methods.formState.isValid && methods.formState.isSubmitted}
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmAddProcessor',
+                { defaultMessage: 'Add processor' }
+              )}
+            </EuiButton>
+          </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
@@ -227,16 +237,22 @@ const createDraftProcessorFromForm = (
 };
 
 export interface EditProcessorPanelProps {
+  dragHandleProps: DraggableProvidedDragHandleProps | null;
   processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
 }
 
-export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
+export function EditProcessorPanel({
+  dragHandleProps,
+  processorRef,
+  processorMetrics,
+}: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
-  const grokCollection = useStreamsEnrichmentSelector((_state) => _state.context.grokCollection);
-  const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
+
+  const canEdit = useStreamEnrichmentSelector((s) => s.context.definition.privileges.simulate);
+  const grokCollection = useStreamEnrichmentSelector((_state) => _state.context.grokCollection);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 
@@ -313,7 +329,9 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
     <strong>{processor.type.toUpperCase()}</strong>
   ) : (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiIcon type="grab" />
+      <EuiPanel hasShadow={false} color="transparent" paddingSize="xs" {...dragHandleProps}>
+        <EuiIcon type="grab" />
+      </EuiPanel>
       <strong>{processor.type.toUpperCase()}</strong>
       <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
         {processorDescription}

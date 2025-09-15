@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 /**
  * The definition of the validation config schema
- * @private
+ * @internal
  */
 const configSchema = schema.object({
   overrides: schema.maybe(schema.recordOf(schema.string(), schema.any())),
@@ -20,7 +20,7 @@ const configSchema = schema.object({
 
 /**
  * Type definition of the Feature Flags configuration
- * @private
+ * @internal
  */
 export interface FeatureFlagsConfig {
   overrides?: Record<string, unknown>;
@@ -28,7 +28,7 @@ export interface FeatureFlagsConfig {
 
 /**
  * Config descriptor for the feature flags service
- * @private
+ * @internal
  */
 export const featureFlagsConfig: ServiceConfigDescriptor<FeatureFlagsConfig> = {
   /**

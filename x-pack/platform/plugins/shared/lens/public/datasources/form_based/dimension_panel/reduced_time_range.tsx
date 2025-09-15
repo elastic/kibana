@@ -127,7 +127,7 @@ export function ReducedTimeRange({
                 }}
                 position="top"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </>
           ) : (

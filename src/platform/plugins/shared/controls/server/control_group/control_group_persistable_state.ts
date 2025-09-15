@@ -11,7 +11,7 @@ import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
-} from '@kbn/embeddable-plugin/common/types';
+} from '@kbn/embeddable-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
 import type { ControlPanelsState, SerializedControlState } from '../../common';

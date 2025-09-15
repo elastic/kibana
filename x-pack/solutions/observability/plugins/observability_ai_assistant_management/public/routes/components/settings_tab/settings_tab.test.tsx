@@ -10,20 +10,28 @@ import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  E5_SMALL_INFERENCE_ID,
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  KnowledgeBaseState,
+  LEGACY_CUSTOM_INFERENCE_ID,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import {
   useKnowledgeBase,
   useGenAIConnectors,
   useInferenceEndpoints,
 } from '@kbn/ai-assistant/src/hooks';
+import { useProductDoc } from '../../../hooks/use_product_doc';
 
 jest.mock('../../../hooks/use_app_context');
 jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_product_doc');
 jest.mock('@kbn/ai-assistant/src/hooks');
 
 const useAppContextMock = useAppContext as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
+const useProductDocMock = useProductDoc as jest.Mock;
 const useGenAIConnectorsMock = useGenAIConnectors as jest.Mock;
 const useInferenceEndpointsMock = useInferenceEndpoints as jest.Mock;
 const navigateToAppMock = jest.fn(() => Promise.resolve());
@@ -38,6 +46,14 @@ describe('SettingsTab', () => {
     });
     useKibanaMock.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockImplementation((flag) => {
+            if (flag === 'aiAssistant.defaultLlmSettingEnabled') {
+              return true;
+            }
+            return false;
+          }),
+        },
         application: {
           getUrlForApp: getUrlForAppMock,
           capabilities: {
@@ -48,6 +64,11 @@ describe('SettingsTab', () => {
           basePath: { prepend: prependMock },
         },
         productDocBase: undefined,
+        notifications: {
+          toasts: {
+            add: jest.fn(),
+          },
+        },
       },
     });
     useKnowledgeBaseMock.mockReturnValue({
@@ -56,7 +77,23 @@ describe('SettingsTab', () => {
       isPolling: false,
       isWarmingUpModel: false,
     });
-    useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
+    useProductDocMock.mockReturnValue({
+      status: 'uninstalled',
+      isLoading: false,
+      installProductDoc: jest.fn().mockResolvedValue({}),
+      uninstallProductDoc: jest.fn().mockResolvedValue({}),
+    });
+    useGenAIConnectorsMock.mockReturnValue({
+      connectors: [
+        {
+          id: 'test-connector',
+          name: 'Test Connector',
+          isPreconfigured: false,
+          actionTypeId: 'test-action-type',
+        },
+      ],
+      loading: false,
+    });
     useInferenceEndpointsMock.mockReturnValue({
       inferenceEndpoints: [{ id: 'test-endpoint', inference_id: 'test-inference-id' }],
       isLoading: false,
@@ -101,7 +138,7 @@ describe('SettingsTab', () => {
   });
 
   it('should not show knowledge base model section when no connectors exist', () => {
-    useGenAIConnectorsMock.mockReturnValue({ connectors: [] });
+    useGenAIConnectorsMock.mockReturnValue({ connectors: [], loading: false });
 
     const { queryByTestId } = render(<SettingsTab />, {
       coreStart: {
@@ -130,5 +167,61 @@ describe('SettingsTab', () => {
 
     expect(getByTestId('observabilityAiAssistantKnowledgeBaseLoadingSpinner')).toBeInTheDocument();
     expect(getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton')).toBeDisabled();
+  });
+
+  describe('should call useProductDoc with the correct inference ID', () => {
+    it('calls useProductDoc with ELSER_ON_ML_NODE_INFERENCE_ID when inference ID is LEGACY_CUSTOM_INFERENCE_ID', async () => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            enabled: true,
+            kbState: KnowledgeBaseState.READY,
+            currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
+          },
+        },
+        isInstalling: false,
+        isPolling: false,
+        isWarmingUpModel: false,
+      });
+      render(<SettingsTab />);
+
+      expect(useProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
+    });
+
+    it('calls useProductDoc with the current inference ID when inference ID is not LEGACY_CUSTOM_INFERENCE_ID"', async () => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            enabled: true,
+            kbState: KnowledgeBaseState.READY,
+            currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+          },
+        },
+        isInstalling: false,
+        isPolling: false,
+        isWarmingUpModel: false,
+      });
+      render(<SettingsTab />);
+
+      expect(useProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
+    });
+
+    it('calls useProductDoc with the current inference ID when inference ID is not E5_SMALL_INFERENCE_ID"', async () => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            enabled: true,
+            kbState: KnowledgeBaseState.READY,
+            currentInferenceId: E5_SMALL_INFERENCE_ID,
+          },
+        },
+        isInstalling: false,
+        isPolling: false,
+        isWarmingUpModel: false,
+      });
+      render(<SettingsTab />);
+
+      expect(useProductDoc).toHaveBeenCalledWith(E5_SMALL_INFERENCE_ID);
+    });
   });
 });

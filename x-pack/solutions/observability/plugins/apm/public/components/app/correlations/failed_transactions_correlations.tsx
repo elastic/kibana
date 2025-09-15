@@ -117,7 +117,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   content={i18n.translate(
                     'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
@@ -148,7 +148,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   content={i18n.translate(
                     'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageDescription',
@@ -177,7 +177,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   content={i18n.translate(
                     'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageDescription',
@@ -210,7 +210,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
             <EuiIconTip
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               content={i18n.translate(
                 'xpack.apm.correlations.failedTransactions.correlationsTable.scoreTooltip',
@@ -482,7 +482,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                   'Enable additional statistical information for the correlation results.',
               }
             )}
-            type="questionInCircle"
+            type="question"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

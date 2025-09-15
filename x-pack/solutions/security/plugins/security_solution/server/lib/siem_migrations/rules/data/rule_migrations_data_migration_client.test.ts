@@ -44,8 +44,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
   describe('create', () => {
     test('should create a new migration', async () => {
       const index = '.kibana-siem-rule-migrations';
+      const name = 'test name';
 
-      const result = await ruleMigrationsDataMigrationClient.create();
+      const result = await ruleMigrationsDataMigrationClient.create(name);
 
       expect(result).not.toBeFalsy();
       expect(esClient.asInternalUser.create).toHaveBeenCalledWith({
@@ -55,6 +56,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         document: {
           created_by: currentUser.profile_uid,
           created_at: expect.any(String),
+          name,
         },
       });
     });
@@ -64,7 +66,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(ruleMigrationsDataMigrationClient.create()).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.create('test')).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.create).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
@@ -192,21 +194,11 @@ describe('RuleMigrationsDataMigrationClient', () => {
   });
 
   describe('updateLastExecution', () => {
-    const lastExecutionParams = {
-      started_at: new Date().toISOString(),
-      is_aborted: false,
-      error: '',
-      ended_at: new Date().toISOString(),
-      connector_id: 'testConnector',
-    };
-
+    const connectorId = 'testConnector';
     it('should update `started_at` & `connector_id` when called saveAsStarted', async () => {
       const migrationId = 'testId';
 
-      await ruleMigrationsDataMigrationClient.saveAsStarted({
-        id: migrationId,
-        connectorId: lastExecutionParams.connector_id,
-      });
+      await ruleMigrationsDataMigrationClient.saveAsStarted({ id: migrationId, connectorId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -215,20 +207,21 @@ describe('RuleMigrationsDataMigrationClient', () => {
         doc: {
           last_execution: {
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
-            is_aborted: false,
+            is_stopped: false,
             error: null,
-            ended_at: null,
-            connector_id: 'testConnector',
+            finished_at: null,
+            connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
           },
         },
         retry_on_conflict: 1,
       });
     });
 
-    it('should update `ended_at` when called saveAsEnded', async () => {
+    it('should update `finished_at` when called saveAsEnded', async () => {
       const migrationId = 'testId';
 
-      await ruleMigrationsDataMigrationClient.saveAsEnded({ id: migrationId });
+      await ruleMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -236,17 +229,17 @@ describe('RuleMigrationsDataMigrationClient', () => {
         refresh: 'wait_for',
         doc: {
           last_execution: {
-            ended_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },
         retry_on_conflict: 1,
       });
     });
 
-    it('should update `is_aborted` & `ended_at` correctly when called setIsAborted', async () => {
+    it('should update `is_stopped` correctly when called setIsStopped', async () => {
       const migrationId = 'testId';
 
-      await ruleMigrationsDataMigrationClient.setIsAborted({ id: migrationId });
+      await ruleMigrationsDataMigrationClient.setIsStopped({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -254,7 +247,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         refresh: 'wait_for',
         doc: {
           last_execution: {
-            is_aborted: true,
+            is_stopped: true,
           },
         },
         retry_on_conflict: 1,
@@ -276,7 +269,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         doc: {
           last_execution: {
             error: 'Test error',
-            ended_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },
         retry_on_conflict: 1,

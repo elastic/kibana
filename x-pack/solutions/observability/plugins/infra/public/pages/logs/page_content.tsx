@@ -18,9 +18,9 @@ import {
   type ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { safeDecode } from '@kbn/rison';
-import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { isDevMode } from '@kbn/xstate-utils';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { safeDecode } from '@kbn/rison';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -31,15 +31,19 @@ import { NotFoundPage } from '../404';
 import { getLogsAppRoutes } from './routes';
 
 const StreamPage = dynamic(() => import('./stream').then((mod) => ({ default: mod.StreamPage })));
+
 const LogEntryCategoriesPage = dynamic(() =>
   import('./log_entry_categories').then((mod) => ({ default: mod.LogEntryCategoriesPage }))
 );
+
 const LogEntryRatePage = dynamic(() =>
   import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
+
 const LogsSettingsPage = dynamic(() =>
   import('./settings').then((mod) => ({ default: mod.LogsSettingsPage }))
 );
+
 const StateMachinePlayground = dynamic(() =>
   import('../../observability_logs/xstate_helpers').then((mod) => ({
     default: mod.StateMachinePlayground,
@@ -130,11 +134,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         )}
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
-        <RedirectWithQueryParams
-          from={'/'}
-          to={routes.stream?.path ?? routes.logsAnomalies.path}
-          exact
-        />
+        <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
 
         <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>

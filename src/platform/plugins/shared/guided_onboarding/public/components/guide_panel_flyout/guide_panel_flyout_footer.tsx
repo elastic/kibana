@@ -32,7 +32,7 @@ export const GuidePanelFlyoutFooter = ({
       >
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType="questionInCircle"
+            iconType="question"
             iconSide="right"
             href="https://cloud.elastic.co/support "
             target="_blank"

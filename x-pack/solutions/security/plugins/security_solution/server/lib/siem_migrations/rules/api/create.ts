@@ -6,8 +6,12 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
-import { type CreateRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  type CreateRuleMigrationResponse,
+  CreateRuleMigrationRequestBody,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
@@ -26,8 +30,11 @@ export const registerSiemRuleMigrationsCreateRoute = (
     .addVersion(
       {
         version: '1',
-        // no request body or params to validate
-        validate: false,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(CreateRuleMigrationRequestBody),
+          },
+        },
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
@@ -36,8 +43,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
             await siemMigrationAuditLogger.logCreateMigration();
-
-            const migrationId = await ruleMigrationsClient.data.migrations.create();
+            const migrationId = await ruleMigrationsClient.data.migrations.create(req.body.name);
 
             return res.ok({ body: { migration_id: migrationId } });
           } catch (error) {

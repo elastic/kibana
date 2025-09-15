@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
@@ -14,7 +14,8 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import { MetricItemExtra } from './metric_item_extra';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -29,11 +30,10 @@ import {
 import { formatDuration } from '../../../../../utils/formatting';
 import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
-import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
 import { FlyoutParamProps } from '../types';
 
-const METRIC_ITEM_HEIGHT = 160;
+export const METRIC_ITEM_HEIGHT = 180;
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -53,6 +53,16 @@ export const getColor = (
     default:
       return theme.eui.euiColorVis0_behindText;
   }
+};
+
+const truncateText = (text: string) => {
+  // truncate from middle if longer than maxLength
+  const maxLength = 100;
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const halfLength = Math.floor(maxLength / 2);
+  return `${text.slice(0, halfLength)}…${text.slice(-halfLength)}`;
 };
 
 export const MetricItem = ({
@@ -78,9 +88,45 @@ export const MetricItem = ({
 
   const dispatch = useDispatch();
 
+  const trendMessage = useMemo(() => {
+    if (trendData === 'loading') {
+      return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.loadingCase', {
+        defaultMessage: 'Metrics are loading and have no value to display.',
+      });
+    }
+
+    if (!trendData) {
+      return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.noData', {
+        defaultMessage: 'No data available for the selected time window.',
+      });
+    }
+
+    return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage', {
+      defaultMessage:
+        'The duration statistics currently shown by the chart are: average: {avg}, median: {median}, max: {max}, min: {min}.',
+      values: {
+        max: trendData.max,
+        min: trendData.min,
+        median: trendData.median,
+        avg: trendData.avg,
+      },
+    });
+  }, [trendData]);
+
   return (
     <div
       data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
+      aria-label={i18n.translate('xpack.synthetics.overview.metricItem.label', {
+        defaultMessage:
+          'Monitor {name} in {location}. The background of this element also contains a sparkline chart indicating the status of test duration over the selected time window. {trendMessage}',
+        values: {
+          name: monitor.name,
+          location: locationName,
+          trendMessage,
+        },
+      })}
+      // this is the ID the Chart child will expect in its `aria-labelledby` attribute
+      id={`echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-title_echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-description`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel
@@ -108,10 +154,13 @@ export const MetricItem = ({
             pointer-events: auto;
             opacity: 1;
           }
+          .echMetricText__body {
+            overflow: visible;
+          }
         `}
         title={moment(timestamp).format('LLL')}
       >
-        <Chart>
+        <Chart id={`${monitor.configId}-${monitor.locationId}-metric-chart`}>
           <Settings
             onElementClick={() => {
               if (testInProgress) {
@@ -127,7 +176,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
-                  spaceId: monitor.spaceId,
+                  spaces: monitor.spaces,
                 });
               }
             }}
@@ -139,7 +188,7 @@ export const MetricItem = ({
             data={[
               [
                 {
-                  title: monitor.name,
+                  title: truncateText(monitor.name),
                   subtitle: locationName,
                   value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
                   trendShape: MetricTrendShape.Area,
@@ -155,12 +204,12 @@ export const MetricItem = ({
                         }}
                       />
                     ) : trendData === 'loading' ? (
-                      <div>
+                      <span>
                         <FormattedMessage
-                          defaultMessage="Loading metrics"
+                          defaultMessage="..."
                           id="xpack.synthetics.overview.metricItem.loadingMessage"
                         />
-                      </div>
+                      </span>
                     ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),

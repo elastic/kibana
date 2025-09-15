@@ -78,7 +78,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
         defaultMessage: "There's a new, better way to explore your logs!",
       })}
       color="warning"
-      iconType="iInCircle"
+      iconType="info"
       heading="h2"
       onDismiss={() => setDismissed(true)}
       className={calloutStyle}

@@ -49,7 +49,7 @@ describe('useIntegrations', () => {
       rules: [
         {
           related_integrations: [{ package: 'splunk' }],
-          id: 'SplunkRuleId',
+          rule_id: 'SplunkRuleId',
         } as RuleResponse,
       ],
       isLoading: false,
@@ -111,7 +111,7 @@ describe('useIntegrations', () => {
       rules: [
         {
           related_integrations: [{ package: 'splunk' }],
-          id: 'SplunkRuleId',
+          rule_id: 'SplunkRuleId',
         } as RuleResponse,
       ],
       isLoading: false,

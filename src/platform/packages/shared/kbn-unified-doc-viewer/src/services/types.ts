@@ -50,32 +50,16 @@ export interface DocViewRenderProps {
   decreaseAvailableHeightBy?: number;
   initialTabId?: string;
 }
-export type DocViewerComponent = React.FC<DocViewRenderProps>;
-export type DocViewRenderFn = (
-  domeNode: HTMLDivElement,
-  renderProps: DocViewRenderProps
-) => () => void;
 
-export interface BaseDocViewInput {
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
+
+export interface DocView {
   id: string;
   order: number;
   title: string;
+  component: DocViewerComponent;
   enabled?: boolean;
 }
-
-export interface RenderDocViewInput extends BaseDocViewInput {
-  render: DocViewRenderFn;
-  component?: undefined;
-  directive?: undefined;
-}
-
-interface ComponentDocViewInput extends BaseDocViewInput {
-  component: DocViewerComponent;
-  render?: undefined;
-  directive?: undefined;
-}
-
-export type DocView = ComponentDocViewInput | RenderDocViewInput;
 
 export type DocViewFactory = () => DocView;
 

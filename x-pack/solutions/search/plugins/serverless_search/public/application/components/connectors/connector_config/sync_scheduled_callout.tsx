@@ -13,7 +13,7 @@ export const SyncScheduledCallOut: React.FC = () => {
   return (
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       title={i18n.translate('xpack.serverlessSearch.connectors.syncScheduledTitle', {
         defaultMessage: 'A sync has been scheduled',
       })}

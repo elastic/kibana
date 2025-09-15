@@ -44,8 +44,14 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('log highlight apis', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
+    before(() =>
+      esArchiver.load('x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs')
+    );
+    after(() =>
+      esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      )
+    );
 
     describe('/log_entries/highlights', () => {
       describe('with the default source', () => {

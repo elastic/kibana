@@ -35,6 +35,7 @@ import {
   useLink,
   useStartServices,
   sendGetFileByPath,
+  useConfig,
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -138,7 +139,7 @@ export const PrereleaseCallout: React.FC<{
             packageTitle,
           },
         })}
-        iconType="iInCircle"
+        iconType="info"
         color="warning"
       >
         {latestGAVersion && (
@@ -166,6 +167,7 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
 
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
+    const config = useConfig();
     const screenshots = useMemo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
@@ -295,6 +297,7 @@ export const OverviewPage: React.FC<Props> = memo(
     }, [h1, navItems]);
 
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
+    const hideDashboards = config?.hideDashboards;
 
     const [showAVCBanner, setShowAVCBanner] = useState(
       storage.get('securitySolution.showAvcBanner') ?? true
@@ -351,7 +354,7 @@ export const OverviewPage: React.FC<Props> = memo(
                 <Requirements />
               </EuiFlexItem>
             ) : null}
-            {screenshots.length ? (
+            {!hideDashboards && screenshots.length ? (
               <EuiFlexItem>
                 <Screenshots
                   images={screenshots}

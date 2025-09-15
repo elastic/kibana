@@ -35,6 +35,7 @@ export class ConnectorUsageReportingTask {
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
   private readonly usageApiUrl: string;
+  private readonly enabled: boolean;
 
   constructor({
     logger,
@@ -55,6 +56,7 @@ export class ConnectorUsageReportingTask {
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
     this.usageApiUrl = config.url;
+    this.enabled = config.enabled ?? true;
     const caCertificatePath = config.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
@@ -112,6 +114,15 @@ export class ConnectorUsageReportingTask {
 
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const { state } = taskInstance;
+
+    if (!this.enabled) {
+      this.logger.warn(
+        `Usage API is disabled, ${CONNECTOR_USAGE_REPORTING_TASK_TYPE} will be skipped`
+      );
+      return {
+        state,
+      };
+    }
 
     if (!this.projectId) {
       this.logger.warn(

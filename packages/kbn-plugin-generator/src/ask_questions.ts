@@ -70,7 +70,7 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
   },
   {
     name: 'X-Pack Functional Testing',
-    value: Path.resolve(REPO_ROOT, 'x-pack/test/plugin_functional/plugins'),
+    value: Path.resolve(REPO_ROOT, 'x-pack/platform/test/plugin_functional/plugins'),
   },
 ];
 

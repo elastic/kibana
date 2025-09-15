@@ -15,6 +15,16 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
+export const deanonymizationRt = t.type({
+  start: t.number,
+  end: t.number,
+  entity: t.type({
+    class_name: t.string,
+    value: t.string,
+    mask: t.string,
+  }),
+});
+
 export const messageRt: t.Type<Message> = t.type({
   '@timestamp': t.string,
   message: t.intersection([
@@ -45,6 +55,7 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
+      deanonymizations: t.array(deanonymizationRt),
     }),
   ]),
 });

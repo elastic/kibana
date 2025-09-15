@@ -48,13 +48,20 @@ export class HomePageObject extends FtrService {
   }
 
   async isSampleDataSetInstalled(id: string) {
-    const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    const installStatus = await (
-      await sampleDataCard.findByCssSelector('[data-status]')
-    ).getAttribute('data-status');
-    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
-    this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
-    return installStatus === 'installed' && deleteButton.length > 0;
+    try {
+      // The find timeout is short because we don't want to hang here. Calling this method happens within
+      // a parent `waitFor` which handles retries.
+      const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`, 500);
+      const installStatus = await (
+        await sampleDataCard.findByCssSelector('[data-status]')
+      ).getAttribute('data-status');
+      const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+      this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
+      return installStatus === 'installed' && deleteButton.length > 0;
+    } catch (e) {
+      this.log.debug(`Sample data card for [${id}] not found.`);
+      return false;
+    }
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -91,8 +98,7 @@ export class HomePageObject extends FtrService {
 
   async addSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    await this.retry.waitFor('sample data to be installed', async () => {
-      // count for the edge case where some how installation completes just before the retry occurs
+    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
       if (await this.isSampleDataSetInstalled(id)) {
         return true;
       }
@@ -113,7 +119,6 @@ export class HomePageObject extends FtrService {
   async removeSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
     await this.retry.waitFor('sample data to be removed', async () => {
-      // account for the edge case where some how data is uninstalled just before the retry occurs
       if (!(await this.isSampleDataSetInstalled(id))) {
         return true;
       }

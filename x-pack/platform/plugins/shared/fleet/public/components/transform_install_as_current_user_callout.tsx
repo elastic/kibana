@@ -28,7 +28,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
 }> = ({ count }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut color="primary" iconType="iInCircle">
+    <EuiCallOut color="primary" iconType="info">
       <FormattedMessage
         id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.text"
         defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink} which will be created and started with the same roles as the user installing the package."

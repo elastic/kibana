@@ -76,6 +76,7 @@ export {
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
+  LEGACY_CUSTOM_INFERENCE_ID,
 } from '../common';
 
 export type {
@@ -136,3 +137,8 @@ export {
   useElasticLlmCalloutDismissed,
   ElasticLlmCalloutKey,
 } from './hooks/use_elastic_llm_callout_dismissed';
+
+export {
+  ObservabilityAIAssistantFlyoutStateProvider,
+  useObservabilityAIAssistantFlyoutStateContext,
+} from './context/observability_ai_assistant_flyout_state_context';

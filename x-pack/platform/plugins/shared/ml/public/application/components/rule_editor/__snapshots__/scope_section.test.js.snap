@@ -1,200 +1,401 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ScopeSection don't render when no partitioning fields 1`] = `""`;
+exports[`ScopeSection don't render when no partitioning fields 1`] = `<div />`;
 
 exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut when no filter list IDs 1`] = `
-<Fragment>
-  <EuiTitle>
-    <h2>
-      <MemoizedFormattedMessage
-        defaultMessage="Scope"
-        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+<div>
+  <h2
+    class="euiTitle emotion-euiTitle-m"
+  >
+    Scope
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiCheckbox emotion-euiCheckbox"
+  >
+    <div
+      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+    >
+      <span
+        class="emotion-euiCheckbox__icon-check"
+        data-euiicon-type="check"
       />
-    </h2>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiCheckbox
-    checked={true}
-    id="enable_scope_checkbox"
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Add a filter list to limit where the job rule applies."
-        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+      <input
+        checked=""
+        class="euiCheckbox__input emotion-euiCheckbox__input"
+        id="enable_scope_checkbox"
+        type="checkbox"
       />
-    }
-    onChange={[MockFunction]}
+    </div>
+    <label
+      class="euiCheckbox__label emotion-euiCheckbox__label"
+      for="enable_scope_checkbox"
+    >
+      Add a filter list to limit where the job rule applies.
+    </label>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiSpacer
-    size="s"
+  <div
+    class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+  >
+    <p
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="gear"
+      />
+      You do not have permission to view filter lists
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
   />
-  <NoPermissionCallOut />
-  <EuiSpacer
-    size="xxl"
-  />
-</Fragment>
+</div>
 `;
 
 exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
-<Fragment>
-  <EuiTitle>
-    <h2>
-      <MemoizedFormattedMessage
-        defaultMessage="Scope"
-        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+<div>
+  <h2
+    class="euiTitle emotion-euiTitle-m"
+  >
+    Scope
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiCheckbox emotion-euiCheckbox"
+  >
+    <div
+      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+    >
+      <span
+        class="emotion-euiCheckbox__icon-check"
+        data-euiicon-type="check"
       />
-    </h2>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiCheckbox
-    checked={true}
-    id="enable_scope_checkbox"
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Add a filter list to limit where the job rule applies."
-        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+      <input
+        checked=""
+        class="euiCheckbox__input emotion-euiCheckbox__input"
+        id="enable_scope_checkbox"
+        type="checkbox"
       />
-    }
-    onChange={[MockFunction]}
+    </div>
+    <label
+      class="euiCheckbox__label emotion-euiCheckbox__label"
+      for="enable_scope_checkbox"
+    >
+      Add a filter list to limit where the job rule applies.
+    </label>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiSpacer
-    size="s"
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
+          />
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="scope_cb_domain"
+            type="checkbox"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          when
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          domain
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="operatorValuePopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            is in
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            web_domains
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
   />
-  <ScopeExpression
-    enabled={false}
-    fieldName="domain"
-    filterId="web_domains"
-    filterListIds={
-      Array [
-        "web_domains",
-        "safe_domains",
-        "uk_domains",
-      ]
-    }
-    filterType="include"
-    key="0"
-    updateScope={[MockFunction]}
-  />
-  <EuiSpacer
-    size="xxl"
-  />
-</Fragment>
+</div>
 `;
 
 exports[`ScopeSection renders when enabled with scope supplied 1`] = `
-<Fragment>
-  <EuiTitle>
-    <h2>
-      <MemoizedFormattedMessage
-        defaultMessage="Scope"
-        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+<div>
+  <h2
+    class="euiTitle emotion-euiTitle-m"
+  >
+    Scope
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiCheckbox emotion-euiCheckbox"
+  >
+    <div
+      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+    >
+      <span
+        class="emotion-euiCheckbox__icon-check"
+        data-euiicon-type="check"
       />
-    </h2>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiCheckbox
-    checked={true}
-    id="enable_scope_checkbox"
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Add a filter list to limit where the job rule applies."
-        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+      <input
+        checked=""
+        class="euiCheckbox__input emotion-euiCheckbox__input"
+        id="enable_scope_checkbox"
+        type="checkbox"
       />
-    }
-    onChange={[MockFunction]}
+    </div>
+    <label
+      class="euiCheckbox__label emotion-euiCheckbox__label"
+      for="enable_scope_checkbox"
+    >
+      Add a filter list to limit where the job rule applies.
+    </label>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiSpacer
-    size="s"
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+          />
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="scope_cb_domain"
+            type="checkbox"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          when
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          domain
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="operatorValuePopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            is in
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            uk_domains
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
   />
-  <ScopeExpression
-    enabled={true}
-    fieldName="domain"
-    filterId="uk_domains"
-    filterListIds={
-      Array [
-        "web_domains",
-        "safe_domains",
-        "uk_domains",
-      ]
-    }
-    filterType="include"
-    key="0"
-    updateScope={[MockFunction]}
-  />
-  <EuiSpacer
-    size="xxl"
-  />
-</Fragment>
+</div>
 `;
 
 exports[`ScopeSection renders when not enabled 1`] = `
-<Fragment>
-  <EuiTitle>
-    <h2>
-      <MemoizedFormattedMessage
-        defaultMessage="Scope"
-        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+<div>
+  <h2
+    class="euiTitle emotion-euiTitle-m"
+  >
+    Scope
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiCheckbox emotion-euiCheckbox"
+  >
+    <div
+      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+    >
+      <span
+        class="emotion-euiCheckbox__icon-check"
+        data-euiicon-type="empty"
       />
-    </h2>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiCheckbox
-    checked={false}
-    id="enable_scope_checkbox"
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Add a filter list to limit where the job rule applies."
-        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+      <input
+        class="euiCheckbox__input emotion-euiCheckbox__input"
+        id="enable_scope_checkbox"
+        type="checkbox"
       />
-    }
-    onChange={[MockFunction]}
+    </div>
+    <label
+      class="euiCheckbox__label emotion-euiCheckbox__label"
+      for="enable_scope_checkbox"
+    >
+      Add a filter list to limit where the job rule applies.
+    </label>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiSpacer
-    size="s"
+  <div
+    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
   />
-  <EuiSpacer
-    size="xxl"
-  />
-</Fragment>
+</div>
 `;
 
 exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
-<Fragment>
-  <EuiTitle>
-    <h2>
-      <MemoizedFormattedMessage
-        defaultMessage="Scope"
-        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+<div>
+  <h2
+    class="euiTitle emotion-euiTitle-m"
+  >
+    Scope
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiCheckbox emotion-euiCheckbox"
+  >
+    <div
+      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+    >
+      <span
+        class="emotion-euiCheckbox__icon-check"
+        data-euiicon-type="check"
       />
-    </h2>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiCheckbox
-    checked={true}
-    id="enable_scope_checkbox"
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Add a filter list to limit where the job rule applies."
-        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+      <input
+        checked=""
+        class="euiCheckbox__input emotion-euiCheckbox__input"
+        id="enable_scope_checkbox"
+        type="checkbox"
       />
-    }
-    onChange={[MockFunction]}
+    </div>
+    <label
+      class="euiCheckbox__label emotion-euiCheckbox__label"
+      for="enable_scope_checkbox"
+    >
+      Add a filter list to limit where the job rule applies.
+    </label>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiSpacer
-    size="s"
+  <div
+    class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+  >
+    <p
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="gear"
+      />
+      No filter lists configured
+    </p>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <p>
+        To configure scope, you must first use the 
+        <button
+          class="euiLink emotion-euiLink-primary"
+          type="button"
+        >
+          Filter Lists
+        </button>
+         settings page to create the list of values you want to include or exclude in the job rule.
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
   />
-  <NoFilterListsCallOut />
-  <EuiSpacer
-    size="xxl"
-  />
-</Fragment>
+</div>
 `;

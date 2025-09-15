@@ -10,20 +10,31 @@
 const protocolAndDomainRE = /^(?:\w+:)?\/\/(\S+)$/;
 const localhostDomainRE = /^localhost[\:?\d]*(?:[^\:?\d]\S*)?$/;
 const nonLocalhostDomainRE = /^[^\s\.]+\.\S{2,}$/;
+const nonLocalhostDomainNoTldRE = /^[^\s\.]+$/;
 
-export const isUrl = (string: string) => {
+export const isUrl = (string: string, { requireTld = true }: { requireTld?: boolean } = {}) => {
   if (typeof string !== 'string') {
     return false;
   }
 
   const match = string.match(protocolAndDomainRE);
+
   if (!match) {
     return false;
   }
 
   const everythingAfterProtocol = match[1];
+
   if (!everythingAfterProtocol) {
     return false;
+  }
+
+  if (
+    !requireTld &&
+    (localhostDomainRE.test(everythingAfterProtocol) ||
+      nonLocalhostDomainNoTldRE.test(everythingAfterProtocol))
+  ) {
+    return true;
   }
 
   if (

@@ -17,7 +17,7 @@ import {
 
 /**
  * Generic method for checking all types of the UI Restrictions
- * @private
+ * @internal
  */
 const checkUIRestrictions = (
   key: string,

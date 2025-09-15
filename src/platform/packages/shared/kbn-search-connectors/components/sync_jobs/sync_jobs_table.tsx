@@ -74,7 +74,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
             {i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
               defaultMessage: 'Last sync',
             })}
-            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -101,7 +101,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
             {i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
               defaultMessage: 'Sync duration',
             })}
-            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -126,12 +126,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                   {i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
                     defaultMessage: 'Docs upserted',
                   })}
-                  <EuiIcon
-                    size="s"
-                    type="questionInCircle"
-                    color="subdued"
-                    className="eui-alignTop"
-                  />
+                  <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
                 </>
               </EuiToolTip>
             ),
@@ -154,12 +149,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                   {i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
                     defaultMessage: 'Docs deleted',
                   })}
-                  <EuiIcon
-                    size="s"
-                    type="questionInCircle"
-                    color="subdued"
-                    className="eui-alignTop"
-                  />
+                  <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
                 </>
               </EuiToolTip>
             ),

@@ -7,7 +7,7 @@
 
 export * from './errors';
 export * from './state_machine';
-export * from './types';
+export type * from './types';
 export * from './url_state_storage_service';
 export * from './time_filter_state_service';
 export * from './defaults';

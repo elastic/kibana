@@ -7,96 +7,105 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiIcon,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiLink,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { DataStreamResolutionType, DataStreamsAction } from '../../../../../../common/types';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { DataStreamMigrationStatus, DataStreamsAction } from '../../../../../../common/types';
 import { useDataStreamMigrationContext } from './context';
 import { LoadingState } from '../../../types';
+import { ActionButtonConfig, ActionButtons } from '../../common/action_buttons';
 
-const getI18nTexts = (
-  resolutionType?: DataStreamResolutionType,
-  excludedActions: Array<'readOnly' | 'reindex'> = []
-) => {
-  const resolutionAction = excludedActions.includes('readOnly')
-    ? 'reindex'
-    : excludedActions.includes('reindex')
-    ? 'readOnly'
-    : 'readOnlyOrReindex';
-
-  const resolutionTexts = {
-    readOnlyOrReindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReadOnlyOrReindexLabel',
-      {
-        defaultMessage: 'Mark as read-only, or reindex',
-      }
-    ),
-    readOnly: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReadOnlyLabel',
-      {
-        defaultMessage: 'Mark as read-only',
-      }
-    ),
-    reindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReindexLabel',
-      {
-        defaultMessage: 'Reindex',
-      }
-    ),
-  };
-
-  const resolutionTooltipLabels = {
-    readOnlyOrReindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyOrReindexLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by reindexing this data stream or marking its indices as read-only. This issue can be resolved automatically.',
-      }
-    ),
-    readOnly: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by marking its indices as read-only. This issue can be resolved automatically.',
-      }
-    ),
-    reindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReindexLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',
-      }
-    ),
-  };
-
-  return {
-    loadingStatusText: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLoadingActionsText',
-      {
-        defaultMessage: 'Loading actions…',
-      }
-    ),
-
-    resolutionText: resolutionTexts[resolutionAction],
-    resolutionTooltipLabel: resolutionTooltipLabels[resolutionAction],
-  };
+const actionsI18nTexts = {
+  readOnlyTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyLabel',
+    {
+      defaultMessage: 'Resolve this issue by setting its indices to read-only.',
+    }
+  ),
+  reindexTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReindexLabel',
+    {
+      defaultMessage: 'Resolve this issue by reindexing this data stream.',
+    }
+  ),
+  loadingStatusText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLoadingActionsText',
+    {
+      defaultMessage: 'Loading actions…',
+    }
+  ),
+  deleteTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipDeleteLabel',
+    {
+      defaultMessage: 'Resolve this issue by deleting this data stream.',
+    }
+  ),
 };
 
-export const DataStreamReindexActionsCell: React.FunctionComponent<{
+interface Props {
   correctiveAction: DataStreamsAction;
   openFlyout: () => void;
-}> = ({ correctiveAction, openFlyout }) => {
+  openModal: (migrationType: 'delete' | 'readonly') => void;
+}
+
+export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
+  correctiveAction,
+  openFlyout,
+  openModal,
+}) => {
   const { migrationState } = useDataStreamMigrationContext();
-  const i18nTexts = getI18nTexts(
-    migrationState.resolutionType,
-    correctiveAction.metadata.excludedActions
+  const reindexExcluded = correctiveAction.metadata.excludedActions?.includes('reindex');
+  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
+  const migrationInProgressOrCompleted =
+    migrationState.status === DataStreamMigrationStatus.inProgress ||
+    migrationState.status === DataStreamMigrationStatus.completed;
+
+  const canDisplayReadOnly = !!(
+    migrationState.hasRequiredPrivileges &&
+    !readOnlyExcluded &&
+    (!migrationInProgressOrCompleted ||
+      (migrationInProgressOrCompleted && migrationState.resolutionType === 'readonly'))
   );
+
+  const canDisplayReindex = !!(
+    migrationState.hasRequiredPrivileges &&
+    !reindexExcluded &&
+    (!migrationInProgressOrCompleted ||
+      (migrationInProgressOrCompleted && migrationState.resolutionType === 'reindex'))
+  );
+  const canDisplayDelete = !!(
+    migrationState.hasRequiredPrivileges &&
+    (!migrationInProgressOrCompleted ||
+      (migrationInProgressOrCompleted && migrationState.resolutionType === 'delete'))
+  );
+
+  const actions: ActionButtonConfig[] = [
+    {
+      tooltip: actionsI18nTexts.reindexTooltipLabel,
+      iconType: 'indexSettings',
+      canDisplay: canDisplayReindex,
+      resolutionType: 'reindex',
+      onClick: () => {
+        openFlyout();
+      },
+    },
+    {
+      tooltip: actionsI18nTexts.readOnlyTooltipLabel,
+      iconType: 'readOnly',
+      canDisplay: canDisplayReadOnly,
+      resolutionType: 'readonly',
+      onClick: () => {
+        openModal('readonly');
+      },
+    },
+    {
+      tooltip: actionsI18nTexts.deleteTooltipLabel,
+      iconType: 'trash',
+      canDisplay: canDisplayDelete,
+      resolutionType: 'delete',
+      onClick: () => {
+        openModal('delete');
+      },
+    },
+  ];
 
   if (migrationState.loadingState === LoadingState.Loading) {
     return (
@@ -105,24 +114,10 @@ export const DataStreamReindexActionsCell: React.FunctionComponent<{
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.loadingStatusText}</EuiText>
+          <EuiText size="s">{actionsI18nTexts.loadingStatusText}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
-
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiLink onClick={openFlyout} data-test-subj={`deprecation-${correctiveAction.type}`}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="indexSettings" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiLink>
-    </EuiToolTip>
-  );
+  return <ActionButtons actions={actions} dataTestSubjPrefix={correctiveAction.type} />;
 };

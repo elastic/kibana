@@ -15,8 +15,8 @@ fi
 echo "--- Push docker image"
 mkdir -p target
 
-download_artifact "kibana-cloud-$FULL_VERSION-docker-image.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-docker load < "target/kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
+download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+docker load < "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 
 TAG="$FULL_VERSION-$GIT_COMMIT"
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"
@@ -93,4 +93,4 @@ export TEST_BROWSER_HEADLESS=1
 export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 echo "--- FTR - Reporting"
-node --no-warnings scripts/functional_test_runner.js --config x-pack/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+node --no-warnings scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet

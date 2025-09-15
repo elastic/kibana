@@ -40,7 +40,7 @@ export const getScriptPaths = ({
   darkMode: DarkModeValue;
 }) => {
   if (darkMode === 'system') {
-    return [`${baseHref}/ui/legacy_theme.js`];
+    return [`${baseHref}/ui/bootstrap_system_theme_amsterdam.js`];
   } else {
     return [];
   }

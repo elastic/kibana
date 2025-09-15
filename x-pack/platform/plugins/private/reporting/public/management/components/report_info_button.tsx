@@ -40,7 +40,7 @@ export const ReportInfoButton: FunctionComponent<Props> = ({ job, onClick }) => 
     <EuiToolTip position="top" content={message}>
       <EuiButtonEmpty
         onClick={onClick}
-        iconType="iInCircle"
+        iconType="info"
         color="primary"
         data-test-subj="reportInfoButton"
         aria-label={showReportInfoCopy}

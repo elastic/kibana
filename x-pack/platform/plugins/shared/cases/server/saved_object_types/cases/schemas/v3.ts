@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { casesSchema as casesSchemaV2 } from './v2';
 
 export const casesSchema = casesSchemaV2.extends({

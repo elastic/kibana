@@ -25,7 +25,6 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
@@ -41,10 +40,8 @@ import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
-import { CodeBlockDetails } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
@@ -58,6 +55,7 @@ import {
   useAssistantLastConversation,
   useAssistantSpaceId,
 } from './use_space_aware_context';
+import { AssistantConversationBanner } from './assistant_conversation_banner';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -204,15 +202,19 @@ const AssistantComponent: React.FC<Props> = ({
 
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
 
-  const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
+    let unmountFunc = () => {};
     if (currentConversation) {
       // need in order for code block controls to be added to the DOM
       setTimeout(() => {
-        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
+        unmountFunc = augmentMessageCodeBlocks.mount({ currentConversation, showAnonymizedValues });
       }, 0);
     }
+
+    return () => {
+      unmountFunc();
+    };
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
   // Keyboard shortcuts to toggle the visibility of content references and anonymized values
@@ -371,26 +373,6 @@ const AssistantComponent: React.FC<Props> = ({
     setUserPrompt,
   ]);
 
-  const createCodeBlockPortals = useCallback(
-    () =>
-      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
-        return (
-          <span key={`${i}`}>
-            {codeBlocks.map((codeBlock: CodeBlockDetails, j: number) => {
-              const getElement = codeBlock.getControlContainer;
-              const element = getElement?.();
-              return (
-                <span key={`${i}+${j}`}>
-                  {element ? createPortal(codeBlock.button, element) : <></>}
-                </span>
-              );
-            })}
-          </span>
-        );
-      }),
-    [messageCodeBlocks]
-  );
-
   const comments = useMemo(
     () => (
       <>
@@ -511,9 +493,6 @@ const AssistantComponent: React.FC<Props> = ({
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     setPaginationObserver={setPaginationObserver}
                   />
-
-                  {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-                  {createCodeBlockPortals()}
                 </EuiFlyoutHeader>
                 <EuiFlyoutBody
                   css={css`
@@ -538,12 +517,13 @@ const AssistantComponent: React.FC<Props> = ({
                   `}
                   banner={
                     !isDisabled &&
-                    showMissingConnectorCallout &&
                     isFetchedConnectors && (
-                      <ConnectorMissingCallout
-                        isConnectorConfigured={(connectors?.length ?? 0) > 0}
+                      <AssistantConversationBanner
                         isSettingsModalVisible={isSettingsModalVisible}
                         setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        shouldShowMissingConnectorCallout={showMissingConnectorCallout}
+                        currentConversation={currentConversation}
+                        connectors={connectors}
                       />
                     )
                   }
@@ -559,6 +539,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
                     isWelcomeSetup={isWelcomeSetup}
+                    setUserPrompt={setUserPrompt}
                     setCurrentSystemPromptId={setCurrentSystemPromptId}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                   />

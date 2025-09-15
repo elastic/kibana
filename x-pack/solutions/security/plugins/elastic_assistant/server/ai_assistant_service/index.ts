@@ -27,6 +27,7 @@ import { omit, some } from 'lodash';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
@@ -49,7 +50,6 @@ import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clien
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import {
   ASSISTANT_ELSER_INFERENCE_ID,
-  ELASTICSEARCH_ELSER_INFERENCE_ID,
   knowledgeBaseFieldMap,
 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
@@ -290,7 +290,7 @@ export class AIAssistantService {
           type: 'semantic_text',
           array: false,
           required: false,
-          ...(targetInferenceEndpointId !== ELASTICSEARCH_ELSER_INFERENCE_ID
+          ...(targetInferenceEndpointId !== defaultInferenceEndpoints.ELSER
             ? { inference_id: targetInferenceEndpointId }
             : {}),
         },
@@ -374,7 +374,7 @@ export class AIAssistantService {
       if (isUsingDedicatedInferenceEndpoint) {
         this.knowledgeBaseDataStream = await this.rolloverDataStream(
           ASSISTANT_ELSER_INFERENCE_ID,
-          ELASTICSEARCH_ELSER_INFERENCE_ID
+          defaultInferenceEndpoints.ELSER
         );
       } else {
         // We need to make sure that the data stream is created with the correct mappings
@@ -542,7 +542,9 @@ export class AIAssistantService {
   }
 
   public async getProductDocumentationStatus(): Promise<InstallationStatus> {
-    const status = await this.productDocManager?.getStatus();
+    const status = await this.productDocManager?.getStatus({
+      inferenceId: defaultInferenceEndpoints.ELSER,
+    });
 
     if (!status) {
       return 'uninstalled';

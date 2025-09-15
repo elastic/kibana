@@ -6,6 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -14,7 +17,16 @@ import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/sched
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
-type AttackDiscoveryDataClientContract = PublicMethodsOf<AttackDiscoveryDataClient>;
+type AttackDiscoveryDataClientContract = PublicMethodsOf<AttackDiscoveryDataClient> & {
+  spaceId: AttackDiscoveryDataClient['spaceId'];
+  indexTemplateAndPattern: AttackDiscoveryDataClient['indexTemplateAndPattern'];
+  options: AttackDiscoveryDataClient['options'];
+  // additional properties that are accessed at runtime:
+  adhocAttackDiscoveryDataClient: unknown;
+  currentUser: unknown;
+  writerCache: unknown;
+  initializeWriter: unknown;
+};
 export type AttackDiscoveryDataClientMock = jest.Mocked<AttackDiscoveryDataClientContract>;
 type AttackDiscoveryScheduleDataClientContract = PublicMethodsOf<AttackDiscoveryScheduleDataClient>;
 export type AttackDiscoveryScheduleDataClientMock =
@@ -30,6 +42,7 @@ const createConversationsDataClientMock = () => {
     appendConversationMessages: jest.fn(),
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
+    deleteAllConversations: jest.fn(),
     getConversation: jest.fn(),
     updateConversation: jest.fn(),
     getReader: jest.fn(),
@@ -44,23 +57,54 @@ export const conversationsDataClientMock: {
   create: createConversationsDataClientMock,
 };
 
-const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => ({
-  bulkUpdateAttackDiscoveryAlerts: jest.fn(),
-  createAttackDiscovery: jest.fn(),
-  createAttackDiscoveryAlerts: jest.fn(),
-  findAllAttackDiscoveries: jest.fn(),
-  getAlertConnectorNames: jest.fn(),
-  getAttackDiscovery: jest.fn(),
-  findAttackDiscoveryAlerts: jest.fn(),
-  findDocuments: jest.fn(),
-  findAttackDiscoveryByConnectorId: jest.fn(),
-  getAttackDiscoveryGenerations: jest.fn(),
-  getAttackDiscoveryGenerationById: jest.fn(),
-  getReader: jest.fn(),
-  getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
-  refreshEventLogIndex: jest.fn(),
-  updateAttackDiscovery: jest.fn(),
-});
+const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => {
+  const mockDataClient = {
+    bulkUpdateAttackDiscoveryAlerts: jest.fn(),
+    createAttackDiscovery: jest.fn(),
+    getAdHocAlertsIndexPattern: jest.fn(),
+    getScheduledAndAdHocIndexPattern: jest.fn(),
+    createAttackDiscoveryAlerts: jest.fn(),
+    findAllAttackDiscoveries: jest.fn(),
+    getAlertConnectorNames: jest.fn(),
+    getAttackDiscovery: jest.fn(),
+    findAttackDiscoveryAlerts: jest.fn(),
+    findDocuments: jest.fn(),
+    findAttackDiscoveryByConnectorId: jest.fn(),
+    getAttackDiscoveryGenerations: jest.fn(),
+    getAttackDiscoveryGenerationById: jest.fn(),
+    getReader: jest.fn(),
+    getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+    refreshEventLogIndex: jest.fn(),
+    updateAttackDiscovery: jest.fn(),
+    // Properties from AIAssistantDataClient
+    spaceId: 'default',
+    indexTemplateAndPattern: {
+      alias: '.ds-.kibana-elastic-ai-assistant-attack-discovery-default',
+      pattern: '.ds-.kibana-elastic-ai-assistant-attack-discovery-default*',
+      basePattern: '.kibana-elastic-ai-assistant-attack-discovery',
+      name: '.ds-.kibana-elastic-ai-assistant-attack-discovery-default-000001',
+      validPrefixes: ['.ds-.kibana-elastic-ai-assistant-attack-discovery-default'],
+    },
+    options: {
+      elasticsearchClientPromise: Promise.resolve(
+        elasticsearchServiceMock.createElasticsearchClient()
+      ),
+      kibanaVersion: '8.0.0',
+      spaceId: 'default',
+      logger: loggingSystemMock.createLogger(),
+      indexPatternsResourceName: 'attackDiscovery',
+      currentUser: null,
+      adhocAttackDiscoveryDataClient: undefined,
+    },
+    // Additional properties that are accessed at runtime
+    adhocAttackDiscoveryDataClient: undefined,
+    currentUser: null,
+    writerCache: new Map(),
+    initializeWriter: jest.fn(),
+  } as AttackDiscoveryDataClientMock;
+
+  return mockDataClient;
+};
 
 export const attackDiscoveryDataClientMock: {
   create: () => AttackDiscoveryDataClientMock;
@@ -107,6 +151,7 @@ const createKnowledgeBaseDataClientMock = () => {
     getLoadedSecurityLabsDocsCount: jest.fn(),
     getProductDocumentationStatus: jest.fn(),
   };
+
   return mocked;
 };
 

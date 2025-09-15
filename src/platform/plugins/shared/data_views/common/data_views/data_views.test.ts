@@ -385,7 +385,7 @@ describe('IndexPatterns', () => {
     expect((await indexPatterns.get(id)).fields.length).toBe(1);
   });
 
-  test('existing indices, so dataView.matchedIndices.length equals 1 ', async () => {
+  test('existing indices, so dataView.matchedIndices.length equals 1 and hasMatchedIndices() returns true', async () => {
     const id = '1';
     setDocsourcePayload(id, {
       id: 'foo',
@@ -396,9 +396,10 @@ describe('IndexPatterns', () => {
     });
     const dataView = await indexPatterns.get(id);
     expect(dataView.matchedIndices.length).toBe(1);
+    expect(dataView.hasMatchedIndices()).toBe(true);
   });
 
-  test('missing indices, so dataView.matchedIndices.length equals 0 ', async () => {
+  test('missing indices, so dataView.matchedIndices.length equals 0 and hasMatchedIndices() returns false', async () => {
     const id = '1';
     setDocsourcePayload(id, {
       id: 'foo',
@@ -412,6 +413,7 @@ describe('IndexPatterns', () => {
     });
     const dataView = await indexPatterns.get(id);
     expect(dataView.matchedIndices.length).toBe(0);
+    expect(dataView.hasMatchedIndices()).toBe(false);
   });
 
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {

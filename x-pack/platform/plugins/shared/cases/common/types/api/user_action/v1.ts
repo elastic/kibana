@@ -26,8 +26,11 @@ export type UserActionWithResponse<T> = T & { id: string; version: string } & rt
  */
 export const CaseUserActionStatsRt = rt.strict({
   total: rt.number,
+  total_deletions: rt.number,
   total_comments: rt.number,
+  total_comment_deletions: rt.number,
   total_other_actions: rt.number,
+  total_other_action_deletions: rt.number,
 });
 
 export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;

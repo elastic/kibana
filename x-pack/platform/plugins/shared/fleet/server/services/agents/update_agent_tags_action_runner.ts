@@ -196,7 +196,7 @@ export async function updateTagsBatch(
         agentId: failure.id,
         actionId,
         namespace: spaceId,
-        error: failure.cause.reason,
+        error: failure.cause.reason ?? undefined, // reason can be null and we want to replace it with undefined
       }))
     );
     appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);

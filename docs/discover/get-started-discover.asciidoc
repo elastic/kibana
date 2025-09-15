@@ -236,7 +236,7 @@ hover your mouse over the *Field* or *Value* columns for filters and additional 
 ** Use the search above the table to filter for specific fields or values, or filter by field type using the options to the right of the search field.
 ** You can pin some fields by clicking the left column to keep them displayed even if you filter the table.
 +
-TIP: You can restrict the fields listed in the detailed view to just the fields that you explicitly added to the **Discover** table, using the **Selected only** toggle. In ES|QL mode, you also have an option to hide fields with null values.
+TIP: You can restrict the fields listed in the detailed view to just the fields that you explicitly added to the **Discover** table, using the **Selected only** toggle. In ES|QL mode, you also have an option to hide fields with null values. This toggle isn't available from the **View single document** page.
 
 . To navigate to a view of the document that you can bookmark and share, select **View single document**.
 
@@ -259,6 +259,8 @@ To search all fields, enter a simple string in the query bar.
 
 [role="screenshot"]
 image:images/discover-search-field.png[Search field in Discover]
+
+NOTE: Free text searches that don't specify a field may not return expected results depending on how the {ref}/index-modules.html#index-query-default-field[`index.query.default_field` index setting] is configured for the indices matching the current data view.
 
 To search particular fields and
 build more complex queries, use the <<kuery-query,Kibana Query language>>.
@@ -298,10 +300,11 @@ You can use **Discover** with the Elasticsearch Query Language, ES|QL. When usin
 you don't have to select a data view. It's your query that determines the data to explore and display in Discover.
 
 You can switch to the ES|QL mode of Discover from the application menu bar.
-
-TIP: If you've entered a KQL or Lucene query in the default mode of Discover, it automatically converts to {esql}.
+If you've entered a KQL or Lucene query in the default mode of Discover, it automatically converts to {esql}.
 
 Note that in ES|QL mode, the **Documents** tab is named **Results**.
+
+IMPORTANT: When an ES|QL query times out, partial results that are available are shown. The timeout is defined by the `search:timeout` advanced setting, which is set to 10 minutes (600000 ms) by default. In serverless projects, this advanced setting is not customizable and the timeout is set to 10 minutes.
 
 Learn more about how to use ES|QL queries in <<try-esql, Using ES|QL>>.
 

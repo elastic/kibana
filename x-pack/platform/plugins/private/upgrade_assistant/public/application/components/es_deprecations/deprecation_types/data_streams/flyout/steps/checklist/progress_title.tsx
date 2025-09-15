@@ -49,7 +49,7 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {}}"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {}}"
           values={{ resolutionType }}
         />
       );
@@ -58,7 +58,7 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
-          defaultMessage="Failed to {resolutionType, select, reindex {reindex} readonly {mark as read-only} other {}}"
+          defaultMessage="Failed to {resolutionType, select, reindex {reindex} readonly {set to read-only} other {}}"
           values={{ resolutionType }}
         />
       );
@@ -73,7 +73,7 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
-          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {}} cancelled"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {}} cancelled"
           values={{ resolutionType }}
         />
       );
@@ -81,7 +81,7 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
-          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {}} completed"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {}} completed"
           values={{ resolutionType }}
         />
       );
@@ -89,8 +89,9 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
     default: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Mark data stream as read-only} other {Unknown action}}"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.notStarted.reindexingDocumentsStepTitle"
+          defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Set data stream to read-only} other {Unknown action}}"
+          values={{ resolutionType }}
         />
       );
     }

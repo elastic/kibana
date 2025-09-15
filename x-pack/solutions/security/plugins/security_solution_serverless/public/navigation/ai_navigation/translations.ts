@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.socNavLinks.projectType.title',
-  { defaultMessage: 'AI for SOC' }
+  { defaultMessage: 'Elastic AI SOC Engine' }
 );
 export const ALERT_SUMMARY = i18n.translate(
   'xpack.securitySolutionServerless.navigation.aiSoc.alertSummary',
@@ -40,6 +40,6 @@ export const CALLOUT_DESCRIPTION = i18n.translate(
 export const CALLOUT_ARIA_LABEL = i18n.translate(
   'xpack.securitySolutionServerless.navigation.aiSoc.callout.ariaLabel',
   {
-    defaultMessage: 'Information about Elastic AI for SOC',
+    defaultMessage: 'Information about Elastic AI SOC Engine',
   }
 );

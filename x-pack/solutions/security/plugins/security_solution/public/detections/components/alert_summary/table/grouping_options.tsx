@@ -26,7 +26,7 @@ const RULE_NAME = i18n.translate('xpack.securitySolution.alertsTable.groups.rule
 /**
  * Returns a list of fields for the default grouping options. These are displayed in the `Group alerts by` dropdown button.
  * The default values are:
- * - signal.rule.id
+ * - signal.rule.rule_id
  * - kibana.alert.severity
  * - kibana.alert.rule.name
  *
@@ -35,7 +35,7 @@ const RULE_NAME = i18n.translate('xpack.securitySolution.alertsTable.groups.rule
 export const groupingOptions: GroupOption[] = [
   {
     label: INTEGRATION_NAME,
-    key: 'signal.rule.id',
+    key: 'signal.rule.rule_id',
   },
   {
     label: SEVERITY,

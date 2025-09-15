@@ -53,14 +53,10 @@ export function Uploader({ onUpload }: Props) {
   };
 
   return (
-    <EuiFormRow
-      isInvalid={Boolean(error)}
-      error={error}
-      aria-label={TESTING_SCRIPT_LABEL}
-      fullWidth
-    >
+    <EuiFormRow isInvalid={Boolean(error)} error={error} aria-label={FORM_ROW_LABEL} fullWidth>
       <EuiFilePicker
         id="syntheticsFleetScriptRecorderUploader"
+        aria-label={TESTING_SCRIPT_LABEL}
         data-test-subj="syntheticsFleetScriptRecorderUploader"
         ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
         initialPromptText={PROMPT_TEXT}
@@ -72,12 +68,16 @@ export function Uploader({ onUpload }: Props) {
   );
 }
 
-const TESTING_SCRIPT_LABEL = i18n.translate(
+const FORM_ROW_LABEL = i18n.translate(
   'xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.uploader.fieldLabel',
   {
     defaultMessage: 'Testing script',
   }
 );
+
+const TESTING_SCRIPT_LABEL = i18n.translate('xpack.synthetics.monitorEdit.uploader.ariaLabel', {
+  defaultMessage: 'Input for uploading a script file for your monitor',
+});
 
 const PROMPT_TEXT = i18n.translate('xpack.synthetics.monitorConfig.uploader.label', {
   defaultMessage: 'Select or drag and drop a .js file',

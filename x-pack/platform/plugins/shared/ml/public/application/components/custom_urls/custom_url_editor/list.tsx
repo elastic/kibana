@@ -211,8 +211,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       : [];
 
     return (
-      <>
-        <EuiFlexGroup key={`url_${index}`} data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
+      <React.Fragment key={`url_${index}`}>
+        <EuiFlexGroup data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
           <EuiFlexItem grow={false}>
             <EuiFormRow
               label={
@@ -341,7 +341,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-      </>
+      </React.Fragment>
     );
   });
 

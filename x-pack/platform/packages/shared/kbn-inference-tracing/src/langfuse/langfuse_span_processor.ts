@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { InferenceTracingLangfuseExportConfig } from '@kbn/inference-common';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
+import { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
 import { memoize, omit, partition } from 'lodash';
+import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { unflattenAttributes } from '../util/unflatten_attributes';
 
 export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
-  constructor(
-    private readonly logger: Logger,
-    private readonly config: InferenceTracingLangfuseExportConfig
-  ) {
+  constructor(private readonly config: InferenceTracingLangfuseExportConfig) {
     const headers = {
       Authorization: `Basic ${Buffer.from(`${config.public_key}:${config.secret_key}`).toString(
         'base64'
@@ -44,14 +41,14 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
 
     this.getProjectId = () => {
       return getProjectIdMemoized().catch((error) => {
-        logger.error(`Could not get project ID from Langfuse: ${error.message}`);
+        diag.error(`Could not get project ID from Langfuse: ${error.message}`);
         getProjectIdMemoized.cache.clear?.();
         return undefined;
       });
     };
   }
 
-  override processInferenceSpan(span: ReadableSpan): ReadableSpan {
+  override processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
     // Langfuse doesn't understand fully semconv-compliant span events
     // yet, so we translate to a format it does understand. see
     // https://github.com/langfuse/langfuse/blob/c1c22a9b9b684bd45ca9436556c2599d5a23271d/web/src/features/otel/server/index.ts#L476
@@ -88,7 +85,7 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
           `/project/${projectId}/traces/${langfuseTraceId}`,
           new URL(this.config.base_url)
         );
-        this.logger.info(`View trace at ${url.toString()}`);
+        diag.info(`View trace at ${url.toString()}`);
       });
     }
 

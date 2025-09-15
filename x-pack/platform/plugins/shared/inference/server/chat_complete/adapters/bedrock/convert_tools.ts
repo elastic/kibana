@@ -12,42 +12,39 @@ import {
   ToolSchemaType,
   type ToolOptions,
 } from '@kbn/inference-common';
-import type { BedrockToolChoice } from './types';
+import type { ToolChoice as ConverseBedRockToolChoice } from '@aws-sdk/client-bedrock-runtime';
 
-export const toolChoiceToBedrock = (
+export const toolChoiceToConverse = (
   toolChoice: ToolOptions['toolChoice']
-): BedrockToolChoice | undefined => {
+): ConverseBedRockToolChoice | undefined => {
   if (toolChoice === ToolChoiceType.required) {
-    return {
-      type: 'any',
-    };
+    return { any: {} };
   } else if (toolChoice === ToolChoiceType.auto) {
-    return {
-      type: 'auto',
-    };
+    return { auto: {} };
   } else if (typeof toolChoice === 'object') {
-    return {
-      type: 'tool',
-      name: toolChoice.function,
-    };
+    return { tool: { name: toolChoice.function } };
   }
   // ToolChoiceType.none is not supported by claude
   // we are adding a directive to the system instructions instead in that case.
   return undefined;
 };
 
-export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
+export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
   if (tools) {
     return Object.entries(tools).map(([toolName, toolDef]) => {
       return {
-        name: toolName,
-        description: toolDef.description,
-        input_schema: fixSchemaArrayProperties(
-          toolDef.schema ?? {
-            type: 'object' as const,
-            properties: {},
-          }
-        ),
+        toolSpec: {
+          name: toolName,
+          description: toolDef.description,
+          inputSchema: {
+            json: fixSchemaArrayProperties(
+              toolDef.schema ?? {
+                type: 'object' as const,
+                properties: {},
+              }
+            ),
+          },
+        },
       };
     });
   }
@@ -61,11 +58,15 @@ export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[])
   if (hasToolUse) {
     return [
       {
-        name: 'do_not_call_this_tool',
-        description: 'Do not call this tool, it is strictly forbidden',
-        input_schema: {
-          type: 'object',
-          properties: {},
+        toolSpec: {
+          name: 'do_not_call_this_tool',
+          description: 'Do not call this tool, it is strictly forbidden',
+          inputSchema: {
+            json: {
+              type: 'object',
+              properties: {},
+            },
+          },
         },
       },
     ];

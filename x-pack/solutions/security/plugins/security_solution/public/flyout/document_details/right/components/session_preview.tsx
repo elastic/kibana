@@ -6,8 +6,7 @@
  */
 
 import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import type { ReactElement } from 'react';
-import React, { useMemo, type FC, type PropsWithChildren } from 'react';
+import React, { useMemo, type FC, type PropsWithChildren, type ReactElement } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -36,7 +35,7 @@ const ValueContainer: FC<PropsWithChildren<{ text?: ReactElement }>> = ({ text, 
  * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
 export const SessionPreview: FC = () => {
-  const { isPreview } = useDocumentDetailsContext();
+  const { isRulePreview } = useDocumentDetailsContext();
 
   const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
@@ -82,7 +81,7 @@ export const SessionPreview: FC = () => {
     );
   }, [startAt]);
 
-  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
 
   const ruleFragment = useMemo(() => {
     return (

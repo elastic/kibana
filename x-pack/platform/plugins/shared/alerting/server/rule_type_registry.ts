@@ -71,6 +71,8 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'alerts'
+    | 'internallyManaged'
+    | 'autoRecoverAlerts'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -406,6 +408,7 @@ export class RuleTypeRegistry {
         hasAlertsMappings: !!_ruleType.alerts,
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,
+        autoRecoverAlerts: _ruleType.autoRecoverAlerts,
       };
 
       ruleTypesMap.set(ruleType.id, ruleType);

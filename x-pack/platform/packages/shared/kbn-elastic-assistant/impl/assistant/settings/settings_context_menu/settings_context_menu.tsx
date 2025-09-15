@@ -27,7 +27,6 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { Conversation, useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
@@ -158,6 +157,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       [selectedConversation]
     );
 
+    const selectedConversationExists = useMemo(
+      () => selectedConversation && selectedConversation.id !== '',
+      [selectedConversation]
+    );
+
     const items = useMemo(
       () => [
         <EuiContextMenuItem
@@ -265,7 +269,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -320,25 +324,28 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiThemeVars.euiColorDanger};
-            `}
-          >
-            {i18n.RESET_CONVERSATION}
-          </EuiContextMenuItem>
+          {selectedConversationExists && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                aria-label={'clear-chat'}
+                key={'clear-chat'}
+                onClick={showDestroyModal}
+                icon={'refresh'}
+                data-test-subj={'clear-chat'}
+                css={css`
+                  color: ${euiThemeVars.euiColorDanger};
+                `}
+              >
+                {i18n.RESET_CONVERSATION}
+              </EuiContextMenuItem>
+            </>
+          )}
         </EuiPanel>,
       ],
       [
@@ -352,6 +359,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
         showDestroyModal,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]
@@ -367,15 +375,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiPopover
           button={
-            <KnowledgeBaseTour>
-              <EuiButtonIcon
-                aria-label={AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="boxesVertical"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            </KnowledgeBaseTour>
+            <EuiButtonIcon
+              aria-label={AI_ASSISTANT_MENU}
+              isDisabled={isDisabled}
+              iconType="boxesVertical"
+              onClick={onButtonClick}
+              data-test-subj="chat-context-menu"
+            />
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}

@@ -29,7 +29,11 @@
     "@kbn/core-plugins-server",
     "@kbn/product-doc-base-plugin",
     "@kbn/ml-plugin",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/inference-common",
+    "@kbn/licensing-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-default-llm-setting"
   ],
   "exclude": [
     "target/**/*"

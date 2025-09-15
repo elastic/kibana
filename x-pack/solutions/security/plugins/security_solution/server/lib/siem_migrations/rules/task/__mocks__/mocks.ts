@@ -25,6 +25,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
     startRuleTranslation: mockStartRuleTranslation,
     success: jest.fn(),
     failure: jest.fn(),
+    aborted: jest.fn(),
   };
 
   return {

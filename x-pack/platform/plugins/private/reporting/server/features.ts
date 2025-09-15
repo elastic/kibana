@@ -9,6 +9,11 @@ import { DEFAULT_APP_CATEGORIES, type Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
+
+export const API_PRIVILEGES = {
+  MANAGE_SCHEDULED_REPORTING: 'manage_scheduled_reports',
+};
 
 interface FeatureRegistrationOpts {
   features: FeaturesPluginSetup;
@@ -73,4 +78,29 @@ export function registerFeatures({
     // trigger application to register Reporting as a subfeature
     features.enableReportingUiCapabilities();
   }
+
+  features.registerKibanaFeature({
+    id: 'manageReporting',
+    name: i18n.translate('xpack.reporting.features.manageScheduledReportsFeatureName', {
+      defaultMessage: 'Manage Scheduled Reports',
+    }),
+    description: i18n.translate(
+      'xpack.reporting.features.manageScheduledReportsFeatureDescription',
+      {
+        defaultMessage: 'View and manage scheduled reports for all users in this space.',
+      }
+    ),
+    category: DEFAULT_APP_CATEGORIES.management,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: [],
+    privileges: {
+      all: {
+        api: [API_PRIVILEGES.MANAGE_SCHEDULED_REPORTING],
+        savedObject: { all: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE], read: [] },
+        ui: ['show'],
+      },
+      // No read-only mode currently supported
+      read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+    },
+  });
 }

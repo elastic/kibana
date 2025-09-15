@@ -18,7 +18,7 @@ const UiSharedDepsNpm = require('.');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const useEuiAmsterdamRelease = process.env.EUI_AMSTERDAM === 'true';
 
@@ -35,7 +35,6 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'whatwg-fetch',
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
@@ -185,6 +184,10 @@ module.exports = (_, argv) => {
       // are more tailored for the final bundles result
       // and not for the webpack compilations performance itself
       hints: false,
+    },
+
+    cache: {
+      type: 'filesystem',
     },
 
     plugins: [

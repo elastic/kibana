@@ -6,63 +6,65 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
 import { HttpStatusBadge } from '.';
-import {
-  successColor,
-  neutralColor,
-  warningColor,
-  errorColor,
-} from '../../../../utils/http_status_code_to_color';
+import { renderWithTheme } from '../../../../utils/test_helpers';
+import { httpStatusCodeToColor } from '../../../../utils/http_status_code_to_color';
 
 describe('HttpStatusBadge', () => {
-  describe('render', () => {
-    describe('with status code 100', () => {
-      it('renders with neutral color', () => {
-        const wrapper = mount(<HttpStatusBadge status={100} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(neutralColor);
-      });
+  it('renders status code 100 with neutral color', () => {
+    renderWithTheme(<HttpStatusBadge status={100} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': httpStatusCodeToColor(100),
     });
+    expect(badge).toHaveTextContent('100');
+  });
 
-    describe('with status code 200', () => {
-      it('renders with success color', () => {
-        const wrapper = mount(<HttpStatusBadge status={200} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(successColor);
-      });
+  it('renders status code 200 with success color', () => {
+    renderWithTheme(<HttpStatusBadge status={200} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': httpStatusCodeToColor(200),
     });
+    expect(badge).toHaveTextContent('200');
+  });
 
-    describe('with status code 301', () => {
-      it('renders with neutral color', () => {
-        const wrapper = mount(<HttpStatusBadge status={301} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(neutralColor);
-      });
+  it('renders status code 301 with neutral color', () => {
+    renderWithTheme(<HttpStatusBadge status={301} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': httpStatusCodeToColor(301),
     });
+    expect(badge).toHaveTextContent('301');
+  });
 
-    describe('with status code 404', () => {
-      it('renders with warning color', () => {
-        const wrapper = mount(<HttpStatusBadge status={404} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(warningColor);
-      });
+  it('renders status code 404 with warning color', () => {
+    renderWithTheme(<HttpStatusBadge status={404} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': httpStatusCodeToColor(404),
     });
+    expect(badge).toHaveTextContent('404');
+  });
 
-    describe('with status code 502', () => {
-      it('renders with error color', () => {
-        const wrapper = mount(<HttpStatusBadge status={502} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(errorColor);
-      });
+  it('renders status code 502 with error color', () => {
+    renderWithTheme(<HttpStatusBadge status={502} />);
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': httpStatusCodeToColor(502),
     });
+    expect(badge).toHaveTextContent('502');
+  });
 
-    describe('with other status code', () => {
-      it('renders with default color', () => {
-        const wrapper = mount(<HttpStatusBadge status={700} />);
+  it('renders other status codes with default color', () => {
+    renderWithTheme(<HttpStatusBadge status={700} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual('default');
-      });
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).not.toHaveStyle({
+      '--euiBadgeBackgroundColor': expect.any(String),
     });
+    expect(badge.className).toContain('default');
+    expect(badge).toHaveTextContent('700');
   });
 });

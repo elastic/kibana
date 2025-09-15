@@ -6,9 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { FlexItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import type { FieldConfigs } from './types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface MetricEmbeddableProps {
   fields: FieldConfigs[];
@@ -25,6 +27,8 @@ const MetricEmbeddableComponent = ({
   inspectTitle,
   timerange,
 }: MetricEmbeddableProps) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   return (
     <EuiFlexGroup gutterSize="none" className="metricEmbeddable">
       {fields.map((field) => (
@@ -51,6 +55,11 @@ const MetricEmbeddableComponent = ({
                     lensAttributes={field.lensAttributes}
                     timerange={timerange}
                     inspectTitle={inspectTitle}
+                    scopeId={
+                      newDataViewPickerEnabled
+                        ? DataViewManagerScopeName.explore
+                        : DataViewManagerScopeName.default
+                    }
                   />
                 </div>
               )}

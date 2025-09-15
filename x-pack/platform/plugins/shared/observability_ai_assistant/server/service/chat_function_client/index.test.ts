@@ -97,7 +97,7 @@ describe('chatFunctionClient', () => {
           description: expect.any(String),
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           parameters: expect.any(Object),
-          visibility: FunctionVisibility.AssistantOnly,
+          visibility: FunctionVisibility.All,
         },
         respond: expect.any(Function),
       });

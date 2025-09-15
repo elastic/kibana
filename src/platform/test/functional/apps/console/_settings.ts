@@ -26,17 +26,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays the a11y overlay', async () => {
-      await PageObjects.console.pressEscape();
-
       await retry.try(async () => {
+        // Press Escape to open a11y overlay
+        await PageObjects.console.pressEscape();
+        await PageObjects.console.sleepForDebouncePeriod(500);
+
         const isOverlayVisible = await PageObjects.console.isA11yOverlayVisible();
         expect(isOverlayVisible).to.be(true);
+
+        // Press Enter to re-focus on editor
+        await PageObjects.console.pressEnter();
       });
     });
 
     it('disables the a11y overlay via settings', async () => {
       await PageObjects.console.openConfig();
-      await PageObjects.console.toggleA11yOverlaySetting();
+      await PageObjects.console.toggleA11yOverlaySetting(false);
       await PageObjects.console.openConsole();
 
       await retry.try(async () => {

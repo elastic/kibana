@@ -11,7 +11,7 @@ components:
 
     ExceptionListHumanId:
       $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: The exception list's human readable string identifier, `endpoint_list`.
 
     ExceptionListType:
       type: string

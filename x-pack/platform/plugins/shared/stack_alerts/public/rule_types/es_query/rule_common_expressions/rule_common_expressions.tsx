@@ -49,6 +49,21 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
 }
 
+const SIZE_VALUE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip',
+  {
+    defaultMessage:
+      'Specify the number of documents to pass to the configured actions when the threshold condition is met.',
+  }
+);
+
+const SIZE_VALUE_EXPRESSION_LABEL = i18n.translate(
+  'xpack.stackAlerts.esQuery.ui.selectSizePrompt.label',
+  {
+    defaultMessage: 'Set the number of documents to send.',
+  }
+);
+
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   esFields,
   thresholdComparator,
@@ -163,11 +178,9 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
           <EuiIconTip
             position="right"
             color="subdued"
-            type="questionInCircle"
-            content={i18n.translate('xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip', {
-              defaultMessage:
-                'Specify the number of documents to pass to the configured actions when the threshold condition is met.',
-            })}
+            type="question"
+            content={SIZE_VALUE_TOOLTIP_CONTENT}
+            aria-label={SIZE_VALUE_EXPRESSION_LABEL}
           />,
         ]}
       >

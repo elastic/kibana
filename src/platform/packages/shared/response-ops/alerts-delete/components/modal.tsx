@@ -26,6 +26,9 @@ import {
   EuiPanel,
   EuiText,
   EuiIconTip,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -177,8 +180,12 @@ export const AlertDeleteModal = ({
 
   const { mutate: createAlertDeleteSchedule } = useAlertDeleteSchedule({
     services: { http },
-    onSuccess: () => {
-      notifications.toasts.addSuccess(translations.ALERT_DELETE_SUCCESS);
+    onSuccess: (message?: string) => {
+      if (message) {
+        notifications.toasts.addInfo(message);
+      } else {
+        notifications.toasts.addSuccess(translations.ALERT_DELETE_SUCCESS);
+      }
       onClose();
     },
     onError: (error: IHttpFetchError<ResponseErrorBody>) => {
@@ -305,7 +312,18 @@ export const AlertDeleteModal = ({
     <EuiModal aria-labelledby={MODAL_ID} onClose={onClose} data-test-subj="alert-delete-modal">
       <EuiForm id={FORM_ID} component="form">
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={MODAL_ID}>{translations.MODAL_TITLE}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={MODAL_ID}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>{translations.MODAL_TITLE}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  className="eui-alignTop"
+                  label={translations.RULE_SETTINGS_TECH_PREVIEW_LABEL}
+                  title={translations.RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
@@ -323,7 +341,7 @@ export const AlertDeleteModal = ({
             <EuiIconTip
               color="subdued"
               size="s"
-              type="iInCircle"
+              type="info"
               content={translations.MODAL_DESCRIPTION_EXCEPTION}
             />
           </p>

@@ -6,7 +6,13 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { validateSpaceId } from '../services/validate_space_id';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ProjectMonitor } from '../../../../common/runtime_types';
@@ -20,6 +26,20 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
+    query: schema.object({
+      // primarily used for testing purposes, to specify the type of saved object
+      savedObjectType: schema.maybe(
+        schema.oneOf(
+          [
+            schema.literal(syntheticsMonitorSavedObjectType),
+            schema.literal(legacySyntheticsMonitorTypeSingle),
+          ],
+          {
+            defaultValue: syntheticsMonitorSavedObjectType,
+          }
+        )
+      ),
+    }),
     params: schema.object({
       projectName: schema.string(),
     }),
@@ -57,21 +77,18 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
     try {
       const [spaceId, permissionError] = await Promise.all([
-        validateSpaceId(routeContext),
-        validatePermissions(routeContext, monitors),
+        validMultiSpacePrivileges(routeContext, monitors),
+        checkPublicLocationsPermissions(routeContext, monitors),
       ]);
 
       if (permissionError) {
         return response.forbidden({ body: { message: permissionError } });
       }
 
-      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
-
       const pushMonitorFormatter = new ProjectMonitorFormatter({
         routeContext,
         projectId: decodedProjectName,
         spaceId,
-        encryptedSavedObjectsClient,
         monitors,
       });
 
@@ -83,32 +100,104 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
         failedMonitors: pushMonitorFormatter.failedMonitors,
       };
     } catch (error) {
-      server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
       if (error.output?.statusCode === 404) {
-        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
+        return response.notFound({
+          body: { message: `Kibana space '${routeContext.spaceId}' does not exist` },
+        });
       }
 
+      server.logger.error(`Error adding monitors to project ${decodedProjectName}`, { error });
       throw error;
     }
   },
 });
 
-export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
-  defaultMessage:
-    'Request payload is too large. Please send a max of 250 browser monitors per request.',
-});
+const validProjectMultiSpace = async (routeContext: RouteContext, monitors: ProjectMonitor[]) => {
+  const { response, server } = routeContext;
+  const spaceId = await validateSpaceId(routeContext);
 
-export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
-  'xpack.synthetics.server.project.delete.request.lightweight',
-  {
-    defaultMessage:
-      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
+  const spacesList = new Set(
+    monitors
+      .map((monitor) => monitor.spaces ?? [])
+      .flat()
+      .filter((sp) => sp !== ALL_SPACES_ID)
+  );
+  if ((spacesList.size === 1 && spacesList.has(DEFAULT_SPACE_ID)) || spacesList.size === 0) {
+    return spaceId;
   }
-);
+  const spacesClient = server.spaces?.spacesService.createSpacesClient(routeContext.request);
+  if (spacesClient) {
+    try {
+      await pMap(
+        spacesList,
+        async (space) => {
+          await spacesClient.get(space);
+        },
+        { concurrency: 5, stopOnError: true }
+      );
+    } catch (error) {
+      throw response.notFound({
+        body: { message: `Kibana space does not exist, ${error}` },
+      });
+    }
+  }
 
-export const validatePermissions = async (
-  { server, response, request }: RouteContext,
+  for (const monitor of monitors) {
+    if (monitor.spaces?.length && !monitor.spaces.includes(spaceId)) {
+      throw response.badRequest({
+        body: {
+          message: i18n.translate(
+            'xpack.synthetics.server.project.addMonitor.multiSpaceValidation',
+            {
+              defaultMessage: 'Monitor {monitor} does not include spaceId {spaceId} in its spaces.',
+              values: {
+                monitor: monitor.name,
+                spaceId,
+              },
+            }
+          ),
+        },
+      });
+    }
+  }
+  return spaceId;
+};
+
+const validMultiSpacePrivileges = async (
+  routeContext: RouteContext,
+  monitors: ProjectMonitor[]
+) => {
+  const { spaceId, request, response, server } = routeContext;
+
+  const spacesList = monitors.flatMap((monitor) => monitor.spaces ?? []);
+  if (spacesList.length === 0 || (spacesList.length === 1 && spacesList[0] === spaceId)) {
+    // If there are no spaces or only the current space, no need to check privileges
+    return validProjectMultiSpace(routeContext, monitors);
+  }
+
+  const checkSavedObjectsPrivileges =
+    server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
+
+  const { hasAllRequested } = await checkSavedObjectsPrivileges(
+    'saved_object:synthetics-monitor/bulk_update',
+    spacesList
+  );
+  if (!hasAllRequested) {
+    throw response.forbidden({
+      body: {
+        message: i18n.translate('xpack.synthetics.addMonitor.forbidden', {
+          defaultMessage:
+            'You do not have sufficient permissions to update monitors in all required spaces.',
+        }),
+      },
+    });
+  }
+
+  return validProjectMultiSpace(routeContext, monitors);
+};
+
+export const checkPublicLocationsPermissions = async (
+  { server, request }: RouteContext,
   projectMonitors: ProjectMonitor[]
 ) => {
   const hasPublicLocations = projectMonitors.some(({ locations }) => (locations ?? []).length > 0);
@@ -134,5 +223,18 @@ export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
   {
     defaultMessage:
       "You don't have permission to use Elastic managed global locations. Please contact your Kibana administrator.",
+  }
+);
+
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
+  defaultMessage:
+    'Request payload is too large. Please send a max of 250 browser monitors per request.',
+});
+
+export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
+  'xpack.synthetics.server.project.delete.request.lightweight',
+  {
+    defaultMessage:
+      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
   }
 );

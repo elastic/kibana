@@ -1,6 +1,6 @@
-# SORT
+## SORT
 
-The SORT command is used to arrange a table based on one or more columns.
+The `SORT` command organizes a table by one or more columns.
 
 ## Syntax
 
@@ -8,13 +8,15 @@ The SORT command is used to arrange a table based on one or more columns.
 
 ### Parameters
 
-#### columnX
+#### `columnX`
 
-The column on which the sorting is to be performed.
+The column to sort on.
 
 ## Examples
 
-Sort a table based on the 'height' column:
+### Basic sorting
+
+Sort the table by the `height` column in ascending order (default behavior):
 
 ```esql
 FROM employees
@@ -22,7 +24,9 @@ FROM employees
 | SORT height
 ```
 
-Explicitly sort in ascending order with `ASC`:
+### Explicitly sorting in descending order with `DESC`
+
+Sort the table by the `height` column in descending order:
 
 ```esql
 FROM employees
@@ -30,7 +34,9 @@ FROM employees
 | SORT height DESC
 ```
 
-Provide additional sort expressions to act as tie breakers:
+### Providing additional sort expressions to act as tie breakers
+
+Sort the table by `height` in descending order, and use `first_name` in ascending order as a tie breaker:
 
 ```esql
 FROM employees
@@ -38,7 +44,9 @@ FROM employees
 | SORT height DESC, first_name ASC
 ```
 
-Sort `null` values first using `NULLS FIRST`:
+### Sorting `null` values first using `NULLS FIRST`
+
+Sort the table by `first_name` in ascending order, placing `null` values first:
 
 ```esql
 FROM employees

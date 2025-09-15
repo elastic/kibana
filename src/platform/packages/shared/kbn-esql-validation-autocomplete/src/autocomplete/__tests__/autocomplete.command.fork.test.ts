@@ -8,7 +8,7 @@
  */
 
 import { Location } from '../../definitions/types';
-import { ESQL_STRING_TYPES } from '../../shared/esql_types';
+import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 import { EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS } from './autocomplete.command.sort.test';
 import { AVG_TYPES, EXPECTED_FOR_EMPTY_EXPRESSION } from './autocomplete.command.stats.test';
 import {
@@ -18,9 +18,12 @@ import {
 import {
   AssertSuggestionsFn,
   SuggestFn,
+  attachTriggerCommand,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   setup,
+  lookupIndexFields,
+  policies,
 } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -48,7 +51,24 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT ', 'STATS ', 'EVAL '];
+        const FORK_SUBCOMMANDS = [
+          'WHERE ',
+          'SORT ',
+          'LIMIT ',
+          'CHANGE_POINT ',
+          'DISSECT ',
+          'STATS ',
+          'EVAL ',
+          'GROK ',
+          'COMPLETION ',
+          'MV_EXPAND ',
+          'DROP ',
+          'ENRICH ',
+          'KEEP ',
+          'RENAME ',
+          'SAMPLE ',
+          'LOOKUP JOIN ',
+        ];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);
@@ -98,6 +118,87 @@ describe('autocomplete.suggest', () => {
               'APPEND_SEPARATOR = ',
               '| ',
             ]);
+          });
+
+          test('keep', async () => {
+            await assertSuggestions('FROM a | FORK (KEEP /)', getFieldNamesByType('any'));
+            await assertSuggestions('FROM a | FORK (KEEP integerField /)', [',', '| ']);
+          });
+
+          test('drop', async () => {
+            await assertSuggestions('FROM a | FORK (DROP /)', getFieldNamesByType('any'));
+            await assertSuggestions('FROM a | FORK (DROP integerField /)', [',', '| ']);
+          });
+
+          test('mv_expand', async () => {
+            await assertSuggestions(
+              'FROM a | FORK (MV_EXPAND /)',
+              getFieldNamesByType('any').map((name) => `${name} `)
+            );
+            await assertSuggestions('FROM a | FORK (MV_EXPAND integerField /)', ['| ']);
+          });
+
+          test('sample', async () => {
+            await assertSuggestions('FROM a | FORK (SAMPLE /)', ['.001 ', '.01 ', '.1 ']);
+            await assertSuggestions('FROM a | FORK (SAMPLE 0.01 /)', ['| ']);
+          });
+
+          test('rename', async () => {
+            await assertSuggestions('FROM a | FORK (RENAME /)', [
+              'col0 = ',
+              ...getFieldNamesByType('any').map((field) => field + ' '),
+            ]);
+            await assertSuggestions('FROM a | FORK (RENAME textField /)', ['AS ']);
+            await assertSuggestions('FROM a | FORK (RENAME field /)', ['= ']);
+          });
+
+          test('change_point', async () => {
+            await assertSuggestions(
+              `FROM a | FORK (CHANGE_POINT /`,
+              getFieldNamesByType(ESQL_NUMBER_TYPES).map((v) => `${v} `)
+            );
+            await assertSuggestions(
+              `FROM a | FORK (CHANGE_POINT value /)`,
+              ['ON ', 'AS ', '| '].map(attachTriggerCommand)
+            );
+            await assertSuggestions(
+              `FROM a | FORK (CHANGE_POINT value on /)`,
+              getFieldNamesByType('any').map((v) => `${v} `)
+            );
+          });
+
+          test('lookup join after command name', async () => {
+            await assertSuggestions('FROM a | FORK (LOOKUP JOIN /)', [
+              'join_index ',
+              'join_index_with_alias ',
+              'lookup_index ',
+              'join_index_alias_1 $0',
+              'join_index_alias_2 $0',
+            ]);
+          });
+
+          test('lookup join after ON keyword', async () => {
+            const expected = getFieldNamesByType('any')
+              .sort()
+              .map((field) => field.trim());
+
+            for (const { name } of lookupIndexFields) {
+              expected.push(name.trim());
+            }
+
+            await assertSuggestions('FROM a | FORK (LOOKUP JOIN join_index ON /)', expected);
+          });
+
+          test('enrich', async () => {
+            const expectedPolicyNameSuggestions = policies
+              .map(({ name, suggestedAs }) => suggestedAs || name)
+              .map((name) => `${name} `);
+
+            await assertSuggestions(`FROM a | FORK (ENRICH /)`, expectedPolicyNameSuggestions);
+            await assertSuggestions(
+              `FROM a | FORK (ENRICH policy ON /)`,
+              getFieldNamesByType('any').map((v) => `${v} `)
+            );
           });
 
           describe('stats', () => {

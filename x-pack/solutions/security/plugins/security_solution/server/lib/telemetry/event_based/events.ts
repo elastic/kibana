@@ -21,6 +21,10 @@ import type {
 } from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
 import { SiemMigrationsEventTypes } from './types';
+import type {
+  HealthDiagnosticQueryResult,
+  HealthDiagnosticQueryStats,
+} from '../diagnostic/health_diagnostic_service.types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -846,6 +850,115 @@ export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeInge
     },
   };
 
+export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT: EventTypeOpts<HealthDiagnosticQueryResult> =
+  {
+    eventType: 'telemetry_health_diagnostic_query_result_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Identifier for the executed query.' },
+      },
+      queryId: {
+        type: 'keyword',
+        _meta: { description: 'Unique identifier for the specific query.' },
+      },
+      traceId: {
+        type: 'keyword',
+        _meta: { description: 'Unique trace ID for correlating a single query execution.' },
+      },
+      page: {
+        type: 'integer',
+        _meta: { description: 'Page number of the query result.' },
+      },
+      data: {
+        type: 'pass_through',
+        _meta: { description: 'Raw query result payload.' },
+      },
+    },
+  };
+export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<HealthDiagnosticQueryStats> =
+  {
+    eventType: 'telemetry_health_diagnostic_query_stats_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Identifier for the executed query.' },
+      },
+      traceId: {
+        type: 'keyword',
+        _meta: { description: 'Unique trace ID for correlating a single query execution.' },
+      },
+      numDocs: {
+        type: 'integer',
+        _meta: { description: 'Number of documents returned by the query.' },
+      },
+      passed: {
+        type: 'boolean',
+        _meta: { description: 'Indicates whether the query completed successfully.' },
+      },
+      started: {
+        type: 'keyword',
+        _meta: { description: 'When the query started execution.' },
+      },
+      finished: {
+        type: 'keyword',
+        _meta: { description: 'When the query finished execution.' },
+      },
+      failure: {
+        properties: {
+          message: {
+            type: 'keyword',
+            _meta: { description: 'A high-level failure message describing the error.' },
+          },
+          reason: {
+            properties: {
+              circuitBreaker: {
+                type: 'keyword',
+                _meta: {
+                  description: 'The name of the circuit breaker that triggered the failure.',
+                },
+              },
+              valid: {
+                type: 'boolean',
+                _meta: {
+                  description: 'Indicates whether the query execution was considered valid.',
+                },
+              },
+              message: {
+                type: 'keyword',
+                _meta: {
+                  optional: true,
+                  description:
+                    'A detailed reason or message explaining why the circuit breaker was triggered.',
+                },
+              },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Details about the failure if the operation was unsuccessful.',
+        },
+      },
+      fieldNames: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'Field names in the query result.',
+          },
+        },
+      },
+      circuitBreakers: {
+        type: 'pass_through',
+        _meta: {
+          optional: true,
+          description: 'Circuit breaker metrics such as execution time and memory usage.',
+        },
+      },
+    },
+  };
+
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
@@ -1085,7 +1198,7 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   prebuiltMatch: boolean;
   eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.TranslationSucess,
+  eventType: SiemMigrationsEventTypes.TranslationSuccess,
   schema: {
     eventName: {
       type: 'keyword',
@@ -1311,6 +1424,70 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
+  model: string;
+  reason: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.MigrationAborted,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    reason: {
+      type: 'keyword',
+      _meta: {
+        description: 'The reason of the migration abort',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
 export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
@@ -1347,6 +1524,55 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const GAP_DETECTED_EVENT: EventTypeOpts<{
+  gapDuration: number;
+  intervalDuration: number;
+  intervalAndLookbackDuration: number;
+  ruleType: string;
+  ruleSource: string;
+  isCustomized: boolean;
+}> = {
+  eventType: 'gap_detected_event',
+  schema: {
+    gapDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the gap',
+      },
+    },
+    intervalDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the interval',
+      },
+    },
+    intervalAndLookbackDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the interval and lookback',
+      },
+    },
+    ruleType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the rule',
+      },
+    },
+    ruleSource: {
+      type: 'keyword',
+      _meta: {
+        description: 'The source of the rule',
+      },
+    },
+    isCustomized: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the prebuilt rule is customized',
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -1362,6 +1588,8 @@ export const events = [
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
+  TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
+  TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,
@@ -1369,9 +1597,11 @@ export const events = [
   TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
+  SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
+  GAP_DETECTED_EVENT,
 ];

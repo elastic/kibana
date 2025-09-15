@@ -235,6 +235,7 @@ export interface LangChainExecuteParams {
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  inferenceChatModelDisabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -265,6 +266,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   contentReferencesStore,
+  inferenceChatModelDisabled,
   isOssModel,
   context,
   actionsClient,
@@ -291,8 +293,10 @@ export const langChainExecute = async ({
   const assistantContext = context.elasticAssistant;
   // We don't (yet) support invoking these tools interactively
   const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
+  const pluginNames = Array.from(new Set([pluginName, DEFAULT_PLUGIN_NAME]));
+
   const assistantTools = assistantContext
-    .getRegisteredTools(pluginName)
+    .getRegisteredTools(pluginNames)
     .filter((tool) => !unsupportedTools.has(tool.id));
 
   // get a scoped esClient for assistant memory
@@ -331,6 +335,7 @@ export const langChainExecute = async ({
     esClient,
     llmTasks,
     inference,
+    inferenceChatModelDisabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,

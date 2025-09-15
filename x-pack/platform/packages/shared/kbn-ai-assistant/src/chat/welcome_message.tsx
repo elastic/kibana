@@ -20,6 +20,7 @@ import { WelcomeMessageKnowledgeBase } from '../knowledge_base/welcome_message_k
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
+import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -34,11 +35,13 @@ export function WelcomeMessage({
   connectors,
   knowledgeBase,
   showElasticLlmCalloutInChat,
+  showKnowledgeBaseReIndexingCallout,
   onSelectPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   showElasticLlmCalloutInChat: boolean;
+  showKnowledgeBaseReIndexingCallout: boolean;
   onSelectPrompt: (prompt: string) => void;
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
@@ -78,6 +81,7 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
+        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
         {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />

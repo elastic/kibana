@@ -93,6 +93,8 @@ export class FunctionalTestRunner {
         log: this.log,
         config: this.config,
         providers,
+        // Skipping root hooks when there are no tests to execute
+        skipRootHooks: !realServices,
         esVersion: this.esVersion,
         reporter,
         reporterOptions,
@@ -162,6 +164,7 @@ export class FunctionalTestRunner {
         log: this.log,
         config: this.config,
         providers,
+        skipRootHooks: true,
         esVersion: this.esVersion,
       });
 

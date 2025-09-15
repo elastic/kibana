@@ -7,7 +7,10 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
-import { SNAPSHOT_STATE } from '../../public/application/constants';
+import {
+  SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
+  SNAPSHOT_STATE,
+} from '../../public/application/constants';
 import { API_BASE_PATH } from '../../common';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
@@ -418,7 +421,8 @@ describe('<SnapshotRestoreHome />', () => {
   describe('snapshots', () => {
     describe('when there are no snapshots nor repositories', () => {
       beforeAll(() => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], repositories: [] });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [] });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
       });
 
       beforeEach(async () => {
@@ -448,8 +452,10 @@ describe('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots: [],
-          repositories: ['my-repo'],
           total: 0,
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: 'my-repo' }],
         });
 
         testBed = await setup(httpSetup);
@@ -489,8 +495,10 @@ describe('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
-          repositories: [REPOSITORY_NAME],
           total: 2,
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }],
         });
 
         testBed = await setup(httpSetup);
@@ -528,7 +536,6 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           total: 2,
-          repositories: [REPOSITORY_NAME],
           errors: {
             repository_with_errors: {
               type: 'repository_exception',
@@ -536,6 +543,9 @@ describe('<SnapshotRestoreHome />', () => {
                 '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
             },
           },
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }],
         });
 
         testBed = await setup(httpSetup);
@@ -551,32 +561,6 @@ describe('<SnapshotRestoreHome />', () => {
         expect(find('repositoryErrorsWarning').text()).toContain(
           'Some repositories contain errors'
         );
-      });
-
-      test('should show a prompt if a repository contains errors and there are no other repositories', async () => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({
-          snapshots,
-          repositories: [],
-          errors: {
-            repository_with_errors: {
-              type: 'repository_exception',
-              reason:
-                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
-            },
-          },
-        });
-
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-
-        testBed.component.update();
-
-        const { find, exists } = testBed;
-        expect(exists('repositoryErrorsPrompt')).toBe(true);
-        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
       });
 
       test('each row should have a link to the repository', async () => {
@@ -884,6 +868,69 @@ describe('<SnapshotRestoreHome />', () => {
           expect(shardText).toBe(`Shard ${mockedFailure.shard_id}`);
           expect(reasonText).toBe(`${mockedFailure.status}: ${mockedFailure.reason}`);
         });
+      });
+    });
+
+    describe('when there is an error while fetching the snapshots', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse(undefined, {
+          statusCode: 500,
+          message: '[repository_with_errors] cannot retrieve snapshots list from this repository',
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }, { name: 'repository_with_errors' }],
+        });
+
+        testBed = await setup(httpSetup);
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+      });
+
+      test('should show a generic error prompt if snapshots request fails while still showing the search bar', async () => {
+        const { find, exists } = testBed;
+
+        // Check that the search bar is still present
+        expect(exists('snapshotListSearch')).toBe(true);
+
+        // Check that the error message is displayed
+        expect(exists('snapshotsLoadingError')).toBe(true);
+        expect(find('snapshotsLoadingError').text()).toContain('Error loading snapshots');
+      });
+
+      test('should show a repository error prompt if snapshots request fails due to repository exception while still showing the search bar', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse(undefined, {
+          statusCode: 500,
+          message: '[repository_with_errors] cannot retrieve snapshots list from this repository',
+          attributes: {
+            error: {
+              type: SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
+            },
+          },
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }, { name: 'repository_with_errors' }],
+        });
+
+        testBed = await setup(httpSetup);
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+
+        // Check that the search bar is still present
+        expect(exists('snapshotListSearch')).toBe(true);
+
+        // Check that the error message is displayed
+        expect(exists('repositoryErrorsPrompt')).toBe(true);
+        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
       });
     });
   });

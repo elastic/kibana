@@ -24,6 +24,9 @@ jest.mock('react-router', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 const defaultProps = {
   connectorId: undefined,
@@ -131,5 +134,15 @@ describe('AlertSelection', () => {
     fireEvent.click(secondTab);
 
     expect(secondTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('does not render the connector selector or customize text when showConnectorSelector is false', () => {
+    render(
+      <TestProviders>
+        <AlertSelection {...defaultProps} showConnectorSelector={false} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('customizeAlerts')).toBeNull();
   });
 });

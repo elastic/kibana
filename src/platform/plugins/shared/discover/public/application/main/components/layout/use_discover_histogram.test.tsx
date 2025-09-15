@@ -31,6 +31,11 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+
+const { profilesManagerMock: mockProfilesManager } = createContextAwarenessMocks();
+mockProfilesManager.resolveDataSourceProfile({});
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {
@@ -51,7 +56,7 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   const originalModule = jest.requireActual('../../../../hooks/use_discover_services');
   return {
     ...originalModule,
-    useDiscoverServices: () => ({ data: mockData }),
+    useDiscoverServices: () => ({ data: mockData, profilesManager: mockProfilesManager }),
   };
 });
 
@@ -435,6 +440,17 @@ describe('useDiscoverHistogram', () => {
         mockHistogramCustomization.withDefaultActions
       );
       expect(hook.result.current.disabledActions).toBeUndefined();
+    });
+  });
+
+  describe('context awareness', () => {
+    it('should modify vis attributes based on profile', async () => {
+      const stateContainer = getStateContainer();
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const modifiedAttributes = hook.result.current.getModifiedVisAttributes?.(
+        {} as TypedLensByValueInput['attributes']
+      );
+      expect(modifiedAttributes).toEqual({ title: 'Modified title' });
     });
   });
 });

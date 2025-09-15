@@ -66,7 +66,6 @@ export class SecurityUsageReportingTask {
       if (backfillConfig.enabled && !backfillConfig.maxRecords) {
         throw new Error('maxRecords is required when backfill is enabled');
       }
-
       this.backfillConfig = backfillConfig;
     }
 
@@ -214,7 +213,6 @@ export class SecurityUsageReportingTask {
         );
         if (this.backfillConfig.enabled) {
           backfillRecords = [...backfillRecords, ...usageRecords];
-
           if (
             this.backfillConfig.maxRecords &&
             backfillRecords.length > this.backfillConfig.maxRecords

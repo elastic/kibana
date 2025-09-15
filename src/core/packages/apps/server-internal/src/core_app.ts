@@ -296,7 +296,7 @@ export class CoreAppsService {
    * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
    * @param router {@link IRouter}
    * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
-   * @private
+   * @internal
    */
   private registerInternalCoreSettingsRoute(
     router: IRouter,
@@ -421,7 +421,7 @@ export class CoreAppsService {
     });
   }
 
-  // After the package is built and bootstrap extracts files to bazel-bin,
+  // After the package is built and bootstrap extracts files to target/build,
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
     /**

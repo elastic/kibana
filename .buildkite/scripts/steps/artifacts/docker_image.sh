@@ -44,11 +44,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   echo "--- Tag images"
   docker rmi "$KIBANA_IMAGE"
-  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
   docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
 
   docker rmi "$KIBANA_IMAGE"
-  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
   docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
   echo "--- Push images"
@@ -76,8 +76,8 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   echo "--- Upload archives"
   buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-x86_64.tar.gz"
   buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-aarch64.tar.gz"
-  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
-  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
+  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
   buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
   buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
   buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"

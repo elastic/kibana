@@ -12,8 +12,18 @@ jest.mock('../../../capabilities/check_capabilities', () => ({
 }));
 jest.mock('../../../services/ml_api_service', () => 'ml');
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
+// Mock the react-router-dom Link component
+jest.mock('react-router-dom', () => ({
+  Link: ({ to, children }) => <a href={to}>{children}</a>,
+}));
+
+// Mock the useCreateAndNavigateToMlLink hook
+jest.mock('../../../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: () => jest.fn(),
+}));
 
 import { FilterListsTable } from './table';
 
@@ -49,9 +59,9 @@ describe('Filter Lists Table', () => {
       filterLists: testFilterLists,
     };
 
-    const component = shallowWithIntl(<FilterListsTable {...props} />);
+    const { container } = renderWithI18n(<FilterListsTable {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders with filter lists and selection supplied', () => {
@@ -61,8 +71,8 @@ describe('Filter Lists Table', () => {
       selectedFilterLists: [testFilterLists[0]],
     };
 
-    const component = shallowWithIntl(<FilterListsTable {...props} />);
+    const { container } = renderWithI18n(<FilterListsTable {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

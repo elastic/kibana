@@ -71,7 +71,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      initialState.rawState
+      initialState
     );
     // if it is provided, start the dynamic actions manager
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
@@ -158,14 +158,14 @@ export const getVisualizeEmbeddableFactory: (deps: {
       linkedToLibraryArg: boolean
     ) => {
       return serializeState({
-        serializedVis: serializedVis$.value,
+        serializedVis: vis$.getValue().serialize(),
         titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary: linkedToLibraryArg,
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        ...(dynamicActionsManager?.getLatestState() ?? {}),
+        serializeDynamicActions: dynamicActionsManager?.serializeState,
         ...timeRangeManager.getLatestState(),
       });
     };

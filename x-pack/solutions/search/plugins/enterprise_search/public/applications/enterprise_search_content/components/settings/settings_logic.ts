@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import isDeepEqual from 'fast-deep-equal/react';
 import { kea, MakeLogicType } from 'kea';
-
-import { isDeepEqual } from 'react-use/lib/util';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
@@ -89,7 +88,6 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
     pipelineState: [
       DEFAULT_PIPELINE_VALUES,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setPipeline: (_, { pipeline }) => pipeline,
       },
     ],

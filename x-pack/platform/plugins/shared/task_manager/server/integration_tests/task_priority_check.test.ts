@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { TaskDefinition, TaskPriority } from '../task';
-import { setupTestServers } from './lib';
+import { retry, setupTestServers } from './lib';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 jest.mock('../task_type_dictionary', () => {
@@ -24,7 +24,8 @@ jest.mock('../task_type_dictionary', () => {
 });
 
 // Notify response-ops if a task sets a priority to something other than `Normal`
-describe('Task priority checks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/228815
+describe.skip('Task priority checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskTypeDictionary: TaskTypeDictionary;
@@ -49,12 +50,16 @@ describe('Task priority checks', () => {
   });
 
   it('detects tasks with priority definitions', async () => {
-    const taskTypes = taskTypeDictionary.getAllDefinitions();
-    const taskTypesWithPriority = taskTypes
-      .map((taskType: TaskDefinition) =>
-        !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
-      )
-      .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
-    expect(taskTypesWithPriority).toMatchSnapshot();
+    await retry(async () => {
+      const taskTypes = taskTypeDictionary.getAllDefinitions();
+      const taskTypesWithPriority = taskTypes
+        .map((taskType: TaskDefinition) =>
+          !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
+        )
+        .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
+
+      expect(taskTypesWithPriority.length).toEqual(2);
+      expect(taskTypesWithPriority).toMatchSnapshot();
+    });
   });
 });

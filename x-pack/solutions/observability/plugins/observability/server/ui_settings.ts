@@ -17,7 +17,6 @@ import {
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
@@ -34,6 +33,7 @@ import {
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
   apmEnableServiceMapApiV2,
+  enableDiagnosticMode,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -179,23 +179,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    solution: 'oblt',
-  },
-  [entityCentricExperience]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.entityCentricExperience', {
-      defaultMessage: 'Entity-centric experience',
-    }),
-    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
-      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
     requiresPageReload: true,
     type: 'boolean',
     solution: 'oblt',
@@ -464,6 +447,20 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.arrayOf(
       schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
     ),
+    requiresPageReload: false,
+    solution: 'oblt',
+  },
+  [enableDiagnosticMode]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableDiagnosticMode', {
+      defaultMessage: 'Enable diagnostic mode',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableDiagnosticModeDescription', {
+      defaultMessage:
+        'Enable diagnostic mode for debugging and troubleshooting capabilities. Currently available only in the Service map view.',
+    }),
+    schema: schema.boolean(),
     requiresPageReload: false,
     solution: 'oblt',
   },

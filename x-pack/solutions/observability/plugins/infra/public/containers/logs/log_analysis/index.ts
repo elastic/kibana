@@ -11,7 +11,7 @@ export * from './log_analysis_module';
 export * from './log_analysis_module_configuration';
 export * from './log_analysis_module_definition';
 export * from './log_analysis_module_status';
-export * from './log_analysis_module_types';
+export type * from './log_analysis_module_types';
 export * from './log_analysis_setup_state';
 
 export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';

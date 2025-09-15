@@ -31,7 +31,7 @@ export { YAML_LANG_ID, configureMonacoYamlSchema } from './src/yaml';
 import { registerLanguage } from './src/helpers';
 
 export { BarePluginApi, registerLanguage };
-export * from './src/types';
+export type * from './src/types';
 
 export {
   CONSOLE_LANG_ID,
@@ -40,6 +40,7 @@ export {
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
   createOutputParser,
+  ConsoleLang,
 } from './src/console';
 
 export type { ParsedRequest } from './src/console';

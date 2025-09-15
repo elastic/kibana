@@ -102,6 +102,15 @@ describe('Cloud Experiments server plugin', () => {
         },
       });
     });
+
+    test('registers the initial feature flags getter to enable bootstrapping', async () => {
+      const coreSetupMock = coreMock.createSetup();
+      plugin.setup(coreSetupMock, {
+        cloud: cloudMock.createSetup(),
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+      });
+      expect(coreSetupMock.featureFlags.setInitialFeatureFlagsGetter).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('start', () => {

@@ -75,7 +75,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
     "@kbn/observability-alert-details",
-    "@kbn/investigation-shared",
     "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",
@@ -91,7 +90,6 @@
     "@kbn/home-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/guided-onboarding-plugin",
-    "@kbn/investigate-plugin",
     "@kbn/license-management-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/security-plugin",
@@ -123,7 +121,10 @@
     "@kbn/core-saved-objects-server",
     "@kbn/response-ops-rule-params",
     "@kbn/controls-plugin",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/esql"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -8,10 +8,11 @@
  */
 
 import { resolve } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFlags } from '@kbn/dev-cli-runner';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
@@ -31,13 +32,19 @@ export const getPlaywrightProject = (
   return 'local';
 };
 
-async function runPlaywrightTest(procs: ProcRunner, cmd: string, args: string[]) {
+async function runPlaywrightTest(
+  procs: ProcRunner,
+  cmd: string,
+  args: string[],
+  env: Record<string, string> = {}
+) {
   return procs.run(`playwright`, {
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
     env: {
       ...process.env,
+      ...env,
     },
     wait: true,
   });
@@ -48,20 +55,32 @@ export async function hasTestsInPlaywrightConfig(
   cmd: string,
   cmdArgs: string[],
   configPath: string
-): Promise<boolean> {
+): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = `SCOUT_REPORTER_ENABLED=false ${cmd} ${cmdArgs.join(' ')} --list`;
+    const validationCmd = ['SCOUT_REPORTER_ENABLED=false', cmd, ...cmdArgs, '--list'].join(' ');
     log.debug(`scout: running '${validationCmd}'`);
 
     const result = await execPromise(validationCmd);
     const lastLine = result.stdout.trim().split('\n').pop() || '';
 
     log.info(`scout: ${lastLine}`);
-    return true; // success
+    return 0; // success
   } catch (err) {
-    log.error(`scout: No tests found in [${configPath}]`);
-    return false; // failure
+    const errorMessage = (err as Error).message || String(err);
+
+    if (errorMessage.includes('No tests found')) {
+      log.error(`scout: No tests found in [${configPath}]`);
+      return 2; // "no tests" code, no hard failure on CI
+    }
+
+    if (errorMessage.includes(`unknown command 'test'`)) {
+      log.error(`scout: Playwright CLI is probably broken.\n${errorMessage}`);
+      return 1;
+    }
+
+    log.error(`scout: Unknown error occurred.\n${errorMessage}`);
+    return 1;
   }
 }
 
@@ -70,7 +89,8 @@ async function runLocalServersAndTests(
   log: ToolingLog,
   options: RunTestsOptions,
   cmd: string,
-  cmdArgs: string[]
+  cmdArgs: string[],
+  env: Record<string, string> = {}
 ) {
   const config = await loadServersConfig(options.mode, log);
   const abortCtrl = new AbortController();
@@ -102,7 +122,7 @@ async function runLocalServersAndTests(
     // wait for 5 seconds
     await silence(log, 5000);
 
-    await runPlaywrightTest(procs, cmd, cmdArgs);
+    await runPlaywrightTest(procs, cmd, cmdArgs, env);
   } finally {
     try {
       await procs.stop('kibana');
@@ -120,11 +140,23 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   const pwGrepTag = getPlaywrightGrepTag(options.mode);
   const pwConfigPath = options.configPath;
+  const pwTestFiles = options.testFiles || [];
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
+  const globalFlags = getFlags(process.argv.slice(2), {
+    allowUnexpected: true,
+  });
+  // Temporarily use `debug` log level for Playwright tests to better understand performance issues;
+  // We are going to change it to `info` in the future. This change doesn't affect Test Servers logging.
+  const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
+
+  if (pwTestFiles.length > 0) {
+    log.info(`scout: Running Scout tests located in:\n${pwTestFiles.join('\n')}`);
+  }
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
+    ...(pwTestFiles.length ? pwTestFiles : []),
     `--config=${pwConfigPath}`,
     `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
@@ -132,21 +164,46 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   ];
 
   await withProcRunner(log, async (procs) => {
-    const hasTests = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
 
-    if (!hasTests) {
-      process.exit(2); // code "2" means no tests found
+    if (exitCode !== 0) {
+      process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs);
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, {
+        SCOUT_LOG_LEVEL: logsLevel,
+      });
     } else {
-      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, {
+        SCOUT_LOG_LEVEL: logsLevel,
+      });
     }
 
     reportTime(runStartTime, 'ready', {
       success: true,
       ...options,
+    });
+  });
+}
+
+export async function runPlaywrightTestCheck(log: ToolingLog) {
+  const runStartTime = Date.now();
+  const reportTime = getTimeReporter(log, 'scripts/scout run-playwright-test-check');
+  log.info(`scout: Validate 'playwright test' command can run successfully`);
+
+  const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+  const pwCmdArgs = [
+    'test',
+    `--config=x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/playwright.config.ts`,
+    `--list`,
+  ];
+
+  await withProcRunner(log, async (procs) => {
+    await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
+
+    reportTime(runStartTime, 'ready', {
+      success: true,
     });
   });
 }

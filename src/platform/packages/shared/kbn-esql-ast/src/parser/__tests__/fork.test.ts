@@ -86,15 +86,5 @@ describe('FORK', () => {
 
       expect(errors.length > 0).toBe(true);
     });
-
-    it('when unsupported command', () => {
-      const text = `FROM kibana_ecommerce_data
-      | FORK
-          (DROP bytes)`;
-
-      const { errors } = parse(text);
-
-      expect(errors.length > 0).toBe(true);
-    });
   });
 });

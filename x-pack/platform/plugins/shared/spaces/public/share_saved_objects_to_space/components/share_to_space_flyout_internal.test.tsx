@@ -621,7 +621,7 @@ describe('ShareToSpaceFlyout', () => {
             <EuiIconTip
               content="You need additional privileges to deselect this space."
               position="left"
-              type="iInCircle"
+              type="info"
             />
             <EuiIconTip
               color="warning"
@@ -637,7 +637,7 @@ describe('ShareToSpaceFlyout', () => {
             <EuiIconTip
               content="You need additional privileges to deselect this space."
               position="left"
-              type="iInCircle"
+              type="info"
             />
           </React.Fragment>
         `);
@@ -647,7 +647,7 @@ describe('ShareToSpaceFlyout', () => {
             <EuiIconTip
               content="You need additional privileges to select this space."
               position="left"
-              type="iInCircle"
+              type="info"
             />
           </React.Fragment>
         `);

@@ -14,21 +14,26 @@ import { ToastsApi } from './toasts_api';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { EventReporter } from './telemetry';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+import { notificationCoordinator, Coordinator } from '../notification_coordinator';
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 const mockRendering = renderingServiceMock.create();
 
-const eventReporter = new EventReporter({ analytics: mockAnalytics });
+const mockAnalyticsSetup = analyticsServiceMock.createAnalyticsServiceSetup();
+
+const coordinator = notificationCoordinator.bind(new Coordinator());
 
 describe('#setup()', () => {
   it('returns a ToastsApi', () => {
     const toasts = new ToastsService();
 
     expect(
-      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
+      toasts.setup({
+        uiSettings: uiSettingsServiceMock.createSetupContract(),
+        analytics: mockAnalyticsSetup,
+      })
     ).toBeInstanceOf(ToastsApi);
   });
 });
@@ -40,12 +45,16 @@ describe('#start()', () => {
     const toasts = new ToastsService();
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.setup({
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
+      analytics: mockAnalyticsSetup,
+    });
     toasts.start({
       rendering: mockRendering,
       targetDomElement,
       overlays: mockOverlays,
-      eventReporter,
+      analytics: mockAnalytics,
+      notificationCoordinator: coordinator,
     });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
@@ -55,14 +64,18 @@ describe('#start()', () => {
     const toasts = new ToastsService();
 
     expect(
-      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
+      toasts.setup({
+        uiSettings: uiSettingsServiceMock.createSetupContract(),
+        analytics: mockAnalyticsSetup,
+      })
     ).toBeInstanceOf(ToastsApi);
     expect(
       toasts.start({
         rendering: mockRendering,
         targetDomElement,
         overlays: mockOverlays,
-        eventReporter,
+        analytics: mockAnalytics,
+        notificationCoordinator: coordinator,
       })
     ).toBeInstanceOf(ToastsApi);
   });
@@ -74,12 +87,16 @@ describe('#stop()', () => {
     targetDomElement.setAttribute('test', 'target-dom-element');
     const toasts = new ToastsService();
 
-    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.setup({
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
+      analytics: mockAnalyticsSetup,
+    });
     toasts.start({
       rendering: mockRendering,
       targetDomElement,
       overlays: mockOverlays,
-      eventReporter,
+      analytics: mockAnalytics,
+      notificationCoordinator: coordinator,
     });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
@@ -98,12 +115,16 @@ describe('#stop()', () => {
     const targetDomElement = document.createElement('div');
     const toasts = new ToastsService();
 
-    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.setup({
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
+      analytics: mockAnalyticsSetup,
+    });
     toasts.start({
       rendering: mockRendering,
       targetDomElement,
       overlays: mockOverlays,
-      eventReporter,
+      analytics: mockAnalytics,
+      notificationCoordinator: coordinator,
     });
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);

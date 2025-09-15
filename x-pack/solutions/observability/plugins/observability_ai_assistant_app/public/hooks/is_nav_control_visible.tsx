@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { Space } from '@kbn/spaces-plugin/common';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
@@ -19,7 +20,8 @@ interface UseIsNavControlVisibleProps {
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  preferredAssistantType: AIAssistantType,
+  space: Space
 ) {
   if (preferredAssistantType === AIAssistantType.Never) {
     return false;
@@ -28,7 +30,11 @@ function getVisibility(
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-  if (preferredAssistantType === AIAssistantType.Observability) {
+  if (
+    preferredAssistantType === AIAssistantType.Observability ||
+    space.solution === 'es' ||
+    space.solution === 'oblt'
+  ) {
     return categoryId !== DEFAULT_APP_CATEGORIES.security.id;
   }
 
@@ -42,21 +48,24 @@ export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavCont
   const [isVisible, setIsVisible] = useState(false);
 
   const { currentAppId$, applications$ } = coreStart.application;
-  const { aiAssistantManagementSelection } = pluginsStart;
+  const { aiAssistantManagementSelection, spaces } = pluginsStart;
+
+  const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, space]) => {
+        setIsVisible(getVisibility(appId, applications, preferredAssistantType, space));
       },
     });
 
     return () => appSubscription.unsubscribe();
-  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
+  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$, space$]);
 
   return {
     isVisible,

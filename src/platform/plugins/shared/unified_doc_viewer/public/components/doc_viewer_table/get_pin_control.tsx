@@ -79,7 +79,7 @@ export const getPinColumnControl = ({
     id: 'pin_field',
     width: 32,
     headerCellRender: () => (
-      <EuiIconTip aria-label={pinColumnHeader} type="iInCircle" content={pinColumnHeader} />
+      <EuiIconTip aria-label={pinColumnHeader} type="info" content={pinColumnHeader} />
     ),
     rowCellRender: ({ rowIndex }) => {
       const row = rows[rowIndex];

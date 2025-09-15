@@ -72,6 +72,7 @@ describe('Transaction', () => {
     container: {
       id: 'container1234567890abcdef',
     },
+    event_name: 'otel event name',
   };
 
   matchSnapshot(transaction);
@@ -127,6 +128,7 @@ describe('Span', () => {
     transaction: {
       id: 'transaction id',
     },
+    event_name: 'otel event name',
   };
 
   matchSnapshot(span);
@@ -190,6 +192,7 @@ describe('Error', () => {
       id: 'transaction id',
       type: 'request',
     },
+    event_name: 'otel event name',
   };
 
   matchSnapshot(errorDoc);

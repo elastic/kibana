@@ -120,8 +120,14 @@ export interface UseTableFiltersReturn extends TableFiltersCommonProps {
   onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
 }
 
-export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
-  const [searchTerm, setSearchTerm] = useState(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM) || '');
+export const useTableFilters = ({
+  storage,
+  storageKey,
+}: {
+  storage: Storage;
+  storageKey: string;
+}): UseTableFiltersReturn => {
+  const [searchTerm, setSearchTerm] = useState(storage.get(storageKey) || '');
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>(
     getStoredFieldTypes(storage)
   );

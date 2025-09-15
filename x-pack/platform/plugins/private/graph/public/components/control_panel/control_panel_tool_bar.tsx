@@ -176,7 +176,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={drillDownButtonMsg}>
           <EuiButtonIcon
-            iconType="iInCircle"
+            iconType="info"
             size="xs"
             aria-label={drillDownButtonMsg}
             isDisabled={haveNodes}

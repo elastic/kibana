@@ -583,7 +583,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage: 'Join table with another table.',
     }),
     declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,
-    preview: true,
+    preview: false,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
       // TODO: Uncomment when other join types are implemented
@@ -594,7 +594,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForJoin,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'change_point',
     preview: true,
     description: i18n.translate(
@@ -713,7 +713,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'completion',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionDoc', {
@@ -728,7 +728,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterCompletion,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'sample',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sampleDoc', {

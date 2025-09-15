@@ -33,14 +33,12 @@ export const MetaEngineSchemaLogic = kea<
     fields: [
       {},
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { fields }) => fields,
       },
     ],
     conflictingFields: [
       {},
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { conflictingFields }) => conflictingFields,
       },
     ],

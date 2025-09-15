@@ -59,7 +59,5 @@
     "@kbn/i18n-react",
     "@kbn/inference-tracing"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

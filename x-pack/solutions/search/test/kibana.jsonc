@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-xpack-search",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "devOnly": true
+}

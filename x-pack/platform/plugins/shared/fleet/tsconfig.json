@@ -120,5 +120,8 @@
     "@kbn/core-security-server",
     "@kbn/core-http-server-utils",
     "@kbn/handlebars",
+    "@kbn/saved-search-component",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/embeddable-plugin",
   ]
 }

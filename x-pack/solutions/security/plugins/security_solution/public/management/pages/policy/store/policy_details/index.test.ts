@@ -331,7 +331,7 @@ describe('policy details: ', () => {
                     },
                   },
                   mac: {
-                    events: { process: true, file: true, network: true, security: true },
+                    events: { dns: true, process: true, file: true, network: true, security: true },
                     malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     behavior_protection: {
                       mode: 'off',

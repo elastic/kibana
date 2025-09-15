@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker } from '@elastic/eui';
+import React from 'react';
+import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import React from 'react';
 import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { DatePicker } from '.';
 
-let history: MemoryHistory;
-
 const mockRefreshTimeRange = jest.fn();
+let history: MemoryHistory;
 let mockHistoryPush: jest.SpyInstance;
 let mockHistoryReplace: jest.SpyInstance;
 
 function DatePickerWrapper() {
   const location = useLocation();
-
   const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = qs.parse(location.search, {
     parseNumbers: true,
     parseBooleans: true,
@@ -46,7 +44,7 @@ function DatePickerWrapper() {
   );
 }
 
-function mountDatePicker(initialParams: {
+function renderDatePicker(initialParams: {
   rangeFrom?: string;
   rangeTo?: string;
   refreshInterval?: number;
@@ -62,28 +60,30 @@ function mountDatePicker(initialParams: {
   mockHistoryPush = jest.spyOn(history, 'push');
   mockHistoryReplace = jest.spyOn(history, 'replace');
 
-  const wrapper = mount(
-    <MockApmPluginContextWrapper
-      value={
-        {
-          plugins: {
-            data: {
-              query: {
-                timefilter: {
-                  timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
+  return {
+    ...render(
+      <MockApmPluginContextWrapper
+        value={
+          {
+            plugins: {
+              data: {
+                query: {
+                  timefilter: {
+                    timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
+                  },
                 },
               },
             },
-          },
-        } as any
-      }
-      history={history}
-    >
-      <DatePickerWrapper />
-    </MockApmPluginContextWrapper>
-  );
-
-  return { wrapper, setTimeSpy, getTimeSpy };
+          } as any
+        }
+        history={history}
+      >
+        <DatePickerWrapper />
+      </MockApmPluginContextWrapper>
+    ),
+    setTimeSpy,
+    getTimeSpy,
+  };
 }
 
 describe('DatePicker', () => {
@@ -99,71 +99,81 @@ describe('DatePicker', () => {
     jest.resetAllMocks();
   });
 
-  it('updates the URL when the date range changes', () => {
-    const { wrapper } = mountDatePicker({
+  it('updates the URL when the date range changes', async () => {
+    const user = userEvent.setup();
+    renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     });
 
     expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
 
-    wrapper.find(EuiSuperDatePicker).props().onTimeChange({
-      start: 'now-90m',
-      end: 'now-60m',
-      isInvalid: false,
-      isQuickSelection: true,
-    });
+    const quickSelectButton = screen.getByTestId('superDatePickerToggleQuickMenuButton');
+    await user.click(quickSelectButton);
+
+    const commonlyUsedRange = screen.getByTestId('superDatePickerCommonlyUsed_Last_24 hours');
+    await user.click(commonlyUsedRange);
+
     expect(mockHistoryPush).toHaveBeenCalledTimes(1);
     expect(mockHistoryPush).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        search: 'rangeFrom=now-90m&rangeTo=now-60m',
+        search: expect.stringContaining('rangeFrom=now-24h&rangeTo=now'),
       })
     );
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    const { wrapper } = mountDatePicker({
+
+    renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       refreshPaused: false,
       refreshInterval: 1000,
     });
+
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
-    await waitFor(() => {});
-    expect(mockRefreshTimeRange).toHaveBeenCalled();
-    wrapper.unmount();
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    await waitFor(() => {
+      expect(mockRefreshTimeRange).toHaveBeenCalled();
+    });
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    mountDatePicker({
+
+    renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       refreshPaused: true,
       refreshInterval: 1000,
     });
+
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
-    await waitFor(() => {});
-    expect(mockRefreshTimeRange).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    await waitFor(() => {
+      expect(mockRefreshTimeRange).not.toHaveBeenCalled();
+    });
   });
 
-  describe('if both `rangeTo` and `rangeFrom` is set', () => {
-    it('calls setTime ', async () => {
-      const { setTimeSpy } = mountDatePicker({
-        rangeTo: 'now-20m',
-        rangeFrom: 'now-22m',
-      });
-      expect(setTimeSpy).toHaveBeenCalledWith({
-        to: 'now-20m',
-        from: 'now-22m',
-      });
+  it('sets time when both rangeTo and rangeFrom are provided', async () => {
+    const { setTimeSpy } = renderDatePicker({
+      rangeTo: 'now-20m',
+      rangeFrom: 'now-22m',
     });
 
-    it('does not update the url', () => {
-      expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
+    expect(setTimeSpy).toHaveBeenCalledWith({
+      to: 'now-20m',
+      from: 'now-22m',
     });
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
   });
 });

@@ -131,7 +131,22 @@ describe('Microsoft Defender for Endpoint Connector', () => {
             cancellationComment: '',
             cancellationDateTimeUtc: '',
             cancellationRequestor: '',
-            commands: ['RunScript'],
+            commands: [
+              {
+                index: 0,
+                startTime: '2025-07-07T18:50:10.186354Z',
+                endTime: '2025-07-07T18:50:21.811356Z',
+                commandStatus: 'Completed',
+                errors: [],
+                command: {
+                  type: 'RunScript',
+                  params: [
+                    { key: 'ScriptName', value: 'hello.sh' },
+                    { key: 'Args', value: '--noargs' },
+                  ],
+                },
+              },
+            ],
             computerDnsName: 'desktop-test',
             creationDateTimeUtc: '2019-01-02T14:39:38.2262283Z',
             externalID: 'abc',
@@ -209,6 +224,123 @@ describe('Microsoft Defender for Endpoint Connector', () => {
         }),
         connectorMock.usageCollector
       );
+    });
+  });
+
+  describe('#getActionResults()', () => {
+    it('should call Microsoft Defender API to retrieve action results download link', async () => {
+      const actionId = 'test-action-123';
+      const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
+
+      // Mock only the external download URL (Microsoft Defender API is mocked in mocks.ts)
+      connectorMock.apiMock[mockDownloadUrl] = () =>
+        microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({
+          pipe: jest.fn(),
+          on: jest.fn(),
+          read: jest.fn(),
+        });
+
+      await connectorMock.instanceMock.getActionResults(
+        { id: actionId },
+        connectorMock.usageCollector
+      );
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`,
+          method: 'GET',
+        }),
+        connectorMock.usageCollector
+      );
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: mockDownloadUrl,
+          method: 'get',
+          responseType: 'stream',
+        }),
+        connectorMock.usageCollector
+      );
+    });
+
+    it('should return a Stream for downloading the file', async () => {
+      const actionId = 'test-action-123';
+      const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
+
+      // Mock external download URL to return a stream (Microsoft Defender API uses default mock)
+      const mockStream = { pipe: jest.fn(), on: jest.fn(), read: jest.fn() };
+      connectorMock.apiMock[mockDownloadUrl] = () =>
+        microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock(mockStream);
+
+      const result = await connectorMock.instanceMock.getActionResults(
+        { id: actionId },
+        connectorMock.usageCollector
+      );
+
+      expect(result).toEqual(mockStream);
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: mockDownloadUrl,
+          method: 'get',
+          responseType: 'stream',
+        }),
+        connectorMock.usageCollector
+      );
+    });
+
+    it('should error if download URL is not found in API response', async () => {
+      const actionId = 'test-action-123';
+
+      // Override the default mock to return null
+      connectorMock.apiMock[
+        `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`
+      ] = () => microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({ value: null });
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow(`Download URL for script results of machineId [${actionId}] not found`);
+    });
+
+    it('should error if download URL is empty string in API response', async () => {
+      const actionId = 'test-action-123';
+
+      // Override the default mock to return empty string
+      connectorMock.apiMock[
+        `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`
+      ] = () => microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock({ value: '' });
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow(`Download URL for script results of machineId [${actionId}] not found`);
+    });
+
+    it('should handle Microsoft Defender API errors for download link retrieval', async () => {
+      const actionId = 'test-action-123';
+
+      // Override the default mock to throw an error
+      connectorMock.apiMock[
+        `https://api.mock__microsoft.com/api/machineactions/${actionId}/GetLiveResponseResultDownloadLink(index=0)`
+      ] = () => {
+        throw new Error('Microsoft Defender API error');
+      };
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow('Microsoft Defender API error');
+    });
+
+    it('should handle file download errors', async () => {
+      const actionId = 'test-action-123';
+      const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
+
+      // Mock external download URL to throw an error (Microsoft Defender API uses default mock)
+      connectorMock.apiMock[mockDownloadUrl] = () => {
+        throw new Error('File download failed');
+      };
+
+      await expect(
+        connectorMock.instanceMock.getActionResults({ id: actionId }, connectorMock.usageCollector)
+      ).rejects.toThrow('File download failed');
     });
   });
 });

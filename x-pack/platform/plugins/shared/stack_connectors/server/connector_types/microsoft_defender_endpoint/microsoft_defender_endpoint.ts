@@ -10,6 +10,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Stream } from 'stream';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
@@ -23,6 +24,7 @@ import {
   RunScriptParamsSchema,
   MicrosoftDefenderEndpointEmptyParamsSchema,
   GetActionResultsParamsSchema,
+  DownloadActionResultsResponseSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -450,16 +452,36 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   public async getActionResults(
     { id }: MicrosoftDefenderEndpointGetActionsParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MicrosoftDefenderEndpointGetActionResultsResponse> {
+  ): Promise<Stream> {
     // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-live-response-result
 
-    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
+    const resultDownloadLink =
+      await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
+        {
+          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
+          method: 'GET',
+        },
+        connectorUsageCollector
+      );
+    this.logger.debug(
+      () => `script results for machineId [${id}]:\n${JSON.stringify(resultDownloadLink)}`
+    );
+
+    const fileUrl = resultDownloadLink.value;
+
+    if (!fileUrl) {
+      throw new Error(`Download URL for script results of machineId [${id}] not found`);
+    }
+    const downloadConnection = await this.request(
       {
-        url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
-        method: 'GET',
+        url: fileUrl,
+        method: 'get',
+        responseType: 'stream',
+        responseSchema: DownloadActionResultsResponseSchema,
       },
       connectorUsageCollector
     );
+    return downloadConnection.data;
   }
 
   public async getLibraryFiles(

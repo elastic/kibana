@@ -81,6 +81,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
+  const isServerless = !!cloud?.isServerlessEnabled;
 
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
     'disabled'
@@ -194,38 +195,48 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             defaultMessage:
               'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
           });
+        case outputType.RemoteElasticsearch:
+          return i18n.translate('xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout', {
+            defaultMessage:
+              'Remote Elasticsearch output does not support connectivity to a serverless project.',
+          });
       }
     };
-    return isRemoteESOutput ? (
+    return (
       <>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.remoteESTypeText"
-            defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
-            values={{
-              doc: (
-                <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
-                  {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
-                    defaultMessage: 'our documentation',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      </>
-    ) : (
-      <>
-        <EuiSpacer size="xs" />
-        <EuiCallOut
-          data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
-          title={generateWarningMessage()}
-          iconType="alert"
-          color="warning"
-          size="s"
-          heading="p"
-        />
+        {!isServerless ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiCallOut
+              data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
+              title={generateWarningMessage()}
+              iconType="alert"
+              color="warning"
+              size="s"
+              heading="p"
+            />
+          </>
+        ) : null}
+        {isRemoteESOutput ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.remoteESTypeText"
+                defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
+                values={{
+                  doc: (
+                    <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
+                      {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
+                        defaultMessage: 'our documentation',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </>
+        ) : null}
       </>
     );
   };

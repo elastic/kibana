@@ -93,6 +93,7 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
         index,
         count,
         name: key,
+        // @ts-expect-error upgrade typescript v5.4.5
         percent: (count / total) * 100,
       };
     });

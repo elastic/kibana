@@ -8,17 +8,22 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
-import * as Bazel from '../../lib/bazel.mjs';
 import External from '../../lib/external_packages.js';
 
-import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
-import { setupRemoteCache } from './setup_remote_cache.mjs';
+import {
+  areNodeModulesPresent,
+  checkYarnIntegrity,
+  removeYarnIntegrityFileIfExists,
+  yarnInstallDeps,
+} from './yarn.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
 import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
+
+const IS_CI = process.env.CI?.match(/(1|true)/i);
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -44,6 +49,7 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -54,38 +60,16 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
-    const reactVersion = process.env.REACT_18 ? '18' : '17';
-
-    // Default to true when EUI_AMSTERDAM is not set on 8.19
-    // TODO: Remove when Kibana 8.19 is EOL and Amsterdam backports aren't needed anymore
-    // https://github.com/elastic/kibana/issues/221593
-    const euiAmsterdam = !process.env.EUI_AMSTERDAM || process.env.EUI_AMSTERDAM === 'true';
-
     const vscodeConfig =
-      args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
+      !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
+    const allowRoot = args.getBooleanValue('allow-root') ?? false;
+    const forceInstall = args.getBooleanValue('force-install');
+    const shouldInstall =
+      forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
 
-    // Force install is set in case a flag is passed into yarn kbn bootstrap or
-    // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
-    // tracking mechanism is no longer valid
-    const forceInstall =
-      args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
+    const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
-    const [{ packageManifestPaths, tsConfigRepoRels }] = await Promise.all([
-      // discover the location of packages, plugins, etc
-      await time('discovery', discovery),
-
-      (async () => {
-        await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
-
-        // Install bazel machinery tools if needed
-        await Bazel.ensureInstalled(log);
-
-        // Setup remote cache settings in .bazelrc.cache if needed
-        await setupRemoteCache(log);
-      })(),
-    ]);
-
-    // generate the package map and package.json file, if necessary
+    // generate the package map and update package.json file, if necessary
     const [packages] = await Promise.all([
       time('regenerate package map', async () => {
         return await regeneratePackageMap(log, packageManifestPaths);
@@ -104,30 +88,43 @@ export const command = {
       }),
     ]);
 
-    // Bootstrap process for Bazel packages
-    // Bazel is now managing dependencies so yarn install
-    // will happen as part of this
-    //
-    // NOTE: Bazel projects will be introduced incrementally
-    // And should begin from the ones with none dependencies forward.
-    // That way non bazel projects could depend on bazel projects but not the other way around
-    // That is only intended during the migration process while non Bazel projects are not removed at all.
-    if (forceInstall) {
-      await time('force install dependencies', async () => {
-        await removeYarnIntegrityFileIfExists();
-        await Bazel.expungeCache(log, { quiet });
-        await Bazel.installYarnDeps(log, { offline, quiet });
-      });
-    }
+    /**
+     * shouldInstall = node_modules missing || forceInstall || yarn integrity check failed
+     * Final install scenarios:
+     * node_modules missing: full reinstall irrespective of flags.
+     * node_modules present, with --force-install: the yarn integrity file will be removed, that triggers a reinstall, but it's faster than a full reinstall with some modules present
+     * node_modules present, with an out-of-date yarn integrity file: yarn will do a quick install, only fixing whatever is broken, probably
+     * node_modules present, with an up-to-date yarn integrity file: only an integrity check is done, and module installs are skipped
+     */
+    await time('install dependencies', async () => {
+      if (shouldInstall) {
+        if (forceInstall) {
+          await removeYarnIntegrityFileIfExists();
+        }
+        await yarnInstallDeps(log, { offline, quiet });
+      }
+    });
 
     await time('pre-build webpack bundles for packages', async () => {
-      await Bazel.buildWebpackBundles(log, { offline, quiet, reactVersion, euiAmsterdam });
+      log.info('pre-build webpack bundles for packages');
+      await run(
+        'yarn',
+        ['kbn', 'build-shared']
+          .concat(quiet ? ['--quiet'] : [])
+          .concat(forceInstall ? ['--no-cache'] : [])
+          .concat(allowRoot ? ['--allow-root'] : []),
+        {
+          pipe: true,
+        }
+      );
+      log.success('shared webpack bundles built');
+    });
+
+    await time('sort package json', async () => {
+      await sortPackageJson(log);
     });
 
     await Promise.all([
-      time('sort package json', async () => {
-        await sortPackageJson(log);
-      }),
       validate
         ? time('validate dependencies', async () => {
             // now that deps are installed we can import `@kbn/yarn-lock-validator`
@@ -139,7 +136,6 @@ export const command = {
         ? time('update vscode config', async () => {
             // Update vscode settings
             await run('node', ['scripts/update_vscode_config']);
-
             log.success('vscode config updated');
           })
         : undefined,

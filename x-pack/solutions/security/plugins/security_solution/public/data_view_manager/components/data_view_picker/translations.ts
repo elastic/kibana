@@ -14,6 +14,13 @@ export const LOADING = i18n.translate('xpack.securitySolution.dataViewManager.lo
 export const DEFAULT_SECURITY_DATA_VIEW = i18n.translate(
   'xpack.securitySolution.dataViewManager.defaultSecurityDataView',
   {
-    defaultMessage: 'Default Security Data View',
+    defaultMessage: 'Default security data view',
+  }
+);
+
+export const DEFAULT_SECURITY_ALERT_DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.dataViewManager.defaultSecurityAlertDataView',
+  {
+    defaultMessage: 'Security alert data view',
   }
 );

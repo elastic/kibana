@@ -12,6 +12,7 @@ import {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
+  DeleteAllConversationsRequestBody,
 } from '@kbn/elastic-assistant-common';
 import {
   CreateMessageSchema,
@@ -86,6 +87,10 @@ export const getCreateConversationSchemaMock = (
   ],
   category: 'assistant',
   ...rest,
+});
+
+export const getDeleteAllConversationsSchemaMock = (): DeleteAllConversationsRequestBody => ({
+  excludedIds: ['conversation-1'],
 });
 
 export const getUpdateConversationSchemaMock = (
@@ -237,5 +242,37 @@ export const getEsCreateConversationSchemaMock = (
   category: 'assistant',
   users: [{ name: 'elastic' }],
   namespace: 'default',
+  ...rest,
+});
+
+export const getEsConversationSchemaMock = (
+  rest?: Partial<EsConversationSchema>
+): EsConversationSchema => ({
+  '@timestamp': '2020-04-20T15:25:31.830Z',
+  created_at: '2020-04-20T15:25:31.830Z',
+  title: 'title-1',
+  updated_at: '2020-04-20T15:25:31.830Z',
+  messages: [],
+  id: '1',
+  namespace: 'default',
+  exclude_from_last_conversation_storage: false,
+  api_config: {
+    action_type_id: '.gen-ai',
+    connector_id: 'c1',
+    default_system_prompt_id: 'prompt-1',
+    model: 'test',
+    provider: 'Azure OpenAI',
+  },
+  summary: {
+    content: 'test',
+  },
+  category: 'assistant',
+  users: [
+    {
+      id: '1111',
+      name: 'elastic',
+    },
+  ],
+  replacements: undefined,
   ...rest,
 });

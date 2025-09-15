@@ -18,7 +18,7 @@ root)
 |`yarn test:jest_integration [test path]`
 
 |Functional
-|`test/**/config.js` `x-pack/test/**/config.js`
+|`test/**/config.js` `x-pack/platform/test/**/config.js`
 |`node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp`
 |===
 
@@ -115,5 +115,5 @@ something simple, e.g. "`computer`".
 * Run {kib} with `yarn start --host=computer.local` (substituting
 your computer name).
 * Now you can run your VM, open the browser, and navigate to
-`http://computer.local:5601` to test {kib}.
+`<COMPUTER_NAME>.local:5601` to test {kib}.
 * Alternatively you can use browserstack

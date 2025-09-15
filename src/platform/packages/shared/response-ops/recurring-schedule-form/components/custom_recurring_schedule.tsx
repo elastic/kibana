@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import { css } from '@emotion/react';
@@ -43,10 +43,18 @@ const styles = {
 
 export interface CustomRecurringScheduleProps {
   startDate?: string;
+  readOnly?: boolean;
+  compressed?: boolean;
+  minFrequency?: Frequency;
 }
 
-export const CustomRecurringSchedule: React.FC = React.memo(
-  ({ startDate }: CustomRecurringScheduleProps) => {
+export const CustomRecurringSchedule = memo(
+  ({
+    startDate,
+    readOnly = false,
+    compressed = false,
+    minFrequency = Frequency.YEARLY,
+  }: CustomRecurringScheduleProps) => {
     const [{ recurringSchedule }] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
         'recurringSchedule.frequency',
@@ -59,10 +67,13 @@ export const CustomRecurringSchedule: React.FC = React.memo(
       return parseSchedule(recurringSchedule);
     }, [recurringSchedule]);
 
-    const frequencyOptions = useMemo(
-      () => RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY(parsedSchedule?.interval),
-      [parsedSchedule?.interval]
-    );
+    const frequencyOptions = useMemo(() => {
+      const options = RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY(parsedSchedule?.interval);
+      if (minFrequency != null) {
+        return options.filter(({ value }) => Number(value) >= minFrequency);
+      }
+      return options;
+    }, [minFrequency, parsedSchedule?.interval]);
 
     const bymonthOptions = useMemo(() => {
       if (!startDate) return [];
@@ -97,6 +108,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(
                     'data-test-subj': 'interval-field',
                     id: 'interval',
                     euiFieldProps: {
+                      compressed,
                       'data-test-subj': 'customRecurringScheduleIntervalInput',
                       min: 1,
                       prepend: (
@@ -104,6 +116,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(
                           {RECURRING_SCHEDULE_FORM_INTERVAL_EVERY}
                         </EuiFormLabel>
                       ),
+                      readOnly,
                     },
                   }}
                 />
@@ -114,8 +127,10 @@ export const CustomRecurringSchedule: React.FC = React.memo(
                   componentProps={{
                     'data-test-subj': 'custom-frequency-field',
                     euiFieldProps: {
+                      compressed,
                       'data-test-subj': 'customRecurringScheduleFrequencySelect',
                       options: frequencyOptions,
+                      disabled: readOnly,
                     },
                   }}
                 />
@@ -148,10 +163,12 @@ export const CustomRecurringSchedule: React.FC = React.memo(
             }}
             componentProps={{
               'data-test-subj': 'byweekday-field',
+              compressed,
               euiFieldProps: {
                 'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
                 legend: 'Repeat on weekday',
                 options: WEEKDAY_OPTIONS,
+                isDisabled: readOnly,
               },
             }}
           />
@@ -162,9 +179,11 @@ export const CustomRecurringSchedule: React.FC = React.memo(
             path="recurringSchedule.bymonth"
             componentProps={{
               'data-test-subj': 'bymonth-field',
+              compressed,
               euiFieldProps: {
                 legend: 'Repeat on weekday or month day',
                 options: bymonthOptions,
+                readOnly,
               },
             }}
           />

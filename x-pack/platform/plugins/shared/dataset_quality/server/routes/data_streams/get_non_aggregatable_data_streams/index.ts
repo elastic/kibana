@@ -29,36 +29,48 @@ export async function getNonAggregatableDataStreams({
 
   const dataStreamTypes = types.map((type) => `${type}-*-*`).join(',');
 
-  const response = await datasetQualityESClient.fieldCaps({
-    index: dataStream ?? dataStreamTypes,
-    fields: [_IGNORED],
-    index_filter: {
-      ...rangeQuery(start, end)[0],
-    },
-  });
+  try {
+    const response = await datasetQualityESClient.fieldCaps({
+      index: dataStream ?? dataStreamTypes,
+      fields: [_IGNORED],
+      index_filter: {
+        ...rangeQuery(start, end)[0],
+      },
+    });
 
-  const indices = response?.indices ?? [];
+    const indices = response?.indices ?? [];
 
-  // if no indices are returned, it means there are no data streams matching the criteria
-  // so we return an empty response - aggregatable is set to true so no error is thrown in the UI
-  if (indices.length === 0) {
+    // if no indices are returned, it means there are no data streams matching the criteria
+    // so we return an empty response - aggregatable is set to true so no error is thrown in the UI
+    if (indices.length === 0) {
+      return {
+        aggregatable: true,
+        datasets: [],
+      };
+    }
+
+    const nonAggregatableIndices =
+      response.fields._ignored?._ignored?.non_aggregatable_indices ?? [];
+
+    const datasets = extractNonAggregatableDatasets(indices, nonAggregatableIndices);
+    // If there are no non_aggregatable_indices, it means that either all indices are either aggregatable or non-aggregatable
+    // so we need to check the aggregatable field to determine
+    const aggregatable = response.fields._ignored?._ignored?.non_aggregatable_indices
+      ? datasets.length === 0
+      : Boolean(response.fields._ignored?._ignored?.aggregatable);
+
     return {
-      aggregatable: true,
-      datasets: [],
+      aggregatable,
+      datasets,
     };
+  } catch (error) {
+    if (error.message.includes('index_closed_exception')) {
+      return {
+        aggregatable: true,
+        datasets: [],
+      };
+    }
+
+    throw error;
   }
-
-  const nonAggregatableIndices = response.fields._ignored?._ignored?.non_aggregatable_indices ?? [];
-
-  const datasets = extractNonAggregatableDatasets(indices, nonAggregatableIndices);
-  // If there are no non_aggregatable_indices, it means that either all indices are either aggregatable or non-aggregatable
-  // so we need to check the aggregatable field to determine
-  const aggregatable = response.fields._ignored?._ignored?.non_aggregatable_indices
-    ? datasets.length === 0
-    : Boolean(response.fields._ignored?._ignored?.aggregatable);
-
-  return {
-    aggregatable,
-    datasets,
-  };
 }

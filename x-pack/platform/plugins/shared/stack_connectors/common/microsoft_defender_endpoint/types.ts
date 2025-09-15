@@ -64,7 +64,7 @@ export interface MicrosoftDefenderEndpointGetActionsResponse {
 
 export interface MicrosoftDefenderEndpointGetActionResultsResponse {
   '@odata.context': string;
-  value: string[]; // Downloadable link
+  value: string; // Downloadable link
 }
 
 /**
@@ -151,8 +151,8 @@ export interface MicrosoftDefenderEndpointMachineAction {
   externalID?: string;
   /** The name of the user/application that submitted the action. */
   requestSource: string;
-  /** Commands to run. Allowed values are PutFile, RunScript, GetFile. */
-  commands: Array<'PutFile' | 'RunScript' | 'GetFile'>;
+  /** Array of command execution details for this action. */
+  commands: MicrosoftDefenderCommandEntry[];
   /** Identity of the person that canceled the action. */
   cancellationRequestor: string;
   /** Comment that was written when issuing the action. */
@@ -198,3 +198,24 @@ export interface MicrosoftDefenderEndpointApiTokenResponse {
 }
 
 export type MicrosoftDefenderGetLibraryFilesResponse = TypeOf<typeof GetLibraryFilesResponse>;
+
+/**
+ * Represents a single command execution entry as returned by Microsoft Defender API.
+ */
+export interface MicrosoftDefenderCommandEntry {
+  /** The index of the command in the sequence. */
+  index: number;
+  /** The UTC start time (ISO string) of the command execution. */
+  startTime: string;
+  /** The UTC end time (ISO string) of the command execution. */
+  endTime: string;
+  /** Status of the command execution. */
+  commandStatus: string;
+  /** Array of error messages (if any) for the command execution. */
+  errors: string[];
+  /** The command details (type and params). */
+  command: {
+    type: 'PutFile' | 'RunScript' | 'GetFile';
+    params: Array<{ key: string; value: string }>;
+  };
+}

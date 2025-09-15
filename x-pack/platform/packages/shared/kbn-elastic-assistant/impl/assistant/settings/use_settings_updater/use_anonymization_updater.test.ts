@@ -56,6 +56,7 @@ describe('useAnonymizationUpdater', () => {
   it('should initialize with default values', () => {
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -69,6 +70,7 @@ describe('useAnonymizationUpdater', () => {
   it('should update hasPendingChanges and updatedAnonymizationData on onListUpdated', async () => {
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -99,6 +101,7 @@ describe('useAnonymizationUpdater', () => {
 
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -129,7 +132,7 @@ describe('useAnonymizationUpdater', () => {
     expect(result.current.hasPendingChanges).toBe(true);
     expect(result.current.updatedAnonymizationData).toEqual({
       ...mockAnonymizationFields,
-      data: [mockField2, { ...mockField, anonymized: true }],
+      data: [{ ...mockField, anonymized: true }, mockField2],
     });
     await act(async () => {
       await result.current.onListUpdated(update2);
@@ -158,6 +161,7 @@ describe('useAnonymizationUpdater', () => {
 
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,
@@ -203,6 +207,7 @@ describe('useAnonymizationUpdater', () => {
 
     const { result } = renderHook(() =>
       useAnonymizationUpdater({
+        anonymizationAllFields: mockAnonymizationFields,
         anonymizationFields: mockAnonymizationFields,
         http: mockHttp,
         toasts: mockToasts,

@@ -31,7 +31,7 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
         return;
       }
       const coreStart = (await getStartServices())[0];
-      const { overlays, ...startServices } = coreStart;
+      const { overlays, rendering } = coreStart;
       const openFlyout = overlays.openFlyout;
       openFlyout(
         toMountPoint(
@@ -45,7 +45,7 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
               <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
             </EuiFlyoutBody>
           </React.Fragment>,
-          startServices
+          rendering
         ),
         {
           'data-test-subj': 'samplePanelActionFlyout',

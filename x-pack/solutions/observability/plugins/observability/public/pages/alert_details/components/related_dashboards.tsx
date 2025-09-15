@@ -5,127 +5,74 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import {
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-} from '@elastic/eui';
-import { useKibana } from '../../../utils/kibana_react';
-import { TopAlert } from '../../..';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { DashboardTiles } from './related_dashboards/dashboard_tiles';
+import { DashboardMetadata } from './related_dashboards/dashboard_tile';
+import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
 
 interface RelatedDashboardsProps {
-  alert: TopAlert;
-  relatedDashboards: Array<{ id: string }>;
+  rule: Rule;
+  suggestedDashboards?: DashboardMetadata[];
+  linkedDashboards?: DashboardMetadata[];
+  isLoadingRelatedDashboards: boolean;
+  onSuccessAddSuggestedDashboard: () => Promise<void>;
 }
 
-export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboardsProps) {
-  const [dashboardsMeta, setDashboardsMeta] = useState<
-    Array<{ id: string; title: string; description: string }>
-  >([]);
+export function RelatedDashboards({
+  rule,
+  isLoadingRelatedDashboards,
+  linkedDashboards,
+  suggestedDashboards,
+  onSuccessAddSuggestedDashboard,
+}: RelatedDashboardsProps) {
+  const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({
+    rule,
+    onSuccessAddSuggestedDashboard,
+  });
 
-  const {
-    services: {
-      share: { url: urlService },
-      dashboard: dashboardService,
-    },
-  } = useKibana();
-
-  const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
-
-  useEffect(() => {
-    if (!relatedDashboards?.length || !dashboardService) {
-      return;
-    }
-
-    const fetchDashboards = async () => {
-      const dashboardPromises = relatedDashboards.map(async (dashboard) => {
-        try {
-          const findDashboardsService = await dashboardService.findDashboardsService();
-          const response = await findDashboardsService.findById(dashboard.id);
-
-          if (response.status === 'error') {
-            return null;
-          }
-
-          return {
-            id: dashboard.id,
-            title: response.attributes.title,
-            description: response.attributes.description,
-          };
-        } catch (dashboardError) {
-          return null;
-        }
-      });
-
-      const results = await Promise.all(dashboardPromises);
-
-      // Filter out null results (failed dashboard fetches)
-      const validDashboards = results.filter(Boolean) as Array<{
-        id: string;
-        title: string;
-        description: string;
-      }>;
-
-      setDashboardsMeta(validDashboards);
-    };
-
-    fetchDashboards();
-  }, [relatedDashboards, dashboardService, setDashboardsMeta]);
+  const suggestedDashboardsWithButton = useMemo(
+    () =>
+      suggestedDashboards?.map((d) => {
+        const ruleType = rule.ruleTypeId.split('.').pop();
+        return {
+          ...d,
+          actionButtonProps: {
+            isDisabled: addingDashboardId !== undefined && addingDashboardId !== d.id,
+            isLoading: addingDashboardId === d.id,
+            label: i18n.translate(
+              'xpack.observability.alertDetails.suggestedDashboards.buttonLabel',
+              {
+                defaultMessage: 'Add to linked dashboards',
+              }
+            ),
+            onClick: onClickAddSuggestedDashboard,
+            ruleType: ruleType || 'unknown',
+          },
+        };
+      }),
+    [addingDashboardId, onClickAddSuggestedDashboard, rule.ruleTypeId, suggestedDashboards]
+  );
 
   return (
     <div>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.observability.alertDetails.relatedDashboards', {
-                defaultMessage: 'Linked dashboards',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-      {dashboardsMeta.map((dashboard) => (
-        <>
-          <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
-            <EuiFlexItem key={dashboard.id}>
-              <EuiText size="s">
-                <a
-                  href="#"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (dashboardLocator) {
-                      const url = await dashboardLocator.getUrl({
-                        dashboardId: dashboard.id,
-                      });
-                      window.open(url, '_blank');
-                    } else {
-                      console.error('Dashboard locator is not available');
-                    }
-                  }}
-                >
-                  {dashboard.title}
-                </a>
-              </EuiText>
-              <EuiText color={'subdued'} size="s">
-                {dashboard.description}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="xs" />
-        </>
-      ))}
+      <DashboardTiles
+        title={i18n.translate('xpack.observability.alertDetails.linkedDashboards', {
+          defaultMessage: 'Linked dashboards',
+        })}
+        isLoadingDashboards={isLoadingRelatedDashboards}
+        dashboards={linkedDashboards}
+        dataTestSubj="linked-dashboards"
+      />
+      <DashboardTiles
+        title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
+          defaultMessage: 'Suggested dashboards',
+        })}
+        isLoadingDashboards={isLoadingRelatedDashboards}
+        dashboards={suggestedDashboardsWithButton}
+        dataTestSubj="suggested-dashboards"
+      />
     </div>
   );
 }

@@ -30,6 +30,9 @@ jest.mock('@kbn/elastic-assistant/impl/assistant/use_conversation', () => ({
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 const useAssistantContextMock = useAssistantContext as jest.Mock;
 const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as jest.Mock;
@@ -61,7 +64,7 @@ describe('ManagementSettings', () => {
   }) => {
     useAssistantContextMock.mockReturnValue({
       http,
-      assistantAvailability: { isAssistantEnabled },
+      assistantAvailability: { isAssistantEnabled, isAssistantVisible: isAssistantEnabled },
       setCurrentUserAvatar,
     });
 
@@ -91,6 +94,13 @@ describe('ManagementSettings', () => {
         security: {
           userProfiles: {
             getCurrent: jest.fn().mockResolvedValue({ data: { color: 'blue', initials: 'P' } }),
+          },
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
           },
         },
       },

@@ -402,6 +402,17 @@ describe('get_prompt', () => {
 
       expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
     });
+
+    it('finds the default prompt if no provider/model are indicated and no connector details are provided', async () => {
+      const result = await getPrompt({
+        savedObjectsClient,
+        localPrompts,
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+      });
+
+      expect(result).toEqual('Hello world this is a system prompt no model, no provider');
+    });
   });
 
   describe('getPromptsByGroupId', () => {
@@ -532,6 +543,22 @@ describe('get_prompt', () => {
           connectorId: 'connector-123',
         })
       ).rejects.toThrow('Prompt not found for promptId: fake-id and promptGroupId: aiAssistant');
+    });
+
+    it('finds the default prompt if no provider/model are indicated and no connector details are provided', async () => {
+      const result = await getPromptsByGroupId({
+        savedObjectsClient,
+        localPrompts,
+        promptIds: [promptDictionary.systemPrompt],
+        promptGroupId: promptGroupId.aiAssistant,
+      });
+
+      expect(result).toEqual([
+        {
+          promptId: promptDictionary.systemPrompt,
+          prompt: 'Hello world this is a system prompt no model, no provider',
+        },
+      ]);
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';

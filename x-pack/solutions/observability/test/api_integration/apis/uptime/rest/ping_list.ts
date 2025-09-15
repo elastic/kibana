@@ -24,10 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('pingList query', () => {
     before('load heartbeat data', () =>
-      getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+      getService('esArchiver').load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat'
+      )
     );
     after('unload heartbeat index', () =>
-      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+      getService('esArchiver').unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat'
+      )
     );
 
     it('returns a list of pings for the given date range and default size', async () => {

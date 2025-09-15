@@ -18,5 +18,9 @@ export type ObservabilityAIAssistantManagementConfig = TypeOf<typeof configSchem
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: { logSourcesEnabled: true, spacesEnabled: true, visibilityEnabled: true },
+  exposeToBrowser: {
+    logSourcesEnabled: true,
+    spacesEnabled: true,
+    visibilityEnabled: true,
+  },
 };

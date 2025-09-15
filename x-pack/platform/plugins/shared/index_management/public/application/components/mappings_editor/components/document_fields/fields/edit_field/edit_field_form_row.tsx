@@ -156,7 +156,7 @@ export const EditFieldFormRow = React.memo(
                   <EuiButtonIcon
                     href={docLink.href}
                     target="_blank"
-                    iconType="help"
+                    iconType="question"
                     aria-label={docLink.text}
                   />
                 </EuiToolTip>

@@ -22,6 +22,7 @@ import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
+  collectDashboardSections,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
@@ -102,6 +103,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             // });
 
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
+            dashboardData = collectDashboardSections(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(

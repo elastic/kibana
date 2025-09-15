@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createId } from '@paralleldrive/cuid2';
+import { randomUUID } from 'crypto';
 import { encode, decode } from '@kbn/cbor';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -226,7 +226,7 @@ export class ContentStream extends Duplex {
 
   private getId(): string {
     if (!this.id) {
-      this.id = createId();
+      this.id = randomUUID();
     }
     return this.id;
   }

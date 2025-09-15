@@ -30,6 +30,7 @@ jest.mock('../../common/lib/kibana', () => {
       addError: mockAddError,
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
   };

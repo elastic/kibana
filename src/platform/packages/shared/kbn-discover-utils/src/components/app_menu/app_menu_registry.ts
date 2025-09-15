@@ -28,7 +28,7 @@ export class AppMenuRegistry {
   /**
    * As custom actions can be registered under a submenu from both root and data source profiles, we need to keep track of them separately.
    * Otherwise, it would be less predictable. For example, we would override/reset the actions from the data source profile with the ones from the root profile.
-   * @private
+   * @internal
    */
   private customSubmenuItemsBySubmenuId: Map<
     string,
@@ -125,7 +125,9 @@ export class AppMenuRegistry {
     const secondaryItems = this.getSortedItemsForType(AppMenuActionType.secondary);
     const customItems = this.getSortedItemsForType(AppMenuActionType.custom);
 
-    return [...customItems, ...secondaryItems, ...primaryItems];
+    return [...customItems, ...secondaryItems, ...primaryItems].filter(
+      (item) => !isAppMenuActionSubmenu(item) || item.actions.length > 0
+    );
   }
 }
 

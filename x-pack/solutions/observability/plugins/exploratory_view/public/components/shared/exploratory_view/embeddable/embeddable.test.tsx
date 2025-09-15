@@ -45,7 +45,6 @@ const mockLensAttrs = {
                 isBucketed: false,
                 label: ' ',
                 operationType: 'unique_count',
-                scale: 'ratio',
                 sourceField: 'host.name',
               },
             },

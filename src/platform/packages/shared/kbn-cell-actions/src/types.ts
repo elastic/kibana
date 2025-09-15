@@ -18,7 +18,7 @@ import type { Serializable } from '@kbn/utility-types';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import type { CellActionsMode } from './constants';
 
-export * from './actions/types';
+export type * from './actions/types';
 
 export type CellActionsProviderProps = PropsWithChildren<{
   /**

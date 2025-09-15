@@ -37,7 +37,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     getDisplayName: () => displayName,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const defaultControlManager = initializeDefaultControlManager(initialState);
-      const selections = initializeESQLControlSelections(initialState);
+      const selections = initializeESQLControlSelections(
+        initialState,
+        controlGroupApi.controlFetch$(uuid),
+        defaultControlManager.api.setDataLoading
+      );
 
       const closeOverlay = () => {
         if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {

@@ -32,7 +32,7 @@ export const generateInferenceEndpointId = (config: Config) => {
 };
 
 export const getNonEmptyValidator = (
-  schema: ConfigEntryView[],
+  requiredFieldsSchema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
@@ -43,8 +43,8 @@ export const getNonEmptyValidator = (
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
-    if (schema) {
-      schema.map((field: ConfigEntryView) => {
+    if (requiredFieldsSchema) {
+      requiredFieldsSchema.map((field: ConfigEntryView) => {
         // validate if submitting or on field edit - value is not default to null
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular

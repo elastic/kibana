@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
@@ -80,21 +80,31 @@ export function ClassicStreamDetailManagement({
   const tabs: ManagementTabs = {};
 
   if (definition.data_stream_exists) {
-    tabs.enrich = {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
-      }),
-    };
-
     tabs.lifecycle = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+            defaultMessage:
+              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data retention',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    };
+    tabs.enrich = {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     };
   }
@@ -107,9 +117,20 @@ export function ClassicStreamDetailManagement({
           refreshDefinition={refreshDefinition}
         />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-        defaultMessage: 'Advanced',
-      }),
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+            defaultMessage:
+              'View technical details about this classic stream’s underlying index setup',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
     };
   }
 

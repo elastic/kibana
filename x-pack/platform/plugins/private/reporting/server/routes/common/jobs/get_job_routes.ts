@@ -12,7 +12,7 @@ import { getCounters } from '..';
 import { ReportingCore } from '../../..';
 import { getContentStream } from '../../../lib';
 import { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
-import { handleUnavailable } from '../generate';
+import { handleUnavailable } from '../request_handler';
 import { jobManagementPreRouting } from './job_management_pre_routing';
 import { jobsQueryFactory } from './jobs_query';
 

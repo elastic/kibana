@@ -47,7 +47,7 @@ export const INACTIVE_ALERTS_DESCRIPTION = i18n.translate(
   'responseOpsAlertDelete.inactiveAlertsDescription',
   {
     defaultMessage:
-      'Remove alerts that were recovered, closed, or untracked longer than the threshold',
+      'Remove alerts that were recovered, closed, acknowledged, or untracked longer than the threshold',
   }
 );
 
@@ -108,6 +108,21 @@ export const RULE_SETTINGS_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Clean up alert history by removing old active alerts and long-inactive alerts based on customizable time thresholds',
+  }
+);
+
+export const RULE_SETTINGS_TECH_PREVIEW_LABEL = i18n.translate(
+  'responseOpsAlertDelete.ruleSettingsTechPreviewLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'responseOpsAlertDelete.ruleSettingsTechPreviewDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   }
 );
 

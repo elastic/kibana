@@ -39,10 +39,6 @@ describe('generateLayer', () => {
         },
         "name": "logs.abc@stream.layer",
         "template": Object {
-          "lifecycle": Object {
-            "data_retention": "30d",
-            "enabled": true,
-          },
           "mappings": Object {
             "dynamic": false,
             "properties": Object {
@@ -63,10 +59,7 @@ describe('generateLayer', () => {
               },
             },
           },
-          "settings": Object {
-            "index.lifecycle.name": undefined,
-            "index.lifecycle.prefer_ilm": false,
-          },
+          "settings": Object {},
         },
         "version": 1,
       }
@@ -83,9 +76,6 @@ describe('generateLayer', () => {
         },
         "name": "logs@stream.layer",
         "template": Object {
-          "lifecycle": Object {
-            "data_retention": "30d",
-          },
           "mappings": Object {
             "dynamic": false,
             "properties": Object {

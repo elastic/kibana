@@ -119,4 +119,24 @@ describe('useUnsavedChangesPrompt', () => {
 
     expect(blockSpy).not.toBeCalled();
   });
+
+  it('should not block if replaced when shouldPromptOnReplace is false', () => {
+    renderHook(() =>
+      useUnsavedChangesPrompt({
+        hasUnsavedChanges: false,
+        http: coreStart.http,
+        openConfirm: coreStart.overlays.openConfirm,
+        history,
+        navigateToUrl,
+        shouldPromptOnReplace: false,
+      })
+    );
+
+    act(() => history.replace('/test'));
+
+    expect(history.location.pathname).toBe('/test');
+    expect(history.location.search).toBe('');
+    expect(coreStart.overlays.openConfirm).not.toBeCalled();
+    expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
+  });
 });

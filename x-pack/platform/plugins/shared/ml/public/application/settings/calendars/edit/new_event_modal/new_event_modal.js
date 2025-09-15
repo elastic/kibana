@@ -178,6 +178,7 @@ export class NewEventModal extends Component {
                 onChange={this.handleTimeStartChange}
                 placeholder={TIME_FORMAT}
                 value={startDateString}
+                data-test-subj="mlCalendarEventStartDateInput"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -196,6 +197,7 @@ export class NewEventModal extends Component {
                 onChange={this.handleTimeEndChange}
                 placeholder={TIME_FORMAT}
                 value={endDateString}
+                data-test-subj="mlCalendarEventEndDateInput"
               />
             </EuiFormRow>
           </EuiFlexItem>

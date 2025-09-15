@@ -102,7 +102,7 @@ export async function getEnterpriseSearchPre8IndexDeprecations(
         i18n.translate(
           'xpack.upgradeAssistant.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
           {
-            defaultMessage: 'Set all incompatible indices and data streams to read only, or',
+            defaultMessage: 'Set all incompatible indices and data streams to read-only, or',
           }
         ),
         i18n.translate(

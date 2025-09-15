@@ -399,7 +399,7 @@ export class SettingsPageObject extends FtrService {
 
     await this.find.clickByCssSelector(
       `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-        td:nth-last-child(2) button`
+        td:last-child button`
     );
     await this.retry.waitFor('flyout to open', async () => {
       return await this.testSubjects.exists('flyoutTitle');
@@ -550,6 +550,19 @@ export class SettingsPageObject extends FtrService {
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
+
+      await this.retry.waitFor(
+        'the index pattern form should have no validation errors',
+        async () => {
+          const form = await this.testSubjects.find('indexPatternEditorForm');
+          const validationError = await form.getAttribute('data-validation-error');
+          if (validationError !== '0') {
+            this.log.debug('Validation error found, retrying');
+          }
+          return validationError === '0';
+        }
+      );
+
       await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();

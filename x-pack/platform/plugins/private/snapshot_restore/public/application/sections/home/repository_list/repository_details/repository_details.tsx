@@ -190,7 +190,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiCallOut
               size="s"
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"
@@ -224,7 +224,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               flush="right"
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="documentationLink"
             >
               <FormattedMessage

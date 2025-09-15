@@ -12,6 +12,7 @@
  * - 5s
  * - 3m
  * - 7h
+ * - 9d
  */
 export class TimeDuration {
   /**

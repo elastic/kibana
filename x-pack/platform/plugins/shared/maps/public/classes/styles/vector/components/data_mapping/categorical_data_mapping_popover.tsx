@@ -60,7 +60,7 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
               </EuiText>
             }
           >
-            <EuiIcon type="questionInCircle" color="subdued" />
+            <EuiIcon type="question" color="subdued" />
           </EuiToolTip>
         </>
       </EuiFormRow>

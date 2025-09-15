@@ -49,12 +49,14 @@ export interface ESQLControlState {
   grow?: boolean;
   width?: ControlWidthOptions;
   title: string;
-  availableOptions: string[];
   selectedOptions: string[];
   variableName: string;
   variableType: ESQLVariableType;
   esqlQuery: string;
   controlType: EsqlControlType;
+  // If the controlType is STATIC_VALUES, store the list of availableOptions in the control state
+  // VALUES_FROM_QUERY controls will instead fetch available options at runtime
+  availableOptions?: string[];
 }
 
 export const apiPublishesESQLVariable = (

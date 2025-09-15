@@ -85,7 +85,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177384
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
       const res = await bettertest<{

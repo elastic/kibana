@@ -30,7 +30,7 @@ export const SearchSessionsDeprecatedWarning = ({
     title={searchSessionsDeprecatedWarningTitle}
     size={size}
     color="warning"
-    iconType="help"
+    iconType="question"
     data-test-subj="searchSessionsDeprecatedWarningTitle"
   >
     <FormattedMessage

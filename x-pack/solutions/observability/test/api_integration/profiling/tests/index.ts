@@ -7,6 +7,8 @@
 import globby from 'globby';
 import path from 'path';
 import { FtrProviderContext } from '../common/ftr_provider_context';
+import { cleanUpProfilingData } from '../utils/profiling_data';
+import { getBettertest } from '../common/bettertest';
 
 const cwd = path.join(__dirname);
 const envGrepFiles = process.env.profiling_TEST_GREP_FILES as string;
@@ -26,10 +28,13 @@ export default function profilingApiIntegrationTests({
   loadTestFile,
 }: FtrProviderContext) {
   const registry = getService('registry');
+  const es = getService('es');
+  const supertest = getService('supertest');
+  const bettertest = getBettertest(supertest);
+  const logger = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169820
-  // FLAKY: https://github.com/elastic/kibana/issues/169841
-  describe.skip('Profiling API tests', function () {
+  describe('Profiling API tests', function () {
+    this.tags('skipFIPS');
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 
@@ -43,6 +48,10 @@ export default function profilingApiIntegrationTests({
     }
 
     tests.forEach((testName) => {
+      before(async () => {
+        await cleanUpProfilingData({ es, logger, bettertest });
+      });
+
       describe(testName, () => {
         loadTestFile(require.resolve(`./${testName}`));
         registry.run();

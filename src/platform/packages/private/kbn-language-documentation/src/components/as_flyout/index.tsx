@@ -85,6 +85,7 @@ function DocumentationFlyout({
           type="push"
           size={DEFAULT_WIDTH}
           paddingSize="m"
+          className="esqlInlineDocumentationFlyout"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">

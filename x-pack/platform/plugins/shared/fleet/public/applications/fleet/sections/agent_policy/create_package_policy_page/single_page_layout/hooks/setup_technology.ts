@@ -19,9 +19,6 @@ import { SetupTechnology } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
-  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
 } from '../../../../../../../../common/constants';
@@ -29,6 +26,7 @@ import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
   isOnlyAgentlessIntegration,
+  getAgentlessGlobalDataTags,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
@@ -147,7 +145,7 @@ export function useSetupTechnology({
         monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
       }),
       name: agentlessPolicyName,
-      global_data_tags: getGlobaDataTags(packageInfo),
+      global_data_tags: getAgentlessGlobalDataTags(packageInfo),
     };
 
     const agentlessPolicy = getAgentlessPolicy(packageInfo);
@@ -221,44 +219,6 @@ export const isAgentlessSetupDefault = (
   }
 
   return false;
-};
-
-const getGlobaDataTags = (packageInfo?: PackageInfo) => {
-  if (
-    !packageInfo?.policy_templates &&
-    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
-  ) {
-    return undefined;
-  }
-  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
-    (policy) => policy.deployment_modes
-  );
-
-  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
-  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
-  if (
-    agentlessInfo === undefined ||
-    !agentlessInfo.organization ||
-    !agentlessInfo.division ||
-    !agentlessInfo.team
-  ) {
-    return undefined;
-  }
-
-  return [
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-      value: agentlessInfo.organization,
-    },
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-      value: agentlessInfo.division,
-    },
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-      value: agentlessInfo.team,
-    },
-  ];
 };
 
 const getAgentlessPolicy = (packageInfo?: PackageInfo) => {

@@ -1,6 +1,6 @@
 # ST_ENVELOPE
 
-The ST_ENVELOPE function determines the minimum bounding box for the provided geometry.
+Determines the minimum bounding box of the supplied geometry.
 
 ## Syntax
 
@@ -8,13 +8,11 @@ The ST_ENVELOPE function determines the minimum bounding box for the provided ge
 
 ### Parameters
 
-#### geometry
+#### `geometry`
 
-The `geometry` parameter refers to the input geometry. This should be an expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the parameter is `null`, the function will also return `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
-
-Here is an example where ST_ENVELOPE is used to determine the minimum bounding box of a city's boundary:
 
 ```esql
 FROM airport_city_boundaries
@@ -22,3 +20,5 @@ FROM airport_city_boundaries
 | EVAL envelope = ST_ENVELOPE(city_boundary)
 | KEEP abbrev, airport, envelope
 ```
+
+This example calculates the minimum bounding box for the `city_boundary` geometry of the airport with the abbreviation "CPH".

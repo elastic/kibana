@@ -10,6 +10,7 @@
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
@@ -34,6 +35,10 @@ describe('useTopNavLinks', () => {
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
+  // identifier to denote if share integration is available,
+  // we default to false especially that there a specific test scenario for when this is true
+  const hasShareIntegration = false;
+
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
       <KibanaContextProvider services={services}>
@@ -56,6 +61,7 @@ describe('useTopNavLinks', () => {
           adHocDataViews: [],
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
+          hasShareIntegration,
         }),
       {
         wrapper: Wrapper,
@@ -99,15 +105,6 @@ describe('useTopNavLinks', () => {
           "testId": "discoverOpenButton",
         },
         Object {
-          "description": "Share Discover session",
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "Share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
           "description": "Save session",
           "emphasize": true,
           "iconType": "save",
@@ -132,6 +129,7 @@ describe('useTopNavLinks', () => {
           adHocDataViews: [],
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
+          hasShareIntegration,
         }),
       {
         wrapper: Wrapper,
@@ -175,15 +173,6 @@ describe('useTopNavLinks', () => {
           "testId": "discoverOpenButton",
         },
         Object {
-          "description": "Share Discover session",
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "Share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
           "description": "Save session",
           "emphasize": true,
           "iconType": "save",
@@ -194,5 +183,113 @@ describe('useTopNavLinks', () => {
         },
       ]
     `);
+  });
+
+  describe('useTopNavLinks with share service included', () => {
+    beforeAll(() => {
+      services.share = sharePluginMock.createStartContract();
+    });
+
+    afterAll(() => {
+      services.share = undefined;
+    });
+
+    it('will include share menu item if the share service is available', () => {
+      const topNavLinks = renderHook(
+        () =>
+          useTopNavLinks({
+            dataView: dataViewMock,
+            onOpenInspector: jest.fn(),
+            services,
+            state,
+            isEsqlMode: false,
+            adHocDataViews: [],
+            topNavCustomization: undefined,
+            shouldShowESQLToDataViewTransitionModal: false,
+            hasShareIntegration,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      ).result.current;
+      expect(topNavLinks).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "text",
+            "emphasize": true,
+            "fill": false,
+            "id": "esql",
+            "label": "Try ES|QL",
+            "run": [Function],
+            "testId": "select-text-based-language-btn",
+            "tooltip": "ES|QL is Elastic's powerful new piped query language.",
+          },
+          Object {
+            "description": "Open Inspector for search",
+            "id": "inspect",
+            "label": "Inspect",
+            "run": [Function],
+            "testId": "openInspectorButton",
+          },
+          Object {
+            "description": "New session",
+            "iconOnly": true,
+            "iconType": "plus",
+            "id": "new",
+            "label": "New session",
+            "run": [Function],
+            "testId": "discoverNewButton",
+          },
+          Object {
+            "description": "Open session",
+            "iconOnly": true,
+            "iconType": "folderOpen",
+            "id": "open",
+            "label": "Open session",
+            "run": [Function],
+            "testId": "discoverOpenButton",
+          },
+          Object {
+            "description": "Share Discover session",
+            "iconOnly": true,
+            "iconType": "share",
+            "id": "share",
+            "label": "Share",
+            "run": [Function],
+            "testId": "shareTopNavButton",
+          },
+          Object {
+            "description": "Save session",
+            "emphasize": true,
+            "iconType": "save",
+            "id": "save",
+            "label": "Save",
+            "run": [Function],
+            "testId": "discoverSaveButton",
+          },
+        ]
+      `);
+    });
+
+    it('will include export menu item if there are export integrations available', () => {
+      const topNavLinks = renderHook(
+        () =>
+          useTopNavLinks({
+            dataView: dataViewMock,
+            onOpenInspector: jest.fn(),
+            services,
+            state,
+            isEsqlMode: false,
+            adHocDataViews: [],
+            topNavCustomization: undefined,
+            shouldShowESQLToDataViewTransitionModal: false,
+            hasShareIntegration: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      ).result.current;
+      expect(topNavLinks.filter((obj) => obj.id === 'export')).toBeDefined();
+    });
   });
 });

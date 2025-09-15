@@ -18,7 +18,7 @@ import { PricingProductFeature } from './types';
 export class ProductFeaturesRegistry {
   /**
    * Internal storage for registered product features.
-   * @private
+   * @internal
    */
   private readonly productFeatures: Map<string, PricingProductFeature>;
 

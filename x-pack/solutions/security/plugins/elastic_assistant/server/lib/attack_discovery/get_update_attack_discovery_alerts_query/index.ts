@@ -7,7 +7,14 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 
 import { ALERT_ATTACK_DISCOVERY_USERS } from '../schedules/fields';
 
@@ -35,8 +42,11 @@ export const getUpdateAttackDiscoveryAlertsQuery = ({
   },
   script: {
     source: `
+      def now = new Date();
+
       if (params.kibanaAlertWorkflowStatus != null) {
         ctx._source['${ALERT_WORKFLOW_STATUS}'] = params.kibanaAlertWorkflowStatus;
+        ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = now;
       }
 
     if (params.visibility == 'not_shared') {
@@ -47,9 +57,17 @@ export const getUpdateAttackDiscoveryAlertsQuery = ({
       user.put('name', params.authenticatedUser.username);
 
       ctx._source['${ALERT_ATTACK_DISCOVERY_USERS}'].add(user);
+
+      ctx._source['${TIMESTAMP}'] = now;
     } else if (params.visibility == 'shared') {
       ctx._source['${ALERT_ATTACK_DISCOVERY_USERS}'] = new ArrayList();
+
+      ctx._source['${TIMESTAMP}'] = now;
     }
+
+    ctx._source['${ALERT_UPDATED_AT}'] = now;
+    ctx._source['${ALERT_UPDATED_BY_USER_ID}'] = params.authenticatedUser.profile_uid;
+    ctx._source['${ALERT_UPDATED_BY_USER_NAME}'] = params.authenticatedUser.username;
     `,
     params: {
       authenticatedUser: {

@@ -4,11 +4,15 @@
       "repoOwner": "elastic",
       "repoName": "kibana",
       "pipelineSlug": "kibana-pull-request",
-
       "enabled": true,
       "allow_org_users": true,
-      "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
+      "allowed_repo_permissions": [
+        "admin",
+        "write"
+      ],
+      "allowed_list": [
+        "elastic-vault-github-plugin-prod[bot]"
+      ],
       "set_commit_status": true,
       "commit_status_context": "kibana-ci",
       "build_on_commit": true,
@@ -17,8 +21,14 @@
       "build_on_ready": true,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
       "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
-      "skip_ci_labels": ["skip-ci"],
-      "skip_target_branches": ["6.8", "7.11", "7.12"],
+      "skip_ci_labels": [
+        "skip-ci"
+      ],
+      "skip_target_branches": [
+        "6.8",
+        "7.11",
+        "7.12"
+      ],
       "enable_skippable_commits": true,
       "skip_ci_on_only_changed": [
         "^docs/",
@@ -38,10 +48,14 @@
       ],
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
+        "^x-pack/platform/test/",
+        "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
         "\\.test\\.(ts|tsx|js|jsx)"
       ]
@@ -53,8 +67,13 @@
       "skip_ci_labels": [],
       "enabled": true,
       "allow_org_users": true,
-      "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
+      "allowed_repo_permissions": [
+        "admin",
+        "write"
+      ],
+      "allowed_list": [
+        "elastic-vault-github-plugin-prod[bot]"
+      ],
       "set_commit_status": true,
       "commit_status_context": "kibana-deploy-project-from-pr",
       "build_on_commit": false,
@@ -63,10 +82,15 @@
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:project))$",
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project-from-pr"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge",
+        "kibana-deploy-project-from-pr"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
+        "^x-pack/platform/test/",
+        "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
         "\\.test\\.(ts|tsx|js|jsx)"
       ]
@@ -78,8 +102,13 @@
       "skip_ci_labels": [],
       "enabled": true,
       "allow_org_users": true,
-      "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
+      "allowed_repo_permissions": [
+        "admin",
+        "write"
+      ],
+      "allowed_list": [
+        "elastic-vault-github-plugin-prod[bot]"
+      ],
       "set_commit_status": true,
       "commit_status_context": "kibana-deploy-cloud-from-pr",
       "build_on_commit": false,
@@ -88,13 +117,33 @@
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:cloud))$",
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge",
+        "kibana-deploy-cloud-from-pr"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
+        "^x-pack/platform/test/",
+        "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
         "\\.test\\.(ts|tsx|js|jsx)"
       ]
+    },
+    {
+      "repoOwner": "elastic",
+      "repoName": "kibana",
+      "pipelineSlug": "kibana-renovate-helper",
+      "skip_ci_labels": [],
+      "enabled": true,
+      "allow_org_users": true,
+      "allowed_repo_permissions": ["admin", "write"],
+      "allowed_list": ["elastic-vault-github-plugin-prod[bot]", "elastic-renovate-prod[bot]"],
+      "build_on_commit": true,
+      "build_on_comment": true,
+      "build_drafts": false,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:run)\\W+(?:renovate)\\W+(?:helper))$",
+      "kibana_versions_check": true
     }
   ]
 }

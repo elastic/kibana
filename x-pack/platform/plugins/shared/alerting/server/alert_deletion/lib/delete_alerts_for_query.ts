@@ -104,7 +104,7 @@ export const deleteAlertsForQuery = async (
                 action: AlertAuditAction.DELETE,
                 id: alertUuid,
                 outcome: 'failure',
-                error: new Error(item.delete?.error?.reason),
+                error: new Error(item.delete?.error?.reason ?? undefined), // reason can be null and it's not a valid parameter for Error
               })
             );
             errors.push(`Error deleting alert "${alertUuid!}" - ${item.delete?.error?.reason}`);

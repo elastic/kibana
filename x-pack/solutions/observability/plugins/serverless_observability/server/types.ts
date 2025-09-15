@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObservabilityAIAssistantServerSetup } from '@kbn/observability-ai-assistant-plugin/server';
 import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -17,4 +18,5 @@ export interface StartDependencies {}
 
 export interface SetupDependencies {
   serverless: ServerlessPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
 }

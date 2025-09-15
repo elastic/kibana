@@ -8,12 +8,9 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardState } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
-
-type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -37,7 +34,9 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
+export function extractPanelsState(state: { [key: string]: unknown }): {
+  panels?: DashboardState['panels'];
+} {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
@@ -49,17 +48,29 @@ export function extractPanelsState(state: { [key: string]: unknown }): Partial<P
     return {};
   }
 
-  // < 8.17 panels state stored panelConfig as embeddableConfig
-  const standardizedPanels = panels.map((panel) => {
-    if (typeof panel === 'object' && panel?.embeddableConfig) {
-      const { embeddableConfig, ...rest } = panel;
-      return {
-        ...rest,
-        panelConfig: embeddableConfig,
-      };
+  const standardizedPanels = panels.map((legacyPanel) => {
+    const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
+
+    // < 8.17 panels state stored panelConfig as embeddableConfig
+    if (panel?.embeddableConfig) {
+      panel.panelConfig = panel.embeddableConfig;
+      delete panel.embeddableConfig;
     }
+
+    // <8.19 'id' (saved object id) stored as siblings to panelConfig
+    if (panel.id && panel.panelConfig && typeof panel.panelConfig === 'object') {
+      panel.panelConfig.savedObjectId = panel.id;
+      delete panel.id;
+    }
+
+    // <8.19 'title' stored as siblings to panelConfig
+    if (panel.title && panel.panelConfig && typeof panel.panelConfig === 'object') {
+      panel.panelConfig.title = panel.title;
+      delete panel.title;
+    }
+
     return panel;
   });
 
-  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
+  return { panels: standardizedPanels };
 }

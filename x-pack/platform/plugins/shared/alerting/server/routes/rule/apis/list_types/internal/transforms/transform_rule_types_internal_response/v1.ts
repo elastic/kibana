@@ -18,6 +18,7 @@ export const transformRuleTypesInternalResponse = (
       ...(ruleType.actionVariables ? { action_variables: ruleType.actionVariables } : {}),
       ...(ruleType.alerts ? { alerts: ruleType.alerts } : {}),
       authorized_consumers: ruleType.authorizedConsumers,
+      auto_recover_alerts: ruleType.autoRecoverAlerts,
       category: ruleType.category,
       default_action_group_id: ruleType.defaultActionGroupId,
       ...(ruleType.defaultScheduleInterval

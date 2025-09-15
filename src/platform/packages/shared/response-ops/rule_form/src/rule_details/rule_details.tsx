@@ -16,12 +16,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiIconTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
+  RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
   RULE_NAME_INPUT_TITLE,
   RULE_TAG_INPUT_TITLE,
   RULE_TAG_PLACEHOLDER,
@@ -31,6 +29,7 @@ import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
+import { LabelWithTooltip } from './label_with_tooltip';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
@@ -115,6 +114,7 @@ export const RuleDetails = () => {
               placeholder={RULE_NAME_INPUT_TITLE}
               onChange={onNameChange}
               data-test-subj="ruleDetailsNameInput"
+              isInvalid={!!baseErrors?.name?.length}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -143,25 +143,10 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>{RULE_INVESTIGATION_GUIDE_LABEL}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="questionInCircle"
-                content={
-                  <p>
-                    {i18n.translate(
-                      'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
-                      {
-                        defaultMessage:
-                          'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
-                      }
-                    )}
-                  </p>
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <LabelWithTooltip
+            labelContent={RULE_INVESTIGATION_GUIDE_LABEL}
+            tooltipContent={RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT}
+          />
         }
         labelAppend={OptionalFieldLabel}
         isInvalid={

@@ -34,7 +34,7 @@ exports[`DocumentsPanel renders 1`] = `
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </React.Fragment>
           </EuiToolTip>,
@@ -66,7 +66,7 @@ exports[`DocumentsPanel renders 1`] = `
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </React.Fragment>
           </EuiToolTip>,
@@ -98,7 +98,7 @@ exports[`DocumentsPanel renders 1`] = `
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </React.Fragment>
           </EuiToolTip>,

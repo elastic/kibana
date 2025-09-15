@@ -29,8 +29,6 @@ describe('POST risk_engine/preview route', () => {
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     server = serverMock.create();
     logger = loggerMock.create();
     ({ clients, context } = requestContextMock.createTools());

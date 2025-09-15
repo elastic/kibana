@@ -43,6 +43,7 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  * right hand side of the Kibana global header
  */
 export const GlobalHeader = React.memo(() => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
   const {
     theme,
@@ -58,7 +59,7 @@ export const GlobalHeader = React.memo(() => {
     (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
   );
 
-  const sourcererScope = getScopeFromPath(pathname);
+  const sourcererScope = getScopeFromPath(pathname, newDataViewPickerEnabled);
   const showSourcerer = showSourcererByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
 
@@ -84,8 +85,6 @@ export const GlobalHeader = React.memo(() => {
       };
     }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataViewPicker = newDataViewPickerEnabled ? (
     <DataViewPicker

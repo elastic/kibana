@@ -70,6 +70,37 @@ describe('EPM template', () => {
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
+  it('tests processing keyword field attributes in a dynamic template', () => {
+    const textFieldLiteralYml = `
+- name: labels.*
+  type: keyword
+  ignore_above: 4096
+`;
+    const fieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              ignore_above: 4096,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = load(textFieldLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(fieldMapping);
+  });
 
   it('adds composed_of correctly', () => {
     const composedOfTemplates = ['component1', 'component2'];
@@ -2435,6 +2466,57 @@ describe('EPM template', () => {
           templateName: 'test',
           indexTemplate: {
             index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should not rollover when package do not define index mode and defaut source mode is logsdb', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'logs.prefix1-default': {
+          mappings: {},
+          settings: {
+            index: {
+              mode: 'logsdb',
+              mapping: {
+                source: {
+                  mode: 'STORED',
+                },
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {},
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
             template: {
               settings: { index: {} },
               mappings: {},
