@@ -47,6 +47,10 @@ export interface TabState extends TabItem {
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+  /**
+   * ESQL query variables
+   */
+  esqlVariables: ESQLControlVariable[] | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -85,10 +89,6 @@ export interface DiscoverInternalState {
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
-  /**
-   * ESQL query variables
-   */
-  esqlVariables?: ESQLControlVariable[];
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;

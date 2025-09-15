@@ -80,7 +80,6 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
-    internalState,
   } = params;
   const { data, expressions } = services;
 
@@ -88,7 +87,6 @@ export function fetchAll(
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = appStateContainer.getState();
-    const { esqlVariables } = internalState.getState();
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
@@ -125,7 +123,7 @@ export function fetchAll(
           expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
-          esqlVariables,
+          esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
         })
       : fetchDocuments(searchSource, params);
@@ -193,7 +191,7 @@ export function fetchAll(
 
           const isFirstQuery = !prevQuery;
           const queryChanged = !isEqual(query, prevQuery);
-          const hasEsqlVariables = Boolean(esqlVariables?.length);
+          const hasEsqlVariables = Boolean(currentTab.esqlVariables?.length);
 
           return isFirstQuery || queryChanged || hasEsqlVariables
             ? FetchStatus.PARTIAL

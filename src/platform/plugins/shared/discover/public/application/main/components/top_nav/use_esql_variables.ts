@@ -104,6 +104,7 @@ export const useESQLVariables = ({
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
+  const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
   const initialSavedSearch = useObservable(stateContainer.savedSearchState.getInitial$());
 
@@ -144,7 +145,7 @@ export const useESQLVariables = ({
         const newVariables = extractEsqlVariables(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
           // Update the ESQL variables in the internal state
-          dispatch(internalStateActions.setEsqlVariables(newVariables));
+          dispatch(setEsqlVariables({ esqlVariables: newVariables }));
           stateContainer.dataState.fetch();
         }
       }
@@ -155,13 +156,15 @@ export const useESQLVariables = ({
       savedSearchResetSubsciption.unsubscribe();
     };
   }, [
-    initialSavedSearch?.controlGroupJson,
     controlGroupApi,
-    setControlGroupState,
     currentEsqlVariables,
     dispatch,
+    initialSavedSearch?.controlGroupJson,
     isEsqlMode,
-    stateContainer,
+    setControlGroupState,
+    setEsqlVariables,
+    stateContainer.dataState,
+    stateContainer.savedSearchState,
   ]);
 
   const onSaveControl = useCallback(
