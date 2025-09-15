@@ -232,7 +232,7 @@ export const i18nStrings = {
   },
   launchPad: {
     title: i18n.translate('securitySolutionPackages.navLinks.launchPad', {
-      defaultMessage: 'Launch Pad',
+      defaultMessage: 'Launchpad',
     }),
     migrations: {
       title: i18n.translate('securitySolutionPackages.navLinks.launchPad.migrations', {

@@ -43,6 +43,7 @@ export const createLaunchpadNavigationTree = (
       link: securityLink(SecurityPageName.landing),
       renderAs: 'item',
       icon: 'launch',
+      iconV2: 'launch',
     };
   }
 
@@ -52,6 +53,7 @@ export const createLaunchpadNavigationTree = (
     title: SecurityLinkGroup[SecurityGroupName.launchpad].title,
     renderAs: 'panelOpener',
     icon: 'launch',
+    iconV2: 'launch',
     children,
   };
 };
