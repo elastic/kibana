@@ -17,10 +17,10 @@ describe('EnterForeachNodeImpl', () => {
   let underTest: EnterForeachNodeImpl;
   let startStep: jest.Mock<any, any, any>;
   let finishStep: jest.Mock<any, any, any>;
-  let getStepState: jest.Mock<any, any, any>;
-  let setStepState: jest.Mock<any, any, any>;
-  let goToNextStep: jest.Mock<any, any, any>;
-  let goToStep: jest.Mock<any, any, any>;
+  let getCurrentStepState: jest.Mock<any, any, any>;
+  let setCurrentStepState: jest.Mock<any, any, any>;
+  let navigateToNextNode: jest.Mock<any, any, any>;
+  let navigateToNode: jest.Mock<any, any, any>;
   let enterScope: jest.Mock<any, any, any>;
   let readContextPath: jest.Mock<any, any, any>;
   let logDebug: jest.Mock<any, any, any>;
@@ -28,16 +28,18 @@ describe('EnterForeachNodeImpl', () => {
   beforeEach(() => {
     startStep = jest.fn();
     finishStep = jest.fn();
-    getStepState = jest.fn();
-    setStepState = jest.fn();
-    goToNextStep = jest.fn();
-    goToStep = jest.fn();
+    getCurrentStepState = jest.fn();
+    setCurrentStepState = jest.fn();
+    navigateToNextNode = jest.fn();
+    navigateToNode = jest.fn();
     enterScope = jest.fn();
     readContextPath = jest.fn();
     logDebug = jest.fn();
     step = {
       id: 'testStep',
       type: 'enter-foreach',
+      stepId: 'testStep',
+      stepType: 'foreach',
       exitNodeId: 'exitNode',
       configuration: {
         foreach: JSON.stringify(['item1', 'item2', 'item3']),
@@ -46,10 +48,10 @@ describe('EnterForeachNodeImpl', () => {
     workflowExecutionRuntimeManager = {
       startStep,
       finishStep,
-      getStepState,
-      setStepState,
-      goToNextStep,
-      goToStep,
+      getCurrentStepState,
+      setCurrentStepState,
+      navigateToNextNode,
+      navigateToNode,
       enterScope,
     } as any;
     const contextManager = { readContextPath } as any;
@@ -66,7 +68,7 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on the first enter', () => {
     beforeEach(() => {
-      getStepState.mockReturnValue(undefined);
+      getCurrentStepState.mockReturnValue(undefined);
     });
 
     it('should enter the whole foreach scope', async () => {
@@ -97,7 +99,7 @@ describe('EnterForeachNodeImpl', () => {
       await underTest.run();
 
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledWith(step.id);
+      expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledWith();
     });
 
     describe('when foreach configuration is an array with items', () => {
@@ -106,7 +108,7 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
 
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
           items: ['item1', 'item2', 'item3'],
           item: 'item1',
           index: 0,
@@ -124,7 +126,7 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(readContextPath).toHaveBeenCalledWith('steps.testStep.array');
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
           items: ['item1', 'item2', 'item3'],
           item: 'item1',
           index: 0,
@@ -142,7 +144,7 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(readContextPath).toHaveBeenCalledWith('steps.testStep.array');
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
           items: ['item1', 'item2', 'item3'],
           item: 'item1',
           index: 0,
@@ -167,7 +169,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should set empty items and total to 0', async () => {
         await underTest.run();
-        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
+        expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
           items: [],
           total: 0,
         });
@@ -175,7 +177,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should finish step', async () => {
         await underTest.run();
-        expect(workflowExecutionRuntimeManager.finishStep).toHaveBeenCalledWith(step.id);
+        expect(workflowExecutionRuntimeManager.finishStep).toHaveBeenCalledWith();
       });
 
       it('should go to exit node', async () => {
@@ -218,7 +220,7 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on next iterations', () => {
     beforeEach(() => {
-      getStepState.mockReturnValue({
+      getCurrentStepState.mockReturnValue({
         items: ['item1', 'item2', 'item3'],
         item: 'item1',
         index: 0,
@@ -241,14 +243,14 @@ describe('EnterForeachNodeImpl', () => {
     it('should not start step', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.startStep).not.toHaveBeenCalledWith(step.id);
+      expect(workflowExecutionRuntimeManager.startStep).not.toHaveBeenCalledWith();
     });
 
     it('should initialize foreach state', async () => {
       await underTest.run();
 
       expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(step.id, {
+      expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
         items: ['item1', 'item2', 'item3'],
         item: 'item2',
         index: 1,
@@ -259,7 +261,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should go to next node', async () => {
       await underTest.run();
 
-      expect(goToNextStep).toHaveBeenCalled();
+      expect(navigateToNextNode).toHaveBeenCalled();
     });
   });
 });

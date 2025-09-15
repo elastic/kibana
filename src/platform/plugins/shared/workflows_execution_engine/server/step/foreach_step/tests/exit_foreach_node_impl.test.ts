@@ -16,38 +16,37 @@ describe('ExitForeachNodeImpl', () => {
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let underTest: ExitForeachNodeImpl;
   let startStep: jest.Mock<any, any, any>;
-  let getStepState: jest.Mock<any, any, any>;
-  let setStepState: jest.Mock<any, any, any>;
-  let setStepResult: jest.Mock<any, any, any>;
-  let goToNextStep: jest.Mock<any, any, any>;
-  let goToStep: jest.Mock<any, any, any>;
+  let getCurrentStepState: jest.Mock<any, any, any>;
+  let setCurrentStepState: jest.Mock<any, any, any>;
+  let navigateToNextNode: jest.Mock<any, any, any>;
+  let navigateToNode: jest.Mock<any, any, any>;
   let exitScope: jest.Mock<any, any, any>;
   let finishStep: jest.Mock<any, any, any>;
   let logDebug: jest.Mock<any, any, any>;
 
   beforeEach(() => {
     startStep = jest.fn();
-    getStepState = jest.fn();
-    setStepState = jest.fn();
-    setStepResult = jest.fn();
-    goToNextStep = jest.fn();
+    getCurrentStepState = jest.fn();
+    setCurrentStepState = jest.fn();
+    navigateToNextNode = jest.fn();
     exitScope = jest.fn();
     finishStep = jest.fn();
-    goToStep = jest.fn();
+    navigateToNode = jest.fn();
     logDebug = jest.fn();
     step = {
       id: 'testStep',
+      stepId: 'testStep',
+      stepType: 'foreach',
       type: 'exit-foreach',
       startNodeId: 'foreachStartNode',
     };
     wfExecutionRuntimeManager = {
       startStep,
-      getStepState,
-      setStepState,
-      setStepResult,
-      goToNextStep,
+      getCurrentStepState,
+      setCurrentStepState,
+      navigateToNextNode,
+      navigateToNode,
       finishStep,
-      goToStep,
       exitScope,
     } as any;
     const workflowLogger = {
@@ -58,7 +57,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when no foreach step', () => {
     beforeEach(() => {
-      getStepState.mockReturnValue(undefined);
+      getCurrentStepState.mockReturnValue(undefined);
     });
 
     it('should throw an error', async () => {
@@ -70,7 +69,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when there are more items to process', () => {
     beforeEach(() => {
-      getStepState.mockReturnValue({
+      getCurrentStepState.mockReturnValue({
         items: ['item1', 'item2', 'item3'],
         index: 1,
         item: 'item2',
@@ -84,11 +83,11 @@ describe('ExitForeachNodeImpl', () => {
       expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(step.startNodeId);
     });
 
-    it('should not finish the foreach step and not set step result', async () => {
+    it('should not finish the foreach step and not set step state', async () => {
       await underTest.run();
 
       expect(wfExecutionRuntimeManager.finishStep).not.toHaveBeenCalled();
-      expect(wfExecutionRuntimeManager.setCurrentStepResult).not.toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.setCurrentStepState).not.toHaveBeenCalled();
     });
 
     it('should exit iteration scope', async () => {
@@ -99,7 +98,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when no more items to process', () => {
     beforeEach(() => {
-      getStepState.mockReturnValue({
+      getCurrentStepState.mockReturnValue({
         items: ['item1', 'item2', 'item3'],
         index: 2,
         item: 'item3',
@@ -107,19 +106,10 @@ describe('ExitForeachNodeImpl', () => {
       });
     });
 
-    it('should clear the foreach state', async () => {
-      await underTest.run();
-
-      expect(wfExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith(
-        step.startNodeId,
-        undefined
-      );
-    });
-
     it('should finish the foreach step', async () => {
       await underTest.run();
 
-      expect(wfExecutionRuntimeManager.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(wfExecutionRuntimeManager.finishStep).toHaveBeenCalledWith();
     });
 
     it('should go to the next step', async () => {

@@ -34,7 +34,6 @@ export class ExitForeachNodeImpl implements StepImplementation {
     }
     // All items have been processed, exit the foreach scope
     this.wfExecutionRuntimeManager.exitScope();
-    await this.wfExecutionRuntimeManager.setCurrentStepState(undefined);
     await this.wfExecutionRuntimeManager.finishStep();
     this.workflowLogger.logDebug(
       `Exiting foreach step ${this.step.startNodeId} after processing all items.`,
