@@ -108,6 +108,7 @@ const ESQLEditorInternal = function ESQLEditor({
   detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
+  clientWarning,
   isLoading,
   isDisabled,
   hideRunQueryText,
@@ -186,6 +187,13 @@ const ESQLEditorInternal = function ESQLEditor({
     },
     [onTextLangQueryChange]
   );
+
+  const parsedClientWarning = useMemo(() => {
+    if (clientWarning) {
+      return parseWarning(clientWarning);
+    }
+    return [];
+  }, [clientWarning]);
 
   const onQuerySubmit = useCallback(() => {
     if (isQueryLoading && isLoading && allowQueryCancellation) {
@@ -634,13 +642,17 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
-      return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
+      const validatedMessage = await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
+      return {
+        errors: validatedMessage.errors,
+        warnings: [...validatedMessage.warnings, ...parsedClientWarning],
+      };
     }
     return {
       errors: [],
-      warnings: [],
+      warnings: [...parsedClientWarning],
     };
-  }, [esqlCallbacks, code]);
+  }, [esqlCallbacks, code, parsedClientWarning]);
 
   useEffect(() => {
     const setQueryToTheCache = async () => {
