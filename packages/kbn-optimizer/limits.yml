@@ -11,7 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  cloud: 8836
+  cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -109,7 +109,7 @@ pageLoadAssetSize:
   newsfeed: 12371
   noDataPage: 1749
   observability: 176467
-  observabilityAIAssistant: 46941
+  observabilityAIAssistant: 52565
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918

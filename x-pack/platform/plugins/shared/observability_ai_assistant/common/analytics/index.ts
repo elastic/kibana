@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { MapEmbeddablePersistableState } from './types';
-export { extract } from './extract';
-export { inject } from './inject';
+export { type Connector, connectorSchema } from './schemas/connector';
+export { type Scope, scopeSchema } from './schemas/scope';
