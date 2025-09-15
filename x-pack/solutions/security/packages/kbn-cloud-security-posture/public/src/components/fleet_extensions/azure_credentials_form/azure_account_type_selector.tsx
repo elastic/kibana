@@ -16,7 +16,7 @@ import {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
-import { getAzureCredentialsType, updatePolicyWithInputs } from '../utils';
+import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { AzureAccountType, UpdatePolicy } from '../types';
@@ -71,14 +71,9 @@ export const AzureAccountTypeSelect = ({
   updatePolicy,
   disabled,
 }: AzureAccountTypeSelectProps) => {
-  const { azurePolicyType, azureOrganizationEnabled, shortName, azureCloudConnectors } =
-    useCloudSetup();
+  const { azurePolicyType, azureOrganizationEnabled, shortName } = useCloudSetup();
 
-  // this should be removed when we enable Azure organization support for cloud connectors
-  const cloudConnectorDisablesOrganization =
-    !!azureCloudConnectors && getAzureCredentialsType(input) === 'cloud_connectors';
-
-  const organizationDisabled = !azureOrganizationEnabled || !!cloudConnectorDisablesOrganization;
+  const organizationDisabled = !azureOrganizationEnabled;
   const azureAccountTypeOptions = getAzureAccountTypeOptions(organizationDisabled);
 
   const accountType = getAzureAccountType(input);

@@ -32,6 +32,7 @@ import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
+import { AzureSelectedCredentialsGuide } from './azure_credential_guides';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
@@ -106,6 +107,11 @@ export const AzureCredentialsFormAgentless = ({
             }}
           />
           <EuiSpacer size="l" />
+        </>
+      )}
+      <AzureSelectedCredentialsGuide azureCredentialType={azureCredentialsType} />
+      {azureCredentialsType === 'cloud_connectors' && azureCloudConnectors && (
+        <>
           <EuiButton
             data-test-subj={AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ}
             target="_blank"
@@ -115,7 +121,7 @@ export const AzureCredentialsFormAgentless = ({
           >
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.armTemplate.launchCloudConnectorButton"
-              defaultMessage="Launch ARM Template"
+              defaultMessage="Deploy in Azure"
             />
           </EuiButton>
           <EuiSpacer size="m" />

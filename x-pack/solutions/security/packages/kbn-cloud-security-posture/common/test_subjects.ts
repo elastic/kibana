@@ -52,6 +52,8 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS = {
 export const AZURE_PROVIDER_TEST_SUBJ = 'cloudSetupAzureTestId';
 export const AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'azureOrganizationAccountTestId';
 export const AZURE_SINGLE_ACCOUNT_TEST_SUBJ = 'azureSingleAccountTestId';
+export const AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ =
+  'launchCloudConnectorArmAccordianInstructions';
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azureCredentialsTypeSelector';
 export const AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ =
   'azureLaunchCloudConnectorArmTemplate';
@@ -69,6 +71,7 @@ export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
   CLIENT_USERNAME: 'cloudSetupAzureClientUsername',
   CLIENT_PASSWORD: 'cloudSetupAzureClientPassword',
+  CLOUD_CONNECTOR_ID: 'cloudSetupAzureCloudConnectorId',
 };
 
 export const ADVANCED_OPTION_ACCORDION_TEST_SUBJ = 'advancedOptionsAccordion';

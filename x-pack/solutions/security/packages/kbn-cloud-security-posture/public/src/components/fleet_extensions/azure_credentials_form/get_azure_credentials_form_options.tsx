@@ -73,6 +73,14 @@ const I18N_CLIENT_ID = i18n.translate(
     defaultMessage: 'Client ID',
   }
 );
+
+const I18N_CLOUD_CONNECTOR_ID = i18n.translate(
+  'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorIdLabel',
+  {
+    defaultMessage: 'Elastic Cloud Connector ID',
+  }
+);
+
 export const getAgentlessCredentialsType = (
   input: NewPackagePolicyInput,
   showCloudConnectors: boolean
@@ -91,6 +99,28 @@ export const getAgentlessCredentialsType = (
 
   return credentialsType;
 };
+
+const getAzureSericePrincipalWithClientSecretFields = (): AzureCredentialsFields => ({
+  'azure.credentials.tenant_id': {
+    label: I18N_TENANT_ID,
+    testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+  },
+  'azure.credentials.client_id': {
+    label: I18N_CLIENT_ID,
+    testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+  },
+  'azure.credentials.client_secret': {
+    type: 'password',
+    isSecret: true,
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
+      {
+        defaultMessage: 'Client Secret',
+      }
+    ),
+    testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+  },
+});
 
 export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
   AzureOptions,
@@ -121,6 +151,10 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
           label: I18N_CLIENT_ID,
           testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
         },
+        'azure.credentials.cloud_connector_id': {
+          label: I18N_CLOUD_CONNECTOR_ID,
+          testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
+        },
       },
     },
     [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET]: {
@@ -130,27 +164,7 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
           defaultMessage: 'Service principal with Client Secret',
         }
       ),
-      fields: {
-        'azure.credentials.tenant_id': {
-          label: I18N_TENANT_ID,
-          testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-        },
-        'azure.credentials.client_id': {
-          label: I18N_CLIENT_ID,
-          testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-        },
-        'azure.credentials.client_secret': {
-          type: 'password',
-          isSecret: true,
-          label: i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
-            {
-              defaultMessage: 'Client Secret',
-            }
-          ),
-          testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
-        },
-      },
+      fields: getAzureSericePrincipalWithClientSecretFields(),
     },
   };
 };
@@ -166,27 +180,7 @@ export const getAzureAgentlessCredentialFormOptions = (): Pick<
         defaultMessage: 'Service principal with Client Secret',
       }
     ),
-    fields: {
-      'azure.credentials.tenant_id': {
-        label: I18N_TENANT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-      },
-      'azure.credentials.client_id': {
-        label: I18N_CLIENT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-      },
-      'azure.credentials.client_secret': {
-        type: 'password',
-        isSecret: true,
-        label: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
-          {
-            defaultMessage: 'Client Secret',
-          }
-        ),
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
-      },
-    },
+    fields: getAzureSericePrincipalWithClientSecretFields(),
   },
 });
 
@@ -226,27 +220,7 @@ export const getAzureCredentialsFormOptions = (): Omit<AzureOptions, 'cloud_conn
         defaultMessage: 'Service principal with Client Secret',
       }
     ),
-    fields: {
-      'azure.credentials.tenant_id': {
-        label: I18N_TENANT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-      },
-      'azure.credentials.client_id': {
-        label: I18N_CLIENT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-      },
-      'azure.credentials.client_secret': {
-        type: 'password',
-        isSecret: true,
-        label: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
-          {
-            defaultMessage: 'Client Secret',
-          }
-        ),
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
-      },
-    },
+    fields: getAzureSericePrincipalWithClientSecretFields(),
   },
   [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE]: {
     label: i18n.translate(

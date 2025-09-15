@@ -40,17 +40,19 @@ import {
 import { CloudSetupContext } from '../cloud_setup_context';
 import { getInputByType, getTemplateUrlFromPackageInfo } from '../utils';
 
+type CloudForCloudConnector = Pick<
+  CloudSetup,
+  | 'isCloudEnabled'
+  | 'cloudId'
+  | 'cloudHost'
+  | 'deploymentUrl'
+  | 'serverless'
+  | 'isServerlessEnabled'
+>;
+
 interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
+  cloud: CloudForCloudConnector;
   packageInfo: PackageInfo;
   templateName: string;
   provider: CloudProviders;
@@ -78,6 +80,21 @@ const getKibanaComponentId = (cloudId: string | undefined): string | undefined =
   return kibanaComponentId || undefined;
 };
 
+const getElasticStackId = (cloud: CloudForCloudConnector): string | undefined => {
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    return cloud.serverless.projectId;
+  }
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    return kibanaComponentId;
+  }
+
+  return undefined;
+};
+
 const getCloudConnectorRemoteRoleTemplate: (
   params: GetCloudConnectorRemoteRoleTemplateParams
 ) => string | undefined = ({
@@ -87,8 +104,6 @@ const getCloudConnectorRemoteRoleTemplate: (
   templateName,
   provider,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  let elasticResourceId: string | undefined;
-
   const defaultAccountType =
     provider === AWS_PROVIDER
       ? AWS_SINGLE_ACCOUNT
@@ -103,17 +118,7 @@ const getCloudConnectorRemoteRoleTemplate: (
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
   if (!hostProvider || (provider === 'aws' && hostProvider !== provider)) return undefined;
 
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
-  }
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
+  const elasticResourceId = getElasticStackId(cloud);
 
   if (!elasticResourceId) return undefined;
 
@@ -307,11 +312,8 @@ const buildCloudSetupState = ({
     awsCloudConnectorRemoteRoleTemplate,
     awsCloudConnectors,
     azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
-    // this Serverless check should be removed when we enable Azure cloud connectors for ESS
-    azureCloudConnectorRemoteRoleTemplate: cloud.isServerlessEnabled
-      ? azureCloudConnectorRemoteRoleTemplate
-      : undefined,
-    azureCloudConnectors: cloud.isServerlessEnabled ? azureCloudConnectors : false,
+    azureCloudConnectorRemoteRoleTemplate,
+    azureCloudConnectors,
     azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
     azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
     azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
@@ -325,6 +327,7 @@ const buildCloudSetupState = ({
     shortName: config.shortName,
     templateInputOptions,
     templateName: config.policyTemplate,
+    elasticStackId: getElasticStackId(cloud),
   };
 
   return cloudSetupContextValues;
@@ -364,6 +367,7 @@ interface CloudSetupContextValue {
     testId: string;
   }>;
   templateName: string;
+  elasticStackId?: string;
 }
 
 export function useCloudSetup(): CloudSetupContextValue {
