@@ -13,18 +13,24 @@ import { ensureDuration } from '../duration';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
 import { Type, type DefaultValue } from './type';
+import type { Reference } from '../references';
 
 // we need to special-case defaultValue as we want to handle string inputs too
 export type DurationValueType = Duration | string | number;
 
-export interface DurationOptions<D extends DefaultValue<DurationValueType>> {
+export type DurationDefaultValue =
+  | DurationValueType
+  | (() => DurationValueType)
+  | Reference<Duration>; // references must only be a Duration
+
+export interface DurationOptions<D extends DurationDefaultValue> {
   defaultValue?: D;
   validate?: (value: Duration) => string | void;
   min?: DurationValueType;
   max?: DurationValueType;
 }
 
-export class DurationType<D extends DefaultValue<DurationValueType>> extends Type<
+export class DurationType<D extends DurationDefaultValue> extends Type<
   Duration,
   [D] extends [never] ? never : Duration
 > {

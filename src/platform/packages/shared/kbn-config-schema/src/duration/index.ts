@@ -40,7 +40,7 @@ function stringToDuration(text: string): Duration {
   return duration;
 }
 
-function numberToDuration(numberMs: number) {
+function numberToDuration(numberMs: number): Duration {
   if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
     throw new Error(`Value in milliseconds is expected to be a safe positive integer.`);
   }
@@ -48,7 +48,7 @@ function numberToDuration(numberMs: number) {
   return momentDuration(numberMs);
 }
 
-export function ensureDuration(value: Duration | string | number) {
+export function ensureDuration(value: Duration | string | number): Duration {
   if (typeof value === 'string') {
     return stringToDuration(value);
   }

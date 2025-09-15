@@ -70,7 +70,7 @@ import {
   StreamType,
   Lazy,
 } from './src/types';
-import type { DurationValueType } from './src/types/duration_type';
+import type { DurationDefaultValue } from './src/types/duration_type';
 import type { ByteSizeValueType } from './src/types/byte_size_type';
 import type { UnionBaseType, UnionDefaultValue } from './src/types/union_type';
 import type {
@@ -145,7 +145,7 @@ function byteSize<D extends ByteSizeValueType = never>(
   return new ByteSizeType(options);
 }
 
-function duration<D extends DefaultValue<DurationValueType> = never>(
+function duration<D extends DurationDefaultValue = never>(
   options?: DurationOptions<D>
 ): Type<Duration, [D] extends [never] ? never : Duration> {
   return new DurationType(options);
@@ -609,6 +609,7 @@ function oneOf<RTS extends Array<Type<any>>, DV extends DefaultValue<any> = neve
  * Limitations:
  *
  * - Types are only supported up to about 20 types.
+ * - The `options.defaultValue` type will point to the root function if there's an error
  * - Ignores root-level `schema.object` defaults when validating.
  *
  * @example
