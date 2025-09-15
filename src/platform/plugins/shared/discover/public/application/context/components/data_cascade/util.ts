@@ -35,6 +35,8 @@ export interface AppliedStatsFunction {
   operator: string;
 }
 
+const supportedStatsFunctions = new Set(['categorize']);
+
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
 
@@ -87,6 +89,13 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       // if there is a where command targeting a column on the stats command we are processing in the query,
       // then we do not want to classify it as having metadata required for the cascade experience
       return { groupByFields: [], appliedFunctions: [] };
+    }
+
+    if (isESQLFunction(group.definition)) {
+      const functionName = group.definition.name;
+      if (!supportedStatsFunctions.has(functionName)) {
+        continue;
+      }
     }
 
     groupByFields.push({
@@ -207,10 +216,6 @@ export const constructCascadeQuery = ({
             );
             handled = true;
           }
-          break;
-        }
-        case 'bucket': {
-          // TODO: handle bucket option
           break;
         }
         default: {
@@ -374,10 +379,3 @@ function handleStatsByCategorizeLeafOperation(
 
   mutate.generic.commands.insert(query.ast, whereCommand, 1);
 }
-
-// function handleStatsByCategorizeGroupOperation(
-//   query: EsqlQuery,
-//   nodePathMap: Record<string, string>
-// ) {
-//   throw new Error('Not yet implemented!');
-// }
