@@ -14,21 +14,13 @@
         "allow_custom_routing": false,
         "hidden": false
       },
-      "ignore_missing_component_templates": [
-        "logs@custom",
-        "entityanalytics_okta@custom",
-        "logs-entityanalytics_okta.user@custom"
+      "ignore_missing_component_templates": [],
+      "index_patterns": [
+        "logs-entityanalytics_okta.user-*"
       ],
-      "index_patterns": ["logs-entityanalytics_okta.user-*"],
       "name": "logs-entityanalytics_okta.user",
       "priority": 200,
       "template": {
-        "aliases": {},
-        "data_stream_options": {
-          "failure_store": {
-            "enabled": true
-          }
-        },
         "mappings": {
           "_meta": {
             "managed": true,
@@ -42,20 +34,28 @@
             {
               "ecs_timestamp": {
                 "match": "@timestamp",
-                "mapping": { "type": "date", "ignore_malformed": false }
+                "mapping": {
+                  "type": "date",
+                  "ignore_malformed": false
+                }
               }
             },
             {
               "entityanalytics_okta.groups.profile.*": {
                 "path_match": "entityanalytics_okta.groups.profile.*",
                 "match_mapping_type": "*",
-                "mapping": { "type": "keyword" }
+                "mapping": {
+                  "type": "keyword"
+                }
               }
             },
             {
               "strings_as_keyword": {
                 "match_mapping_type": "string",
-                "mapping": { "type": "keyword", "ignore_above": 1024 }
+                "mapping": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
               }
             },
             {
@@ -63,7 +63,10 @@
                 "mapping": {
                   "type": "match_only_text"
                 },
-                "path_match": ["message", "*.message"],
+                "path_match": [
+                  "message",
+                  "*.message"
+                ],
                 "unmatch_mapping_type": "object"
               }
             },
@@ -74,7 +77,10 @@
                   "index": false,
                   "type": "keyword"
                 },
-                "path_match": ["*event.original", "*gen_ai.agent.description"]
+                "path_match": [
+                  "*event.original",
+                  "*gen_ai.agent.description"
+                ]
               }
             },
             {
@@ -84,7 +90,9 @@
                   "index": false,
                   "type": "long"
                 },
-                "path_match": ["*.x509.public_key_exponent"]
+                "path_match": [
+                  "*.x509.public_key_exponent"
+                ]
               }
             },
             {
@@ -93,7 +101,11 @@
                   "type": "ip"
                 },
                 "match_mapping_type": "string",
-                "path_match": ["ip", "*.ip", "*_ip"]
+                "path_match": [
+                  "ip",
+                  "*.ip",
+                  "*_ip"
+                ]
               }
             },
             {
@@ -101,7 +113,12 @@
                 "mapping": {
                   "type": "wildcard"
                 },
-                "path_match": ["*.io.text", "*.message_id", "*registry.data.strings", "*url.path"],
+                "path_match": [
+                  "*.io.text",
+                  "*.message_id",
+                  "*registry.data.strings",
+                  "*url.path"
+                ],
                 "unmatch_mapping_type": "object"
               }
             },
@@ -115,7 +132,11 @@
                   },
                   "type": "wildcard"
                 },
-                "path_match": ["*.body.content", "*url.full", "*url.original"],
+                "path_match": [
+                  "*.body.content",
+                  "*url.full",
+                  "*url.original"
+                ],
                 "unmatch_mapping_type": "object"
               }
             },
@@ -129,7 +150,10 @@
                   },
                   "type": "wildcard"
                 },
-                "match": ["*command_line", "*stack_trace"],
+                "match": [
+                  "*command_line",
+                  "*stack_trace"
+                ],
                 "unmatch_mapping_type": "object"
               }
             },
@@ -193,7 +217,10 @@
                 "mapping": {
                   "type": "float"
                 },
-                "path_match": ["*.score.*", "*_score*"],
+                "path_match": [
+                  "*.score.*",
+                  "*_score*"
+                ],
                 "path_unmatch": "*.version",
                 "unmatch_mapping_type": "object"
               }
@@ -204,7 +231,11 @@
                   "scaling_factor": 1000,
                   "type": "scaled_float"
                 },
-                "match_mapping_type": ["double", "long", "string"],
+                "match_mapping_type": [
+                  "double",
+                  "long",
+                  "string"
+                ],
                 "path_match": "*.usage"
               }
             },
@@ -213,7 +244,9 @@
                 "mapping": {
                   "type": "geo_point"
                 },
-                "path_match": ["*.geo.location"]
+                "path_match": [
+                  "*.geo.location"
+                ]
               }
             },
             {
@@ -222,7 +255,11 @@
                   "type": "flattened"
                 },
                 "match_mapping_type": "object",
-                "path_match": ["*structured_data", "*exports", "*imports"]
+                "path_match": [
+                  "*structured_data",
+                  "*exports",
+                  "*imports"
+                ]
               }
             },
             {
@@ -754,23 +791,6 @@
                     }
                   }
                 }
-              }
-            }
-          }
-        },
-        "settings": {
-          "index": {
-            "codec": "best_compression",
-            "default_pipeline": "logs-entityanalytics_okta.user-2.5.1",
-            "final_pipeline": ".fleet_final_pipeline-1",
-            "lifecycle": {
-              "name": "logs"
-            },
-            "mapping": {
-              "ignore_malformed": "true",
-              "total_fields": {
-                "ignore_dynamic_beyond_limit": "true",
-                "limit": "1000"
               }
             }
           }
