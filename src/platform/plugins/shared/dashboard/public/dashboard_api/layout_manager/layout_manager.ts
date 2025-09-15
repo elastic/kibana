@@ -59,6 +59,7 @@ import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import { childrenReady$, getActivePanelCount, isSectionCollapsed } from './active_panels';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -336,7 +337,7 @@ export function initializeLayoutManager(
     if (children$.value[uuid]) return children$.value[uuid];
 
     // if the panel is in a collapsed section and has never been built, then childApi will be undefined
-    if (isSectionCollapsed(panelLayout.gridData.sectionId)) {
+    if (isSectionCollapsed(layout$.getValue().sections, panelLayout.gridData.sectionId)) {
       return undefined;
     }
 
@@ -355,11 +356,6 @@ export function initializeLayoutManager(
       });
     });
   };
-
-  function isSectionCollapsed(sectionId?: string): boolean {
-    const { sections } = layout$.getValue();
-    return Boolean(sectionId && sections[sectionId].collapsed);
-  }
 
   return {
     internalApi: {
@@ -401,18 +397,20 @@ export function initializeLayoutManager(
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
         currentChildState[uuid] = state;
       },
-      isSectionCollapsed,
+      isSectionCollapsed: (sectionId?: string) =>
+        isSectionCollapsed(layout$.getValue().sections, sectionId),
     },
     api: {
       /** Panels */
       children$,
+      childrenReady$: childrenReady$(children$, layout$),
+      getActivePanelCount: () => getActivePanelCount(layout$.getValue()),
       getChildApi,
       addNewPanel,
       removePanel,
       replacePanel,
       duplicatePanel,
       getDashboardPanelFromId,
-      getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
       /** Sections */

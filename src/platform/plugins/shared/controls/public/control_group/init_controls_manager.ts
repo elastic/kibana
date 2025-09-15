@@ -203,9 +203,6 @@ export function initControlsManager(
       children$: children$ as PublishingSubject<{
         [key: string]: DefaultControlApi;
       }>,
-      getPanelCount: () => {
-        return controlsInOrder$.value.length;
-      },
       addNewPanel: async (panel: PanelPackage<DefaultControlState>) => {
         return addNewPanel(panel, controlsInOrder$.value.length);
       },

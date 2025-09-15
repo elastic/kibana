@@ -204,9 +204,6 @@ export function getPageApi() {
       executionContext: {
         type: 'presentationContainerEmbeddableExample',
       },
-      getPanelCount: () => {
-        return layout$.value.length;
-      },
       replacePanel: async (idToRemove: string, newPanel: PanelPackage<object>) => {
         // TODO remove method from interface? It should not be required
         return '';

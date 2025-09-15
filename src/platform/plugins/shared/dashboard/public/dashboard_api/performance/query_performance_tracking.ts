@@ -22,6 +22,7 @@ import {
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
+import type { DashboardApi } from '../types';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
@@ -41,16 +42,15 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
 };
 
 export function startQueryPerformanceTracking(
-  dashboard: PresentationContainer,
+  dashboard: Required<PresentationContainer> & {
+    getActivePanelCount: DashboardApi['getActivePanelCount'];
+  },
   performanceState: PerformanceState
 ) {
-  return dashboard.children$
+  return combineLatest([dashboard.childrenReady$, dashboard.children$])
     .pipe(
-      skipWhile((children) => {
-        // Don't track render-status when the dashboard is still adding embeddables.
-        return Object.values(children).length !== dashboard.getPanelCount();
-      }),
-      map((children) => {
+      skipWhile(([childrenReady]) => !childrenReady),
+      map(([, children]) => {
         // Filter for embeddables which publish phase events
         const childPhaseEventTrackers: PublishesPhaseEvents[] = [];
         const values = Object.values(children);
@@ -78,7 +78,7 @@ export function startQueryPerformanceTracking(
       pairwise()
     )
     .subscribe(([wasDashboardStillLoading, isDashboardStillLoading]: [boolean, boolean]) => {
-      const panelCount = dashboard.getPanelCount();
+      const panelCount = dashboard.getActivePanelCount();
       const now = performance.now();
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
         ? 'sessionFirstLoad'

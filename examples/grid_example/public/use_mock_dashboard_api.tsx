@@ -54,9 +54,6 @@ export const useMockDashboardApi = ({
       viewMode$,
       setViewMode: (viewMode: ViewMode) => viewMode$.next(viewMode),
       panels$,
-      getPanelCount: () => {
-        return Object.keys(panels$.getValue()).length;
-      },
       sections$: new BehaviorSubject<MockedDashboardSectionMap>(savedState.sections),
       expandedPanelId$,
       expandPanel: (id: string) => {

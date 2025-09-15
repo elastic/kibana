@@ -101,7 +101,7 @@ export type DashboardApi = CanExpandPanels &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
   PassThroughContext &
-  PresentationContainer &
+  Required<PresentationContainer> &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
@@ -122,6 +122,7 @@ export type DashboardApi = CanExpandPanels &
     focusedPanelId$: PublishingSubject<string | undefined>;
     setFocusedPanelId: (id: string | undefined) => void;
     forceRefresh: () => void;
+    getActivePanelCount: () => number;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardAttributes;
