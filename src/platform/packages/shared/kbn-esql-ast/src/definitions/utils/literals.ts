@@ -58,8 +58,7 @@ export function getDateLiterals(options?: {
       options,
       // appears when the user opens the second level popover
       i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
-        defaultMessage:
-          'Use the `?_tstart` and `?_tend` parameters to bind a custom timestamp field to Kibana's time filter.',
+        defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
       })
     ),
     {
