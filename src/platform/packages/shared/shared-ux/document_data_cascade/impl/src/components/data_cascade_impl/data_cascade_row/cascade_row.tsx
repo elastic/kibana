@@ -64,19 +64,31 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     );
   }, [euiTheme, hasAllParentsExpanded, rowDepth, rowParentId, size]);
 
-  const rowHeader = (
-    <CascadeRowHeaderPrimitive<G, L>
-      isGroupNode={isGroupNode}
-      rowHeaderTitleSlot={RowTitleSlot}
-      rowHeaderMetaSlots={rowHeaderMetaSlots}
-      rowHeaderActions={rowHeaderActions}
-      rowInstance={rowInstance}
-      size={size}
-      enableRowSelection={enableRowSelection}
-      enableSecondaryExpansionAction={enableSecondaryExpansionAction}
-      onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
-    />
-  );
+  const rowHeader = useMemo(() => {
+    return (
+      <CascadeRowHeaderPrimitive<G, L>
+        isGroupNode={isGroupNode}
+        rowHeaderTitleSlot={RowTitleSlot}
+        rowHeaderMetaSlots={rowHeaderMetaSlots}
+        rowHeaderActions={rowHeaderActions}
+        rowInstance={rowInstance}
+        size={size}
+        enableRowSelection={enableRowSelection}
+        enableSecondaryExpansionAction={enableSecondaryExpansionAction}
+        onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+      />
+    );
+  }, [
+    RowTitleSlot,
+    enableRowSelection,
+    enableSecondaryExpansionAction,
+    isGroupNode,
+    onCascadeGroupNodeExpanded,
+    rowHeaderActions,
+    rowHeaderMetaSlots,
+    rowInstance,
+    size,
+  ]);
 
   return (
     <div

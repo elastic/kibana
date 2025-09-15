@@ -63,8 +63,13 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
   } = useAdaptedTableRows<G, L>({ rowInstance });
 
   const headerMetaSlots = useMemo(
-    () => rowHeaderMetaSlots?.({ row: rowInstance }) ?? [],
+    () => rowHeaderMetaSlots?.({ row: rowInstance }),
     [rowHeaderMetaSlots, rowInstance]
+  );
+
+  const headerActions = useMemo(
+    () => rowHeaderActions?.({ row: rowInstance }),
+    [rowHeaderActions, rowInstance]
   );
 
   const fetchGroupNodeData = useCallback(() => {
@@ -173,7 +178,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 overflow: 'hidden',
               }}
               style={{
-                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots.length, 1) * 20, 60)}%`,
+                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots?.length ?? 0, 1) * 20, 60)}%`,
               }}
             >
               <EuiFlexGroup
@@ -184,14 +189,14 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 css={styles.rowHeaderSlotWrapper}
               >
                 <React.Fragment>
-                  {headerMetaSlots.map((metaSlot, index) => (
+                  {headerMetaSlots?.map((metaSlot, index) => (
                     <EuiFlexItem css={styles.rowHeaderSlotInner} key={index} grow>
                       {metaSlot}
                     </EuiFlexItem>
                   ))}
                 </React.Fragment>
                 <React.Fragment>
-                  {!!rowHeaderActions?.length && (
+                  {Boolean(headerActions?.length) && (
                     <EuiFlexItem
                       key="actions"
                       css={[
@@ -202,10 +207,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                       ]}
                       grow={false}
                     >
-                      <CascadeRowActions<G>
-                        rowHeaderActions={rowHeaderActions}
-                        rowInstance={rowInstance}
-                      />
+                      <CascadeRowActions headerRowActions={headerActions!} />
                     </EuiFlexItem>
                   )}
                 </React.Fragment>
