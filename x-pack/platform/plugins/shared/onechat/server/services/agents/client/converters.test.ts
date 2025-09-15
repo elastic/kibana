@@ -26,7 +26,7 @@ describe('fromEs', () => {
         labels: ['foo', 'bar'],
         configuration: {
           instructions: 'instructions',
-          tools: [{ tool_ids: ['id_1', 'id_2'] }],
+          tools: { tool_ids: ['id_1', 'id_2'] },
         },
         created_at: creationDate,
         updated_at: updateDate,
@@ -45,11 +45,9 @@ describe('fromEs', () => {
       name: 'name',
       configuration: {
         instructions: 'instructions',
-        tools: [
-          {
-            tool_ids: ['id_1', 'id_2'],
-          },
-        ],
+        tools: {
+          tool_ids: ['id_1', 'id_2'],
+        },
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -76,11 +74,9 @@ describe('createRequestToEs', () => {
       description: 'description',
       configuration: {
         instructions: 'instructions',
-        tools: [
-          {
-            tool_ids: ['id_1', 'id_2'],
-          },
-        ],
+        tools: {
+          tool_ids: ['id_1', 'id_2'],
+        },
       },
       labels: ['foo', 'bar'],
     };
@@ -99,11 +95,9 @@ describe('createRequestToEs', () => {
       description: 'description',
       configuration: {
         instructions: 'instructions',
-        tools: [
-          {
-            tool_ids: ['id_1', 'id_2'],
-          },
-        ],
+        tools: {
+          tool_ids: ['id_1', 'id_2'],
+        },
       },
       labels: ['foo', 'bar'],
       created_at: expect.any(String),
@@ -123,11 +117,9 @@ describe('updateRequestToEs', () => {
       description: 'description',
       configuration: {
         instructions: 'instructions',
-        tools: [
-          {
-            tool_ids: ['id_1', 'id_2'],
-          },
-        ],
+        tools: {
+          tool_ids: ['id_1', 'id_2'],
+        },
       },
       labels: ['foo', 'bar'],
       created_at: creationDate,
@@ -137,7 +129,7 @@ describe('updateRequestToEs', () => {
     const updateRequest: AgentUpdateRequest = {
       name: 'new name',
       configuration: {
-        tools: [{ tool_ids: ['new_id_1', 'new_id_2'] }],
+        tools: { tool_ids: ['new_id_1', 'new_id_2'] },
       },
     };
 
@@ -155,11 +147,9 @@ describe('updateRequestToEs', () => {
       description: 'description',
       configuration: {
         instructions: 'instructions',
-        tools: [
-          {
-            tool_ids: ['new_id_1', 'new_id_2'],
-          },
-        ],
+        tools: {
+          tool_ids: ['new_id_1', 'new_id_2'],
+        },
       },
       labels: ['foo', 'bar'],
       created_at: creationDate,

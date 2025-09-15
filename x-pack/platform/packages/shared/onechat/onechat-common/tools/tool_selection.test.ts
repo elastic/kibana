@@ -77,13 +77,9 @@ describe('filterToolsBySelection', () => {
     expect(result).toEqual([
       {
         id: 'toolA',
-        type: 'type1',
-        tags: [],
       },
       {
         id: 'toolB',
-        type: 'type1',
-        tags: [],
       },
     ]);
   });

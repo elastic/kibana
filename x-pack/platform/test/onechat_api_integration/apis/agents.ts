@@ -23,12 +23,9 @@ export default function ({ getService }: FtrProviderContext) {
       description: 'A test agent for API testing',
       configuration: {
         instructions: 'You are a helpful test agent',
-        tools: [
-          {
-            type: 'builtin',
-            tool_ids: ['*'],
-          },
-        ],
+        tools: {
+          tool_ids: ['*'],
+        },
       },
     };
 
@@ -116,12 +113,9 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'invalid-tools-agent',
           configuration: {
             instructions: 'Test agent with invalid tools',
-            tools: [
-              {
-                type: 'invalid_type',
-                tool_ids: ['non-existent-tool'],
-              },
-            ],
+            tools: {
+              tool_ids: ['non-existent-tool'],
+            },
           },
         };
 
@@ -270,7 +264,9 @@ export default function ({ getService }: FtrProviderContext) {
         const configUpdates = {
           configuration: {
             instructions: 'Updated instructions for the agent',
-            tools: [],
+            tools: {
+              tool_ids: [],
+            },
           },
         };
 
