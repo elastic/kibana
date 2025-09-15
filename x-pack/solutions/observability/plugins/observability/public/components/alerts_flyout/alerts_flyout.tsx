@@ -43,6 +43,7 @@ export interface AlertsFlyoutProps {
   isLoading?: boolean;
   tableId?: string;
   onClose: () => void;
+  headerAppend?: React.ReactNode;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
 
@@ -52,6 +53,7 @@ export function AlertsFlyout({
   tableId,
   onClose,
   observabilityRuleTypeRegistry,
+  headerAppend,
 }: AlertsFlyoutProps) {
   const {
     http: {
@@ -151,6 +153,7 @@ export function AlertsFlyout({
             <EuiText size="s">{alert[ALERT_RULE_NAME]?.[0] as string}</EuiText>
           </EuiFlexGroup>
         )}
+        {headerAppend}
       </EuiFlyoutHeader>
 
       {isLoading ? (

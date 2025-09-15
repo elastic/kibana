@@ -7,6 +7,8 @@
 
 import React, { type ComponentProps } from 'react';
 import type { Alert } from '@kbn/alerting-types';
+import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiSpacer } from '@elastic/eui';
+import { ALERT_FLYOUT_PAGINATION_ARIA_LABEL } from '@kbn/response-ops-alerts-table/translations';
 import type { GetObservabilityAlertsTableProp } from '../..';
 import AlertsFlyout from './alerts_flyout';
 
@@ -16,6 +18,7 @@ export function AlertsTableExpandedAlertView({
   expandedAlertIndex,
   onExpandedAlertIndexChange,
   alerts,
+  alertsCount,
   isLoading,
   tableId,
   observabilityRuleTypeRegistry,
@@ -34,6 +37,25 @@ export function AlertsTableExpandedAlertView({
         onExpandedAlertIndexChange?.(null);
       }}
       observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+      headerAppend={
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                aria-label={ALERT_FLYOUT_PAGINATION_ARIA_LABEL}
+                pageCount={alertsCount}
+                activePage={expandedAlertIndex}
+                onPageClick={(activePage) => {
+                  onExpandedAlertIndexChange?.(activePage);
+                }}
+                compressed
+                data-test-subj="alertFlyoutPagination"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      }
     />
   );
 }
