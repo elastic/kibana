@@ -44,14 +44,14 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { login, loginWithUser } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
 describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
-  const primaryUser = isServerless ? 'elastic_admin' : 'system_indices_superuser';
-  const secondaryUser = isServerless ? 'elastic_serverless' : 'elastic';
+  const primaryUser = isServerless ? 'platform_engineer' : 'system_indices_superuser';
+  const secondaryUser = isServerless ? 't1_analyst' : 'elastic';
   const mockConvo1 = {
     id: 'spooky',
     title: 'Spooky convo',
@@ -319,9 +319,5 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
 });
 
 const loginSecondaryUser = (isServerless: boolean, username: string) => {
-  if (isServerless) {
-    loginWithUser({ username, password: 'changeme' });
-  } else {
-    login(username);
-  }
+  login(username);
 };
