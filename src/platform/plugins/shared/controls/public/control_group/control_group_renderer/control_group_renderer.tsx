@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, Subject, map } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash';
 

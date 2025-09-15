@@ -46,8 +46,6 @@ export interface PublishesESQLVariable {
 export type ControlWidthOptions = 'small' | 'medium' | 'large';
 
 export interface ESQLControlState {
-  grow?: boolean;
-  width?: ControlWidthOptions;
   title: string;
   selectedOptions: string[];
   variableName: string;
