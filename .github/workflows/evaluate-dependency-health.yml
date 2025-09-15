@@ -17,6 +17,7 @@ jobs:
     if: |
       github.repository == 'elastic/kibana' &&
       github.event.pull_request.user.login != 'app/elastic-renovate-prod' &&
+      github.event.pull_request.user.type != 'Bot' &&
       github.event.pull_request.draft == false
     steps:
       - name: Checkout kibana-operations
