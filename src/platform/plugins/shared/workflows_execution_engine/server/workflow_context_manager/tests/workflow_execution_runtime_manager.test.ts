@@ -361,10 +361,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
           step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId3',
         },
         labels: {
-          connector_type: 'unknown',
-          step_id: 'node3',
-          step_name: 'node3',
-          step_type: 'unknown',
+          connector_type: 'fakeStepType3',
+          step_id: 'fakeStepId3',
+          step_name: 'fakeStepId3',
+          step_type: 'fakeStepType3',
         },
       });
     });
@@ -408,13 +408,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
-    it('should throw error upon attempt to finish a step that is not running', async () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
-      await expect(underTest.finishStep()).rejects.toThrowError(
-        'Step execution not found for step ID: fakeStepId2'
-      );
-    });
-
     it('should correctly calculate step completedAt and executionTimeMs', async () => {
       const expectedCompletedAt = new Date('2025-08-06T00:00:02.000Z');
       mockDateNow = expectedCompletedAt;
@@ -435,7 +428,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
             if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2') {
               return {
                 stepId: 'node1',
-                startedAt: '2025-08-06T00:00:00.000Z',
+                startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
                 error: null,
               } as Partial<EsWorkflowStepExecution>;
@@ -460,8 +453,16 @@ describe('WorkflowExecutionRuntimeManager', () => {
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
             status: ExecutionStatus.COMPLETED,
-            output: { success: true, data: {} },
-            error: null,
+          })
+        );
+      });
+
+      it('should finish a step execution executionTime', async () => {
+        await underTest.finishStep();
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            executionTimeMs: 86400000,
           })
         );
       });
@@ -480,11 +481,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
             step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
           },
           labels: {
-            connector_type: 'unknown',
-            execution_time_ms: 0,
-            step_id: 'node1',
-            step_name: 'node1',
-            step_type: 'unknown',
+            connector_type: 'fakeStepType2',
+            execution_time_ms: 86400000,
+            step_id: 'fakeStepId2',
+            step_name: 'fakeStepId2',
+            step_type: 'fakeStepType2',
           },
         });
       });
@@ -528,20 +529,28 @@ describe('WorkflowExecutionRuntimeManager', () => {
         );
       });
 
-      it('should log successful step execution', async () => {
-        await underTest.finishStep();
-        expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId2' failed`, {
-          event: {
-            action: 'step-complete',
-            category: ['workflow', 'step'],
-            outcome: 'failure',
-          },
-          tags: ['workflow', 'step', 'complete'],
-          workflow: {
-            step_id: 'fakeStepId2',
-            step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
-          },
-        });
+      it('should log the failure of the step', async () => {
+        const error = new Error('Step execution failed');
+        await underTest.failStep(error);
+
+        expect(workflowLogger.logError).toHaveBeenCalledWith(
+          `Step 'fakeStepId2' failed: Step execution failed`,
+          error,
+          {
+            event: { action: 'step-fail', category: ['workflow', 'step'] },
+            tags: ['workflow', 'step', 'fail'],
+            labels: {
+              step_type: 'fakeStepType2',
+              connector_type: 'fakeStepType2',
+              step_name: 'fakeStepId2',
+              step_id: 'fakeStepId2',
+            },
+            workflow: {
+              step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
+              step_id: 'fakeStepId2',
+            },
+          }
+        );
       });
     });
   });
@@ -594,14 +603,24 @@ describe('WorkflowExecutionRuntimeManager', () => {
       const error = new Error('Step execution failed');
       await underTest.failStep(error);
 
-      expect(workflowLogger.logError).toHaveBeenCalledWith(`Step 'fakeStepId1' failed`, error, {
-        event: { action: 'step-fail', category: ['workflow', 'step'] },
-        tags: ['workflow', 'step', 'fail'],
-        workflow: {
-          step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
-          step_id: 'fakeStepId1',
-        },
-      });
+      expect(workflowLogger.logError).toHaveBeenCalledWith(
+        `Step 'fakeStepId1' failed: Step execution failed`,
+        error,
+        {
+          event: { action: 'step-fail', category: ['workflow', 'step'] },
+          tags: ['workflow', 'step', 'fail'],
+          labels: {
+            step_type: 'fakeStepType1',
+            connector_type: 'fakeStepType1',
+            step_name: 'fakeStepId1',
+            step_id: 'fakeStepId1',
+          },
+          workflow: {
+            step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
+            step_id: 'fakeStepId1',
+          },
+        }
+      );
     });
   });
 
