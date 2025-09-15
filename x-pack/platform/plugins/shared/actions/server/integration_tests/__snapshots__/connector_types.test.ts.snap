@@ -3981,6 +3981,76 @@ Object {
       ],
       "type": "alternatives",
     },
+    "secretHeaders": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-get-additional-properties": [Function],
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "key": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                  "value": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "name": "entries",
+              },
+            ],
+            "type": "record",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
     "user": Object {
       "flags": Object {
         "default": null,
@@ -40721,6 +40791,76 @@ Object {
               },
             ],
             "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "secretHeaders": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-get-additional-properties": [Function],
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "key": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                  "value": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "name": "entries",
+              },
+            ],
+            "type": "record",
           },
         },
         Object {
