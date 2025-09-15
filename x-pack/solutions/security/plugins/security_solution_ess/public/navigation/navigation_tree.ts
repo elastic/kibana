@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NodeDefinition,
+} from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { securityLink, i18nStrings } from '@kbn/security-solution-navigation/links';
@@ -103,6 +107,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           sideNavVersion: 'v1',
           icon: 'launch',
         },
+        // version 2 sidenav launchpad
         {
           id: 'launchpad',
           title: i18nStrings.launchPad.title,
@@ -147,6 +152,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           title: i18nStrings.devTools,
           icon: 'editorCodeBlock',
         },
+        ...v2FooterItems,
         {
           title: i18nStrings.management.title,
           icon: 'gear',
@@ -255,9 +261,11 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             },
             {
               link: 'monitoring',
+              sideNavVersion: 'v1',
             },
             {
               link: 'integrations',
+              sideNavVersion: 'v1',
             },
           ],
         },
@@ -265,3 +273,114 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
     },
   ],
 });
+
+const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
+  {
+    title: i18nStrings.ingestAndManageData.title,
+    iconV2: 'database',
+    breadcrumbStatus: 'hidden',
+    renderAs: 'panelOpener',
+    spaceBefore: null,
+    sideNavVersion: 'v2',
+    children: [
+      {
+        title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
+        children: [
+          { link: 'integrations', sideNavVersion: 'v2' },
+          { link: 'fleet' },
+          { link: 'management:ingest_pipelines' },
+          { link: 'management:pipelines' }, // logstash pipeline
+          { link: 'management:content_connectors' },
+        ],
+      },
+      {
+        title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
+        children: [
+          // { link: 'management:streams' }, // TODO : update Steams link
+          { link: 'management:index_management' },
+          { link: 'management:index_lifecycle_management' },
+          { link: 'management:snapshot_restore' },
+          { link: 'management:transform' },
+          { link: 'management:rollup_jobs' },
+          { link: 'management:data_quality' }, // data set quality
+          // { link: 'management:migrate_data' },
+        ],
+      },
+    ],
+  },
+  {
+    title: i18nStrings.stackManagementV2.title,
+    iconV2: 'gear',
+    breadcrumbStatus: 'hidden',
+    renderAs: 'panelOpener',
+    spaceBefore: null,
+    sideNavVersion: 'v2',
+    children: [
+      { link: 'monitoring' },
+      {
+        title: i18nStrings.stackManagementV2.alertsAndInsights.title,
+        children: [
+          { link: 'management:triggersActions' },
+          { link: 'management:cases' },
+          { link: 'management:triggersActionsConnectors' },
+          { link: 'management:reporting' },
+          { link: 'management:jobsListLink' },
+          { link: 'management:watcher' },
+          { link: 'management:maintenanceWindows' },
+          {
+            id: SecurityPageName.entityAnalyticsManagement,
+            link: securityLink(SecurityPageName.entityAnalyticsManagement),
+          },
+          {
+            id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+            link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
+          },
+        ],
+      },
+
+      {
+        title: i18nStrings.ml.title,
+        children: [
+          { link: 'management:overview' },
+          { link: 'management:anomaly_detection' },
+          { link: 'management:analytics' },
+          { link: 'management:trained_models' },
+          { link: 'management:supplied_configurations' },
+        ],
+      },
+      {
+        title: i18nStrings.stackManagementV2.security.title,
+        children: [
+          { link: 'management:users' },
+          { link: 'management:roles' },
+          { link: 'management:api_keys' },
+          { link: 'management:role_mappings' },
+        ],
+      },
+      {
+        title: i18nStrings.stackManagementV2.data.title,
+        children: [
+          { link: 'management:cross_cluster_replication' },
+          { link: 'management:remote_clusters' },
+        ],
+      },
+      {
+        title: i18nStrings.stackManagementV2.kibana.title,
+        children: [
+          { link: 'management:dataViews' },
+          { link: 'management:filesManagement' },
+          { link: 'management:objects' },
+          { link: 'management:tags' },
+          { link: 'management:aiAssistantManagementSelection' },
+          { link: 'management:search_sessions' }, // not in the sheet // doesn't show up?
+          { link: 'management:spaces' },
+          { link: 'maps' },
+          { link: 'visualize' },
+          { link: 'graph' },
+          { link: 'canvas' },
+          { link: 'management:settings' },
+        ],
+      },
+    ],
+  },
+];
