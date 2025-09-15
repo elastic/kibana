@@ -55,6 +55,7 @@ export interface ContentFrameworkTableProps
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
   id: string;
+  'data-test-subj'?: string;
 }
 
 export function ContentFrameworkTable({
@@ -65,6 +66,7 @@ export function ContentFrameworkTable({
   columns,
   id,
   textBasedHits,
+  'data-test-subj': dataTestSubj,
   filter,
   onAddColumn,
   onRemoveColumn,
@@ -155,10 +157,18 @@ export function ContentFrameworkTable({
 
       if (!fieldConfig) return null;
       if (columnId === 'name') {
+        const rowDataTestSubj = `${dataTestSubj}${fieldConfig.name
+          .replace(/ (\w)/g, (_, c) => c.toUpperCase())
+          .replace(/^\w/, (c) => c.toUpperCase())}`;
+
         return (
           <>
             <EuiSpacer size="s" />
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold }}>
+            <EuiText
+              size="xs"
+              css={{ fontWeight: euiTheme.font.weight.bold }}
+              data-test-subj={rowDataTestSubj}
+            >
               {fieldConfig.name}
             </EuiText>
           </>
@@ -166,7 +176,7 @@ export function ContentFrameworkTable({
       }
       return fieldConfig.valueCellContent ? fieldConfig.valueCellContent() : null;
     },
-    [rows, fields, euiTheme.font.weight.bold]
+    [rows, fields, dataTestSubj, euiTheme.font.weight.bold]
   );
 
   const cellPopoverRenderer = useCallback(
@@ -202,6 +212,7 @@ export function ContentFrameworkTable({
           height: auto !important;
         }
       `}
+      data-test-subj={dataTestSubj}
     >
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"

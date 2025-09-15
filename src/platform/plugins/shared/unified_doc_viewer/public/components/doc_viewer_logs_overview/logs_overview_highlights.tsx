@@ -111,12 +111,13 @@ export function LogsOverviewHighlights({
         <ContentFrameworkTable
           fieldNames={fieldNames}
           fieldConfigurations={fieldConfigurations}
-          title={'logs-about'}
           filter={filter}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
           hit={doc}
           dataView={dataView}
+          id="logs-highlights"
+          data-test-subj="unifiedDocViewLogsOverview"
         />
       </EuiPanel>
       <EuiSpacer size="m" />
