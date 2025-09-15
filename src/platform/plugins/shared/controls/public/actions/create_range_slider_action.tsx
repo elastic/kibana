@@ -26,7 +26,7 @@ export const createRangeSliderControlAction =
     return {
       id: RANGE_SLIDER_ACTION,
       type: RANGE_SLIDER_CONTROL,
-      order: 1,
+      order: 0,
       getIconType: () => 'controlsHorizontal',
       getDisplayName: RangeSliderStrings.control.getDisplayName,
       isCompatible: async ({ state: { dataViewId, fieldName } }) => {

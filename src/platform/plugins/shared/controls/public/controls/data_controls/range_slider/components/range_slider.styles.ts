@@ -34,6 +34,18 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         border: none;
         border-radius: 0;
       }
+
+      /** Don't deform the control when rendering the loading spinner. 
+        * Instead, render the spinner on top of the control with a light background,
+        * ensuring that it covers up the up/down arrow buttons rendered at all times by some browsers.
+        * Add 16px of right padding to get it out of the way of the drag handle.
+        * */
+      .euiFormControlLayout__childrenWrapper .euiFormControlLayoutIcons:last-child {
+        position: absolute;
+        right: 0;
+        padding-right: 16px;
+        background: ${euiTheme.colors.backgroundBaseSubdued};
+      }
     `,
     invalid: css`
       /* EUI CSS util for the generating the underline background-image/gradient */
