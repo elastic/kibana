@@ -8,15 +8,15 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction } from 'lodash';
+import { isString, pull, isFunction } from 'lodash';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { createInterceptors } from './interceptors';
-import { createOpenAiChunk } from './create_openai_chunk';
+import { LlmSimulator, sseEvent } from './llm_simulator';
 
 type Request = http.IncomingMessage;
-type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
+export type Response = http.ServerResponse<http.IncomingMessage>;
 
 type LLMMessage = string[] | ToolMessage | string | undefined;
 
@@ -35,16 +35,6 @@ export interface ToolMessage {
   role: 'assistant';
   content?: string;
   tool_calls?: ChatCompletionChunkToolCall[];
-}
-
-export interface LlmResponseSimulator {
-  requestBody: ChatCompletionStreamParams;
-  status: (code: number) => void;
-  next: (msg: string | ToolMessage) => Promise<void>;
-  error: (error: any) => Promise<void>;
-  complete: () => Promise<void>;
-  rawWrite: (chunk: string) => Promise<void>;
-  rawEnd: () => Promise<void>;
 }
 
 export class LlmProxy {
@@ -179,62 +169,23 @@ export class LlmProxy {
     when: RequestInterceptor['when'];
     responseMock?: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage);
   }): {
-    waitForIntercept: () => Promise<LlmResponseSimulator>;
-    completeAfterIntercept: () => Promise<LlmResponseSimulator>;
+    waitForIntercept: () => Promise<LlmSimulator>;
+    completeAfterIntercept: () => Promise<LlmSimulator>;
   } {
     const waitForInterceptPromise = Promise.race([
-      new Promise<LlmResponseSimulator>((outerResolve) => {
+      new Promise<LlmSimulator>((outerResolve) => {
         this.requestInterceptors.push({
           name,
           when,
           handle: (request, response, requestBody) => {
-            function write(chunk: string) {
-              return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
-            }
-            function end() {
-              return new Promise<void>((resolve) => response.end(resolve));
-            }
-
-            const simulator: LlmResponseSimulator = {
-              requestBody,
-              status: once((status: number) => {
-                response.writeHead(status, {
-                  'Elastic-Interceptor': name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
-                  'Content-Type': 'text/event-stream',
-                  'Cache-Control': 'no-cache',
-                  Connection: 'keep-alive',
-                });
-              }),
-              next: (msg) => {
-                simulator.status(200);
-                const chunk = createOpenAiChunk(msg);
-                return write(sseEvent(chunk));
-              },
-              rawWrite: (chunk: string) => {
-                simulator.status(200);
-                return write(chunk);
-              },
-              rawEnd: async () => {
-                await end();
-              },
-              complete: async () => {
-                this.log.debug(`Completed intercept for "${name}"`);
-                await write('data: [DONE]\n\n');
-                await end();
-              },
-              error: async (error) => {
-                await write(`data: ${JSON.stringify({ error })}\n\n`);
-                await end();
-              },
-            };
-
+            const simulator = new LlmSimulator(requestBody, response, this.log, name);
             outerResolve(simulator);
 
             return isFunction(responseMock) ? responseMock(simulator.requestBody) : responseMock;
           },
         });
       }),
-      new Promise<LlmResponseSimulator>((_, reject) => {
+      new Promise<LlmSimulator>((_, reject) => {
         setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 30000ms`)), 30000);
       }),
     ]);
@@ -298,8 +249,4 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
       reject(error);
     });
   });
-}
-
-function sseEvent(chunk: unknown) {
-  return `data: ${JSON.stringify(chunk)}\n\n`;
 }
