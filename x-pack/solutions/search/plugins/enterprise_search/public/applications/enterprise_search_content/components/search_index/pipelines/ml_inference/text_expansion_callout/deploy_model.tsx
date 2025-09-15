@@ -88,7 +88,6 @@ export const DeployModel = ({
               >
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    data-test-subj="enterpriseSearchDeployModelDeployButton"
                     color="primary"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
@@ -104,11 +103,7 @@ export const DeployModel = ({
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj="enterpriseSearchDeployModelLearnMoreLink"
-                    target="_blank"
-                    href={docLinks.elser}
-                  >
+                  <EuiLink target="_blank" href={docLinks.elser}>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
                       defaultMessage="Learn more"

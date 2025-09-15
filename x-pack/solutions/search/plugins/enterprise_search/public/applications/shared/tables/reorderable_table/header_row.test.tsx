@@ -9,8 +9,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { i18n } from '@kbn/i18n';
-
 import { Cell } from './cell';
 import { HeaderRow } from './header_row';
 
@@ -33,18 +31,7 @@ describe('HeaderRow', () => {
   });
 
   it('will render an additional cell in the first column if one is provided', () => {
-    const wrapper = shallow(
-      <HeaderRow
-        columns={columns}
-        leftAction={
-          <div>
-            {i18n.translate('xpack.enterpriseSearch..div.leftActionLabel', {
-              defaultMessage: 'Left Action',
-            })}
-          </div>
-        }
-      />
-    );
+    const wrapper = shallow(<HeaderRow columns={columns} leftAction={<div>Left Action</div>} />);
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(3);
     expect(cells.at(0).html()).toContain('Left Action');

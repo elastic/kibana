@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { MlModel } from '../../../../../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
@@ -48,7 +47,6 @@ export const DeployModelButton: React.FC<{
 }> = ({ onClick, modelId, disabled }) => {
   return (
     <EuiButton
-      data-test-subj="enterpriseSearchDeployModelButtonDeployButton"
       onClick={onClick}
       disabled={disabled}
       color="primary"
@@ -76,12 +74,7 @@ export const DeployModelButton: React.FC<{
 
 export const ModelDeployingButton: React.FC = () => {
   return (
-    <EuiButton
-      data-test-subj="enterpriseSearchModelDeployingButtonButton"
-      disabled
-      color="primary"
-      size="s"
-    >
+    <EuiButton disabled color="primary" size="s">
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
@@ -106,7 +99,6 @@ export const StartModelButton: React.FC<{
 }> = ({ onClick, modelId, disabled }) => {
   return (
     <EuiButton
-      data-test-subj="enterpriseSearchStartModelButtonStartButton"
       onClick={onClick}
       disabled={disabled}
       color="success"
@@ -134,12 +126,7 @@ export const StartModelButton: React.FC<{
 
 export const ModelStartingButton: React.FC = () => {
   return (
-    <EuiButton
-      data-test-subj="enterpriseSearchModelStartingButtonButton"
-      disabled
-      color="success"
-      size="s"
-    >
+    <EuiButton disabled color="success" size="s">
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
@@ -211,15 +198,7 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
         );
 
   return (
-    <EuiPanel
-      color="subdued"
-      title={
-        <FormattedMessage
-          id="xpack.enterpriseSearch.selectedModel.euiPanel.selectedModelLabel"
-          defaultMessage="Selected model"
-        />
-      }
-    >
+    <EuiPanel color="subdued" title="Selected model">
       <EuiScreenReaderLive>{getSelectedModelAnnouncement(model)}</EuiScreenReaderLive>
       <EuiPanel>
         <EuiFlexGroup direction="column" gutterSize="s">

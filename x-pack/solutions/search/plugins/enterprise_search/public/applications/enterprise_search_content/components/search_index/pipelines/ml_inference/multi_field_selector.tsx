@@ -184,7 +184,6 @@ export const MultiFieldMapping: React.FC = () => {
             fullWidth
           >
             <EuiFieldText
-              data-test-subj="enterpriseSearchMultiFieldMappingFieldText"
               prepend="ml.inference."
               onChange={(e) => setTargetField(e.target.value)}
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
@@ -197,7 +196,6 @@ export const MultiFieldMapping: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem style={{ paddingTop: '20px' }}>
           <EuiButton
-            data-test-subj="enterpriseSearchMultiFieldMappingAddButton"
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             disabled={selectedFields.length === 0}

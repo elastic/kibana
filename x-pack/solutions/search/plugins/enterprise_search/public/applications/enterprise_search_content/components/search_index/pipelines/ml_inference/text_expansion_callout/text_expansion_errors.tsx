@@ -26,11 +26,7 @@ export const TextExpansionErrors = ({ error }: { error: { title: string; message
       <SendEnterpriseSearchTelemetry action="error" metric="textExpansionModel-error" />
       <EuiCallOut color="danger" iconType="error" title={error.title}>
         <p>{error.message}</p>
-        <EuiLink
-          data-test-subj="enterpriseSearchTextExpansionErrorsMachineLearningNotificationsLink"
-          href={http.basePath.prepend(ML_NOTIFICATIONS_PATH)}
-          target="_blank"
-        >
+        <EuiLink href={http.basePath.prepend(ML_NOTIFICATIONS_PATH)} target="_blank">
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.mlNotificationsLink',
             {

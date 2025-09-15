@@ -62,7 +62,6 @@ export const CreateApiKeyForm = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <EuiFieldText
-              data-test-subj="searchPlaygroundCreateApiKeyFormFieldText"
               fullWidth
               placeholder={i18n.translate(
                 'xpack.searchPlayground.viewCode.apiForm.name.placeholder',
@@ -84,7 +83,6 @@ export const CreateApiKeyForm = () => {
           rules={{ min: 0, required: true }}
           render={({ field }) => (
             <EuiFieldText
-              data-test-subj="searchPlaygroundCreateApiKeyFormFieldText"
               fullWidth
               append={
                 <EuiText size="xs">
@@ -113,11 +111,7 @@ export const CreateApiKeyForm = () => {
       <EuiFormRow fullWidth>
         <EuiFlexGroup gutterSize="m">
           {isSuccess && !isDirty ? (
-            <EuiButton
-              data-test-subj="searchPlaygroundCreateApiKeyFormCreatedButton"
-              color="success"
-              iconType="check"
-            >
+            <EuiButton color="success" iconType="check">
               <FormattedMessage
                 id="xpack.searchPlayground.viewCode.apiForm.createdButton"
                 defaultMessage="Created"
@@ -125,7 +119,6 @@ export const CreateApiKeyForm = () => {
             </EuiButton>
           ) : (
             <EuiButton
-              data-test-subj="searchPlaygroundCreateApiKeyFormCreateApiKeyButton"
               isDisabled={!isValid || isLoading}
               isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
@@ -139,7 +132,6 @@ export const CreateApiKeyForm = () => {
           )}
 
           <EuiButtonEmpty
-            data-test-subj="searchPlaygroundCreateApiKeyFormViewAllApiKeysButton"
             iconSide="left"
             iconType="popout"
             href={managementApiKeysLinks}

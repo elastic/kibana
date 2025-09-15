@@ -236,9 +236,9 @@ export interface Process {
   isDescendantOf(process: Process): boolean;
 }
 
-export interface ProcessMap {
+export type ProcessMap = {
   [key: string]: Process;
-}
+};
 
 export interface ProcessEventContainer {
   id?: string;

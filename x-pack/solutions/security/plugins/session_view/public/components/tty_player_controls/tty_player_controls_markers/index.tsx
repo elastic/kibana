@@ -12,24 +12,24 @@ import type { ProcessStartMarker } from '../../../../common';
 import { useStyles } from './styles';
 import { PlayHead } from './play_head';
 
-interface Props {
+type Props = {
   processStartMarkers: ProcessStartMarker[];
   linesLength: number;
   currentLine: number;
   onChange: EuiRangeProps['onChange'];
   onSeekLine(line: number): void;
-}
+};
 
 export enum TTYPlayerLineMarkerType {
   ProcessChanged = 'process_changed',
   ProcessDataLimitReached = 'data_limited',
 }
 
-interface TTYPlayerLineMarker {
+type TTYPlayerLineMarker = {
   line: number;
   type: TTYPlayerLineMarkerType;
   name: string;
-}
+};
 
 export const TTYPlayerControlsMarkers = ({
   processStartMarkers,

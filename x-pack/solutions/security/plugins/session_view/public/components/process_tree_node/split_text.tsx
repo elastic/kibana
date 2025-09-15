@@ -8,12 +8,12 @@
 import React from 'react';
 import type { CSSObject } from '@emotion/react';
 
-interface Props {
+type Props = {
   children: string;
   highlightIndices?: number[];
   highlightStyle?: CSSObject;
   role?: string;
-}
+};
 
 // Split a text into multiple spans, each of which a single character. This is
 // useful for creating inline "like" text but still having control over the blocks

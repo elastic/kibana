@@ -8,12 +8,12 @@
 import React from 'react';
 import type { CSSObject } from '@emotion/react';
 
-interface Props {
+type Props = {
   children: JSX.Element | JSX.Element[];
   text: string;
   match: null | number[];
   highlightStyle: any;
-}
+};
 
 const css: CSSObject = {
   '&&': {

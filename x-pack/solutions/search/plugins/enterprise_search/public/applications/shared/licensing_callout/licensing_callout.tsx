@@ -124,22 +124,14 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
       <p>{secondContentBlock[feature]}</p>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiLink
-            data-test-subj="enterpriseSearchLicensingCalloutExplorePlatinumFeaturesLink"
-            external
-            href={docLinks.licenseManagement}
-          >
+          <EuiLink external href={docLinks.licenseManagement}>
             {i18n.translate('xpack.enterpriseSearch.workplaceSearch.explorePlatinumFeatures.link', {
               defaultMessage: 'Explore Platinum features',
             })}
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink
-            data-test-subj="enterpriseSearchLicensingCalloutExploreEnterpriseSearchOnElasticCloudLink"
-            href="https://www.elastic.co/subscriptions/cloud"
-            external
-          >
+          <EuiLink href="https://www.elastic.co/subscriptions/cloud" external>
             {i18n.translate('xpack.enterpriseSearch.content.licensingCallout.contentCloudTrial', {
               defaultMessage: 'Explore Enterprise Search on Elastic Cloud ',
             })}

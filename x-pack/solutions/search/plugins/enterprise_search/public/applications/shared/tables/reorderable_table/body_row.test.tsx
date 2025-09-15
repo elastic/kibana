@@ -10,7 +10,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiToken } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { BodyRow } from './body_row';
 import { Cell } from './cell';
@@ -68,17 +67,7 @@ describe('BodyRow', () => {
 
   it('will render an additional cell in the first column if one is provided', () => {
     const wrapper = shallow(
-      <BodyRow
-        columns={columns}
-        item={item}
-        leftAction={
-          <div>
-            {i18n.translate('xpack.enterpriseSearch..div.leftActionLabel', {
-              defaultMessage: 'Left Action',
-            })}
-          </div>
-        }
-      />
+      <BodyRow columns={columns} item={item} leftAction={<div>Left Action</div>} />
     );
     const cells = wrapper.find(Cell);
 

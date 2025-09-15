@@ -10,20 +10,12 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { PageIntroduction } from './page_introduction';
 
 describe('PageIntroduction component', () => {
   it('renders with title as a string', () => {
-    const wrapper = mount(
-      <PageIntroduction
-        title={i18n.translate('xpack.enterpriseSearch..pageIntroduction.stringTitleLabel', {
-          defaultMessage: 'string title',
-        })}
-        description="some description"
-      />
-    );
+    const wrapper = mount(<PageIntroduction title="string title" description="some description" />);
     // .hostNodes is required due to Emotion injection causing problems with enzyme
     const titleContainer = wrapper
       .find('[data-test-subj="pageIntroductionTitleContainer"]')
@@ -36,13 +28,7 @@ describe('PageIntroduction component', () => {
   it('renders title as React node', () => {
     const wrapper = mount(
       <PageIntroduction
-        title={
-          <h2 data-test-subj="injected">
-            {i18n.translate('xpack.enterpriseSearch..h2.reactNodeTitleLabel', {
-              defaultMessage: 'react node title',
-            })}
-          </h2>
-        }
+        title={<h2 data-test-subj="injected">react node title</h2>}
         description="some description"
       />
     );
@@ -74,14 +60,10 @@ describe('PageIntroduction component', () => {
     const wrapper = mount(
       <PageIntroduction
         description="some description"
-        title={i18n.translate('xpack.enterpriseSearch..pageIntroduction.someTitleLabel', {
-          defaultMessage: 'some title',
-        })}
+        title="some title"
         links={
-          <EuiLink data-test-subj="enterpriseSearchTestLinkToNowhereLink" href="testlink" external>
-            {i18n.translate('xpack.enterpriseSearch..testLinkToNowhereLinkLabel', {
-              defaultMessage: 'test link to nowhere',
-            })}
+          <EuiLink href="testlink" external>
+            test link to nowhere
           </EuiLink>
         }
       />
@@ -97,23 +79,13 @@ describe('PageIntroduction component', () => {
     const wrapper = mount(
       <PageIntroduction
         description="some description"
-        title={i18n.translate('xpack.enterpriseSearch..pageIntroduction.someTitleLabel', {
-          defaultMessage: 'some title',
-        })}
+        title="some title"
         links={[
-          <EuiLink data-test-subj="enterpriseSearchTestLinkToNowhereLink" href="testlink" external>
-            {i18n.translate('xpack.enterpriseSearch..testLinkToNowhereLinkLabel', {
-              defaultMessage: 'test link to nowhere',
-            })}
+          <EuiLink href="testlink" external>
+            test link to nowhere
           </EuiLink>,
-          <EuiLink
-            data-test-subj="enterpriseSearchTestLinkToNowhere2Link"
-            href="testlink2"
-            external
-          >
-            {i18n.translate('xpack.enterpriseSearch..testLinkToNowhereLinkLabel', {
-              defaultMessage: 'test link to nowhere2',
-            })}
+          <EuiLink href="testlink2" external>
+            test link to nowhere2
           </EuiLink>,
         ]}
       />
@@ -132,16 +104,8 @@ describe('PageIntroduction component', () => {
     const wrapper = mount(
       <PageIntroduction
         description="some description"
-        title={i18n.translate('xpack.enterpriseSearch..pageIntroduction.someTitleLabel', {
-          defaultMessage: 'some title',
-        })}
-        actions={
-          <button>
-            {i18n.translate('xpack.enterpriseSearch..button.someActionLabel', {
-              defaultMessage: 'some action',
-            })}
-          </button>
-        }
+        title="some title"
+        actions={<button>some action</button>}
       />
     );
     const actions = wrapper.find('button');
@@ -153,21 +117,8 @@ describe('PageIntroduction component', () => {
     const wrapper = mount(
       <PageIntroduction
         description="some description"
-        title={i18n.translate('xpack.enterpriseSearch..pageIntroduction.someTitleLabel', {
-          defaultMessage: 'some title',
-        })}
-        actions={[
-          <button>
-            {i18n.translate('xpack.enterpriseSearch..button.someActionLabel', {
-              defaultMessage: 'some action',
-            })}
-          </button>,
-          <button>
-            {i18n.translate('xpack.enterpriseSearch..button.anotherActionLabel', {
-              defaultMessage: 'another action',
-            })}
-          </button>,
-        ]}
+        title="some title"
+        actions={[<button>some action</button>, <button>another action</button>]}
       />
     );
     const actions = wrapper.find('button');

@@ -25,7 +25,6 @@ import {
   EuiPanel,
   EuiCard,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiLinkTo,
@@ -63,14 +62,7 @@ describe('React Router EUI component helpers', () => {
   });
 
   it('renders an EuiListGroupItem', () => {
-    const wrapper = shallow(
-      <EuiListGroupItemTo
-        to="/"
-        label={i18n.translate('xpack.enterpriseSearch..euiListGroupItemTo.fooLabel', {
-          defaultMessage: 'foo',
-        })}
-      />
-    );
+    const wrapper = shallow(<EuiListGroupItemTo to="/" label="foo" />);
 
     expect(wrapper.find(EuiListGroupItem)).toHaveLength(1);
     expect(wrapper.find(EuiListGroupItem).prop('label')).toEqual('foo');
@@ -84,15 +76,7 @@ describe('React Router EUI component helpers', () => {
   });
 
   it('renders an EuiCard', () => {
-    const wrapper = shallow(
-      <EuiCardTo
-        to="/"
-        title={i18n.translate('xpack.enterpriseSearch..euiCardTo.testLabel', {
-          defaultMessage: 'test',
-        })}
-        description=""
-      />
-    );
+    const wrapper = shallow(<EuiCardTo to="/" title="test" description="" />);
 
     expect(wrapper.find(EuiCard)).toHaveLength(1);
     expect(wrapper.find(EuiCard).prop('title')).toEqual('test');

@@ -12,7 +12,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from './flash_messages';
 
@@ -23,13 +22,7 @@ describe('FlashMessages', () => {
       {
         type: 'error',
         message: 'Whoa nelly!',
-        description: (
-          <div data-test-subj="error">
-            {i18n.translate('xpack.enterpriseSearch..div.somethingWentWrongLabel', {
-              defaultMessage: 'Something went wrong',
-            })}
-          </div>
-        ),
+        description: <div data-test-subj="error">Something went wrong</div>,
       },
       { type: 'info', message: 'Everything is fine, nothing is ruined' },
       { type: 'warning', message: 'Uh oh' },
@@ -51,9 +44,7 @@ describe('FlashMessages', () => {
     const wrapper = shallow(
       <FlashMessages>
         <button data-test-subj="testing">
-          {i18n.translate('xpack.enterpriseSearch..button.someActionYouLabel', {
-            defaultMessage: 'Some action - you could even clear flash messages here',
-          })}
+          Some action - you could even clear flash messages here
         </button>
       </FlashMessages>
     );

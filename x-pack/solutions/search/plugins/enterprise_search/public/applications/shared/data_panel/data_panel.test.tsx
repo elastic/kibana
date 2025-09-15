@@ -10,7 +10,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiIcon, EuiButton, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { LoadingOverlay } from '../loading';
 
@@ -19,20 +18,8 @@ import { DataPanel } from './data_panel';
 describe('DataPanel', () => {
   it('renders with a title and children', () => {
     const wrapper = shallow(
-      <DataPanel
-        title={
-          <h1 data-test-subj="title">
-            {i18n.translate('xpack.enterpriseSearch..h1.tabulaRasaLabel', {
-              defaultMessage: 'Tabula Rasa',
-            })}
-          </h1>
-        }
-      >
-        <div data-test-subj="children">
-          {i18n.translate('xpack.enterpriseSearch..div.lookAtThisGraphLabel', {
-            defaultMessage: 'Look at this graph',
-          })}
-        </div>
+      <DataPanel title={<h1 data-test-subj="title">Tabula Rasa</h1>}>
+        <div data-test-subj="children">Look at this graph</div>
       </DataPanel>
     );
 
@@ -41,15 +28,7 @@ describe('DataPanel', () => {
   });
 
   it('conditionally renders a spacer between the header and children', () => {
-    const wrapper = shallow(
-      <DataPanel
-        title={
-          <h1>
-            {i18n.translate('xpack.enterpriseSearch..h1.testLabel', { defaultMessage: 'Test' })}
-          </h1>
-        }
-      />
-    );
+    const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
     expect(wrapper.find(EuiSpacer)).toHaveLength(0);
 
@@ -64,34 +43,14 @@ describe('DataPanel', () => {
 
   describe('components', () => {
     it('renders with an icon', () => {
-      const wrapper = shallow(
-        <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.theSmokeMonsterLabel', {
-                defaultMessage: 'The Smoke Monster',
-              })}
-            </h1>
-          }
-          iconType="eye"
-        />
-      );
+      const wrapper = shallow(<DataPanel title={<h1>The Smoke Monster</h1>} iconType="eye" />);
 
       expect(wrapper.find(EuiIcon).prop('type')).toEqual('eye');
     });
 
     it('renders with a subtitle', () => {
       const wrapper = shallow(
-        <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.hugoReyesLabel', {
-                defaultMessage: 'Hugo Reyes',
-              })}
-            </h1>
-          }
-          subtitle="Hurley was typically happy-go-lucky"
-        />
+        <DataPanel title={<h1>Hugo Reyes</h1>} subtitle="Hurley was typically happy-go-lucky" />
       );
 
       expect(wrapper.find('p').text()).toEqual('Hurley was typically happy-go-lucky');
@@ -100,13 +59,7 @@ describe('DataPanel', () => {
     it('renders with an icon and a subtitle', () => {
       const wrapper = shallow(
         <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.flightLabel', {
-                defaultMessage: 'Flight 815',
-              })}
-            </h1>
-          }
+          title={<h1>Flight 815</h1>}
           iconType="package"
           subtitle="Oceanic Airlines Flight 815 was a scheduled flight from Sydney, Australia to Los Angeles, California"
         />
@@ -121,20 +74,8 @@ describe('DataPanel', () => {
     it('renders with a button', () => {
       const wrapper = shallow(
         <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.boardFlightLabel', {
-                defaultMessage: 'Board Flight 815',
-              })}
-            </h1>
-          }
-          action={
-            <EuiButton data-test-subj="action">
-              {i18n.translate('xpack.enterpriseSearch..bookFlightButtonLabel', {
-                defaultMessage: 'Book flight',
-              })}
-            </EuiButton>
-          }
+          title={<h1>Board Flight 815</h1>}
+          action={<EuiButton data-test-subj="action">Book flight</EuiButton>}
         />
       );
 
@@ -144,15 +85,7 @@ describe('DataPanel', () => {
 
   describe('props', () => {
     it('passes titleSize to the title', () => {
-      const wrapper = shallow(
-        <DataPanel
-          title={
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch..h2.testLabel', { defaultMessage: 'Test' })}
-            </h2>
-          }
-        />
-      );
+      const wrapper = shallow(<DataPanel title={<h2>Test</h2>} />);
 
       expect(wrapper.find(EuiTitle).prop('size')).toEqual('xs'); // Default
 
@@ -162,15 +95,7 @@ describe('DataPanel', () => {
     });
 
     it('renders panel color based on filled flag', () => {
-      const wrapper = shallow(
-        <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.testLabel', { defaultMessage: 'Test' })}
-            </h1>
-          }
-        />
-      );
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
       expect(wrapper.prop('color')).toEqual('plain');
       expect(wrapper.prop('className')).toEqual('dataPanel');
@@ -182,15 +107,7 @@ describe('DataPanel', () => {
     });
 
     it('renders a loading overlay based on isLoading flag', () => {
-      const wrapper = shallow(
-        <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.testLabel', { defaultMessage: 'Test' })}
-            </h1>
-          }
-        />
-      );
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
       expect(wrapper.prop('aria-busy')).toBeFalsy();
       expect(wrapper.find(LoadingOverlay)).toHaveLength(0);
@@ -202,16 +119,7 @@ describe('DataPanel', () => {
     });
 
     it('passes hasBorder', () => {
-      const wrapper = shallow(
-        <DataPanel
-          filled
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.testLabel', { defaultMessage: 'Test' })}
-            </h1>
-          }
-        />
-      );
+      const wrapper = shallow(<DataPanel filled title={<h1>Test</h1>} />);
       expect(wrapper.prop('hasBorder')).toBeFalsy();
 
       wrapper.setProps({ hasBorder: true });
@@ -219,31 +127,13 @@ describe('DataPanel', () => {
     });
 
     it('passes class names', () => {
-      const wrapper = shallow(
-        <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.testLabel', { defaultMessage: 'Test' })}
-            </h1>
-          }
-          className="testing"
-        />
-      );
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} className="testing" />);
 
       expect(wrapper.prop('className')).toEqual('dataPanel testing');
     });
 
     it('passes arbitrary props', () => {
-      const wrapper = shallow(
-        <DataPanel
-          title={
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch..h1.testLabel', { defaultMessage: 'Test' })}
-            </h1>
-          }
-          data-test-subj="testing"
-        />
-      );
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} data-test-subj="testing" />);
 
       expect(wrapper.find('[data-test-subj="testing"]')).toHaveLength(1);
     });

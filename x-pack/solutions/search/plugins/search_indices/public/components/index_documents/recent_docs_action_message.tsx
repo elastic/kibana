@@ -42,10 +42,7 @@ export const RecentDocsActionMessage: React.FC<RecentDocsActionMessageProps> = (
                 pageSize: DEFAULT_DOCUMENT_PAGE_SIZE,
               },
             })}{' '}
-            <EuiLink
-              data-test-subj="searchIndicesRecentDocsActionMessageDiscoverLink"
-              onClick={onClick}
-            >
+            <EuiLink onClick={onClick}>
               {i18n.translate('xpack.searchIndices.indexDocuments.recentDocsActionMessageLink', {
                 defaultMessage: 'Discover.',
               })}

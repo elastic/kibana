@@ -24,11 +24,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveCli
           defaultMessage: 'Selected indices',
         }),
         truncateText: true,
-        render: (index: string) => (
-          <EuiLink data-test-subj="searchPlaygroundIndicesTableLink" href="#">
-            {index}
-          </EuiLink>
-        ),
+        render: (index: string) => <EuiLink href="#">{index}</EuiLink>,
       },
       {
         actions: [
