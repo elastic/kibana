@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   aiAssistantManagementSelection: 6917
   aiops: 15371
-  alerting: 28395
+  alerting: 28353
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12584
@@ -11,7 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  chatDataRegistry: 16243
+  chatDataRegistry: 4162
   cloud: 8836
   cloudDataMigration: 5687
   cloudExperiments: 103984
@@ -22,7 +22,7 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 12234
-  core: 573263
+  core: 575834
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -126,7 +126,7 @@ pageLoadAssetSize:
   profiling: 20716
   reindexService: 3601
   remoteClusters: 10170
-  reporting: 46733
+  reporting: 46647
   rollup: 12692
   runtimeFields: 11828
   sampleDataIngest: 2604
@@ -155,7 +155,7 @@ pageLoadAssetSize:
   serverless: 7733
   serverlessChat: 5133
   serverlessObservability: 16307
-  serverlessSearch: 28740
+  serverlessSearch: 33693
   sessionView: 47938
   share: 58677
   slo: 36645
@@ -163,7 +163,7 @@ pageLoadAssetSize:
   spaces: 32135
   stackAlerts: 31499
   stackConnectors: 67939
-  streams: 8372
+  streams: 8494
   streamsApp: 12431
   streamsAppWrapper: 5787
   synthetics: 31571
