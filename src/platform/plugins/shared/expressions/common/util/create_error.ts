@@ -9,11 +9,11 @@
 
 import type { ExpressionValueError } from '..';
 
-export type SerializedError = {
+export interface SerializedError {
   name: string;
   message: string;
   stack?: string;
-};
+}
 
 export type ErrorLike = SerializedError & {
   original?: SerializedError;

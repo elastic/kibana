@@ -81,6 +81,7 @@ export function UnmanagedElasticsearchAssets({
   if (!definition.data_stream_exists) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
           defaultMessage: 'Data stream missing',
         })}

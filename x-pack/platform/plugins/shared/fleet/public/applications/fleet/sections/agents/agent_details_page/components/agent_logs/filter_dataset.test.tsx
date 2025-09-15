@@ -9,8 +9,9 @@ import { render } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { DatasetFilter } from './filter_dataset';
 import userEvent from '@testing-library/user-event';
+
+import { DatasetFilter } from './filter_dataset';
 
 const renderComponent = (props: React.ComponentProps<typeof DatasetFilter>) => {
   return render(

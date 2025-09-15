@@ -204,6 +204,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           <>
             <EuiSpacer size="xs" />
             <EuiCallOut
+              announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
               title={generateWarningMessage()}
               iconType="alert"
@@ -262,6 +263,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         {output?.is_preconfigured && (
           <>
             <EuiCallOut
+              announceOnMount
               iconType="lock"
               title={
                 <FormattedMessage
@@ -490,6 +492,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   iconType="alert"
                   size="s"

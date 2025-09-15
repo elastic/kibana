@@ -24,6 +24,9 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
 
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.apm.deleteButton.deleteButton.ariaLabel', {
+        defaultMessage: 'Delete',
+      })}
       data-test-subj="apmDeleteButtonDeleteButton"
       color="danger"
       isLoading={isDeleting}

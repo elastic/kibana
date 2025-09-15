@@ -15,10 +15,10 @@ export function TechnicalPreviewBadge() {
       label="E"
       iconType="beaker"
       color="hollow"
-      title={i18n.translate('xpack.observabilityAiAssistant.experimentalTitle', {
+      title={i18n.translate('xpack.observability.experimentalTitle', {
         defaultMessage: 'Technical preview',
       })}
-      tooltipContent={i18n.translate('xpack.observabilityAiAssistant.experimentalTooltip', {
+      tooltipContent={i18n.translate('xpack.observability.experimentalTooltip', {
         defaultMessage:
           'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
       })}

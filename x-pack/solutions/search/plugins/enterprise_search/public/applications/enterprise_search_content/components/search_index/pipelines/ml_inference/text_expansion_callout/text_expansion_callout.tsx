@@ -46,6 +46,7 @@ export const TextExpansionDismissButton = ({
 }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
     <EuiButtonIcon
+      data-test-subj="enterpriseSearchTextExpansionDismissButtonButton"
       aria-label={i18n.translate(
         'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
         { defaultMessage: 'Dismiss ELSER call out' }
@@ -58,6 +59,7 @@ export const TextExpansionDismissButton = ({
 
 export const FineTuneModelsButton: React.FC = () => (
   <EuiButtonEmpty
+    data-test-subj="enterpriseSearchFineTuneModelsButtonFineTunePerformanceButton"
     iconSide="left"
     iconType="wrench"
     onClick={() =>

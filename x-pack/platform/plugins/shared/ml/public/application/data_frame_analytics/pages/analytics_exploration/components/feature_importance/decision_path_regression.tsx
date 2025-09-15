@@ -61,6 +61,7 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
     <>
       {baseline === undefined && (
         <EuiCallOut
+          announceOnMount
           size={'s'}
           heading={'p'}
           title={

@@ -23,6 +23,9 @@ export function EditDashboard({
   return (
     <>
       <EuiButtonEmpty
+        aria-label={i18n.translate('xpack.apm.editDashboard.editdashboardlinkButton.ariaLabel', {
+          defaultMessage: 'Edit dashboard link',
+        })}
         color="text"
         size="s"
         iconType={'pencil'}

@@ -94,6 +94,9 @@ export function TraceSearchBox({ query, onQueryChange, onQueryCommit, loading }:
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
+                  aria-label={i18n.translate('xpack.apm.traceSearchBox.select.ariaLabel', {
+                    defaultMessage: '',
+                  })}
                   data-test-subj="apmTraceSearchBoxSelect"
                   id="select-query-language"
                   value={query.type}

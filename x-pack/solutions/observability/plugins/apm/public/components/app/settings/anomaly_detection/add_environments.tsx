@@ -118,7 +118,9 @@ export function AddEnvironments({ currentEnvironments, onCreateJobSuccess, onCan
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="apmAddEnvironmentsCancelButton"
-            aria-label="Cancel"
+            aria-label={i18n.translate('xpack.apm.addEnvironments.euiButtonEmpty.cancelLabel', {
+              defaultMessage: 'Cancel',
+            })}
             onClick={onCancel}
           >
             {i18n.translate(

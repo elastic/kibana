@@ -104,7 +104,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
       groupPanelRenderer: renderGroupPanel,
       getGroupStats,
       unit: (totalCount) =>
-        i18n.translate('alertsGrouping.unit', {
+        i18n.translate('app_not_found_in_i18nrc.unit', {
           values: { totalCount },
           defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
         }),

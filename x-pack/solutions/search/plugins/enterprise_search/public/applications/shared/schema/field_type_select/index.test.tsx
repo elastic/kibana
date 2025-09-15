@@ -10,6 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { SchemaFieldTypeSelect } from '.';
 
@@ -41,7 +42,15 @@ describe('SchemaFieldTypeSelect', () => {
   });
 
   it('passes arbitrary props', () => {
-    const wrapper = shallow(<SchemaFieldTypeSelect {...props} disabled aria-label="Test label" />);
+    const wrapper = shallow(
+      <SchemaFieldTypeSelect
+        {...props}
+        disabled
+        aria-label={i18n.translate('xpack.enterpriseSearch..schemaFieldTypeSelect.testLabelLabel', {
+          defaultMessage: 'Test label',
+        })}
+      />
+    );
 
     expect(wrapper.find(EuiSelect).prop('aria-label')).toEqual('Test label');
   });

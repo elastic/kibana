@@ -113,6 +113,7 @@ export const TestPipeline: React.FC = () => {
                   error={getDocumentsErr}
                 >
                   <EuiFieldText
+                    data-test-subj="enterpriseSearchTestPipelineFieldText"
                     fullWidth
                     prepend={i18n.translate(
                       'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.documentId',
@@ -243,7 +244,10 @@ export const TestPipeline: React.FC = () => {
           <EuiSpacer />
           <EuiFlexItem grow={false}>
             <div>
-              <EuiButton onClick={simulatePipeline}>
+              <EuiButton
+                data-test-subj="enterpriseSearchTestPipelineSimulatePipelineButton"
+                onClick={simulatePipeline}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton',
                   { defaultMessage: 'Simulate Pipeline' }

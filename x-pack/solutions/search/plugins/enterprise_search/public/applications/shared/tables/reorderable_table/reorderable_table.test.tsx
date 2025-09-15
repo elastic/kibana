@@ -9,6 +9,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { i18n } from '@kbn/i18n';
+
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
 import { DraggableBodyRow } from './draggable_body_row';
@@ -28,7 +30,17 @@ describe('ReorderableTable', () => {
   describe('when the table is reorderable', () => {
     it('renders with a header that has an additional column injected as the first column, which is empty', () => {
       const wrapper = shallow(
-        <ReorderableTable noItemsMessage={<p>No Items</p>} items={items} columns={columns} />
+        <ReorderableTable
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
+          items={items}
+          columns={columns}
+        />
       );
       const header = wrapper.find(HeaderRow);
       expect(header.exists()).toEqual(true);
@@ -38,7 +50,17 @@ describe('ReorderableTable', () => {
 
     it('renders draggable rows inside of the reorderable table', () => {
       const wrapper = shallow(
-        <ReorderableTable noItemsMessage={<p>No Items</p>} items={items} columns={columns} />
+        <ReorderableTable
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
+          items={items}
+          columns={columns}
+        />
       );
       const bodyRows = wrapper.find(DraggableBodyRows);
       expect(bodyRows.exists()).toBe(true);
@@ -58,7 +80,13 @@ describe('ReorderableTable', () => {
     it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           columns={columns}
           rowProps={(item) => ({
@@ -75,7 +103,13 @@ describe('ReorderableTable', () => {
     it('will disableDragging on individual rows if disableDragging is enabled', () => {
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           columns={columns}
           disableDragging
@@ -89,7 +123,13 @@ describe('ReorderableTable', () => {
       const onReorder = jest.fn();
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           columns={columns}
           onReorder={onReorder}
@@ -100,7 +140,17 @@ describe('ReorderableTable', () => {
 
     it('will provide a default callback for reordered if none is provided, which does nothing', () => {
       const wrapper = shallow(
-        <ReorderableTable noItemsMessage={<p>No Items</p>} items={items} columns={columns} />
+        <ReorderableTable
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
+          items={items}
+          columns={columns}
+        />
       );
       const onReorder = wrapper.find(DraggableBodyRows).prop('onReorder');
       expect(onReorder([], [])).toBeUndefined();
@@ -110,7 +160,13 @@ describe('ReorderableTable', () => {
       const unreorderableItems = [{ id: 3 }];
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           unreorderableItems={unreorderableItems}
           columns={columns}
@@ -134,7 +190,13 @@ describe('ReorderableTable', () => {
       const bottomRows = [<div />, <div />];
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           bottomRows={bottomRows}
           columns={columns}
@@ -149,7 +211,13 @@ describe('ReorderableTable', () => {
     it('renders a table with a header and non-reorderable rows', () => {
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           columns={columns}
           disableReordering
@@ -171,7 +239,13 @@ describe('ReorderableTable', () => {
     it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
       const wrapper = shallow(
         <ReorderableTable
-          noItemsMessage={<p>No Items</p>}
+          noItemsMessage={
+            <p>
+              {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+                defaultMessage: 'No Items',
+              })}
+            </p>
+          }
           items={items}
           columns={columns}
           rowProps={(item) => ({
@@ -189,7 +263,18 @@ describe('ReorderableTable', () => {
 
   it('appends an additional className if specified', () => {
     const wrapper = shallow(
-      <ReorderableTable noItemsMessage={<p>No Items</p>} items={[]} columns={[]} className="foo" />
+      <ReorderableTable
+        noItemsMessage={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+              defaultMessage: 'No Items',
+            })}
+          </p>
+        }
+        items={[]}
+        columns={[]}
+        className="foo"
+      />
     );
 
     expect(wrapper.hasClass('foo')).toBe(true);
@@ -197,7 +282,17 @@ describe('ReorderableTable', () => {
 
   it('will show a no items message when there are no items', () => {
     const wrapper = shallow(
-      <ReorderableTable noItemsMessage={<p>No Items</p>} items={[]} columns={columns} />
+      <ReorderableTable
+        noItemsMessage={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch..p.noItemsLabel', {
+              defaultMessage: 'No Items',
+            })}
+          </p>
+        }
+        items={[]}
+        columns={columns}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="NoItems"]').exists()).toBe(true);

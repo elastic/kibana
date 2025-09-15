@@ -647,6 +647,7 @@ export function ChatBody({
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
@@ -677,6 +678,7 @@ export function ChatBody({
       >
         {conversation.error ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',

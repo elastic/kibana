@@ -220,6 +220,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
           {showWarning && (
             <EuiFlexItem grow={true}>
               <EuiCallOut
+                announceOnMount
                 title={calloutMessage}
                 color="danger"
                 iconType="warning"

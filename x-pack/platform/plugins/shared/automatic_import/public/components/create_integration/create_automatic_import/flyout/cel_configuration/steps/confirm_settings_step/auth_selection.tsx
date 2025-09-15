@@ -81,6 +81,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
             <EuiFlexItem>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 title={i18n.AUTH_DOES_NOT_ALIGN}
                 size="s"
                 color="warning"

@@ -14,9 +14,9 @@ import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 
 export type ActionContext = ChartActionContext;
 
-export type Config = {
+export interface Config {
   name: string;
-};
+}
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 

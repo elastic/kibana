@@ -281,6 +281,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     if (this.checkEmptyAnyAllMappings(this.state.roleMapping!.rules as RoleMappingRule)) {
       return (
         <EuiCallOut
+          announceOnMount
           title="Warning"
           color="warning"
           iconType="alert"

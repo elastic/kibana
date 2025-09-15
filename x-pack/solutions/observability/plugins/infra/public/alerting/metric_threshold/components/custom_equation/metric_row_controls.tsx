@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { DELETE_LABEL } from '../../i18n_strings';
 
@@ -18,6 +19,10 @@ export const MetricRowControls = ({ onDelete, disableDelete }: MetricRowControlP
     <>
       <EuiFlexItem grow={0}>
         <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.infra.metricRowControls.[objectObject]Button.ariaLabel',
+            { defaultMessage: '[object Object]' }
+          )}
           data-test-subj="infraMetricRowControlsButton"
           iconType="trash"
           color="danger"

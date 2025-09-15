@@ -118,6 +118,9 @@ export function MobileFilters() {
         return (
           <EuiFlexItem grow={false} key={key} style={isLarge ? {} : { width: '225px' }}>
             <EuiSelect
+              aria-label={i18n.translate('xpack.apm.mobileFilters.select.ariaLabel', {
+                defaultMessage: '',
+              })}
               data-test-subj="apmMobileFiltersSelect"
               fullWidth
               isLoading={status === FETCH_STATUS.LOADING}

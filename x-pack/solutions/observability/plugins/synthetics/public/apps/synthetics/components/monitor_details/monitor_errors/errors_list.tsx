@@ -130,7 +130,9 @@ export const ErrorsList = ({
             render: (value: string) => {
               const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
               if (!failedStep) {
-                return <>--</>;
+                return (
+                  <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
+                );
               }
               return (
                 <EuiText size="s">

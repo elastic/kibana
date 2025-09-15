@@ -21,6 +21,7 @@ export const CopyActionButton: React.FC<CopyActionButtonProps> = ({ copyText, ar
 
   return (
     <EuiButtonIcon
+      data-test-subj="searchPlaygroundCopyActionButtonButton"
       aria-label={ariaLabel}
       color="text"
       iconType="copyClipboard"

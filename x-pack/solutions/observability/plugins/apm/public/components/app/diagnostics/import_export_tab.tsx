@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiCard,
@@ -44,14 +45,19 @@ function ExportCard() {
     <EuiCard
       isDisabled={isImported}
       icon={<EuiIcon size="xxl" type="importAction" />}
-      title="Export"
+      title={i18n.translate('xpack.apm.exportCard.euiCard.exportLabel', {
+        defaultMessage: 'Export',
+      })}
       description="Export the diagnostics report in order to provide it to Elastic Support"
       footer={
         <div>
           <EuiButton
             isDisabled={isImported}
             data-test-subj="apmDiagnosticsImportExportGoForItButton"
-            aria-label="Export diagnostics report"
+            aria-label={i18n.translate(
+              'xpack.apm.exportCard.euiButton.exportDiagnosticsReportLabel',
+              { defaultMessage: 'Export diagnostics report' }
+            )}
             onClick={() => {
               if (!diagnosticsBundle) {
                 return;
@@ -69,7 +75,7 @@ function ExportCard() {
               link.click();
             }}
           >
-            Export
+            {i18n.translate('xpack.apm.exportCard.exportButtonLabel', { defaultMessage: 'Export' })}
           </EuiButton>
         </div>
       }
@@ -88,7 +94,9 @@ function ImportCard() {
   return (
     <EuiCard
       icon={<EuiIcon size="xxl" type="exportAction" />}
-      title="Import diagnostics report"
+      title={i18n.translate('xpack.apm.importCard.euiCard.importDiagnosticsReportLabel', {
+        defaultMessage: 'Import diagnostics report',
+      })}
       description={
         isImported
           ? 'Diagnostics report was imported'
@@ -102,14 +110,19 @@ function ImportCard() {
               onClick={() => setImportedDiagnosticsBundle(undefined)}
               color="danger"
             >
-              Remove report
+              {i18n.translate('xpack.apm.importCard.removeReportButtonLabel', {
+                defaultMessage: 'Remove report',
+              })}
             </EuiButton>
           ) : (
             <>
               {!importStatus.isValid && (
                 <>
-                  <EuiCallOut color="danger" iconType="warning">
-                    The uploaded file could not be parsed: {importStatus.errorMessage}
+                  <EuiCallOut announceOnMount color="danger" iconType="warning">
+                    {i18n.translate('xpack.apm.importCard.theUploadedFileCouldCallOutLabel', {
+                      defaultMessage: 'The uploaded file could not be parsed:',
+                    })}
+                    {importStatus.errorMessage}
                   </EuiCallOut>
                   <EuiSpacer />
                 </>

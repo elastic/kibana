@@ -40,10 +40,9 @@ import { usePricingFeature } from '../shared/use_pricing_feature';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb({
-    text: i18n.translate(
-      'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
-      { defaultMessage: 'Elastic Agent: Logs & Metrics' }
-    ),
+    text: i18n.translate('xpack.observability.autoDetectPanel.breadcrumbs.autoDetectLabel', {
+      defaultMessage: 'Elastic Agent: Logs & Metrics',
+    }),
   });
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const metricsOnboardingEnabled = usePricingFeature(
@@ -95,10 +94,9 @@ export const AutoDetectPanel: FunctionComponent = () => {
       <EuiSteps
         steps={[
           {
-            title: i18n.translate(
-              'xpack.observability_onboarding.autoDetectPanel.runTheCommandOnLabel',
-              { defaultMessage: 'Install standalone Elastic Agent on your host' }
-            ),
+            title: i18n.translate('xpack.observability.autoDetectPanel.runTheCommandOnLabel', {
+              defaultMessage: 'Install standalone Elastic Agent on your host',
+            }),
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
               <>
@@ -106,13 +104,13 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   <p>
                     {metricsOnboardingEnabled
                       ? i18n.translate(
-                          'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+                          'xpack.observability.autoDetectPanel.p.wellScanYourHostLabel',
                           {
                             defaultMessage: "We'll scan your host for logs and metrics, including:",
                           }
                         )
                       : i18n.translate(
-                          'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+                          'xpack.observability.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
                           {
                             defaultMessage: "We'll scan your host for logs, including:",
                           }
@@ -142,10 +140,9 @@ export const AutoDetectPanel: FunctionComponent = () => {
             ),
           },
           {
-            title: i18n.translate(
-              'xpack.observability_onboarding.autoDetectPanel.visualizeYourDataLabel',
-              { defaultMessage: 'Visualize your data' }
-            ),
+            title: i18n.translate('xpack.observability.autoDetectPanel.visualizeYourDataLabel', {
+              defaultMessage: 'Visualize your data',
+            }),
             status:
               status === 'dataReceived'
                 ? 'complete'
@@ -158,7 +155,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   <ProgressIndicator
                     iconType="cheer"
                     title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.yourDataIsReadyToExploreLabel',
+                      'xpack.observability.autoDetectPanel.yourDataIsReadyToExploreLabel',
                       { defaultMessage: 'Your data is ready to explore!' }
                     )}
                     isLoading={false}
@@ -167,7 +164,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 ) : status === 'awaitingData' ? (
                   <ProgressIndicator
                     title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.installingElasticAgentFlexItemLabel',
+                      'xpack.observability.autoDetectPanel.installingElasticAgentFlexItemLabel',
                       { defaultMessage: 'Waiting for data to arrive...' }
                     )}
                     data-test-subj="observabilityOnboardingAutoDetectPanelAwaitingDataProgressIndicator"
@@ -175,7 +172,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 ) : status === 'inProgress' ? (
                   <ProgressIndicator
                     title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.lookingForLogFilesFlexItemLabel',
+                      'xpack.observability.autoDetectPanel.lookingForLogFilesFlexItemLabel',
                       { defaultMessage: 'Waiting for installation to complete...' }
                     )}
                     data-test-subj="observabilityOnboardingAutoDetectPanelInProgressProgressIndicator"
@@ -202,14 +199,14 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                     {
                                       id: 'inventory-host-details',
                                       title: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewTitle',
+                                        'xpack.observability.autoDetectPanel.systemOverviewTitle',
                                         {
                                           defaultMessage:
                                             'Overview your system health within the Hosts Inventory',
                                         }
                                       ),
                                       label: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewLabel',
+                                        'xpack.observability.autoDetectPanel.systemOverviewLabel',
                                         {
                                           defaultMessage: 'Explore metrics data',
                                         }
@@ -230,13 +227,13 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                     {
                                       id: 'inventory-host-details',
                                       title: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsTitle',
+                                        'xpack.observability.autoDetectPanel.systemLogsTitle',
                                         {
                                           defaultMessage: 'View and analyze system logs',
                                         }
                                       ),
                                       label: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsLabel',
+                                        'xpack.observability.autoDetectPanel.systemLogsLabel',
                                         {
                                           defaultMessage: 'Explore logs',
                                         }
@@ -268,13 +265,13 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                         return {
                                           id: asset.id,
                                           title: i18n.translate(
-                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataDiscoverTitle',
+                                            'xpack.observability.autoDetectPanel.exploreLogsDataDiscoverTitle',
                                             {
                                               defaultMessage: 'View and analyze your logs',
                                             }
                                           ),
                                           label: i18n.translate(
-                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDiscoverDataLabel',
+                                            'xpack.observability.autoDetectPanel.exploreLogsDiscoverDataLabel',
                                             {
                                               defaultMessage: 'Explore logs',
                                             }
@@ -294,14 +291,14 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                         title:
                                           dashboard.type === 'metrics'
                                             ? i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
+                                                'xpack.observability.autoDetectPanel.exploreMetricsDataTitle',
                                                 {
                                                   defaultMessage:
                                                     'Overview your metrics data with this pre-made dashboard',
                                                 }
                                               )
                                             : i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
+                                                'xpack.observability.autoDetectPanel.exploreLogsDataTitle',
                                                 {
                                                   defaultMessage:
                                                     'Overview your logs data with this pre-made dashboard',
@@ -310,13 +307,13 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                         label:
                                           dashboard.type === 'metrics'
                                             ? i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
+                                                'xpack.observability.autoDetectPanel.exploreMetricsDataLabel',
                                                 {
                                                   defaultMessage: 'Explore metrics data',
                                                 }
                                               )
                                             : i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
+                                                'xpack.observability.autoDetectPanel.exploreLogsDataLabel',
                                                 {
                                                   defaultMessage: 'Explore logs data',
                                                 }
@@ -341,7 +338,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                               )
                             }
                             title={i18n.translate(
-                              'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
+                              'xpack.observability.autoDetectPanel.h3.getStartedWithNginxLabel',
                               {
                                 defaultMessage: 'Get started with {title}',
                                 values: { title: integration.title },
@@ -374,7 +371,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         id={`${accordionId}_custom`}
                         icon={<EuiIcon type="documents" size="l" />}
                         title={i18n.translate(
-                          'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithlogLabel',
+                          'xpack.observability.autoDetectPanel.h3.getStartedWithlogLabel',
                           { defaultMessage: 'Get started with custom .log files' }
                         )}
                         isDisabled={status !== 'dataReceived'}

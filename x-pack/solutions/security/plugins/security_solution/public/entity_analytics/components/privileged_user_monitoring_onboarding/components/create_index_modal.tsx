@@ -113,7 +113,9 @@ export const CreateIndexModal = ({
       <EuiModalBody>
         {error && (
           <>
-            <EuiCallOut color="danger">{error}</EuiCallOut>
+            <EuiCallOut announceOnMount color="danger">
+              {error}
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}

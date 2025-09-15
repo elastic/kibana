@@ -94,6 +94,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={nameError}
             >
               <EuiFieldText
+                data-test-subj="enterpriseSearchConfigurePipelineFieldText"
                 isInvalid={nameError}
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
                 disabled={inputsDisabled}
@@ -119,6 +120,7 @@ export const ConfigurePipeline: React.FC = () => {
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelStateChangeError.title',
                     { defaultMessage: 'Error changing model state' }

@@ -9,13 +9,15 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { i18n } from '@kbn/i18n';
+
 import { Cell } from './cell';
 
 describe('Cell', () => {
   it('renders a table cell with the provided content and styles', () => {
     const wrapper = shallow(
       <Cell flexBasis="foo" flexGrow={0} alignItems="bar">
-        Content
+        {i18n.translate('xpack.enterpriseSearch..cell.contentLabel', { defaultMessage: 'Content' })}
       </Cell>
     );
     expect(wrapper.props()).toEqual({

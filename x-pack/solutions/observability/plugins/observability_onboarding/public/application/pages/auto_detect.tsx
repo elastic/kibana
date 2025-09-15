@@ -26,13 +26,13 @@ export const AutoDetectPage = () => {
           headlineCopy={
             metricsOnboardingEnabled
               ? i18n.translate(
-                  'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.system.text',
+                  'xpack.observability.experimentalOnboardingFlow.customHeader.system.text',
                   {
                     defaultMessage: 'Auto-detect logs and metrics',
                   }
                 )
               : i18n.translate(
-                  'xpack.observability_onboarding.logsEssential.experimentalOnboardingFlow.customHeader.system.text',
+                  'xpack.observability.logsEssential.experimentalOnboardingFlow.customHeader.system.text',
                   {
                     defaultMessage: 'Auto-detect logs',
                   }
@@ -41,14 +41,14 @@ export const AutoDetectPage = () => {
           captionCopy={
             metricsOnboardingEnabled
               ? i18n.translate(
-                  'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.system.description',
+                  'xpack.observability.experimentalOnboardingFlow.customHeader.system.description',
                   {
                     defaultMessage:
                       'This installation scans your host and auto-detects log and metric files.',
                   }
                 )
               : i18n.translate(
-                  'xpack.observability_onboarding.logsEssential.experimentalOnboardingFlow.customHeader.system.description',
+                  'xpack.observability.logsEssential.experimentalOnboardingFlow.customHeader.system.description',
                   {
                     defaultMessage: 'This installation scans your host and auto-detects log files.',
                   }

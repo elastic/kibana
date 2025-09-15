@@ -31,7 +31,7 @@ export function OptionalFormRow(props: OptionalFormRowProps) {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>{label}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.observability_onboarding.form.optional', {
+            {i18n.translate('xpack.observability.form.optional', {
               defaultMessage: 'Optional',
             })}
           </EuiFlexItem>

@@ -33,6 +33,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
           <Fragment>
             <EuiSpacer size="xs" />
             <EuiCallOut
+              announceOnMount
               size="s"
               title={i18n.translate(
                 'xpack.dataVisualizer.dataGrid.fieldText.noExamplesForFieldsTitle',

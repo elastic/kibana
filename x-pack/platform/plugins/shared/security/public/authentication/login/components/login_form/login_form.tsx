@@ -155,6 +155,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
       return (
         <Fragment>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="danger"
             data-test-subj="loginErrorMessage"
@@ -170,6 +171,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
       return (
         <Fragment>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="primary"
             data-test-subj="loginInfoMessage"

@@ -58,7 +58,7 @@ export function NavNameWithBadge({ label, localStorageId }: Props) {
       </LabelContainer>
       {isBadgeVisible && (
         <StyledBadge color="accent">
-          {i18n.translate('xpack.observabilityShared.navigation.newBadge', {
+          {i18n.translate('xpack.observability.navigation.newBadge', {
             defaultMessage: 'NEW',
           })}
         </StyledBadge>

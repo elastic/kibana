@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/// <reference types="@kbn/ambient-ftr-types"/>
+// / <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';

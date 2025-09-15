@@ -96,7 +96,7 @@ export function DataIngestStatus({ onboardingId }: Props) {
           <EuiSpacer />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.observability_onboarding.dataIngestStatus.troubleshootingTextLabel"
+              id="xpack.observability.dataIngestStatus.troubleshootingTextLabel"
               defaultMessage="Find more details and troubleshooting solutions in our documentation. {troubleshootingLink}"
               values={{
                 troubleshootingLink: (
@@ -107,7 +107,7 @@ export function DataIngestStatus({ onboardingId }: Props) {
                     target="_blank"
                   >
                     {i18n.translate(
-                      'xpack.observability_onboarding.dataIngestStatus.troubleshootingLinkText',
+                      'xpack.observability.dataIngestStatus.troubleshootingLinkText',
                       {
                         defaultMessage: 'Open documentation',
                       }
@@ -135,19 +135,13 @@ export function DataIngestStatus({ onboardingId }: Props) {
               metricsOnboardingEnabled
                 ? {
                     id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                    label: i18n.translate(
-                      'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
-                      {
-                        defaultMessage: 'Explore Kubernetes cluster',
-                      }
-                    ),
-                    title: i18n.translate(
-                      'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
-                      {
-                        defaultMessage:
-                          'Overview your Kubernetes cluster with this pre-made dashboard',
-                      }
-                    ),
+                    label: i18n.translate('xpack.observability.kubernetesPanel.exploreDashboard', {
+                      defaultMessage: 'Explore Kubernetes cluster',
+                    }),
+                    title: i18n.translate('xpack.observability.kubernetesPanel.monitoringCluster', {
+                      defaultMessage:
+                        'Overview your Kubernetes cluster with this pre-made dashboard',
+                    }),
                     href:
                       dashboardLocator?.getRedirectUrl({
                         dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
@@ -155,18 +149,12 @@ export function DataIngestStatus({ onboardingId }: Props) {
                   }
                 : {
                     id: 'logs',
-                    title: i18n.translate(
-                      'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
-                      {
-                        defaultMessage: 'View and analyze your logs:',
-                      }
-                    ),
-                    label: i18n.translate(
-                      'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
-                      {
-                        defaultMessage: 'Explore logs',
-                      }
-                    ),
+                    title: i18n.translate('xpack.observability.otelKubernetesPanel.logsTitle', {
+                      defaultMessage: 'View and analyze your logs:',
+                    }),
+                    label: i18n.translate('xpack.observability.otelKubernetesPanel.logsLabel', {
+                      defaultMessage: 'Explore logs',
+                    }),
                     href: logsLocator?.getRedirectUrl({}) ?? '',
                   },
             ]}

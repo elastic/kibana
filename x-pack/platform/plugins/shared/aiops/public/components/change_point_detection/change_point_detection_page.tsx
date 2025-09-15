@@ -62,6 +62,7 @@ export const ChangePointDetectionPage: FC = () => {
   if (metricFieldOptions.length === 0) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
           defaultMessage: 'The data view "{dataViewTitle}" does not contain any metric fields.',
           values: { dataViewTitle: dataView.getName() },

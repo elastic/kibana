@@ -15,7 +15,7 @@ export function ExistingDataCallout() {
   return (
     <div css={{ maxWidth: isMobile ? '100%' : '80%' }}>
       <EuiCallOut
-        title={i18n.translate('xpack.observability_onboarding.firehose.existingDataCallout.title', {
+        title={i18n.translate('xpack.observability.firehose.existingDataCallout.title', {
           defaultMessage: 'This workflow has been used before.',
         })}
         iconType="info"
@@ -23,12 +23,9 @@ export function ExistingDataCallout() {
         data-test-subj="observabilityOnboardingFirehosePanelExistingDataCallout"
       >
         <p>
-          {i18n.translate(
-            'xpack.observability_onboarding.firehose.existingDataCallout.description',
-            {
-              defaultMessage: `If the Amazon Firehose Data stream(s) associated with this workflow are still active, you will encounter errors during onboarding. Navigate to Step 3 below in order to explore your services.`,
-            }
-          )}
+          {i18n.translate('xpack.observability.firehose.existingDataCallout.description', {
+            defaultMessage: `If the Amazon Firehose Data stream(s) associated with this workflow are still active, you will encounter errors during onboarding. Navigate to Step 3 below in order to explore your services.`,
+          })}
         </p>
       </EuiCallOut>
     </div>

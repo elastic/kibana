@@ -57,6 +57,10 @@ export function BottomBarActions({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.profiling.bottomBarActions.discardchangesButton.ariaLabel',
+                  { defaultMessage: 'Discard changes' }
+                )}
                 data-test-subj="profilingBottomBarActionsDiscardChangesButton"
                 color="text"
                 onClick={onDiscardChanges}

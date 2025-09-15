@@ -80,19 +80,13 @@ interface VisualizeESQLProps {
 function generateId() {
   return uuidv4();
 }
-const saveVisualizationLabel = i18n.translate(
-  'xpack.observabilityAiAssistant.lensESQLFunction.save',
-  {
-    defaultMessage: 'Save visualization',
-  }
-);
+const saveVisualizationLabel = i18n.translate('xpack.observability.lensESQLFunction.save', {
+  defaultMessage: 'Save visualization',
+});
 
-const editVisualizationLabel = i18n.translate(
-  'xpack.observabilityAiAssistant.lensESQLFunction.edit',
-  {
-    defaultMessage: 'Edit visualization',
-  }
-);
+const editVisualizationLabel = i18n.translate('xpack.observability.lensESQLFunction.edit', {
+  defaultMessage: 'Edit visualization',
+});
 
 export function VisualizeESQL({
   lens,
@@ -245,7 +239,7 @@ export function VisualizeESQL({
         {!!errorMessages?.length && (
           <>
             <EuiText size="s">
-              {i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.errorMessage', {
+              {i18n.translate('xpack.observability.lensESQLFunction.errorMessage', {
                 defaultMessage: 'There were some errors in the generated query',
               })}
             </EuiText>
@@ -273,13 +267,10 @@ export function VisualizeESQL({
                   <EuiToolTip
                     content={
                       isTableVisible
-                        ? i18n.translate(
-                            'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
-                            {
-                              defaultMessage: 'Visualization',
-                            }
-                          )
-                        : i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.table', {
+                        ? i18n.translate('xpack.observability.lensESQLFunction.visualization', {
+                            defaultMessage: 'Visualization',
+                          })
+                        : i18n.translate('xpack.observability.lensESQLFunction.table', {
                             defaultMessage: 'Table of results',
                           })
                     }
@@ -291,18 +282,12 @@ export function VisualizeESQL({
                       data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
                       aria-label={
                         isTableVisible
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
-                              {
-                                defaultMessage: 'Display chart',
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
-                              {
-                                defaultMessage: 'Display table',
-                              }
-                            )
+                          ? i18n.translate('xpack.observability.lensESQLFunction.displayChart', {
+                              defaultMessage: 'Display chart',
+                            })
+                          : i18n.translate('xpack.observability.lensESQLFunction.displayTable', {
+                              defaultMessage: 'Display table',
+                            })
                       }
                     />
                   </EuiToolTip>

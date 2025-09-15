@@ -176,6 +176,9 @@ export const CustomMetricForm = withEuiTheme(
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiSelect
+                    aria-label={i18n.translate('xpack.infra.customMetricForm.select.ariaLabel', {
+                      defaultMessage: '',
+                    })}
                     data-test-subj="infraCustomMetricFormSelect"
                     onChange={handleAggregationChange}
                     value={aggregation}
@@ -194,6 +197,10 @@ export const CustomMetricForm = withEuiTheme(
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiComboBox
+                    aria-label={i18n.translate(
+                      'xpack.infra.customMetricForm.selectafieldComboBox.ariaLabel',
+                      { defaultMessage: 'Select a field' }
+                    )}
                     fullWidth
                     placeholder={i18n.translate(
                       'xpack.infra.waffle.customMetrics.fieldPlaceholder',
@@ -232,6 +239,9 @@ export const CustomMetricForm = withEuiTheme(
           </div>
           <div style={{ padding: theme?.euiTheme.size.m, textAlign: 'right' }}>
             <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.infra.customMetricForm.cancelButton.ariaLabel', {
+                defaultMessage: 'Cancel',
+              })}
               data-test-subj="infraCustomMetricFormCancelButton"
               onClick={onCancel}
               size="s"

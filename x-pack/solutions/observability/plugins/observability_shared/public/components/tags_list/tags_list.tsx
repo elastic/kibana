@@ -21,7 +21,7 @@ export interface TagsListProps {
   prependChildren?: React.ReactNode;
 }
 const getFilterLabel = (tag: string) => {
-  return i18n.translate('xpack.observabilityShared.getFilterLabel.filter', {
+  return i18n.translate('xpack.observability.getFilterLabel.filter', {
     defaultMessage: 'Click to filter list with tag {tag}',
     values: {
       tag,
@@ -46,7 +46,7 @@ const TagsList = ({
     }
     return (
       <EuiText>
-        {i18n.translate('xpack.observabilityShared.tagsList.TextLabel', { defaultMessage: '--' })}
+        {i18n.translate('xpack.observability.tagsList.TextLabel', { defaultMessage: '--' })}
       </EuiText>
     );
   }
@@ -139,10 +139,10 @@ const TagsList = ({
 // eslint-disable-next-line import/no-default-export
 export default TagsList;
 
-const EXPAND_TAGS_LABEL = i18n.translate('xpack.observabilityShared.tagsList.expand', {
+const EXPAND_TAGS_LABEL = i18n.translate('xpack.observability.tagsList.expand', {
   defaultMessage: 'Click to view remaining tags',
 });
 
-const COLLAPSE_TAGS_LABEL = i18n.translate('xpack.observabilityShared.tagsList.collapse', {
+const COLLAPSE_TAGS_LABEL = i18n.translate('xpack.observability.tagsList.collapse', {
   defaultMessage: 'Click to collapse tags',
 });

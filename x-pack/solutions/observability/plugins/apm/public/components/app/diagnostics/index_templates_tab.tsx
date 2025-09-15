@@ -9,6 +9,7 @@ import { EuiCallOut, EuiLoadingElastic } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -35,14 +36,30 @@ export function DiagnosticsIndexTemplates() {
       field: 'status',
       render: (_, { exists, isNonStandard }) => {
         if (isNonStandard) {
-          return <EuiBadge color="warning">Non standard</EuiBadge>;
+          return (
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.apm.columns.nonStandardBadgeLabel', {
+                defaultMessage: 'Non standard',
+              })}
+            </EuiBadge>
+          );
         }
 
         if (!exists) {
-          return <EuiBadge color="danger">Not found</EuiBadge>;
+          return (
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.apm.columns.notFoundBadgeLabel', {
+                defaultMessage: 'Not found',
+              })}
+            </EuiBadge>
+          );
         }
 
-        return <EuiBadge color="green">OK</EuiBadge>;
+        return (
+          <EuiBadge color="green">
+            {i18n.translate('xpack.apm.columns.okBadgeLabel', { defaultMessage: 'OK' })}
+          </EuiBadge>
+        );
       },
       truncateText: true,
     },
@@ -52,7 +69,10 @@ export function DiagnosticsIndexTemplates() {
     <>
       <NonStandardIndexTemplateCalout diagnosticsBundle={diagnosticsBundle} />
       <EuiText>
-        This section lists the names of the default APM Index Templates and whether it exists or not
+        {i18n.translate('xpack.apm.diagnosticsIndexTemplates.thisSectionListsTheTextLabel', {
+          defaultMessage:
+            'This section lists the names of the default APM Index Templates and whether it exists or not',
+        })}
       </EuiText>
 
       <EuiSpacer />
@@ -82,8 +102,21 @@ function NonStandardIndexTemplateCalout({
 
   return (
     <>
-      <EuiCallOut title="Non-standard index templates" color="warning" iconType="warning">
-        The following index templates do not follow the recommended naming scheme:{' '}
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.nonStandardIndexTemplateCalout.euiCallOut.nonstandardIndexTemplatesLabel',
+          { defaultMessage: 'Non-standard index templates' }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        {i18n.translate(
+          'xpack.apm.nonStandardIndexTemplateCalout.theFollowingIndexTemplatesCallOutLabel',
+          {
+            defaultMessage:
+              'The following index templates do not follow the recommended naming scheme:',
+          }
+        )}{' '}
         {nonStandardIndexTemplates.map(({ name }) => (
           <EuiBadge>{name}</EuiBadge>
         ))}

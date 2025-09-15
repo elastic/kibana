@@ -57,7 +57,7 @@ export class ObservabilityAIAssistantAppPlugin
   ): ObservabilityAIAssistantAppPublicSetup {
     coreSetup.application.register({
       id: AI_ASSISTANT_APP_ID,
-      title: i18n.translate('xpack.observabilityAiAssistant.appTitle', {
+      title: i18n.translate('xpack.observability.appTitle', {
         defaultMessage: 'Observability AI Assistant',
       }),
       euiIconType: 'logoObservability',
@@ -67,7 +67,7 @@ export class ObservabilityAIAssistantAppPlugin
       deepLinks: [
         {
           id: 'conversations',
-          title: i18n.translate('xpack.observabilityAiAssistant.conversationsDeepLinkTitle', {
+          title: i18n.translate('xpack.observability.conversationsDeepLinkTitle', {
             defaultMessage: 'Conversations',
           }),
           path: '/conversations/new',

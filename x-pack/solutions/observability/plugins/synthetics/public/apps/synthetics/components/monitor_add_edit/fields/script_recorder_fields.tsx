@@ -43,7 +43,13 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
     <>
       <EuiSpacer size="m" />
       {isEditable && script ? (
-        <EuiFormRow aria-label="Testing script" fullWidth>
+        <EuiFormRow
+          aria-label={i18n.translate(
+            'xpack.synthetics.scriptRecorderFields.euiFormRow.testingScriptLabel',
+            { defaultMessage: 'Testing script' }
+          )}
+          fullWidth
+        >
           <EuiText size="s">
             <strong>{fileName}</strong>
           </EuiText>

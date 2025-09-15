@@ -99,7 +99,8 @@ export const PackageListSearchForm = React.forwardRef(
     if (errorLoading)
       return (
         <EuiCallOut
-          title={i18n.translate('xpack.observability_onboarding.asyncLoadFailureCallout.title', {
+          announceOnMount
+          title={i18n.translate('xpack.observability.asyncLoadFailureCallout.title', {
             defaultMessage: 'Loading failure',
           })}
           color="warning"
@@ -108,7 +109,7 @@ export const PackageListSearchForm = React.forwardRef(
         >
           <p>
             <FormattedMessage
-              id="xpack.observability_onboarding.asyncLoadFailureCallout.copy"
+              id="xpack.observability.asyncLoadFailureCallout.copy"
               defaultMessage="Some required elements failed to load."
             />
           </p>
@@ -120,7 +121,7 @@ export const PackageListSearchForm = React.forwardRef(
             }}
           >
             <FormattedMessage
-              id="xpack.observability_onboarding.asyncLoadFailureCallout.buttonContent"
+              id="xpack.observability.asyncLoadFailureCallout.buttonContent"
               defaultMessage="Retry"
             />
           </EuiButton>

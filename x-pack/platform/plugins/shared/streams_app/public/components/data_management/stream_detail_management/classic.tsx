@@ -79,6 +79,7 @@ export function ClassicStreamDetailManagement({
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
               defaultMessage: 'Data stream missing',
             })}

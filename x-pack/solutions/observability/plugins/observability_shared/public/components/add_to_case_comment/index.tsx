@@ -59,7 +59,7 @@ export function AddToCaseComment({
       errors.forEach((error) => {
         notifications.toasts.addError(error, {
           title: i18n.translate(
-            'xpack.observabilityShared.cases.addPageToCaseModal.errorGeneratingSummary',
+            'xpack.observability.cases.addPageToCaseModal.errorGeneratingSummary',
             {
               defaultMessage: 'Could not initialize AI-generated summary',
             }
@@ -86,13 +86,13 @@ export function AddToCaseComment({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.observabilityShared.cases.addPageToCaseModal.commentLabel', {
+        label={i18n.translate('xpack.observability.cases.addPageToCaseModal.commentLabel', {
           defaultMessage: 'Add a comment (optional)',
         })}
         helpText={
           showAIEnhancedExperience ? (
             <FormattedMessage
-              id="xpack.observabilityShared.cases.addPageToCaseModal.commentHelpText"
+              id="xpack.observability.cases.addPageToCaseModal.commentHelpText"
               defaultMessage="{icon} Initial comment AI generated. AI can be wrong or incomplete. Please review and edit as necessary."
               values={{ icon: <EuiIcon type="sparkles" /> }}
             />

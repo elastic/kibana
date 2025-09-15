@@ -164,6 +164,7 @@ export const EntityInsight = <T,>({
                 <EuiSpacer size="m" />
 
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.securitySolution.flyout.entityDetails.callOutTitle',
                     {

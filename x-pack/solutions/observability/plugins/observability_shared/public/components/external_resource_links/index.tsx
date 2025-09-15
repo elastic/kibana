@@ -29,17 +29,17 @@ export const ExternalResourceLinks: FunctionComponent = () => {
     {
       iconUrl: demoIconUrl,
       title: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.demoEnvironmentFlexItemLabel',
+        'xpack.observability.experimentalOnboardingFlow.demoEnvironmentFlexItemLabel',
         { defaultMessage: 'Demo environment' }
       ),
       description: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.demoEnvironmentFlexItemDescription',
+        'xpack.observability.experimentalOnboardingFlow.demoEnvironmentFlexItemDescription',
         {
           defaultMessage: 'Explore our live demo environment',
         }
       ),
       linkLabel: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.demoEnvironmentFlexItemLinkLabel',
+        'xpack.observability.experimentalOnboardingFlow.demoEnvironmentFlexItemLinkLabel',
         { defaultMessage: 'Explore demo' }
       ),
       link: URL_DEMO_ENV,
@@ -48,21 +48,21 @@ export const ExternalResourceLinks: FunctionComponent = () => {
     {
       iconUrl: forumIconUrl,
       title: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.exploreForumFlexItemLabel',
+        'xpack.observability.experimentalOnboardingFlow.exploreForumFlexItemLabel',
         { defaultMessage: 'Explore forum' }
       ),
       description: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.exploreForumFlexItemDescription',
+        'xpack.observability.experimentalOnboardingFlow.exploreForumFlexItemDescription',
         {
           defaultMessage: 'Exchange thoughts about Elastic',
         }
       ),
       linkLabel: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.exploreForumFlexItemLinkLabel',
+        'xpack.observability.experimentalOnboardingFlow.exploreForumFlexItemLinkLabel',
         { defaultMessage: 'Discuss forum' }
       ),
       linkARIALabel: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.exploreForumFlexItemLinkARIALabel',
+        'xpack.observability.experimentalOnboardingFlow.exploreForumFlexItemLinkARIALabel',
         { defaultMessage: 'Discuss forum. Open Elastic forum' }
       ),
       link: URL_FORUM,
@@ -71,21 +71,21 @@ export const ExternalResourceLinks: FunctionComponent = () => {
     {
       iconUrl: docsIconUrl,
       title: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.browseDocumentationFlexItemLabel',
+        'xpack.observability.experimentalOnboardingFlow.browseDocumentationFlexItemLabel',
         { defaultMessage: 'Browse documentation' }
       ),
       description: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.browseDocumentationFlexItemDescription',
+        'xpack.observability.experimentalOnboardingFlow.browseDocumentationFlexItemDescription',
         {
           defaultMessage: 'In-depth guides on all Elastic features',
         }
       ),
       linkLabel: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.browseDocumentationFlexItemLinkLabel',
+        'xpack.observability.experimentalOnboardingFlow.browseDocumentationFlexItemLinkLabel',
         { defaultMessage: 'Learn more' }
       ),
       linkARIALabel: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.browseDocumentationFlexItemLinkARIALabel',
+        'xpack.observability.experimentalOnboardingFlow.browseDocumentationFlexItemLinkARIALabel',
         { defaultMessage: 'Learn more about all Elastic features' }
       ),
       link: docLinks.links.observability.guide,
@@ -94,17 +94,17 @@ export const ExternalResourceLinks: FunctionComponent = () => {
     {
       iconUrl: supportIconUrl,
       title: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.supportHubFlexItemLabel',
+        'xpack.observability.experimentalOnboardingFlow.supportHubFlexItemLabel',
         { defaultMessage: 'Support Hub' }
       ),
       description: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.supportHubFlexItemDescription',
+        'xpack.observability.experimentalOnboardingFlow.supportHubFlexItemDescription',
         {
           defaultMessage: 'Get help by opening a case',
         }
       ),
       linkLabel: i18n.translate(
-        'xpack.observabilityShared.experimentalOnboardingFlow.supportHubFlexItemLinkLabel',
+        'xpack.observability.experimentalOnboardingFlow.supportHubFlexItemLinkLabel',
         { defaultMessage: 'Open Support Hub' }
       ),
       link: helpSupportUrl,

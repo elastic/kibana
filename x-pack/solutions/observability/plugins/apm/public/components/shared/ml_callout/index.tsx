@@ -163,6 +163,9 @@ export function MLCallout({
       {dismissable && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.apm.mLCallout.button.ariaLabel', {
+              defaultMessage: '',
+            })}
             data-test-subj="apmMLCalloutButton"
             onClick={onDismiss}
             color={properties.color}

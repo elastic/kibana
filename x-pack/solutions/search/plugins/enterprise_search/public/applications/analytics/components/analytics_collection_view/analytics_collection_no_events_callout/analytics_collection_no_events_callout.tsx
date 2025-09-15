@@ -39,6 +39,7 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
 
   return hasEvents || isLoading ? null : (
     <EuiCallOut
+      announceOnMount
       color="primary"
       iconType="download"
       title={i18n.translate(
@@ -59,6 +60,7 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
       </EuiText>
       <EuiSpacer />
       <EuiButton
+        data-test-subj="enterpriseSearchAnalyticsCollectionNoEventsCalloutLearnHowButton"
         fill
         type="submit"
         onClick={() =>

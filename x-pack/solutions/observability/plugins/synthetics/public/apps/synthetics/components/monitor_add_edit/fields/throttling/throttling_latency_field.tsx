@@ -49,7 +49,11 @@ export const ThrottlingLatencyField = ({
         data-test-subj="syntheticsBrowserLatency"
         append={
           <EuiText size="xs">
-            <strong>ms</strong>
+            <strong>
+              {i18n.translate('xpack.synthetics.throttlingLatencyField.strong.msLabel', {
+                defaultMessage: 'ms',
+              })}
+            </strong>
           </EuiText>
         }
         readOnly={readOnly}

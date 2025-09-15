@@ -58,7 +58,7 @@ export function SupportedIntegrationsList() {
     euiTheme: { colors },
   } = useEuiTheme();
   const customLogFilesTitle = i18n.translate(
-    'xpack.observability_onboarding.autoDetectPanel.supportedIntegrationsList.customIntegrationTitle',
+    'xpack.observability.autoDetectPanel.supportedIntegrationsList.customIntegrationTitle',
     { defaultMessage: 'Custom .log files' }
   );
   return (

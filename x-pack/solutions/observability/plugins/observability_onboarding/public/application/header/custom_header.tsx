@@ -43,12 +43,9 @@ export function CustomHeader({ euiIconType, logo, headlineCopy, captionCopy }: P
       restrictWidth
     >
       <BackButton>
-        {i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel',
-          {
-            defaultMessage: 'Return',
-          }
-        )}
+        {i18n.translate('xpack.observability.experimentalOnboardingFlow.button.returnButtonLabel', {
+          defaultMessage: 'Return',
+        })}
       </BackButton>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>

@@ -105,6 +105,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 color={'primary'}
                 title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
                 iconType={'info'}

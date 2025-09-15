@@ -66,6 +66,7 @@ export const CopyAndCustomizePipelinePanel: React.FC = () => {
           />
         </p>
         <EuiButton
+          data-test-subj="enterpriseSearchCopyAndCustomizePipelinePanelCopyAndCustomizeButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
           isLoading={createStatus === Status.LOADING}
           iconType="lockOpen"

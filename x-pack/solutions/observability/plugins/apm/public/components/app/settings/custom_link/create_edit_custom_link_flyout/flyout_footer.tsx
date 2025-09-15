@@ -34,6 +34,9 @@ export function FlyoutFooter({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.apm.flyoutFooter.closeButton.ariaLabel', {
+              defaultMessage: 'Close',
+            })}
             data-test-subj="apmCustomLinkFlyoutFooterCloseButton"
             iconType="cross"
             onClick={onClose}

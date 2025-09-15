@@ -147,7 +147,9 @@ export const IndexSelectorModal = ({
         <EuiSpacer size="m" />
         {error ? (
           <>
-            <EuiCallOut color="danger">{LOADING_ERROR_MESSAGE}</EuiCallOut>
+            <EuiCallOut announceOnMount color="danger">
+              {LOADING_ERROR_MESSAGE}
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         ) : null}

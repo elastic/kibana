@@ -54,7 +54,12 @@ export const SearchExperiencesGuide: React.FC = () => {
             <EuiFlexGroup direction="column" justifyContent="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle>
-                  <h2>About Search UI</h2>
+                  <h2>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.searchExperiencesGuide.h2.aboutSearchUILabel',
+                      { defaultMessage: 'About Search UI' }
+                    )}
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="l" />
                 <EuiText grow={false}>
@@ -70,6 +75,7 @@ export const SearchExperiencesGuide: React.FC = () => {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="enterpriseSearchSearchExperiencesGuideVisitTheSearchUiDocumentationButton"
                       href={SEARCH_EXPERIENCES_PLUGIN.DOCUMENTATION_URL}
                       target="_blank"
                       color="primary"
@@ -85,6 +91,7 @@ export const SearchExperiencesGuide: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="enterpriseSearchSearchExperiencesGuideSearchUiOnGithubButton"
                       href={SEARCH_EXPERIENCES_PLUGIN.GITHUB_URL}
                       target="_blank"
                       iconType={'popout'}
@@ -168,7 +175,10 @@ export const SearchExperiencesGuide: React.FC = () => {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xl" type="logoElasticsearch" />}
-              title="Elasticsearch"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.searchExperiencesGuide.euiCard.elasticsearchLabel',
+                { defaultMessage: 'Elasticsearch' }
+              )}
               description={i18n.translate(
                 'xpack.enterpriseSearch.searchExperiences.guide.tutorials.elasticsearch.description',
                 {
@@ -182,7 +192,10 @@ export const SearchExperiencesGuide: React.FC = () => {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xl" type="logoAppSearch" />}
-              title="App Search"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.searchExperiencesGuide.euiCard.appSearchLabel',
+                { defaultMessage: 'App Search' }
+              )}
               description={i18n.translate(
                 'xpack.enterpriseSearch.searchExperiences.guide.tutorials.appSearch.description',
                 {
@@ -196,7 +209,10 @@ export const SearchExperiencesGuide: React.FC = () => {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xl" type="logoWorkplaceSearch" />}
-              title="Workplace Search"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.searchExperiencesGuide.euiCard.workplaceSearchLabel',
+                { defaultMessage: 'Workplace Search' }
+              )}
               description={i18n.translate(
                 'xpack.enterpriseSearch.searchExperiences.guide.tutorials.workplaceSearch.description',
                 {

@@ -64,10 +64,9 @@ export function RootCauseAnalysisEntityLogPatternTable({
       },
       {
         field: 'pattern',
-        name: i18n.translate(
-          'xpack.observabilityAiAssistant.rca.logPatternTable.messageColumnTitle',
-          { defaultMessage: 'Message' }
-        ),
+        name: i18n.translate('xpack.observability.rca.logPatternTable.messageColumnTitle', {
+          defaultMessage: 'Message',
+        }),
         render: (_, { regex, sample }) => {
           return (
             <EuiText
@@ -88,10 +87,9 @@ export function RootCauseAnalysisEntityLogPatternTable({
       },
       {
         field: 'count',
-        name: i18n.translate(
-          'xpack.observabilityAiAssistant.rca.logPatternTable.countColumnTitle',
-          { defaultMessage: 'Count' }
-        ),
+        name: i18n.translate('xpack.observability.rca.logPatternTable.countColumnTitle', {
+          defaultMessage: 'Count',
+        }),
         width: '96px',
         render: (_, { count }) => {
           return (
@@ -108,10 +106,9 @@ export function RootCauseAnalysisEntityLogPatternTable({
       },
       {
         field: 'change',
-        name: i18n.translate(
-          'xpack.observabilityAiAssistant.rca.logPatternTable.changeColumnTitle',
-          { defaultMessage: 'Change' }
-        ),
+        name: i18n.translate('xpack.observability.rca.logPatternTable.changeColumnTitle', {
+          defaultMessage: 'Change',
+        }),
         width: '128px',
         render: (_, { change }) => {
           return getChangeBadge(change);
@@ -120,10 +117,9 @@ export function RootCauseAnalysisEntityLogPatternTable({
       {
         field: 'timeseries',
         width: '128px',
-        name: i18n.translate(
-          'xpack.observabilityAiAssistant.rca.logPatternTable.trendColumnTitle',
-          { defaultMessage: 'Trend' }
-        ),
+        name: i18n.translate('xpack.observability.rca.logPatternTable.trendColumnTitle', {
+          defaultMessage: 'Trend',
+        }),
         render: (_, { timeseries, change }) => {
           return (
             <SparkPlot
@@ -176,7 +172,7 @@ export function RootCauseAnalysisEntityLogPatternTable({
         <EuiFlexItem grow>
           <EuiText size="s">
             {i18n.translate(
-              'xpack.observabilityAiAssistant.rootCauseAnalysisEntityInvestigation.logPatternsTableTitle',
+              'xpack.observability.rootCauseAnalysisEntityInvestigation.logPatternsTableTitle',
               {
                 defaultMessage: 'Showing {count} of {total} log patterns',
                 values: {
@@ -197,12 +193,9 @@ export function RootCauseAnalysisEntityLogPatternTable({
               }}
             />
             <EuiText size="xs">
-              {i18n.translate(
-                'xpack.observabilityAiAssistant.rca.logPatternTable.showUsualPatternsCheckbox',
-                {
-                  defaultMessage: 'Show unremarkable patterns',
-                }
-              )}
+              {i18n.translate('xpack.observability.rca.logPatternTable.showUsualPatternsCheckbox', {
+                defaultMessage: 'Show unremarkable patterns',
+              })}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>

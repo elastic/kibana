@@ -18,7 +18,7 @@ export function ProfilingEmptyState() {
       icon={<EuiImage size="fullWidth" src={profilingImg} alt="" />}
       title={
         <h2>
-          {i18n.translate('xpack.observabilityShared.profilingEmptyState.title', {
+          {i18n.translate('xpack.observability.profilingEmptyState.title', {
             defaultMessage:
               'Improve computational efficiency. Debug performance regressions. Reduce cloud spend.',
           })}
@@ -31,7 +31,7 @@ export function ProfilingEmptyState() {
       body={
         <>
           <p>
-            {i18n.translate('xpack.observabilityShared.profilingEmptyState.body', {
+            {i18n.translate('xpack.observability.profilingEmptyState.body', {
               defaultMessage:
                 'Elastic Universal Profiling is a whole-system, always-on, continuous profiling solution that eliminates the need for code instrumentation, recompilation, on-host debug symbols, or service restarts. Leveraging eBPF, Universal Profiling operates within the Linux kernel space, capturing only the needed data with minimal overhead in an unobtrusive manner.',
             })}
@@ -45,7 +45,7 @@ export function ProfilingEmptyState() {
           color="primary"
           fill
         >
-          {i18n.translate('xpack.observabilityShared.profilingEmptyState.addProfiling', {
+          {i18n.translate('xpack.observability.profilingEmptyState.addProfiling', {
             defaultMessage: 'Add profiling',
           })}
         </EuiButton>,
@@ -55,7 +55,7 @@ export function ProfilingEmptyState() {
           target="_blank"
           external
         >
-          {i18n.translate('xpack.observabilityShared.profilingEmptyState.goToDocs', {
+          {i18n.translate('xpack.observability.profilingEmptyState.goToDocs', {
             defaultMessage: 'Go to docs',
           })}
         </EuiLink>,

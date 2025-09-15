@@ -59,19 +59,13 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption, hasExis
     ) {
       notifications?.toasts.addSuccess(
         {
-          title: i18n.translate(
-            'xpack.observability_onboarding.firehosePanel.dataReceivedToastTitle',
-            {
-              defaultMessage: 'Your data is on its way',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.observability_onboarding.firehosePanel.dataReceivedToastText',
-            {
-              defaultMessage:
-                'We’ve begun processing your data. In the background, we automatically refresh every few seconds to capture more incoming data.',
-            }
-          ),
+          title: i18n.translate('xpack.observability.firehosePanel.dataReceivedToastTitle', {
+            defaultMessage: 'Your data is on its way',
+          }),
+          text: i18n.translate('xpack.observability.firehosePanel.dataReceivedToastText', {
+            defaultMessage:
+              'We’ve begun processing your data. In the background, we automatically refresh every few seconds to capture more incoming data.',
+          }),
         },
         {
           toastLifeTimeMs: 10000,
@@ -119,7 +113,7 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption, hasExis
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.observability_onboarding.firehosePanel.visualizeDataDescription"
+            id="xpack.observability.firehosePanel.visualizeDataDescription"
             defaultMessage="Once the Firehose stream is created, data capture will begin automatically, and the incoming data will be displayed below."
           />
         </p>

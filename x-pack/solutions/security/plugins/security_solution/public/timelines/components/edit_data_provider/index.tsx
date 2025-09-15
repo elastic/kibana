@@ -271,6 +271,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
             {type === DataProviderTypeEnum.template && showComboBoxInput && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   iconType="warning"
                   size="s"

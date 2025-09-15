@@ -107,6 +107,7 @@ export const ModelStarted = ({
                   <FineTuneModelsButton />
                 ) : (
                   <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchModelStartedViewDetailsButton"
                     iconSide="left"
                     iconType="wrench"
                     onClick={() =>

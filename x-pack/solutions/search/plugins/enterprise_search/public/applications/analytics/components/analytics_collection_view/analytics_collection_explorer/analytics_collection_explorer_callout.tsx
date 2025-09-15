@@ -24,6 +24,7 @@ export const AnalyticsCollectionExplorerCallout: React.FC = () => {
 
   return discoverLink ? (
     <EuiCallOut
+      announceOnMount
       title={i18n.translate(
         'xpack.enterpriseSearch.analytics.collectionsView.explorer.callout.title',
         { defaultMessage: 'Need a deeper analysis?' }
@@ -39,6 +40,7 @@ export const AnalyticsCollectionExplorerCallout: React.FC = () => {
 
       <RedirectAppLinks coreStart={{ application }}>
         <EuiButton
+          data-test-subj="enterpriseSearchAnalyticsCollectionExplorerCalloutExploreButton"
           fill
           href={discoverLink}
           data-telemetry-id="entSearch-analytics-explorer-callout-exploreLink"

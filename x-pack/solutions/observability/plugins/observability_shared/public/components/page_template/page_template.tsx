@@ -228,7 +228,7 @@ export function ObservabilityPageTemplate({
 // eslint-disable-next-line import/no-default-export
 export default ObservabilityPageTemplate;
 
-const sideNavTitle = i18n.translate('xpack.observabilityShared.pageLayout.sideNavTitle', {
+const sideNavTitle = i18n.translate('xpack.observability.pageLayout.sideNavTitle', {
   defaultMessage: 'Observability',
 });
 

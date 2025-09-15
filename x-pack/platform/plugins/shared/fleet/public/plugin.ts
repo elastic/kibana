@@ -55,6 +55,8 @@ import { Subject } from 'rxjs';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
 import {
@@ -92,7 +94,6 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export type { FleetConfigType } from '../common/types';
 

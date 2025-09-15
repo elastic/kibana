@@ -28,7 +28,7 @@ export function RootCauseAnalysisReport({
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiTitle size="s">
             <h2>
-              {i18n.translate('xpack.observabilityAiAssistant.rootCauseAnalysisReport.title', {
+              {i18n.translate('xpack.observability.rootCauseAnalysisReport.title', {
                 defaultMessage: 'Report',
               })}
             </h2>

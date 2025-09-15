@@ -101,12 +101,12 @@ export class ObservabilityOnboardingPlugin
 
     plugins.customIntegrations.registerCustomIntegration({
       id: 'otel',
-      title: i18n.translate('xpack.observability_onboarding.otelTile.title', {
+      title: i18n.translate('xpack.observability.otelTile.title', {
         defaultMessage: 'OpenTelemetry',
       }),
       categories: ['observability'],
       uiInternalPath: '/app/observabilityOnboarding/otel-logs',
-      description: i18n.translate('xpack.observability_onboarding.otelTile.description', {
+      description: i18n.translate('xpack.observability.otelTile.description', {
         defaultMessage:
           'Collect logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
       }),

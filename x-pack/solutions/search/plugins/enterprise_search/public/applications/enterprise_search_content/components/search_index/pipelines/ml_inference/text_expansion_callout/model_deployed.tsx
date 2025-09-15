@@ -85,6 +85,7 @@ export const ModelDeployed = ({
           >
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchModelDeployedStartSingleThreadedButton"
                 color="success"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
                 disabled={isStartButtonDisabled}

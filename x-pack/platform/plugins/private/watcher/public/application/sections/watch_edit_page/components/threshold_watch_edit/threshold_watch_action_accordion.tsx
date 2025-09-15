@@ -189,6 +189,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
               {settings && settings.actionTypes[action.type].enabled === false ? (
                 <Fragment>
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.translate(
                       'xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningTitleText',
                       {

@@ -61,7 +61,7 @@ function getImpactProperties({
   if (impact === ChangeListItemImpact.high) {
     return {
       color: theme.colors.danger,
-      label: i18n.translate('xpack.observabilityAiAssistant.changesList.dotImpactHigh', {
+      label: i18n.translate('xpack.observability.changesList.dotImpactHigh', {
         defaultMessage: 'High',
       }),
     };
@@ -70,7 +70,7 @@ function getImpactProperties({
   if (impact === ChangeListItemImpact.medium) {
     return {
       color: theme.colors.warning,
-      label: i18n.translate('xpack.observabilityAiAssistant.changesList.dotImpactMedium', {
+      label: i18n.translate('xpack.observability.changesList.dotImpactMedium', {
         defaultMessage: 'Medium',
       }),
     };
@@ -78,7 +78,7 @@ function getImpactProperties({
 
   return {
     color: theme.colors.darkShade,
-    label: i18n.translate('xpack.observabilityAiAssistant.changesList.dotImpactLow', {
+    label: i18n.translate('xpack.observability.changesList.dotImpactLow', {
       defaultMessage: 'Low',
     }),
   };
@@ -107,7 +107,7 @@ function getColumns({
                 white-space: nowrap;
               `}
             >
-              {i18n.translate('xpack.observabilityAiAssistant.changesList.noChangesDetected', {
+              {i18n.translate('xpack.observability.changesList.noChangesDetected', {
                 defaultMessage: 'No changes detected',
               })}
             </EuiText>
@@ -155,7 +155,7 @@ function getColumns({
       },
     },
     {
-      name: i18n.translate('xpack.observabilityAiAssistant.changesList.trendColumnTitle', {
+      name: i18n.translate('xpack.observability.changesList.trendColumnTitle', {
         defaultMessage: 'Trend',
       }),
       sortable: false,
@@ -186,7 +186,7 @@ function getColumns({
       },
     },
     {
-      name: i18n.translate('xpack.observabilityAiAssistant.changesList.labelColumnTitle', {
+      name: i18n.translate('xpack.observability.changesList.labelColumnTitle', {
         defaultMessage: 'Label',
       }),
       width: '100%',

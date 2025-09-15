@@ -32,6 +32,9 @@ export function CpuProfilingPrompt() {
           defaultMessage: 'View CPU Breakdown using',
         })}
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.cpuProfilingPrompt.profilingButton.ariaLabel', {
+            defaultMessage: 'Profiling',
+          })}
           data-test-subj="infraCpuProfilingPromptProfilingButton"
           onClick={() => showTab('profiling')}
           flush="both"

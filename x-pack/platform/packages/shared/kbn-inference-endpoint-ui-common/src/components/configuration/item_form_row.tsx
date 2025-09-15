@@ -110,7 +110,12 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
       {sensitive ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            title={LABELS.RE_ENTER_SECRETS(label)}
+          />
         </>
       ) : null}
     </EuiFlexItem>

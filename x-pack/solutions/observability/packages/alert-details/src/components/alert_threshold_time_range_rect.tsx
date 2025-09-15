@@ -16,7 +16,7 @@ interface Props {
 }
 
 const RECT_ANNOTATION_TITLE = i18n.translate(
-  'observabilityAlertDetails.alertThresholdTimeRangeRect.detailsTooltip',
+  'app_not_found_in_i18nrc.alertThresholdTimeRangeRect.detailsTooltip',
   {
     defaultMessage: 'Threshold',
   }

@@ -153,6 +153,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.apm.columns.button.ariaLabel', { defaultMessage: '' })}
           data-test-subj="apmColumnsButton"
           flush="left"
           size="s"

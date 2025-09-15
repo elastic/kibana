@@ -44,7 +44,10 @@ export const createFlaskAgentInstructions = (commonOptions: AgentInstructions): 
               defaultMessage: 'Copy the code to install the APM agent for Flask',
             })}
           >
-            $ pip install elastic-apm[flask]
+            {i18n.translate(
+              'xpack.apm.createFlaskAgentInstructions.PipInstallElasticapmflaskCodeBlockLabel',
+              { defaultMessage: '$ pip install elastic-apm[flask]' }
+            )}
           </EuiCodeBlock>
         </>
       ),

@@ -72,6 +72,7 @@ export const SearchLabsBanner: React.FC = () => {
         <EuiFlexItem grow={false}>
           <span>
             <EuiButton
+              data-test-subj="enterpriseSearchSearchLabsBannerTutorialsButton"
               href="https://www.elastic.co/search-labs/tutorials"
               color="success"
               fill
@@ -86,6 +87,7 @@ export const SearchLabsBanner: React.FC = () => {
         <EuiFlexItem grow={false}>
           <span>
             <EuiButton
+              data-test-subj="enterpriseSearchSearchLabsBannerNotebooksExamplesButton"
               href="https://www.elastic.co/search-labs/tutorials/examples"
               color="success"
               target="_blank"

@@ -33,7 +33,13 @@ export const ManageLicenseButton: React.FC<EuiButtonProps> = (props) => {
       })}
     </EuiButtonTo>
   ) : (
-    <EuiButton {...props} target="_blank" iconType="popout" href={docLinks.licenseManagement}>
+    <EuiButton
+      data-test-subj="enterpriseSearchManageLicenseButtonLearnMoreAboutLicenseFeaturesButton"
+      {...props}
+      target="_blank"
+      iconType="popout"
+      href={docLinks.licenseManagement}
+    >
       {i18n.translate('xpack.enterpriseSearch.licenseDocumentationLink', {
         defaultMessage: 'Learn more about license features',
       })}

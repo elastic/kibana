@@ -13,13 +13,13 @@ import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-fin
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useMemo } from 'react';
 
-export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
+export interface RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> {
   onAdd: (
     container: CanAddNewPanel,
     savedObject: SavedObjectCommon<TSavedObjectAttributes>
   ) => void;
   savedObjectMetaData: SavedObjectMetaData;
-};
+}
 
 const registry: Map<string, RegistryItem<any>> = new Map();
 

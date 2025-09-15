@@ -198,6 +198,7 @@ export function SelectServices({
               {kueryValidationMessage?.length ? (
                 <CentralizedContainer>
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.translate('xpack.apm.serviceGroups.searchResults.error', {
                       defaultMessage: 'Error retrieving search results',
                     })}
@@ -249,6 +250,9 @@ export function SelectServices({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.apm.selectServices.cancelButton.ariaLabel', {
+                defaultMessage: 'Cancel',
+              })}
               data-test-subj="apmSelectServicesCancelButton"
               onClick={onCloseModal}
               isDisabled={isLoading}

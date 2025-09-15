@@ -105,6 +105,7 @@ export const FlyoutWrapper = ({
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}

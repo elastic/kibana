@@ -138,6 +138,7 @@ export const LastTestRunComponent = ({
       />
       {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
+          announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           style={{
             marginTop: euiTheme.base,

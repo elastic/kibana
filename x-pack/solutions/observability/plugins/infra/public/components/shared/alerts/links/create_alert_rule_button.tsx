@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
@@ -19,6 +20,9 @@ export const CreateAlertRuleButton = ({
 }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.infra.createAlertRuleButton.createruleButton.ariaLabel', {
+        defaultMessage: 'Create rule',
+      })}
       data-test-subj={dataTestSubj}
       onClick={onClick}
       size="xs"

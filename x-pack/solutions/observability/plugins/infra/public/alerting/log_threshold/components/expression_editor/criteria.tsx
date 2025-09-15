@@ -251,6 +251,9 @@ const AddCriterionButton = ({ addCriterion }: { addCriterion: () => void }) => {
   return (
     <div>
       <EuiButtonEmpty
+        aria-label={i18n.translate('xpack.infra.addCriterionButton.addconditionButton.ariaLabel', {
+          defaultMessage: 'Add condition',
+        })}
         data-test-subj="infraAddCriterionButtonAddConditionButton"
         color={'primary'}
         iconSide={'left'}

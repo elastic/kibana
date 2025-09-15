@@ -8,10 +8,10 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
+import { IntlProvider } from '@kbn/i18n-react';
+
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { IntlProvider } from 'react-intl';
 
 import { useActionStatus } from '../../hooks';
 import { useGetAgentPolicies, useAuthz } from '../../../../../hooks';

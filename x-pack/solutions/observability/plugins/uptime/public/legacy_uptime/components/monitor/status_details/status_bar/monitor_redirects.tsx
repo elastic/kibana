@@ -46,7 +46,11 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
 
   return list ? (
     <>
-      <EuiDescriptionListTitle>Redirects</EuiDescriptionListTitle>
+      <EuiDescriptionListTitle>
+        {i18n.translate('xpack.uptime.monitorRedirects.redirectsDescriptionListTitleLabel', {
+          defaultMessage: 'Redirects',
+        })}
+      </EuiDescriptionListTitle>
       <EuiPopover
         button={button}
         isOpen={isPopoverOpen}

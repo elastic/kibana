@@ -13,10 +13,9 @@ export function useFlowBreadcrumb(breadcrumb: ChromeBreadcrumb | null) {
   useBreadcrumbs(breadcrumb !== null ? [breadcrumb] : [], {
     app: {
       id: 'observabilityOnboarding',
-      label: i18n.translate(
-        'xpack.observability_onboarding.otelKubernetesPanel.breadcrumbs.addDataLabel',
-        { defaultMessage: 'Add Data' }
-      ),
+      label: i18n.translate('xpack.observability.otelKubernetesPanel.breadcrumbs.addDataLabel', {
+        defaultMessage: 'Add Data',
+      }),
     },
     absoluteProjectStyleBreadcrumbs: false,
   });

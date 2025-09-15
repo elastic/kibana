@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
@@ -52,7 +53,9 @@ export function SelectedWildcards({ indexPattern }: Props) {
       field={TRANSACTION_URL}
       value={searchTerm}
       negate={false}
-      label={'URL wildcard'}
+      label={i18n.translate('xpack.ux.selectedWildcards.filterValueLabel.urlWildcardLabel', {
+        defaultMessage: 'URL wildcard',
+      })}
     />
   ) : null;
 }

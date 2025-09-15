@@ -22,6 +22,9 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApm
   });
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.apm.gotoDashboard.gotodashboardButton.ariaLabel', {
+        defaultMessage: 'Go to dashboard',
+      })}
       data-test-subj="apmGotoDashboardGoToDashboardButton"
       color="text"
       size="s"

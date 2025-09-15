@@ -61,6 +61,9 @@ export function EditDiscoveryRule({
             }}
           >
             <EuiSelect
+              aria-label={i18n.translate('xpack.apm.editDiscoveryRule.select.ariaLabel', {
+                defaultMessage: '',
+              })}
               data-test-subj="apmEditDiscoveryRuleSelect"
               options={operationTypes.map((item) => ({
                 text: item.operation.label,
@@ -85,6 +88,9 @@ export function EditDiscoveryRule({
             }}
           >
             <EuiFormRow
+              aria-label={i18n.translate('xpack.apm.editDiscoveryRule.select.ariaLabel', {
+                defaultMessage: '',
+              })}
               fullWidth
               helpText={i18n.translate(
                 'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText',
@@ -152,8 +158,16 @@ export function EditDiscoveryRule({
       )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj="apmEditDiscoveryRuleCancelButton" onClick={onCancel}>
-            Cancel
+          <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.apm.editDiscoveryRule.cancelButton.ariaLabel', {
+              defaultMessage: 'Cancel',
+            })}
+            data-test-subj="apmEditDiscoveryRuleCancelButton"
+            onClick={onCancel}
+          >
+            {i18n.translate('xpack.apm.editDiscoveryRule.cancelButtonEmptyLabel', {
+              defaultMessage: 'Cancel',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

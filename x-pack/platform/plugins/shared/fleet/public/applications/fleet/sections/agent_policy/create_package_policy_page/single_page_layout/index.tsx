@@ -594,6 +594,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             title={

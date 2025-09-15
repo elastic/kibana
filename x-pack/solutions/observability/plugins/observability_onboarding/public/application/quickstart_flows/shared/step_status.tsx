@@ -44,7 +44,7 @@ export function StepStatus({
   if (status === 'complete') {
     return (
       <EuiFlexItem data-test-subj={`obltOnboardingStepStatus-${status}`}>
-        <EuiCallOut title={title} color="success" iconType="check">
+        <EuiCallOut announceOnMount title={title} color="success" iconType="check">
           {message}
         </EuiCallOut>
       </EuiFlexItem>
@@ -53,7 +53,7 @@ export function StepStatus({
   if (status === 'danger') {
     return (
       <EuiFlexItem data-test-subj={`obltOnboardingStepStatus-${status}`}>
-        <EuiCallOut title={title} color="danger" iconType="warning">
+        <EuiCallOut announceOnMount title={title} color="danger" iconType="warning">
           {message}
         </EuiCallOut>
       </EuiFlexItem>
@@ -62,7 +62,7 @@ export function StepStatus({
   if (status === 'warning') {
     return (
       <EuiFlexItem data-test-subj={`obltOnboardingStepStatus-${status}`}>
-        <EuiCallOut title={title} color="warning" iconType="warning">
+        <EuiCallOut announceOnMount title={title} color="warning" iconType="warning">
           {message}
         </EuiCallOut>
       </EuiFlexItem>

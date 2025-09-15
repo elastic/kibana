@@ -113,7 +113,7 @@ export function GetStartedPanel({
           <EuiSpacer />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
+              id="xpack.observability.dataIngestStatus.findAllPremadeAssetsTextLabel"
               defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
               values={{
                 viewAllAssetsLink: (
@@ -122,12 +122,9 @@ export function GetStartedPanel({
                     data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
                     href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
                   >
-                    {i18n.translate(
-                      'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
-                      {
-                        defaultMessage: 'View all assets',
-                      }
-                    )}
+                    {i18n.translate('xpack.observability.dataIngestStatus.viewAllAssetsLinkText', {
+                      defaultMessage: 'View all assets',
+                    })}
                   </EuiLink>
                 ),
               }}

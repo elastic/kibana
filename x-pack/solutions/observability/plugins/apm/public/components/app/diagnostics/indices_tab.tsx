@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -106,9 +107,8 @@ export function DiagnosticsIndices() {
   return (
     <>
       <EuiText>
-        This section shows the concrete indices backing the data streams, and highlights mapping
-        issues and missing ingest pipelines.
-      </EuiText>
+        {i18n.translate('xpack.apm.diagnosticsIndices.thisSectionShowsTheTextLabel', { defaultMessage: 'This section shows the concrete indices backing the data streams, and highlights mapping
+        issues and missing ingest pipelines.' })}</EuiText>
 
       <EuiSpacer />
 

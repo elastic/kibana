@@ -348,6 +348,7 @@ export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverv
 
       <EuiFlexGroup>
         <EuiButton
+          data-test-subj="enterpriseSearchAnalyticsCollectionOverviewTableExploreAllButton"
           fill
           onClick={() =>
             navigateToUrl(

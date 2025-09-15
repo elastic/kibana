@@ -71,7 +71,11 @@ export const ThrottlingUploadField = ({
         data-test-subj="syntheticsBrowserUploadSpeed"
         append={
           <EuiText size="xs">
-            <strong>Mbps</strong>
+            <strong>
+              {i18n.translate('xpack.synthetics.throttlingUploadField.strong.mbpsLabel', {
+                defaultMessage: 'Mbps',
+              })}
+            </strong>
           </EuiText>
         }
         readOnly={readOnly}

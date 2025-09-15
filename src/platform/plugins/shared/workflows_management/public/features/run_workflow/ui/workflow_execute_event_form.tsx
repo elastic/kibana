@@ -296,7 +296,13 @@ export const WorkflowExecuteEventForm = ({
       {/* Error Display */}
       {errors && (
         <EuiFlexItem>
-          <EuiCallOut title="Failed to load alerts" color="warning" iconType="help" size="s">
+          <EuiCallOut
+            announceOnMount
+            title="Failed to load alerts"
+            color="warning"
+            iconType="help"
+            size="s"
+          >
             <p>{errors}</p>
             <EuiText size="s">
               Make sure you have the proper permissions to access security alerts, or manually enter
@@ -309,7 +315,13 @@ export const WorkflowExecuteEventForm = ({
       {/* Alert Info */}
       {selectedAlert && (
         <EuiFlexItem>
-          <EuiCallOut title="Alert Selected" color="success" iconType="check" size="s">
+          <EuiCallOut
+            announceOnMount
+            title="Alert Selected"
+            color="success"
+            iconType="check"
+            size="s"
+          >
             <EuiText size="s">
               <strong>{selectedAlert._source['kibana.alert.rule.name']}</strong> - Severity:{' '}
               {selectedAlert._source['kibana.alert.severity']} - Status:{' '}

@@ -89,6 +89,9 @@ export function SloCallout({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonEmpty
+                aria-label={i18n.translate('xpack.apm.sloCallout.hidethisButton.ariaLabel', {
+                  defaultMessage: 'Hide this',
+                })}
                 data-test-subj="apmSloDismissButton"
                 onClick={() => {
                   dismissCallout();

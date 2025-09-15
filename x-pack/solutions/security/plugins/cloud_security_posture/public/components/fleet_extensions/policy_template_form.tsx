@@ -192,6 +192,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {isEditPage && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
                 defaultMessage: 'Modifying Integration Details',
               })}

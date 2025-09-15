@@ -7,6 +7,7 @@
 
 import { EuiCard, EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
@@ -23,7 +24,10 @@ export function DeleteDataView() {
         <EuiCard
           style={{ flexGrow: 0, maxWidth: '500px' }}
           icon={<EuiIcon color="danger" size="xxl" type="warning" />}
-          title="You have existing profiling data"
+          title={i18n.translate(
+            'xpack.profiling.deleteDataView.euiCard.youHaveExistingProfilingLabel',
+            { defaultMessage: 'You have existing profiling data' }
+          )}
           description="To proceed with the Universal Profiling setup, please delete existing profiling data following the steps described in the link below."
           footer={
             <div>
@@ -32,7 +36,10 @@ export function DeleteDataView() {
                 href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-upgrade.html#profiling-delete-data`}
                 target="_blank"
               >
-                Delete existing profiling data
+                {i18n.translate(
+                  'xpack.profiling.deleteDataView.deleteExistingProfilingDataLinkLabel',
+                  { defaultMessage: 'Delete existing profiling data' }
+                )}
               </EuiLink>
             </div>
           }

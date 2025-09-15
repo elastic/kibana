@@ -13,7 +13,7 @@ export type ActionApi = Partial<PublishesDataViews>;
 
 export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: ActionApi };
 
-export type Config = {
+export interface Config {
   /**
    * Whether to use a user selected index pattern, stored in `indexPatternId` field.
    */
@@ -34,6 +34,6 @@ export type Config = {
    * Whether to carry over source dashboard time range.
    */
   carryTimeRange: boolean;
-};
+}
 
 export type CollectConfigProps = CollectConfigPropsBase<Config>;

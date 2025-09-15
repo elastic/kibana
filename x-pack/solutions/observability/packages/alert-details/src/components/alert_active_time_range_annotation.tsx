@@ -17,7 +17,7 @@ interface Props {
 }
 
 const RECT_ANNOTATION_TITLE = i18n.translate(
-  'observabilityAlertDetails.alertActiveTimeRangeAnnotation.detailsTooltip',
+  'app_not_found_in_i18nrc.alertActiveTimeRangeAnnotation.detailsTooltip',
   {
     defaultMessage: 'Active',
   }

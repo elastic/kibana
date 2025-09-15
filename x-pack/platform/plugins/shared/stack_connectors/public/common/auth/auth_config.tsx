@@ -273,7 +273,12 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
           {hasInitialCA && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut size="s" iconType="document" title={i18n.EDIT_CA_CALLOUT} />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                iconType="document"
+                title={i18n.EDIT_CA_CALLOUT}
+              />
             </>
           )}
         </>

@@ -80,6 +80,9 @@ export function AnalyzeDataButton() {
         })}
       >
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.apm.analyzeDataButton.exploredataButton.ariaLabel', {
+            defaultMessage: 'Explore data',
+          })}
           data-test-subj="apmAnalyzeDataButtonExploreDataButton"
           href={href}
           iconType="visBarVerticalStacked"

@@ -81,6 +81,9 @@ export function EmbeddedMapSelect({
       </EuiFlexItem>
 
       <EuiSuperSelect
+        aria-label={i18n.translate('xpack.apm.embeddedMapSelect.select.ariaLabel', {
+          defaultMessage: '',
+        })}
         fullWidth
         style={{ minWidth: '200px' }}
         options={options}

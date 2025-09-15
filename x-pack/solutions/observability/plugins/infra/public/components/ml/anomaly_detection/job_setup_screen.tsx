@@ -309,7 +309,12 @@ export const JobSetupScreen = (props: Props) => {
             <EuiSpacer />
             {setupStatus.reasons.map((errorMessage, i) => (
               <React.Fragment key={i}>
-                <EuiCallOut color="danger" iconType="warning" title={errorCalloutTitle}>
+                <EuiCallOut
+                  announceOnMount
+                  color="danger"
+                  iconType="warning"
+                  title={errorCalloutTitle}
+                >
                   <EuiCode transparentBackground>{errorMessage}</EuiCode>
                 </EuiCallOut>
                 <EuiSpacer />

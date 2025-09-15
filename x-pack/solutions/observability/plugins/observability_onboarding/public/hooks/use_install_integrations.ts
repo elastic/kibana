@@ -13,7 +13,7 @@ import { useKibana } from './use_kibana';
 
 // Errors
 const UNAUTHORIZED_ERROR = i18n.translate(
-  'xpack.observability_onboarding.installIntegration.error.unauthorized',
+  'xpack.observability.installIntegration.error.unauthorized',
   {
     defaultMessage:
       'Required kibana privilege {requiredKibanaPrivileges} is missing, please add the required privilege to the role of the authenticated user.',

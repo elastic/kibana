@@ -17,13 +17,13 @@ export const FirehosePage = () => (
       <CustomHeader
         logo="firehose"
         headlineCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.firehose.text',
+          'xpack.observability.experimentalOnboardingFlow.customHeader.firehose.text',
           {
             defaultMessage: 'Set up Amazon Data Firehose',
           }
         )}
         captionCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.firehose.caption.description',
+          'xpack.observability.experimentalOnboardingFlow.customHeader.firehose.caption.description',
           {
             defaultMessage:
               'This installation is tailored for setting up Firehose in your Observability project with minimal configuration.',

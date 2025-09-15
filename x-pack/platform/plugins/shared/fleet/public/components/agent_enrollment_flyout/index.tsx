@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useGeneratedHtmlId } from '@elastic/eui';
+
 import {
   useStartServices,
   useFleetStatus,
@@ -44,8 +46,6 @@ import {
   useAgentPolicyWithPackagePolicies,
   useCloudSecurityIntegration,
 } from './hooks';
-
-import { useGeneratedHtmlId } from '@elastic/eui';
 
 export * from './agent_policy_selection';
 export * from './agent_policy_select_create';

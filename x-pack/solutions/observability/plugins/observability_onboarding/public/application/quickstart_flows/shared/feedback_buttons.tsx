@@ -20,7 +20,7 @@ import { OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT } from '../../../../c
 export type Feedback = 'positive' | 'negative';
 
 const THANK_YOU_MESSAGE = i18n.translate(
-  'xpack.observability_onboarding.feedbackButtons.em.thanksForYourFeedbackLabel',
+  'xpack.observability.feedbackButtons.em.thanksForYourFeedbackLabel',
   { defaultMessage: 'Thanks for your feedback!' }
 );
 
@@ -42,7 +42,7 @@ export function FeedbackButtons({ flow }: { flow: string }) {
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="s">
             <em>
-              {i18n.translate('xpack.observability_onboarding.insight.feedbackButtons.title', {
+              {i18n.translate('xpack.observability.insight.feedbackButtons.title', {
                 defaultMessage: 'Was this helpful?',
               })}
             </em>
@@ -59,7 +59,7 @@ export function FeedbackButtons({ flow }: { flow: string }) {
                 size="s"
                 onClick={() => handleClick('positive')}
               >
-                {i18n.translate('xpack.observability_onboarding.insight.feedbackButtons.positive', {
+                {i18n.translate('xpack.observability.insight.feedbackButtons.positive', {
                   defaultMessage: 'Yes',
                 })}
               </EuiButtonEmpty>
@@ -73,7 +73,7 @@ export function FeedbackButtons({ flow }: { flow: string }) {
                 size="s"
                 onClick={() => handleClick('negative')}
               >
-                {i18n.translate('xpack.observability_onboarding.insight.feedbackButtons.negative', {
+                {i18n.translate('xpack.observability.insight.feedbackButtons.negative', {
                   defaultMessage: 'No',
                 })}
               </EuiButtonEmpty>

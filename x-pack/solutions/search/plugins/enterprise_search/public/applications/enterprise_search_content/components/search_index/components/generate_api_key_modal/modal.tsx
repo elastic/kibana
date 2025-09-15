@@ -146,6 +146,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                   ) : (
                     <EuiFlexItem>
                       <EuiCallOut
+                        announceOnMount
                         title={
                           <FormattedMessage
                             id="xpack.enterpriseSearch.content.overview.generateApiKeyModal.callOutMessage"

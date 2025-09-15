@@ -27,6 +27,9 @@ export function LinkDashboard({
     <>
       {emptyButton ? (
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.apm.linkDashboard.linknewdashboardButton.ariaLabel', {
+            defaultMessage: 'Link new dashboard',
+          })}
           color="text"
           size="s"
           iconType="plusInCircle"

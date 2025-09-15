@@ -190,6 +190,9 @@ export function GroupDetails({
           )}
           <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
             <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.apm.groupDetails.cancelButton.ariaLabel', {
+                defaultMessage: 'Cancel',
+              })}
               data-test-subj="apmGroupDetailsCancelButton"
               onClick={onCloseModal}
               isLoading={isLoading}

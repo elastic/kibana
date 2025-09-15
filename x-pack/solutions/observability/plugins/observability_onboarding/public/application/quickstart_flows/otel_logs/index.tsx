@@ -38,7 +38,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 
 const HOST_COMMAND = i18n.translate(
-  'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
+  'xpack.observability.otelLogsPanel.p.runTheCommandOnYourHostLabel',
   {
     defaultMessage:
       'Run the following command on your host to download and configure the collector.',
@@ -47,7 +47,7 @@ const HOST_COMMAND = i18n.translate(
 
 export const OtelLogsPanel: React.FC = () => {
   useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
+    text: i18n.translate('xpack.observability.autoDetectPanel.breadcrumbs.otelHost', {
       defaultMessage: 'OpenTelemetry: Logs & Metrics',
     }),
   });
@@ -154,17 +154,16 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
         <EuiSteps
           steps={[
             {
-              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.platform', {
+              title: i18n.translate('xpack.observability.otelLogsPanel.steps.platform', {
                 defaultMessage: 'Select your platform',
               }),
 
               children: (
                 <EuiFlexGroup direction="column">
                   <EuiButtonGroup
-                    legend={i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
-                      { defaultMessage: 'Choose platform' }
-                    )}
+                    legend={i18n.translate('xpack.observability.otelLogsPanel.choosePlatform', {
+                      defaultMessage: 'Choose platform',
+                    })}
                     options={installTabContents.map(({ id, name }) => ({
                       id,
                       label: name,
@@ -198,7 +197,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                                 onClick={copy}
                               >
                                 {i18n.translate(
-                                  'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+                                  'xpack.observability.installOtelCollector.configStep.copyCommand',
                                   { defaultMessage: 'Copy to clipboard' }
                                 )}
                               </EuiButton>
@@ -212,22 +211,21 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
               ),
             },
             {
-              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
+              title: i18n.translate('xpack.observability.otelLogsPanel.steps.start', {
                 defaultMessage: 'Start the collector',
               }),
               children: (
                 <EuiFlexGroup direction="column">
                   <EuiCallOut
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
-                      { defaultMessage: 'Configuration Information' }
-                    )}
+                    title={i18n.translate('xpack.observability.otelLogsPanel.limitationTitle', {
+                      defaultMessage: 'Configuration Information',
+                    })}
                     color="warning"
                     iconType="info"
                   >
                     <p>
                       {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
+                        'xpack.observability.otelLogsPanel.historicalDataDescription',
                         {
                           defaultMessage: 'New log messages are collected from the setup onward.',
                         }
@@ -235,7 +233,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                     </p>
                     <p>
                       {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                        'xpack.observability.otelLogsPanel.historicalDataDescription2',
                         {
                           defaultMessage:
                             'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
@@ -247,7 +245,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel',
+                        'xpack.observability.otelLogsPanel.p.startTheCollectorLabel',
                         {
                           defaultMessage: 'Run the following command to start the collector',
                         }
@@ -259,23 +257,17 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
               ),
             },
             {
-              title: i18n.translate(
-                'xpack.observability_onboarding.otelLogsPanel.steps.visualize',
-                {
-                  defaultMessage: 'Visualize your data',
-                }
-              ),
+              title: i18n.translate('xpack.observability.otelLogsPanel.steps.visualize', {
+                defaultMessage: 'Visualize your data',
+              }),
               children: (
                 <>
                   <EuiText>
                     <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.waitForTheDataLabel',
-                        {
-                          defaultMessage:
-                            'After running the previous command, come back and view your data.',
-                        }
-                      )}
+                      {i18n.translate('xpack.observability.otelLogsPanel.waitForTheDataLabel', {
+                        defaultMessage:
+                          'After running the previous command, come back and view your data.',
+                      })}
                     </p>
                   </EuiText>
                   <EuiSpacer />
@@ -295,7 +287,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                             <EuiFlexItem grow={false}>
                               <EuiText size="s">
                                 {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
+                                  'xpack.observability.otelLogsPanel.viewAndAnalyzeYourTextLabel',
                                   { defaultMessage: 'View and analyze your logs' }
                                 )}
                               </EuiText>
@@ -305,12 +297,9 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                                 data-test-subj="obltOnboardingExploreLogs"
                                 href={deeplinks.logs}
                               >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
-                                  {
-                                    defaultMessage: 'Explore logs',
-                                  }
-                                )}
+                                {i18n.translate('xpack.observability.otelLogsPanel.exploreLogs', {
+                                  defaultMessage: 'Explore logs',
+                                })}
                               </EuiLink>
                             </EuiFlexItem>
                           </>
@@ -321,7 +310,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                             <EuiFlexItem grow={false}>
                               <EuiText size="s">
                                 {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
+                                  'xpack.observability.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
                                   { defaultMessage: 'View and analyze your metrics' }
                                 )}
                               </EuiText>
@@ -332,7 +321,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                                 href={deeplinks.metrics}
                               >
                                 {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
+                                  'xpack.observability.otelLogsPanel.exploreMetrics',
                                   {
                                     defaultMessage: 'Open Hosts',
                                   }
@@ -347,7 +336,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                   <EuiSpacer />
                   <EuiText size="xs" color="subdued">
                     <FormattedMessage
-                      id="xpack.observability_onboarding.otelLogsPanel.troubleshooting"
+                      id="xpack.observability.otelLogsPanel.troubleshooting"
                       defaultMessage="Find more details and troubleshooting solution in our documentation. {link}"
                       values={{
                         link: (
@@ -357,10 +346,9 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                             target="_blank"
                             external
                           >
-                            {i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.documentationLink',
-                              { defaultMessage: 'Open documentation' }
-                            )}
+                            {i18n.translate('xpack.observability.otelLogsPanel.documentationLink', {
+                              defaultMessage: 'Open documentation',
+                            })}
                           </EuiLink>
                         ),
                       }}
@@ -389,10 +377,9 @@ function CopyableCodeBlock({ content }: { content: string }) {
             iconType="copyClipboard"
             onClick={copy}
           >
-            {i18n.translate(
-              'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-              { defaultMessage: 'Copy to clipboard' }
-            )}
+            {i18n.translate('xpack.observability.installOtelCollector.configStep.copyCommand', {
+              defaultMessage: 'Copy to clipboard',
+            })}
           </EuiButton>
         )}
       </EuiCopy>

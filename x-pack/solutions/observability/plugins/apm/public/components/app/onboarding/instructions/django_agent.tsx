@@ -44,7 +44,10 @@ export const createDjangoAgentInstructions = (commonOptions: AgentInstructions):
               defaultMessage: 'Copy the code to install the APM agent for Django',
             })}
           >
-            $ pip install elastic-apm
+            {i18n.translate(
+              'xpack.apm.createDjangoAgentInstructions.PipInstallElasticapmCodeBlockLabel',
+              { defaultMessage: '$ pip install elastic-apm' }
+            )}
           </EuiCodeBlock>
         </>
       ),

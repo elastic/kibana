@@ -52,6 +52,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
       {error ? (
         <EuiFlexItem grow={7}>
           <EuiCallOut
+            announceOnMount
             data-test-subj="configsTab.errorCallout"
             title={
               <FormattedMessage
@@ -114,6 +115,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 <>
                   <EuiSpacer size="s" />
                   <EuiCallOut
+                    announceOnMount
                     data-test-subj="configsTab.notInstalled"
                     title={
                       <FormattedMessage

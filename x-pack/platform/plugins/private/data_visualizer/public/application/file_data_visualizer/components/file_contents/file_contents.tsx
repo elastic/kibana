@@ -196,7 +196,7 @@ const PreviewLimitMessage: FC<PropsWithChildren<{ wrapInCallout?: boolean }>> = 
   children,
 }) => {
   return wrapInCallout ? (
-    <EuiCallOut size="s" color="primary" title={children} />
+    <EuiCallOut announceOnMount size="s" color="primary" title={children} />
   ) : (
     <>
       <EuiSpacer size="s" />

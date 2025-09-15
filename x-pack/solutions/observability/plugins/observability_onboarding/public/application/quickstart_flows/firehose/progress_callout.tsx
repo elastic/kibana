@@ -42,7 +42,7 @@ export function ProgressCallout() {
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiText>
             <p>
-              {i18n.translate('xpack.observability_onboarding.firehosePanel.waitingForDataTitle', {
+              {i18n.translate('xpack.observability.firehosePanel.waitingForDataTitle', {
                 defaultMessage: 'Retrieving data from Amazon Data Firehose',
               })}
             </p>
@@ -52,7 +52,7 @@ export function ProgressCallout() {
               <EuiText size="s">
                 <strong>
                   {i18n.translate(
-                    'xpack.observability_onboarding.progressCallout.strong.allServicesWeCanLabel',
+                    'xpack.observability.progressCallout.strong.allServicesWeCanLabel',
                     { defaultMessage: 'All services we can detect' }
                   )}
                 </strong>
@@ -62,13 +62,10 @@ export function ProgressCallout() {
                     <li key={service}>{service}</li>
                   ))}
                   <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.otherLabel',
-                      {
-                        defaultMessage:
-                          'Other (Unsupported logs will be stored in a generic Firehose index).',
-                      }
-                    )}
+                    {i18n.translate('xpack.observability.progressCallout.li.otherLabel', {
+                      defaultMessage:
+                        'Other (Unsupported logs will be stored in a generic Firehose index).',
+                    })}
                   </li>
                 </ul>
               </EuiText>

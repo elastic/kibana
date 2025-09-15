@@ -52,6 +52,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
       {addDataSourceResult?.successful && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               addDataSourceResult.userCount > 0
                 ? i18n.translate(

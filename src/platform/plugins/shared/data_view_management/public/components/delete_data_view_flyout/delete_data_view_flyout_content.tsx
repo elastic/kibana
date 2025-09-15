@@ -209,10 +209,15 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
     <div>
       {showRelationshipsCallout ? (
         <>
-          <EuiCallOut color="danger" iconType="warning" title={relationshipCalloutText} />
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="warning"
+            title={relationshipCalloutText}
+          />
         </>
       ) : (
-        <EuiCallOut color="warning" iconType="warning" title={spacesWarningText} />
+        <EuiCallOut announceOnMount color="warning" iconType="warning" title={spacesWarningText} />
       )}
       <EuiSpacer size="m" />
       <div>

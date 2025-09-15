@@ -133,7 +133,7 @@ export function FieldValueSelection({
 
   const filterButton = (
     <EuiFilterButton
-      aria-label={i18n.translate('xpack.observabilityShared.fieldValueSelection.label', {
+      aria-label={i18n.translate('xpack.observability.fieldValueSelection.label', {
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
       })}
@@ -181,13 +181,10 @@ export function FieldValueSelection({
           searchable
           singleSelection={singleSelection}
           searchProps={{
-            placeholder: i18n.translate(
-              'xpack.observabilityShared.fieldValueSelection.placeholder',
-              {
-                defaultMessage: 'Filter {label}',
-                values: { label },
-              }
-            ),
+            placeholder: i18n.translate('xpack.observability.fieldValueSelection.placeholder', {
+              defaultMessage: 'Filter {label}',
+              values: { label },
+            }),
             compressed,
             onInput: onValueChange,
             'data-test-subj': 'suggestionInputField',
@@ -206,7 +203,7 @@ export function FieldValueSelection({
               {list}
               {loading && query && (
                 <EuiText className="eui-textCenter" color="subdued">
-                  {i18n.translate('xpack.observabilityShared.fieldValueSelection.loading', {
+                  {i18n.translate('xpack.observability.fieldValueSelection.loading', {
                     defaultMessage: 'Loading',
                   })}{' '}
                   <EuiLoadingSpinner size="m" />
@@ -224,7 +221,7 @@ export function FieldValueSelection({
                           color: euiTheme.colors.textSubdued,
                         }}
                         label={i18n.translate(
-                          'xpack.observabilityShared.fieldValueSelection.logicalAnd',
+                          'xpack.observability.fieldValueSelection.logicalAnd',
                           {
                             defaultMessage: 'Use logical AND',
                           }
@@ -244,7 +241,7 @@ export function FieldValueSelection({
                 <EuiButton
                   data-test-subj="o11yFieldValueSelectionApplyButton"
                   aria-label={i18n.translate(
-                    'xpack.observabilityShared.fieldValueSelection.apply.label',
+                    'xpack.observability.fieldValueSelection.apply.label',
                     {
                       defaultMessage: 'Apply the selected filters for {label}',
                       values: { label },
@@ -275,7 +272,7 @@ export function FieldValueSelection({
                     setForceOpen?.(false);
                   }}
                 >
-                  {i18n.translate('xpack.observabilityShared.fieldValueSelection.apply', {
+                  {i18n.translate('xpack.observability.fieldValueSelection.apply', {
                     defaultMessage: 'Apply',
                   })}
                 </EuiButton>

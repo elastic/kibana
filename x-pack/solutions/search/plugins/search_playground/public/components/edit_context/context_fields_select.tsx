@@ -63,6 +63,7 @@ export const ContextFieldsSelect = ({
   if (selectOptions.length === 0) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.searchPlayground.editContext.noSourceFieldWarning', {
           defaultMessage: 'No source fields found',
         })}

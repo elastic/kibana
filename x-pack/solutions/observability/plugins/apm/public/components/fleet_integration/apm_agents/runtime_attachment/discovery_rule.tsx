@@ -99,6 +99,10 @@ export function DiscoveryRule({
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.apm.discoveryRule.[objectObject]Button.ariaLabel',
+                      { defaultMessage: '[object Object]' }
+                    )}
                     data-test-subj="apmDiscoveryRuleButton"
                     iconType="pencil"
                     color="primary"
@@ -109,6 +113,10 @@ export function DiscoveryRule({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.apm.discoveryRule.[objectObject]Button.ariaLabel',
+                      { defaultMessage: '[object Object]' }
+                    )}
                     data-test-subj="apmDiscoveryRuleButton"
                     iconType="trash"
                     color="danger"

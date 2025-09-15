@@ -44,7 +44,9 @@ export const createRailsAgentInstructions = (commonOptions: AgentInstructions): 
               defaultMessage: 'Copy the code to install the APM agent for Ruby on Rails',
             })}
           >
-            gem &apos;elastic-apm&apos;
+            {i18n.translate('xpack.apm.createRailsAgentInstructions.gemelasticapmCodeBlockLabel', {
+              defaultMessage: "gem 'elastic-apm'",
+            })}
           </EuiCodeBlock>
         </>
       ),

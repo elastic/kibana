@@ -18,13 +18,13 @@ export const OtelKubernetesPage = () => {
         <CustomHeader
           logo="opentelemetry"
           headlineCopy={i18n.translate(
-            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otelKubernetes.text',
+            'xpack.observability.experimentalOnboardingFlow.customHeader.otelKubernetes.text',
             {
               defaultMessage: 'Elastic Distribution for OTel Collector',
             }
           )}
           captionCopy={i18n.translate(
-            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otelKubernetes.caption.description',
+            'xpack.observability.experimentalOnboardingFlow.customHeader.otelKubernetes.caption.description',
             {
               defaultMessage: 'Unified Kubernetes observability with the OpenTelemetry Operator',
             }

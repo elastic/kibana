@@ -536,6 +536,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         {errorSubmitting != null && (
           <>
             <EuiCallOut
+              announceOnMount
               data-test-subj="addExceptionErrorCallOut"
               title={i18n.SUBMIT_ERROR_TITLE}
               color="danger"

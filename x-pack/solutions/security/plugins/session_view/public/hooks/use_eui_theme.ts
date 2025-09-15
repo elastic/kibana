@@ -13,12 +13,12 @@ import { useEuiTheme as useEuiThemeHook } from '@elastic/eui';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
-type ExtraEuiVars = {
+interface ExtraEuiVars {
   terminalOutputBackground: string;
   terminalOutputMarkerAccent: string;
   terminalOutputMarkerWarning: string;
   terminalOutputSliderBackground: string;
-};
+}
 type EuiVars = ExtraEuiVars;
 type EuiThemeReturn = ReturnType<typeof useEuiThemeHook> & { euiVars: EuiVars };
 

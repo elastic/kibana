@@ -48,7 +48,7 @@ export const BottomBarActions = ({
         >
           <EuiHealth color="warning" />
           <EuiText>
-            {i18n.translate('xpack.observabilityShared.bottomBarActions.unsavedChanges', {
+            {i18n.translate('xpack.observability.bottomBarActions.unsavedChanges', {
               defaultMessage:
                 '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
               values: { unsavedChangesCount },
@@ -59,11 +59,15 @@ export const BottomBarActions = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.observability.bottomBarActions.discardchangesButton.ariaLabel',
+                  { defaultMessage: 'Discard changes' }
+                )}
                 data-test-subj={`${appTestSubj}BottomBarActionsDiscardChangesButton`}
                 color="text"
                 onClick={onDiscardChanges}
               >
-                {i18n.translate('xpack.observabilityShared.bottomBarActions.discardChangesButton', {
+                {i18n.translate('xpack.observability.bottomBarActions.discardChangesButton', {
                   defaultMessage: 'Discard changes',
                 })}
               </EuiButtonEmpty>
@@ -72,7 +76,7 @@ export const BottomBarActions = ({
               <EuiToolTip
                 content={
                   areChangesInvalid &&
-                  i18n.translate('xpack.observabilityShared.saveButtonTooltipWithInvalidChanges', {
+                  i18n.translate('xpack.observability.saveButtonTooltipWithInvalidChanges', {
                     defaultMessage: 'Fix invalid settings before saving.',
                   })
                 }

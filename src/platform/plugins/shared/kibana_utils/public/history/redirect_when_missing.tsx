@@ -19,10 +19,10 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
-type MarkdownRendererProps = {
+interface MarkdownRendererProps {
   basePath: HttpStart['basePath'];
   children: string;
-};
+}
 
 const MarkdownRenderer = React.lazy(async () => {
   const { default: ReactMarkdown } = await import('react-markdown');

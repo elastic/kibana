@@ -43,6 +43,7 @@ export const InvestigationGuide: React.FC = () => {
     if (isRulePreview) {
       return (
         <EuiCallOut
+          announceOnMount
           iconType="documentation"
           size="s"
           title={
@@ -79,6 +80,7 @@ export const InvestigationGuide: React.FC = () => {
     if (hasInvestigationGuide && !isLinkEnabled) {
       return (
         <EuiCallOut
+          announceOnMount
           iconType="documentation"
           size="s"
           title={

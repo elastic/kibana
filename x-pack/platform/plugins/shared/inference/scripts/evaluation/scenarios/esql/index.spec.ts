@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/// <reference types="@kbn/ambient-ftr-types"/>
+// / <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
 import type { Logger } from '@kbn/logging';

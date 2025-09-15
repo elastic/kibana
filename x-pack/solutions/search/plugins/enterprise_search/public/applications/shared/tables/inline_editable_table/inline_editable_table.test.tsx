@@ -12,6 +12,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { BindLogic } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { PageIntroduction } from '../../page_introduction/page_introduction';
 import { ReorderableTable } from '../reorderable_table';
 
@@ -97,7 +99,16 @@ describe('InlineEditableTable', () => {
 
   it('renders a title if one is provided', () => {
     const wrapper = shallow(
-      <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
+      <InlineEditableTableContents
+        {...requiredParams}
+        description={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch..p.someDescriptionLabel', {
+              defaultMessage: 'Some Description',
+            })}
+          </p>
+        }
+      />
     );
     expect(wrapper.find(PageIntroduction).prop('title')).toEqual(requiredParams.title);
   });
@@ -106,7 +117,13 @@ describe('InlineEditableTable', () => {
     const wrapper = shallow(
       <InlineEditableTableContents
         {...{ ...requiredParams, title: '' }}
-        description={<p>Some Description</p>}
+        description={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch..p.someDescriptionLabel', {
+              defaultMessage: 'Some Description',
+            })}
+          </p>
+        }
       />
     );
     expect(wrapper.find('[data-test-subj="inlineEditableTableTitle"]').exists()).toBe(false);
@@ -114,9 +131,24 @@ describe('InlineEditableTable', () => {
 
   it('renders a description if one is provided', () => {
     const wrapper = shallow(
-      <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
+      <InlineEditableTableContents
+        {...requiredParams}
+        description={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch..p.someDescriptionLabel', {
+              defaultMessage: 'Some Description',
+            })}
+          </p>
+        }
+      />
     );
-    expect(wrapper.find(PageIntroduction).prop('description')).toEqual(<p>Some Description</p>);
+    expect(wrapper.find(PageIntroduction).prop('description')).toEqual(
+      <p>
+        {i18n.translate('xpack.enterpriseSearch..p.someDescriptionLabel', {
+          defaultMessage: 'Some Description',
+        })}
+      </p>
+    );
   });
 
   it('renders no description if none is provided', () => {

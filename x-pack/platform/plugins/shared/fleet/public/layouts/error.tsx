@@ -14,11 +14,11 @@ import { useStartServices } from '../hooks';
 
 import { MissingESRequirementsPage } from '../applications/fleet/sections/agents/agent_requirements_page';
 
-import { WithHeaderLayout, WithoutHeaderLayout } from '.';
-
 import { Error } from '../applications/fleet/components';
 
 import { DefaultLayout, DefaultPageTitle } from '../applications/fleet/layouts/default';
+
+import { WithHeaderLayout, WithoutHeaderLayout } from '.';
 
 const Panel = styled(EuiPanel)`
   max-width: 500px;

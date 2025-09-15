@@ -231,6 +231,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
         )}
         {error && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="warning"
             title={i18n.translate('xpack.enterpriseSearch.apiKey.flyout.errorTitle', {

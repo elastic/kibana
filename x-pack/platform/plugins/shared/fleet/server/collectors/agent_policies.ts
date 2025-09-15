@@ -8,10 +8,11 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import _ from 'lodash';
 
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+
 import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common';
 import type { OutputSOAttributes, AgentPolicy } from '../types';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 export interface AgentPoliciesUsage {
   count: number;

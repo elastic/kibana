@@ -63,6 +63,9 @@ export function DashboardSelector({
 
   return (
     <EuiComboBox
+      aria-label={i18n.translate('xpack.apm.dashboardSelector.selectdashboardComboBox.ariaLabel', {
+        defaultMessage: 'Select dashboard',
+      })}
       compressed
       style={{ minWidth: '200px' }}
       placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {

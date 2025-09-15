@@ -37,19 +37,13 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
   const generateMetricsDashboardActionLink = useCallback(
     (dashboardId: string, name?: string) => ({
       id: `dashboard-${dashboardId}`,
-      title: i18n.translate(
-        'xpack.observability_onboarding.firehosePanel.exploreMetricsDataTitle',
-        {
-          defaultMessage: 'Overview{name} metrics data with this pre-made dashboard',
-          values: { name: name ? ` ${name}` : '' },
-        }
-      ),
-      label: i18n.translate(
-        'xpack.observability_onboarding.firehosePanel.exploreMetricsDataLabel',
-        {
-          defaultMessage: 'Explore metrics data',
-        }
-      ),
+      title: i18n.translate('xpack.observability.firehosePanel.exploreMetricsDataTitle', {
+        defaultMessage: 'Overview{name} metrics data with this pre-made dashboard',
+        values: { name: name ? ` ${name}` : '' },
+      }),
+      label: i18n.translate('xpack.observability.firehosePanel.exploreMetricsDataLabel', {
+        defaultMessage: 'Explore metrics data',
+      }),
       href:
         dashboardLocator?.getRedirectUrl({
           dashboardId,
@@ -61,10 +55,10 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
   const generateLogsDashboardActionLink = useCallback(
     (dashboardId: string) => ({
       id: `dashboard-${dashboardId}`,
-      title: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreLogsDataTitle', {
+      title: i18n.translate('xpack.observability.firehosePanel.exploreLogsDataTitle', {
         defaultMessage: 'Overview your logs data with this pre-made dashboard',
       }),
-      label: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreLogsDataLabel', {
+      label: i18n.translate('xpack.observability.firehosePanel.exploreLogsDataLabel', {
         defaultMessage: 'Explore logs data',
       }),
       href:
@@ -78,11 +72,11 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
   const generateLogsExplorerActionLink = useCallback(
     (dataset: string, name: string) => ({
       id: `logs-explorer-${dataset}`,
-      title: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataTitle', {
+      title: i18n.translate('xpack.observability.firehosePanel.exploreDataTitle', {
         defaultMessage: 'See {name} data in Logs explorer',
         values: { name },
       }),
-      label: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataLabel', {
+      label: i18n.translate('xpack.observability.firehosePanel.exploreDataLabel', {
         defaultMessage: 'Explore',
       }),
       href:
@@ -99,11 +93,11 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
   const generateMetricsDiscoverActionLink = useCallback(
     (namespace: string, name: string) => ({
       id: `discover-${namespace}`,
-      title: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataTitle', {
+      title: i18n.translate('xpack.observability.firehosePanel.exploreDataTitle', {
         defaultMessage: 'See {name} metrics data in Discover',
         values: { name },
       }),
-      label: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataLabel', {
+      label: i18n.translate('xpack.observability.firehosePanel.exploreDataLabel', {
         defaultMessage: 'Explore',
       }),
       href:

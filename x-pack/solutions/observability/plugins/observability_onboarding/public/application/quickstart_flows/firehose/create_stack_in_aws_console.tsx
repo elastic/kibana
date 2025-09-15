@@ -51,13 +51,13 @@ export function CreateStackInAWSConsole({
         <p>
           {metricsOnboardingEnabled && (
             <FormattedMessage
-              id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
+              id="xpack.observability.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
               defaultMessage="Click the button below to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter, metrics stream, and necessary IAM roles. Keep this page open, and return once you've submitted the form in AWS Console"
             />
           )}
           {!metricsOnboardingEnabled && (
             <FormattedMessage
-              id="xpack.observability_onboarding.logsEssential.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
+              id="xpack.observability.logsEssential.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
               defaultMessage="Click the button below to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter and necessary IAM roles. Keep this page open, and return once you've submitted the form in AWS Console"
             />
           )}
@@ -78,7 +78,7 @@ export function CreateStackInAWSConsole({
         fill={isPrimaryAction}
       >
         {i18n.translate(
-          'xpack.observability_onboarding.createStackInAWSConsole.createFirehoseStreamInAWSConsoleButtonLabel',
+          'xpack.observability.createStackInAWSConsole.createFirehoseStreamInAWSConsoleButtonLabel',
           { defaultMessage: 'Create Firehose Stream in AWS' }
         )}
       </EuiButton>

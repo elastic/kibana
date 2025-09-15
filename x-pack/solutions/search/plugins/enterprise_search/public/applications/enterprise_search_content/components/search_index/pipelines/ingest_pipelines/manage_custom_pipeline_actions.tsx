@@ -38,6 +38,7 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
     <EuiPopover
       button={
         <EuiButtonEmpty
+          data-test-subj="enterpriseSearchManageCustomPipelineActionsManageButton"
           buttonRef={buttonRef}
           size="s"
           iconType="arrowDown"

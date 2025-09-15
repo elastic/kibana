@@ -22,9 +22,10 @@ import { LicenseService } from '../../common/services';
 
 import { createAgentPolicyMock } from '../../common/mocks';
 
+import { createAppContextStartContractMock } from '../mocks';
+
 import { PolicyWatcher } from './agent_policy_watch';
 import { agentPolicyService } from './agent_policy';
-import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from './app_context';
 
 jest.mock('./agent_policy');

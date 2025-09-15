@@ -454,6 +454,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 data-test-subj="ruleErrorBanner"
                 size="s"
@@ -480,6 +481,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
+                announceOnMount
                 color="warning"
                 data-test-subj="ruleWarningBanner"
                 size="s"
@@ -501,6 +503,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             <EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiCallOut
+                announceOnMount
                 color="warning"
                 data-test-subj="actionWithBrokenConnectorWarningBanner"
                 size="s"

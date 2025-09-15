@@ -57,6 +57,7 @@ export const DefaultPipelineItem: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="enterpriseSearchDefaultPipelineItemSettingsButton"
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-settings`}
               onClick={openPipelineSettings}
             >

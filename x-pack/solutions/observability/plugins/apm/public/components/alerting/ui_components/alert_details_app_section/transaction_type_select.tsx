@@ -21,6 +21,9 @@ export function TransactionTypeSelect({
 
   return (
     <EuiSelect
+      aria-label={i18n.translate('xpack.apm.transactionTypeSelect.select.ariaLabel', {
+        defaultMessage: '',
+      })}
       style={{ minWidth: 160 }}
       compressed
       data-test-subj="alertingFilterTransactionType"

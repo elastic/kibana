@@ -64,6 +64,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
     <>
       {padInstallationStatusError && (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.errorStatus',
             {

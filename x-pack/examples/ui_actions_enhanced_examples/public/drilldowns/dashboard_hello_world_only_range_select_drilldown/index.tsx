@@ -13,9 +13,9 @@ import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import type { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
 
-export type Config = {
+export interface Config {
   name: string;
-};
+}
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT =
   'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT';

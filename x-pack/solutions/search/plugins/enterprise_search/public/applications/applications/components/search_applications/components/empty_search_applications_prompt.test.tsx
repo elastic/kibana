@@ -9,12 +9,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EmptySearchApplicationsPrompt } from './empty_search_applications_prompt';
 
 describe('EmptySearchApplicationsPrompt', () => {
   it('should pass children to prompt actions', () => {
-    const dummyEl = <div>dummy</div>;
+    const dummyEl = (
+      <div>
+        {i18n.translate('xpack.enterpriseSearch..div.dummyLabel', { defaultMessage: 'dummy' })}
+      </div>
+    );
     const wrapper = shallow(
       <EmptySearchApplicationsPrompt>{dummyEl}</EmptySearchApplicationsPrompt>
     );

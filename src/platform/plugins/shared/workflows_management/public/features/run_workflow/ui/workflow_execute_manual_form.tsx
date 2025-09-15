@@ -115,7 +115,13 @@ export const WorkflowExecuteManualForm = ({
       {errors && (
         <>
           <EuiFlexItem>
-            <EuiCallOut title="Input data is not valid" color="danger" iconType="help" size="s">
+            <EuiCallOut
+              announceOnMount
+              title="Input data is not valid"
+              color="danger"
+              iconType="help"
+              size="s"
+            >
               <p>{errors}</p>
             </EuiCallOut>
           </EuiFlexItem>

@@ -7,6 +7,7 @@
 
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
@@ -155,7 +156,13 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertExpressionPopover
-              aria-label="xpack.synthetics.alerts.monitorStatus.availability.timerangeUnit"
+              aria-label={i18n.translate(
+                'xpack.uptime.availabilityExpressionSelect.alertExpressionPopover.xpacksyntheticsalertsmonitorstatusavailabilitytimerangeunitLabel',
+                {
+                  defaultMessage:
+                    'xpack.synthetics.alerts.monitorStatus.availability.timerangeUnit',
+                }
+              )}
               content={
                 <TimeUnitSelectable
                   aria-label={labels.ENTER_AVAILABILITY_RANGE_SELECT_ARIA}

@@ -19,7 +19,7 @@ export function TroubleshootingLink() {
         href="https://www.elastic.co/guide/en/observability/current/logs-troubleshooting.html"
         target="_blank"
       >
-        {i18n.translate('xpack.observability_onboarding.installElasticAgent.troubleshooting', {
+        {i18n.translate('xpack.observability.installElasticAgent.troubleshooting', {
           defaultMessage: 'Troubleshooting',
         })}
       </EuiButtonEmpty>

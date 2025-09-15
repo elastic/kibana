@@ -97,6 +97,9 @@ export function IndexLifecyclePhaseSelect() {
 
   return (
     <EuiSuperSelect
+      aria-label={i18n.translate('xpack.profiling.indexLifecyclePhaseSelect.select.ariaLabel', {
+        defaultMessage: '',
+      })}
       prepend={i18n.translate('xpack.profiling.storageExplorer.indexLifecyclePhase.label', {
         defaultMessage: 'Index lifecycle phase',
       })}

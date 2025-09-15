@@ -46,7 +46,7 @@ export function CommandSnippet({
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription"
+            id="xpack.observability.kubernetesPanel.installElasticAgentDescription"
             defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest."
             values={{
               scalingLink: (
@@ -57,7 +57,7 @@ export function CommandSnippet({
                   target="_blank"
                 >
                   {i18n.translate(
-                    'xpack.observability_onboarding.kubernetesPanel.scalingElasticAgentOnLinkLabel',
+                    'xpack.observability.kubernetesPanel.scalingElasticAgentOnLinkLabel',
                     { defaultMessage: 'Scaling Elastic Agent on Kubernetes' }
                   )}
                 </EuiLink>

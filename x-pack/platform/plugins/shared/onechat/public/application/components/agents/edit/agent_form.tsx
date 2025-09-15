@@ -316,6 +316,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.onechat.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
