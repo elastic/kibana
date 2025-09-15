@@ -539,7 +539,7 @@ export const helper = async (es: any) => {
   console.log('Resolved backing:', backing);
   // 3) Count the docs in the backing index (should be >0)
   await es.indices.refresh({ index: backing });
-  const { count } = await es.count({ index: 'backing' });
+  const { count } = await es.count({ index: backing });
   expect(count).toBeGreaterThan(0);
 
   // (Optional) peek at a doc for sanity
