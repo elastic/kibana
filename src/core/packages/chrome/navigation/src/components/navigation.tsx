@@ -259,9 +259,11 @@ export const Navigation = ({
                     ))}
                   </NestedSecondaryMenu>
                 ) : (
-                  <SecondaryMenu title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
+                  <SecondaryMenu
+                    title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
                       defaultMessage: 'More',
-                  })}>
+                    })}
+                  >
                     <SecondaryMenu.Section hasGap>
                       {overflowMenuItems.map((item) => {
                         const { sections, ...itemProps } = item;
