@@ -180,7 +180,8 @@ export const SearchWorkflowCommandSchema = z.object({
   limit: z.number().default(100),
   page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
-  enabled: z.array(z.boolean()).optional(),
+  // bool or number transformed to boolean
+  enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });

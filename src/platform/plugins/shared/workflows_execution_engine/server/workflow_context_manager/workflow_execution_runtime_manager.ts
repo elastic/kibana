@@ -622,6 +622,12 @@ export class WorkflowExecutionRuntimeManager {
       workflow: { step_id: stepId, step_execution_id: stepExecutionId },
       event: { action: 'step-start', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'start'],
+      labels: {
+        step_type: this.getCurrentNode().stepType,
+        connector_type: this.getCurrentNode().stepType,
+        step_name: this.getCurrentNode().stepId,
+        step_id: stepId,
+      },
     });
   }
 
@@ -636,15 +642,49 @@ export class WorkflowExecutionRuntimeManager {
         outcome: isSuccess ? 'success' : 'failure',
       },
       tags: ['workflow', 'step', 'complete'],
+      labels: {
+        step_type: this.getCurrentNode().stepType,
+        connector_type: this.getCurrentNode().stepType,
+        step_name: this.getCurrentNode().stepId,
+        step_id: step.stepId,
+        execution_time_ms: step.executionTimeMs,
+      },
+      ...(step.error && {
+        error: {
+          message:
+            typeof step.error === 'string'
+              ? step.error
+              : (step.error as Error)?.message || 'Unknown error',
+          type:
+            typeof step.error === 'string'
+              ? 'WorkflowStepError'
+              : (step.error as Error)?.name || 'Error',
+          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
+        },
+      }),
     });
   }
 
   private logStepFail(stepId: string, stepExecutionId: string, error: Error | string): void {
+    const node = this.workflowGraph.getNode(stepId);
+    const stepName = node.stepId;
+    const stepType = node?.type || 'unknown';
     const _error = typeof error === 'string' ? Error(error) : error;
-    this.workflowLogger?.logError(`Step '${stepId}' failed`, _error, {
+
+    // Include error message in the log message
+    const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
+    const message = `Step '${stepName}' failed: ${errorMsg}`;
+
+    this.workflowLogger?.logError(message, _error, {
       workflow: { step_id: stepId, step_execution_id: stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'fail'],
+      labels: {
+        step_type: stepType,
+        connector_type: stepType,
+        step_name: stepName,
+        step_id: stepId,
+      },
     });
   }
 }

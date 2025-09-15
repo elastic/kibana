@@ -9,7 +9,8 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, GraphNode } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { GraphNode } from '@kbn/workflows/graph';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -359,6 +360,12 @@ describe('WorkflowExecutionRuntimeManager', () => {
           step_id: 'fakeStepId3',
           step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId3',
         },
+        labels: {
+          connector_type: 'unknown',
+          step_id: 'node3',
+          step_name: 'node3',
+          step_type: 'unknown',
+        },
       });
     });
 
@@ -471,6 +478,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
           workflow: {
             step_id: 'fakeStepId2',
             step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
+          },
+          labels: {
+            connector_type: 'unknown',
+            execution_time_ms: 0,
+            step_id: 'node1',
+            step_name: 'node1',
+            step_type: 'unknown',
           },
         });
       });

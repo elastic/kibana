@@ -9,6 +9,8 @@
 
 import type { StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest, CoreStart } from '@kbn/core/server';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
@@ -19,17 +21,27 @@ export interface ContextManagerInit {
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   workflowExecutionState: WorkflowExecutionState;
+  // New properties for internal actions
+  esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
+  fakeRequest?: KibanaRequest;
+  coreStart?: CoreStart; // For using Kibana's internal HTTP client
 }
 
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   private workflowExecutionState: WorkflowExecutionState;
+  private esClient: ElasticsearchClient;
+  private fakeRequest?: KibanaRequest;
+  private coreStart?: CoreStart;
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
     this.workflowExecutionState = init.workflowExecutionState;
+    this.esClient = init.esClient;
+    this.fakeRequest = init.fakeRequest;
+    this.coreStart = init.coreStart;
   }
 
   public getContext(): StepContext {
@@ -79,6 +91,28 @@ export class WorkflowContextManager {
     }
 
     return { pathExists: true, value: result };
+  }
+
+  /**
+   * Get the Elasticsearch client for internal actions
+   * This client is already user-scoped if fakeRequest was available during initialization
+   */
+  public getEsClientAsUser(): ElasticsearchClient {
+    return this.esClient;
+  }
+
+  /**
+   * Get the fake request from task manager for Kibana API authentication
+   */
+  public getFakeRequest(): KibanaRequest | undefined {
+    return this.fakeRequest;
+  }
+
+  /**
+   * Get CoreStart for accessing Kibana's internal services
+   */
+  public getCoreStart(): CoreStart | undefined {
+    return this.coreStart;
   }
 
   private buildWorkflowContext(): WorkflowContext {

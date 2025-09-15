@@ -14,6 +14,8 @@ import type {
   HttpStep,
   IfStep,
   WaitStep,
+  ElasticsearchStep,
+  KibanaStep,
   WorkflowYaml,
 } from '../../../spec/schema';
 import type {
@@ -26,6 +28,8 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
+  ElasticsearchGraphNode,
+  KibanaGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
@@ -262,6 +266,155 @@ describe('convertToWorkflowGraph', () => {
         { v: 'testAtomicStep1', w: 'testWaitStep' },
         { v: 'testWaitStep', w: 'testAtomicStep2' },
       ]);
+    });
+  });
+
+  describe('elasticsearch step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testElasticsearchStep',
+          type: 'elasticsearch.search.query',
+          with: {
+            index: 'logs-*',
+            query: {
+              match: {
+                message: 'error',
+              },
+            },
+            size: 10,
+          },
+        } as ElasticsearchStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for elasticsearch step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testElasticsearchStep']);
+    });
+
+    it('should configure the elasticsearch step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testElasticsearchStep');
+      expect(node).toEqual({
+        id: 'testElasticsearchStep',
+        type: 'elasticsearch.search.query',
+        configuration: {
+          name: 'testElasticsearchStep',
+          type: 'elasticsearch.search.query',
+          with: {
+            index: 'logs-*',
+            query: {
+              match: {
+                message: 'error',
+              },
+            },
+            size: 10,
+          },
+        },
+      } as ElasticsearchGraphNode);
+    });
+
+    it('should handle elasticsearch step with raw API format', () => {
+      const rawApiWorkflow = {
+        steps: [
+          {
+            name: 'testElasticsearchRawStep',
+            type: 'elasticsearch.search',
+            with: {
+              request: {
+                method: 'GET',
+                path: '/logs-*/_search',
+                body: {
+                  query: {
+                    match: {
+                      message: 'error',
+                    },
+                  },
+                  size: 5,
+                },
+              },
+            },
+          } as ElasticsearchStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
+      const node = executionGraph.node(
+        'testElasticsearchRawStep'
+      ) as unknown as ElasticsearchGraphNode;
+      expect(node.type).toBe('elasticsearch.search');
+      expect(node.configuration.with.request.path).toBe('/logs-*/_search');
+    });
+  });
+
+  describe('kibana step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testKibanaStep',
+          type: 'kibana.cases.create',
+          with: {
+            title: 'Test Case',
+            description: 'A test case created by workflow',
+            tags: ['automation'],
+            severity: 'medium',
+          },
+        } as KibanaStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for kibana step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testKibanaStep']);
+    });
+
+    it('should configure the kibana step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testKibanaStep');
+      expect(node).toEqual({
+        id: 'testKibanaStep',
+        type: 'kibana.cases.create',
+        configuration: {
+          name: 'testKibanaStep',
+          type: 'kibana.cases.create',
+          with: {
+            title: 'Test Case',
+            description: 'A test case created by workflow',
+            tags: ['automation'],
+            severity: 'medium',
+          },
+        },
+      } as KibanaGraphNode);
+    });
+
+    it('should handle kibana step with raw API format', () => {
+      const rawApiWorkflow = {
+        steps: [
+          {
+            name: 'testKibanaRawStep',
+            type: 'kibana.cases.get',
+            with: {
+              request: {
+                method: 'GET',
+                path: '/api/cases/test-case-id',
+                headers: {
+                  'kbn-xsrf': 'true',
+                },
+              },
+            },
+          } as KibanaStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
+      const node = executionGraph.node('testKibanaRawStep') as unknown as KibanaGraphNode;
+      expect(node.type).toBe('kibana.cases.get');
+      expect(node.configuration.with.request.path).toBe('/api/cases/test-case-id');
     });
   });
 
