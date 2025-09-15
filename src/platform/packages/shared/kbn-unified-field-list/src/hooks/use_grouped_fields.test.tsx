@@ -920,7 +920,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
         services: mockedServices,
         additionalFieldGroups: {
           // recommendedFields is undefined
-          fallbackFields: { test: ['field1'] },
         },
       };
 

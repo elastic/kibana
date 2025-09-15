@@ -185,7 +185,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
-    let recommendedFields = [];
+    let recommendedFields: T[] = [];
 
     if (additionalFieldGroups?.recommendedFields?.length) {
       const allRecommendedFields = additionalFieldGroups?.recommendedFields ?? ([] as T[]);
