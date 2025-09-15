@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Controls main menu panel', async () => {
-      await testSubjects.click('dashboard-controls-menu-button');
+      await dashboardControls.openControlsMenu();
       await a11y.testAppSnapshot();
     });
 
