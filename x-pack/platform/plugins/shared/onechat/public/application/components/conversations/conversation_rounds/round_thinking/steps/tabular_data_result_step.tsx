@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
 
@@ -56,20 +57,15 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
               defaultMessage: 'See documents in Discover',
             }
           )}
+          target="_blank"
         >
-          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-            {i18n.translate(
-              'xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage',
-              {
-                defaultMessage:
-                  '{totalDocuments, plural, one {{totalDocuments, number} record} other {{totalDocuments, number} records}}',
-                values: {
-                  totalDocuments: data.values.length,
-                },
-              }
-            )}
-            <EuiIcon type="popout" />
-          </EuiFlexGroup>
+          <FormattedMessage
+            id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+            defaultMessage="{totalDocuments, plural, one {{totalDocuments, number} document} other {{totalDocuments, number} documents}}"
+            values={{
+              totalDocuments: data.values.length,
+            }}
+          />
         </EuiLink>
       )}
     </EuiFlexGroup>
