@@ -67,7 +67,14 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
 
   if (errorMessage) {
     return (
-      <div css={css`padding: 16px; text-align: center;`}>
+      <div css={css`
+        height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        text-align: center;
+      `}>
         {errorMessage}
       </div>
     );
@@ -76,10 +83,10 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
   if (isLoading) {
     return (
       <div css={css`
+        height: 600px;
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 200px;
       `}>
         <EuiLoadingSpinner size="xl" />
       </div>
@@ -88,7 +95,14 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
 
   if (!options.length && !customComponents.length) {
     return (
-      <div css={css`padding: 16px; text-align: center;`}>
+      <div css={css`
+        height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        text-align: center;
+      `}>
         {emptyMessage || 'No results found'}
       </div>
     );
@@ -101,7 +115,7 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       css={css`
-        max-height: 75vh;
+        height: 600px;
         overflow-y: auto;
         padding: 8px;
         outline: none;
