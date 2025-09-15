@@ -41,7 +41,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import { esql } from '@kbn/esql-ast';
-import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { IndicesAutocompleteResult } from '@kbn/esql-types';
@@ -210,17 +209,15 @@ export class IndexUpdateService {
     this._indexCreated$,
     this._indexName$,
     this._qstr$,
-    this._sortOrder$,
   ]).pipe(
     skipWhile(([indexCreated, indexName]) => {
       return !indexCreated || !indexName;
     }),
-    map(([indexCreated, indexName, qstr, sortOrder]) => {
+    map(([indexCreated, indexName, qstr]) => {
       return this._buildESQLQuery({
         indexName: indexName!,
         qstr,
         includeMetadata: true,
-        sortOrder,
       });
     })
   );
@@ -229,11 +226,10 @@ export class IndexUpdateService {
   public readonly esqlDiscoverQuery$: Observable<string | undefined> = combineLatest([
     this._indexName$,
     this._qstr$,
-    this._sortOrder$,
   ]).pipe(
-    map(([indexName, qstr, sortOrder]) => {
+    map(([indexName, qstr]) => {
       if (indexName) {
-        return this._buildESQLQuery({ indexName, qstr, includeMetadata: false, sortOrder });
+        return this._buildESQLQuery({ indexName, qstr, includeMetadata: false });
       }
     })
   );
@@ -242,12 +238,10 @@ export class IndexUpdateService {
     indexName,
     qstr,
     includeMetadata,
-    sortOrder,
   }: {
     indexName: string;
     qstr: string | null;
     includeMetadata: boolean;
-    sortOrder?: SortOrder[];
   }): string {
     const query = includeMetadata
       ? esql`FROM ${indexName} METADATA _id, _source`
@@ -258,11 +252,6 @@ export class IndexUpdateService {
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;
-
-    if (Array.isArray(sortOrder) && sortOrder.length > 0) {
-      const [firstSort, ...restSort] = sortOrder as Array<[string, ESQLOrderExpression['order']]>;
-      query.sort(firstSort, ...restSort);
-    }
 
     return query.print('basic');
   }

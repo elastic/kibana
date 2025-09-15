@@ -11,21 +11,24 @@ import React, { type FunctionComponent, type RefObject } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+export interface CellContent {
+  docId: string;
+  value: unknown;
+}
 
 export const getCellValueRenderer =
   (
-    rows: DataTableRecord[],
     dataTableRef: RefObject<EuiDataGridRefProps>,
-    canEditIndex: boolean
+    canEditIndex: boolean,
+    setCellBeingEdited: (cellContent: CellContent) => void
   ): FunctionComponent<DataGridCellValueElementProps> =>
-  ({ rowIndex, colIndex, columnId }) => {
-    const row = rows[rowIndex];
-
+  ({ rowIndex, colIndex, columnId, row }) => {
     const cellValue = row.flattened[columnId]?.toString();
 
     const onEditStartHandler = () => {
+      setCellBeingEdited({ docId: row.id, value: cellValue });
       dataTableRef.current?.openCellPopover({
         rowIndex,
         colIndex,

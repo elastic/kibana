@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { RefObject } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -18,24 +17,24 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 import { getInputComponentForType } from '../value_inputs_factory';
 import { isPlaceholderColumn } from '../../utils';
+import type { CellContent } from './cell_value_renderer';
 
 export type OnCellValueChange = (docId: string, update: any) => void;
 export const getValueInputPopover =
   ({
-    rows,
     columns,
     onValueChange,
     dataTableRef,
+    cellBeingEdited,
   }: {
-    rows: DataTableRecord[];
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
     dataTableRef: RefObject<EuiDataGridRefProps>;
+    cellBeingEdited: CellContent | null;
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
-    const row = rows[rowIndex];
-    const docId = row.id as string;
-    const cellValue = row.flattened[columnId]?.toString() ?? '';
+    const docId = cellBeingEdited?.docId;
+    const cellValue = cellBeingEdited?.value ? String(cellBeingEdited?.value) : '';
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 

@@ -32,6 +32,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
 import { type KibanaContextExtra } from '../types';
+import type { CellContent } from './grid_custom_renderers/cell_value_renderer';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 
@@ -77,6 +78,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
+
+  const [cellBeingEdited, setCellBeingEdited] = useState<CellContent | null>(null);
 
   // These are the columns that are currently rendered in the grid.
   // The columns data is taken from the props.columns. It has all the available columns, including placeholders.
@@ -142,16 +145,16 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const renderCellPopover = useMemo(
     () =>
       getValueInputPopover({
-        rows,
         columns: props.columns,
         onValueChange,
         dataTableRef,
+        cellBeingEdited,
       }),
-    [rows, props.columns, onValueChange, dataTableRef]
+    [props.columns, onValueChange, cellBeingEdited]
   );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, dataTableRef, indexUpdateService.canEditIndex);
-  }, [rows, indexUpdateService.canEditIndex]);
+    return getCellValueRenderer(dataTableRef, indexUpdateService.canEditIndex, setCellBeingEdited);
+  }, [dataTableRef, indexUpdateService.canEditIndex, setCellBeingEdited]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
