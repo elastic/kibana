@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*"
-, "../../../packages/private/kbn-data-quality/common/utils/quality_helpers.ts", "../../../packages/private/kbn-data-quality/common/utils/calculate_percentage.ts"  ],
+    , "../../../packages/private/kbn-data-quality/common/utils/quality_helpers.ts", "../../../packages/private/kbn-data-quality/common/utils/calculate_percentage.ts"  ],
   "kbn_references": [
     "@kbn/alerting-comparators",
     "@kbn/alerting-plugin",
@@ -70,7 +70,8 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
-    "@kbn/failure-store-modal"
+    "@kbn/failure-store-modal",
+    "@kbn/data-quality"
   ],
   "exclude": [
     "target/**/*"
