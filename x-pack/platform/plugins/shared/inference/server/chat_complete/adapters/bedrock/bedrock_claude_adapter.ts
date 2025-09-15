@@ -14,6 +14,7 @@ import type {
   ToolResultContentBlock,
 } from '@aws-sdk/client-bedrock-runtime';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isPlainObject } from 'lodash';
 import type { Readable } from 'stream';
 import type { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
@@ -153,7 +154,16 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
         if (typeof message.response === 'string') {
           contentArr.push({ text: message.response });
         } else {
-          contentArr.push({ json: message.response as ToolResultContentBlock.JsonMember['json'] });
+          // It currently accepts only objects, see - https://github.com/aws/aws-sdk-js-v3/issues/7330
+          if (isPlainObject(message.response)) {
+            contentArr.push({
+              json: message.response as ToolResultContentBlock.JsonMember['json'],
+            });
+          } else {
+            throw createInferenceInternalError(
+              `Unsupported tool response type for toolCallId "${message.toolCallId}"; expected string or plain object`
+            );
+          }
         }
 
         return {
