@@ -7,8 +7,10 @@
 
 import type {
   FormulaIndexPatternColumn,
+  CountIndexPatternColumn,
   MetricState,
   OperationType,
+  FormBasedLayer,
 } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -49,7 +51,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.visualization = this.getMetricState();
   }
 
-  getSingleMetricLayer() {
+  getSingleMetricLayer(): FormBasedLayer | undefined {
     const { seriesConfig, selectedMetricField, operationType, dataView, name } =
       this.layerConfigs[0];
 
@@ -70,13 +72,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
       this.metricStateOptions = metricStateOptions;
 
       if (columnType === FORMULA_COLUMN && formula) {
-        return this.getFormulaLayer({
-          formula,
-          label: name ?? columnLabel,
-          dataView,
-          format,
-          filter: columnFilter,
-        });
+        return {
+          ...this.getFormulaLayer({
+            formula,
+            label: name ?? columnLabel,
+            dataView,
+            format,
+            filter: columnFilter,
+          }),
+          indexPatternId: dataView.id!,
+        };
       }
 
       const getSourceField = () => {
@@ -94,31 +99,44 @@ export class SingleMetricLensAttributes extends LensAttributes {
       const isPercentileColumn = operationType?.includes('th');
 
       if (isPercentileColumn) {
-        return this.getPercentileLayer({
-          sourceField,
-          operationType,
-          seriesConfig,
-          columnLabel,
-          columnFilter,
-        });
+        return {
+          ...this.getPercentileLayer({
+            sourceField,
+            operationType,
+            seriesConfig,
+            columnLabel,
+            columnFilter,
+          }),
+          indexPatternId: dataView.id!,
+        };
       }
 
       return {
         columns: {
-          [this.columnId]: {
-            ...buildNumberColumn(sourceField),
-            customLabel: true,
-            label: name ?? columnLabel,
-            operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
-            filter: columnFilter,
-            params: {
-              emptyAsNull,
-            },
-          },
+          [this.columnId]:
+            sourceField === RECORDS_FIELD
+              ? ({
+                  ...buildNumberColumn(sourceField),
+                  customLabel: true,
+                  label: name ?? columnLabel,
+                  operationType: 'count',
+                  filter: columnFilter,
+                  params: {
+                    emptyAsNull: Boolean(emptyAsNull),
+                  },
+                } as CountIndexPatternColumn)
+              : {
+                  ...buildNumberColumn(sourceField),
+                  customLabel: true,
+                  label: name ?? columnLabel,
+                  operationType: operationType || 'median',
+                  filter: columnFilter,
+                },
         },
         columnOrder: [this.columnId],
         incompleteColumns: {},
-      };
+        indexPatternId: dataView.id!,
+      } satisfies FormBasedLayer;
     }
   }
 
@@ -161,7 +179,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
           references: [],
         } satisfies FormulaIndexPatternColumn,
       },
-      indexPatternId: dataView.id,
     };
 
     return layer!;

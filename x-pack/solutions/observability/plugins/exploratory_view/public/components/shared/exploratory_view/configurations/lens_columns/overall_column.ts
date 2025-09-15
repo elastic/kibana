@@ -21,7 +21,7 @@ export function getDistributionInPercentageColumn({
   dataView: DataView;
   formula?: string;
   format?: string;
-}) {
+}): FormulaIndexPatternColumn {
   let lensFormula = formula ?? 'count() / overall_sum(count())';
 
   if (columnFilter) {
