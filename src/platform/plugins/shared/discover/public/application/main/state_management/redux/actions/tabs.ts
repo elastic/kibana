@@ -117,6 +117,21 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       };
 
       if (!existingTab) {
+        tab.initialAppState =
+          'initialAppState' in item
+            ? cloneDeep(item.initialAppState as TabState['initialAppState'])
+            : tab.initialAppState;
+
+        tab.globalState =
+          'globalState' in item
+            ? cloneDeep(item.globalState as TabState['globalState'])
+            : tab.globalState;
+
+        tab.dataRequestParams =
+          'dataRequestParams' in item
+            ? (item.dataRequestParams as TabState['dataRequestParams'])
+            : tab.dataRequestParams;
+
         if (item.duplicatedFromId) {
           // the new tab was created by duplicating an existing tab
           const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);

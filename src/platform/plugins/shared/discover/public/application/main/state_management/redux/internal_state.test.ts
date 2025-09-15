@@ -45,4 +45,51 @@ describe('InternalStateStore', () => {
       dataViewMock
     );
   });
+
+  it('should append a new tab to the tabs list', async () => {
+    const services = createDiscoverServicesMock();
+    const urlStateStorage = createKbnUrlStateStorage();
+    const runtimeStateManager = createRuntimeStateManager();
+    const tabsStorageManager = createTabsStorageManager({
+      urlStateStorage,
+      storage: services.storage,
+    });
+    const store = createInternalStateStore({
+      services: createDiscoverServicesMock(),
+      customizationContext: mockCustomizationContext,
+      runtimeStateManager,
+      urlStateStorage,
+      tabsStorageManager,
+    });
+    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
+    const initialTabId = store.getState().tabs.unsafeCurrentId;
+    expect(store.getState().tabs.allIds).toHaveLength(1);
+    expect(store.getState().tabs.unsafeCurrentId).toBe(initialTabId);
+    const params = {
+      tabLabel: 'New tab',
+      searchSessionId: 'session_123',
+      appState: {
+        query: { query: 'test this', language: 'kuery' },
+      },
+      globalState: {
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-02T00:00:00.000Z',
+        },
+      },
+    };
+    await store.dispatch(internalStateActions.openInNewTab(params));
+    const tabsState = store.getState().tabs;
+    expect(tabsState.allIds).toHaveLength(2);
+    expect(tabsState.unsafeCurrentId).not.toBe(initialTabId);
+    expect(tabsState.unsafeCurrentId).toBe(tabsState.allIds[1]);
+    expect(tabsState.byId[tabsState.unsafeCurrentId].label).toBe(params.tabLabel);
+    expect(tabsState.byId[tabsState.unsafeCurrentId].initialAppState).toEqual(params.appState);
+    expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
+    expect(tabsState.byId[tabsState.unsafeCurrentId].dataRequestParams).toEqual({
+      searchSessionId: params.searchSessionId,
+      timeRangeAbsolute: undefined,
+      timeRangeRelative: undefined,
+    });
+  });
 });
