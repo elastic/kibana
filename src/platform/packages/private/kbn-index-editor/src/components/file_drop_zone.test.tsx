@@ -46,6 +46,7 @@ const mockIndexUpdateService = {
   setError: jest.fn(),
   discardUnsavedChanges: jest.fn(),
   canEditIndex: true,
+  setIsSaving: jest.fn(),
   isSaving$: {
     subscribe: (cb: (isSaving: boolean) => void) => {
       cb(false);
