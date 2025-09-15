@@ -7,7 +7,7 @@
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { defineDockerServersConfig, dockerRegistryPort, packageRegistryDocker } from '@kbn/test';
+import { dockerRegistryPort } from '@kbn/test';
 import { resolve } from 'path';
 import type { CreateTestConfigOptions } from '../shared/types';
 import { pageObjects } from './page_objects';
@@ -27,11 +27,7 @@ export function createTestConfig<
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
-      ...(enableFleetDockerRegistry && {
-        dockerServers: defineDockerServersConfig({
-          registry: packageRegistryDocker,
-        }),
-      }),
+      ...(!enableFleetDockerRegistry && { dockerServers: undefined }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
