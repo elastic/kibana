@@ -311,6 +311,7 @@ export function CollapsibleNav({
                   category.label
                 )
               }
+              titleSize="xs"
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
               onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}

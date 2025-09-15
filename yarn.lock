@@ -2252,10 +2252,9 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@3.3.2":
+"@elastic/eui-theme-borealis@file:./package-3.3.2-20250915-152148.tgz":
   version "3.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.2.tgz#b3b6a9bf0df3cbfc4c4e07f24c5a2f8eec2abd94"
-  integrity sha512-0NbT2MtoaM2ltzyc1ms/lIc163p/XgG/6ePMsEWuHTWkScZe5V1sN7cnjzKncwpIIDJ0CfdOkeJQKcL/gj7bBA==
+  resolved "file:./package-3.3.2-20250915-152148.tgz#1dd70dbf1f63312f0f9d6e73dcc3aa016717721a"
 
 "@elastic/eui-theme-common@4.0.0":
   version "4.0.0"
@@ -2266,12 +2265,18 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@106.4.0":
-  version "106.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.4.0.tgz#a974ebfa7ea5636235edd64022e9f2122ac44d40"
-  integrity sha512-LCNImIS3+ZN1SrsppqICkm/1DH5uTe1YptyVPctsogViPVm6CxEeo+SyFz1PDKE5wKbmSvCHcVGVUf2xjH7RgA==
+"@elastic/eui-theme-common@file:./package-4.0.0-20250915-152148.tgz":
+  version "4.0.0"
+  resolved "file:./package-4.0.0-20250915-152148.tgz#a8f8ae2f23927fdc34fae65c7a42f2c5b331ecb0"
   dependencies:
-    "@elastic/eui-theme-common" "4.0.0"
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./package-106.5.0-20250915-152148.tgz":
+  version "106.5.0"
+  resolved "file:./package-106.5.0-20250915-152148.tgz#2bb82fdfa8707b8e4b3d146981037df49b9b1205"
+  dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
