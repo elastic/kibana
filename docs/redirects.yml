@@ -1,3 +1,3 @@
 redirects:
   # Contributing to docs
-  'docs/extend/development-documentation.md': '!docs-content://extend/contribute/index.md'
+  'extend/development-documentation.md': 'docs-content://extend/contribute/index.md'
