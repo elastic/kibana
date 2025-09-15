@@ -2,7 +2,6 @@
   "type": "plugin",
   "id": "@kbn/chat-data-registry-plugin",
   "owner": [
-    "@elastic/search-kibana",
     "@elastic/workchat-eng"
   ],
   "group": "platform",
