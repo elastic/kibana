@@ -15,7 +15,7 @@ export default createTestConfig({
   serverlessProject: 'security',
   pageObjects,
   services,
-  enableFleetDockerRegistry: true,
+  enableFleetDockerRegistry: false,
   junit: {
     reportName: 'Serverless Security Cloud Security Functional Tests',
   },
