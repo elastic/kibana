@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { InventoryItemType, InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  DataSchemaFormat,
+  InventoryItemType,
+  InventoryTsvbType,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
@@ -22,6 +26,7 @@ interface UseMetadataProps {
     to: number;
   };
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
+  schema?: DataSchemaFormat | null;
 }
 export function useMetadata({
   entityId,
@@ -30,6 +35,7 @@ export function useMetadata({
   timeRange,
   requiredTsvb = [],
   request$,
+  schema,
 }: UseMetadataProps) {
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
@@ -40,11 +46,12 @@ export function useMetadata({
           nodeType: entityType,
           sourceId,
           timeRange,
+          schema: schema ?? 'ecs',
         }),
       });
       return decodeOrThrow(InfraMetadataRT)(response);
     },
-    [entityId, entityType, sourceId, timeRange],
+    [entityId, entityType, sourceId, timeRange, schema],
     {
       requestObservable$: request$,
     }

@@ -16,6 +16,7 @@ export const InfraMetadataRequestRT = rt.type({
     from: rt.number,
     to: rt.number,
   }),
+  schema: rt.string,
 });
 
 export const InfraMetadataFeatureRT = rt.type({

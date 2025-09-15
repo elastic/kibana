@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema as configSchema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { get } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
@@ -21,7 +21,7 @@ import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
+const escapeHatch = configSchema.object({}, { unknowns: 'allow' });
 
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -35,7 +35,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      const { nodeId, nodeType, sourceId, timeRange } = pipe(
+      const { nodeId, nodeType, sourceId, timeRange, schema } = pipe(
         InfraMetadataRequestRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
@@ -64,7 +64,8 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         configuration,
         nodeId,
         nodeType,
-        timeRange
+        timeRange,
+        schema
       );
       const cloudInstanceId = get(info, 'cloud.instance.id');
 

@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { startsWith, merge } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
@@ -27,7 +27,8 @@ export const getNodeInfo = async (
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InventoryItemType,
-  timeRange: { from: number; to: number }
+  timeRange: { from: number; to: number },
+  schema: DataSchemaFormat
 ): Promise<InfraMetadataInfo> => {
   // If the nodeType is a Kubernetes pod then we need to get the node info
   // from a host record instead of a pod. This is due to the fact that any host
@@ -50,11 +51,22 @@ export const getNodeInfo = async (
         sourceConfiguration,
         kubernetesNodeName,
         'host',
-        timeRange
+        timeRange,
+        schema
       );
     }
     return {};
   }
+  const isSemconvSchema = schema === 'semconv';
+
+  const getField = (field: string) =>
+    isSemconvSchema
+      ? { docvalue_fields: [field] }
+      : {
+          _source: {
+            includes: [field],
+          },
+        };
   const fields = findInventoryFields(nodeType);
   const params = {
     allow_no_indices: true,
@@ -88,9 +100,7 @@ export const getNodeInfo = async (
           aggs: {
             latest: {
               top_hits: {
-                _source: {
-                  includes: ['host.*'],
-                },
+                ...getField('host.*'),
                 size: 10,
                 sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
               },
@@ -104,9 +114,7 @@ export const getNodeInfo = async (
           aggs: {
             latest: {
               top_hits: {
-                _source: {
-                  includes: ['cloud.*'],
-                },
+                ...getField('cloud.*'),
                 size: 10,
                 sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
               },
@@ -120,9 +128,7 @@ export const getNodeInfo = async (
           aggs: {
             latest: {
               top_hits: {
-                _source: {
-                  includes: ['agent.*'],
-                },
+                ...getField('agent.*'),
                 size: 10,
                 sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
               },
@@ -136,79 +142,73 @@ export const getNodeInfo = async (
           aggs: {
             latest: {
               top_hits: {
-                _source: {
-                  includes: ['container.*'],
-                },
+                ...getField('container.*'),
                 size: 10,
                 sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
               },
             },
           },
         },
-        resourceOsMetadata: {
-          filter: {
-            exists: { field: 'resource.attributes.os.type' },
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                _source: {
-                  includes: ['resource.attributes.os.*'],
+        ...(isSemconvSchema
+          ? {
+              resourceOsMetadata: {
+                filter: {
+                  exists: { field: 'resource.attributes.os.type' },
                 },
-                size: 10,
-                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
-              },
-            },
-          },
-        },
-        resourceHostMetadata: {
-          filter: {
-            exists: { field: 'resource.attributes.host.name' },
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                _source: {
-                  includes: ['resource.attributes.host.*'],
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      docvalue_fields: ['resource.attributes.os.*'],
+                      size: 10,
+                      sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+                    },
+                  },
                 },
-                size: 10,
-                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
               },
-            },
-          },
-        },
-        resourceAgentMetadata: {
-          filter: {
-            exists: { field: 'resource.attributes.agent.name' },
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                _source: {
-                  includes: ['resource.attributes.agent.*'],
+              resourceHostMetadata: {
+                filter: {
+                  exists: { field: 'resource.attributes.host.name' },
                 },
-                size: 10,
-                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
-              },
-            },
-          },
-        },
-        resourceCloudMetadata: {
-          filter: {
-            exists: { field: 'resource.attributes.cloud.provider' },
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                _source: {
-                  includes: ['resource.attributes.cloud.*'],
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      docvalue_fields: ['resource.attributes.host.*'],
+                      size: 10,
+                      sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+                    },
+                  },
                 },
-                size: 10,
-                sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
               },
-            },
-          },
-        },
+              resourceAgentMetadata: {
+                filter: {
+                  exists: { field: 'resource.attributes.agent.name' },
+                },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      docvalue_fields: ['resource.attributes.agent.*'],
+                      size: 10,
+                      sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+                    },
+                  },
+                },
+              },
+              resourceCloudMetadata: {
+                filter: {
+                  exists: { field: 'resource.attributes.cloud.provider' },
+                },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      docvalue_fields: ['resource.attributes.cloud.*'],
+                      size: 10,
+                      sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+                    },
+                  },
+                },
+              },
+            }
+          : {}),
       },
     },
   };
@@ -244,7 +244,11 @@ export const getNodeInfo = async (
     const mergedFields: Record<string, any> = {};
 
     hits.forEach((hit: any) => {
-      if (hit?._source) {
+      if (hit?.fields) {
+        unflattenMetadataInfoFields(mergedFields, hit);
+      }
+
+      if (hit?._source && !isSemconvSchema) {
         const hitFields: Record<string, any> = {};
         unflattenMetadataFromSource(hitFields, hit._source);
 
