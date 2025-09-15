@@ -345,7 +345,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
   startListening({
     actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
     effect: () => {
-      dismissFlyouts([DiscoverFlyouts.lensEdit]);
+      dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
     },
   });
 
