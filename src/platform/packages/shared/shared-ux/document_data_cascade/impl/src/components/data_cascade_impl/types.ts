@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeShape } from '@elastic/eui';
+import type { MouseEvent } from 'react';
+import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
 import type { Row, CellContext } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
@@ -59,10 +60,21 @@ interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
   nodePathMap: Record<string, string>;
 }
 
-export interface CascadeRowActionProps<G extends GroupNode> {
+export interface CascadeRowActionProps {
   hideOver?: number;
-  rowInstance: Row<G>;
-  rowHeaderActions: (params: { row: Row<G> }) => React.ReactNode[];
+  headerRowActions: Array<
+    Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
+      onClick: (e: MouseEvent<HTMLButtonElement>) => void;
+    } & (
+        | {
+            label?: React.ReactNode;
+          }
+        | {
+            label: React.ReactNode;
+            iconSide?: EuiButtonEmptyProps['iconSide'];
+          }
+      )
+  >;
 }
 
 export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends LeafNode> {
@@ -97,7 +109,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
   /**
    * @description The row header actions slot for the cascade row.
    */
-  rowHeaderActions?: CascadeRowActionProps<G>['rowHeaderActions'];
+  rowHeaderActions?: (params: { row: Row<G> }) => CascadeRowActionProps['headerRowActions'];
   /**
    * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
    */

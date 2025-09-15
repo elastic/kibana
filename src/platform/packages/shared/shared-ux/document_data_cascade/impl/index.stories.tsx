@@ -15,7 +15,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiBasicTable,
   EuiHealth,
   EuiStat,
@@ -147,12 +146,19 @@ export const CascadeGridImplementation: StoryObj<
                   : baseSlotDef;
               }}
               rowHeaderActions={({ row }) => [
-                <EuiButtonEmpty color="text" iconSide="right" iconType="arrowDown" flush="right">
-                  <FormattedMessage
-                    id="sharedUXPackages.data_cascade.demo.row.action"
-                    defaultMessage="Take action"
-                  />
-                </EuiButtonEmpty>,
+                {
+                  iconType: 'arrowDown',
+                  iconSide: 'right',
+                  onClick: () => {
+                    /** Noop click handler */
+                  },
+                  label: (
+                    <FormattedMessage
+                      id="sharedUXPackages.data_cascade.demo.row.action"
+                      defaultMessage="Take action"
+                    />
+                  ),
+                },
               ]}
             >
               <DataCascadeRowCell
