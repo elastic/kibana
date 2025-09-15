@@ -287,7 +287,6 @@ describe('convertToBuildEsQuery', () => {
     const updatedConfig = { ...config, ignoreFilterIfFieldNotInIndex: true };
 
     it('should use dataViewSpec when an empty dataView is provided', () => {
-      const updatedConfig = { ...config, ignoreFilterIfFieldNotInIndex: true };
       mockDataViewSpec.fields = {
         _id: {
           name: '_id',
