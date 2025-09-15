@@ -144,7 +144,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
-      analytics: core.analytics,
+      getAnalytics: () => core.analytics,
 
       getServerBasePath: () => core.http.basePath.serverBasePath,
 

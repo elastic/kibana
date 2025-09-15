@@ -24,10 +24,7 @@ import { calculateThreeWayRuleFieldsDiff } from '../../logic/diff/calculation/ca
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getValueForField } from './get_value_for_field';
-import {
-  createRuleUpdateTelemetryDraft,
-  type RuleUpdateTelemetryDraft,
-} from './update_rule_telemetry';
+import type { RuleUpdateContext } from './update_rule_telemetry';
 
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
@@ -38,7 +35,7 @@ interface CreateModifiedPrebuiltRuleAssetsProps {
 interface ProcessedRules {
   modifiedPrebuiltRuleAssets: PrebuiltRuleAsset[];
   processingErrors: Array<PromisePoolError<{ rule_id: string }>>;
-  ruleUpdateTelemetryDrafts: RuleUpdateTelemetryDraft[];
+  ruleUpdateContexts: RuleUpdateContext[];
 }
 
 export const createModifiedPrebuiltRuleAssets = ({
@@ -53,7 +50,7 @@ export const createModifiedPrebuiltRuleAssets = ({
       on_conflict: onConflict,
     } = requestBody;
 
-    const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpdateTelemetryDrafts } =
+    const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpdateContexts } =
       upgradeableRules.reduce<ProcessedRules>(
         (processedRules, upgradeableRule) => {
           const targetRuleType = upgradeableRule.target.type;
@@ -112,13 +109,12 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
 
-            const ruleUpdateTelemetryDraft = createRuleUpdateTelemetryDraft({
-              calculatedRuleDiff,
+            processedRules.ruleUpdateContexts.push({
               ruleId,
               ruleName: upgradeableRule.target.name,
-              hasBaseVersion: upgradeableRule.base != null,
+              hasBaseVersion: !!upgradeableRule.base,
+              fieldsDiff: calculatedRuleDiff,
             });
-            processedRules.ruleUpdateTelemetryDrafts.push(ruleUpdateTelemetryDraft);
 
             return processedRules;
           } catch (err) {
@@ -132,14 +128,14 @@ export const createModifiedPrebuiltRuleAssets = ({
         {
           modifiedPrebuiltRuleAssets: [],
           processingErrors: [],
-          ruleUpdateTelemetryDrafts: [],
+          ruleUpdateContexts: [],
         }
       );
 
     return {
       modifiedPrebuiltRuleAssets,
       processingErrors,
-      ruleUpdateTelemetryDrafts,
+      ruleUpdateContexts,
     };
   });
 };

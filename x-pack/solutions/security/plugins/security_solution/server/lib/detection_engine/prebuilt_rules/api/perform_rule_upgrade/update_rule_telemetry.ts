@@ -20,7 +20,14 @@ export type BasicRuleFieldsDiff = Record<string, BasicDiffInfo>;
 
 type UpdateRuleFinalResult = 'SUCCESS' | 'SKIP' | 'ERROR';
 
-export interface RuleUpdateTelemetryDraft {
+export interface RuleUpdateContext {
+  ruleId: string;
+  ruleName: string;
+  hasBaseVersion: boolean;
+  fieldsDiff: BasicRuleFieldsDiff;
+}
+
+export interface RuleUpdateTelemetry {
   ruleId: string;
   ruleName: string;
   hasBaseVersion: boolean;
@@ -34,31 +41,30 @@ export interface RuleUpdateTelemetryDraft {
   updatedFieldsWithNonSolvableConflicts: string[];
   updatedFieldsWithSolvableConflicts: string[];
   updatedFieldsWithNoConflicts: string[];
-}
-
-export interface RuleUpdateTelemetry extends RuleUpdateTelemetryDraft {
   finalResult: UpdateRuleFinalResult;
 }
 
-interface BuildRuleUpdateTelemetryDraftParams {
-  calculatedRuleDiff: BasicRuleFieldsDiff;
+interface CreateRuleUpdateTelemetryEventParams {
+  fieldsDiff: BasicRuleFieldsDiff;
   ruleId: string;
   ruleName: string;
   hasBaseVersion: boolean;
+  finalResult: UpdateRuleFinalResult;
 }
 
-export function createRuleUpdateTelemetryDraft({
-  calculatedRuleDiff,
+function createRuleUpdateTelemetryEvent({
+  fieldsDiff,
   ruleId,
   ruleName,
   hasBaseVersion,
-}: BuildRuleUpdateTelemetryDraftParams): RuleUpdateTelemetryDraft {
+  finalResult,
+}: CreateRuleUpdateTelemetryEventParams): RuleUpdateTelemetry {
   const updatedFieldsTotal: string[] = [];
   const updatedFieldsWithNonSolvableConflicts: string[] = [];
   const updatedFieldsWithSolvableConflicts: string[] = [];
   const updatedFieldsWithNoConflicts: string[] = [];
 
-  Object.entries(calculatedRuleDiff).forEach(([fieldName, diff]) => {
+  Object.entries(fieldsDiff).forEach(([fieldName, diff]) => {
     if (fieldName === 'version') {
       return;
     }
@@ -69,7 +75,7 @@ export function createRuleUpdateTelemetryDraft({
       diff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
       diff.diff_outcome === ThreeWayDiffOutcome.MissingBaseCanUpdate;
 
-    if (isUpdatableOutcome) {
+    if (!isUpdatableOutcome) {
       return;
     }
 
@@ -89,24 +95,21 @@ export function createRuleUpdateTelemetryDraft({
     }
   });
 
-  const nonSolvableConflictCount = updatedFieldsWithNonSolvableConflicts.length;
-  const solvableConflictCount = updatedFieldsWithSolvableConflicts.length;
-  const noConflictCount = updatedFieldsWithNoConflicts.length;
-
   return {
     ruleId,
     ruleName,
     hasBaseVersion,
     updatedFieldsSummary: {
       count: updatedFieldsTotal.length,
-      nonSolvableConflictsCount: nonSolvableConflictCount,
-      solvableConflictsCount: solvableConflictCount,
-      noConflictsCount: noConflictCount,
+      nonSolvableConflictsCount: updatedFieldsWithNonSolvableConflicts.length,
+      solvableConflictsCount: updatedFieldsWithSolvableConflicts.length,
+      noConflictsCount: updatedFieldsWithNoConflicts.length,
     },
     updatedFieldsTotal,
     updatedFieldsWithNonSolvableConflicts,
     updatedFieldsWithSolvableConflicts,
     updatedFieldsWithNoConflicts,
+    finalResult,
   };
 }
 
@@ -126,32 +129,50 @@ interface BasicSkippedRule {
 
 export function sendRuleUpdateTelemetryEvents(
   analytics: AnalyticsServiceStart,
-  draftsByRuleId: Map<string, RuleUpdateTelemetryDraft>,
+  RuleUpdateContextsMap: Map<string, RuleUpdateContext>,
   updatedRules: BasicRuleResponse[],
   installationErrors: BasicInstallationError[],
   skippedRules: BasicSkippedRule[]
 ) {
   try {
     for (const ruleResponse of updatedRules) {
-      const draft = draftsByRuleId.get(ruleResponse.rule_id);
-      if (draft) {
-        const event: RuleUpdateTelemetry = { ...draft, finalResult: 'SUCCESS' };
+      const ruleUpdateContext = RuleUpdateContextsMap.get(ruleResponse.rule_id);
+      if (ruleUpdateContext) {
+        const event: RuleUpdateTelemetry = createRuleUpdateTelemetryEvent({
+          fieldsDiff: ruleUpdateContext.fieldsDiff,
+          ruleId: ruleUpdateContext.ruleId,
+          ruleName: ruleUpdateContext.ruleName,
+          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
+          finalResult: 'SUCCESS',
+        });
         analytics.reportEvent(DETECTION_RULE_UPDATE_EVENT.eventType, event);
       }
     }
 
     for (const erroredRule of installationErrors) {
-      const draft = draftsByRuleId.get(erroredRule.item.rule_id);
-      if (draft) {
-        const event: RuleUpdateTelemetry = { ...draft, finalResult: 'ERROR' };
+      const ruleUpdateContext = RuleUpdateContextsMap.get(erroredRule.item.rule_id);
+      if (ruleUpdateContext) {
+        const event: RuleUpdateTelemetry = createRuleUpdateTelemetryEvent({
+          fieldsDiff: ruleUpdateContext.fieldsDiff,
+          ruleId: ruleUpdateContext.ruleId,
+          ruleName: ruleUpdateContext.ruleName,
+          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
+          finalResult: 'ERROR',
+        });
         analytics.reportEvent(DETECTION_RULE_UPDATE_EVENT.eventType, event);
       }
     }
 
     for (const skippedRule of skippedRules) {
-      const draft = draftsByRuleId.get(skippedRule.rule_id);
-      if (draft) {
-        const event: RuleUpdateTelemetry = { ...draft, finalResult: 'SKIP' };
+      const ruleUpdateContext = RuleUpdateContextsMap.get(skippedRule.rule_id);
+      if (ruleUpdateContext) {
+        const event: RuleUpdateTelemetry = createRuleUpdateTelemetryEvent({
+          fieldsDiff: ruleUpdateContext.fieldsDiff,
+          ruleId: ruleUpdateContext.ruleId,
+          ruleName: ruleUpdateContext.ruleName,
+          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
+          finalResult: 'SKIP',
+        });
         analytics.reportEvent(DETECTION_RULE_UPDATE_EVENT.eventType, event);
       }
     }

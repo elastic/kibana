@@ -53,7 +53,7 @@ export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
-  analytics: AnalyticsServiceSetup;
+  getAnalytics: () => AnalyticsServiceSetup;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getEndpointService: () => EndpointAppContextService;

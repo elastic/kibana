@@ -151,7 +151,7 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
-    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
+    getAnalytics: jest.fn(() => analyticsServiceMock.createAnalyticsServiceSetup()),
     getServerBasePath: jest.fn(() => ''),
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)

@@ -42,11 +42,8 @@ import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
-import type { RuleUpdateTelemetryDraft } from './update_rule_telemetry';
-import {
-  sendRuleUpdateTelemetryEvents,
-  createRuleUpdateTelemetryDraft,
-} from './update_rule_telemetry';
+import type { RuleUpdateContext } from './update_rule_telemetry';
+import { sendRuleUpdateTelemetryEvents } from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -64,7 +61,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
-    const analytics = ctx.securitySolution.analytics;
+    const analytics = ctx.securitySolution.getAnalytics();
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -85,7 +82,7 @@ export const performRuleUpgradeHandler = async (
     const updatedRules: RuleResponse[] = [];
     const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
-    const ruleUpdateTelemetryDraftsMap = new Map<string, RuleUpdateTelemetryDraft>();
+    const ruleUpdateContextsMap = new Map<string, RuleUpdateContext>();
 
     const ruleUpgradeQueue: Array<{
       rule_id: RuleSignatureId;
@@ -184,15 +181,12 @@ export const performRuleUpgradeHandler = async (
               conflict,
             });
 
-            ruleUpdateTelemetryDraftsMap.set(
-              targetRule.rule_id,
-              createRuleUpdateTelemetryDraft({
-                calculatedRuleDiff: ruleDiff.fields,
-                ruleId: targetVersion.rule_id,
-                ruleName: targetVersion.name,
-                hasBaseVersion: baseVersion == null,
-              })
-            );
+            ruleUpdateContextsMap.set(targetRule.rule_id, {
+              ruleId: targetRule.rule_id,
+              ruleName: currentVersion.name,
+              hasBaseVersion: !!baseVersion,
+              fieldsDiff: ruleDiff.fields,
+            });
             return;
           }
         }
@@ -205,7 +199,7 @@ export const performRuleUpgradeHandler = async (
         });
       });
 
-      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpdateTelemetryDrafts } =
+      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpdateContexts } =
         createModifiedPrebuiltRuleAssets({
           upgradeableRules,
           requestBody: request.body,
@@ -213,8 +207,8 @@ export const performRuleUpgradeHandler = async (
         });
       ruleErrors.push(...processingErrors);
 
-      ruleUpdateTelemetryDrafts.forEach((draft) => {
-        ruleUpdateTelemetryDraftsMap.set(draft.ruleId, draft);
+      ruleUpdateContexts.forEach((ruleUpdateContext) => {
+        ruleUpdateContextsMap.set(ruleUpdateContext.ruleId, ruleUpdateContext);
       });
 
       if (isDryRun) {
@@ -248,7 +242,7 @@ export const performRuleUpgradeHandler = async (
 
       sendRuleUpdateTelemetryEvents(
         analytics,
-        ruleUpdateTelemetryDraftsMap,
+        ruleUpdateContextsMap,
         updatedRules,
         ruleErrors,
         skippedRules
