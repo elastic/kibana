@@ -399,12 +399,12 @@ export function initializeLayoutManager(
       },
       isSectionCollapsed: (sectionId?: string) =>
         isSectionCollapsed(layout$.getValue().sections, sectionId),
+      childrenReady$: childrenReady$(children$, layout$),
+      getActivePanelCount: () => getActivePanelCount(layout$.getValue()),
     },
     api: {
       /** Panels */
       children$,
-      childrenReady$: childrenReady$(children$, layout$),
-      getActivePanelCount: () => getActivePanelCount(layout$.getValue()),
       getChildApi,
       addNewPanel,
       removePanel,

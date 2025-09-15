@@ -56,11 +56,6 @@ export interface PresentationContainer<ApiType extends unknown = unknown> extend
    * to retrieve the child API for a specific panel.
    */
   children$: PublishingSubject<{ [key: string]: ApiType }>;
-
-  /**
-   * A publishing subject signaling when all children APIs are available
-   */
-  childrenReady$?: Observable<number>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {

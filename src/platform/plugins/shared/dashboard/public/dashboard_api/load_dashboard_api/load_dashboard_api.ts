@@ -87,9 +87,14 @@ export async function loadDashboardApi({
     savedObjectId,
   });
 
-  const performanceSubscription = startQueryPerformanceTracking(api, {
-    firstLoad: true,
-    creationStartTime,
+  const performanceSubscription = startQueryPerformanceTracking({
+    children$: api.children$,
+    childrenReady$: internalApi.childrenReady$,
+    getActivePanelCount: internalApi.getActivePanelCount,
+    performanceState: {
+      firstLoad: true,
+      creationStartTime,
+    },
   });
 
   if (savedObjectId && !incomingEmbeddable) {

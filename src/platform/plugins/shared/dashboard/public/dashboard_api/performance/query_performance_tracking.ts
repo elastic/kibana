@@ -22,7 +22,7 @@ import {
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
-import type { DashboardApi } from '../types';
+import type { DashboardInternalApi } from '../types';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
@@ -41,13 +41,18 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   dashboardSubsequentLoad: 2, // on filter-refresh
 };
 
-export function startQueryPerformanceTracking(
-  dashboard: Required<PresentationContainer> & {
-    getActivePanelCount: DashboardApi['getActivePanelCount'];
-  },
-  performanceState: PerformanceState
-) {
-  return combineLatest([dashboard.childrenReady$, dashboard.children$])
+export function startQueryPerformanceTracking({
+  childrenReady$,
+  children$,
+  getActivePanelCount,
+  performanceState,
+}: {
+  childrenReady$: DashboardInternalApi['childrenReady$'];
+  getActivePanelCount: DashboardInternalApi['getActivePanelCount'];
+  children$: PresentationContainer['children$'];
+  performanceState: PerformanceState;
+}) {
+  return combineLatest([childrenReady$, children$])
     .pipe(
       skipWhile(([childrenReady]) => !childrenReady),
       map(([, children]) => {
@@ -78,7 +83,7 @@ export function startQueryPerformanceTracking(
       pairwise()
     )
     .subscribe(([wasDashboardStillLoading, isDashboardStillLoading]: [boolean, boolean]) => {
-      const panelCount = dashboard.getActivePanelCount();
+      const panelCount = getActivePanelCount();
       const now = performance.now();
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
         ? 'sessionFirstLoad'
