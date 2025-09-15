@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useController, useFormContext } from 'react-hook-form';
 import { css } from '@emotion/react';
+import { EsResourceType } from '@kbn/onechat-common';
 import { labels } from '../../../../../utils/i18n';
 import { useIndexSearchSources } from '../../../../../hooks/tools/use_resolve_search_sources';
 import type { IndexSearchToolFormData } from '../../types/tool_form_types';
@@ -24,28 +25,13 @@ import type { IndexSearchToolFormData } from '../../types/tool_form_types';
 const DEFAULT_PAGE_SIZE = 5;
 
 export const IndexSearchPattern: React.FC = () => {
-  const { control, setValue, setError, clearErrors } = useFormContext<IndexSearchToolFormData>();
+  const { control, setValue, trigger } = useFormContext<IndexSearchToolFormData>();
   const {
     field: { ref, value, onChange, onBlur, name },
     fieldState,
   } = useController({
     name: 'pattern',
     control,
-    rules: {
-      required: {
-        value: true,
-        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.requiredError', {
-          defaultMessage: 'Pattern is required.',
-        }),
-      },
-      pattern: {
-        value: /^(?!.*,$).+$/,
-        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.trailingCommaError', {
-          defaultMessage:
-            'Pattern cannot end with a comma. Add another pattern or remove the comma.',
-        }),
-      },
-    },
   });
 
   const patternValue = value ?? '';
@@ -57,34 +43,12 @@ export const IndexSearchPattern: React.FC = () => {
     setPageIndex(0);
   }, [patternValue]);
 
-  const { data, isLoading, error } = useIndexSearchSources({
+  const { data, isLoading } = useIndexSearchSources({
     pattern: patternValue,
   });
 
   const items = useMemo(() => (hasQuery ? data?.results ?? [] : []), [data, hasQuery]);
   const total = hasQuery ? data?.total ?? 0 : 0;
-
-  const validatePattern = useCallback(() => {
-    if (fieldState.invalid) return;
-
-    if (error) {
-      setError('pattern', {
-        type: 'error',
-        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.error', {
-          defaultMessage: 'Error loading index patterns.',
-        }),
-      });
-    } else if (patternValue && total === 0) {
-      setError('pattern', {
-        type: 'noMatches',
-        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.noMatchesError', {
-          defaultMessage: 'No matches found for this pattern.',
-        }),
-      });
-    } else if (!patternValue || total > 0) {
-      clearErrors('pattern');
-    }
-  }, [patternValue, total, error, setError, clearErrors, fieldState.invalid]);
 
   const pageOfItems = useMemo(() => {
     const start = pageIndex * pageSize;
@@ -102,11 +66,11 @@ export const IndexSearchPattern: React.FC = () => {
       render: (type: string) => {
         return (
           <EuiBadge color="hollow" data-test-subj="onechatIndexPatternBadge">
-            {type === 'index'
+            {type === EsResourceType.index
               ? labels.tools.indexTypeLabel
-              : type === 'alias'
+              : type === EsResourceType.alias
               ? labels.tools.aliasTypeLabel
-              : type === 'data_stream'
+              : type === EsResourceType.dataStream
               ? labels.tools.dataStreamTypeLabel
               : undefined}
           </EuiBadge>
@@ -133,8 +97,10 @@ export const IndexSearchPattern: React.FC = () => {
           }),
           icon: 'plusInCircle',
           type: 'icon',
-          onClick: (item: { name: string }) =>
-            setValue('pattern', item.name, { shouldDirty: true, shouldValidate: true }),
+          onClick: async (item: { name: string }) => {
+            setValue('pattern', item.name, { shouldDirty: true, shouldValidate: true });
+            await trigger('pattern');
+          },
         },
       ],
     },
@@ -146,10 +112,7 @@ export const IndexSearchPattern: React.FC = () => {
         name={name}
         value={patternValue}
         onChange={onChange}
-        onBlur={() => {
-          onBlur();
-          validatePattern();
-        }}
+        onBlur={onBlur}
         inputRef={ref}
         isInvalid={fieldState.invalid}
         aria-label={i18n.translate('xpack.onechat.tools.indexPattern.pattern.inputAriaLabel', {
