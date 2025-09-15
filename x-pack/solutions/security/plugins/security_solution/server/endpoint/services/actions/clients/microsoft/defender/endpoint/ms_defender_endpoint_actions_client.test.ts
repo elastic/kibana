@@ -802,7 +802,6 @@ describe('MS Defender response actions client', () => {
         index: ENDPOINT_ACTIONS_INDEX,
         response: originalActionSearchResponse,
       });
-
     });
 
     it('should send cancel request to Microsoft Defender with expected parameters', async () => {
@@ -918,7 +917,6 @@ describe('MS Defender response actions client', () => {
       ).rejects.toThrow('action_id is required in parameters');
     });
 
-
     it('should throw error when external action ID cannot be resolved', async () => {
       // Mock empty search results for original action
       const generator = new EndpointActionGenerator('seed');
@@ -997,8 +995,8 @@ describe('MS Defender response actions client', () => {
     it('should handle MDE error when action status is not Pending or InProgress', async () => {
       const mdeError = new Error(
         'Attempt to send [cancelAction] to Microsoft Defender for Endpoint failed: Status code: 400. Message: API Error: [Bad Request] Request failed with status code 400\n' +
-        'URL called:[post] https://api.securitycenter.windows.com/api/machineactions/357dd251-e714-4a6e-b00a-93c06d87aaff/cancel\n' +
-        'Response body: {"error":{"code":"BadRequest","message":"Canceled machine action status must be Pending or InProgress, Current Status: Failed, machineActionId: 357dd251-e714-4a6e-b00a-93c06d87aaff","target":"|00-fdaabbeb2ebe3146b47f958d7b671dcd-e13c20d6f3402a0d-01.8c111081_1.1."}}'
+          'URL called:[post] https://api.securitycenter.windows.com/api/machineactions/357dd251-e714-4a6e-b00a-93c06d87aaff/cancel\n' +
+          'Response body: {"error":{"code":"BadRequest","message":"Canceled machine action status must be Pending or InProgress, Current Status: Failed, machineActionId: 357dd251-e714-4a6e-b00a-93c06d87aaff","target":"|00-fdaabbeb2ebe3146b47f958d7b671dcd-e13c20d6f3402a0d-01.8c111081_1.1."}}'
       );
 
       connectorActionsMock.execute.mockImplementation(async (options) => {
@@ -1040,7 +1038,6 @@ describe('MS Defender response actions client', () => {
         'Cancel request was sent to Microsoft Defender, but Machine Action Id was not provided!'
       );
     });
-
 
     it('should handle ES client errors when resolving external action ID', async () => {
       const generator = new EndpointActionGenerator('seed');
@@ -1782,7 +1779,6 @@ describe('MS Defender response actions client', () => {
           msMachineActionsApiResponse
         );
       });
-
 
       it('should generate success response for cancel action with Cancelled status', async () => {
         const expectedResult: LogsEndpointActionResponse = {
