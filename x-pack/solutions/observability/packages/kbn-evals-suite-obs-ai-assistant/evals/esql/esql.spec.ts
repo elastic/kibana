@@ -39,7 +39,7 @@ const evaluate = base.extend<{
   ],
 });
 
-evaluate.describe.only('ES|QL query generation', { tag: '@svlOblt' }, () => {
+evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
   // --- Test Suite for Logs Data ---
   evaluate.describe('with Logs data', () => {
     evaluate.beforeAll(async ({ logsSynthtraceEsClient }) => {
