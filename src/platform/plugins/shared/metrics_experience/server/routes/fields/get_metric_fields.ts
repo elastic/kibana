@@ -108,7 +108,6 @@ export async function getMetricFields({
     return {
       ...field,
       description,
-      unit: field.unit,
       source,
       // Sort dimensions alphabetically by name
       dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),

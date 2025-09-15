@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const MCP_SERVER_PATH = '/api/chat/mcp';
+import { publicApiPath } from './constants';
+
+export const MCP_SERVER_PATH = `${publicApiPath}/mcp`;
