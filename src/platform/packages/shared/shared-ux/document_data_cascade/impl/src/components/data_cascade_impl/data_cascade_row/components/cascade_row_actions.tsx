@@ -9,57 +9,90 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  useGeneratedHtmlId,
+  type EuiButtonIconProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GroupNode } from '../../../../store_provider';
 import type { CascadeRowActionProps } from '../../types';
 
-export function CascadeRowActions<G extends GroupNode>({
-  rowHeaderActions,
-  rowInstance,
+export const CascadeRowActions = function RowActions({
+  headerRowActions,
   hideOver = 2,
-}: CascadeRowActionProps<G>) {
-  const actions = useMemo(
-    () => rowHeaderActions?.({ row: rowInstance }) || [],
-    [rowHeaderActions, rowInstance]
+}: CascadeRowActionProps) {
+  const id = useGeneratedHtmlId({
+    prefix: 'dataCascadeRowActions',
+  });
+
+  const defaultActionProps = useMemo<Pick<EuiButtonIconProps, 'color' | 'size'>>(
+    () => ({
+      color: 'text',
+      size: 's',
+    }),
+    []
+  );
+
+  const visibleActions = useMemo(
+    () =>
+      headerRowActions.slice(0, hideOver).map(({ label, ...props }, index) => (
+        <EuiFlexItem key={index}>
+          {label ? (
+            <EuiButtonEmpty {...defaultActionProps} {...props}>
+              {label}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonIcon {...defaultActionProps} {...props} />
+          )}
+        </EuiFlexItem>
+      )),
+    [defaultActionProps, headerRowActions, hideOver]
+  );
+
+  const hiddenActions = useMemo(
+    () =>
+      headerRowActions.slice(hideOver).map(({ label, ...props }, index) => (
+        <EuiContextMenuPanel key={index}>
+          {label ? (
+            <EuiButtonEmpty {...defaultActionProps} {...props}>
+              {label}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonIcon {...defaultActionProps} {...props} />
+          )}
+        </EuiContextMenuPanel>
+      )),
+    [defaultActionProps, headerRowActions, hideOver]
   );
 
   return (
     <EuiFlexGroup alignItems="center" key="cascade-row-actions">
-      <React.Fragment>
-        {actions.slice(0, hideOver).map((action, index) => (
-          <EuiFlexItem key={index}>{action}</EuiFlexItem>
-        ))}
-      </React.Fragment>
-      {actions.length > hideOver && (
+      <React.Fragment>{visibleActions}</React.Fragment>
+      {headerRowActions.length > hideOver && (
         <EuiFlexItem>
           <EuiPopover
             button={
               <EuiButtonIcon
+                color="text"
                 aria-label={i18n.translate(
                   'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
                   {
-                    defaultMessage: 'Select More options',
+                    defaultMessage: 'Select more options',
                   }
                 )}
                 iconType="boxesVertical"
-                data-test-subj={`expand-row-${rowInstance.id}-button`}
+                data-test-subj={`expand-row-${id}-button`}
               />
             }
           >
-            <EuiContextMenuPanel
-              items={actions.slice(hideOver).map((action, index) => (
-                <EuiContextMenuPanel key={index}>{action}</EuiContextMenuPanel>
-              ))}
-            />
+            <EuiContextMenuPanel items={hiddenActions} />
           </EuiPopover>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
-}
+};
