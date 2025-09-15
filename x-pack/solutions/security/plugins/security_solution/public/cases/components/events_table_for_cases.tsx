@@ -9,19 +9,20 @@ import { EcsFlat } from '@elastic/ecs';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import {
-  defaultColumnHeaderType,
   getPageRowIndex,
   addBuildingBlockStyle,
   defaultHeaders,
   DataTableComponent,
   dataTableActions,
+  getTableByIdSelector,
+  tableDefaults,
 } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import type { TimelineItem, DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
 import React, { useMemo, useEffect, useContext } from 'react';
-import { useDispatch } from 'react-redux';
-// eslint-disable-next-line @kbn/eslint/module_migration
+import { useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { SecurityCellActionsTrigger } from '../../app/actions/constants';
 import { RowAction } from '../../common/components/control_columns/row_action';
@@ -29,6 +30,7 @@ import { buildBrowserFields } from '../../data_view_manager/utils/security_brows
 import { getDefaultControlColumn } from '../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import type { State } from '../../common/store/types';
 
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
 
@@ -37,6 +39,8 @@ export const emptyObject = {} as const;
 export const emptyArray = [];
 
 export const MAX_ACTION_BUTTON_COUNT = 4;
+
+const defaultModel: SubsetDataTableModel = structuredClone(tableDefaults);
 
 export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
   const dispatch = useDispatch();
@@ -63,21 +67,45 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
     });
   }, [props.data]);
 
+  const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
+
+  const selectTableById = useMemo(() => getTableByIdSelector(), []);
+  const {
+    defaultColumns,
+    columns,
+    loadingEventIds,
+    itemsPerPage,
+    itemsPerPageOptions,
+    sort,
+    queryFields,
+  } = useSelector(
+    (state: State) => selectTableById(state, EVENTS_TABLE_FOR_CASES_ID) ?? defaultModel
+  );
+
   useEffect(() => {
     dispatch(
       dataTableActions.createDataTable({
         indexNames: props.dataView.getIndexPattern().split(','),
-        columns: [{ id: '_id', columnHeaderType: defaultColumnHeaderType }],
-        defaultColumns: [],
-        sort: emptyArray,
+        columns,
+        defaultColumns,
+        sort,
         id: EVENTS_TABLE_FOR_CASES_ID,
       })
     );
-  }, [dispatch, props.dataView]);
-
-  const controlColumns = getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT);
+  }, [columns, defaultColumns, dispatch, props.dataView, sort]);
 
   const theme: EuiTheme = useContext(ThemeContext);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: 0,
+      pageSize: itemsPerPage,
+      pageSizeOptions: itemsPerPageOptions,
+      onChangeItemsPerPage: noop,
+      onChangePage: noop,
+    }),
+    [itemsPerPage, itemsPerPageOptions]
+  );
 
   const leadingControlColumns = useMemo(
     () =>
@@ -92,7 +120,7 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
           colIndex,
           setCellProps,
         }: EuiDataGridCellValueElementProps) => {
-          const pageRowIndex = getPageRowIndex(rowIndex, 10);
+          const pageRowIndex = getPageRowIndex(rowIndex, itemsPerPage);
           const rowData = data[pageRowIndex];
 
           if (rowData) {
@@ -116,7 +144,7 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
               isExpanded={isExpanded}
               isEventViewer={false}
               isExpandable={isExpandable}
-              loadingEventIds={emptyArray}
+              loadingEventIds={loadingEventIds}
               onRowSelected={noop}
               onRuleChange={noop}
               pageRowIndex={pageRowIndex}
@@ -131,7 +159,7 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
           );
         },
       })),
-    [controlColumns, data, theme]
+    [controlColumns, data, itemsPerPage, loadingEventIds, theme]
   );
 
   return (
@@ -145,13 +173,7 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
       cellActionsTriggerId={SecurityCellActionsTrigger.CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}
       loadPage={noop}
-      pagination={{
-        pageIndex: 0,
-        pageSize: 10,
-        // TODO: add handlers
-        onChangeItemsPerPage: noop,
-        onChangePage: noop,
-      }}
+      pagination={pagination}
       renderCellValue={DefaultCellRenderer}
       rowRenderers={defaultRowRenderers as unknown as DeprecatedRowRenderer[]}
     />
