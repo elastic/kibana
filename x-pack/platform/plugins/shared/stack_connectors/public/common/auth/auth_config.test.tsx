@@ -488,7 +488,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: 'oauth2',
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://api.example.com/oauth/token',
           clientId: 'client_id_123',
         },
