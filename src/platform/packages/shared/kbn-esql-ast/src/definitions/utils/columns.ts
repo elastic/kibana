@@ -16,12 +16,18 @@ import { fuzzySearch } from './shared';
  */
 export function getColumnExists(
   node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: Pick<ICommandContext, 'fields' | 'userDefinedColumns'>,
+  { columns }: Pick<ICommandContext, 'columns'>,
   excludeFields = false
 ) {
   const columnName = node.type === 'identifier' ? node.name : node.parts.join('.');
 
-  const set = new Set([...(!excludeFields ? fields.keys() : []), ...userDefinedColumns.keys()]);
+  const set = new Set(
+    !excludeFields
+      ? columns.keys()
+      : Array.from(columns.values())
+          .filter((col) => col.userDefined)
+          .map((col) => col.name)
+  );
 
   if (set.has(columnName)) {
     return true;
