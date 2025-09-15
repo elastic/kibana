@@ -272,7 +272,13 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
             ],
-            iconV2: 'storage',
+          },
+          {
+            id: 'aiAssistantContainer',
+            title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
+              defaultMessage: 'AI Assistant',
+            }),
+            link: 'observabilityAIAssistant',
           },
           {
             id: 'aiAssistantContainer',
@@ -292,7 +298,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             iconV2: LazyIconMl,
             children: [
               {
-                id: 'ml-overview',
                 title: '',
                 children: [
                   {
