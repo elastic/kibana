@@ -201,6 +201,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
+            iconV2: 'storage',
             children: [
               {
                 children: [
@@ -251,18 +252,23 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
             ],
-            iconV2: 'storage',
+          },
+          {
+            id: 'aiAssistantContainer',
+            title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
+              defaultMessage: 'AI Assistant',
+            }),
+            link: 'observabilityAIAssistant',
           },
           {
             id: 'machine_learning-landing',
-            renderAs: 'panelOpener',
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
             iconV2: 'info',
+            renderAs: 'panelOpener',
             children: [
               {
-                id: 'ml-overview',
                 title: '',
                 children: [
                   {
@@ -351,7 +357,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 }),
               },
             ],
-            iconV2: 'boxesVertical',
           },
         ],
       },
