@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -18,6 +18,8 @@ import { HeaderButtons, UnknownMigration } from '../../common/components';
 import { EmptyMigrationDashboardsPage } from './empty';
 import * as i18n from './translations';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
+import { MigrationDashboardsTable } from '../components/dashboard_table';
+import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -28,7 +30,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
     },
   }) => {
     const { navigateTo } = useNavigation();
-    const { data, isLoading } = useLatestStats();
+    const { data, isLoading, refreshStats } = useLatestStats();
     const dashboardMigrationsStats = useMemo(() => data.slice().reverse(), [data]); // Show the most recent migration first
 
     useEffect(() => {
@@ -49,6 +51,15 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsDashboards, path: selectedId });
     };
 
+    const invalidateGetMigrationDashboards = useInvalidateGetMigrationDashboards();
+    const refetchData = useCallback(() => {
+      if (!migrationId) {
+        return;
+      }
+      refreshStats();
+      invalidateGetMigrationDashboards(migrationId);
+    }, [invalidateGetMigrationDashboards, migrationId, refreshStats]);
+
     const content = useMemo(() => {
       if (dashboardMigrationsStats.length === 0 && !migrationId) {
         return <EmptyMigrationDashboardsPage />;
@@ -57,8 +68,12 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
-      return <></>;
-    }, [migrationId, dashboardMigrationsStats]);
+      return (
+        <>
+          <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
+        </>
+      );
+    }, [dashboardMigrationsStats, migrationId, refetchData]);
 
     return (
       <SecuritySolutionPageWrapper>

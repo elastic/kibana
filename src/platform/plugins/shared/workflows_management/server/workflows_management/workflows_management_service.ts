@@ -26,8 +26,14 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+} from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
+import type { estypes } from '@elastic/elasticsearch';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { WorkflowValidationError } from '../../common/lib/errors';
 
@@ -53,6 +59,12 @@ import type {
   GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
+
+export interface SearchWorkflowExecutionsParams {
+  workflowId: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+}
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -647,16 +659,45 @@ export class WorkflowsService {
   }
 
   public async getWorkflowExecutions(
-    workflowId: string,
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
+    const must: estypes.QueryDslQueryContainer[] = [
+      { term: { workflowId: params.workflowId } },
+      {
+        bool: {
+          should: [
+            { term: { spaceId } },
+            // Backward compatibility for objects without spaceId
+            { bool: { must_not: { exists: { field: 'spaceId' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
+    if (params.statuses) {
+      must.push({
+        terms: {
+          status: params.statuses,
+        },
+      });
+    }
+    if (params.executionTypes) {
+      must.push({
+        terms: {
+          executionType: params.executionTypes,
+        },
+      });
+    }
+
     return searchWorkflowExecutions({
       esClient: this.esClient!,
       logger: this.logger,
       workflowExecutionIndex: this.workflowsExecutionIndex,
       query: {
         bool: {
-          must: [{ term: { workflowId } }, { term: { spaceId } }],
+          must,
         },
       },
     });
@@ -708,7 +749,7 @@ export class WorkflowsService {
       logger: this.logger,
       stepsExecutionIndex: this.stepsExecutionIndex,
       workflowExecutionId: params.executionId,
-      additionalQuery: { term: { stepId: params.stepId } },
+      additionalQuery: { term: { id: params.id } },
       spaceId,
     });
   }
@@ -732,16 +773,12 @@ export class WorkflowsService {
     params: GetStepExecutionParams,
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
-    const { executionId, stepId } = params;
+    const { executionId, id } = params;
     const response = await this.esClient!.search<EsWorkflowStepExecution>({
       index: this.stepsExecutionIndex,
       query: {
         bool: {
-          must: [
-            { term: { workflowRunId: executionId } },
-            { term: { stepId } },
-            { term: { spaceId } },
-          ],
+          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
         },
       },
       size: 1,

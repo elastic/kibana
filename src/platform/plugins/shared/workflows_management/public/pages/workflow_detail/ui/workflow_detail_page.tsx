@@ -252,14 +252,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         }}
       />
       <EuiFlexGroup gutterSize="none" css={styles.container}>
-        {activeTab === 'executions' && (
-          <EuiFlexItem css={styles.executionListColumn}>
-            <WorkflowExecutionList workflowId={workflow?.id ?? null} />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem css={styles.workflowMainColumn}>
+        <EuiFlexItem css={styles.main}>
           <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem css={styles.workflowYamlEditorColumn}>
+            <EuiFlexItem css={styles.yamlEditor}>
               <React.Suspense fallback={<EuiLoadingSpinner />}>
                 <WorkflowYAMLEditor
                   workflowId={workflow?.id ?? 'unknown'}
@@ -275,7 +270,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               </React.Suspense>
             </EuiFlexItem>
             {isVisualEditorEnabled && workflow && (
-              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+              <EuiFlexItem css={styles.visualEditor}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <WorkflowVisualEditor
                     workflowYaml={yamlValue}
@@ -285,7 +280,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               </EuiFlexItem>
             )}
             {isExecutionGraphEnabled && workflow && (
-              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+              <EuiFlexItem css={styles.visualEditor}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <ExecutionGraph workflowYaml={yamlValue} />
                 </React.Suspense>
@@ -293,9 +288,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {selectedExecutionId && (
-          <EuiFlexItem css={styles.stepExecutionListColumn}>
-            {workflow && (
+        {activeTab === 'executions' && (
+          <EuiFlexItem css={styles.sidebar}>
+            {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
+            {workflow && selectedExecutionId && (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
                 workflowYaml={yamlValue}
@@ -325,7 +321,8 @@ const componentStyles = {
   pageContainer: css({
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 auto',
+    flex: '1 1 0',
+    overflow: 'hidden',
   }),
   container: css`
     flex: 1;
@@ -333,32 +330,23 @@ const componentStyles = {
     min-height: 0;
     flex-wrap: nowrap !important;
   `,
-  executionListColumn: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexBasis: '200px',
-      maxWidth: '200px',
-      flex: 1,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  workflowMainColumn: css({
+  main: css({
     flex: 1,
     overflow: 'hidden',
   }),
-  workflowYamlEditorColumn: css({
+  yamlEditor: css({
     flex: 1,
     overflow: 'hidden',
   }),
-  workflowVisualEditorColumn: ({ euiTheme }: UseEuiTheme) =>
+  visualEditor: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
       overflow: 'hidden',
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  stepExecutionListColumn: ({ euiTheme }: UseEuiTheme) =>
+  sidebar: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flexBasis: '275px',
-      maxWidth: '275px',
+      maxWidth: '300px',
       flex: 1,
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
