@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await runCasesBackfillTask(supertest);
 
-      await retry.try(async () => {
+      await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
           index: '.internal.cases.default-securitysolution',
           id: `cases:${caseToBackfill.id}`,
