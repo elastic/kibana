@@ -50,7 +50,7 @@ We need to register the new command in the `kbn-esql-ast` [package](https://gith
 
 All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/commands_registry/README.md) for context.
 
-- [ ] First, create a new folder with the same name as the command under `src/platform/packages/shared/kbn-esql-ast/src/commands_registry/commands`. This will house all command logic that get's sent to the registry.
+- [ ] First, create a new folder with the same name as the command under `kbn-esql-ast/src/commands_registry/commands`. This will house all command logic that gets sent to the registry.
 - [ ] Create an `index.ts` file within the folder. This is where you create your command definition (`ICommand`).
 
   If the command is not ready to be advertised, use `hidden: true`.
@@ -62,6 +62,30 @@ All commands are registered in our commands registry. Read [the doc](https://git
 - [ ] Import your new command definition in `commands_registry/index.ts`.
 
 If you get stuck, check the many examples in `commands_registry/commands`.
+
+### Example ⭐
+
+```ts
+// (will add these methods in the next steps)
+const dissectCommandMethods: ICommandMethods<ICommandContext> = {
+  validate,
+  autocomplete,
+  columnsAfter,
+};
+
+export const dissectCommand = {
+  name: 'dissect',
+  methods: dissectCommandMethods,
+  metadata: {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dissectDoc', {
+      defaultMessage:
+        'Extracts multiple string values from a single string input, based on a pattern',
+    }),
+    declaration: 'DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]',
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
+  },
+};
+```
 
 ## Define column list behavior
 
@@ -198,10 +222,6 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
   1. then accept a suggestion
 
   If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
-
-### Example PR’s ⭐
-
-[Adding FORK command](https://github.com/elastic/kibana/pull/216743)
 
 ## Add syntax highlighting
 
