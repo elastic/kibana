@@ -30,11 +30,13 @@ export const mapToUISession = ({
   locators,
   sessionStatuses,
   actions: filteredActions,
+  enableOpeningInNewTab,
 }: {
   savedObject: SearchSessionSavedObject;
   locators: LocatorsStart;
   sessionStatuses: SearchSessionsFindResponse['statuses'];
   actions?: ACTION[];
+  enableOpeningInNewTab?: boolean;
 }): UISession => {
   const {
     name,
@@ -59,11 +61,17 @@ export const mapToUISession = ({
   if (initialState) delete initialState.searchSessionId;
   // derive the URL and add it in
   const reloadUrl = getUrlFromState(locators, locatorId, initialState);
-  const restoreUrl = getUrlFromState(locators, locatorId, {
-    ...restoreState,
-    tabId: 'new',
-    tabLabel: name,
-  });
+  const restoreUrl = getUrlFromState(
+    locators,
+    locatorId,
+    enableOpeningInNewTab
+      ? {
+          ...restoreState,
+          tabId: 'new',
+          tabLabel: name,
+        }
+      : restoreState
+  );
 
   return {
     id: savedObject.id,
