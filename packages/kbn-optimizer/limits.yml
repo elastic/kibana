@@ -46,7 +46,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 10370
+  esql: 12323
   esqlDataGrid: 10209
   esUiShared: 100338
   eventAnnotation: 22361
@@ -108,8 +108,8 @@ pageLoadAssetSize:
   navigation: 13598
   newsfeed: 12371
   noDataPage: 1749
-  observability: 160191
-  observabilityAIAssistant: 46941
+  observability: 176467
+  observabilityAIAssistant: 52565
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
@@ -154,7 +154,7 @@ pageLoadAssetSize:
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
-  serverlessSearch: 28909
+  serverlessSearch: 35000
   sessionView: 47938
   share: 58677
   slo: 36645
