@@ -17,10 +17,7 @@ import {
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
-import {
-  RELATED_ALERTS_TABLE_ID,
-  SLO_ALERTS_TABLE_ID,
-} from '@kbn/observability-shared-plugin/common';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -89,12 +86,15 @@ export function AlertActions(
 
   const onAddToCase = useCallback(
     ({ isNewCase }: { isNewCase: boolean }) => {
-      if (tableId === RELATED_ALERTS_TABLE_ID) {
-        telemetryClient.reportRelatedAlertAddedToCase(isNewCase);
-      }
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+
       refresh?.();
     },
-    [refresh, telemetryClient, tableId]
+    [telemetryClient, tableId, observabilityAlert.fields, refresh]
   );
 
   const onRemoveAlertFromCase = useCallback(() => {

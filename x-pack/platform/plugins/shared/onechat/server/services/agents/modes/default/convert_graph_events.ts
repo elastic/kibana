@@ -16,6 +16,7 @@ import type {
   MessageCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
+  ReasoningEvent,
 } from '@kbn/onechat-common';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
@@ -26,19 +27,23 @@ import {
   createMessageEvent,
   createToolCallEvent,
   createToolResultEvent,
+  createReasoningEvent,
   extractTextContent,
   extractToolCalls,
   extractToolReturn,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
+import { ChunkDecisionBuffer, ChunkType } from '../utils/chunk_decision_buffer';
 import type { StateType } from './graph';
+import { toolReasoningOpeningTag } from './consts';
 
 export type ConvertedEvents =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ToolCallEvent
-  | ToolResultEvent;
+  | ToolResultEvent
+  | ReasoningEvent;
 
 export const convertGraphEvents = ({
   graphName,
@@ -53,6 +58,9 @@ export const convertGraphEvents = ({
     const toolCallIdToIdMap = new Map<string, string>();
     const messageId = uuidv4();
 
+    const decisionBuffer = new ChunkDecisionBuffer({ tag: toolReasoningOpeningTag });
+    let thinkingBuffer = '';
+
     return streamEvents$.pipe(
       mergeMap((event) => {
         if (!matchGraphName(event, graphName)) {
@@ -64,12 +72,38 @@ export const convertGraphEvents = ({
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            return of(createTextChunkEvent(textContent, { messageId }));
+            const classifiedChunks = decisionBuffer.process(textContent) ?? [];
+            const textChunks = classifiedChunks
+              .filter((cc) => cc.type === ChunkType.FinalAnswer)
+              .map((cc) => cc.text);
+
+            const thinkingChunks = classifiedChunks
+              .filter((cc) => cc.type === ChunkType.ToolReasoning)
+              .map((cc) => cc.text);
+            if (thinkingChunks.length > 0) {
+              thinkingBuffer += thinkingChunks.join('');
+            }
+
+            return of(
+              ...textChunks.map((textChunk) => createTextChunkEvent(textChunk, { messageId }))
+            );
           }
         }
 
         // emit tool calls or full message on each agent step
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+          const events: ConvertedEvents[] = [];
+
+          // create reasoning event from thinking if present
+          if (thinkingBuffer.length > 0) {
+            events.push(createReasoningEvent(thinkingBuffer));
+          }
+
+          // reset decision and thinking buffer
+          decisionBuffer.reset();
+          thinkingBuffer = '';
+
+          // process last emitted message
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
@@ -89,15 +123,15 @@ export const convertGraphEvents = ({
                 })
               );
             }
-
-            return of(...toolCallEvents);
+            events.push(...toolCallEvents);
           } else {
             const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
               messageId,
             });
-
-            return of(messageEvent);
+            events.push(messageEvent);
           }
+
+          return of(...events);
         }
 
         // emit tool result events
