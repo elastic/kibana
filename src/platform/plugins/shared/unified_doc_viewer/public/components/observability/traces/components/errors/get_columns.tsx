@@ -12,21 +12,33 @@ import { EuiText, EuiTextTruncate, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ErrorsByTraceId } from '@kbn/apm-types';
-import { TRACE_ID, SPAN_ID, TRANSACTION_ID } from '@kbn/apm-types';
+import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
+import { TRACE_ID, SPAN_ID, PROCESSOR_EVENT, EVENT_NAME, ERROR_ID } from '@kbn/apm-types';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
+
+const getErrorMessage = (error: ErrorData) => {
+  if (error?.exception?.message) {
+    return error.exception.message;
+  }
+
+  if (error?.log?.message) {
+    return error.log.message;
+  }
+
+  return NOT_AVAILABLE_LABEL;
+};
 
 export const getColumns = ({
   generateDiscoverLink,
   traceId,
   spanId,
-  transactionId,
+  source,
 }: {
   generateDiscoverLink: GenerateDiscoverLink;
   traceId: string;
   spanId?: string;
-  transactionId?: string;
+  source: string;
 }): Array<EuiBasicTableColumn<ErrorsByTraceId['traceErrors'][0]>> => [
   {
     field: 'name',
@@ -39,12 +51,14 @@ export const getColumns = ({
       const href = generateDiscoverLink({
         [TRACE_ID]: traceId,
         ...(spanId && { [SPAN_ID]: spanId }),
+        ...(source === 'apm' ? { [PROCESSOR_EVENT]: 'error', [ERROR_ID]: item.error.id } : null),
+        ...(source === 'unprocessedOtel' ? { [EVENT_NAME]: 'exception' } : null),
       });
 
       const content = (
         <EuiTextTruncate
           data-test-subj="error-exception-message"
-          text={item.error?.exception?.message || NOT_AVAILABLE_LABEL}
+          text={getErrorMessage(item.error)}
         />
       );
       return (

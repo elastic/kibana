@@ -50,14 +50,14 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
   });
 
   const { columns, openInDiscoverLink } = useMemo(() => {
-    const cols = getColumns({ traceId, spanId, transactionId, generateDiscoverLink });
+    const cols = getColumns({ traceId, spanId, generateDiscoverLink, source: response.source });
 
     const link = generateDiscoverLink(
       createTraceContextWhereClause({ traceId, spanId, transactionId })
     );
 
     return { columns: cols, openInDiscoverLink: link };
-  }, [traceId, spanId, transactionId, generateDiscoverLink]);
+  }, [traceId, spanId, transactionId, generateDiscoverLink, response.source]);
 
   if (loading || (!error && response.traceErrors.length === 0)) {
     return null;

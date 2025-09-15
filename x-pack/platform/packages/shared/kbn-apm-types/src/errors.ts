@@ -9,17 +9,21 @@ import type { TimestampUs } from '../es_schemas_raw';
 import type { Exception } from './es_schemas/raw/error_raw';
 
 export interface ErrorData {
-  exception: Exception;
+  exception?: Exception;
   grouping_key?: string;
   culprit?: string;
   id?: string;
+  log?: {
+    message?: string;
+  };
 }
 
 export interface Errors {
   error: ErrorData;
-  timestamp: TimestampUs | null;
+  timestamp?: TimestampUs | null;
 }
 
 export interface ErrorsByTraceId {
   traceErrors: Errors[];
+  source: 'apm' | 'unprocessedOtel';
 }

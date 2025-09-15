@@ -7,6 +7,7 @@
 
 import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { type Errors, type ErrorsByTraceId } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -231,11 +232,7 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
     query: t.intersection([rangeRt, t.partial({ spanId: t.string, transactionId: t.string })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceErrors: {};
-  }> => {
+  handler: async (resources): Promise<ErrorsByTraceId> => {
     const apmEventClient = await getApmEventClient(resources);
     const logsClient = await createLogsClient(resources);
 
@@ -243,7 +240,7 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
     const { traceId } = params.path;
     const { start, end, spanId } = params.query;
 
-    const unifiedTraceErrors = await getUnifiedTraceErrors({
+    const { apmErrors, unprocessedOtelErrors } = await getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
       spanId,
@@ -252,27 +249,32 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
       end,
     });
 
-    const normalizeApmErrors = (errors: UnifiedTraceErrors['apmErrors']) =>
-      errors.map(({ error, timestamp }) => ({
-        error: {
-          ...error,
-          exception: Array.isArray(error?.exception) ? error.exception[0] : error?.exception,
-        },
-        timestamp,
-      }));
+    const normalizeApmErrors = (errors: UnifiedTraceErrors['apmErrors']): Errors[] =>
+      errors.map(
+        ({ error, timestamp }): Errors => ({
+          error: {
+            ...error,
+            exception: Array.isArray(error?.exception) ? error.exception[0] : error?.exception,
+          },
+          timestamp,
+        })
+      );
 
-    const normalizeOtelErrors = (errors: UnifiedTraceErrors['unprocessedOtelErrors']) =>
-      errors.map(({ error }) => ({
-        error,
-        timestamp: null, // no timestamp available
-      }));
+    if (apmErrors.length > 0) {
+      return { traceErrors: normalizeApmErrors(apmErrors), source: 'apm' };
+    }
 
-    const traceErrors = [
-      ...normalizeApmErrors(unifiedTraceErrors.apmErrors),
-      ...normalizeOtelErrors(unifiedTraceErrors.unprocessedOtelErrors),
-    ];
+    const normalizeOtelErrors = (errors: UnifiedTraceErrors['unprocessedOtelErrors']): Errors[] =>
+      errors.map(
+        ({ error }): Errors => ({
+          error,
+        })
+      );
 
-    return { traceErrors };
+    return {
+      traceErrors: normalizeOtelErrors(unprocessedOtelErrors),
+      source: 'unprocessedOtel',
+    };
   },
 });
 
