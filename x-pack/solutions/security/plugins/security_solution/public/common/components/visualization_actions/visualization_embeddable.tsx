@@ -30,6 +30,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     isDonut,
     label,
     donutTextWrapperClassName,
+    donutTitleLabel,
     onLoad,
     signalIndexName,
     ...lensProps
@@ -140,7 +141,10 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         label={label}
         title={
           visualizationTablesTotalCount != null ? (
-            <ChartLabel count={visualizationTablesTotalCount} />
+            <>
+              {donutTitleLabel && <span className="donutTitleLabel">{donutTitleLabel}</span>}
+              <ChartLabel count={visualizationTablesTotalCount} />
+            </>
           ) : null
         }
         donutTextWrapperClassName={donutTextWrapperClassName}

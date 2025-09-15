@@ -133,7 +133,6 @@ export const getDefaultDefendInsightsGraph = ({
         refine: NodeType.REFINE_NODE,
       });
 
-    // compile the graph:
     return graph.compile();
   } catch (e) {
     throw new Error(`Unable to compile DefendInsightsGraph\n${e}`);

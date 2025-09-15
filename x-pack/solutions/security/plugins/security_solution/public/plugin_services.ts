@@ -145,6 +145,7 @@ export class PluginServices {
       ...plugins,
       ...this.contract.getStartServices(),
       apm,
+      inference: startPlugins.inference,
       configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
       storage: this.storage,

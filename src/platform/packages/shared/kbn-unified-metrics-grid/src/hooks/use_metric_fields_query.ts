@@ -10,19 +10,25 @@
 import type { QueryFunctionContext } from '@tanstack/react-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { useMetricsExperience } from './use_metrics_experience';
 
 export const useMetricFieldsQuery = (params?: {
   fields?: string[];
   index: string;
-  from?: string;
-  to?: string;
+  timeRange: TimeRange;
 }) => {
   const { client } = useMetricsExperience();
 
   const { hasNextPage, data, status, fetchNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ['metricFields', params?.fields, params?.index, params?.from, params?.to],
+      queryKey: [
+        'metricFields',
+        params?.fields,
+        params?.index,
+        params?.timeRange.from,
+        params?.timeRange.to,
+      ],
       queryFn: async ({
         queryKey,
         pageParam = 1,
@@ -52,6 +58,7 @@ export const useMetricFieldsQuery = (params?: {
           throw error;
         }
       },
+      keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (!lastPage) return;
         if (lastPage?.fields.length === 0) return;
@@ -70,5 +77,9 @@ export const useMetricFieldsQuery = (params?: {
     return data?.pages?.filter(Boolean).flatMap((page) => page.fields) ?? [];
   }, [data]);
 
-  return { data: metricFieldsData, status, isLoading };
+  return {
+    data: metricFieldsData,
+    status,
+    isLoading,
+  };
 };
