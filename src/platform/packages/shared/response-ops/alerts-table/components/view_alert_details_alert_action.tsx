@@ -22,8 +22,6 @@ export const ViewAlertDetailsAlertAction = typedMemo(
   <AC extends AdditionalContext = AdditionalContext>({
     alert,
     rowIndex,
-    pageIndex,
-    pageSize,
     onExpandedAlertIndexChange,
     onActionExecuted,
     isAlertDetailsEnabled,
@@ -65,7 +63,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
         size="s"
         onClick={() => {
           onActionExecuted?.();
-          onExpandedAlertIndexChange(pageIndex * pageSize + rowIndex);
+          onExpandedAlertIndexChange(rowIndex);
         }}
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {

@@ -39,8 +39,6 @@ export function AlertActions(
     refresh,
     parentAlert,
     rowIndex,
-    pageIndex,
-    pageSize,
     onExpandedAlertIndexChange,
     services,
   } = props;
@@ -199,7 +197,7 @@ export function AlertActions(
         });
 
   const onExpandEvent = () => {
-    onExpandedAlertIndexChange(pageIndex * pageSize + rowIndex);
+    onExpandedAlertIndexChange(rowIndex);
   };
 
   const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;

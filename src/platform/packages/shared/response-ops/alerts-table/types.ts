@@ -341,6 +341,8 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Callback for expanded alert index changes
    *
    * The expanded alert index can be set to `null` to close the expanded view.
+   * To open a row of the alerts table in the expanded view, set this value to the corresponding
+   * `rowIndex`.
    */
   onExpandedAlertIndexChange?: (expandedAlertIndex: number | null) => void;
   /**

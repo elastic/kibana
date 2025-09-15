@@ -77,8 +77,6 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     columnId,
     alert,
     rowIndex,
-    pageIndex,
-    pageSize,
     onExpandedAlertIndexChange,
     observabilityRuleTypeRegistry,
     services: { http },
@@ -119,7 +117,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
         <EuiLink
           data-test-subj="o11yGetRenderCellValueLink"
           css={{ ':hover': { textDecoration: 'none' } }}
-          onClick={() => onExpandedAlertIndexChange(pageIndex * pageSize + rowIndex)}
+          onClick={() => onExpandedAlertIndexChange(rowIndex)}
         >
           {parsedAlert.reason}
         </EuiLink>
