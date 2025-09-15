@@ -25,11 +25,11 @@ export const dsl = {
   matchTitle(title: string): QueryDslQueryContainer {
     return { match: { 'elastic_rule.title': title } };
   },
-  isInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullyTranslated(), dsl.isNotInstalled()];
+  isInstallable(): QueryDslQueryContainer {
+    return { bool: { must: [genericDsl.isFullyTranslated(), dsl.isNotInstalled()] } };
   },
-  isNotInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
+  isNotInstallable(): QueryDslQueryContainer {
+    return { bool: { should: [genericDsl.isNotFullyTranslated(), dsl.isInstalled()] } };
   },
   isMissingIndex(): QueryDslQueryContainer {
     return {
