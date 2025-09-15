@@ -494,7 +494,10 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: false } },
+          features: {
+            alerts: { sync: false },
+            observables: { enabled: true, autoExtract: false },
+          },
         },
         {}
       );
@@ -510,7 +513,10 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: false } },
+          features: {
+            alerts: { sync: false },
+            observables: { enabled: true, autoExtract: false },
+          },
         },
         {}
       );
@@ -529,7 +535,10 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: false, read: false },
-          features: { alerts: { sync: false } },
+          features: {
+            alerts: { sync: false },
+            observables: { enabled: true, autoExtract: false },
+          },
         },
         {}
       );
@@ -541,7 +550,7 @@ describe('AlertsTable', () => {
         casesConfiguration: {
           featureId: 'test-feature-id',
           owner: ['cases'],
-          syncAlerts: true,
+          extractObservables: false,
         },
       };
 
@@ -554,7 +563,7 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: true } },
+          features: { alerts: { sync: false }, observables: { enabled: true, autoExtract: false } },
         },
         {}
       );

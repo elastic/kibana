@@ -60,6 +60,8 @@ import { CreateCaseFormFields } from './form_fields';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { renderWithTestingProviders } from '../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
+import { OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants/observables';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -165,6 +167,7 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
+  const bulkPostObservables = jest.fn();
   let user: UserEvent;
 
   // eslint-disable-next-line prefer-object-spread
@@ -421,7 +424,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: true },
         },
       });
     });
@@ -458,7 +461,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: true },
         },
       });
     });
@@ -977,7 +980,87 @@ describe('Create case', () => {
     expect(createAttachments).not.toHaveBeenCalled();
   });
 
+  it('should call bulkPostObservables if the observables are not empty', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    const observables = [
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host1',
+        description: null,
+      },
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host2',
+        description: null,
+      },
+    ];
+
+    renderWithTestingProviders(
+      <FormContext
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        observables={observables}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>,
+      {
+        wrapperProps: { license },
+      }
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(bulkPostObservables).toHaveBeenCalledTimes(1);
+    });
+
+    expect(bulkPostObservables).toHaveBeenCalledWith({
+      caseId: 'case-id',
+      observables,
+      caseOwner: 'securitySolution',
+    });
+  });
+
+  it('should NOT call bulkPostObservables if the observables are an empty array', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    renderWithTestingProviders(
+      <FormContext
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        observables={[]}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>,
+      {
+        wrapperProps: { license },
+      }
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitForComponentToUpdate();
+
+    expect(createAttachments).not.toHaveBeenCalled();
+  });
+
   it(`should call callbacks in correct order`, async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
     useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       data: connectorsMock,
@@ -995,6 +1078,14 @@ describe('Create case', () => {
       },
     ];
 
+    const observables = [
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host1',
+        description: null,
+      },
+    ];
+
     renderWithTestingProviders(
       <FormContext
         selectedOwner={SECURITY_SOLUTION_OWNER}
@@ -1002,10 +1093,14 @@ describe('Create case', () => {
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         attachments={attachments}
+        observables={observables}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
         <SubmitCaseButton />
-      </FormContext>
+      </FormContext>,
+      {
+        wrapperProps: { license },
+      }
     );
 
     await waitForFormToRender();
@@ -1026,6 +1121,7 @@ describe('Create case', () => {
     });
 
     expect(createAttachments).toHaveBeenCalled();
+    expect(bulkPostObservables).toHaveBeenCalled();
     expect(afterCaseCreated).toHaveBeenCalled();
     expect(pushCaseToExternalService).toHaveBeenCalled();
 
@@ -1035,13 +1131,15 @@ describe('Create case', () => {
 
     const postCaseOrder = postCase.mock.invocationCallOrder[0];
     const createAttachmentsOrder = createAttachments.mock.invocationCallOrder[0];
+    const bulkPostObservablesOrder = bulkPostObservables.mock.invocationCallOrder[0];
     const afterCaseOrder = afterCaseCreated.mock.invocationCallOrder[0];
     const pushCaseToExternalServiceOrder = pushCaseToExternalService.mock.invocationCallOrder[0];
     const onFormSubmitSuccessOrder = onFormSubmitSuccess.mock.invocationCallOrder[0];
 
     expect(
       postCaseOrder < createAttachmentsOrder &&
-        createAttachmentsOrder < afterCaseOrder &&
+        createAttachmentsOrder < bulkPostObservablesOrder &&
+        bulkPostObservablesOrder < afterCaseOrder &&
         afterCaseOrder < pushCaseToExternalServiceOrder &&
         pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);
