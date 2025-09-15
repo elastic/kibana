@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridPaginationProps,
@@ -23,8 +22,7 @@ import {
   getTableByIdSelector,
   tableDefaults,
 } from '@kbn/securitysolution-data-table';
-import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
-import type { TimelineItem, DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
+import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
 import React, { useMemo, useEffect, useContext, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
@@ -59,7 +57,7 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
       (state: State) => selectTableById(state, EVENTS_TABLE_FOR_CASES_ID) ?? defaultModel
     );
 
-  const eventsQueryResult = useGetEvents(dataView, {
+  const { data = [] } = useGetEvents(dataView, {
     eventIds: events.flatMap((event) =>
       Array.isArray(event.eventId) ? event.eventId : [event.eventId]
     ),
@@ -72,26 +70,6 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
   const browserFields = useMemo(() => {
     return buildBrowserFields(dataView.fields).browserFields;
   }, [dataView.fields]);
-
-  const data = useMemo((): TimelineItem[] => {
-    return (
-      eventsQueryResult.data?.map((row) => {
-        const ecs = structuredClone(EcsFlat) as unknown as EcsSecurityExtension;
-        ecs._id = row?._id as string;
-        ecs._index = row._index as string;
-
-        return {
-          _id: row._id as string,
-          _index: row._index as string,
-          ecs,
-          data: [
-            ...Object.entries(row.fields ?? {}).map(([field, value]) => ({ field, value })),
-            { field: '_id', value: [row._id] },
-          ],
-        };
-      }) ?? []
-    );
-  }, [eventsQueryResult.data]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
 

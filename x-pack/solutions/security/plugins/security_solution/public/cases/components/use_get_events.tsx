@@ -10,6 +10,9 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { EcsFlat } from '@elastic/ecs';
+import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
 import { KibanaServices, useToasts } from '../../common/lib/kibana';
 
@@ -21,7 +24,7 @@ const searchEvents = async (
     eventIds: string[];
     sort: SortColumnTable[];
   }
-) => {
+): Promise<TimelineItem[]> => {
   if (!dataView) {
     throw new Error('data view is not defined');
   }
@@ -51,7 +54,23 @@ const searchEvents = async (
     throw new AbortError();
   }
 
-  return response?.rawResponse?.hits?.hits;
+  return (
+    response?.rawResponse?.hits?.hits?.map((row) => {
+      const ecs = structuredClone(EcsFlat) as unknown as EcsSecurityExtension;
+      ecs._id = row?._id as string;
+      ecs._index = row._index as string;
+
+      return {
+        _id: row._id as string,
+        _index: row._index as string,
+        ecs,
+        data: [
+          ...Object.entries(row.fields ?? {}).map(([field, value]) => ({ field, value })),
+          { field: '_id', value: [row._id] },
+        ],
+      };
+    }) ?? []
+  );
 };
 
 export const useGetEvents = (
