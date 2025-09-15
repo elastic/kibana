@@ -49,7 +49,7 @@ export function DashboardRenderer({
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
-  const dashboardContainerRef = useRef<HTMLDivElement | null>(null);
+  const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
@@ -102,6 +102,15 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
+  useEffect(() => {
+    if (
+      dashboardInternalApi &&
+      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
+      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+    }
+  }, [dashboardInternalApi]);
+
   const isDashboardViewportLoading = !dashboardApi && !error;
 
   const viewportClasses = classNames(
@@ -141,7 +150,17 @@ export function DashboardRenderer({
         className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
-        ref={(e) => (dashboardContainerRef.current = e)}
+        ref={(e) => {
+          if (dashboardInternalApi) {
+            if (dashboardInternalApi.dashboardContainerRef$.value !== e) {
+              dashboardInternalApi.setDashboardContainerRef(e);
+            }
+            return;
+          }
+
+          // only store ref locally if dashboardInternalApi is not yet available
+          dashboardContainerRef.current = e;
+        }}
       >
         <GlobalPrintStyles />
         <ExitFullScreenButtonKibanaProvider
