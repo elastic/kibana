@@ -181,16 +181,20 @@ describe('useESQLVariables', () => {
 
       // Mock the getInput$ observable
       jest.spyOn(mockControlGroupAPI.inputSubject, 'asObservable').mockReturnValue(
-        new Observable((subscriber) => {
+        new Observable(() => {
           return () => mockUnsubscribeInput();
         })
       );
 
       // Mock the savedSearchState with getInitial$ observable
       const stateContainer = getStateContainer();
-      jest
-        .spyOn(stateContainer.savedSearchState.getInitial$(), 'unsubscribe')
-        .mockImplementation(mockUnsubscribeReset());
+      const mockGetInitial$ = new BehaviorSubject(null) as unknown as BehaviorSubject<SavedSearch>;
+      jest.spyOn(mockGetInitial$, 'pipe').mockReturnValue(
+        new Observable(() => {
+          return () => mockUnsubscribeReset();
+        })
+      );
+      jest.spyOn(stateContainer.savedSearchState, 'getInitial$').mockReturnValue(mockGetInitial$);
 
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
@@ -233,7 +237,7 @@ describe('useESQLVariables', () => {
 
       expect(mockUpdateInput).not.toHaveBeenCalled();
 
-      // Simulate the getInitial$ emitting a new saved search
+      // Simulate getInitial$ emitting a new saved search
       act(() => {
         mockGetInitial$.next(mockInitialSavedSearch as SavedSearch);
       });
