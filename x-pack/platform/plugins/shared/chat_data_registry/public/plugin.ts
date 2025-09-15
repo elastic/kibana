@@ -13,17 +13,25 @@ export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
 {
   public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
-    core.application.register({
-      id: 'chatDataRegistry',
-      title: 'Chat Data Registry',
-      appRoute: '/app/chat-data-registry',
-      category: DEFAULT_APP_CATEGORIES.chat,
-      visibleIn: [],
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        return renderApp(params);
-      },
-    });
+    const isPluginEnabled = core.settings.client.get<boolean>(
+      'chat_data_registry.enableChatDataRegistry', // unregistered ff, just to make sure the UI is hidden
+      false
+    );
+
+    if (isPluginEnabled) {
+      core.application.register({
+        id: 'chatDataRegistry',
+        title: 'Chat Data Registry',
+        appRoute: '/app/chat-data-registry',
+        category: DEFAULT_APP_CATEGORIES.chat,
+        visibleIn: [],
+        async mount(params: AppMountParameters) {
+          const { renderApp } = await import('./application');
+          return renderApp(params);
+        },
+      });
+    }
+
     return {};
   }
 
