@@ -1520,7 +1520,7 @@ export class CstToAstConverter {
   ): ast.ESQLColumn[] {
     const identifiers = this.extractIdentifiers(ctx);
 
-    return this.makeColumnsOutOfIdentifiers(identifiers);
+    return this.toColumns(identifiers);
   }
 
   private extractIdentifiers(
@@ -1562,7 +1562,7 @@ export class CstToAstConverter {
     return context;
   }
 
-  private makeColumnsOutOfIdentifiers(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
+  private toColumns(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
     const args: ast.ESQLColumn[] =
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
