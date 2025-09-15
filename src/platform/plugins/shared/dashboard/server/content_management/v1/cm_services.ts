@@ -400,17 +400,7 @@ export const dashboardSearchResultsSchema = dashboardAPIItemSchema.extends({
   attributes: searchResultsAttributesSchema,
 });
 
-export const mayBeDashboardAPIItemSchema = schema.oneOf([
-  dashboardAPIItemSchema,
-  schema.object(
-    {
-      error: apiError,
-    },
-    { unknowns: 'allow' }
-  ),
-]);
-
-const dashboardGetResultMetaSchemaSettings = {
+const dashboardResolveMetaSchema = {
   outcome: schema.oneOf([
     schema.literal('exactMatch'),
     schema.literal('aliasMatch'),
@@ -421,16 +411,14 @@ const dashboardGetResultMetaSchemaSettings = {
     schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
   ),
 };
-export const dashboardGetResultMetaSchema = dashboardMetaSchema.extends(
-  dashboardGetResultMetaSchemaSettings
-);
+export const dashboardGetResultMetaSchema = dashboardMetaSchema.extends(dashboardResolveMetaSchema);
 
 export const dashboardAPIGetResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
     data: dashboardDataAttributesSchema,
-    meta: dashboardMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
+    meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
   },
   { unknowns: 'forbid' }
 );
@@ -547,7 +535,7 @@ export const dashboardStorageCreateResultSchema = schema.object(
     id: schema.string(),
     type: schema.string(),
     data: dashboardDataAttributesSchema,
-    meta: dashboardMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
+    meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
   },
   { unknowns: 'forbid' }
 );

@@ -32,7 +32,6 @@ import type {
   dashboardGetResultMetaSchema,
   dashboardDataAttributesSchema,
   dashboardMetaSchema,
-  mayBeDashboardAPIItemSchema,
   dashboardCreateRequestAttributesSchema,
   dashboardItemSchema,
   dashboardGetResultSchema,
@@ -67,7 +66,6 @@ export type FindDashboardsByIdResponseAttributes = Omit<
 };
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
-export type MaybeDashboardItem = TypeOf<typeof mayBeDashboardAPIItemSchema>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
   attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
@@ -98,6 +96,6 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardItemSchema>>;
 
 export type DashboardSearchAPIResult = SearchResult<TypeOf<typeof dashboardItemSchema>>;
+export type DashboardSearchOut = DashboardSearchAPIResult;
