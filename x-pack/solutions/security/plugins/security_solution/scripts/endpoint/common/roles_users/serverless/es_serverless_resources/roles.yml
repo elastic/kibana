@@ -129,6 +129,7 @@ editor:
         - '.asset-criticality.asset-criticality-*'
         - .entities.v1.latest.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
       privileges:
         - 'read'
         - 'write'
@@ -763,6 +764,7 @@ endpoint_operations_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:

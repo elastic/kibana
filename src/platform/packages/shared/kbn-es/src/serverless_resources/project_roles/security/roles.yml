@@ -109,6 +109,7 @@ editor:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
         - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset.*'
       privileges:
         - 'read'
         - 'write'
@@ -676,6 +677,7 @@ platform_engineer:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - .entities.v1.history.*.security_*
+        - .entities.v1.reset.*
       privileges:
         - read
         - write
