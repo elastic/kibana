@@ -14,7 +14,7 @@ export const RootStreamEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
       aria-live="polite"
-      titleSize="xs"
+      titleSize="s"
       icon={<AssetImage type="processorsCannotBeAddedToRootStreams" />}
       title={
         <h2>
