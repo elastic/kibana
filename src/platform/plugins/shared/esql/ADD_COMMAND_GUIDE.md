@@ -8,13 +8,13 @@ Seamlessly integrating a new command involves:
 
 - [ ] Supporting a new node in the ES|QL abstract syntax tree (AST)
 - [ ] Validating that the command works well when prettifying the query
-- [ ] Supporting the new command in the syntax highlighting libraries
 - [ ] Creating the command definition
 - [ ] Adding logic to simulate any changes the command makes to the column list
 - [ ] Adding the corresponding client-side validations
 - [ ] Adding the autocomplete suggestions
+- [ ] Supporting the new command in the syntax highlighting libraries
 
-## Supporting a new node in the ES|QL AST
+## Add AST support
 
 We use a custom AST as a helper to support the rest of the capabilities listed in this document. Therefore, the first step is to create a new node in the tree when parsing the new command.
 
@@ -30,7 +30,7 @@ We use a custom AST as a helper to support the rest of the capabilities listed i
 
 [FORK command](https://github.com/elastic/kibana/pull/216743).
 
-## Validating that the command works well when prettifying the query
+## Verify prettifying behavior
 
 [Pretty-printing](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/pretty_print/README.md) is the process of converting an ES|QL AST into a human-readable string. This is useful for debugging or for displaying the AST to the user.
 
@@ -44,34 +44,7 @@ Depending on the command you are adding, it may be required or not to do an adju
 
 [FORK command](https://github.com/elastic/kibana/pull/216743/files#diff-b4a14d3c1f4ce04db1f706548871db4d89fc99666d9c179b1b9e4af52069172b).
 
-## Supporting the new command in the syntax highlighting libraries
-
-Currently, we support 3 highlighting libraries: Monaco, HighlightJS, and PrismJS. We should update them when adding new commands.
-
-- [ ] Add command to [prismjs-esql](https://github.com/elastic/prismjs-esql) | [npm](https://www.npmjs.com/package/@elastic/prismjs-esql)
-  - [ ] [Release](https://github.com/elastic/eui) a new version
-- [ ] Add command to [monaco-esql](https://github.com/elastic/monaco-esql) | [npm](https://www.npmjs.com/package/@elastic/monaco-esql)
-  - [ ] [Release](https://github.com/elastic/monaco-esql?tab=readme-ov-file#releasing) a new version
-- [ ] Add command to [highlightjs-esql](https://github.com/elastic/highlightjs-esql) | [npm](https://www.npmjs.com/package/@elastic/highlightjs-esql)
-  - [ ] [Release](https://github.com/elastic/monaco-esql?tab=readme-ov-file#releasing) a new version
-- [ ] Update [EUI’s](https://github.com/elastic/eui) prismjs-esql version
-  - [ ] `yarn upgrade @elastic/prismjs-esql@<version>`
-- [ ] Update Kibana monaco-esql version
-  - [ ] `yarn upgrade @elastic/monaco-esql@<version>`
-
-### Example PR’s ⭐
-
-[Prismjs-esql](https://github.com/elastic/prismjs-esql/pull/3)
-
-[Monaco-esql](https://github.com/elastic/monaco-esql/pull/4)
-
-[Highlightjs-esql](https://github.com/elastic/highlightjs-esql/pull/4)
-
-[update eui](https://github.com/elastic/eui/pull/8587)
-
-[update Kibana](https://github.com/elastic/kibana/pull/220378)
-
-## Creating the command definition
+## Create the command definition
 
 We need to register the new command in the `kbn-esql-ast` [package](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md) in order to activate the autocomplete and validation features.
 
@@ -122,7 +95,7 @@ export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnDa
 };
 ```
 
-## Add validation support
+## Add validation
 
 Each command definition is responsible for validating the AST command nodes of that type. In other words, the `STATS` command definition's `validate` method will be invoked everytime the validator sees a command AST node with the name `stats`.
 
@@ -164,7 +137,7 @@ export const validate = (
 }
 ```
 
-## Adding the autocomplete suggestions
+## Add autocomplete
 
 Define what are the keywords you want to be suggested when the cursor is positioned at the new command.
 
@@ -229,3 +202,30 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
 ### Example PR’s ⭐
 
 [Adding FORK command](https://github.com/elastic/kibana/pull/216743)
+
+## Add syntax highlighting
+
+Currently, we support 3 highlighting libraries: Monaco, HighlightJS, and PrismJS. We should update them when adding new commands.
+
+- [ ] Add command to [prismjs-esql](https://github.com/elastic/prismjs-esql) | [npm](https://www.npmjs.com/package/@elastic/prismjs-esql)
+  - [ ] [Release](https://github.com/elastic/eui) a new version
+- [ ] Add command to [monaco-esql](https://github.com/elastic/monaco-esql) | [npm](https://www.npmjs.com/package/@elastic/monaco-esql)
+  - [ ] [Release](https://github.com/elastic/monaco-esql?tab=readme-ov-file#releasing) a new version
+- [ ] Add command to [highlightjs-esql](https://github.com/elastic/highlightjs-esql) | [npm](https://www.npmjs.com/package/@elastic/highlightjs-esql)
+  - [ ] [Release](https://github.com/elastic/monaco-esql?tab=readme-ov-file#releasing) a new version
+- [ ] Update [EUI’s](https://github.com/elastic/eui) prismjs-esql version
+  - [ ] `yarn upgrade @elastic/prismjs-esql@<version>`
+- [ ] Update Kibana monaco-esql version
+  - [ ] `yarn upgrade @elastic/monaco-esql@<version>`
+
+### Example PR’s ⭐
+
+[Prismjs-esql](https://github.com/elastic/prismjs-esql/pull/3)
+
+[Monaco-esql](https://github.com/elastic/monaco-esql/pull/4)
+
+[Highlightjs-esql](https://github.com/elastic/highlightjs-esql/pull/4)
+
+[update eui](https://github.com/elastic/eui/pull/8587)
+
+[update Kibana](https://github.com/elastic/kibana/pull/220378)
