@@ -18,9 +18,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  // Failing: See https://github.com/elastic/kibana/issues/233044
-  // Failing: See https://github.com/elastic/kibana/issues/233044
-  describe.skip('Diagnostics: Index pattern settings', () => {
+  describe('Diagnostics: Index pattern settings', () => {
     describe('When data is ingested', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
@@ -90,6 +88,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           'metrics-apm.transaction.1m@template',
           'metrics-apm.transaction.60m@template',
           'metrics-otel@template',
+          'metrics-service_destination.10m.otel@template',
+          'metrics-service_destination.1m.otel@template',
+          'metrics-service_destination.60m.otel@template',
           'metrics-service_summary.10m.otel@template',
           'metrics-service_summary.1m.otel@template',
           'metrics-service_summary.60m.otel@template',
