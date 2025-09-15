@@ -12,7 +12,7 @@ const registry: { [key: string]: React.FC<any> } = {};
 export const registerProfilingComponent = <T>(key: string, component: React.FC<T>) => {
   if (registry[key] !== undefined) {
     throw new Error(
-      i18n.translate('xpack.observability.profilingComponentAlreadyExists.error', {
+      i18n.translate('xpack.observabilityShared.profilingComponentAlreadyExists.error', {
         defaultMessage: `Component with key {key} already exists`,
         values: { key },
       })
@@ -24,7 +24,7 @@ export const registerProfilingComponent = <T>(key: string, component: React.FC<T
 export const getProfilingComponent = <T>(key: string): React.FC<T> => {
   if (registry[key] === undefined) {
     throw new Error(
-      i18n.translate('xpack.observability.profilingComponentNotFound.error', {
+      i18n.translate('xpack.observabilityShared.profilingComponentNotFound.error', {
         defaultMessage: `Component with key {key} not found`,
         values: { key },
       })

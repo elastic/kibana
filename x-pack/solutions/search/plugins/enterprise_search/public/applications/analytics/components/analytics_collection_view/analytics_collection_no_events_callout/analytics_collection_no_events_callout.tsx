@@ -60,7 +60,6 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
       </EuiText>
       <EuiSpacer />
       <EuiButton
-        data-test-subj="enterpriseSearchAnalyticsCollectionNoEventsCalloutLearnHowButton"
         fill
         type="submit"
         onClick={() =>

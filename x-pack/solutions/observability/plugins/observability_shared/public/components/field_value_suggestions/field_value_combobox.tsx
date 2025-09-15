@@ -63,17 +63,16 @@ export function FieldValueCombobox({
 
   const comboBox = (
     <EuiComboBox
-      aria-label={i18n.translate(
-        'xpack.observability.fieldValueCombobox.search{label}ComboBox.ariaLabel',
-        { defaultMessage: 'Search {label}' }
-      )}
       fullWidth
       singleSelection={singleSelection ? { asPlainText: true } : false}
       compressed={compressed}
-      placeholder={i18n.translate('xpack.observability.fieldValueSelection.placeholder.search', {
-        defaultMessage: 'Search {label}',
-        values: { label },
-      })}
+      placeholder={i18n.translate(
+        'xpack.observabilityShared.fieldValueSelection.placeholder.search',
+        {
+          defaultMessage: 'Search {label}',
+          values: { label },
+        }
+      )}
       isLoading={loading}
       onSearchChange={(searchVal) => {
         setQuery(searchVal);

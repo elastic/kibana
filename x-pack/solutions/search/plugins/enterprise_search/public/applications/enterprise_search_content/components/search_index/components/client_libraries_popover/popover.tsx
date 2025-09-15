@@ -122,7 +122,6 @@ export const ClientLibrariesPopover: React.FC = () => {
       closePopover={toggleClientsPopover}
       button={
         <EuiButton
-          data-test-subj="enterpriseSearchClientLibrariesPopoverClientLibrariesButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-clientLibraries-openClientLibraries`}
           iconType="arrowDown"
           iconSide="right"

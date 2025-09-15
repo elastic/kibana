@@ -36,13 +36,13 @@ function getStats({
       ? {
           kibanaApiQueryParameters: {
             label: i18n.translate(
-              'xpack.observability.inspector.stats.kibanaApiQueryParametersLabel',
+              'xpack.observabilityShared.inspector.stats.kibanaApiQueryParametersLabel',
               {
                 defaultMessage: 'Kibana API query parameters',
               }
             ),
             description: i18n.translate(
-              'xpack.observability.inspector.stats.kibanaApiQueryParametersDescription',
+              'xpack.observabilityShared.inspector.stats.kibanaApiQueryParametersDescription',
               {
                 defaultMessage:
                   'The query parameters used in the Kibana API request that initiated the Elasticsearch request.',
@@ -53,21 +53,24 @@ function getStats({
         }
       : {}),
     kibanaApiRoute: {
-      label: i18n.translate('xpack.observability.inspector.stats.kibanaApiRouteLabel', {
+      label: i18n.translate('xpack.observabilityShared.inspector.stats.kibanaApiRouteLabel', {
         defaultMessage: 'Kibana API route',
       }),
-      description: i18n.translate('xpack.observability.inspector.stats.kibanaApiRouteDescription', {
-        defaultMessage:
-          'The route of the Kibana API request that initiated the Elasticsearch request.',
-      }),
+      description: i18n.translate(
+        'xpack.observabilityShared.inspector.stats.kibanaApiRouteDescription',
+        {
+          defaultMessage:
+            'The route of the Kibana API request that initiated the Elasticsearch request.',
+        }
+      ),
       value: `${kibanaRequest.route.method.toUpperCase()} ${kibanaRequest.route.path}`,
     },
     indexPattern: {
-      label: i18n.translate('xpack.observability.inspector.stats.dataViewLabel', {
+      label: i18n.translate('xpack.observabilityShared.inspector.stats.dataViewLabel', {
         defaultMessage: 'Data view',
       }),
       value: esRequestParams.index,
-      description: i18n.translate('xpack.observability.inspector.stats.dataViewDescription', {
+      description: i18n.translate('xpack.observabilityShared.inspector.stats.dataViewDescription', {
         defaultMessage: 'The data view that connected to the Elasticsearch indices.',
       }),
     },
@@ -75,11 +78,11 @@ function getStats({
 
   if (esResponse?.hits?.hits) {
     stats.hits = {
-      label: i18n.translate('xpack.observability.inspector.stats.hitsLabel', {
+      label: i18n.translate('xpack.observabilityShared.inspector.stats.hitsLabel', {
         defaultMessage: 'Hits',
       }),
       value: `${esResponse.hits.hits.length}`,
-      description: i18n.translate('xpack.observability.inspector.stats.hitsDescription', {
+      description: i18n.translate('xpack.observabilityShared.inspector.stats.hitsDescription', {
         defaultMessage: 'The number of documents returned by the query.',
       }),
     };
@@ -87,18 +90,21 @@ function getStats({
 
   if (esResponse?.took) {
     stats.queryTime = {
-      label: i18n.translate('xpack.observability.inspector.stats.queryTimeLabel', {
+      label: i18n.translate('xpack.observabilityShared.inspector.stats.queryTimeLabel', {
         defaultMessage: 'Query time',
       }),
-      value: i18n.translate('xpack.observability.inspector.stats.queryTimeValue', {
+      value: i18n.translate('xpack.observabilityShared.inspector.stats.queryTimeValue', {
         defaultMessage: '{queryTime}ms',
         values: { queryTime: esResponse.took },
       }),
-      description: i18n.translate('xpack.observability.inspector.stats.queryTimeDescription', {
-        defaultMessage:
-          'The time it took to process the query. ' +
-          'Does not include the time to send the request or parse it in the browser.',
-      }),
+      description: i18n.translate(
+        'xpack.observabilityShared.inspector.stats.queryTimeDescription',
+        {
+          defaultMessage:
+            'The time it took to process the query. ' +
+            'Does not include the time to send the request or parse it in the browser.',
+        }
+      ),
     };
   }
 
@@ -116,13 +122,16 @@ function getStats({
     }
 
     stats.hitsTotal = {
-      label: i18n.translate('xpack.observability.inspector.stats.hitsTotalLabel', {
+      label: i18n.translate('xpack.observabilityShared.inspector.stats.hitsTotalLabel', {
         defaultMessage: 'Hits (total)',
       }),
       value: hitsTotalValue,
-      description: i18n.translate('xpack.observability.inspector.stats.hitsTotalDescription', {
-        defaultMessage: 'The number of documents that match the query.',
-      }),
+      description: i18n.translate(
+        'xpack.observabilityShared.inspector.stats.hitsTotalDescription',
+        {
+          defaultMessage: 'The number of documents that match the query.',
+        }
+      ),
     };
   }
   return stats;

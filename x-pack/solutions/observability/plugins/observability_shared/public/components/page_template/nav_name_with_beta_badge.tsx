@@ -28,7 +28,7 @@ export function NavNameWithBetaBadge({ label, iconType, isTechnicalPreview }: Pr
           <EuiBetaBadge
             color="hollow"
             size="s"
-            label={i18n.translate('xpack.observability.navigation.experimentalBadgeLabel', {
+            label={i18n.translate('xpack.observabilityShared.navigation.experimentalBadgeLabel', {
               defaultMessage: 'Technical preview',
             })}
             iconType={iconType}
@@ -37,7 +37,7 @@ export function NavNameWithBetaBadge({ label, iconType, isTechnicalPreview }: Pr
           <EuiBetaBadge
             color="hollow"
             size="s"
-            label={i18n.translate('xpack.observability.navigation.betaBadge', {
+            label={i18n.translate('xpack.observabilityShared.navigation.betaBadge', {
               defaultMessage: 'Beta',
             })}
           />

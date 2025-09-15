@@ -53,11 +53,7 @@ export const StepDuration = ({
   );
 
   if (step.synthetics.step?.status === 'skipped') {
-    return (
-      <span>
-        {i18n.translate('xpack.uptime.stepDuration.span.Label', { defaultMessage: '--' })}
-      </span>
-    );
+    return <span>--</span>;
   }
 
   if (!showStepDurationTrend) {

@@ -17,10 +17,10 @@ type Props = {
 export function TechnicalPreviewBadge({ icon = 'beaker', size, style }: Props) {
   return (
     <EuiBetaBadge
-      label={i18n.translate('xpack.observability.technicalPreviewBadgeLabel', {
+      label={i18n.translate('xpack.observabilityShared.technicalPreviewBadgeLabel', {
         defaultMessage: 'Technical preview',
       })}
-      tooltipContent={i18n.translate('xpack.observability.technicalPreviewBadgeDescription', {
+      tooltipContent={i18n.translate('xpack.observabilityShared.technicalPreviewBadgeDescription', {
         defaultMessage:
           'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
       })}

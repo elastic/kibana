@@ -70,9 +70,13 @@ export function AddPageAttachmentToCaseModal({
   useEffect(() => {
     if (!hasCasesPermissions) {
       notifications.toasts.addWarning({
-        title: i18n.translate('xpack.observability.cases.addPageToCaseModal.noPermissionsTitle', {
-          defaultMessage: 'Insufficient privileges to add page to case. Please contact your admin.',
-        }),
+        title: i18n.translate(
+          'xpack.observabilityShared.cases.addPageToCaseModal.noPermissionsTitle',
+          {
+            defaultMessage:
+              'Insufficient privileges to add page to case. Please contact your admin.',
+          }
+        ),
       });
     }
   }, [hasCasesPermissions, notifications.toasts]);
@@ -154,21 +158,24 @@ function AddToCaseButtonContent({
   return isCommentModalOpen ? (
     <EuiConfirmModal
       onCancel={handleCloseModal}
-      aria-label={i18n.translate('xpack.observability.cases.addToCaseModal.confirmAriaLabel', {
-        defaultMessage: 'Confirm comment',
-      })}
+      aria-label={i18n.translate(
+        'xpack.observabilityShared.cases.addToCaseModal.confirmAriaLabel',
+        {
+          defaultMessage: 'Confirm comment',
+        }
+      )}
       onConfirm={onCommentAdded}
       data-test-subj="syntheticsAddToCaseCommentModal"
       style={{ width: 800 }}
       isLoading={isCommentLoading}
       confirmButtonText={i18n.translate(
-        'xpack.observability.cases.addToPageAttachmentToCaseModal.confirmButtonText',
+        'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.confirmButtonText',
         {
           defaultMessage: 'Confirm',
         }
       )}
       cancelButtonText={i18n.translate(
-        'xpack.observability.cases.addToPageAttachmentToCaseModal.cancelButtonText',
+        'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.cancelButtonText',
         {
           defaultMessage: 'Cancel',
         }
@@ -176,7 +183,7 @@ function AddToCaseButtonContent({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('xpack.observability.cases.addToCaseModal.title', {
+          {i18n.translate('xpack.observabilityShared.cases.addToCaseModal.title', {
             defaultMessage: 'Add page to case',
           })}
         </EuiModalHeaderTitle>

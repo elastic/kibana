@@ -14,7 +14,7 @@ const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 const SANITIZED_PATH_PARAM = 'entry.1876422621';
 const ML_JOB_TYPE = 'entry.170406579';
 const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate(
-  'xpack.observability.featureFeedbackButton.defaultText',
+  'xpack.observabilityShared.featureFeedbackButton.defaultText',
   {
     defaultMessage: 'Give feedback',
   }

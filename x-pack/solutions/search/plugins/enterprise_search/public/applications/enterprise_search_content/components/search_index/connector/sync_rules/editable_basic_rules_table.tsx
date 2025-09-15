@@ -78,12 +78,7 @@ export const SyncRulesTable: React.FC = () => {
         values: { indexName },
       })}
       <EuiSpacer />
-      <EuiLink
-        data-test-subj="enterpriseSearchSyncRulesTableLearnMoreAboutCustomizingYourSyncRulesLink"
-        href={docLinks.syncRules}
-        external
-        target="_blank"
-      >
+      <EuiLink href={docLinks.syncRules} external target="_blank">
         {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.link', {
           defaultMessage: 'Learn more about customizing your sync rules.',
         })}
@@ -95,7 +90,6 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
-          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
           value={filteringRule.policy}
           onChange={(e) => onChange(e.target.value)}
@@ -123,12 +117,7 @@ export const SyncRulesTable: React.FC = () => {
       editingRender: (rule, onChange) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiFieldText
-              data-test-subj="enterpriseSearchColumnsFieldText"
-              fullWidth
-              value={rule.field}
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <EuiFieldText fullWidth value={rule.field} onChange={(e) => onChange(e.target.value)} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -146,7 +135,6 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
-          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
           value={filteringRule.rule}
           onChange={(e) => onChange(e.target.value)}
@@ -167,12 +155,7 @@ export const SyncRulesTable: React.FC = () => {
       editingRender: (rule, onChange) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiFieldText
-              data-test-subj="enterpriseSearchColumnsFieldText"
-              fullWidth
-              value={rule.value}
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <EuiFieldText fullWidth value={rule.value} onChange={(e) => onChange(e.target.value)} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

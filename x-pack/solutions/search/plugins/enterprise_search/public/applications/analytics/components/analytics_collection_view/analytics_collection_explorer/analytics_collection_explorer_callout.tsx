@@ -40,7 +40,6 @@ export const AnalyticsCollectionExplorerCallout: React.FC = () => {
 
       <RedirectAppLinks coreStart={{ application }}>
         <EuiButton
-          data-test-subj="enterpriseSearchAnalyticsCollectionExplorerCalloutExploreButton"
           fill
           href={discoverLink}
           data-telemetry-id="entSearch-analytics-explorer-callout-exploreLink"

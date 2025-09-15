@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { LineAnnotationDatum, LineAnnotationStyle } from '@elastic/charts';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -35,14 +34,7 @@ export function PercentileAnnotations({ percentiles }: Props) {
   };
 
   function PercentileTooltip({ annotation }: { annotation: LineAnnotationDatum }) {
-    return (
-      <span data-cy="percentileTooltipTitle">
-        {annotation.details}
-        {i18n.translate('xpack.ux.percentileTooltip.span.thPercentileLabel', {
-          defaultMessage: 'th Percentile',
-        })}
-      </span>
-    );
+    return <span data-cy="percentileTooltipTitle">{annotation.details}th Percentile</span>;
   }
 
   return (
@@ -60,21 +52,9 @@ export function PercentileAnnotations({ percentiles }: Props) {
             <span data-cy="percentile-markers">
               <EuiToolTip
                 title={<PercentileTooltip annotation={annotation} />}
-                content={
-                  <span>
-                    {i18n.translate('xpack.ux.percentileAnnotations.span.pagesLoadedLabel', {
-                      defaultMessage: 'Pages loaded:',
-                    })}
-                    {Math.round(annotation.dataValue)}
-                  </span>
-                }
+                content={<span>Pages loaded: {Math.round(annotation.dataValue)}</span>}
               >
-                <>
-                  {annotation.details}
-                  {i18n.translate('xpack.ux.percentileAnnotations.thLabel', {
-                    defaultMessage: 'th',
-                  })}
-                </>
+                <>{annotation.details}th</>
               </EuiToolTip>
             </span>
           }

@@ -108,12 +108,12 @@ export function FlameGraphTooltip({
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
           {inline && (
             <EuiCallOut
-              announceOnMount
               css={css`
                 p {
                   display: flex;
                 }
               `}
+              announceOnMount
               color="primary"
               title={
                 <EuiText size="xs">
@@ -205,9 +205,6 @@ export function FlameGraphTooltip({
               />
               <EuiFlexItem>
                 <EuiButtonEmpty
-                  aria-label={i18n.translate('xpack.profiling.flameGraphTooltip.button.ariaLabel', {
-                    defaultMessage: '',
-                  })}
                   data-test-subj="profilingFlameGraphTooltipButton"
                   size="s"
                   iconType="inspect"

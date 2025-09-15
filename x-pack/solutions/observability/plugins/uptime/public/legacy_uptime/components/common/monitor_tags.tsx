@@ -85,9 +85,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
         href={docLinks?.links.heartbeat.monitorTags}
         target="_blank"
       >
-        {i18n.translate('xpack.uptime.monitorTags.setTagsLinkLabel', {
-          defaultMessage: 'Set tags',
-        })}
+        Set tags
       </EuiLink>
     );
   }

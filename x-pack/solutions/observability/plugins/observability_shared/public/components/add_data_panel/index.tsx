@@ -55,12 +55,15 @@ export interface AddDataPanelProps {
   'data-test-subj'?: string;
 }
 
-const tryItDefaultLabel = i18n.translate('xpack.observability.addDataPabel.tryItButtonLabel', {
-  defaultMessage: 'Try it now in our demo cluster',
-});
+const tryItDefaultLabel = i18n.translate(
+  'xpack.observabilityShared.addDataPabel.tryItButtonLabel',
+  {
+    defaultMessage: 'Try it now in our demo cluster',
+  }
+);
 
 const learnMoreDefaultLabel = i18n.translate(
-  'xpack.observability.addDataPabel.learnMoreLinkLabel',
+  'xpack.observabilityShared.addDataPabel.learnMoreLinkLabel',
   {
     defaultMessage: 'Learn more',
   }
@@ -153,10 +156,6 @@ export function AddDataPanel({
 
           {onDismiss && (
             <EuiButtonIcon
-              aria-label={i18n.translate(
-                'xpack.observability.addDataPanel.[objectObject]Button.ariaLabel',
-                { defaultMessage: '[object Object]' }
-              )}
               style={{
                 position: 'absolute',
                 top: `${euiTheme.size.s}`,

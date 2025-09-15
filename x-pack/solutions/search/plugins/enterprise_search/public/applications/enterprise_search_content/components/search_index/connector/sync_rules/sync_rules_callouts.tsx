@@ -58,7 +58,6 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
             <EuiFlexItem>
               <span>
                 <EuiButton
-                  data-test-subj="enterpriseSearchSyncRulesStateCalloutsEditDraftRulesButton"
                   data-telemetry-id="entSearchContent-connector-syncRules-validatingCallout-editRules"
                   onClick={editDraft}
                   color="warning"
@@ -98,7 +97,6 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
             <EuiFlexItem>
               <span>
                 <EuiButton
-                  data-test-subj="enterpriseSearchSyncRulesStateCalloutsEditDraftRulesButton"
                   data-telemetry-id="entSearchContent-connector-syncRules-errorCallout-editRules"
                   onClick={editDraft}
                   color="danger"
@@ -139,7 +137,6 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                 <EuiFlexItem grow={false}>
                   <span>
                     <EuiButton
-                      data-test-subj="enterpriseSearchSyncRulesStateCalloutsActivateDraftRulesButton"
                       data-telemetry-id="entSearchContent-connector-syncRules-successCallout-applyRules"
                       onClick={applyDraft}
                       color="success"
@@ -157,7 +154,6 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                 <EuiFlexItem grow={false}>
                   <span>
                     <EuiButton
-                      data-test-subj="enterpriseSearchSyncRulesStateCalloutsEditDraftRulesButton"
                       data-telemetry-id="entSearchContent-connector-syncRules-successCallout-editRules"
                       onClick={editDraft}
                       color="success"

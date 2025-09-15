@@ -79,7 +79,6 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchConnectorNameAndDescriptionFlyoutButton"
               onClick={() => setIsEditing(false)}
               isLoading={status === Status.LOADING}
             >
@@ -87,12 +86,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="enterpriseSearchConnectorNameAndDescriptionFlyoutSaveNameAndDescriptionButton"
-              isLoading={status === Status.LOADING}
-              fill
-              onClick={saveNameAndDescription}
-            >
+            <EuiButton isLoading={status === Status.LOADING} fill onClick={saveNameAndDescription}>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.saveButtonLabel',
                 {

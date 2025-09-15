@@ -48,12 +48,7 @@ export const AnalyticsOverviewEmptyPage: React.FC = () => (
             })}
           </span>
         </EuiTitle>{' '}
-        <EuiLink
-          data-test-subj="enterpriseSearchAnalyticsOverviewEmptyPageReadDocumentationLink"
-          href={docLinks.behavioralAnalytics}
-          target="_blank"
-          external
-        >
+        <EuiLink href={docLinks.behavioralAnalytics} target="_blank" external>
           {i18n.translate('xpack.enterpriseSearch.analytics.collections.emptyState.footerLink', {
             defaultMessage: 'Read documentation',
           })}

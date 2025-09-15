@@ -11,7 +11,7 @@ export const COMMON_OBSERVABILITY_GROUPING = [
   {
     id: 'observability',
     getDisplayName: () =>
-      i18n.translate('xpack.observability.common.constants.grouping', {
+      i18n.translate('xpack.observabilityShared.common.constants.grouping', {
         defaultMessage: 'Observability',
       }),
     getIconType: () => {

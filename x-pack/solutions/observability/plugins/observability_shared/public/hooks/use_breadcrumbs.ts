@@ -15,9 +15,12 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useQueryParams } from './use_query_params';
 
-const OBSERVABILITY_TEXT = i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
-  defaultMessage: 'Observability',
-});
+const OBSERVABILITY_TEXT = i18n.translate(
+  'xpack.observabilityShared.breadcrumbs.observabilityLinkText',
+  {
+    defaultMessage: 'Observability',
+  }
+);
 
 function addClickHandlers(
   breadcrumbs: ChromeBreadcrumb[],

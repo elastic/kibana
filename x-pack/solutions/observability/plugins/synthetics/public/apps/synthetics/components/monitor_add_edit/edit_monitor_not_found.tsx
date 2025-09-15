@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,14 +44,7 @@ const LeftoverIntegrationFound: React.FC = () => {
   if (!packagePolicyId) return null;
 
   return (
-    <EuiCallOut
-      title={i18n.translate(
-        'xpack.synthetics.leftoverIntegrationFound.euiCallOut.leftoverIntegrationFoundLabel',
-        { defaultMessage: 'Leftover integration found' }
-      )}
-      color="warning"
-      iconType="question"
-    >
+    <EuiCallOut title="Leftover integration found" color="warning" iconType="question">
       <p>
         <FormattedMessage
           id="xpack.synthetics.leftOver.errors.title"

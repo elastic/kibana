@@ -6,7 +6,6 @@
  */
 
 import type { MouseEventHandler } from 'react';
-
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
@@ -20,7 +19,6 @@ import {
   EuiStat,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { DESCRIPTION_LABEL, NAME_LABEL } from '../../../shared/constants';
 import { isConnectorIndex } from '../../utils/indices';
@@ -36,11 +34,7 @@ const EditDescription: React.FC<{
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty data-test-subj="enterpriseSearchEditDescriptionEditButton" onClick={onClick}>
-        {i18n.translate('xpack.enterpriseSearch.editDescription.editButtonEmptyLabel', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButtonEmpty>
+      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

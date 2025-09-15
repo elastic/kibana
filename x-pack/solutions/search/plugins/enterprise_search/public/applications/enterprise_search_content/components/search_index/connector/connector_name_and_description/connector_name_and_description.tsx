@@ -73,12 +73,7 @@ export const ConnectorNameAndDescription: React.FC = () => {
             <EuiSpacer />
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="enterpriseSearchConnectorNameAndDescriptionButton"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {EDIT_BUTTON_LABEL}
-                </EuiButton>
+                <EuiButton onClick={() => setIsEditing(!isEditing)}>{EDIT_BUTTON_LABEL}</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

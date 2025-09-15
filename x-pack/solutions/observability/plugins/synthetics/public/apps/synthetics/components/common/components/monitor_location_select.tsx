@@ -70,13 +70,7 @@ export const MonitorLocationSelect = ({
 
       const menuItems =
         loadingLocationsStatus && !locationsStatus
-          ? [
-              <span key="loading">
-                {i18n.translate('xpack.synthetics.locationList.span.loadingLabel', {
-                  defaultMessage: 'Loading...',
-                })}
-              </span>,
-            ]
+          ? [<span key="loading">Loading...</span>]
           : locationsStatus
               .map((location) => {
                 return (

@@ -102,7 +102,6 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
               values={{
                 docsLink: (
                   <EuiLink
-                    data-test-subj="enterpriseSearchCreateSearchApplicationSearchApplicationsDocumentationLink"
                     href={docLinks.searchApplications}
                     target="_blank"
                     data-telemetry-id="entSearchApplications-createSearchApplication-docsLink"
@@ -174,7 +173,6 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
                 {
                   children: (
                     <EuiFieldText
-                      data-test-subj="enterpriseSearchCreateSearchApplicationFieldText"
                       fullWidth
                       disabled={formDisabled}
                       placeholder={i18n.translate(
@@ -200,7 +198,6 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchCreateSearchApplicationButton"
               disabled={formDisabled}
               data-telemetry-id="entSearchApplications-createSearchApplication-cancel"
               onClick={onClose}
@@ -211,7 +208,6 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="enterpriseSearchCreateSearchApplicationCreateButton"
               isDisabled={createDisabled || formDisabled}
               data-telemetry-id="entSearchApplications-createSearchApplication-submit"
               fill

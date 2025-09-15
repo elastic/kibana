@@ -86,7 +86,6 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
         </EuiText>
         <EuiSpacer />
         <EuiButton
-          data-test-subj="enterpriseSearchAnalyticsCollectionSettingsDeleteThisCollectionButton"
           fill
           type="submit"
           color="danger"

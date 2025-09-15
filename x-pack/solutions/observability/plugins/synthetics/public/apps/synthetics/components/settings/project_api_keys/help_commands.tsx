@@ -27,10 +27,7 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
-        {i18n.translate('xpack.synthetics.helpCommands.exportSYNTHETICSAPIKEYCodeBlockLabel', {
-          defaultMessage: 'export SYNTHETICS_API_KEY=',
-        })}
-        {apiKey}
+        export SYNTHETICS_API_KEY={apiKey}
       </EuiCodeBlock>
       <EuiSpacer size="m" />
       <EuiSpacer size="m" />
@@ -39,13 +36,7 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
-        {i18n.translate('xpack.synthetics.helpCommands.syntheticsapikeyCodeBlockLabel', {
-          defaultMessage: 'SYNTHETICS_API_KEY=',
-        })}
-        {apiKey}{' '}
-        {i18n.translate('xpack.synthetics.helpCommands.npmRunPushCodeBlockLabel', {
-          defaultMessage: 'npm run push',
-        })}
+        SYNTHETICS_API_KEY={apiKey} npm run push
       </EuiCodeBlock>
     </div>
   );
