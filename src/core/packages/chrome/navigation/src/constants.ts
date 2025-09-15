@@ -18,4 +18,4 @@ export const POPOVER_HOVER_DELAY = 100;
 export const TOP_BAR_HEIGHT = 48;
 export const TOP_BAR_POPOVER_GAP = 8;
 export const BOTTOM_POPOVER_GAP = 17;
-export const TOOLTIP_OFFSET = -8;
+export const TOOLTIP_OFFSET = 4;
