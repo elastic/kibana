@@ -16,5 +16,3 @@ export type { IDataStreamsStatsClient } from './services/data_streams_stats/type
 export function plugin() {
   return new DatasetQualityPlugin();
 }
-
-export { QualityIndicator } from './components/quality_indicator';

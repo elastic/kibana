@@ -8,4 +8,4 @@
 export * from './url_schema';
 export * from './utils';
 export * from './constants';
-export * from './types';
+export type * from './types';
