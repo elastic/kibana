@@ -30,9 +30,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
     model: 'test',
     provider: 'Azure OpenAI',
   },
-  summary: {
-    content: 'test',
-  },
   category: 'assistant',
   users: [
     {
