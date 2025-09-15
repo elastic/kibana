@@ -52,6 +52,7 @@ export interface DocLinks {
   };
   readonly cloud: {
     readonly beatsAndLogstashConfiguration: string;
+    readonly elasticsearchBillingDimensions: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -430,6 +431,8 @@ export interface DocLinks {
     aiAssistant: string;
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
+    elasticServerlessSearchManagedLlmUsageCost: string;
+
   }>;
   readonly alerting: Readonly<{
     authorization: string;

@@ -22,15 +22,17 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
+  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
-
+import { useStateWithLocalStorage } from '../../../../../hooks/use_state_with_localstorage';
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
@@ -72,7 +74,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       notificationService: { toasts },
     },
     docLinks,
-    plugins: { share },
+    plugins: { cloud, share },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
@@ -129,6 +131,10 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
+  const [isLLMCostTourVisible, setLLMCostTourVisible] = useStateWithLocalStorage<boolean>(
+    'elasticSemanticTextVCUTourSkipKey',
+    true
+  );
 
   const inferencePopover = () => (
     <EuiPopover
@@ -140,6 +146,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
             </p>
           </EuiText>
           <EuiSpacer size="xs" />
+
           <EuiButton
             iconType="arrowDown"
             iconSide="right"
@@ -273,7 +280,66 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
-          {inferencePopover()}
+          {cloud?.isServerlessEnabled ? (
+            <EuiTourStep
+              content={
+                <FormattedMessage
+                  id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.contents"
+                  values={{
+                    additionalCosts: (
+                      <EuiLink
+                        data-test-subj="mlVcuAdditionalCost"
+                        target="_blank"
+                        href={
+                          docLinks.links.observability.elasticServerlessSearchManagedLlmUsageCost
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.additionalCosts"
+                          defaultMessage="additional Costs"
+                        />
+                      </EuiLink>
+                    ),
+                    learnMore: (
+                      <EuiLink
+                        data-test-subj="mlVcuLearnMore"
+                        target="_blank"
+                        href={docLinks.links.cloud.elasticsearchBillingDimensions}
+                      >
+                        <FormattedMessage
+                          id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.learnMore"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                  defaultMessage="The VCUs used to perform inference, NLP tasks, and other ML activities will incur {additionalCosts}. You can continue to use other models as normal. {learnMore}"
+                />
+              }
+              onFinish={() => setLLMCostTourVisible(false)}
+              stepsTotal={1}
+              title={
+                <FormattedMessage
+                  id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.title"
+                  defaultMessage="Machine Learning Usage"
+                />
+              }
+              subtitle={
+                <FormattedMessage
+                  id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.subtitle"
+                  defaultMessage="VCU Consumption"
+                />
+              }
+              step={1}
+              data-test-subj="semantic-text-ml-cost-tour"
+              isOpen={isLLMCostTourVisible}
+            >
+              {inferencePopover()}
+            </EuiTourStep>
+          ) : (
+            inferencePopover()
+          )}
+
           {isInferenceFlyoutVisible ? (
             <Suspense fallback={<EuiLoadingSpinner size="l" />}>
               <InferenceFlyoutWrapper
