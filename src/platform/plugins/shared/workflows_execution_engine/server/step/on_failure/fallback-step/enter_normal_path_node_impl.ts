@@ -20,7 +20,7 @@ export class EnterNormalPathNodeImpl implements NodeImplementation, StepErrorCat
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
+    this.wfExecutionRuntimeManager.enterScope('normal');
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 

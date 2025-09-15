@@ -44,7 +44,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  * and uses topological sorting to determine execution order.
  */
 export class WorkflowExecutionRuntimeManager {
-  private currentNodeId: string | null = null;
+  private currentNodeId: string | undefined = undefined;
   private stack: string[] = [];
 
   private workflowLogger: IWorkflowEventLogger | null = null;
@@ -93,11 +93,11 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNode(): GraphNode {
-    if (!this.workflowExecution.currentNodeId) {
+    if (!this.currentNodeId) {
       return null as any; // TODO: better handling
     }
 
-    return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
+    return this.workflowGraph.getNode(this.currentNodeId as string);
   }
 
   public getCurrentStepExecutionId(): string {
@@ -113,18 +113,24 @@ export class WorkflowExecutionRuntimeManager {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
     }
 
-    this.currentNodeId = nodeId;
+    this.workflowExecutionState.updateWorkflowExecution({
+      currentNodeId: nodeId,
+    });
   }
 
   public navigateToNextNode(): void {
-    const currentNodeId = this.workflowExecution.currentNodeId;
+    const currentNodeId = this.currentNodeId;
     const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
     if (currentNodeIndex < this.topologicalOrder.length - 1) {
-      this.currentNodeId = this.topologicalOrder[currentNodeIndex + 1];
+      this.workflowExecutionState.updateWorkflowExecution({
+        currentNodeId: this.topologicalOrder[currentNodeIndex + 1],
+      });
       return;
     }
 
-    this.currentNodeId = null;
+    this.workflowExecutionState.updateWorkflowExecution({
+      currentNodeId: undefined,
+    });
   }
 
   public getCurrentNodeScope(): string[] {
@@ -136,11 +142,15 @@ export class WorkflowExecutionRuntimeManager {
       scopeId = this.getCurrentNode().stepId;
     }
 
-    this.stack.push(scopeId as string);
+    this.workflowExecutionState.updateWorkflowExecution({
+      stack: [...this.workflowExecution.stack, scopeId as string],
+    });
   }
 
   public exitScope(): void {
-    this.stack.pop();
+    this.workflowExecutionState.updateWorkflowExecution({
+      stack: this.workflowExecution.stack.slice(0, -1),
+    });
   }
 
   public setWorkflowError(error: Error | string | undefined): void {
@@ -533,12 +543,8 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async saveState(): Promise<void> {
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.currentNodeId as string,
-      stack: this.stack,
-    };
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-
+    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {};
     if (!this.currentNodeId) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
@@ -584,6 +590,8 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
     await this.workflowExecutionState.flush();
+    this.currentNodeId = this.workflowExecution.currentNodeId;
+    this.stack = [...(this.workflowExecution.stack || [])];
   }
 
   private buildCurrentStepPath(): string[] {

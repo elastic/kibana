@@ -129,16 +129,24 @@ async function catchError(
   nodesFactory: NodesFactory,
   workflowGraph: WorkflowGraph
 ) {
+  const nodeStack = workflowGraph.getNodeStack(workflowRuntime.getCurrentNode().id);
+
   try {
     while (
       workflowRuntime.getWorkflowExecution().error &&
       workflowRuntime.getWorkflowExecution().stack.length > 0
     ) {
-      const stack = workflowRuntime.getWorkflowExecution().stack;
-      const nodeId = stack[stack.length - 1];
-      const node = workflowGraph.getNode(nodeId);
+      const stack = [...workflowRuntime.getWorkflowExecution().stack];
+      const scopeId = stack[stack.length - 1];
 
-      if (node) {
+      while (
+        workflowRuntime.getWorkflowExecution().error &&
+        nodeStack.length &&
+        workflowGraph.getNode(nodeStack[nodeStack.length - 1]).stepId === scopeId
+      ) {
+        const nodeId = nodeStack.pop()!;
+        workflowRuntime.navigateToNode(nodeId);
+        const node = workflowGraph.getNode(nodeId);
         const nodeImplementation = nodesFactory.create(node as any);
 
         if ((nodeImplementation as unknown as StepErrorCatcher).catchError) {
@@ -154,7 +162,6 @@ async function catchError(
         if (workflowRuntime.getWorkflowExecution().error) {
           await workflowRuntime.failStep(workflowRuntime.getWorkflowExecution().error!);
         }
-        workflowRuntime.navigateToNode(node.id);
       }
 
       workflowRuntime.exitScope();

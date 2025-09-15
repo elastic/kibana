@@ -14,7 +14,7 @@ export class EnterFallbackPathNodeImpl implements NodeImplementation {
   constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
+    this.wfExecutionRuntimeManager.enterScope('fallback');
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

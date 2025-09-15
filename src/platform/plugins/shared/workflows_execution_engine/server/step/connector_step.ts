@@ -63,6 +63,8 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           error: null,
         };
       }
+    } else if (this.step.name.includes('fail')) {
+      throw new Error('Fail always');
     }
 
     try {
