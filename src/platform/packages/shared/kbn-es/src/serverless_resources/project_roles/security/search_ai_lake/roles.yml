@@ -11,6 +11,7 @@ _search_ai_lake_analyst:
   indices:
     - names:
         - ".alerts-security*"
+        - ".internal.alerts-security*"
       privileges:
         - "index"
         - "read"
@@ -23,7 +24,6 @@ _search_ai_lake_analyst:
         - ".internal.preview.alerts-security*"
         - ".adhoc.alerts-security*"
         - ".internal.adhoc.alerts-security*"
-        - ".internal.alerts-security*"
         - "security_solution-alert-*"
       privileges:
         - "read"
