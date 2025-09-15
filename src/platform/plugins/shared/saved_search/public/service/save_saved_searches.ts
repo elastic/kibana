@@ -55,7 +55,10 @@ export const saveSearchSavedObject = async (
   return resp.item.id;
 };
 
-/** @internal **/
+/**
+ * @internal
+ * @deprecated Use saveDiscoverSession instead
+ */
 export const saveSavedSearch = async (
   savedSearch: SavedSearch,
   options: SaveSavedSearchOptions,

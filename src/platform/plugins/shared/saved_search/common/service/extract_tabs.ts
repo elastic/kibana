@@ -33,7 +33,7 @@ export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
  */
 export const extractTabs = (
   attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
-): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> => {
+): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7> => {
   const { title, description, ...tabAttrs } = attributes;
   const tabs = [
     {

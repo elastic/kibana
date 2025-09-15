@@ -13,7 +13,7 @@ import { pick } from 'lodash';
 import type { SavedSearch } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../saved_searches_utils';
 import type { SavedSearchAttributes, SerializableSavedSearch } from '../types';
-import { extractTabs } from './extract_tabs';
+import { extractTabs, removeTopLevelTabAttributes } from './extract_tabs';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
@@ -33,8 +33,8 @@ export const fromSavedSearchAttributes = (
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes =>
-  extractTabs({
+): SavedSearchAttributes => {
+  const attributes = extractTabs({
     kibanaSavedObjectMeta: { searchSourceJSON },
     title: savedSearch.title ?? '',
     sort: savedSearch.sort ?? [],
@@ -56,4 +56,6 @@ export const toSavedSearchAttributes = (
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
     visContext: savedSearch.visContext,
-  }) as SavedSearchAttributes;
+  });
+  return removeTopLevelTabAttributes(attributes);
+};
