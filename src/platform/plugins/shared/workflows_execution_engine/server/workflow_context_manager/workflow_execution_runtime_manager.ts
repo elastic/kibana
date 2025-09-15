@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, GraphNode } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
 import type { RunStepResult } from '../step/node_implementation';
