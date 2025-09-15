@@ -226,7 +226,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await esClient.indices.createDataStream({ name });
         await esClient.indices.putDataStreamSettings({
           name,
-          settings: { 'index.number_of_shards': 2 },
+          settings: { 'index.refresh_interval': '20s' },
         });
       });
 
@@ -268,6 +268,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       if (!isServerless) {
         it('does not register a rollover when number_of_shards is not updated at creation', async () => {
+          await esClient.indices.putDataStreamSettings({
+            name,
+            settings: { 'index.number_of_shards': 2 },
+          });
+
           await upsertClassicStream({ 'index.number_of_shards': { value: 2 } });
           await esClient.index({
             index: name,
@@ -281,6 +286,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('registers a rollover when number_of_shards is updated at creation', async () => {
+          await esClient.indices.putDataStreamSettings({
+            name,
+            settings: { 'index.number_of_shards': 2 },
+          });
+
           await upsertClassicStream({ 'index.number_of_shards': { value: 3 } });
 
           await esClient.index({
@@ -295,6 +305,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('registers a rollover when number_of_shards is updated', async () => {
+          await esClient.indices.putDataStreamSettings({
+            name,
+            settings: { 'index.number_of_shards': 2 },
+          });
+
           await upsertClassicStream({ 'index.number_of_shards': { value: 2 } });
 
           await esClient.index({

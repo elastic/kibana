@@ -39,6 +39,7 @@ import {
   validateNoManualIngestPipelineUsage,
   validateRootStreamChanges,
   validateBracketsInFieldNames,
+  validateSettings,
 } from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
@@ -436,6 +437,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
       return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
     }
+
+    validateSettings(this._definition, this.dependencies.isServerless);
 
     return { isValid: true, errors: [] };
   }
