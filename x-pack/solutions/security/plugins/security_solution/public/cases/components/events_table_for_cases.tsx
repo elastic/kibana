@@ -33,7 +33,8 @@ import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_re
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
 
 const noop = () => {};
-export const emptyArray = {} as const;
+export const emptyObject = {} as const;
+export const emptyArray = [];
 
 export const MAX_ACTION_BUTTON_COUNT = 4;
 
@@ -66,7 +67,7 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
         indexNames: props.dataView.getIndexPattern().split(','),
         columns: [{ id: '_id', columnHeaderType: defaultColumnHeaderType }],
         defaultColumns: [],
-        sort: [],
+        sort: emptyArray,
         id: EVENTS_TABLE_FOR_CASES_ID,
       })
     );
@@ -113,11 +114,11 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
               isExpanded={isExpanded}
               isEventViewer={false}
               isExpandable={isExpandable}
-              loadingEventIds={[]}
+              loadingEventIds={emptyArray}
               onRowSelected={noop}
               onRuleChange={noop}
               pageRowIndex={pageRowIndex}
-              selectedEventIds={emptyArray}
+              selectedEventIds={emptyObject}
               setCellProps={setCellProps}
               showCheckboxes={false}
               tableId={EVENTS_TABLE_FOR_CASES_ID}
