@@ -847,7 +847,7 @@ describe('DiscoverEBTManager', () => {
       scopedManager.setAsActiveManager();
 
       const esqlQuery = {
-        esql: 'FROM logs-synth-default | WHERE KQL("""test:test-value""")',
+        esql: 'FROM logs-synth-default | WHERE KQL("""test:"test-value" """)',
       };
 
       await scopedManager.trackSubmittingQuery({
