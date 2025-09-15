@@ -539,6 +539,7 @@
     "cloudProvider",
     "created_at",
     "name",
+    "namespace",
     "packagePolicyCount",
     "updated_at",
     "vars"

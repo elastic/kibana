@@ -1812,6 +1812,9 @@
       "name": {
         "type": "keyword"
       },
+      "namespace": {
+        "type": "keyword"
+      },
       "packagePolicyCount": {
         "type": "integer"
       },
@@ -4304,7 +4307,6 @@
       }
     }
   },
-
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
