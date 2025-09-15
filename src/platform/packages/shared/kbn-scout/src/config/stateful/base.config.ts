@@ -74,9 +74,6 @@ export const defaultConfig: ScoutServerConfig = {
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
-      ...(dockerRegistryPort
-        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
-        : []),
     ],
     ssl: false,
   },
@@ -182,6 +179,9 @@ export const defaultConfig: ScoutServerConfig = {
       `--server.publicBaseUrl=${kbnUrl}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      ...(dockerRegistryPort
+        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+        : []),
     ],
   },
 };
