@@ -97,7 +97,7 @@ If your command adds or drops columns from the table, you need to define a `colu
 
 - [ ] Create and export a function, `columnsAfter` within a new module in your command's directory.
 - [ ] Attach it to your command definition.
-- [ ] Implement logic to modify the list of available columns according to the command's behavior. <br>NOTE: we distinguish between "fields" which are not defined within the text of the query, and "user-defined columns" which are. Make sure to use the correct type when adding a column to the list.
+- [ ] Implement logic to modify the list of available columns according to the command's behavior. <br>**NOTE:** we distinguish between "fields" which are not defined within the text of the query, and "user-defined columns" which are. Make sure to use the correct type when adding a column to the list.
 - [ ] Create a test suite in the same directory to validate the new `columnsAfter` method.
 
 ### Example ⭐
@@ -132,7 +132,7 @@ There is a validation function called `validateCommandArguments` that performs s
   - [ ] Optionally, add command-specific validation, but only _sparingly_. Our validation is, by design, incomplete. Really consider whether the UX value of each check is worth the complexity it introduces. If a command requires a field of a certain type as an argument, that is an appropriate check.
 - [ ] Add a suite of validation tests within the command's directory. Check the many examples for help.
 
-**NOTE**: all new validation messages should be registered in the `getMessageAndTypeFromId` function. It is also often a good idea to create method for a new message on our simplified API `errors`. See `kbn-esql-ast/src/definitions/utils/errors.ts`.
+**NOTE**: all new validation messages should be registered in the `getMessageAndTypeFromId` function. It is also often a good idea to create a convenience method for a new message on our simplified API, `errors`. See `kbn-esql-ast/src/definitions/utils/errors.ts`.
 
 ### Example ⭐
 
@@ -222,6 +222,26 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
   1. then accept a suggestion
 
   If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
+
+### A note on regular expressions (regex) in autocomplete
+
+Our strategy is to use the AST in our autocomplete code whenever it makes sense. It is our ground source of truth.
+
+However, we often deal with incomplete (i.e. syntactically-incorrect) queries. The AST is primarily designed to work with correct queries. It
+
+- may have nodes missing in some syntactically incorrect scenarios
+- may add a node, but mark it as `incomplete: true`
+- doesn't always include relevant formatting information such as whether the incomplete query ends with a comma or not
+
+This leads to many cases that can't be covered with just the AST. For these cases, we often employ regex checks on a portion of the query string. Regex-based checks can be written to be very robust to things like varying amounts of whitespace, case sensitivity, and repetition. We recommend brushing up on Javascript regex syntax.
+
+In particular, we often use
+
+- the `$` character to force the regex to match characters at the end of the line. This prevents false positives when the pattern may be present in a previous command in the query. For example `/,\s*/` will match _any comma in the query_, but `/,\s*$/` will match only a comma just before the cursor position.
+- the `\s` character group marker. This matches any whitespace including spaces, tabs, and newlines, making it cover lots of cases.
+- the `i` flag to turn off case sensitivity. For example, `/stats/i` matches `stats`, `STATS`, `StAtS` and so on.
+
+When in doubt, AI tools and [Regexr](https://regexr.com) are great sources of help.
 
 ## Add syntax highlighting
 
