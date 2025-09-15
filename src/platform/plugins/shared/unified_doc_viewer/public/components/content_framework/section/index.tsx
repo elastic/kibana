@@ -41,7 +41,7 @@ export interface ContentFrameworkSectionProps {
   actions?: Action[];
   children: React.ReactNode;
   'data-test-subj'?: string;
-  onToggle?: () => {};
+  onToggle?: (isOpen: boolean) => void;
   forceState?: EuiAccordionProps['forceState'];
   isTechPreview?: boolean;
 }
@@ -103,7 +103,7 @@ export function ContentFrameworkSection({
   const handleToggle = (isOpen: boolean) => {
     setIsAccordionExpanded(isOpen);
     if (onToggle) {
-      onToggle();
+      onToggle(isOpen);
     }
   };
 

@@ -21,7 +21,7 @@ describe('ValuePopoverContent', () => {
   it('renders the valueCellContent', () => {
     render(
       <ValuePopoverContent
-        fieldConfig={{ ...defaultFieldConfig, valueCellContent: <span>Cell Value</span> }}
+        fieldConfig={{ ...defaultFieldConfig, valueCellContent: () => <span>Cell Value</span> }}
         cellActions={null}
       />
     );
@@ -31,7 +31,7 @@ describe('ValuePopoverContent', () => {
   it('renders cellActions if provided', () => {
     render(
       <ValuePopoverContent
-        fieldConfig={{ ...defaultFieldConfig, valueCellContent: <span>With Action</span> }}
+        fieldConfig={{ ...defaultFieldConfig, valueCellContent: () => <span>With Action</span> }}
         cellActions={<button>ActionBtn</button>}
       />
     );
