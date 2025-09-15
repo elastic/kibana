@@ -85,9 +85,9 @@ export function DataQualityColumn({
     }
   );
 
-  const docCount = Number(totalDocsQueryFetch?.value?.values?.[0]?.[0]);
-  const degradedDocCount = Number(degradedDocsQueryFetch?.value?.values?.[0]?.[0]);
-  const failedDocCount = Number(failedDocsQueryFetch?.value?.values?.[0]?.[0]);
+  const docCount = totalDocsQueryFetch?.value ? Number(totalDocsQueryFetch.value?.values?.[0]?.[0]) : 0;
+  const degradedDocCount = degradedDocsQueryFetch?.value ? Number(degradedDocsQueryFetch.value?.values?.[0]?.[0]) : 0;
+  const failedDocCount = failedDocsQueryFetch?.value ? Number(failedDocsQueryFetch.value.values?.[0]?.[0]) : 0;
 
   const degradedPercentage = calculatePercentage({
     totalDocs: docCount,
