@@ -697,9 +697,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
       // forces refresh
-      if (dataSourcesCache.clear) {
-        dataSourcesCache.clear();
-      }
+      dataSourcesCache?.clear?.();
       if (getJoinIndices) {
         await getJoinIndices({ forceRefresh: true });
       }
