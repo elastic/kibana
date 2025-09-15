@@ -20,7 +20,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
 
 describe('InternalStateStore', () => {
-  it('should set data view', async () => {
+  const createTestStore = async () => {
     const services = createDiscoverServicesMock();
     const urlStateStorage = createKbnUrlStateStorage();
     const runtimeStateManager = createRuntimeStateManager();
@@ -36,6 +36,12 @@ describe('InternalStateStore', () => {
       tabsStorageManager,
     });
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
+
+    return { store, runtimeStateManager };
+  };
+
+  it('should set data view', async () => {
+    const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
@@ -47,21 +53,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should append a new tab to the tabs list', async () => {
-    const services = createDiscoverServicesMock();
-    const urlStateStorage = createKbnUrlStateStorage();
-    const runtimeStateManager = createRuntimeStateManager();
-    const tabsStorageManager = createTabsStorageManager({
-      urlStateStorage,
-      storage: services.storage,
-    });
-    const store = createInternalStateStore({
-      services: createDiscoverServicesMock(),
-      customizationContext: mockCustomizationContext,
-      runtimeStateManager,
-      urlStateStorage,
-      tabsStorageManager,
-    });
-    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
+    const { store } = await createTestStore();
     const initialTabId = store.getState().tabs.unsafeCurrentId;
     expect(store.getState().tabs.allIds).toHaveLength(1);
     expect(store.getState().tabs.unsafeCurrentId).toBe(initialTabId);
