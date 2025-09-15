@@ -279,26 +279,20 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
-          // Only label/entity nodes have documentsData. Narrow using in operator.
-          const documentsIds: string[] =
-            'documentsData' in node && Array.isArray(node.documentsData)
-              ? node.documentsData.map((d) => d.id)
-              : [];
-          const isOrigin = documentsIds.some((id) => originEventIdsSet.has(id));
-          const isOriginAlert = documentsIds.some((id) => originAlertIdsSet.has(id));
-
           if (isEntityNode(node)) {
             return {
               ...node,
-              isOrigin,
-              isOriginAlert,
               expandButtonClick: nodeExpandButtonClickHandler,
             };
           } else if (isLabelNode(node)) {
+            const docEventIds: string[] =
+              'documentsData' in node && Array.isArray(node.documentsData)
+                ? node.documentsData.flatMap((d) => (d.event ? d.event.id : []))
+                : [];
             return {
               ...node,
-              isOrigin,
-              isOriginAlert,
+              isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
+              isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
             };
           }
