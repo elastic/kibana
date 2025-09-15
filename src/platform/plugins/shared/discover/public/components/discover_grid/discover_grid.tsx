@@ -25,6 +25,7 @@ import {
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
+  viewModeToggle: React.ReactNode;
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
 }
 
@@ -35,6 +36,7 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
+  viewModeToggle,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   ...props
 }) => {
@@ -90,7 +92,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       cascadeGroups={cascadeGroups}
       dataView={dataView}
       // stateContainer={stateContainer}
-      // viewModeToggle={renderCustomToolbar}
+      viewModeToggle={viewModeToggle}
     />
   ) : (
     <UnifiedDataTable
