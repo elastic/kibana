@@ -43,6 +43,8 @@ export interface Props {
   eventTracker: EventTracker;
   showTour$: Observable<boolean>;
   onFinishTour: () => void;
+  manageSpacesDocsLink: string;
+  manageSpacesLink: string;
 }
 
 interface State {
@@ -138,6 +140,8 @@ class NavControlPopoverUI extends Component<Props, State> {
         solution={activeSpace?.solution}
         isTourOpen={isTourOpen}
         onFinishTour={this.props.onFinishTour}
+        manageSpacesLink={this.props.manageSpacesLink}
+        manageSpacesDocsLink={this.props.manageSpacesDocsLink}
       >
         <EuiPopover
           id="spcMenuPopover"

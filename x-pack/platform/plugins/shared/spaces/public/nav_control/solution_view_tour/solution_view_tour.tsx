@@ -16,16 +16,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SolutionView } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 
-const tourLearnMoreLink = 'https://ela.st/left-nav';
-
-const LearnMoreLink = () => (
-  <EuiLink href={tourLearnMoreLink} target="_blank" external>
-    {i18n.translate('xpack.spaces.navControl.tour.learnMore', {
-      defaultMessage: 'Learn more',
-    })}
-  </EuiLink>
-);
-
 const solutionMap: Record<SolutionId, string> = {
   es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
     defaultMessage: 'Elasticsearch',
@@ -45,9 +35,18 @@ interface Props extends PropsWithChildren<{}> {
   solution?: SolutionView;
   isTourOpen: boolean;
   onFinishTour: () => void;
+  manageSpacesDocsLink: string;
+  manageSpacesLink: string;
 }
 
-export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, onFinishTour }) => {
+export const SolutionViewTour: FC<Props> = ({
+  children,
+  solution,
+  isTourOpen,
+  onFinishTour,
+  manageSpacesLink,
+  manageSpacesDocsLink,
+}) => {
   const solutionLabel = solution && solution !== SOLUTION_VIEW_CLASSIC ? solutionMap[solution] : '';
   if (!solutionLabel) {
     return children;
@@ -60,10 +59,24 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"
-              defaultMessage="You can switch between Elastic Observability, Elastic Security, Elasticsearch or show all solutions by configuring the space here. {learnMore}"
+              defaultMessage="Only {solution} features are visible. To access other solution features, you can change this from your {spacesLink}.{br}{learnMore}"
               values={{
-                //  solution: solutionLabel,
-                learnMore: <LearnMoreLink />,
+                solution: solutionLabel,
+                spacesLink: (
+                  <EuiLink href={manageSpacesLink} target="_blank" external>
+                    {i18n.translate('xpack.spaces.navControl.tour.spaceSettingsLink', {
+                      defaultMessage: 'spaces settings',
+                    })}
+                  </EuiLink>
+                ),
+                learnMore: (
+                  <EuiLink href={manageSpacesDocsLink} target="_blank" external>
+                    {i18n.translate('xpack.spaces.navControl.tour.learnMore', {
+                      defaultMessage: 'Learn more',
+                    })}
+                  </EuiLink>
+                ),
+                br: <br />,
               }}
             />
           </p>
@@ -77,7 +90,7 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
       stepsTotal={4}
       repositionOnScroll
       title={i18n.translate('xpack.spaces.navControl.tour.title', {
-        defaultMessage: 'This space is on {solution} solution view',
+        defaultMessage: 'This space uses the {solution} solution view',
         values: { solution: solutionLabel },
       })}
       anchorPosition="downCenter"

@@ -32,6 +32,8 @@ import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data'
 
 import { registerNavigationEventTypes } from './analytics';
 
+import { SolutionNavigationTourManager } from './solution_tour/solution_tour';
+
 export class NavigationPublicPlugin
   implements
     Plugin<
@@ -114,6 +116,11 @@ export class NavigationPublicPlugin
       initSolutionNavigation();
     } else {
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
+    }
+
+    if (spaces?.solutionViewTourManager) {
+      const tourManager = new SolutionNavigationTourManager(spaces.solutionViewTourManager);
+      void tourManager.startTour();
     }
 
     return {

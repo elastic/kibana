@@ -44,6 +44,8 @@ export type { SpacesContextProps, SpacesReactContextValue } from './spaces_conte
 
 export type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 
+export type { TourManager as SpacesSolutionViewTourManager } from './nav_control';
+
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new SpacesPlugin(initializerContext);
 };

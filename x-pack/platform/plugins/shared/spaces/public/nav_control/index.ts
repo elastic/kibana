@@ -6,3 +6,4 @@
  */
 
 export { initSpacesNavControl } from './nav_control';
+export { TourManager } from './solution_view_tour';
