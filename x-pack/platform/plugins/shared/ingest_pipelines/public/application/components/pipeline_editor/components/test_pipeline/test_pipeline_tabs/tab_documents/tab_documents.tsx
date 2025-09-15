@@ -8,6 +8,7 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import { EuiSpacer, EuiText, EuiButton, EuiLink, EuiCode, EuiButtonEmpty } from '@elastic/eui';
 
@@ -26,8 +27,6 @@ import {
 import { Document } from '../../../../types';
 import { AddDocumentsAccordion } from './add_docs_accordion';
 import { ResetDocumentsModal } from './reset_documents_modal';
-
-import './tab_documents.scss';
 
 const UseField = getUseField({ component: Field });
 
@@ -142,11 +141,22 @@ const documentFieldConfig: FieldConfig<object[], {}, string> = {
   ],
 };
 
-export const DocumentsTab: FunctionComponent<Props> = ({
+const styles = {
+  documentField: css`
+    position: relative;
+  `,
+  documentFieldButton: css`
+    position: absolute;
+    right: 0;
+    top: 0;
+  `,
+};
+
+export const TabDocuments: FunctionComponent<Props> = ({
   validateAndTestPipeline,
+  resetTestOutput,
   isRunningTest,
   form,
-  resetTestOutput,
 }) => {
   const { services } = useKibana();
   const { getFormData, reset } = form;
@@ -170,7 +180,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
       onSubmit={validateAndTestPipeline}
       error={form.getErrors()}
     >
-      <div data-test-subj="documentsTabContent" className="documentsTab">
+      <div data-test-subj="documentsTabContent">
         <EuiText>
           <p>
             <FormattedMessage
@@ -200,12 +210,12 @@ export const DocumentsTab: FunctionComponent<Props> = ({
         {/* Documents editor */}
         <UseField config={documentFieldConfig} path="documents">
           {(field) => (
-            <div className="documentsTab__documentField">
+            <div css={styles.documentField}>
               <EuiButtonEmpty
                 size="xs"
                 onClick={() => setShowResetModal(true)}
                 data-test-subj="clearAllDocumentsButton"
-                className="documentsTab__documentField__button"
+                css={styles.documentFieldButton}
               >
                 {i18nTexts.documentsEditorClearAllButton}
               </EuiButtonEmpty>
