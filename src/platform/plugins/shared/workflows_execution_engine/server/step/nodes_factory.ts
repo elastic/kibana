@@ -10,7 +10,7 @@
 import type { BaseStep } from '@kbn/workflows'; // Adjust path as needed
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import type { StepImplementation } from './step_base';
+import type { NodeImplementation } from './node_implementation';
 // Import schema and inferred types
 import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
@@ -39,7 +39,7 @@ import {
 import { WaitStepImpl } from './wait_step/wait_step';
 import { buildStepExecutionId } from '../utils';
 
-export class StepFactory {
+export class NodesFactory {
   constructor(
     private contextManager: WorkflowContextManager,
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
@@ -52,7 +52,7 @@ export class StepFactory {
 
   public create<TStep extends BaseStep>(
     step: TStep // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
-  ): StepImplementation {
+  ): NodeImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
     const stepId = (step as any).id || (step as any).name;
     if (!stepType) {

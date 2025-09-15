@@ -8,12 +8,12 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { StepErrorCatcher, StepImplementation } from '../step_base';
+import type { StepErrorCatcher, NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
-export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatcher {
+export class EnterForeachNodeImpl implements NodeImplementation, StepErrorCatcher {
   constructor(
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,

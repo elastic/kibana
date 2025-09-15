@@ -8,10 +8,10 @@
  */
 
 import type { ExitIfNode } from '@kbn/workflows/graph';
-import type { StepImplementation } from '../step_base';
+import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitIfNodeImpl implements StepImplementation {
+export class ExitIfNodeImpl implements NodeImplementation {
   constructor(
     private node: ExitIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager

@@ -37,7 +37,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { StepFactory } from './step/step_factory';
+import { NodesFactory } from './step/nodes_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
@@ -340,7 +340,7 @@ async function createContainer(
     allowedHosts: config.http.allowedHosts,
   });
 
-  const nodesFactory = new StepFactory(
+  const nodesFactory = new NodesFactory(
     contextManager,
     connectorExecutor,
     workflowRuntime,

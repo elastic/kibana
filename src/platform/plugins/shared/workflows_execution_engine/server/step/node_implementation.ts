@@ -20,6 +20,7 @@ export interface RunStepResult {
   error: any;
 }
 
+// TODO: To remove it and replace with AtomicGraphNode
 // Base step interface
 export interface BaseStep {
   name: string;
@@ -32,7 +33,7 @@ export interface BaseStep {
 
 export type StepDefinition = BaseStep;
 
-export interface StepImplementation {
+export interface NodeImplementation {
   run(): Promise<void>;
 }
 
@@ -40,7 +41,9 @@ export interface StepErrorCatcher {
   catchError(): Promise<void>;
 }
 
-export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
+export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
+  implements NodeImplementation
+{
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;

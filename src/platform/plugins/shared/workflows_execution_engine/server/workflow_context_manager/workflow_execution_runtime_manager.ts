@@ -12,7 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
-import type { RunStepResult } from '../step/step_base';
+import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { buildStepExecutionId } from '../utils';

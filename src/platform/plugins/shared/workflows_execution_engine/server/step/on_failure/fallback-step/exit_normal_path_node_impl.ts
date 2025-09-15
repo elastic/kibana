@@ -8,10 +8,10 @@
  */
 
 import type { ExitNormalPathNode } from '@kbn/workflows/graph';
-import type { StepImplementation } from '../../step_base';
+import type { NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitNormalPathNodeImpl implements StepImplementation {
+export class ExitNormalPathNodeImpl implements NodeImplementation {
   constructor(
     private node: ExitNormalPathNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager

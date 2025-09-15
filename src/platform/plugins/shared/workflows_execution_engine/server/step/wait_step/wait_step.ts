@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { WaitGraphNode } from '@kbn/workflows/graph';
-import type { StepImplementation } from '../step_base';
+import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 import { parseDuration } from '../../utils';
 
-export class WaitStepImpl implements StepImplementation {
+export class WaitStepImpl implements NodeImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
   private durationCache: number | null = null;
 

@@ -11,7 +11,7 @@ import type { StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { RunStepResult } from '../step/step_base';
+import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
 
 export interface ContextManagerInit {

@@ -10,13 +10,13 @@
 import type { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows/graph';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { StepImplementation } from '../step_base';
+import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { evaluateKql } from './eval_kql';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
-export class EnterIfNodeImpl implements StepImplementation {
+export class EnterIfNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,

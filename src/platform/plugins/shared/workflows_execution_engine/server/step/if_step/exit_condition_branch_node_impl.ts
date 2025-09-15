@@ -9,10 +9,10 @@
 
 import type { ExitConditionBranchNode } from '@kbn/workflows/graph';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { StepImplementation } from '../step_base';
+import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitConditionBranchNodeImpl implements StepImplementation {
+export class ExitConditionBranchNodeImpl implements NodeImplementation {
   constructor(
     private step: ExitConditionBranchNode,
     private workflowGraph: WorkflowGraph,
