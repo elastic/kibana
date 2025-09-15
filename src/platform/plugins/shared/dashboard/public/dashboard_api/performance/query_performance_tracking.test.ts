@@ -24,20 +24,20 @@ jest.mock('@kbn/ebt-tools', () => ({
   },
 }));
 
-describe('startQueryPerformanceTracking', () => {
-  function buildTestAssests(children: {} = {}) {
-    const children$ = new BehaviorSubject<{ [key: string]: unknown }>(children);
-    return {
-      children$,
-      childrenReady$: new BehaviorSubject(true),
-      getActivePanelCount: () => Object.keys(children$.getValue()).length,
-      performanceState: {
-        firstLoad: true,
-        creationStartTime: Date.now(),
-      } as PerformanceState,
-    };
-  }
+function buildTestAssests(children: {} = {}) {
+  const children$ = new BehaviorSubject<{ [key: string]: unknown }>(children);
+  return {
+    children$,
+    childrenReady$: new BehaviorSubject(true),
+    getActivePanelCount: () => Object.keys(children$.getValue()).length,
+    performanceState: {
+      firstLoad: true,
+      creationStartTime: Date.now(),
+    } as PerformanceState,
+  };
+}
 
+describe('startQueryPerformanceTracking', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
