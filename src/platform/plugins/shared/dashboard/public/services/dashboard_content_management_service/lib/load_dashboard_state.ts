@@ -11,7 +11,10 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
-import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
+import {
+  DEFAULT_DASHBOARD_STATE,
+  NEW_DASHBOARD_OVERRIDES,
+} from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
@@ -23,7 +26,7 @@ export const loadDashboardState = async ({
 
   const savedObjectId = id;
 
-  const newDashboardState = { ...DEFAULT_DASHBOARD_STATE };
+  const newDashboardState = { ...DEFAULT_DASHBOARD_STATE, ...NEW_DASHBOARD_OVERRIDES };
 
   /**
    * This is a newly created dashboard, so there is no saved object state to load.

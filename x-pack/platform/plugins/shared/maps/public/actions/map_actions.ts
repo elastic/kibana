@@ -52,6 +52,7 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
+  SET_PAUSE_SYNC_DATA,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
@@ -78,6 +79,26 @@ import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './u
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
 import { getDeletedFeatureIds } from '../selectors/ui_selectors';
+
+export function setPauseSyncData(pauseSyncData: boolean) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: SET_PAUSE_SYNC_DATA,
+      pauseSyncData,
+    });
+
+    if (!pauseSyncData) {
+      if (getMapSettings(getState()).autoFitToDataBounds) {
+        dispatch(autoFitToBounds());
+      } else {
+        dispatch(syncDataForAllLayers(false));
+      }
+    }
+  };
+}
 
 export function setMapInitError(errorMessage: string) {
   return {

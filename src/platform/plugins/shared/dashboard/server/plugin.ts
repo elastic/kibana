@@ -7,44 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
+import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  UiSettingsParams,
+} from '@kbn/core/server';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
-import { registerContentInsights } from '@kbn/content-management-content-insights-server';
-
-import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { registerAPIRoutes } from './api';
+import { capabilitiesProvider } from './capabilities_provider';
+import { DashboardStorage } from './content_management';
+import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
+import { createDashboardSavedObjectType } from './dashboard_saved_object';
+import type { DashboardPluginSetup, DashboardPluginStart } from './types';
 import {
+  TASK_ID,
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
-  TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
-import { getUISettings } from './ui_settings';
-import { DashboardStorage } from './content_management';
-import { capabilitiesProvider } from './capabilities_provider';
-import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { createDashboardSavedObjectType } from './dashboard_saved_object';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
-import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes } from './api';
-import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 
+export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection?: UsageCollectionSetup;
@@ -133,7 +135,22 @@ export class DashboardPlugin
       dashboardPersistableStateServiceFactory(plugins.embeddable)
     );
 
-    core.uiSettings.register(getUISettings());
+    const dashboardUiSettings: Record<string, UiSettingsParams<boolean>> = {
+      [DEFER_BELOW_FOLD]: {
+        schema: schema.boolean(),
+        requiresPageReload: true,
+        category: ['Dashboard'],
+        value: false,
+        name: i18n.translate('dashboard.labs.enableDeferBelowFoldProjectName', {
+          defaultMessage: 'Defer loading panels below "the fold"',
+        }),
+        description: i18n.translate('dashboard.labs.enableDeferBelowFoldProjectDescription', {
+          defaultMessage:
+            'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+        }),
+      },
+    };
+    core.uiSettings.register(dashboardUiSettings);
 
     registerAPIRoutes({
       http: core.http,

@@ -34,6 +34,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
+  PublishesFetchSetting,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -54,7 +55,7 @@ import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import type { DashboardLayout } from './layout_manager/types';
+import type { DashboardLayout, PanelCounts } from './layout_manager/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -103,6 +104,7 @@ export type DashboardApi = CanExpandPanels &
   PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
+  PublishesFetchSetting &
   PublishesDataViews &
   PublishesDescription &
   Pick<PublishesTitle, 'title$'> &
@@ -162,6 +164,7 @@ export interface DashboardInternalApi {
   panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  panelCounters$: BehaviorSubject<PanelCounts>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;

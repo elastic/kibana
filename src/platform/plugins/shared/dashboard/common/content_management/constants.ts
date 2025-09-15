@@ -16,6 +16,7 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 
 export const DEFAULT_DASHBOARD_OPTIONS = {
+  fetchOnlyVisible: false,
   hidePanelTitles: false,
   useMargins: true,
   syncColors: true,

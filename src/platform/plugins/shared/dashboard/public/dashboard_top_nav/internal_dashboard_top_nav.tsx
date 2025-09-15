@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import UseUnmount from 'react-use/lib/useUnmount';
-
-import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiHorizontalRule,
@@ -18,19 +14,22 @@ import {
   EuiLink,
   EuiPopover,
   EuiScreenReaderOnly,
+  type EuiBreadcrumb,
+  type EuiToolTipProps,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
-
-import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import UseUnmount from 'react-use/lib/useUnmount';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
   dashboardManagedBadge,
@@ -66,8 +65,6 @@ export interface InternalDashboardTopNavProps {
   showResetChange?: boolean;
 }
 
-const LabsFlyout = withSuspense(LazyLabsFlyout, null);
-
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
@@ -78,10 +75,8 @@ export function InternalDashboardTopNav({
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
-  const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
@@ -263,8 +258,6 @@ export function InternalDashboardTopNav({
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    isLabsShown,
-    setIsLabsShown,
     maybeRedirect,
     showResetChange,
   });
@@ -387,9 +380,6 @@ export function InternalDashboardTopNav({
         }}
         onSavedQueryIdChange={setSavedQueryId}
       />
-      {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-      ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

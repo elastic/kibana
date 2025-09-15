@@ -51,10 +51,7 @@ export const TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID = 'timepicker:refreshInterv
 export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 
 // Presentation labs settings
-export const LABS_CANVAS_BY_VALUE_EMBEDDABLE_ID = 'labs:canvas:byValueEmbeddable';
-export const LABS_CANVAS_ENABLE_UI_ID = 'labs:canvas:enable_ui';
 export const LABS_DASHBOARD_DEFER_BELOW_FOLD_ID = 'labs:dashboard:deferBelowFold';
-export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
 
 // Accessibility settings
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';

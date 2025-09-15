@@ -153,15 +153,17 @@ describe('embeddable renderer', () => {
       />
     );
     await waitFor(() =>
-      expect(onApiAvailable).toHaveBeenCalledWith({
-        type: 'test',
-        uuid: '12345',
-        parentApi: expect.any(Object),
-        serializeState: expect.any(Function),
-        phase$: expect.any(Object),
-        hasLockedHoverActions$: expect.any(Object),
-        lockHoverActions: expect.any(Function),
-      })
+      expect(onApiAvailable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'test',
+          uuid: '12345',
+          parentApi: expect.any(Object),
+          serializeState: expect.any(Function),
+          phase$: expect.any(Object),
+          hasLockedHoverActions$: expect.any(Object),
+          lockHoverActions: expect.any(Function),
+        })
+      )
     );
   });
 

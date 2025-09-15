@@ -20,6 +20,7 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
+import { usePresentationPanelVisibilityManager } from './presentation_panel_visibility_manager';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 import { usePanelErrorCss } from './use_panel_error_css';
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
@@ -47,6 +48,7 @@ export const PresentationPanelInternal = <
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
+  const visibilityTrackerRef = usePresentationPanelVisibilityManager(api);
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = useMemo(() => {
@@ -131,6 +133,7 @@ export const PresentationPanelInternal = <
         {...contentAttrs}
         css={styles.embPanel}
       >
+        <div ref={visibilityTrackerRef} css={styles.embVisibilityTracker} />
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
@@ -188,6 +191,11 @@ const styles = {
     height: '100%',
     position: 'relative',
     overflow: 'hidden',
+  }),
+  embVisibilityTracker: css({
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
   }),
   embPanelContent: css({
     '&.embPanel__content': {

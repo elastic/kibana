@@ -66,6 +66,7 @@ describe('getSerializedState', () => {
           },
         },
         "options": Object {
+          "fetchOnlyVisible": true,
           "hidePanelTitles": false,
           "syncColors": false,
           "syncCursor": true,
