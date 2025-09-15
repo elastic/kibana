@@ -2260,6 +2260,19 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ConversationRound.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "unique id for this round"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ConversationRound.input",
             "type": "Object",
             "tags": [],
@@ -3992,6 +4005,30 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.IndexSearchToolDefinitionWithSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexSearchToolDefinitionWithSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinitionWithSchema",
+            "text": "ToolDefinitionWithSchema"
+          },
+          "<",
+          "IndexSearchToolConfig",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/index_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.MessageChunkEvent",
         "type": "Type",
         "tags": [],
@@ -4172,7 +4209,7 @@
           "\nID of the onechat default conversational agent"
         ],
         "signature": [
-          "\"default\""
+          "\"elastic-ai-agent\""
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
@@ -4699,6 +4736,21 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.agentIdRegexp",
+        "type": "Object",
+        "tags": [],
+        "label": "agentIdRegexp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/agent_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.internalNamespaces",

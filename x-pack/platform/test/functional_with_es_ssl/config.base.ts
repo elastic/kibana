@@ -20,6 +20,7 @@ const enabledActionTypes = [
   '.pagerduty',
   '.swimlane',
   '.jira',
+  '.jira-service-management',
   '.resilient',
   '.servicenow',
   '.servicenow-sir',
