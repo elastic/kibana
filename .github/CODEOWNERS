@@ -350,6 +350,7 @@ src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/private/kbn-hapi-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-health-gateway-server @elastic/kibana-core
 src/platform/packages/private/kbn-import-resolver @elastic/kibana-operations
+src/platform/packages/private/kbn-index-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-item-buffer @elastic/appex-sharedux
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
@@ -1342,6 +1343,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
+/src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-esql
 /src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
 x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 

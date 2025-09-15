@@ -82,6 +82,7 @@ const withCore = makeDecorator({
           uptime: { enabled: false },
           observability: { enabled: false },
         },
+        managedOtlpServiceUrl: '',
       },
     };
 
