@@ -25,7 +25,7 @@ export class TelemetryService {
     analytics.registerEventType(
       datasetQualityEbtEvents.datasetDetailsBreakdownFieldChangedEventType
     );
-    analytics.registerEventType(datasetQualityEbtEvents.streamFailureStoreUpdatedEventType);
+    analytics.registerEventType(datasetQualityEbtEvents.failureStoreUpdatedEventType);
   }
 
   public start(): ITelemetryClient {

@@ -342,8 +342,8 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
       });
 
-    this.telemetryClient.trackStreamFailureStoreUpdated({
-      stream_name: dataStream,
+    this.telemetryClient.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
       failure_store_enabled: failureStoreEnabled,
       custom_retention_period: customRetentionPeriod,
     });

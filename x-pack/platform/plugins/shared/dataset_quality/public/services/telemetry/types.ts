@@ -100,8 +100,8 @@ export interface DatasetDetailsNavigatedEbtProps extends DatasetDetailsEbtProps 
   source: NavigationSource;
 }
 
-export interface StreamFailureStoreUpdateEbtProps {
-  stream_name: string;
+export interface FailureStoreUpdateEbtProps {
+  data_stream_name: string;
   failure_store_enabled: boolean;
   custom_retention_period?: string;
 }
@@ -113,7 +113,7 @@ export interface ITelemetryClient {
   trackDatasetDetailsOpened: (eventProps: DatasetDetailsEbtProps) => void;
   trackDatasetDetailsNavigated: (eventProps: DatasetDetailsNavigatedEbtProps) => void;
   trackDatasetDetailsBreakdownFieldChanged: (eventProps: DatasetDetailsEbtProps) => void;
-  trackStreamFailureStoreUpdated: (eventProps: StreamFailureStoreUpdateEbtProps) => void;
+  trackFailureStoreUpdated: (eventProps: FailureStoreUpdateEbtProps) => void;
 }
 
 export enum DatasetQualityTelemetryEventTypes {
@@ -121,7 +121,7 @@ export enum DatasetQualityTelemetryEventTypes {
   DETAILS_OPENED = 'Dataset Quality Dataset Details Opened',
   DETAILS_NAVIGATED = 'Dataset Quality Dataset Details Navigated',
   BREAKDOWN_FIELD_CHANGED = 'Dataset Quality Dataset Details Breakdown Field Changed',
-  STREAM_FAILURE_STORE_UPDATED = 'Failure Store Status Updated For A Stream',
+  FAILURE_STORE_UPDATED = 'Failure Store Status Updated For A dataStream',
 }
 
 export type DatasetQualityTelemetryEvent =
@@ -142,6 +142,6 @@ export type DatasetQualityTelemetryEvent =
       schema: RootSchema<DatasetDetailsEbtProps & WithTrackingId>;
     }
   | {
-      eventType: DatasetQualityTelemetryEventTypes.STREAM_FAILURE_STORE_UPDATED;
-      schema: RootSchema<StreamFailureStoreUpdateEbtProps>;
+      eventType: DatasetQualityTelemetryEventTypes.FAILURE_STORE_UPDATED;
+      schema: RootSchema<FailureStoreUpdateEbtProps>;
     };

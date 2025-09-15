@@ -288,10 +288,10 @@ const datasetDetailsBreakdownFieldChangedEventType: DatasetQualityTelemetryEvent
   },
 };
 
-const streamFailureStoreUpdatedEventType: DatasetQualityTelemetryEvent = {
-  eventType: DatasetQualityTelemetryEventTypes.STREAM_FAILURE_STORE_UPDATED,
+const failureStoreUpdatedEventType: DatasetQualityTelemetryEvent = {
+  eventType: DatasetQualityTelemetryEventTypes.FAILURE_STORE_UPDATED,
   schema: {
-    stream_name: {
+    data_stream_name: {
       type: 'keyword',
       _meta: {
         description: 'Name of the data stream',
@@ -300,7 +300,7 @@ const streamFailureStoreUpdatedEventType: DatasetQualityTelemetryEvent = {
     failure_store_enabled: {
       type: 'boolean',
       _meta: {
-        description: 'Whether failure store is enabled for the stream',
+        description: 'Whether failure store is enabled for the datastream',
       },
     },
     custom_retention_period: {
@@ -318,5 +318,5 @@ export const datasetQualityEbtEvents = {
   datasetDetailsOpenedEventType,
   datasetDetailsNavigatedEventType,
   datasetDetailsBreakdownFieldChangedEventType,
-  streamFailureStoreUpdatedEventType,
+  failureStoreUpdatedEventType,
 };
