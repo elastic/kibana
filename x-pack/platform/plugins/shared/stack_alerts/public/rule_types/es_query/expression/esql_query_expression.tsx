@@ -170,7 +170,7 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
+      const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
         isGroupAgg,

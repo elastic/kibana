@@ -36,13 +36,14 @@ describe('ESQL query utils', () => {
   });
 
   describe('toEsqlQueryHits', () => {
-    it('correctly converts ESQL table to ES query hits', () => {
-      const { results, rows, cols } = toEsqlQueryHits(
+    it('correctly converts ESQL table to ES query hits', async () => {
+      const { results, rows, cols } = await toEsqlQueryHits(
         {
           columns,
           values: [value1, value2],
         },
-        true // isPreview
+        true, // isPreview
+        1 // chunkSize
       );
       expect(results).toEqual({
         esResult: {
@@ -103,14 +104,15 @@ describe('ESQL query utils', () => {
   });
 
   describe('toGroupedEsqlQueryHits', () => {
-    it('correctly converts ESQL table to grouped ES query hits', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits', async () => {
+      const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2],
         },
         ['ecs.version'],
-        true // isPreview
+        true, // isPreview
+        1 // chunkSize
       );
       expect(results).toEqual({
         esResult: {
@@ -189,8 +191,8 @@ describe('ESQL query utils', () => {
       ]);
       expect(duplicateAlertIds?.size).toBe(0);
     });
-    it('correctly converts ESQL table to grouped ES query hits with duplicates', () => {
-      const { results, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits with duplicates', async () => {
+      const { results, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value3],
@@ -263,7 +265,7 @@ describe('ESQL query utils', () => {
       });
       expect(duplicateAlertIds?.size).toBe(1);
     });
-    it('correctly converts ESQL table to grouped ES query hits with long alertIds', () => {
+    it('correctly converts ESQL table to grouped ES query hits with long alertIds', async () => {
       const value5 = [
         '2023-07-12T13:32:04.174Z',
         '1.8.0',
@@ -288,7 +290,7 @@ describe('ESQL query utils', () => {
         'test message',
         '/app-search',
       ];
-      const { results, longAlertIds } = toGroupedEsqlQueryHits(
+      const { results, longAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns: [
             { name: '@timestamp', type: 'date' },
@@ -430,8 +432,8 @@ describe('ESQL query utils', () => {
       });
       expect(longAlertIds?.size).toBe(1);
     });
-    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', async () => {
+      const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value4],
@@ -492,8 +494,8 @@ describe('ESQL query utils', () => {
       expect(duplicateAlertIds?.size).toBe(0);
     });
 
-    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', async () => {
+      const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value4],

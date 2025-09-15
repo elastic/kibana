@@ -70,7 +70,7 @@ export async function fetchEsqlQuery({
 
   const sourceFields = getSourceFields(response);
   const isGroupAgg = isPerRowAggregation(params.groupBy);
-  const { results, duplicateAlertIds } = getEsqlQueryHits(
+  const { results, duplicateAlertIds } = await getEsqlQueryHits(
     response,
     params.esqlQuery.esql,
     isGroupAgg
