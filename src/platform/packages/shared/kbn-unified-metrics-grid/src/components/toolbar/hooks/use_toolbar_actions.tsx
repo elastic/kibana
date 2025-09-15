@@ -65,7 +65,7 @@ export const useToolbarActions = ({
 
   const leftSideActions = useMemo(
     () => [
-      renderToggleActions(),
+      isFullscreen ? null : renderToggleActions(),
       <DimensionsSelector
         fields={fields}
         onChange={onDimensionsChange}
@@ -95,6 +95,7 @@ export const useToolbarActions = ({
       renderToggleActions,
       requestParams,
       valueFilters,
+      isFullscreen,
     ]
   );
 

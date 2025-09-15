@@ -26,7 +26,7 @@ import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
-import { MetricsGridHeader } from './metrics_grid_header';
+import { MetricsGridToolbarWrapper } from './metrics_grid_toolbar_wraper';
 import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
@@ -100,7 +100,7 @@ export const MetricsExperienceGrid = ({
 
   if (fields.length === 0) {
     return (
-      <MetricsGridHeader
+      <MetricsGridToolbarWrapper
         indexPattern={indexPattern}
         renderToggleActions={renderToggleActions}
         chartToolbarCss={chartToolbarCss}
@@ -109,12 +109,12 @@ export const MetricsExperienceGrid = ({
         fields={fields}
       >
         <EmptyState isLoading={isLoading} />
-      </MetricsGridHeader>
+      </MetricsGridToolbarWrapper>
     );
   }
 
   return (
-    <MetricsGridHeader
+    <MetricsGridToolbarWrapper
       indexPattern={indexPattern}
       renderToggleActions={renderToggleActions}
       chartToolbarCss={chartToolbarCss}
@@ -173,6 +173,6 @@ export const MetricsExperienceGrid = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </MetricsGridHeader>
+    </MetricsGridToolbarWrapper>
   );
 };

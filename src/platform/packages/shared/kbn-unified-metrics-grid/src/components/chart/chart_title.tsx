@@ -29,8 +29,8 @@ export const ChartTitle = ({
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
 
   const chartTitleCss = css`
-    min-height: 24px;
-    max-height: 24px;
+    min-height: ${euiTheme.size.l};
+    max-height: ${euiTheme.size.l};
     max-width: 90%;
     position: absolute;
     height: 100%;

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFocusTrap, EuiOverlayMask, useEuiTheme } from '@elastic/eui';
-import { getFullScreenStyles } from './get_fullscreen_styles';
+import { css } from '@emotion/react';
 
 interface FullScreenProps {
   isFullscreen: boolean;
@@ -23,14 +23,26 @@ export const FullScreenWrapper = ({
 }: React.PropsWithChildren<FullScreenProps>) => {
   const { euiTheme } = useEuiTheme();
 
-  const styles = useMemo(() => getFullScreenStyles(euiTheme), [euiTheme]);
-
   if (!isFullscreen) return <>{children}</>;
 
   return (
     <EuiOverlayMask headerZindexLocation="above">
       <EuiFocusTrap>
-        <div css={styles} data-test-subj={`${dataTestSubj}FullScreenWrapper`}>
+        <div
+          css={css`position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: ${euiTheme.colors.backgroundBasePlain},
+              display: 'flex',
+              flex-direction: 'column',
+              min-height: 0,
+              z-index: ${euiTheme.levels.modal},
+              overscroll-behavior: 'contain',
+            `}
+          data-test-subj={`${dataTestSubj}FullScreenWrapper`}
+        >
           {children}
         </div>
       </EuiFocusTrap>

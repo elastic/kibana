@@ -7,17 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { EuiFocusTrap, EuiOverlayMask, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useMetricsGridState } from '../hooks';
-import { FullScreenWrapper } from './fullscreen_wrapper/fullscreen_wrapper';
 import { SearchInput } from './toolbar/search_input/search_input';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 
-export interface MetricsGridHeaderProps
+const getFullScreenStyles = (euiTheme: EuiThemeComputed): CSSObject => {
+  return {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: euiTheme.colors.backgroundBasePlain,
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+    zIndex: euiTheme.levels.modal,
+    overscrollBehavior: 'contain',
+  };
+};
+
+interface FullScreenProps {
+  isFullscreen: boolean;
+  dataTestSubj?: string;
+}
+
+const FullScreenWrapper = ({
+  isFullscreen,
+  dataTestSubj,
+  children,
+}: React.PropsWithChildren<FullScreenProps>) => {
+  const { euiTheme } = useEuiTheme();
+
+  const styles = useMemo(() => getFullScreenStyles(euiTheme), [euiTheme]);
+
+  if (!isFullscreen) return <>{children}</>;
+
+  return (
+    <EuiOverlayMask headerZindexLocation="above">
+      <EuiFocusTrap>
+        <div css={styles} data-test-subj={`${dataTestSubj}FullScreenWrapper`}>
+          {children}
+        </div>
+      </EuiFocusTrap>
+    </EuiOverlayMask>
+  );
+};
+
+export interface MetricsGridToolbarWrapperProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   indexPattern: string;
   chartToolbarCss?: SerializedStyles;
@@ -26,7 +71,7 @@ export interface MetricsGridHeaderProps
   children?: React.ReactNode;
 }
 
-export const MetricsGridHeader = ({
+export const MetricsGridToolbarWrapper = ({
   indexPattern,
   renderToggleActions,
   chartToolbarCss,
@@ -34,7 +79,7 @@ export const MetricsGridHeader = ({
   setDebouncedSearchTerm,
   fields,
   children,
-}: MetricsGridHeaderProps) => {
+}: MetricsGridToolbarWrapperProps) => {
   const { leftSideActions, rightSideActions, onClearSearch, showSearchInput } = useToolbarActions({
     fields,
     indexPattern,
