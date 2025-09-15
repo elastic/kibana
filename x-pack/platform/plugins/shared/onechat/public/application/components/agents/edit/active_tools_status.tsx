@@ -16,6 +16,8 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 
 interface ActiveToolsStatusProps {
   activeToolsCount: number;
@@ -26,6 +28,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   activeToolsCount,
   warningThreshold,
 }) => {
+  const { navigateToOnechatUrl } = useNavigation();
   const isOverThreshold = activeToolsCount > warningThreshold;
   const isZeroTools = activeToolsCount === 0;
   const shouldShowWarning = isOverThreshold || isZeroTools;
@@ -88,32 +91,20 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
+                <EuiLink
+                  onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
+                    defaultMessage: 'Tools',
+                  })}
+                </EuiLink>{' '}
                 {i18n.translate('xpack.onechat.activeToolsStatus.description', {
                   defaultMessage:
-                    'Tools are the skills your agent can use to get things done. For best results, try to keep the list under {threshold} — it helps your agent stay focused and respond more clearly.',
+                    'enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options.',
                   values: { threshold: warningThreshold },
                 })}
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink
-                href="#"
-                aria-label={i18n.translate('xpack.onechat.activeToolsStatus.learnMoreAriaLabel', {
-                  defaultMessage: 'Learn more about active tools management',
-                })}
-              >
-                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                  {i18n.translate('xpack.onechat.activeToolsStatus.learnMore', {
-                    defaultMessage: 'Learn more',
-                  })}
-                  <EuiIcon
-                    type="popout"
-                    aria-label={i18n.translate('xpack.onechat.activeToolsStatus.externalLinkIcon', {
-                      defaultMessage: 'External link',
-                    })}
-                  />
-                </EuiFlexGroup>
-              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

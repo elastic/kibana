@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -21,7 +21,7 @@ export const OnechatAgents = () => {
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border: none;
   `;
-  const { createOnechatUrl } = useNavigation();
+  const { createOnechatUrl, navigateToOnechatUrl } = useNavigation();
   const headerButtons = [
     <EuiButton
       iconType={'plusInCircleFilled'}
@@ -43,10 +43,36 @@ export const OnechatAgents = () => {
           pageTitle={i18n.translate('xpack.onechat.agents.title', {
             defaultMessage: 'Agents',
           })}
-          description={i18n.translate('xpack.onechat.agents.description', {
-            defaultMessage:
-              'Agents are AI assistants that use tools to answer questions, take action, or support workflows.',
-          })}
+          description={
+            <>
+              {i18n.translate('xpack.onechat.agents.descriptionPart1', {
+                defaultMessage: 'Define agents with custom instructions and assign them ',
+              })}
+              <EuiLink
+                onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
+                style={{ cursor: 'pointer' }}
+              >
+                {i18n.translate('xpack.onechat.agents.toolsLinkText', {
+                  defaultMessage: 'tools',
+                })}
+              </EuiLink>
+              {i18n.translate('xpack.onechat.agents.descriptionPart2', {
+                defaultMessage:
+                  ' to answer questions about your data and take actions on your behalf. ',
+              })}
+              <EuiLink
+                href="#"
+                aria-label={i18n.translate('xpack.onechat.agents.agentsDocumentationAriaLabel', {
+                  defaultMessage: 'Learn more about agents in the documentation',
+                })}
+              >
+                {i18n.translate('xpack.onechat.agents.agentsDocumentation', {
+                  defaultMessage: 'Learn more',
+                })}{' '}
+                <EuiIcon type="popout" />
+              </EuiLink>
+            </>
+          }
           rightSideItems={headerButtons}
         />
         <KibanaPageTemplate.Section>

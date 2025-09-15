@@ -12,6 +12,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
@@ -284,6 +286,30 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
+          }
+          description={
+            mode === ToolFormMode.Create ? (
+              <>
+                {i18n.translate('xpack.onechat.tools.createToolDescription', {
+                  defaultMessage:
+                    'Give your new tool a unique ID and a clear description, so both humans and LLMs can understand its purpose. Add labels for organization, and write the index pattern or ES|QL query that powers its functionality. ',
+                })}
+                <EuiLink
+                  href="#"
+                  aria-label={i18n.translate(
+                    'xpack.onechat.tools.createToolDocumentationAriaLabel',
+                    {
+                      defaultMessage: 'Learn more about creating tools in the documentation',
+                    }
+                  )}
+                >
+                  {i18n.translate('xpack.onechat.tools.createToolDocumentation', {
+                    defaultMessage: 'Learn more',
+                  })}{' '}
+                  <EuiIcon type="popout" />
+                </EuiLink>
+              </>
+            ) : undefined
           }
           rightSideItems={[
             ...(mode !== ToolFormMode.View ? [renderSaveButton({ size: 'm' })] : []),

@@ -16,6 +16,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiPopover,
@@ -370,11 +372,30 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiFlexGroup>
         }
         description={
-          isCreateMode
-            ? i18n.translate('xpack.onechat.createAgent.description', {
-                defaultMessage: 'Create an AI agent, select tools and provide custom instructions.',
-              })
-            : agentDescription
+          isCreateMode ? (
+            <>
+              {i18n.translate('xpack.onechat.createAgent.description', {
+                defaultMessage:
+                  'Create an AI agent with custom instructions, assign it tools to work with your data, and make it easily findable for your team.',
+              })}{' '}
+              <EuiLink
+                href="#"
+                aria-label={i18n.translate(
+                  'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
+                  {
+                    defaultMessage: 'Learn more about agents in the documentation',
+                  }
+                )}
+              >
+                {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesLearnMore', {
+                  defaultMessage: 'Learn more',
+                })}{' '}
+                <EuiIcon type="popout" />
+              </EuiLink>
+            </>
+          ) : (
+            agentDescription
+          )
         }
         rightSideItems={[
           ...(!isCreateMode
