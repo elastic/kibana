@@ -28,3 +28,4 @@ export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
 export { getColumnExists } from './columns';
 export { getValidSignaturesAndTypesToSuggestNext } from './autocomplete/helpers';
+export { PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './expressions';

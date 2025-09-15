@@ -8,7 +8,7 @@
  */
 
 import { parse, mutate, BasicPrettyPrinter, type FunctionParameterType } from '@kbn/esql-ast';
-import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/validation';
+import { PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils';
 import { sanitazeESQLInput } from './sanitaze_input';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
@@ -53,9 +53,7 @@ export function appendWhereClauseToESQLQuery(
     fieldType !== 'string' &&
     fieldType !== 'number' &&
     (fieldType === undefined ||
-      !PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(
-        fieldType as FunctionParameterType
-      ))
+      !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType as FunctionParameterType))
   ) {
     fieldName = `${fieldName}::string`;
   }
