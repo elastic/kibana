@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -41,12 +42,35 @@ export function WorkflowsEmptyState({
         />
       }
       title={
-        <h2>
-          <FormattedMessage
-            id="workflows.emptyState.title"
-            defaultMessage="Get Started with Workflows"
-          />
-        </h2>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="center"
+          gutterSize="s"
+          responsive={false}
+          wrap={false}
+        >
+          <EuiFlexItem grow={false}>
+            <h2 style={{ whiteSpace: 'nowrap' }}>
+              <FormattedMessage
+                id="workflows.emptyState.title"
+                defaultMessage="Get Started with Workflows"
+              />
+            </h2>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={
+                <FormattedMessage
+                  id="workflows.emptyState.technicalPreviewBadge"
+                  defaultMessage="Technical Preview"
+                />
+              }
+              title="Technical Preview"
+              size="s"
+              style={{ alignSelf: 'center', verticalAlign: 'middle' }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       layout="horizontal"
       color="plain"
