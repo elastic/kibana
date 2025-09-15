@@ -652,6 +652,78 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ExecutableTool.llmDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "llmDescription",
+            "description": [
+              "\nOptional handled to add additional instructions to the LLM.\nWhen provided, will replace the description when converting to llm tool."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.LlmDescriptionHandler",
+                "text": "LlmDescriptionHandler"
+              },
+              "<TConfig> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.LLmDescriptionHandlerParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "LLmDescriptionHandlerParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.LLmDescriptionHandlerParams",
+            "text": "LLmDescriptionHandlerParams"
+          },
+          "<TConfig>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.LLmDescriptionHandlerParams.config",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "TConfig"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.LLmDescriptionHandlerParams.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2251,6 +2323,53 @@
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.LlmDescriptionHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "LlmDescriptionHandler",
+        "description": [],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.LLmDescriptionHandlerParams",
+            "text": "LLmDescriptionHandlerParams"
+          },
+          "<TConfig>) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.LlmDescriptionHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.LLmDescriptionHandlerParams",
+                "text": "LLmDescriptionHandlerParams"
+              },
+              "<TConfig>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

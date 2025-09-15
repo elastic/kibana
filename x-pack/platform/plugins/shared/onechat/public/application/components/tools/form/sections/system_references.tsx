@@ -113,7 +113,6 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           render={({ field }) => (
             <EuiMarkdownEditor
               aria-label={i18nMessages.systemReferences.form.description.label}
-              height={482}
               readOnly={isReadOnly}
               {...field}
             />
