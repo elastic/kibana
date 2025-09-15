@@ -4738,6 +4738,21 @@
     "objects": [
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.agentIdRegexp",
+        "type": "Object",
+        "tags": [],
+        "label": "agentIdRegexp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/agent_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.internalNamespaces",
         "type": "Object",
         "tags": [],

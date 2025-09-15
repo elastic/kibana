@@ -13,9 +13,9 @@ import type { TableColumn } from './constants';
 
 export const createUpdatedColumn = (): TableColumn => {
   return {
-    field: 'updated_at',
+    field: 'original_dashboard.last_updated',
     name: i18n.COLUMN_UPDATED,
-    render: (value: DashboardMigrationDashboard['updated_at']) => (
+    render: (value: DashboardMigrationDashboard['original_dashboard']['last_updated']) => (
       <FormattedRelativePreferenceDate value={value} dateFormat="M/D/YY" />
     ),
     sortable: true,
