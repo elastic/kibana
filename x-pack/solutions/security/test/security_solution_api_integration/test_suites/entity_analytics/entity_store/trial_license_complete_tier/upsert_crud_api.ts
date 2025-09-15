@@ -105,12 +105,13 @@ export default function (providerContext: FtrProviderContext) {
         log.info('Verifying upsert updated subject user...');
         await retry.waitForWithTimeout('Document is updated', TIMEOUT, async () => {
           await assertEntityFromES(es, userName, (hit) => {
+            log.info(JSON.stringify(hit));
             expect(hit._source?.user?.name).toEqual(userName);
             expect(hit._source?.user?.domain).toEqual(['domain.com']);
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.type).toEqual('user');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.First_Seen).toEqual(date);
+            expect(hit._source?.entity?.lifecycle?.First_seen).toEqual(date);
           });
 
           return true;
@@ -131,7 +132,6 @@ export default function (providerContext: FtrProviderContext) {
 
         await retry.waitForWithTimeout('Make sure change was persisted', TIMEOUT, async () => {
           await assertEntityFromES(es, userName, (hit) => {
-            log.info(JSON.stringify(hit));
             expect(hit._source?.user?.name).toEqual(userName);
             expect(hit._source?.user?.domain).toHaveLength(2);
             expect(hit._source?.user?.domain).toContain('domain.com');
@@ -139,7 +139,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.type).toEqual('user updated');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.FirstSeen).toEqual(date);
+            expect(hit._source?.entity?.lifecycle?.First_seen).toEqual(date);
           });
           return true;
         });
