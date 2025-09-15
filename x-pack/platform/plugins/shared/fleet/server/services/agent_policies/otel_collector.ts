@@ -264,7 +264,7 @@ function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorCompon
         },
       };
     default:
-      throw new Error(
+      throw new FleetError(
         `output type ${dataOutput.type} not supported when policy contains OTel inputs`
       );
   }
