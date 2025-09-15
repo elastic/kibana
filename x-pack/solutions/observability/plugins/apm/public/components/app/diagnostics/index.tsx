@@ -205,20 +205,14 @@ function TemplateDescription() {
   if (isImported) {
     return (
       <EuiCallOut
-        announceOnMount
-        title={i18n.translate(
-          'xpack.apm.templateDescription.euiCallOut.displayingResultsFromTheLabel',
-          { defaultMessage: 'Displaying results from the uploaded diagnostics report' }
-        )}
+        title="Displaying results from the uploaded diagnostics report"
         iconType="exportAction"
       >
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"
           onClick={() => setImportedDiagnosticsBundle(undefined)}
         >
-          {i18n.translate('xpack.apm.templateDescription.clearBundleButtonLabel', {
-            defaultMessage: 'Clear bundle',
-          })}
+          Clear bundle
         </EuiButton>
       </EuiCallOut>
     );
@@ -236,7 +230,7 @@ function RefreshButton() {
       fill
       onClick={refetch}
     >
-      {i18n.translate('xpack.apm.refreshButton.refreshButtonLabel', { defaultMessage: 'Refresh' })}
+      Refresh
     </EuiButton>
   );
 }

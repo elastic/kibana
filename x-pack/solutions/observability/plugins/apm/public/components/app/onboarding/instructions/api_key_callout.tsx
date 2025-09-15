@@ -22,7 +22,6 @@ export function ApiKeyCallout({
     return (
       <>
         <EuiCallOut
-          announceOnMount
           title={i18n.translate('xpack.apm.onboarding.apiKey.success.calloutTitle', {
             defaultMessage: 'API key created',
           })}
@@ -44,7 +43,6 @@ export function ApiKeyCallout({
   if (isInsufficientPermissionsError) {
     return (
       <EuiCallOut
-        announceOnMount
         title={i18n.translate('xpack.apm.onboarding.apiKey.warning.calloutTitle', {
           defaultMessage: 'User does not have permissions to create API Key',
         })}

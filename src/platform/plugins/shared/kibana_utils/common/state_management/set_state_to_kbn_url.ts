@@ -11,10 +11,7 @@ import { encodeState } from './encode_state';
 import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 import { createStateHash } from './state_hash';
 
-export interface SetStateToKbnUrlHashOptions {
-  useHash: boolean;
-  storeInHashQuery?: boolean;
-}
+export type SetStateToKbnUrlHashOptions = { useHash: boolean; storeInHashQuery?: boolean };
 
 export function createSetStateToKbnUrl(createHash: <State>(rawState: State) => string) {
   return <State>(

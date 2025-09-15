@@ -38,9 +38,6 @@ export function SetupInstructionsLink({ buttonFill = false }: { buttonFill?: boo
         </EuiButton>
       ) : (
         <EuiButtonEmpty
-          aria-label={i18n.translate('xpack.apm.setupInstructionsLink.button.ariaLabel', {
-            defaultMessage: '',
-          })}
           data-test-subj="apmSetupInstructionsLinkButton"
           size="s"
           color="primary"

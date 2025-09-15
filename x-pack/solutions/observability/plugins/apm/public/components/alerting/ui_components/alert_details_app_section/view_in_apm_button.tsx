@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -43,9 +42,6 @@ export function ViewInAPMButton({
 
   return (
     <EuiButtonEmpty
-      aria-label={i18n.translate('xpack.apm.viewInAPMButton.viewinAPMButton.ariaLabel', {
-        defaultMessage: 'View in APM',
-      })}
       data-test-subj="apmAlertDetailsPageViewInApp"
       onClick={() =>
         serviceNavigator.navigate({

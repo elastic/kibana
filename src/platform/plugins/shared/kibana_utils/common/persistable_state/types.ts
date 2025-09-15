@@ -93,9 +93,7 @@ export type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
  * accumulated over time. Migration functions are keyed using semver version
  * of Kibana releases.
  */
-export interface MigrateFunctionsObject {
-  [semver: string]: MigrateFunction<any, any>;
-}
+export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
   FromVersion extends Serializable = SerializableRecord,
   ToVersion extends Serializable = SerializableRecord

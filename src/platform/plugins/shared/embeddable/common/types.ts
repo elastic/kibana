@@ -9,13 +9,13 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-export interface EmbeddableTransforms<
+export type EmbeddableTransforms<
   StoredState extends object = object,
   State extends object = object
-> {
+> = {
   transformOut?: (state: StoredState, references?: Reference[]) => State;
   transformIn?: (state: State) => {
     state: StoredState;
     references?: Reference[];
   };
-}
+};

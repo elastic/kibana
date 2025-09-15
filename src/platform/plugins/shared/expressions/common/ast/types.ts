@@ -28,7 +28,7 @@ export type ExpressionAstFunction = Omit<AstFunction, 'arguments'> & {
   debug?: ExpressionAstFunctionDebug;
 };
 
-export interface ExpressionAstFunctionDebug {
+export type ExpressionAstFunctionDebug = {
   /**
    * True if function successfully returned output, false if function threw.
    */
@@ -71,6 +71,6 @@ export interface ExpressionAstFunctionDebug {
    * timing starts after the arguments have been resolved.
    */
   duration: number | undefined;
-}
+};
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;

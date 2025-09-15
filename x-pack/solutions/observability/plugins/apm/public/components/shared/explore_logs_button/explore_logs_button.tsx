@@ -45,9 +45,6 @@ export function ExploreLogsButton({
 
   return (
     <EuiButtonEmpty
-      aria-label={i18n.translate('xpack.apm.exploreLogsButton.explorelogsButton.ariaLabel', {
-        defaultMessage: 'Explore logs',
-      })}
       data-test-subj="apmExploreLogsButton"
       href={logsExplorerLinkProps.href}
       color="primary"

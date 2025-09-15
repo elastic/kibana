@@ -18,9 +18,12 @@ interface Props {
   id: string;
 }
 
-const ANNOTATION_TITLE = i18n.translate('app_not_found_in_i18nrc.alertAnnotation.detailsTooltip', {
-  defaultMessage: 'Alert started',
-});
+const ANNOTATION_TITLE = i18n.translate(
+  'observabilityAlertDetails.alertAnnotation.detailsTooltip',
+  {
+    defaultMessage: 'Alert started',
+  }
+);
 
 export function AlertAnnotation({ alertStart, color, dateFormat, id }: Props) {
   return (

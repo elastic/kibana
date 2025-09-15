@@ -163,10 +163,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             >
               <EuiCheckbox
                 id={htmlIdGenerator()()}
-                label={i18n.translate(
-                  'xpack.apm.createAgentKeyFlyout.euiCheckbox.configagentreadLabel',
-                  { defaultMessage: 'config_agent:read' }
-                )}
+                label="config_agent:read"
                 checked={agentConfig}
                 onChange={() =>
                   setAgentKeyBody((state) => ({
@@ -187,10 +184,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             >
               <EuiCheckbox
                 id={htmlIdGenerator()()}
-                label={i18n.translate(
-                  'xpack.apm.createAgentKeyFlyout.euiCheckbox.eventwriteLabel',
-                  { defaultMessage: 'event:write' }
-                )}
+                label="event:write"
                 checked={event}
                 onChange={() =>
                   setAgentKeyBody((state) => ({
@@ -208,13 +202,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              aria-label={i18n.translate('xpack.apm.createAgentKeyFlyout.cancelButton.ariaLabel', {
-                defaultMessage: 'Cancel',
-              })}
-              data-test-subj="apmCreateAgentKeyFlyoutCancelButton"
-              onClick={onCancel}
-            >
+            <EuiButtonEmpty data-test-subj="apmCreateAgentKeyFlyoutCancelButton" onClick={onCancel}>
               {i18n.translate('xpack.apm.settings.agentKeys.createKeyFlyout.cancelButton', {
                 defaultMessage: 'Cancel',
               })}

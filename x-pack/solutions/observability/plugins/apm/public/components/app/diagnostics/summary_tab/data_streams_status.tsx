@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -27,16 +26,12 @@ export function DataStreamsStatus() {
 
   return (
     <TabStatus isLoading={isLoading} isOk={isOk} data-test-subj="dataStreamsStatus">
-      {i18n.translate('xpack.apm.dataStreamsStatus.tabStatus.dataStreamsLabel', {
-        defaultMessage: 'Data streams',
-      })}
+      Data streams
       <EuiLink
         data-test-subj="apmDataStreamsStatusSeeDetailsLink"
         href={router.link('/diagnostics/data-streams', { query })}
       >
-        {i18n.translate('xpack.apm.dataStreamsStatus.seeDetailsLinkLabel', {
-          defaultMessage: 'See details',
-        })}
+        See details
       </EuiLink>
     </TabStatus>
   );

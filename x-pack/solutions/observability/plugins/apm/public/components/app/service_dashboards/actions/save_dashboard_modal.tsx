@@ -166,10 +166,6 @@ export function SaveDashboardModal({
       <EuiModalBody>
         <EuiFlexGroup direction="column" justifyContent="center">
           <EuiComboBox
-            aria-label={i18n.translate(
-              'xpack.apm.saveDashboardModal.selectdashboardComboBox.ariaLabel',
-              { defaultMessage: 'Select dashboard' }
-            )}
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
             placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
@@ -218,9 +214,6 @@ export function SaveDashboardModal({
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          aria-label={i18n.translate('xpack.apm.saveDashboardModal.cancelButton.ariaLabel', {
-            defaultMessage: 'Cancel',
-          })}
           data-test-subj="apmSelectDashboardCancelButton"
           onClick={onClose}
           isDisabled={status === FETCH_STATUS.LOADING || isLoading}

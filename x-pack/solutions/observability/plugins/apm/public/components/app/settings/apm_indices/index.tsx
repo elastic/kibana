@@ -222,13 +222,7 @@ export function ApmIndices() {
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  aria-label={i18n.translate('xpack.apm.apmIndices.cancelButton.ariaLabel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                  data-test-subj="apmApmIndicesCancelButton"
-                  onClick={refetch}
-                >
+                <EuiButtonEmpty data-test-subj="apmApmIndicesCancelButton" onClick={refetch}>
                   {i18n.translate('xpack.apm.settings.apmIndices.cancelButton', {
                     defaultMessage: 'Cancel',
                   })}

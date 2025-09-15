@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -25,16 +24,12 @@ export function IndexTemplatesStatus() {
 
   return (
     <TabStatus isLoading={isLoading} isOk={tabStatus} data-test-subj="indexTemplatesStatus">
-      {i18n.translate('xpack.apm.indexTemplatesStatus.tabStatus.indexTemplatesLabel', {
-        defaultMessage: 'Index templates',
-      })}
+      Index templates
       <EuiLink
         data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
         href={router.link('/diagnostics/index-templates', { query })}
       >
-        {i18n.translate('xpack.apm.indexTemplatesStatus.seeDetailsLinkLabel', {
-          defaultMessage: 'See details',
-        })}
+        See details
       </EuiLink>
     </TabStatus>
   );

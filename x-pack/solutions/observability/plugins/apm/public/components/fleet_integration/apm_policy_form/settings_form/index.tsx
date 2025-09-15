@@ -154,10 +154,6 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                aria-label={i18n.translate(
-                  'xpack.apm.advancedOptions.advancedoptionsButton.ariaLabel',
-                  { defaultMessage: 'Advanced options' }
-                )}
                 data-test-subj="apmAdvancedOptionsAdvancedOptionsButton"
                 iconType={isOpen ? 'arrowDown' : 'arrowRight'}
                 onClick={() => {

@@ -16,7 +16,7 @@ interface Props {
 }
 
 const ANNOTATION_TITLE = i18n.translate(
-  'app_not_found_in_i18nrc.alertThresholdAnnotation.detailsTooltip',
+  'observabilityAlertDetails.alertThresholdAnnotation.detailsTooltip',
   {
     defaultMessage: 'Alert started',
   }

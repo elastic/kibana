@@ -71,9 +71,7 @@ export const createRackAgentInstructions = (commonOptions: AgentInstructions): E
               defaultMessage: 'Copy the code to install the APM agent for Rack',
             })}
           >
-            {i18n.translate('xpack.apm.createRackAgentInstructions.gemelasticapmCodeBlockLabel', {
-              defaultMessage: "gem 'elastic-apm'",
-            })}
+            gem &apos;elastic-apm&apos;
           </EuiCodeBlock>
         </>
       ),

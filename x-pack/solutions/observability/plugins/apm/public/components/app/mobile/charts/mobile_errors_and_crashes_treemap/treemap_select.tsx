@@ -86,9 +86,6 @@ export function TreemapSelect({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSuperSelect
-            aria-label={i18n.translate('xpack.apm.treemapSelect.select.ariaLabel', {
-              defaultMessage: '',
-            })}
             fullWidth
             style={{ minWidth: '300px' }}
             options={options}

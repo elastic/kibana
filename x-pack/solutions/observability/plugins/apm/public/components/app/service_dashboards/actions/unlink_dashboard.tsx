@@ -77,9 +77,6 @@ export function UnlinkDashboard({
   return (
     <>
       <EuiButtonEmpty
-        aria-label={i18n.translate('xpack.apm.unlinkDashboard.unlinkdashboardButton.ariaLabel', {
-          defaultMessage: 'Unlink dashboard',
-        })}
         color="danger"
         size="s"
         iconType="unlink"
