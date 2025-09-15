@@ -29,7 +29,7 @@ export interface UseBulkAlertClosingReasonItemsProps {
   /**
    * Called once the user confirms the closing reason
    */
-  onSubmitCloseReason: (params: OnSubmitCloseReasonParams) => void;
+  onSubmitCloseReason?: (params: OnSubmitCloseReasonParams) => void;
 }
 
 /**
@@ -37,7 +37,7 @@ export interface UseBulkAlertClosingReasonItemsProps {
  */
 export const useBulkAlertClosingReasonItems = ({
   onSubmitCloseReason,
-}: UseBulkAlertClosingReasonItemsProps) => {
+}: UseBulkAlertClosingReasonItemsProps = {}) => {
   const { hasIndexWrite } = useAlertsPrivileges();
   const item = useMemo(
     () =>
@@ -52,18 +52,26 @@ export const useBulkAlertClosingReasonItems = ({
     [hasIndexWrite]
   );
 
-  const renderContent = useCallback(
-    (renderProps: RenderContentPanelProps) => {
-      const handleSubmit = (reason: AlertClosingReason) => {
-        onSubmitCloseReason({
-          ...renderProps,
-          reason,
-        });
-      };
+  const getRenderContent = useCallback(
+    ({
+      onSubmitCloseReason: onSubmitCloseReasonCb,
+    }: {
+      onSubmitCloseReason?: UseBulkAlertClosingReasonItemsProps['onSubmitCloseReason'];
+    }) => {
+      function renderContent(renderProps: RenderContentPanelProps) {
+        const handleSubmit = (reason: AlertClosingReason) => {
+          onSubmitCloseReasonCb?.({
+            ...renderProps,
+            reason,
+          });
+        };
 
-      return <BulkAlertClosingReason onSubmit={handleSubmit} />;
+        return <BulkAlertClosingReason onSubmit={handleSubmit} />;
+      }
+
+      return renderContent;
     },
-    [onSubmitCloseReason]
+    []
   );
 
   const panels = useMemo(
@@ -73,18 +81,41 @@ export const useBulkAlertClosingReasonItems = ({
             {
               id: ALERT_CLOSING_REASON_PANEL_ID,
               title: i18n.ALERT_CLOSING_REASON_MENU_TITLE,
-              renderContent,
+              renderContent: getRenderContent({ onSubmitCloseReason }),
             },
           ] as ContentPanelConfig[])
         : [],
-    [hasIndexWrite, renderContent]
+    [hasIndexWrite, getRenderContent, onSubmitCloseReason]
+  );
+
+  /**
+   * function to use instead of `panels` in case we need to
+   * pass the `onSubmitCloseReason` at run time
+   */
+  const getPanels = useCallback(
+    ({
+      onSubmitCloseReason: onSubmitCloseReasonCb,
+    }: {
+      onSubmitCloseReason?: UseBulkAlertClosingReasonItemsProps['onSubmitCloseReason'];
+    }) =>
+      hasIndexWrite
+        ? ([
+            {
+              id: ALERT_CLOSING_REASON_PANEL_ID,
+              title: i18n.ALERT_CLOSING_REASON_MENU_TITLE,
+              renderContent: getRenderContent({ onSubmitCloseReason: onSubmitCloseReasonCb }),
+            },
+          ] as ContentPanelConfig[])
+        : [],
+    [getRenderContent, hasIndexWrite]
   );
 
   return useMemo(
     () => ({
       item,
       panels,
+      getPanels,
     }),
-    [item, panels]
+    [item, panels, getPanels]
   );
 };

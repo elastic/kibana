@@ -24,6 +24,7 @@ import {
   expandFirstAlert,
   expandFirstAlertActions,
   groupAlertsBy,
+  selectAndConfirmClosingReason,
   selectNumberOfAlerts,
 } from '../../../../tasks/alerts';
 import { IS_SERVERLESS } from '../../../../env_var_names_constants';
@@ -99,6 +100,7 @@ describe(
         it('should display a modal telling the user about the current setting. Pressing cancel should not close the alert', () => {
           expandFirstAlertActions();
           cy.get(CLOSE_ALERT_BTN).click();
+          selectAndConfirmClosingReason();
           cy.get('[data-test-subj="confirmModalCancelButton"]').click();
           cy.get('[data-test-subj="actions-context-menu"]').should('be.visible');
         });
@@ -136,6 +138,7 @@ describe(
         it('should display a modal telling the user about the current setting. Pressing cancel should not close the alert', () => {
           expandFirstAlertActions();
           cy.get(CLOSE_ALERT_BTN).click();
+          selectAndConfirmClosingReason();
           cy.get('[data-test-subj="confirmModalCancelButton"]').click();
           cy.get('[data-test-subj="actions-context-menu"]').should('be.visible');
         });

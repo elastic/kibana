@@ -201,6 +201,7 @@ export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 export const closeAlertFromStatusBadge = (verifyModal?: () => void) => {
   cy.get(ALERT_STATUS_BADGE_BUTTON).click();
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
   if (verifyModal) {
     verifyModal();
   }
@@ -392,6 +393,7 @@ export const bulkCloseSelectedAlerts = (verifyModal?: () => void) => {
   cy.get(SELECTED_ALERTS).should('have.text', `Selected 2 alerts`);
   cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+  selectAndConfirmClosingReason();
   if (verifyModal) {
     verifyModal();
   }
@@ -406,6 +408,7 @@ export const groupAlertsBy = (field: string) => {
 export const closeFirstGroupedAlerts = (verifyModal?: () => void) => {
   cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
   if (verifyModal) {
     verifyModal();
   }
@@ -415,6 +418,7 @@ export const closeFirstGroupedAlerts = (verifyModal?: () => void) => {
 export const closeAlertFromFlyoutActions = (verifyModal?: () => void) => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
   if (verifyModal) {
     verifyModal();
   }
