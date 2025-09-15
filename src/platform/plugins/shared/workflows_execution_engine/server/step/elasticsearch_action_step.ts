@@ -11,8 +11,8 @@ import { buildRequestFromConnector } from '@kbn/workflows';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './step_base';
-import { StepBase } from './step_base';
+import type { RunStepResult, BaseStep } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -20,7 +20,7 @@ export interface ElasticsearchActionStep extends BaseStep {
   with?: Record<string, any>;
 }
 
-export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionStep> {
+export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<ElasticsearchActionStep> {
   constructor(
     step: ElasticsearchActionStep,
     contextManager: WorkflowContextManager,
