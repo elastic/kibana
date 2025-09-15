@@ -8,7 +8,9 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { mapPercentageToQuality, calculatePercentage } from '@kbn/data-quality/common';
-import { DataQualityBadge } from './data_quality_badge';
+import { i18n } from '@kbn/i18n';
+import type { QualityIndicators } from '@kbn/data-quality/common';
+import { QualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -42,11 +44,11 @@ export function DataQualityColumn({
     }
   );
 
-  // Only fetch failed documents if we need to consider them for quality calculation
-  const failedDocsQueryFetch = considerFailedQuality
-    ? useStreamsAppFetch(
-        async ({ signal, timeState: { start, end } }) => {
-          return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+  const failedDocsQueryFetch = useStreamsAppFetch(
+    async ({ signal, timeState: { start, end } }) => {
+      // Only fetch failed documents if we need to consider them for quality calculation
+      return considerFailedQuality
+        ? streamsRepositoryClient.fetch('POST /internal/streams/esql', {
             params: {
               body: {
                 operationName: 'get_failed_doc_count_for_stream',
@@ -56,15 +58,15 @@ export function DataQualityColumn({
               },
             },
             signal,
-          });
-        },
-        [streamsRepositoryClient, indexPattern],
-        {
-          withTimeRange: true,
-          disableToastOnError: true,
-        }
-      )
-    : undefined;
+          })
+        : undefined;
+    },
+    [streamsRepositoryClient, indexPattern, considerFailedQuality],
+    {
+      withTimeRange: true,
+      disableToastOnError: true,
+    }
+  );
 
   const degradedDocsQueryFetch = useStreamsAppFetch(
     async ({ signal, timeState: { start, end } }) => {
@@ -111,11 +113,19 @@ export function DataQualityColumn({
     ? mapPercentageToQuality([degradedPercentage, failedPercentage])
     : mapPercentageToQuality([degradedPercentage]);
 
+  const qualityTexts: Record<QualityIndicators, string> = {
+    poor: i18n.translate('xpack.streams.dataQualityBadge.poor', { defaultMessage: 'Poor' }),
+    degraded: i18n.translate('xpack.streams.dataQualityBadge.degraded', {
+      defaultMessage: 'Degraded',
+    }),
+    good: i18n.translate('xpack.streams.dataQualityBadge.good', { defaultMessage: 'Good' }),
+  };
+
   return totalDocsQueryFetch.loading ||
     failedDocsQueryFetch?.loading ||
     degradedDocsQueryFetch.loading ? (
     <EuiLoadingSpinner />
   ) : (
-    <DataQualityBadge quality={quality} />
+    <QualityIndicator quality={quality} description={qualityTexts[quality]} />
   );
 }
