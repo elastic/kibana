@@ -153,6 +153,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
+            observables: { enabled: true, autoExtract: true },
             events: { enabled: true },
           },
           refreshRef,

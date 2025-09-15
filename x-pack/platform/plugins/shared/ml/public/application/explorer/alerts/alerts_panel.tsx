@@ -219,6 +219,7 @@ export const AlertsPanel: FC = () => {
               featureId: CASE_GENERAL_ID,
               owner: [CASE_APP_ID],
               syncAlerts: false,
+              extractObservables: false,
             }}
             showAlertStatusWithFlapping
             services={{
