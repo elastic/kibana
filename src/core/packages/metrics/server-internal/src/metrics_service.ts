@@ -26,6 +26,7 @@ import { exponentialMovingAverage } from './exponential_moving_average';
 
 /**
  * The period of time for the average ELU calculation.
+ * ElasticPodAutoscaler bases its decisions on the elu.history.long metric: elu.history.long > 0.6 triggers scaling up.
  * @public
  */
 export enum EluTerm {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type OperatorFunction, map, tap } from 'rxjs';
+import { type OperatorFunction, map } from 'rxjs';
 
 /**
  * An RxJS operator implementing the exponential moving average function.
@@ -16,6 +16,7 @@ import { type OperatorFunction, map, tap } from 'rxjs';
  * @param period The period of time.
  * @param interval The interval between values.
  * @returns An operator emitting smoothed values.
+ * @remarks uses the mean value until the observed window is filled to avoid effect on startup
  */
 export function exponentialMovingAverage(
   period: number,
@@ -24,12 +25,17 @@ export function exponentialMovingAverage(
   const alpha = 1 - Math.exp(-interval / period);
 
   return (inner) => {
+    // option 2: return mean value until the observed window is filled
     let previous: number | undefined;
+    let mean = 0;
 
     return inner.pipe(
-      map((current) => (previous == null ? current : alpha * current + (1 - alpha) * previous)),
-      tap((current) => {
-        previous = current;
+      map((current, index) => {
+        if (index < period / interval) {
+          return (mean += (current * interval) / period); // more accurate than `current / (period / interval)`
+        }
+
+        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
       })
     );
   };
