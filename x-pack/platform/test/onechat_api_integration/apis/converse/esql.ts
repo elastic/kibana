@@ -79,7 +79,6 @@ export default function ({ getService }: OneChatFtrProviderContext) {
 
     it('sends the correct esql query to the LLM', () => {
       expect(queryResult.type).to.be('query');
-      // @ts-expect-error
       expect(queryResult.data.esql).to.be(MOCKED_ESQL_QUERY);
     });
 
@@ -88,7 +87,6 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       expect(tabularDataResult).have.property('tool_result_id');
       expect(tabularDataResult.data.source).to.be('esql');
       expect(tabularDataResult.data.query).to.be(MOCKED_ESQL_QUERY);
-
       expect(tabularDataResult.data.values).to.have.length(15);
     });
 
