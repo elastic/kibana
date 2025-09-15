@@ -23,6 +23,7 @@ import {
   EuiHeaderLink,
   EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
@@ -244,9 +245,9 @@ const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedField>> =
     field: 'issue',
     render: (issue: string) => {
       return (
-        <>
+        <EuiText size="xs">
           <b>{issue}</b>&nbsp;{textFieldIgnored}
-        </>
+        </EuiText>
       );
     },
   },
