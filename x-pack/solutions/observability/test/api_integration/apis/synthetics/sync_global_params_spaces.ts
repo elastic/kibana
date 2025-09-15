@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
     let _browserMonitorJson: HTTPFields;
     let browserMonitorJson: HTTPFields;
     let newBrowserMonitorId: string;
-    let newBrowserMonitorId2: string;
     let spaceId = '';
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -102,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
           locations: [omit(loc2WithSpace, 'spaces')],
         })
       );
-      newBrowserMonitorId2 = res.rawBody.id;
     });
 
     it('added an integration for previously added monitor', async () => {
