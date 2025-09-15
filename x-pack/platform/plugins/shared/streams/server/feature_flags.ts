@@ -9,16 +9,14 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_ENABLE_STREAMS_UI,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
 } from '@kbn/management-settings-ids';
-import type { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
+import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
 export function registerFeatureFlags(
   core: CoreSetup<StreamsPluginStartDependencies>,
-  plugins: StreamsPluginSetupDependencies,
   logger: Logger
 ) {
   core.pricing
@@ -47,28 +45,6 @@ export function registerFeatureFlags(
     .catch((error) => {
       logger.error(`Failed to register significant events ui settings: ${error}`);
     });
-
-  const isObservabilityServerless =
-    plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'observability';
-
-  core.uiSettings.register({
-    [OBSERVABILITY_ENABLE_STREAMS_UI]: {
-      category: ['observability'],
-      name: 'Streams UI',
-      value: isObservabilityServerless,
-      description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
-        defaultMessage: 'Enable the {streamsLink}.',
-        values: {
-          streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
-        },
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-    },
-  });
 
   core.uiSettings.register({
     [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {

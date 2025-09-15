@@ -31,6 +31,7 @@ import type { ReportingStore } from '../store';
 import { SavedReport } from '../store';
 import type { ScheduledReportType } from '../../types';
 import { EmailNotificationService } from '../../services/notifications/email_notification_service';
+import { eventTrackerMock } from '../../usage/event_tracker.mock';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -42,6 +43,7 @@ interface StreamMock {
 }
 
 const coreSetupMock = coreMock.createSetup();
+const mockEventTracker = eventTrackerMock.create();
 
 function createStreamMock(): StreamMock {
   const transform: Transform = new Transform({});
@@ -382,6 +384,54 @@ describe('Run Scheduled Report Task', () => {
     });
   });
 
+  it('sends telemetry event when job is claimed', async () => {
+    const store = await mockReporting.getStore();
+    store.addReport = jest.fn().mockImplementation(
+      (report) =>
+        new SavedReport({
+          ...report,
+          _id: 'test',
+          _index: '.reporting-foo-index-234',
+          _seq_no: 1,
+          _primary_term: 1,
+          jobtype: 'test1',
+          payload: { objectType: 'dashboard' },
+        })
+    );
+
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        runAt: new Date(),
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    expect(mockReporting.getEventTracker).toHaveBeenCalledWith('test', 'test1', 'dashboard');
+    expect(mockEventTracker.claimJob).toHaveBeenCalledWith({
+      timeSinceCreation: expect.any(Number),
+      scheduleType: 'scheduled',
+      scheduledTaskId: 'report-so-id',
+    });
+  });
+
   it('throws if no fake request from task', async () => {
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
@@ -653,6 +703,7 @@ describe('Run Scheduled Report Task', () => {
 
   describe('notify', () => {
     it('sends an email notification', async () => {
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -689,6 +740,16 @@ describe('Run Scheduled Report Task', () => {
           type: 'scheduled-report',
         },
         reporting: mockReporting,
+      });
+      expect(mockReporting.getEventTracker).toHaveBeenCalledWith(
+        '290357209345723095',
+        'test1',
+        'test'
+      );
+      expect(mockEventTracker.completeNotification).toHaveBeenCalledWith({
+        byteSize: 2097152,
+        scheduleType: 'scheduled',
+        scheduledTaskId: 'report-so-id',
       });
     });
 
@@ -756,6 +817,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs a warning and sets the execution to warning when the report is larger than 10MB', async () => {
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -784,9 +846,22 @@ describe('Run Scheduled Report Task', () => {
         warning:
           'Error sending notification for scheduled report: The report is larger than the 10MB limit.',
       });
+      expect(mockReporting.getEventTracker).toHaveBeenCalledWith(
+        '290357209345723095',
+        'test1',
+        'test'
+      );
+      expect(mockEventTracker.failedNotification).toHaveBeenCalledWith({
+        byteSize: 11534336,
+        scheduleType: 'scheduled',
+        scheduledTaskId: 'report-so-id',
+        errorMessage:
+          'Error sending notification for scheduled report: The report is larger than the 10MB limit.',
+      });
     });
 
     it('logs a warning and sets the execution to warning when the notification service is not initialized', async () => {
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -815,9 +890,22 @@ describe('Run Scheduled Report Task', () => {
         warning:
           'Error sending notification for scheduled report: Reporting notification service has not been initialized.',
       });
+      expect(mockReporting.getEventTracker).toHaveBeenCalledWith(
+        '290357209345723095',
+        'test1',
+        'test'
+      );
+      expect(mockEventTracker.failedNotification).toHaveBeenCalledWith({
+        byteSize: 2097152,
+        scheduleType: 'scheduled',
+        scheduledTaskId: 'report-so-id',
+        errorMessage:
+          'Error sending notification for scheduled report: Reporting notification service has not been initialized.',
+      });
     });
 
     it('logs a warning and sets the execution to warning if the notification service throws an error', async () => {
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
       jest
         .spyOn(emailNotificationService, 'notify')
         .mockRejectedValueOnce(new Error('This is a test error!'));
@@ -865,6 +953,17 @@ describe('Run Scheduled Report Task', () => {
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 2097152 },
         warning: 'Error sending notification for scheduled report: This is a test error!',
+      });
+      expect(mockReporting.getEventTracker).toHaveBeenCalledWith(
+        '290357209345723095',
+        'test1',
+        'test'
+      );
+      expect(mockEventTracker.failedNotification).toHaveBeenCalledWith({
+        byteSize: 2097152,
+        scheduleType: 'scheduled',
+        scheduledTaskId: 'report-so-id',
+        errorMessage: 'Error sending notification for scheduled report: This is a test error!',
       });
     });
 

@@ -6,15 +6,16 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { ToolResultType, builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools, ToolResultType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import { toolReasoningOpeningTag, toolReasoningClosingTag } from './consts';
 
 const tools = {
-  indexExplorer: sanitizeToolId(builtinToolIds.indexExplorer),
-  listIndices: sanitizeToolId(builtinToolIds.listIndices),
-  search: sanitizeToolId(builtinToolIds.search),
+  indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
+  listIndices: sanitizeToolId(platformCoreTools.listIndices),
+  search: sanitizeToolId(platformCoreTools.search),
 };
 
 export const getActPrompt = ({
@@ -82,7 +83,7 @@ export const getActPrompt = ({
           - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
           - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
           - Never expose internal tool selection reasoning unless the user asks.
-        
+
         OPERATING PROTOCOL
         Step 1 — Analyze & plan
           - Examine the user's query and conversation history.
@@ -103,6 +104,16 @@ export const getActPrompt = ({
               2) Ask the user to enable/authorize a needed tool.
           - Do NOT provide ungrounded general knowledge answers.
 
+        CRITICAL OUTPUT FORMATTING
+        Your response for each turn MUST follow one of these two formats. Do not deviate.
+
+        1. Final Answer Format (No Tool Required):
+          - If you are providing a final answer directly to the user without calling a tool, your response should be plain text.
+        2. Tool Use Format (Tool calling):
+          - When calling a tool, you should generally include a brief reasoning message to keep the user informed.
+          - This message MUST start with the "${toolReasoningOpeningTag}" and end with "${toolReasoningClosingTag}".
+          - You may omit the reasoning message only when the user's request is very direct, simple, and transactional.
+
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
         - [ ] All claims are grounded in tool output or user-provided content.
@@ -115,7 +126,7 @@ export const getActPrompt = ({
         OUTPUT STYLE
         - Clear, direct, and scoped. No extraneous commentary.
         - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
-        - Do not mention internal reasoning or tool names unless user explicitly asks.
+        - For final answers, do not mention internal reasoning or tool names unless user explicitly asks.
 
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
@@ -125,7 +136,18 @@ export const getActPrompt = ({
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
-        - Current date: ${formatDate()}`,
+        - Current date: ${formatDate()}
+
+        ## EXAMPLES
+
+        ### Example of a Tool Call with Reasoning
+        User query: "How many 404 errors did our web server log in the last hour?"
+
+        Your complete output for this turn MUST be structured like this:
+        - Text Component: "${toolReasoningOpeningTag}Of course, I'll search the web server logs for 404 errors from the last hour.${toolReasoningClosingTag}"
+        - Tool Call Component: [The actual tool call to the '${
+          tools.search
+        }' tool with the correct parameters]`,
     ],
     ...messages,
   ];

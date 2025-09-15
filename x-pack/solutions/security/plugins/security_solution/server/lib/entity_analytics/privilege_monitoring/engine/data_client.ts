@@ -16,6 +16,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { MonitoringEngineComponentResource } from '../../../../../common/api/entity_analytics';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
@@ -36,6 +37,8 @@ export interface PrivilegeMonitoringGlobalDependencies {
 
   apiKeyManager?: ApiKeyManager;
   taskManager?: TaskManagerStartContract;
+
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 /**
@@ -46,6 +49,7 @@ export class PrivilegeMonitoringDataClient {
 
   constructor(public readonly deps: PrivilegeMonitoringGlobalDependencies) {
     this.index = getPrivilegedMonitorUsersIndex(deps.namespace);
+    this.deps.experimentalFeatures = deps.experimentalFeatures;
   }
 
   public getScopedSoClient(request: KibanaRequest, options?: SavedObjectsClientProviderOptions) {

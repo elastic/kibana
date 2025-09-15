@@ -17,11 +17,11 @@ import type { SettingsConfig } from './types';
 
 export const zodStringWithDurationValidation = z
   .string()
-  .refine((val) => val.match(/^(\d+[s|m|h|d])?$/), {
+  .refine((val) => val.match(/^(\d+[s|m|h])?$/), {
     message: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
       {
-        defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d',
+        defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h',
       }
     ),
   });
@@ -191,13 +191,13 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalTitle',
       {
-        defaultMessage: 'Agent logging number of files',
+        defaultMessage: 'Agent logging file rotation interval',
       }
     ),
     description: (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalDescription"
-        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 24h, 7d."
+        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 1s, 1m , 1h, 24h."
       />
     ),
     api_field: {

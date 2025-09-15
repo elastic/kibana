@@ -8,7 +8,18 @@
  */
 
 import { z } from '@kbn/zod';
-import { HttpStepSchema, WaitStepSchema } from '../../../spec/schema';
+import {
+  HttpStepSchema,
+  WaitStepSchema,
+  ElasticsearchStepSchema,
+  KibanaStepSchema,
+} from '../../../spec/schema';
+
+export const GraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+});
+export type GraphNode = z.infer<typeof GraphNodeSchema>;
 
 export const ExecutionGraphNodeSchema = z.object({
   id: z.string(),
@@ -38,3 +49,21 @@ export const HttpGraphNodeSchema = z.object({
   configuration: HttpStepSchema,
 });
 export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
+
+export const ElasticsearchGraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
+    message: 'Elasticsearch graph node type must start with "elasticsearch."',
+  }),
+  configuration: ElasticsearchStepSchema,
+});
+export type ElasticsearchGraphNode = z.infer<typeof ElasticsearchGraphNodeSchema>;
+
+export const KibanaGraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.string().refine((val) => val.startsWith('kibana.'), {
+    message: 'Kibana graph node type must start with "kibana."',
+  }),
+  configuration: KibanaStepSchema,
+});
+export type KibanaGraphNode = z.infer<typeof KibanaGraphNodeSchema>;
