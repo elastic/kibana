@@ -41,6 +41,8 @@ export const GRAPH_LABEL_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}LabelNode` as 
 export const GRAPH_STACK_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackNode` as const;
 export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
 
+export const GRAPH_STACKED_SHAPE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackedShape` as const;
+
 export const GRAPH_MINIMAP_ID = `${GRAPH_INVESTIGATION_TEST_ID}Minimap` as const;
 export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;
