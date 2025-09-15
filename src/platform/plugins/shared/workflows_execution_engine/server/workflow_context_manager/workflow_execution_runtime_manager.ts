@@ -100,6 +100,14 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
   }
 
+  public getCurrentStepExecutionId(): string {
+    return buildStepExecutionId(
+      this.workflowExecution.id,
+      this.getCurrentNode().stepId,
+      this.buildCurrentStepPath()
+    );
+  }
+
   public navigateToNode(nodeId: string): void {
     if (!this.workflowGraph.getNode(nodeId)) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
@@ -109,9 +117,8 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public navigateToNextNode(): void {
-    const currentNodeIndex = this.topologicalOrder.findIndex(
-      (nodeId) => nodeId === this.currentNodeId
-    );
+    const currentNodeId = this.workflowExecution.currentNodeId;
+    const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
     if (currentNodeIndex < this.topologicalOrder.length - 1) {
       this.currentNodeId = this.topologicalOrder[currentNodeIndex + 1];
       return;
@@ -144,17 +151,21 @@ export class WorkflowExecutionRuntimeManager {
 
   public getCurrentStepResult(): RunStepResult | undefined {
     const currentNode = this.getCurrentNode();
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
-      currentNode.stepId
+    const stepExecution = this.workflowExecutionState.getStepExecution(
+      buildStepExecutionId(
+        this.workflowExecution.id,
+        currentNode.stepId,
+        this.buildCurrentStepPath()
+      )
     );
 
-    if (!latestStepExecution) {
+    if (!stepExecution) {
       return undefined;
     }
     return {
-      input: latestStepExecution.input || {},
-      output: latestStepExecution.output || {},
-      error: latestStepExecution.error,
+      input: stepExecution.input || {},
+      output: stepExecution.output || {},
+      error: stepExecution.error,
     };
   }
 
@@ -181,7 +192,9 @@ export class WorkflowExecutionRuntimeManager {
 
   public getCurrentStepState(): Record<string, any> | undefined {
     const stepId = this.getCurrentNode().stepId;
-    return this.workflowExecutionState.getLatestStepExecution(stepId)?.state;
+    return this.workflowExecutionState.getStepExecution(
+      buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath())
+    )?.state;
   }
 
   public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
@@ -222,7 +235,7 @@ export class WorkflowExecutionRuntimeManager {
           stepId: currentNode.stepId,
           stepType: currentNode.stepType,
           path: this.buildCurrentStepPath(),
-          topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
+          topologicalIndex: this.topologicalOrder.indexOf(currentNode.id),
           status: ExecutionStatus.RUNNING,
           startedAt: stepStartedAt.toISOString(),
         } as Partial<EsWorkflowStepExecution>;
@@ -250,7 +263,12 @@ export class WorkflowExecutionRuntimeManager {
         },
       },
       async () => {
-        const startedStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+        const stepExecutionId = buildStepExecutionId(
+          this.workflowExecution.id,
+          stepId,
+          this.buildCurrentStepPath()
+        );
+        const startedStepExecution = this.workflowExecutionState.getStepExecution(stepExecutionId);
 
         if (!startedStepExecution) {
           throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
@@ -263,7 +281,7 @@ export class WorkflowExecutionRuntimeManager {
         const executionTimeMs =
           completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
         const stepExecutionUpdate = {
-          id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
+          id: stepExecutionId,
           status: stepStatus,
           completedAt: completedAt.toISOString(),
           executionTimeMs,
@@ -298,6 +316,8 @@ export class WorkflowExecutionRuntimeManager {
         // if not, create a new step execution with fail
         const stepExecutionUpdate = {
           id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
+          stepId,
+          path: this.buildCurrentStepPath(),
           status: ExecutionStatus.FAILED,
           output: null,
           error: String(error),
@@ -564,7 +584,7 @@ export class WorkflowExecutionRuntimeManager {
     const path: string[] = [];
 
     // TODO: TO REVISIT IT
-    for (const part of this.stack) {
+    for (const part of this.workflowExecution.stack) {
       // If the provided stepId is part of the stack, use read path until its position and stop
       if (part === currentNode.stepId) {
         break;
@@ -607,8 +627,9 @@ export class WorkflowExecutionRuntimeManager {
 
   private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
-    this.workflowLogger?.logInfo(`Step '${step.stepId}' ${isSuccess ? 'completed' : 'failed'}`, {
-      workflow: { step_id: step.stepId, step_execution_id: step.id },
+    const stepId = this.getCurrentNode().stepId;
+    this.workflowLogger?.logInfo(`Step '${stepId}' ${isSuccess ? 'completed' : 'failed'}`, {
+      workflow: { step_id: stepId, step_execution_id: step.id },
       event: {
         action: 'step-complete',
         category: ['workflow', 'step'],
