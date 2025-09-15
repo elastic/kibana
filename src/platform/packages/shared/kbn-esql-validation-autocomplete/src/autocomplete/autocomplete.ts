@@ -248,13 +248,8 @@ async function getSuggestionsWithinCommandExpression(
     const { root } = parse(correctedQuery, { withFormatting: true });
     // get columns including the current command being edited
     // this is needed to avoid suggesting a user defined column name that is already used
-    const columnsIncludingCurrentCommand = await new QueryColumns(
-      root,
-      correctedQuery,
-      callbacks
-    ).asMap();
-
-    return findNewUserDefinedColumn(columnsIncludingCurrentCommand);
+    const columnsToCheck = await new QueryColumns(root, correctedQuery, callbacks).asMap();
+    return findNewUserDefinedColumn(columnsToCheck);
   };
 
   const additionalCommandContext = await getCommandContext(

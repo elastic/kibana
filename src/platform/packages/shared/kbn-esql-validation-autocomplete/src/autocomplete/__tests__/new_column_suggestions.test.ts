@@ -10,30 +10,72 @@ import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('new-column suggestions', () => {
-    test('increments suggestion across commands', async () => {
-      const { suggest } = await setup();
+    describe('across commands', () => {
+      test('increments suggestion (EVAL)', async () => {
+        const { suggest } = await setup();
 
-      const suggestions = (
-        await suggest(
-          'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | STATS /'
-        )
-      ).map((s) => s.text);
+        const suggestions = (
+          await suggest(
+            'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | EVAL /'
+          )
+        ).map((s) => s.text);
 
-      expect(suggestions).toContain('col2 = ');
-      expect(suggestions).not.toContain('col1 = ');
-      expect(suggestions).not.toContain('col0 = ');
+        expect(suggestions).toContain('col2 = ');
+        expect(suggestions).not.toContain('col1 = ');
+        expect(suggestions).not.toContain('col0 = ');
+      });
+
+      test('resets suggestion in commands that reset the fields list (STATS)', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = (
+          await suggest(
+            'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | STATS /'
+          )
+        ).map((s) => s.text);
+
+        expect(suggestions).toContain('col2 = ');
+        expect(suggestions).not.toContain('col1 = ');
+        expect(suggestions).not.toContain('col0 = ');
+      });
     });
 
-    test('increments suggestion within single command', async () => {
-      const { suggest } = await setup();
+    describe('within single command', () => {
+      test('STATS', async () => {
+        const { suggest } = await setup();
 
-      const suggestions = (
-        await suggest('FROM a | STATS col0 = AVG(integerField), col1 = 3, /')
-      ).map((s) => s.text);
+        const suggestions = (
+          await suggest('FROM a | STATS col0 = AVG(integerField), col1 = 3, /')
+        ).map((s) => s.text);
 
-      expect(suggestions).toContain('col2 = ');
-      expect(suggestions).not.toContain('col1 = ');
-      expect(suggestions).not.toContain('col0 = ');
+        expect(suggestions).toContain('col2 = ');
+        expect(suggestions).not.toContain('col1 = ');
+        expect(suggestions).not.toContain('col0 = ');
+      });
+
+      test('EVAL', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = (
+          await suggest('FROM a | EVAL col0 = FLOOR(integerField), col1 = 3, /')
+        ).map((s) => s.text);
+
+        expect(suggestions).toContain('col2 = ');
+        expect(suggestions).not.toContain('col1 = ');
+        expect(suggestions).not.toContain('col0 = ');
+      });
+
+      test('ROW', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = (await suggest('ROW col0 = FLOOR(32), col1 = 3, /')).map((s) => s.text);
+
+        expect(suggestions).toContain('col2 = ');
+        expect(suggestions).not.toContain('col1 = ');
+        expect(suggestions).not.toContain('col0 = ');
+      });
+
+      test.todo('RERANK');
     });
   });
 });
