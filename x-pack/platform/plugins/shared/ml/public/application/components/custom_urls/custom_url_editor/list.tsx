@@ -57,13 +57,12 @@ function findDFADataViewId(
   dataViewListItems?: DataViewListItem[],
   isPartialDFAJob?: boolean
 ): string | undefined {
-  let dataViewId;
   const sourceIndex = Array.isArray(dfaJob.source.index)
     ? dfaJob.source.index.join()
     : dfaJob.source.index;
   const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
   const backupIndexName = sourceIndex;
-  dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
+  const dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
   if (!dataViewId) {
     return dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
   }
