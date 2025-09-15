@@ -18,7 +18,6 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { BehaviorSubject } from 'rxjs';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import type { DashboardCreationOptions } from '..';
@@ -50,20 +49,26 @@ export function DashboardRenderer({
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
+  const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
   >();
   const [error, setError] = useState<Error | undefined>();
 
-  const dashboardContainerRef = useStateFromPublishingSubject(
-    dashboardInternalApi?.dashboardContainerRef$ || new BehaviorSubject(null)
-  );
-
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardApi) dashboardApi.locator = locator;
   }, [dashboardApi, locator]);
+
+  useEffect(() => {
+    if (
+      dashboardInternalApi &&
+      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
+      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+    }
+  }, [dashboardInternalApi]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -96,6 +101,15 @@ export function DashboardRenderer({
     // Disabling exhaustive deps because embeddable should only be created on first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
+
+  useEffect(() => {
+    if (
+      dashboardInternalApi &&
+      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
+      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+    }
+  }, [dashboardInternalApi]);
 
   const isDashboardViewportLoading = !dashboardApi && !error;
 
@@ -137,9 +151,15 @@ export function DashboardRenderer({
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
-          if (dashboardInternalApi && dashboardContainerRef !== e) {
-            dashboardInternalApi.setDashboardContainerRef(e);
+          if (dashboardInternalApi) {
+            if (dashboardInternalApi.dashboardContainerRef$.value !== e) {
+              dashboardInternalApi.setDashboardContainerRef(e);
+            }
+            return;
           }
+
+          // only store ref locally if dashboardInternalApi is not yet available
+          dashboardContainerRef.current = e;
         }}
       >
         <GlobalPrintStyles />
