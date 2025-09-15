@@ -23,6 +23,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiTourStep,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
@@ -133,7 +134,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
   const [isLLMCostTourVisible, setLLMCostTourVisible] = useStateWithLocalStorage<boolean>(
     'elasticSemanticTextVCUTourSkipKey',
-    true
+    false
   );
 
   const inferencePopover = () => (
@@ -275,6 +276,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       </EuiContextMenuItem>
     </EuiPopover>
   );
+
   return (
     <>
       <EuiSpacer />
@@ -316,7 +318,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                   defaultMessage="The VCUs used to perform inference, NLP tasks, and other ML activities will incur {additionalCosts}. You can continue to use other models as normal. {learnMore}"
                 />
               }
-              onFinish={() => setLLMCostTourVisible(false)}
+              onFinish={() => setLLMCostTourVisible(true)}
               stepsTotal={1}
               title={
                 <FormattedMessage
@@ -331,8 +333,19 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 />
               }
               step={1}
-              data-test-subj="semantic-text-ml-cost-tour"
-              isOpen={isLLMCostTourVisible}
+              data-test-subj="semanticTextMlCostTour"
+              isOpen={!isLLMCostTourVisible}
+              footerAction={
+                <EuiButtonEmpty
+                  data-test-subj="semanticTextMlCostTourCloseBtn"
+                  onClick={() => setLLMCostTourVisible(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.closeButton"
+                    defaultMessage="Ok"
+                  />
+                </EuiButtonEmpty>
+              }
             >
               {inferencePopover()}
             </EuiTourStep>
