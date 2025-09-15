@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,
   KibanaRequest,
@@ -33,11 +34,10 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
-import type { estypes } from '@elastic/elasticsearch';
-import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
@@ -262,18 +262,17 @@ export class WorkflowsService {
       const now = new Date();
 
       const updatedData: Partial<WorkflowProperties> = {
-        ...workflow,
         lastUpdatedBy: authenticatedUser,
         updated_at: now.toISOString(),
       };
 
-      // If yaml is being updated, validate and update definition
+      // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
         const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
         if (!parsedYaml.success) {
-          workflow.definition = undefined;
-          workflow.enabled = false;
-          workflow.valid = false;
+          updatedData.definition = undefined;
+          updatedData.enabled = false;
+          updatedData.valid = false;
         } else {
           // Validate step name uniqueness
           const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
@@ -287,8 +286,52 @@ export class WorkflowsService {
           const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
             parsedYaml.data as WorkflowYaml
           );
+          // Update all fields from the transformed YAML, not just definition
           updatedData.definition = workflowDef.definition;
+          updatedData.name = workflowDef.name;
+          updatedData.enabled = workflowDef.enabled;
+          updatedData.description = workflowDef.description;
+          updatedData.tags = workflowDef.tags;
           updatedData.valid = true;
+        }
+      }
+
+      // Handle individual field updates only when YAML is not being updated
+      if (!workflow.yaml) {
+        let yamlUpdated = false;
+
+        if (workflow.name !== undefined) {
+          updatedData.name = workflow.name;
+          yamlUpdated = true;
+        }
+        if (workflow.enabled !== undefined) {
+          // If enabling a workflow, ensure it has a valid definition
+          if (workflow.enabled && existingDocument._source?.definition) {
+            updatedData.enabled = true;
+          } else if (!workflow.enabled) {
+            updatedData.enabled = false;
+          }
+          yamlUpdated = true;
+        }
+        if (workflow.description !== undefined) {
+          updatedData.description = workflow.description;
+          yamlUpdated = true;
+        }
+        if (workflow.tags !== undefined) {
+          updatedData.tags = workflow.tags;
+          yamlUpdated = true;
+        }
+
+        // If any individual fields were updated, regenerate the YAML content
+        if (yamlUpdated && existingDocument._source?.definition) {
+          const updatedWorkflowDefinition = {
+            ...existingDocument._source.definition,
+            ...(workflow.name !== undefined && { name: workflow.name }),
+            ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
+            ...(workflow.description !== undefined && { description: workflow.description }),
+            ...(workflow.tags !== undefined && { tags: workflow.tags }),
+          };
+          updatedData.yaml = stringifyWorkflowDefinition(updatedWorkflowDefinition);
         }
       }
 
@@ -378,12 +421,12 @@ export class WorkflowsService {
       },
     });
 
-    if (enabled !== undefined) {
-      must.push({ term: { enabled } });
+    if (enabled !== undefined && enabled.length > 0) {
+      must.push({ terms: { enabled } });
     }
 
-    if (createdBy) {
-      must.push({ term: { createdBy } });
+    if (createdBy && createdBy.length > 0) {
+      must.push({ terms: { createdBy } });
     }
 
     if (query) {
@@ -634,6 +677,7 @@ export class WorkflowsService {
     fields.forEach((field) => {
       if (responseAggs[field]) {
         result[field] = responseAggs[field].buckets.map((bucket: any) => ({
+          label: bucket.key_as_string,
           key: bucket.key,
           doc_count: bucket.doc_count,
         }));

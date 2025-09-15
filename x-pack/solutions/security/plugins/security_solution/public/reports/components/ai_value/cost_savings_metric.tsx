@@ -72,10 +72,12 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
           fill: ${colors.success};
         }
         .echMetricText {
-          padding: 8px 20px 60px;
+          padding: 8px 16px 60px;
         }
         p.echMetricText__value {
           color: ${colors.success};
+          font-size: 48px !important;
+          padding: 10px 0;
         }
         .euiPanel,
         .embPanel__hoverActions > span {

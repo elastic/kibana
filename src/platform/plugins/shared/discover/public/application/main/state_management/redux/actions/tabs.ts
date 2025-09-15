@@ -192,6 +192,8 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
         await urlStateStorage.set(APP_STATE_URL_KEY, null);
       }
+
+      dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
     }
 
     dispatch(

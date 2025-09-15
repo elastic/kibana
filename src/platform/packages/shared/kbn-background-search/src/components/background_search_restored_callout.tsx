@@ -22,6 +22,10 @@ const STICKY_SESSION_STATES = new Set<SearchSessionState>([
 
 interface BackgroundSearchRestoredCalloutProps {
   /**
+   * Indicates whether the current query is an ES|QL query. Used for styling purposes.
+   */
+  isESQLQuery?: boolean;
+  /**
    * Observable that emits the current SearchSessionState to drive the callout visibility.
    */
   state$: Observable<SearchSessionState>;
@@ -36,7 +40,7 @@ interface BackgroundSearchRestoredCalloutProps {
  * @param props Component props.
  */
 export function BackgroundSearchRestoredCallout(props: BackgroundSearchRestoredCalloutProps) {
-  const { state$ } = props;
+  const { isESQLQuery = false, state$ } = props;
   const { euiTheme } = useEuiTheme();
 
   const show$ = state$
@@ -58,11 +62,11 @@ export function BackgroundSearchRestoredCallout(props: BackgroundSearchRestoredC
       borderRadius="none"
       color="transparent"
       css={css`
-        padding-bottom: ${euiTheme.size.s};
+        padding-bottom: ${isESQLQuery ? 0 : euiTheme.size.s};
       `}
       data-test-subj="backgroundSearchRestoredCallout"
       hasShadow={false}
-      paddingSize="none"
+      paddingSize={isESQLQuery ? 's' : 'none'}
     >
       <EuiCallOut size="s">
         <EuiText size="xs">
