@@ -95,6 +95,20 @@ const triggerControl = async (
   });
 };
 
+// ES|QL starting keywords - simplified detection
+const ESQL_STARTING_KEYWORDS = ['SET', 'FROM', 'TS', 'SHOW', 'ROW'];
+
+const detectESQLSyntax = (code: string): boolean => {
+  if (!code || code.trim().length === 0) {
+    return true;
+  }
+
+  const trimmedCode = code.trim().toUpperCase();
+
+  // Check if the query starts with any ES|QL keyword
+  return ESQL_STARTING_KEYWORDS.some((keyword) => trimmedCode.startsWith(keyword));
+};
+
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
   query,
@@ -167,6 +181,22 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
 
+  const [showPlaceholder, setShowPlaceholder] = useState(() => {
+    const initialCode = fixESQLQueryWithVariables(query.esql, esqlVariables);
+    return !initialCode || initialCode.trim().length === 0;
+  });
+
+  // Improved placeholder visibility management
+  const updatePlaceholderVisibility = useCallback((currentCode: string) => {
+    const shouldShowPlaceholder = !currentCode || currentCode.trim().length === 0;
+    setShowPlaceholder(shouldShowPlaceholder);
+  }, []);
+
+  // Determine current editor mode based on content detection
+  const currentEditorMode = useMemo(() => {
+    return detectESQLSyntax(code) ? 'esql' : 'search';
+  }, [code]);
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -177,9 +207,11 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   const onQueryUpdate = useCallback(
     (value: string) => {
+      setCode(value);
+      updatePlaceholderVisibility(value);
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, updatePlaceholderVisibility]
   );
 
   const onQuerySubmit = useCallback(() => {
@@ -191,13 +223,30 @@ const ESQLEditorInternal = function ESQLEditor({
       const abc = new AbortController();
       setAbortController(abc);
 
-      const currentValue = editor1.current?.getValue();
+      const currentValue =
+        currentEditorMode === 'esql'
+          ? editor1.current?.getValue()
+          : `FROM logs* | WHERE KQL("""${editor1.current?.getValue()}""")`;
+
+      if (currentEditorMode === 'search') {
+        setCode(currentValue || '');
+        onTextLangQueryChange({ esql: currentValue } as AggregateQuery);
+      }
+
       if (currentValue != null) {
         setCodeStateOnSubmission(currentValue);
       }
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
     }
-  }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    currentEditorMode,
+    onTextLangQuerySubmit,
+    onTextLangQueryChange,
+  ]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -233,9 +282,10 @@ const ESQLEditorInternal = function ESQLEditor({
     if (editor1.current) {
       if (code !== fixedQuery) {
         setCode(fixedQuery);
+        updatePlaceholderVisibility(fixedQuery);
       }
     }
-  }, [code, fixedQuery]);
+  }, [code, fixedQuery, updatePlaceholderVisibility]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -254,8 +304,10 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [variablesService, controlsContext, esqlVariables]);
 
-  const showSuggestionsIfEmptyQuery = useCallback(() => {
-    if (editorModel.current?.getValueLength() === 0) {
+  const showSuggestionsIfAppropriate = useCallback((currentValue: string) => {
+    // Show suggestions when empty OR when typing ES|QL syntax
+    const shouldShow = detectESQLSyntax(currentValue);
+    if (shouldShow) {
       setTimeout(() => {
         editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
       }, 0);
@@ -418,9 +470,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
-    showSuggestionsIfEmptyQuery();
+    const currentValue = editor1.current?.getValue() || '';
+    showSuggestionsIfAppropriate(currentValue);
     setLabelInFocus(true);
-  }, [showSuggestionsIfEmptyQuery]);
+    setShowPlaceholder(false);
+  }, [showSuggestionsIfAppropriate]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -615,14 +669,14 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
 
   const parseMessages = useCallback(async () => {
-    if (editorModel.current) {
+    if (editorModel.current && currentEditorMode === 'esql') {
       return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
     }
     return {
       errors: [],
       warnings: [],
     };
-  }, [esqlCallbacks, code]);
+  }, [esqlCallbacks, code, currentEditorMode]);
 
   useEffect(() => {
     const setQueryToTheCache = async () => {
@@ -657,30 +711,43 @@ const ESQLEditorInternal = function ESQLEditor({
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
-      const markers = [];
 
-      if (parserErrors.length) {
-        if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(parserErrors));
-        } else {
-          markers.push(...parserErrors);
+      // Only validate ES|QL in ES|QL mode
+      if (currentEditorMode === 'esql') {
+        const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
+        const markers = [];
+
+        if (parserErrors.length) {
+          if (dataErrorsControl?.enabled === false) {
+            markers.push(...filterDataErrors(parserErrors));
+          } else {
+            markers.push(...parserErrors);
+          }
+        }
+        if (active) {
+          setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
+          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
+          return;
+        }
+      } else {
+        // Clear any existing messages in search mode
+        if (active) {
+          setEditorMessages({ errors: [], warnings: [] });
         }
       }
-      if (active) {
-        setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
-        return;
-      }
     },
-    [parseMessages, dataErrorsControl?.enabled]
+    [parseMessages, dataErrorsControl?.enabled, currentEditorMode]
   );
 
   useDebounceWithOptions(
     async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
-      if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+      if (
+        code === codeWhenSubmitted &&
+        (serverErrors || serverWarning) &&
+        currentEditorMode === 'esql'
+      ) {
         const parsedErrors = parseErrors(serverErrors || [], code);
         const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
         setEditorMessages({
@@ -700,15 +767,22 @@ const ESQLEditorInternal = function ESQLEditor({
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code, queryValidation]
+    [serverErrors, serverWarning, code, queryValidation, currentEditorMode]
   );
 
-  const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
-    [esqlCallbacks]
-  );
+  const suggestionProvider = useMemo(() => {
+    // Provide ES|QL suggestions when editor is empty OR when in ES|QL mode
+    const shouldProvideESQLSuggestions = code.trim().length === 0 || currentEditorMode === 'esql';
+    return shouldProvideESQLSuggestions
+      ? ESQLLang.getSuggestionProvider?.(esqlCallbacks)
+      : undefined;
+  }, [esqlCallbacks, currentEditorMode, code]);
 
-  const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
+  const hoverProvider = useMemo(() => {
+    // Provide ES|QL hover when editor is empty OR when in ES|QL mode
+    const shouldProvideESQLHover = code.trim().length === 0 || currentEditorMode === 'esql';
+    return shouldProvideESQLHover ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined;
+  }, [esqlCallbacks, currentEditorMode, code]);
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
@@ -795,6 +869,13 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const [labelInFocus, setLabelInFocus] = useState(false);
+
+  const placeholderText = useMemo(() => {
+    return i18n.translate('esqlEditor.query.searchPlaceholder', {
+      defaultMessage: 'Search for logs, metrics, and more or type an ES|QL query',
+    });
+  }, []);
+
   const editorPanel = (
     <>
       {Boolean(editorIsInline) && (
@@ -864,6 +945,7 @@ const ESQLEditorInternal = function ESQLEditor({
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             setIsCodeEditorExpandedFocused(false);
+            updatePlaceholderVisibility(code);
           }}
         >
           <div css={styles.resizableContainer}>
@@ -876,23 +958,48 @@ const ESQLEditorInternal = function ESQLEditor({
               `}
             >
               <div css={styles.editorContainer}>
+                {showPlaceholder && (
+                  <div
+                    css={css`
+                      position: absolute;
+                      top: 8px; /* Align with editor padding */
+                      left: 44px; /* Account for line numbers and padding */
+                      pointer-events: none;
+                      user-select: none;
+                      color: ${theme.euiTheme.colors.textSubdued};
+                      font-size: 14px; /* Match editor font size */
+                      font-family: ${theme.euiTheme.font.familyCode};
+                      line-height: ${theme.euiTheme.size.l}; /* Match editor line height */
+                      z-index: 1;
+                    `}
+                    aria-hidden="true"
+                    data-test-subj="ESQLEditor-placeholder"
+                  >
+                    {placeholderText}
+                  </div>
+                )}
                 <CodeEditor
                   htmlId={htmlId}
                   aria-label={formLabel}
-                  languageId={ESQL_LANG_ID}
+                  aria-placeholder={showPlaceholder ? placeholderText : undefined}
+                  languageId={currentEditorMode === 'esql' ? ESQL_LANG_ID : 'plaintext'}
                   classNameCss={getEditorOverwrites(theme)}
                   value={code}
                   options={codeEditorOptions}
                   width="100%"
                   suggestionProvider={suggestionProvider}
-                  hoverProvider={{
-                    provideHover: (model, position, token) => {
-                      if (!hoverProvider?.provideHover) {
-                        return { contents: [] };
-                      }
-                      return hoverProvider?.provideHover(model, position, token);
-                    },
-                  }}
+                  hoverProvider={
+                    hoverProvider
+                      ? {
+                          provideHover: (model, position, token) => {
+                            if (!hoverProvider?.provideHover) {
+                              return { contents: [] };
+                            }
+                            return hoverProvider?.provideHover(model, position, token);
+                          },
+                        }
+                      : undefined
+                  }
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
@@ -924,12 +1031,18 @@ const ESQLEditorInternal = function ESQLEditor({
                       onEditorFocus();
                     });
 
-                    // on CMD/CTRL + / comment out the entire line
+                    // on CMD/CTRL + / comment out the entire line (only in ES|QL mode)
                     editor.addCommand(
                       // eslint-disable-next-line no-bitwise
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-                      onCommentLine
+                      () => {
+                        // Only allow commenting in ES|QL mode
+                        if (currentEditorMode === 'esql') {
+                          onCommentLine();
+                        }
+                      }
                     );
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
                       const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
@@ -946,7 +1059,11 @@ const ESQLEditorInternal = function ESQLEditor({
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
-                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+                    editor.onDidChangeModelContent(() => {
+                      const currentValue = editor.getValue();
+                      updatePlaceholderVisibility(currentValue);
+                      showSuggestionsIfAppropriate(currentValue);
+                    });
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {
