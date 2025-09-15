@@ -8,7 +8,7 @@
 import { css, keyframes } from '@emotion/react';
 import React from 'react';
 
-export const HIGHLIGHT_ANIMATION_DURATION = 800;
+export const HIGHLIGHT_ANIMATION_DURATION = 500;
 
 const borderSpinKeyframes = keyframes({
   '0%': {
