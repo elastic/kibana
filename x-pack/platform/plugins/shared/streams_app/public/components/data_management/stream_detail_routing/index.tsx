@@ -200,7 +200,7 @@ const createForkSuccessNofitier =
               href={router.link('/{key}/management/{tab}', {
                 path: {
                   key: streamName,
-                  tab: 'route',
+                  tab: 'partitioning',
                 },
               })}
             >

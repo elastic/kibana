@@ -26,5 +26,9 @@
     "@kbn/lens-plugin",
     "@kbn/esql-composer",
     "@kbn/shared-ux-toolbar-selector",
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-hooks",
+    "@kbn/es-query",
+    "@kbn/discover-utils",
   ]
 }

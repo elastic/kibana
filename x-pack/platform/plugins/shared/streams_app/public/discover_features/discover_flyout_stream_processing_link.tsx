@@ -39,7 +39,7 @@ export function DiscoverFlyoutStreamProcessingLink({
 
   const href = locator.getRedirectUrl({
     name: value,
-    managementTab: 'enrich',
+    managementTab: 'processing',
     pageState: {
       v: 1,
       dataSources: [
