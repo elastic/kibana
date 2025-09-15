@@ -38,7 +38,9 @@
     "@kbn/i18n-react",
     "@kbn/esql-ast",
     "@kbn/restorable-state",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/index-editor",
+    "@kbn/react-hooks"
   ],
   "exclude": [
     "target/**/*",

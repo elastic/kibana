@@ -32,7 +32,8 @@ async function sha256(str: string) {
 // as solving the problem described here https://github.com/elastic/kibana/issues/168131
 export async function getESQLAdHocDataview(
   query: string,
-  dataViewsService: DataViewsPublicPluginStart
+  dataViewsService: DataViewsPublicPluginStart,
+  allowNoIndex?: boolean
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -40,6 +41,7 @@ export async function getESQLAdHocDataview(
     title: indexPattern,
     type: ESQL_TYPE,
     id: await sha256(`esql-${indexPattern}`),
+    allowNoIndex,
   });
 
   dataView.timeFieldName = timeField;
