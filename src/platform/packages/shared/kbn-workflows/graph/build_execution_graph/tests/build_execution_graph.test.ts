@@ -682,6 +682,20 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as Partial<WorkflowYaml>;
 
+        it('should have correct edges', () => {
+          const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
+          const edges = executionGraph.edges();
+          expect(edges).toEqual(
+            expect.arrayContaining([
+              { v: 'outerForeachStep', w: 'innerForeachStep' },
+              { v: 'innerForeachStep', w: 'nestedConnectorStep' },
+              { v: 'nestedConnectorStep', w: 'exitForeach(innerForeachStep)' },
+              { v: 'exitForeach(innerForeachStep)', w: 'exitForeach(outerForeachStep)' },
+            ])
+          );
+          expect(edges).toHaveLength(4);
+        });
+
         it('should handle nested foreach steps correctly', () => {
           const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
           const topSort = graphlib.alg.topsort(executionGraph);
@@ -886,6 +900,31 @@ describe('convertToWorkflowGraph', () => {
         'exitThen(if_testForeachConnectorStep)',
         'exitCondition(if_testForeachConnectorStep)',
       ]);
+    });
+
+    it('should have correct edges', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual(
+        expect.arrayContaining([
+          { v: 'if_testForeachConnectorStep', w: 'enterThen(if_testForeachConnectorStep)' },
+          { v: 'enterThen(if_testForeachConnectorStep)', w: 'foreach_testForeachConnectorStep' },
+          { v: 'foreach_testForeachConnectorStep', w: 'testForeachConnectorStep' },
+          {
+            v: 'testForeachConnectorStep',
+            w: 'exitForeach(foreach_testForeachConnectorStep)',
+          },
+          {
+            v: 'exitForeach(foreach_testForeachConnectorStep)',
+            w: 'exitThen(if_testForeachConnectorStep)',
+          },
+          {
+            v: 'exitThen(if_testForeachConnectorStep)',
+            w: 'exitCondition(if_testForeachConnectorStep)',
+          },
+        ])
+      );
+      expect(edges).toHaveLength(6);
     });
   });
 
