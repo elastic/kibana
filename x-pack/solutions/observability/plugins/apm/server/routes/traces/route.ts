@@ -33,6 +33,7 @@ import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
+import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
@@ -218,6 +219,60 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
       traceItems: focusedTraceItems,
       summary: { ...traceSummaryCount, errors: unifiedTraceErrors.totalErrors },
     };
+  },
+});
+
+const unifiedTracesByIdErrorsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/unified_traces/{traceId}/errors',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: t.intersection([rangeRt, t.partial({ spanId: t.string, transactionId: t.string })]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (
+    resources
+  ): Promise<{
+    traceErrors: {};
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const logsClient = await createLogsClient(resources);
+
+    const { params } = resources;
+    const { traceId } = params.path;
+    const { start, end, spanId } = params.query;
+
+    const unifiedTraceErrors = await getUnifiedTraceErrors({
+      apmEventClient,
+      logsClient,
+      spanId,
+      traceId,
+      start,
+      end,
+    });
+
+    const normalizeApmErrors = (errors: UnifiedTraceErrors['apmErrors']) =>
+      errors.map(({ error, timestamp }) => ({
+        error: {
+          ...error,
+          exception: Array.isArray(error?.exception) ? error.exception[0] : error?.exception,
+        },
+        timestamp,
+      }));
+
+    const normalizeOtelErrors = (errors: UnifiedTraceErrors['unprocessedOtelErrors']) =>
+      errors.map(({ error }) => ({
+        error,
+        timestamp: null, // no timestamp available
+      }));
+
+    const traceErrors = [
+      ...normalizeApmErrors(unifiedTraceErrors.apmErrors),
+      ...normalizeOtelErrors(unifiedTraceErrors.unprocessedOtelErrors),
+    ];
+
+    return { traceErrors };
   },
 });
 
@@ -428,4 +483,5 @@ export const traceRouteRepository = {
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,
   ...unifiedTracesByIdSummaryRoute,
+  ...unifiedTracesByIdErrorsRoute,
 };

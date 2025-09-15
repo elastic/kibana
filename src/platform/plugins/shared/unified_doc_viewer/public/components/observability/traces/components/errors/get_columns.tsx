@@ -12,31 +12,39 @@ import { EuiText, EuiTextTruncate, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
-import { ERROR_GROUP_ID, TRACE_ID } from '@kbn/apm-types';
+import type { ErrorsByTraceId } from '@kbn/apm-types';
+import { TRACE_ID, SPAN_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
-export const getColumns = (
-  generateDiscoverLink: GenerateDiscoverLink
-): Array<EuiBasicTableColumn<ErrorGroupMainStatisticsResponse['errorGroups'][0]>> => [
+export const getColumns = ({
+  generateDiscoverLink,
+  traceId,
+  spanId,
+  transactionId,
+}: {
+  generateDiscoverLink: GenerateDiscoverLink;
+  traceId: string;
+  spanId?: string;
+  transactionId?: string;
+}): Array<EuiBasicTableColumn<ErrorsByTraceId['traceErrors'][0]>> => [
   {
     field: 'name',
     name: i18n.translate(
       'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.error',
       { defaultMessage: 'Error message and culprit' }
     ),
-    sortable: (item) => item.name || '',
+    sortable: (item) => item.error?.exception?.message || '',
     render: (_, item) => {
       const href = generateDiscoverLink({
-        [ERROR_GROUP_ID]: item.groupId,
-        [TRACE_ID]: item.traceId,
+        [TRACE_ID]: traceId,
+        ...(spanId && { [SPAN_ID]: spanId }),
       });
 
       const content = (
         <EuiTextTruncate
-          data-test-subj={`error-group-${item.groupId}`}
-          text={item.name || NOT_AVAILABLE_LABEL}
+          data-test-subj="error-exception-message"
+          text={item.error?.exception?.message || NOT_AVAILABLE_LABEL}
         />
       );
       return (
@@ -46,44 +54,22 @@ export const getColumns = (
           `}
         >
           {href ? (
-            <EuiLink data-test-subj={`error-group-link-${item.groupId}`} href={href}>
+            <EuiLink data-test-subj="error-group-link" href={href}>
               {content}
             </EuiLink>
           ) : (
             content
           )}
           <EuiText size="s" />
-          {item.culprit && (
-            <EuiText size="xs" color="subdued">
-              <EuiTextTruncate
-                data-test-subj={`error-culprit-${item.groupId}`}
-                text={item.culprit}
-              />
-            </EuiText>
-          )}
+
+          <EuiText size="xs" color="subdued">
+            <EuiTextTruncate
+              data-test-subj="error-culprit"
+              text={item.error.culprit || NOT_AVAILABLE_LABEL}
+            />
+          </EuiText>
         </span>
       );
     },
-  },
-  {
-    field: 'occurrences',
-    width: '20%',
-    name: i18n.translate(
-      'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.occurrences',
-      { defaultMessage: 'Occurrences' }
-    ),
-    sortable: (item) => item.occurrences || 0,
-    render: (_, item) =>
-      item.occurrences
-        ? i18n.translate(
-            'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.occurrences.value',
-            {
-              defaultMessage: `{occurrences} occ.`,
-              values: {
-                occurrences: item.occurrences,
-              },
-            }
-          )
-        : NOT_AVAILABLE_LABEL,
   },
 ];

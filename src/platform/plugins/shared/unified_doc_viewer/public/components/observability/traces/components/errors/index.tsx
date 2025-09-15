@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getColumns } from './get_columns';
-import { useFetchErrors } from './use_fetch_errors';
+import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
@@ -43,19 +43,23 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.errors });
 
-  const { loading, error, response } = useFetchErrors({
+  const { loading, error, response } = useFetchErrorsByTraceId({
     traceId,
     transactionId,
     spanId,
-    serviceName,
   });
 
-  const columns = useMemo(() => getColumns(generateDiscoverLink), [generateDiscoverLink]);
-  const openInDiscoverLink = useMemo(() => {
-    return generateDiscoverLink(createTraceContextWhereClause({ traceId }));
-  }, [generateDiscoverLink, traceId]);
+  const { columns, openInDiscoverLink } = useMemo(() => {
+    const cols = getColumns({ traceId, spanId, transactionId, generateDiscoverLink });
 
-  if (loading || (!error && response.errorGroups.length === 0)) {
+    const link = generateDiscoverLink(
+      createTraceContextWhereClause({ traceId, spanId, transactionId })
+    );
+
+    return { columns: cols, openInDiscoverLink: link };
+  }, [traceId, spanId, transactionId, generateDiscoverLink]);
+
+  if (loading || (!error && response.traceErrors.length === 0)) {
     return null;
   }
 
@@ -96,7 +100,7 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
           <EuiFlexItem>
             <EuiInMemoryTable
               responsiveBreakpoint={false}
-              items={response.errorGroups}
+              items={response.traceErrors}
               columns={columns}
               pagination={{ showPerPageOptions: false, pageSize: 5 }}
               sorting={sorting}

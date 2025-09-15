@@ -17,24 +17,21 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
+import type { ErrorsByTraceId } from '@kbn/apm-types';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
-const INITIAL_VALUE: ErrorGroupMainStatisticsResponse = {
-  errorGroups: [],
-  maxCountExceeded: false,
+const INITIAL_VALUE: ErrorsByTraceId = {
+  traceErrors: [],
 };
 
-export function useFetchErrors({
+export function useFetchErrorsByTraceId({
   traceId,
   transactionId,
   spanId,
-  serviceName,
 }: {
   traceId: string;
   transactionId?: string;
   spanId?: string;
-  serviceName?: string;
 }) {
   const { discoverShared, data } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
@@ -47,17 +44,18 @@ export function useFetchErrors({
         return null;
       }
 
-      return fetchErrors.fetchErrors(
+      return fetchErrors.fetchErrorsByTraceId(
         {
           traceId,
-          serviceName,
+          transactionId,
+          spanId,
           start: timeFilter.from,
           end: timeFilter.to,
         },
         signal
       );
     },
-    [fetchErrors, traceId, serviceName, timeFilter.from, timeFilter.to, transactionId, spanId]
+    [fetchErrors, traceId, spanId, timeFilter.from, timeFilter.to]
   );
 
   return { loading, error, response: value || INITIAL_VALUE };

@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-export interface ErrorGroupMainStatisticsResponse {
-  errorGroups: Array<{
-    groupId: string;
-    name: string;
-    lastSeen: number;
-    occurrences: number;
-    culprit: string | undefined;
-    handled: boolean | undefined;
-    type: string | undefined;
-    traceId: string | undefined;
-  }>;
-  maxCountExceeded: boolean;
+import type { TimestampUs } from '../es_schemas_raw';
+import type { Exception } from './es_schemas/raw/error_raw';
+
+export interface ErrorData {
+  exception: Exception;
+  grouping_key?: string;
+  culprit?: string;
+  id?: string;
+}
+
+export interface Errors {
+  error: ErrorData;
+  timestamp: TimestampUs | null;
+}
+
+export interface ErrorsByTraceId {
+  traceErrors: Errors[];
 }

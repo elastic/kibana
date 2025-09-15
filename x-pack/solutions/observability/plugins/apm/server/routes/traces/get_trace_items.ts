@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { last } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -135,11 +135,15 @@ const excludedLogLevels = ['debug', 'info', 'warning'];
 export async function getApmTraceError({
   apmEventClient,
   traceId,
+  transactionId,
+  spanId,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
   traceId: string;
+  transactionId?: string;
+  spanId?: string;
   start: number;
   end: number;
 }) {
@@ -156,7 +160,12 @@ export async function getApmTraceError({
     size: 1000,
     query: {
       bool: {
-        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
+        filter: [
+          ...termQuery(TRACE_ID, traceId),
+          ...termQuery(SPAN_ID, spanId),
+          ...termQuery(TRANSACTION_ID, transactionId),
+          ...rangeQuery(start, end),
+        ],
         must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
     },

@@ -7,43 +7,33 @@
 
 import type { APIReturnType } from './create_call_apm_api';
 import { callApmApi } from './create_call_apm_api';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import type { Environment } from '../../../common/environment_rt';
 
-type MainStatistics = APIReturnType<'GET /internal/apm/services/errors/groups/main_statistics'>;
+type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
 
-export const fetchErrors = (
+export const fetchErrorsByTraceId = (
   {
-    serviceName,
     traceId,
     transactionId,
     spanId,
     start,
     end,
-    environment,
   }: {
-    serviceName?: string;
-    traceId?: string;
+    traceId: string;
     transactionId?: string;
     spanId?: string;
     start: string;
     end: string;
-    environment?: Environment;
-    kuery?: string;
   },
   signal: AbortSignal
-): Promise<MainStatistics> =>
-  callApmApi('GET /internal/apm/services/errors/groups/main_statistics', {
+): Promise<ErrorsByTraceId> =>
+  callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
     params: {
+      path: { traceId },
       query: {
-        serviceName,
-        kuery: '',
-        start,
-        end,
-        traceId,
         transactionId,
         spanId,
-        environment: environment ?? ENVIRONMENT_ALL.value,
+        start,
+        end,
       },
     },
     signal,
