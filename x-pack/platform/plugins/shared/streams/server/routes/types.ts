@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AssetClient } from '../lib/streams/assets/asset_client';
 import type { AssetService } from '../lib/streams/assets/asset_service';
@@ -34,6 +35,7 @@ export interface RouteHandlerScopedClients {
   contentClient: ContentClient;
   queryClient: QueryClient;
   licensing: LicensingPluginStart;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface RouteDependencies {

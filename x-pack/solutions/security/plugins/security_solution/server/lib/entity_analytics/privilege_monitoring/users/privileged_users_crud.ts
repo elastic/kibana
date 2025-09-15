@@ -83,6 +83,7 @@ export const createPrivilegedUsersCrudService = ({
 
     // Create new user
     const doc = merge(user, {
+      '@timestamp': new Date().toISOString(),
       user: {
         is_privileged: true,
       },
