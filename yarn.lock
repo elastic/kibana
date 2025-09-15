@@ -2211,9 +2211,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-amsterdam@file:./eui_106.4.0_form_append_prepend_06.tgz", "@elastic/eui@file:./eui_106.4.0_form_append_prepend_06.tgz":
+"@elastic/eui-amsterdam@file:./eui_106.4.0_vr_append_prepend_01.tgz", "@elastic/eui@file:./eui_106.4.0_vr_append_prepend_01.tgz":
   version "106.4.0"
-  resolved "file:./eui_106.4.0_form_append_prepend_06.tgz#3075826a4e7748aa5faf53ca27dc9514e246ebc1"
+  resolved "file:./eui_106.4.0_vr_append_prepend_01.tgz#c4e9888a4f8e993592f71192e32626d20c628c0e"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -2250,13 +2250,13 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.2_form_append_prepend_01.tgz":
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.2_vr_append_prepend_01.tgz":
   version "3.3.2"
-  resolved "file:./eui_theme_borealis_3.3.2_form_append_prepend_01.tgz#e4fe317283043e1e721fc9e29ec00cfbd32ccb16"
+  resolved "file:./eui_theme_borealis_3.3.2_vr_append_prepend_01.tgz#e4fe317283043e1e721fc9e29ec00cfbd32ccb16"
 
-"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_form_append_prepend_01.tgz":
+"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_vr_append_prepend_01.tgz":
   version "4.0.0"
-  resolved "file:./eui_theme_common_4.0.0_form_append_prepend_01.tgz#b979d193738fdee265b215b930feb8c70e7ca859"
+  resolved "file:./eui_theme_common_4.0.0_vr_append_prepend_01.tgz#b979d193738fdee265b215b930feb8c70e7ca859"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
