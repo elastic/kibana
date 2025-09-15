@@ -337,13 +337,17 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
+
+    console.log('AlertsTable', { alertsData });
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
@@ -436,6 +440,23 @@ const AlertsTableContent = typedForwardRef(
       },
       [id, visibleColumns]
     );
+
+    // allow to reset to previous set in case of sorting error
+    const handleResetToPreviousState = useCallback(() => {
+      const fieldName = queryParams.sort.find((sortField) =>
+        alertsError?.message?.includes(Object.keys(sortField)[0])
+      );
+
+      if (fieldName) {
+        const newSort = queryParams.sort.filter((sortField) => !deepEqual(sortField, fieldName));
+        storageAlertsTable.current = {
+          ...storageAlertsTable.current,
+          sort: newSort,
+        };
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(newSort);
+      }
+    }, [alertsError, setSort, storageRef, queryParams, id]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -627,6 +648,8 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError as Error}
+              onResetToPreviousState={handleResetToPreviousState}
             />
           </InspectButtonContainer>
         )}

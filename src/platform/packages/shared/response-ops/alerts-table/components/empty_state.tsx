@@ -9,7 +9,16 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiTitle,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
 import { css } from '@emotion/react';
@@ -26,7 +35,7 @@ const heights = {
 const panelStyle = {
   maxWidth: 500,
 };
-type EmptyState = NonNullable<AlertsTableProps['emptyState']>;
+type EmptyState = NonNullable<AlertsTableProps['emptyState' | 'errorState']>;
 type EmptyStateMessage = Pick<EmptyState, 'messageTitle' | 'messageBody'>;
 
 export const EmptyState: React.FC<
@@ -36,6 +45,8 @@ export const EmptyState: React.FC<
     additionalToolbarControls?: ReactNode;
     alertsQuerySnapshot?: EsQuerySnapshot;
     showInspectButton?: boolean;
+    error?: Error;
+    onResetToPreviousState?: () => void;
   } & EmptyStateMessage
 > = ({
   height = 'tall',
@@ -45,7 +56,59 @@ export const EmptyState: React.FC<
   additionalToolbarControls,
   alertsQuerySnapshot,
   showInspectButton,
+  error,
+  onResetToPreviousState,
 }) => {
+  const renderErrorState = () => (
+    <EuiFlexItem>
+      <EuiText color="danger">{error?.message}</EuiText>
+      <EuiSpacer size="m" />
+
+      {onResetToPreviousState ? (
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={onResetToPreviousState} size="m">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.empty.resetButton"
+                defaultMessage={'Go back'}
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        ''
+      )}
+    </EuiFlexItem>
+  );
+
+  const renderEmptyState = () => (
+    <EuiFlexItem>
+      <EuiText size="s">
+        <EuiTitle>
+          <h3>
+            {messageTitle ? (
+              messageTitle
+            ) : (
+              <FormattedMessage
+                id="xpack.triggersActionsUI.empty.title"
+                defaultMessage={'No results match your search criteria'}
+              />
+            )}
+          </h3>
+        </EuiTitle>
+        <p>
+          {messageBody ? (
+            messageBody
+          ) : (
+            <FormattedMessage
+              id="xpack.triggersActionsUI.empty.description"
+              defaultMessage={'Try searching over a longer period of time or modifying your search'}
+            />
+          )}
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  );
   return (
     <EuiPanel color={variant} data-test-subj="alertsTableEmptyState">
       <EuiFlexGroup
@@ -80,34 +143,7 @@ export const EmptyState: React.FC<
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={variant === 'subdued'} css={panelStyle} hasShadow={false}>
                 <EuiFlexGroup alignItems={variant === 'transparent' ? 'center' : 'flexStart'}>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <EuiTitle>
-                        <h3>
-                          {messageTitle ? (
-                            messageTitle
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.triggersActionsUI.empty.title"
-                              defaultMessage={'No results match your search criteria'}
-                            />
-                          )}
-                        </h3>
-                      </EuiTitle>
-                      <p>
-                        {messageBody ? (
-                          messageBody
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.empty.description"
-                            defaultMessage={
-                              'Try searching over a longer period of time or modifying your search'
-                            }
-                          />
-                        )}
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
+                  {error ? renderErrorState() : renderEmptyState()}
                   <EuiFlexItem grow={false}>
                     <EuiImage css={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
                   </EuiFlexItem>

@@ -15,6 +15,7 @@ import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { createKbnFieldTypes } from '@kbn/field-types/src/kbn_field_types_factory';
 import type { AlertsTablePersistedConfiguration } from '../components/alerts_table';
 import { toggleColumn } from './toggle_column';
 
@@ -47,6 +48,8 @@ export interface UseColumnsResp {
   }>;
 }
 
+const registeredKbnTypes = createKbnFieldTypes();
+
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   if (fieldType === 'date') return 'datetime';
   if (fieldType === 'number') return 'numeric';
@@ -78,8 +81,12 @@ const euiColumnFactory = (
   const column = defaultColumn ? defaultColumn : { id: columnId };
 
   const browserFieldsProps = getBrowserFieldProps(columnId, browserFields);
+
+  const sortingData = registeredKbnTypes.find((t) => t.name === browserFieldsProps?.type);
+  console.log('euiColumnFactory', { columnId, browserFieldsProps, sortingData });
   return {
     ...column,
+    isSortable: (sortingData?.sortable && browserFieldsProps?.aggregatable) ?? false,
     schema: fieldTypeToDataGridColumnTypeMapper(browserFieldsProps.type),
   };
 };
@@ -121,7 +128,7 @@ const populateColumns = (
   defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn[] => {
   return columns.map((column: EuiDataGridColumn) => {
-    return isPopulatedColumn(column)
+    return isPopulatedColumn(column) && column.isSortable !== undefined
       ? column
       : euiColumnFactory(column.id, browserFields, defaultColumns);
   });

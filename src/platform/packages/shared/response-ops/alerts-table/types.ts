@@ -141,6 +141,29 @@ export interface CasesService {
   };
 }
 
+interface AlertsTableEmptyState {
+  /**
+   * The message title for the empty state prompt
+   */
+  messageTitle?: string;
+  /**
+   * The message body for the empty state prompt
+   */
+  messageBody?: string;
+  /**
+   * The height variant for the empty state prompt
+   */
+  height?: 'tall' | 'short' | 'flex';
+  /**
+   * The style variant for the empty state prompt.
+   *
+   * `subdued` shows a subtle background color and with a distinct centered panel.
+   * `transparent` shows a transparent background and a less prominent center panel.
+   * @default `subdued`
+   */
+  variant?: 'subdued' | 'transparent';
+}
+
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   ? (args: Props & AP) => ReactNode
   : T extends ComponentClass<infer Props>
@@ -226,27 +249,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   dynamicRowHeight?: boolean;
 
-  emptyState?: {
-    /**
-     * The message title for the empty state prompt
-     */
-    messageTitle?: string;
-    /**
-     * The message body for the empty state prompt
-     */
-    messageBody?: string;
-    /**
-     * The height variant for the empty state prompt
-     */
-    height?: 'tall' | 'short' | 'flex';
-    /**
-     * The style variant for the empty state prompt.
-     *
-     * `subdued` shows a subtle background color and with a distinct centered panel.
-     * `transparent` shows a transparent background and a less prominent center panel.
-     * @default `subdued`
-     */
-    variant?: 'subdued' | 'transparent';
+  emptyState?: AlertsTableEmptyState;
+
+  errorState?: AlertsTableEmptyState & {
+    onResetToPreviousState?: () => void;
   };
   /**
    * If true, the links in default cells, flyout and row actions will open in a new tab

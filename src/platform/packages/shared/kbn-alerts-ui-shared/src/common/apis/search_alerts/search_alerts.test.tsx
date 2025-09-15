@@ -279,10 +279,9 @@ describe('searchAlerts', () => {
         ...expectedResponse,
         alerts: [],
         total: 0,
+        error: 'simulated search error',
       })
     );
-
-    expect(mockDataPlugin.search.showError).toHaveBeenCalled();
   });
 
   it("doesn't return while the response is still running", async () => {
