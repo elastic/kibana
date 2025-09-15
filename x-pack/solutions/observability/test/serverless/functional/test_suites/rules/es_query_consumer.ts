@@ -93,7 +93,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('both logs and infrastructure privileges', () => {
       const uuid = ` ${uuidv4()}`;
       const ruleName = `ES Query rule${uuid}`;
-      it('logs in with privileged role', async () => {
+
+      before(async () => {
         await svlCommonPage.loginWithPrivilegedRole();
       });
 
@@ -113,10 +114,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('only logs privileges', () => {
       const uuid = ` ${uuidv4()}`;
       const ruleName = `ES Query rule${uuid}`;
-      it('logs in with logs only role', async () => {
-        await samlAuth.setCustomRole(ROLES.logs_only);
 
+      before(async () => {
+        await samlAuth.setCustomRole(ROLES.logs_only);
         await svlCommonPage.loginWithCustomRole();
+      });
+
+      after(async () => {
+        await samlAuth.deleteCustomRole();
       });
 
       createESQueryRule({ ruleName });
@@ -136,10 +141,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const uuid = ` ${uuidv4()}`;
       const ruleName = `ES Query rule${uuid}`;
 
-      it('logs in with infra only role', async () => {
+      before(async () => {
         await samlAuth.setCustomRole(ROLES.infra_only);
-
         await svlCommonPage.loginWithCustomRole();
+      });
+
+      after(async () => {
+        await samlAuth.deleteCustomRole();
       });
 
       createESQueryRule({ ruleName });
