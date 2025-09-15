@@ -10,8 +10,11 @@
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { getKqlFieldNamesFromExpression, isOfAggregateQueryType } from '@kbn/es-query';
-import { getIsKqlFreeTextExpression } from '@kbn/es-query/src/kuery/utils/get_is_kql_free_text'; // temporary import, until import from '@kbn/es-query' is fixed (issue #234892)
+import {
+  getKqlFieldNamesFromExpression,
+  isOfAggregateQueryType,
+  getIsKqlFreeTextExpression,
+} from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
