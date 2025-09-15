@@ -92,6 +92,7 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const {
     services: {
       http,
@@ -600,7 +601,11 @@ export const SharedLists = React.memo(() => {
                   <EuiFlexItem key={excList.list_id}>
                     <ExceptionsListCard
                       data-test-subj="exceptionsListCard"
-                      readOnly={isReadOnly}
+                      readOnly={
+                        excList.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                          ? !canWriteEndpointExceptions
+                          : isReadOnly
+                      }
                       exceptionsList={excList}
                       handleDelete={handleDelete}
                       handleExport={handleExport}
