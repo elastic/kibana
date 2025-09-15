@@ -9,10 +9,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-import { useEventsDataView } from './use_events_data_view';
+import { useCaseEventsDataView } from './use_events_data_view';
 
 const render = () =>
-  renderHook((indexPattern: string = 'test') => useEventsDataView(indexPattern), {
+  renderHook((indexPattern: string = 'test') => useCaseEventsDataView(indexPattern), {
     wrapper: TestProviders,
   });
 

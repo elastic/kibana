@@ -13,8 +13,6 @@ import { CaseViewTabs } from '../case_view_tabs';
 import type { CaseViewProps } from '../types';
 
 import { AttachmentType, type EventAttachment } from '../../../../common/types/domain';
-import { useGetEvents } from '../../../containers/use_get_events';
-import { useEventsDataView } from '../../events/use_events_data_view';
 
 interface CaseViewEventsProps {
   caseData: CaseUI;
@@ -27,34 +25,20 @@ export const CaseViewEvents = ({
 }: CaseViewEventsProps) => {
   const events = useMemo(
     () =>
-      caseData.comments.filter(
-        (comment) => comment.type === AttachmentType.event
-      ) as unknown as EventAttachment[],
+      caseData.comments
+        .filter((comment) => comment.type === AttachmentType.event)
+        .map((attachment) => {
+          const eventAttachment = attachment as unknown as EventAttachment;
+
+          return {
+            eventId: eventAttachment.id,
+            index: eventAttachment.index,
+          };
+        }),
     [caseData.comments]
   );
 
-  const indexPattern = useMemo(() => events.map((event) => event.index).join(','), [events]);
-
-  const { dataView: eventsDataView } = useEventsDataView(indexPattern);
-
-  const eventsParameters = useMemo(() => {
-    return {
-      caseId: caseData.id,
-      columns: ['*'],
-      eventIds: events.flatMap((event) => event.eventId),
-    };
-  }, [caseData.id, events]);
-
-  const eventsResponse = useGetEvents(eventsDataView, eventsParameters);
-
-  if (!eventsDataView) {
-    return null;
-  }
-
-  if (!eventsResponse.data) {
-    return null;
-  }
-
+  // TODO: skip entire tab if events table is not there
   if (!EventsTable) {
     return null;
   }
@@ -62,7 +46,7 @@ export const CaseViewEvents = ({
   return (
     <EuiFlexItem data-test-subj="case-view-events">
       <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />
-      <EventsTable data={eventsResponse.data} dataView={eventsDataView} />
+      <EventsTable events={events} />
     </EuiFlexItem>
   );
 };

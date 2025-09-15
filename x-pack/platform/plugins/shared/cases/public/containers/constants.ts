@@ -27,8 +27,6 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.caseView(), id, 'similar', params] as const,
   caseView: () => [...casesQueriesKeys.all, 'case'] as const,
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
-  caseEvents: (id: string, params: unknown) =>
-    [...casesQueriesKeys.case(id), 'events', params] as const,
   caseFiles: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), 'files', params] as const,
   caseFileStats: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,

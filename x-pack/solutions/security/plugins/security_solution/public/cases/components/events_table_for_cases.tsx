@@ -6,7 +6,10 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridPaginationProps,
+} from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
@@ -31,6 +34,8 @@ import { getDefaultControlColumn } from '../../timelines/components/timeline/bod
 import { defaultRowRenderers } from '../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import type { State } from '../../common/store/types';
+import { useGetEvents } from './use_get_events';
+import { useCaseEventsDataView } from './use_events_data_view';
 
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
 
@@ -45,8 +50,11 @@ const defaultModel: SubsetDataTableModel = structuredClone(tableDefaults);
 export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
   const dispatch = useDispatch();
 
+  const events = useGetEvents();
+  const dataView = useCaseEventsDataView();
+
   const browserFields = useMemo(() => {
-    return buildBrowserFields(props.dataView.fields).browserFields;
+    return buildBrowserFields(dataView.fields).browserFields;
   }, [props.dataView.fields]);
 
   const data = useMemo((): TimelineItem[] => {
@@ -83,28 +91,32 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
   );
 
   useEffect(() => {
+    props.onChangeSorting(sort);
+  }, [props, sort]);
+
+  useEffect(() => {
     dispatch(
       dataTableActions.createDataTable({
-        indexNames: props.dataView.getIndexPattern().split(','),
+        indexNames: dataView.getIndexPattern().split(','),
         columns,
         defaultColumns,
         sort,
         id: EVENTS_TABLE_FOR_CASES_ID,
       })
     );
-  }, [columns, defaultColumns, dispatch, props.dataView, sort]);
+  }, [columns, defaultColumns, dispatch, dataView, sort]);
 
   const theme: EuiTheme = useContext(ThemeContext);
 
-  const pagination = useMemo(
+  const pagination: EuiDataGridPaginationProps & { pageSize: number } = useMemo(
     () => ({
       pageIndex: 0,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
-      onChangeItemsPerPage: noop,
-      onChangePage: noop,
+      onChangeItemsPerPage: (perPage) => props.onChangePagination({ perPage, pageIndex: 0 }),
+      onChangePage: (pageIndex) => props.onChangePagination({ perPage: itemsPerPage, pageIndex }),
     }),
-    [itemsPerPage, itemsPerPageOptions]
+    [itemsPerPage, itemsPerPageOptions, props]
   );
 
   const leadingControlColumns = useMemo(
@@ -166,9 +178,9 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
     <DataTableComponent
       browserFields={browserFields}
       data={data}
-      getFieldSpec={(fieldName: string) => props.dataView.fields.getByName(fieldName)?.toSpec()}
+      getFieldSpec={(fieldName: string) => dataView.fields.getByName(fieldName)?.toSpec()}
       id={EVENTS_TABLE_FOR_CASES_ID}
-      totalItems={props.data.length}
+      totalItems={data.length}
       unitCountText="events"
       cellActionsTriggerId={SecurityCellActionsTrigger.CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}

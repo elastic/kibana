@@ -9,7 +9,6 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -367,6 +366,5 @@ export type CaseViewAlertsTableProps = Pick<
 };
 
 export interface CaseViewEventsTableProps {
-  dataView: DataView;
-  data: DataTableRecord[];
+  events: { eventId: string; index: string | string[] }[];
 }

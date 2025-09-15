@@ -8,7 +8,6 @@
 import { useEffect, useReducer } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana, useToasts } from '../../common/lib/kibana';
-import { DATA_VIEW_ERROR } from './translations';
 
 interface UseEventsDataViewReturnValue {
   status: 'loading' | 'error' | 'ready';
@@ -31,7 +30,7 @@ const reducer = (state: UseEventsDataViewReturnValue, action: DataView | unknown
   return state;
 };
 
-export const useEventsDataView = (indexPattern: string): UseEventsDataViewReturnValue => {
+export const useCaseEventsDataView = (indexPattern: string): UseEventsDataViewReturnValue => {
   const { services } = useKibana();
   const toasts = useToasts();
 
