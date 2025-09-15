@@ -60,24 +60,14 @@ export function createESQLQuery({
       : (query) => query,
     instrument === 'counter'
       ? stats(
-          `SUM(RATE(??metricField)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${
+          `SUM(RATE(\`${metricField}\`)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${
             dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
-          }`,
-          {
-            metricField,
-            _tstart: timeRange?.from ?? 'NOW() - 15 minute',
-            _tend: timeRange?.to ?? 'NOW()',
-          }
+          }`
         )
       : stats(
-          `AVG(??metricField) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend) ${
+          `AVG(\`${metricField}\`) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend) ${
             dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
-          }`,
-          {
-            metricField,
-            _tstart: timeRange?.from ?? 'NOW() - 15 minute',
-            _tend: timeRange?.to ?? 'NOW()',
-          }
+          }`
         ),
     ...(dimensions.length > 0
       ? dimensions.length === 1

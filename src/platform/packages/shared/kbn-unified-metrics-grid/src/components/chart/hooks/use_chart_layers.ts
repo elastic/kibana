@@ -40,6 +40,7 @@ export const useChartLayers = ({
         esqlQuery: query,
         search: services.data.search.search,
         signal: abortController?.signal,
+        timeRange,
       }),
 
     [query, services.data.search.search, timeRange]
