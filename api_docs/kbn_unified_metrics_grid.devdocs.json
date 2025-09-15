@@ -17,7 +17,7 @@
           "MetricField",
           "[]; total: number; page: number; }>; postData: (params: { esql: string; filters: { value: string; field: string; }[]; from: string; to: string; }, signal?: AbortSignal | null | undefined) => Promise<{ data: { key: Record<string, string>; data: { x: number; y: number; }[]; }[] | { x: number; y: ",
           "FieldValue",
-          "; }[]; esql: string; hasDimensions: boolean; }>; } | undefined; } & React.RefAttributes<{}>>"
+          "; }[]; esql: string; hasDimensions: boolean; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/lazy_unified_metrics_experience_grid.tsx",
         "deprecated": false,
