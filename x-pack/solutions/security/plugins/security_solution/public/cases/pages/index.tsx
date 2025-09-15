@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type {
   CaseViewAlertsTableProps,
@@ -13,16 +13,7 @@ import type {
 } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import {
-  dataTableActions,
-  DataTableComponent,
-  defaultColumnHeaderType,
-  TableId,
-} from '@kbn/securitysolution-data-table';
-import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
-import type { DeprecatedRowRenderer, TimelineItem } from '@kbn/timelines-plugin/common';
-import { EcsFlat } from '@elastic/ecs';
-import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { IOCPanelKey } from '../../flyout/ai_for_soc/constants/panel_keys';
 import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
@@ -48,79 +39,7 @@ import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
-import { defaultRowRenderers } from '../../timelines/components/timeline/body/renderers';
-import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { buildBrowserFields } from '../../data_view_manager/utils/security_browser_fields_manager';
-import { SecurityCellActionsTrigger } from '../../app/actions/constants';
-import { getDefaultControlColumn } from '../../timelines/components/timeline/body/control_columns';
-
-const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
-
-const MAX_ACTION_BUTTON_COUNT = 6;
-
-const EventsTableForCases = (props: CaseViewEventsTableProps) => {
-  const dispatch = useDispatch();
-
-  const browserFields = useMemo(() => {
-    return buildBrowserFields(props.dataView.fields).browserFields;
-  }, [props.dataView.fields]);
-
-  const data = useMemo((): TimelineItem[] => {
-    return props.data.map((row) => ({
-      _id: row.id,
-      // TODO: is there a better way of obtaining this in this context?
-      ecs: EcsFlat as unknown as EcsSecurityExtension,
-      data: [
-        ...Object.entries(row.raw.fields ?? {}).map(([field, value]) => ({ field, value })),
-        { field: '_id', value: [row.id] },
-      ],
-    }));
-  }, [props.data]);
-
-  useEffect(() => {
-    dispatch(
-      dataTableActions.createDataTable({
-        indexNames: props.dataView.getIndexPattern().split(','),
-        columns: [{ id: '_id', columnHeaderType: defaultColumnHeaderType }],
-        defaultColumns: [],
-        sort: [],
-        id: EVENTS_TABLE_FOR_CASES_ID,
-      })
-    );
-  }, [dispatch, props.dataView]);
-
-  const leadingControlColumns = useMemo(
-    () =>
-      getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT).map((column) => ({
-        ...column,
-        headerCellRender: () => null,
-        rowCellRender: () => null,
-      })),
-    []
-  );
-
-  return (
-    <DataTableComponent
-      browserFields={browserFields}
-      data={data}
-      getFieldSpec={(fieldName: string) => props.dataView.fields.getByName(fieldName)?.toSpec()}
-      id={EVENTS_TABLE_FOR_CASES_ID}
-      totalItems={props.data.length}
-      unitCountText="events"
-      cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-      leadingControlColumns={leadingControlColumns}
-      loadPage={() => {}}
-      pagination={{
-        pageIndex: 0,
-        pageSize: 10,
-        onChangeItemsPerPage: () => {},
-        onChangePage: () => {},
-      }}
-      renderCellValue={DefaultCellRenderer}
-      rowRenderers={defaultRowRenderers as unknown as DeprecatedRowRenderer[]}
-    />
-  );
-};
+import { EventsTableForCases } from '../components/events_table_for_cases';
 
 const CaseContainerComponent: React.FC = () => {
   const {
