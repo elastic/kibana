@@ -47,6 +47,7 @@ export const ChartSectionTemplate = ({
         <EuiFlexGroup
           direction="row"
           gutterSize="s"
+          responsive={false}
           alignItems="center"
           justifyContent="spaceBetween"
         >
@@ -60,7 +61,7 @@ export const ChartSectionTemplate = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           {rightSide.length > 0 && (
-            <EuiFlexItem wrap grow={false}>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 direction="row"
                 responsive={false}
