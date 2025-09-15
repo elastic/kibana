@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, otelLog, timerange, generateLongId } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
-  const es = getService('es');
 
   const start = new Date('2025-09-15T00:00:00.000Z').getTime();
   const end = new Date('2025-09-15T00:15:00.000Z').getTime() - 1;
@@ -45,7 +44,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     }
 
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let logsSynthtraceEsClient: LogsSynthtraceEsClient;
     before(async () => {
+      logsSynthtraceEsClient = await synthtrace.createLogsSynthtraceEsClient();
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
     });
 
@@ -105,7 +106,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await apmSynthtraceEsClient.index(Readable.from(unserialized));
       });
 
-      // after(() => apmSynthtraceEsClient.clean());
+      after(async () => await apmSynthtraceEsClient.clean());
 
       it('returns APM errors for the trace', async () => {
         const response = await fetchUnifiedTraceErrors({ traceId });
@@ -127,9 +128,66 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(response.body.source).to.be('apm');
       });
     });
-    // TODO
-    // describe('when unprocessed OTEL errors exist', () => {
-    //
-    // });
+
+    describe('when unprocessed OTEL errors exist', () => {
+      let traceId: string;
+      let spanId: string;
+      let transactionId: string;
+
+      before(async () => {
+        traceId = 'trace123';
+        spanId = 'span123';
+        transactionId = 'transaction123';
+
+        const otelErrorLogs = timerange(start, end)
+          .interval('15m')
+          .rate(1)
+          .generator((timestamp) => {
+            return otelLog
+              .create()
+              .message('Deadline Exceeded')
+              .logLevel('error')
+              .timestamp(timestamp)
+              .defaults({
+                span_id: spanId,
+                trace_id: traceId,
+                resource: {
+                  attributes: {
+                    'service.name': 'otel-service',
+                    'service.version': '1.0.0',
+                    'service.environment': 'production',
+                    'telemetry.sdk.language': 'java',
+                    'span.id': spanId,
+                  },
+                },
+                attributes: {
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                  'span.id': spanId,
+                  'transaction.id': transactionId,
+                  'event.name': 'exception',
+                  'exception.type': 'grpc._channel._MultiThreadedRendezvous',
+                  'exception.message': 'Deadline Exceeded',
+                },
+              });
+          });
+
+        await logsSynthtraceEsClient.index(otelErrorLogs);
+      });
+
+      after(async () => await logsSynthtraceEsClient.clean());
+
+      it('returns unprocessed OTEL errors for the trace', async () => {
+        const response = await fetchUnifiedTraceErrors({ traceId, spanId });
+
+        expect(response.status).to.be(200);
+        expect(response.body.traceErrors).to.have.length(1);
+        expect(response.body.source).to.be('unprocessedOtel');
+        expect(response.body.traceErrors[0].error.exception?.message).to.be('Deadline Exceeded');
+        expect(response.body.traceErrors[0].error.exception?.type).to.be(
+          'grpc._channel._MultiThreadedRendezvous'
+        );
+        expect(response.body.source).to.be('unprocessedOtel');
+      });
+    });
   });
 }
