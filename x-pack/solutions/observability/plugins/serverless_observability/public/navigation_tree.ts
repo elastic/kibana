@@ -355,7 +355,11 @@ export const createNavigationTree = ({
             icon: 'info',
             children: [
               {
-                title: 'Ingest and integrations',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestAndIntegrations', {
+                  defaultMessage: 'Ingest and integrations',
+                  description:
+                    'The title of the ingest and integrations navigation item in the serverless observability nav tree.',
+                }),
                 children: [
                   { link: 'integrations' },
                   { link: 'fleet' },
@@ -365,7 +369,12 @@ export const createNavigationTree = ({
                 ],
               },
               {
-                title: 'Indices, data streams, and roll ups',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.indicesDataStreamsAndRollups',
+                  {
+                    defaultMessage: 'Indices, data streams, and roll ups',
+                  }
+                ),
                 children: [
                   { link: 'management:index_management' },
                   { link: 'management:index_lifecycle_management' },
