@@ -32,7 +32,7 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     name: 'Test Agent',
     description: 'My test agent',
     configuration: {
-      tools: [{ tool_ids: [] }],
+      tools: [],
     },
     ...parts,
   };

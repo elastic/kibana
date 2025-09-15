@@ -268,11 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
         const configUpdates = {
           configuration: {
             instructions: 'Updated instructions for the agent',
-            tools: [
-              {
-                tool_ids: [],
-              },
-            ],
+            tools: [],
           },
         };
 
