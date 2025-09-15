@@ -7,13 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import {
-  EuiSkeletonLoading,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
@@ -28,6 +22,7 @@ import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
+import { PageTitle } from '../../common/components/page_title';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -116,14 +111,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage
-          title={
-            <EuiTitle data-test-subj="siemMigrationsPageTitle" size="l">
-              <h1>{i18n.PAGE_TITLE}</h1>
-            </EuiTitle>
-          }
-          border
-        >
+        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} isBeta={true} />} border>
           <HeaderButtons
             migrationsStats={dashboardMigrationsStats}
             selectedMigrationId={migrationId}
