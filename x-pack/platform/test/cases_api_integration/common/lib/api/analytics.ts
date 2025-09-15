@@ -44,8 +44,7 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
       taskId: getCAICasesBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_CASES_SOURCE_INDEX,
       destIndex: getCasesDestinationIndexName('default', 'securitySolution'),
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -66,8 +65,7 @@ export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => 
       taskId: getCAIAttachmentsBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
       destIndex: getAttachmentsDestinationIndexName('default', 'securitySolution'),
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -96,8 +94,7 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
       taskId: getCAICommentsBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
       destIndex: getCommentsDestinationIndexName('default', 'securitySolution'),
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -118,8 +115,7 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
       taskId: getCAIActivityBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
       destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
