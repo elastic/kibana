@@ -8,14 +8,11 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { i18n } from '@kbn/i18n';
+import type { EsqlToolFieldTypes } from '@kbn/onechat-common/tools';
 import { EsqlToolFieldType, ToolType } from '@kbn/onechat-common/tools';
-import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
-import { get } from 'lodash';
-import { useCallback } from 'react';
-import type { Resolver } from 'react-hook-form';
-import type { EsqlToolFormData } from '../types/tool_form_types';
 import { sharedValidationSchemas } from './shared_tool_validation';
+import { EsqlParamSource } from '../types/tool_form_types';
 
 const esqlI18nMessages = {
   // Specific errors will be provided by the ES|QL editor
@@ -55,40 +52,6 @@ const esqlI18nMessages = {
   },
 };
 
-export const useEsqlToolFormValidationResolver = (): Resolver<EsqlToolFormData> => {
-  return useCallback(async (data) => {
-    try {
-      const values = await esqlFormValidationSchema.parseAsync(data);
-      return {
-        values,
-        errors: {},
-      };
-    } catch (error: unknown) {
-      if (!(error instanceof z.ZodError)) {
-        throw error;
-      }
-      const errors = error.issues.reduce<Record<string, { type: string; message: string }>>(
-        (errorMap, issue) => {
-          const path = issue.path.join('.');
-          if (!get(errorMap, path)) {
-            set(errorMap, path, {
-              type: issue.code,
-              message: issue.message,
-            });
-          }
-          return errorMap;
-        },
-        {}
-      );
-
-      return {
-        values: {},
-        errors,
-      };
-    }
-  }, []);
-};
-
 export const esqlFormValidationSchema = z
   .object({
     // Use shared validation schemas for common fields
@@ -119,7 +82,10 @@ export const esqlFormValidationSchema = z
           description: z
             .string()
             .min(1, { message: esqlI18nMessages.params.descriptionRequiredError }),
-          type: z.nativeEnum(EsqlToolFieldType),
+          type: z.custom<EsqlToolFieldTypes>((data) =>
+            Object.values(EsqlToolFieldType).includes(data)
+          ),
+          source: z.nativeEnum(EsqlParamSource),
         })
       )
       .superRefine((params, ctx) => {
