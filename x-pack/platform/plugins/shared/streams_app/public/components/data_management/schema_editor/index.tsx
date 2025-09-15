@@ -19,7 +19,6 @@ export function SchemaEditor({
   defaultColumns = SUPPORTED_TABLE_COLUMN_NAMES,
   fields,
   isLoading,
-  onFieldUnmap,
   onFieldUpdate,
   onRefreshData,
   stream,
@@ -34,7 +33,6 @@ export function SchemaEditor({
     <SchemaEditorContextProvider
       fields={fields}
       isLoading={isLoading}
-      onFieldUnmap={onFieldUnmap}
       onFieldUpdate={onFieldUpdate}
       stream={stream}
       withControls={withControls}

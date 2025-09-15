@@ -16,6 +16,7 @@ import { SchemaEditor } from '../schema_editor';
 import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
@@ -26,7 +27,7 @@ const wiredDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES;
 const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
-  const { core } = useKibana();
+  const context = useKibana();
   const { loading } = useStreamDetail();
 
   const {
@@ -34,7 +35,6 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     storedFields,
     isLoadingFields,
     refreshFields,
-    unmapField,
     updateField,
     pendingChangesCount,
     discardChanges,
@@ -49,15 +49,18 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   });
 
   const openConfirmationModal = () => {
-    const overlay = core.overlays.openModal(
+    const overlay = context.core.overlays.openModal(
       toMountPoint(
-        <SchemaChangesReviewModal
-          fields={fields}
-          storedFields={storedFields}
-          submitChanges={submitChanges}
-          onClose={() => overlay.close()}
-        />,
-        core
+        <StreamsAppContextProvider context={context}>
+          <SchemaChangesReviewModal
+            fields={fields}
+            stream={definition.stream.name}
+            storedFields={storedFields}
+            submitChanges={submitChanges}
+            onClose={() => overlay.close()}
+          />
+        </StreamsAppContextProvider>,
+        context.core
       ),
       {
         maxWidth: 500,
@@ -77,7 +80,6 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
               : classicDefaultColumns
           }
           stream={definition.stream}
-          onFieldUnmap={unmapField}
           onFieldUpdate={updateField}
           onRefreshData={refreshFields}
           withControls

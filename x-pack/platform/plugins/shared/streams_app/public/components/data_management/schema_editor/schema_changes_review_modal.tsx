@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -25,11 +25,16 @@ import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { SchemaField } from './types';
+import { useAbortController } from '@kbn/react-hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { MappedSchemaField, SchemaField } from './types';
 import { FIELD_TYPE_MAP } from './constants';
+import { convertToFieldDefinitionConfig } from './utils';
 
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
+  stream: string;
   fields: SchemaField[];
   storedFields: SchemaField[];
   submitChanges: () => Promise<void>;
@@ -37,28 +42,76 @@ interface SchemaChangesReviewModalProps {
 
 export function SchemaChangesReviewModal({
   fields,
+  stream,
   storedFields,
   submitChanges,
   onClose,
 }: SchemaChangesReviewModalProps) {
-  const addedFields = fields.filter(
-    (field) => !storedFields.some((stored) => stored.name === field.name)
-  );
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const { signal } = useAbortController();
 
-  const changedFields = fields.filter((field) => {
-    const stored = storedFields.find((storedField) => storedField.name === field.name);
-    return stored && !isEqual(stored, field);
-  });
+  const changes = React.useMemo(() => {
+    const addedFields = fields.filter(
+      (field) => !storedFields.some((stored) => stored.name === field.name)
+    );
 
-  const changes = [...addedFields, ...changedFields];
+    const changedFields = fields.filter((field) => {
+      const stored = storedFields.find((storedField) => storedField.name === field.name);
+      return stored && !isEqual(stored, field);
+    });
+
+    return [...addedFields, ...changedFields];
+  }, [fields, storedFields]);
 
   const [{ loading }, handleSubmit] = useAsyncFn(async () => {
     await submitChanges();
     onClose();
   }, [submitChanges, onClose]);
 
-  const hasSimulationErrors = false; // TODO: Run simulation and check for errors
-  // Also validate that all fields are complete
+  const [hasSimulationErrors, setHasSimulationErrors] = React.useState(false);
+  const [simulationError, setSimulationError] = React.useState<string | null>(null);
+  const [isSimulating, setIsSimulating] = React.useState(false);
+  useEffect(() => {
+    async function simulate() {
+      setIsSimulating(true);
+      setSimulationError(null);
+
+      const mappedFields = changes
+        .filter((field) => field.status === 'mapped')
+        .map((field) => ({
+          ...convertToFieldDefinitionConfig(field as MappedSchemaField),
+          name: field.name,
+        }));
+
+      const simulationResults = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/schema/fields_simulation',
+        {
+          signal,
+          params: {
+            path: { name: stream },
+            body: {
+              field_definitions: mappedFields,
+            },
+          },
+        }
+      );
+
+      if (simulationResults.status === 'failure') {
+        setHasSimulationErrors(true);
+        setSimulationError(simulationResults.simulationError);
+      }
+
+      setIsSimulating(false);
+    }
+
+    simulate();
+  }, [changes, streamsRepositoryClient, signal, stream]);
 
   return (
     <EuiModal onClose={onClose} maxWidth={600} aria-label="Confirm changes">
@@ -68,9 +121,7 @@ export function SchemaChangesReviewModal({
       <EuiModalBody>
         <EuiCallOut title="Schema edits affect all dependent streams." iconType="info" />
         <EuiSpacer size="m" />
-        <EuiText>
-          The fields below will be updated. Any errors from validation will also appear here.
-        </EuiText>
+        <EuiText>The fields below will be updated.</EuiText>
         <EuiSpacer size="m" />
         {hasSimulationErrors && (
           <>
@@ -78,7 +129,9 @@ export function SchemaChangesReviewModal({
               title="Some fields are failing when simulating ingestion."
               iconType="warning"
               color="warning"
-            />
+            >
+              {simulationError}
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}
@@ -92,12 +145,15 @@ export function SchemaChangesReviewModal({
             {
               field: 'type',
               name: 'Type',
-              render: (type?: FieldDefinitionConfig['type']) => {
-                if (!type)
+              render: (type: FieldDefinitionConfig['type'] | undefined, field: SchemaField) => {
+                if (!type || field.status === 'unmapped')
                   return (
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiToken iconType="tokenNull" />
-                      Removed
+                      <FormattedMessage
+                        id="xpack.streams.schemaEditor.unmanagedLabel"
+                        defaultMessage="Unmanaged"
+                      />
                     </EuiFlexGroup>
                   );
 
@@ -119,7 +175,7 @@ export function SchemaChangesReviewModal({
           color="primary"
           onClick={handleSubmit}
           isLoading={loading}
-          disabled={hasSimulationErrors}
+          disabled={isSimulating || hasSimulationErrors}
         >
           Confirm changes
         </EuiButton>
