@@ -194,6 +194,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
+
+  useBackgroundSearchButton?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -284,7 +286,6 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
-    const isBackgroundSearchEnabled = data.search.isBackgroundSearchEnabled;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
@@ -589,7 +590,7 @@ export const QueryBarTopRow = React.memo(
     function renderCancelButton() {
       const buttonLabelCancel = strings.getCancelQueryLabel();
 
-      if (isBackgroundSearchEnabled) {
+      if (props.useBackgroundSearchButton) {
         return (
           <SplitButton
             aria-label={buttonLabelCancel}
@@ -651,7 +652,7 @@ export const QueryBarTopRow = React.memo(
         ? strings.getRunButtonLabel()
         : strings.getUpdateButtonLabel();
 
-      const updateButton = isBackgroundSearchEnabled ? (
+      const updateButton = props.useBackgroundSearchButton ? (
         <SplitButton
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           color={props.isDirty ? 'success' : 'primary'}
