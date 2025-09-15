@@ -21,14 +21,13 @@ import {
   EuiOutsideClickDetector,
   EuiForm,
 } from '@elastic/eui';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { ConnectorSelectorProps } from '@kbn/security-solution-connectors';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
-import type { ReactNode } from 'react-markdown';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { getConnectorDescription } from '../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../common/lib/kibana';
