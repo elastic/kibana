@@ -66,6 +66,6 @@ export const createStatusColumn = (): TableColumn => {
     ),
     sortable: true,
     truncateText: true,
-    width: '25%',
+    width: '15%',
   };
 };
