@@ -42,11 +42,13 @@ export const toolsToLangchain = async ({
   tools,
   logger,
   sendEvent,
+  addReasoningParam = true,
 }: {
   request: KibanaRequest;
   tools: ToolProvider | ExecutableTool[];
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
+  addReasoningParam?: boolean;
 }): Promise<ToolsAndMappings> => {
   const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
   const onechatToLangchainIdMap = createToolIdMappings(allTools);
@@ -54,7 +56,7 @@ export const toolsToLangchain = async ({
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
       const toolId = onechatToLangchainIdMap.get(tool.id);
-      return toolToLangchain({ tool, logger, toolId, sendEvent });
+      return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam });
     })
   );
 
@@ -97,11 +99,13 @@ export const toolToLangchain = ({
   toolId,
   logger,
   sendEvent,
+  addReasoningParam = true,
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
+  addReasoningParam?: boolean;
 }): StructuredTool => {
   const description = tool.llmDescription
     ? tool.llmDescription({ description: tool.description, config: tool.configuration })
@@ -145,12 +149,15 @@ export const toolToLangchain = ({
     },
     {
       name: toolId ?? tool.id,
-      schema: tool.schema.extend({
-        _reasoning: z
-          .string()
-          .optional()
-          .describe('Optional brief reasoning of why you are calling this tool'),
-      }),
+      schema: addReasoningParam
+        ? z.object({
+            _reasoning: z
+              .string()
+              .optional()
+              .describe('Brief reasoning of why you are calling this tool'),
+            ...tool.schema.shape,
+          })
+        : tool.schema,
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
