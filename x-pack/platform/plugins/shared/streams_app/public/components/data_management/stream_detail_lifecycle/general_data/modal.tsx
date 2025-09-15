@@ -522,7 +522,6 @@ function ModalFooter({
         {Streams.WiredStream.GetResponse.is(definition) ? (
           <EuiFlexItem>
             <EuiCallOut
-              announceOnMount
               title={i18n.translate(
                 'xpack.streams.streamDetailLifecycle.lifecycleDependentImpactTitle',
                 {
