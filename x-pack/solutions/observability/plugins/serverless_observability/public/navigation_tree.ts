@@ -118,6 +118,7 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             iconV2: 'spaces',
+            spaceBefore: null,
             children: [
               {
                 id: 'apm',
@@ -180,6 +181,7 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             iconV2: 'storage',
+            spaceBefore: null,
             children: [
               {
                 children: [
@@ -297,6 +299,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
               defaultMessage: 'Other tools',
             }),
+            spaceBefore: null,
             renderAs: 'panelOpener',
             children: [
               {

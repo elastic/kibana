@@ -298,7 +298,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             iconV2: LazyIconMl,
             children: [
               {
-                id: 'ml-overview',
                 title: '',
                 children: [
                   {
