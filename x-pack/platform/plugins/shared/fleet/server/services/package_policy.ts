@@ -49,6 +49,7 @@ import {
   getNormalizedDataStreams,
   getNormalizedInputs,
   isRootPrivilegesRequired,
+  checkIntegrationFipsLooseCompatibility,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -454,6 +455,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy.package = {
         ...enrichedPackagePolicy.package,
         requires_root: requiresRoot,
+        fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
       };
     }
 
@@ -660,6 +662,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           packagePolicy.package = {
             ...packagePolicy.package,
             requires_root: requiresRoot,
+            fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
           };
         }
 
@@ -1234,6 +1237,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       restOfPackagePolicy.package = {
         ...restOfPackagePolicy.package,
         requires_root: requiresRoot,
+        fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
       };
     }
 
@@ -1628,6 +1632,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           restOfPackagePolicy.package = {
             ...restOfPackagePolicy.package,
             requires_root: requiresRoot,
+            fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
           };
         }
 
