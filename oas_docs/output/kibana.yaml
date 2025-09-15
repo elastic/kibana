@@ -27556,6 +27556,8 @@ paths:
                       type: string
                     name:
                       type: string
+                    namespace:
+                      type: string
                     packagePolicyCount:
                       type: number
                     updated_at:
@@ -27688,6 +27690,8 @@ paths:
                   id:
                     type: string
                   name:
+                    type: string
+                  namespace:
                     type: string
                   packagePolicyCount:
                     type: number
