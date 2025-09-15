@@ -22,7 +22,7 @@ function isErrorResponseBase(subject: any): subject is ErrorResponseBase {
   return subject.error != null;
 }
 
-function processSampleMetricDocuments(
+function getDimensionsByMetricFieldMap(
   response: {
     responses: InferSearchResponseOf<
       {
@@ -35,7 +35,7 @@ function processSampleMetricDocuments(
   logger: Logger
 ) {
   // Process responses for each metric
-  const metricsDocumentMap = new Map<string, string[]>(
+  const dimensionsByMetricField = new Map<string, string[]>(
     metricFields.map(({ name }, index) => {
       const searchResult = response.responses[index];
 
@@ -53,10 +53,10 @@ function processSampleMetricDocuments(
     })
   );
 
-  return metricsDocumentMap;
+  return dimensionsByMetricField;
 }
 
-export async function sampleMetricDocuments({
+export async function getSampleMetricsWithDimensions({
   esClient,
   metricFields,
   logger,
@@ -91,13 +91,13 @@ export async function sampleMetricDocuments({
       { body }
     );
 
-    return processSampleMetricDocuments(response, metricFields, logger);
+    return getDimensionsByMetricFieldMap(response, metricFields, logger);
   } catch (error) {
-    const metricsDocumentMap = new Map<string, string[]>();
+    const dimensionsByMetricFieldMap = new Map<string, string[]>();
     for (const { name } of metricFields) {
-      metricsDocumentMap.set(name, []);
+      dimensionsByMetricFieldMap.set(name, []);
     }
-    return metricsDocumentMap;
+    return dimensionsByMetricFieldMap;
   }
 }
 
@@ -116,7 +116,7 @@ export async function sampleAndProcessMetricFields({
     return metricFields;
   }
 
-  const metricDimensionsMap = await sampleMetricDocuments({
+  const dimensionsByMetricMap = await getSampleMetricsWithDimensions({
     esClient,
     metricFields,
     logger,
@@ -125,27 +125,22 @@ export async function sampleAndProcessMetricFields({
   // Pre-compute all unique dimension field combinations to avoid repeated extraction
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
 
-  // Update dimensions based on actual sampled documents
-  for (const field of metricFields) {
+  return metricFields.map((field) => {
     // Get the sampled document fields for this metric
-    const actualFields = metricDimensionsMap.get(field.name) || [];
+    const dimensionFieldNames = dimensionsByMetricMap.get(field.name) || [];
     const fieldCaps = dataStreamFieldCapsMap.get(field.index);
 
-    if (actualFields.length > 0) {
+    if (dimensionFieldNames.length > 0) {
       // Create cache key from sorted field names
-      const cacheKey = actualFields.sort().join(',');
+      const cacheKey = [...dimensionFieldNames].sort().join(',');
 
-      // Check if we've already computed dimensions for this field combination
       if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
-        uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, actualFields));
+        uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensionFieldNames));
       }
-      field.dimensions = uniqueDimensionSets.get(cacheKey)!;
-      field.noData = false;
-    } else {
-      // No sample documents found - set no_data flag
-      field.noData = true;
-    }
-  }
 
-  return metricFields;
+      return { ...field, dimensions: uniqueDimensionSets.get(cacheKey)!, noData: false };
+    } else {
+      return { ...field, dimensions: [], noData: true };
+    }
+  });
 }
