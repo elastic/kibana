@@ -102,15 +102,6 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  useEffect(() => {
-    if (
-      dashboardInternalApi &&
-      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
-    ) {
-      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
-    }
-  }, [dashboardInternalApi]);
-
   const isDashboardViewportLoading = !dashboardApi && !error;
 
   const viewportClasses = classNames(
