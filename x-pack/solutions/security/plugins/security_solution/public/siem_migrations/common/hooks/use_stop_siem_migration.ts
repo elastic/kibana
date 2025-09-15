@@ -12,6 +12,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { StopRuleMigrationResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -42,7 +43,8 @@ export function useStopSiemMigration<T extends MigrationType>(
   migrationType: T,
   { onSuccess }: UseStopOptions = {}
 ) {
-  const { siemMigrations, notifications } = useKibana().services;
+  const { siemMigrations } = useKibana().services;
+  const { addSuccess, addError } = useAppToasts();
   return useMutation<StopMigrationResponse<T>, Error, StopArgs>({
     mutationKey: ['siemMigration', migrationType, 'stop'],
     mutationFn: async ({ migrationId }) => {
@@ -53,12 +55,12 @@ export function useStopSiemMigration<T extends MigrationType>(
     },
     onSuccess: (result) => {
       if (result.stopped) {
-        notifications.toasts.addSuccess(STOP_SUCCESS);
+        addSuccess(STOP_SUCCESS);
       }
       onSuccess?.();
     },
     onError: (e: Error) => {
-      notifications.toasts.addError(e, { title: STOP_ERROR });
+      addError(e, { title: STOP_ERROR });
     },
   });
 }

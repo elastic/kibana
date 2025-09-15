@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -18,23 +18,21 @@ import {
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
-import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import { PanelText } from '../../../../common/components/panel_text';
-import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import * as i18n from './translations';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
-import type { RuleMigrationStats } from '../../types';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
+import type { DashboardMigrationStats } from '../../types';
 
-interface RuleMigrationsUploadMissingPanelProps {
-  migrationStats: RuleMigrationStats;
+interface DashboardMigrationsUploadMissingPanelProps {
+  migrationStats: DashboardMigrationStats;
   topSpacerSize?: SpacerSize;
 }
-export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadMissingPanelProps>(
-  ({ migrationStats, topSpacerSize }) => {
+export const DashboardMigrationsUploadMissingPanel =
+  React.memo<DashboardMigrationsUploadMissingPanelProps>(({ migrationStats, topSpacerSize }) => {
     const [missingResources, setMissingResources] = useState<SiemMigrationResourceBase[]>([]);
     const { mutate: getMissingResources, isLoading } = useGetMissingResources(
-      'rule',
+      'dashboard',
       setMissingResources
     );
 
@@ -47,45 +45,40 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
     }
 
     return (
-      <RuleMigrationsUploadMissingPanelContent
+      <DashboardMigrationsUploadMissingPanelContent
         migrationStats={migrationStats}
         topSpacerSize={topSpacerSize}
         missingResources={missingResources}
       />
     );
-  }
-);
-RuleMigrationsUploadMissingPanel.displayName = 'RuleMigrationsUploadMissingPanel';
+  });
 
-interface RuleMigrationsUploadMissingPanelContentProps
-  extends RuleMigrationsUploadMissingPanelProps {
+DashboardMigrationsUploadMissingPanel.displayName = 'DashboardMigrationsUploadMissingPanel';
+
+interface DashboardMigrationsUploadMissingPanelContentProps
+  extends DashboardMigrationsUploadMissingPanelProps {
   missingResources: SiemMigrationResourceBase[];
 }
-const RuleMigrationsUploadMissingPanelContent =
-  React.memo<RuleMigrationsUploadMissingPanelContentProps>(
+const DashboardMigrationsUploadMissingPanelContent =
+  React.memo<DashboardMigrationsUploadMissingPanelContentProps>(
     ({ migrationStats, topSpacerSize, missingResources }) => {
       const { euiTheme } = useEuiTheme();
-      const { telemetry } = useKibana().services.siemMigrations.rules;
-      const { openFlyout } = useRuleMigrationDataInputContext();
-
       const { data: translationStats, isLoading: isLoadingTranslationStats } =
         useGetMigrationTranslationStats(migrationStats.id);
 
-      const onOpenFlyout = useCallback(() => {
-        openFlyout(migrationStats);
-        telemetry.reportSetupMigrationOpenResources({
-          migrationId: migrationStats.id,
-          missingResourcesCount: missingResources.length,
-        });
-      }, [migrationStats, openFlyout, missingResources, telemetry]);
+      const totalDashboardsToRetry = useMemo(() => {
+        if (!translationStats) return 0;
 
-      const totalRulesToRetry = useMemo(() => {
         return (
-          (translationStats?.rules.failed ?? 0) +
-          (translationStats?.rules.success.result.partial ?? 0) +
-          (translationStats?.rules.success.result.untranslatable ?? 0)
+          (translationStats.dashboards.failed ?? 0) +
+          (translationStats.dashboards.success.result.partial ?? 0) +
+          (translationStats.dashboards.success.result.untranslatable ?? 0)
         );
       }, [translationStats]);
+
+      const onOpenFlyout = () => {
+        // TODO: Implement dashboard-specific flyout logic when available
+      };
 
       return (
         <>
@@ -102,7 +95,7 @@ const RuleMigrationsUploadMissingPanelContent =
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <PanelText size="s" semiBold>
-                  {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                  {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
                 </PanelText>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -110,7 +103,9 @@ const RuleMigrationsUploadMissingPanelContent =
                   <EuiLoadingSpinner size="s" />
                 ) : (
                   <PanelText size="s" subdued>
-                    {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(totalRulesToRetry)}
+                    {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(
+                      totalDashboardsToRetry
+                    )}
                   </PanelText>
                 )}
               </EuiFlexItem>
@@ -123,7 +118,7 @@ const RuleMigrationsUploadMissingPanelContent =
                   iconSide="right"
                   size="s"
                 >
-                  {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
+                  {i18n.DASHBOARD_MIGRATION_UPLOAD_BUTTON}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -132,4 +127,5 @@ const RuleMigrationsUploadMissingPanelContent =
       );
     }
   );
-RuleMigrationsUploadMissingPanelContent.displayName = 'RuleMigrationsUploadMissingPanelContent';
+DashboardMigrationsUploadMissingPanelContent.displayName =
+  'DashboardMigrationsUploadMissingPanelContent';

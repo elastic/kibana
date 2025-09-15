@@ -11,6 +11,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { StartRuleMigrationResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
@@ -53,7 +54,9 @@ export function useStartSiemMigration<T extends MigrationType>(
   migrationType: T,
   { onSuccess }: UseStartOptions = {}
 ) {
-  const { siemMigrations, notifications } = useKibana().services;
+  const { siemMigrations } = useKibana().services;
+  const { addSuccess, addError } = useAppToasts();
+
   return useMutation<StartMigrationResponse<T>, Error, StartArgs<T>>({
     mutationKey: ['siemMigration', migrationType, 'start'],
     mutationFn: async ({ migrationId, retry, settings }) => {
@@ -72,12 +75,12 @@ export function useStartSiemMigration<T extends MigrationType>(
     },
     onSuccess: (result) => {
       if (result.started) {
-        notifications.toasts.addSuccess(START_SUCCESS);
+        addSuccess(START_SUCCESS);
       }
       onSuccess?.();
     },
     onError: (e: Error) => {
-      notifications.toasts.addError(e, { title: START_ERROR });
+      addError(e, { title: START_ERROR });
     },
   });
 }

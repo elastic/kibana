@@ -13,8 +13,9 @@ import {
   UPDATE_MIGRATION_SUCCESS,
   UPDATE_MIGRATION_FAILURE,
 } from './use_update_siem_migration';
-import * as ruleApi from '../../rules/api';
-import * as dashboardApi from '../../dashboards/api';
+import { useKibana } from '../../../common/lib/kibana';
+
+jest.mock('../../../common/lib/kibana');
 
 // Toast mocks
 const mockAddSuccess = jest.fn();
@@ -32,14 +33,29 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-describe('useUpdateSiemMigration (spy strategy)', () => {
-  let ruleSpy: jest.SpyInstance;
-  let dashSpy: jest.SpyInstance;
+describe('useUpdateSiemMigration', () => {
+  const updateRuleMigrationApiMock = jest.fn();
+  const updateDashboardMigrationMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    ruleSpy = jest.spyOn(ruleApi, 'updateMigration');
-    dashSpy = jest.spyOn(dashboardApi, 'updateDashboardMigration');
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        siemMigrations: {
+          rules: {
+            api: {
+              updateMigration: updateRuleMigrationApiMock,
+            },
+          },
+          dashboards: {
+            api: {
+              updateDashboardMigration: updateDashboardMigrationMock,
+            },
+          },
+        },
+      },
+    });
   });
 
   afterEach(() => {
@@ -48,7 +64,7 @@ describe('useUpdateSiemMigration (spy strategy)', () => {
 
   describe('rule', () => {
     it('updates rule migration successfully', async () => {
-      ruleSpy.mockResolvedValue(undefined);
+      updateRuleMigrationApiMock.mockResolvedValue(undefined);
       const wrapper = createWrapper();
       const { result } = renderHook(() => useUpdateSiemMigration('rule'), { wrapper });
 
@@ -58,7 +74,7 @@ describe('useUpdateSiemMigration (spy strategy)', () => {
 
       await waitFor(() => result.current.isSuccess || result.current.isError);
 
-      expect(ruleSpy).toHaveBeenCalledWith({
+      expect(updateRuleMigrationApiMock).toHaveBeenCalledWith({
         migrationId: 'rid',
         body: { name: 'New Name' },
       });
@@ -68,7 +84,7 @@ describe('useUpdateSiemMigration (spy strategy)', () => {
 
     it('handles rule update error', async () => {
       const error = new Error('fail');
-      ruleSpy.mockRejectedValue(error);
+      updateRuleMigrationApiMock.mockRejectedValue(error);
       const onError = jest.fn();
       const wrapper = createWrapper();
       const { result } = renderHook(() => useUpdateSiemMigration('rule', { onError }), { wrapper });
@@ -87,7 +103,7 @@ describe('useUpdateSiemMigration (spy strategy)', () => {
 
   describe('dashboard', () => {
     it('updates dashboard migration successfully', async () => {
-      dashSpy.mockResolvedValue(undefined);
+      updateDashboardMigrationMock.mockResolvedValue(undefined);
       const wrapper = createWrapper();
       const { result } = renderHook(() => useUpdateSiemMigration('dashboard'), { wrapper });
 
@@ -97,7 +113,7 @@ describe('useUpdateSiemMigration (spy strategy)', () => {
 
       await waitFor(() => result.current.isSuccess || result.current.isError);
 
-      expect(dashSpy).toHaveBeenCalledWith({
+      expect(updateDashboardMigrationMock).toHaveBeenCalledWith({
         migrationId: 'did',
         body: { name: 'Dash Name' },
       });
@@ -107,7 +123,7 @@ describe('useUpdateSiemMigration (spy strategy)', () => {
 
     it('handles dashboard update error', async () => {
       const error = new Error('dash fail');
-      dashSpy.mockRejectedValue(error);
+      updateDashboardMigrationMock.mockRejectedValue(error);
       const onError = jest.fn();
       const wrapper = createWrapper();
       const { result } = renderHook(() => useUpdateSiemMigration('dashboard', { onError }), {

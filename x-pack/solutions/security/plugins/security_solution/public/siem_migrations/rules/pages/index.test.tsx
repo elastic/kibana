@@ -25,7 +25,7 @@ import {
   mockedMigrationResultsObj,
   mockedMigrationTranslationStats,
 } from '../../common/mocks/migration_result.data';
-import * as useGetMissingResourcesModule from '../service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
 
 jest.mock('../../../common/components/page_wrapper', () => {
   return {
@@ -161,7 +161,7 @@ describe('Migrations: Translated Rules Page', () => {
     useCalloutStorageSpy.mockReturnValue(mockHiddenCallStorageResult);
     useGetMigrationRulesSpy.mockImplementation(mockUseGetMigrationRules);
     useGetMissingResourcesSpy.mockReturnValue({
-      getMissingResources: jest.fn(() => []),
+      mutate: jest.fn(() => []),
       isLoading: false,
     } as unknown as ReturnType<typeof useGetMissingResourcesModule.useGetMissingResources>);
 

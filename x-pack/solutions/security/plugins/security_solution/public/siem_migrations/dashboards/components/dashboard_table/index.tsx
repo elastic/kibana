@@ -44,8 +44,8 @@ import type { FilterOptionsBase, MigrationSettingsBase } from '../../../common/t
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -164,7 +164,12 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
     }, []);
 
     const { mutateAsync: installMigrationDashboards } = useInstallMigrationDashboards(migrationId);
-    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
+    const { mutate: startMigration, isLoading: isRetryLoading } = useStartSiemMigration(
+      'dashboard',
+      {
+        onSuccess: refetchData,
+      }
+    );
 
     const [isTableLoading, setTableLoading] = useState(false);
 
@@ -204,8 +209,10 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
 
     const reprocessFailedDashboardsWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, {
-          ...settings,
+        startMigration({
+          migrationId,
+          retry: SiemMigrationRetryFilter.FAILED,
+          settings,
         });
       },
       [migrationId, startMigration]

@@ -17,6 +17,10 @@ const mockStartDashboardMigration = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+}));
+
 jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
@@ -24,7 +28,6 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
         rules: { startRuleMigration: mockStartRuleMigration },
         dashboards: { startDashboardMigration: mockStartDashboardMigration },
       },
-      notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
     },
   }),
 }));

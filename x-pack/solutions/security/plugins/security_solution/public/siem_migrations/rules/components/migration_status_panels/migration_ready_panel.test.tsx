@@ -8,12 +8,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MigrationReadyPanel } from './migration_ready_panel';
-import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
+import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -67,7 +67,7 @@ const missingLookup: SiemMigrationResourceBase = {
   name: 'lookup1',
 };
 
-jest.mock('../../service/hooks/use_get_missing_resources');
+jest.mock('../../../common/hooks/use_get_missing_resources');
 const useGetMissingResourcesMock = useGetMissingResources as jest.Mock;
 
 const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
@@ -79,7 +79,7 @@ const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
 describe('MigrationReadyPanel', () => {
   beforeEach(() => {
     useGetMissingResourcesMock.mockReturnValue({
-      getMissingResources: jest.fn().mockResolvedValue([]),
+      mutate: jest.fn().mockResolvedValue([]),
       isLoading: false,
     });
 
@@ -152,9 +152,9 @@ describe('MigrationReadyPanel', () => {
     const missingResources = [missingMacro, missingLookup];
 
     beforeEach(() => {
-      useGetMissingResourcesMock.mockImplementation((setterFn: Function) => {
+      useGetMissingResourcesMock.mockImplementation((type, setterFn: Function) => {
         return {
-          getMissingResources: jest.fn().mockImplementation(() => {
+          mutate: jest.fn().mockImplementation(() => {
             setterFn(missingResources);
           }),
           isLoading: false,

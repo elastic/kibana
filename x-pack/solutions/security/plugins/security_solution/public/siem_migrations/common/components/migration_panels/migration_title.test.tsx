@@ -11,13 +11,14 @@ import { MigrationPanelTitle as MigrationTitle } from './migration_title';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
 import * as i18n from './translations';
-import * as ruleApi from '../../../rules/api';
 import { useDeleteMigration } from '../../hooks/use_delete_migrations';
 import type { RuleMigrationStats } from '../../../rules/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-const mockUpdateMigrationApi = jest.spyOn(ruleApi, 'updateMigration');
+const mockUpdateMigrationApi = jest.fn();
 
 jest.mock('../../hooks/use_delete_migrations');
 const useDeleteMigrationMock = useDeleteMigration as jest.Mock;
@@ -48,6 +49,19 @@ describe('MigrationPanelTitle', () => {
     useDeleteMigrationMock.mockReturnValue({
       mutate: mockDeleteMigration,
       isLoading: false,
+    });
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...createStartServicesMock(),
+        siemMigrations: {
+          rules: {
+            api: {
+              updateMigration: mockUpdateMigrationApi,
+            },
+          },
+        },
+      },
     });
   });
 

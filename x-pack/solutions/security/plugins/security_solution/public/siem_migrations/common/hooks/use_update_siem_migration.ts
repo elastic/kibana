@@ -11,8 +11,7 @@ import type { MigrationType } from '../../../../common/siem_migrations/types';
 import type { UpdateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { UpdateDashboardMigrationRequestBody } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { updateMigration as updateRuleMigration } from '../../rules/api';
-import { updateDashboardMigration } from '../../dashboards/api';
+import { useKibana } from '../../../common/lib/kibana';
 
 export type UpdateMigrationBody<T extends MigrationType> = T extends 'rule'
   ? UpdateRuleMigrationRequestBody
@@ -42,18 +41,21 @@ export function useUpdateSiemMigration<T extends MigrationType>(
   { onSuccess, onError }: UseUpdateSiemMigrationOptions = {}
 ) {
   const { addSuccess, addError } = useAppToasts();
+  const { siemMigrations } = useKibana().services;
 
   return useMutation<void, Error, UpdateMigrationArgs<T>>({
     mutationKey: ['siemMigration', migrationType, 'update'],
     mutationFn: async ({ migrationId, body }) => {
       if (migrationType === 'rule') {
-        await updateRuleMigration({ migrationId, body: body as UpdateRuleMigrationRequestBody });
-      } else {
-        await updateDashboardMigration({
+        return siemMigrations.rules.api.updateMigration({
           migrationId,
-          body: body as UpdateDashboardMigrationRequestBody,
+          body: body as UpdateRuleMigrationRequestBody,
         });
       }
+      return siemMigrations.dashboards.api.updateDashboardMigration({
+        migrationId,
+        body: body as UpdateDashboardMigrationRequestBody,
+      });
     },
     onSuccess: () => {
       addSuccess(UPDATE_MIGRATION_SUCCESS);
