@@ -17,6 +17,5 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n-react",
-    "@kbn/shared-ux-page-kibana-template",
   ]
 }
