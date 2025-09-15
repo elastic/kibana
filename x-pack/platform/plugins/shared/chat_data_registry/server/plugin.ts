@@ -39,7 +39,7 @@ export class ChatDataRegistryPlugin
     this.logger.debug('chatDataRegistry: Started');
 
     const registeredTypes = this.dataCatalog.list();
-    this.logger.info(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
+    this.logger.debug(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
 
     return {};
   }
