@@ -60,7 +60,4 @@ export const REMOVED_TYPES: string[] = [
   // Removed in 9.1 https://github.com/elastic/kibana/pull/231084
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
-  'workchat_agent',
-  'workchat_conversation',
-  'workchat_integration',
 ].sort();
