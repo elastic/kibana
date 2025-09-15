@@ -27,25 +27,7 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         '@timestamp': {
           type: 'date',
         },
-        'scope.dropped_attributes_count': {
-          type: 'long',
-        },
-        dropped_attributes_count: {
-          type: 'long',
-        },
-        'resource.dropped_attributes_count': {
-          type: 'long',
-        },
-        'resource.schema_url': {
-          type: 'keyword',
-        },
         'scope.name': {
-          type: 'keyword',
-        },
-        'scope.schema_url': {
-          type: 'keyword',
-        },
-        'scope.version': {
           type: 'keyword',
         },
         trace_id: {
