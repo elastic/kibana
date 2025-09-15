@@ -9,18 +9,6 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
-const smartFields = [
-  new DataViewField({
-    name: 'content',
-    type: 'smart_field',
-    searchable: false,
-    aggregatable: false,
-  }),
-];
-const fallbackFields = {
-  content: ['message'],
-};
-
 const recommendedFields = [
   new DataViewField({
     name: 'log.level',
@@ -31,7 +19,5 @@ const recommendedFields = [
 ];
 
 export const additionalFieldGroups = {
-  smartFields,
-  fallbackFields,
   recommendedFields,
 };
