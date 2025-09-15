@@ -39,68 +39,6 @@ export function LogsOverviewHighlights({
     return fields.some((field) => Boolean(formattedDoc[field] && flattenedDoc[field]));
   };
 
-  const fieldNames: Array<keyof LogDocumentOverview> = [
-    // Service & Infrastructure
-    fieldConstants.SERVICE_NAME_FIELD,
-    fieldConstants.HOST_NAME_FIELD,
-    fieldConstants.TRACE_ID_FIELD,
-    fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
-    fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
-    // Cloud
-    fieldConstants.CLOUD_PROVIDER_FIELD,
-    fieldConstants.CLOUD_REGION_FIELD,
-    fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD,
-    fieldConstants.CLOUD_PROJECT_ID_FIELD,
-    fieldConstants.CLOUD_INSTANCE_ID_FIELD,
-    // Other
-    fieldConstants.LOG_FILE_PATH_FIELD,
-    fieldConstants.DATASTREAM_DATASET_FIELD,
-    fieldConstants.DATASTREAM_NAMESPACE_FIELD,
-    fieldConstants.AGENT_NAME_FIELD,
-  ];
-
-  const fieldConfigurations: Record<string, FieldConfiguration> = {
-    // Service & Infrastructure
-    [fieldConstants.SERVICE_NAME_FIELD]: {
-      title: serviceLabel,
-    },
-    [fieldConstants.HOST_NAME_FIELD]: { title: hostNameLabel },
-    [fieldConstants.TRACE_ID_FIELD]: {
-      title: traceLabel,
-      formatter: (value: unknown, formattedValue: string) => (
-        <HighlightField value={value as string} formattedValue={formattedValue}>
-          {({ content }) => (
-            <TraceIdLink
-              traceId={value as string}
-              formattedTraceId={content}
-              data-test-subj="unifiedDocViewLogsOverviewTraceIdHighlightLink"
-            />
-          )}
-        </HighlightField>
-      ),
-    },
-    [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: { title: orchestratorClusterNameLabel },
-    [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: { title: orchestratorResourceIdLabel },
-    // Cloud
-    [fieldConstants.CLOUD_PROVIDER_FIELD]: { title: cloudProviderLabel },
-    [fieldConstants.CLOUD_REGION_FIELD]: { title: cloudRegionLabel },
-    [fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]: { title: cloudAvailabilityZoneLabel },
-    [fieldConstants.CLOUD_PROJECT_ID_FIELD]: { title: cloudProjectIdLabel },
-    [fieldConstants.CLOUD_INSTANCE_ID_FIELD]: { title: cloudInstanceIdLabel },
-    // Other
-    [fieldConstants.LOG_FILE_PATH_FIELD]: { title: logPathFileLabel },
-    [fieldConstants.DATASTREAM_DATASET_FIELD]: { title: datasetLabel },
-    [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: {
-      title: namespaceLabel,
-      formatter: (value, formattedValue) => (
-        <HighlightField value={value as string} formattedValue={formattedValue}>
-          {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
-        </HighlightField>
-      ),
-    },
-    [fieldConstants.AGENT_NAME_FIELD]: { title: shipperLabel },
-  };
-
   if (!shouldRenderSection(fieldNames)) {
     return null;
   }
@@ -124,6 +62,26 @@ export function LogsOverviewHighlights({
     </>
   );
 }
+
+const fieldNames: Array<keyof LogDocumentOverview> = [
+  // Service & Infrastructure
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.HOST_NAME_FIELD,
+  fieldConstants.TRACE_ID_FIELD,
+  fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
+  fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
+  // Cloud
+  fieldConstants.CLOUD_PROVIDER_FIELD,
+  fieldConstants.CLOUD_REGION_FIELD,
+  fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD,
+  fieldConstants.CLOUD_PROJECT_ID_FIELD,
+  fieldConstants.CLOUD_INSTANCE_ID_FIELD,
+  // Other
+  fieldConstants.LOG_FILE_PATH_FIELD,
+  fieldConstants.DATASTREAM_DATASET_FIELD,
+  fieldConstants.DATASTREAM_NAMESPACE_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+];
 
 const serviceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.service', {
   defaultMessage: 'Service',
@@ -198,3 +156,45 @@ const datasetLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label
 const shipperLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.shipper', {
   defaultMessage: 'Shipper',
 });
+
+const fieldConfigurations: Record<string, FieldConfiguration> = {
+  // Service & Infrastructure
+  [fieldConstants.SERVICE_NAME_FIELD]: {
+    title: serviceLabel,
+  },
+  [fieldConstants.HOST_NAME_FIELD]: { title: hostNameLabel },
+  [fieldConstants.TRACE_ID_FIELD]: {
+    title: traceLabel,
+    formatter: (value: unknown, formattedValue: string) => (
+      <HighlightField value={value as string} formattedValue={formattedValue}>
+        {({ content }) => (
+          <TraceIdLink
+            traceId={value as string}
+            formattedTraceId={content}
+            data-test-subj="unifiedDocViewLogsOverviewTraceIdHighlightLink"
+          />
+        )}
+      </HighlightField>
+    ),
+  },
+  [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: { title: orchestratorClusterNameLabel },
+  [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: { title: orchestratorResourceIdLabel },
+  // Cloud
+  [fieldConstants.CLOUD_PROVIDER_FIELD]: { title: cloudProviderLabel },
+  [fieldConstants.CLOUD_REGION_FIELD]: { title: cloudRegionLabel },
+  [fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]: { title: cloudAvailabilityZoneLabel },
+  [fieldConstants.CLOUD_PROJECT_ID_FIELD]: { title: cloudProjectIdLabel },
+  [fieldConstants.CLOUD_INSTANCE_ID_FIELD]: { title: cloudInstanceIdLabel },
+  // Other
+  [fieldConstants.LOG_FILE_PATH_FIELD]: { title: logPathFileLabel },
+  [fieldConstants.DATASTREAM_DATASET_FIELD]: { title: datasetLabel },
+  [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: {
+    title: namespaceLabel,
+    formatter: (value, formattedValue) => (
+      <HighlightField value={value as string} formattedValue={formattedValue}>
+        {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
+      </HighlightField>
+    ),
+  },
+  [fieldConstants.AGENT_NAME_FIELD]: { title: shipperLabel },
+};
