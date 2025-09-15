@@ -66,6 +66,7 @@ describe('getAxiosConfig', () => {
       password: null,
       crt: null,
       pfx: null,
+      secretHeaders: null,
     },
     services,
     configurationUtilities: actionsConfigMock.create(),
