@@ -20,7 +20,8 @@
       "inference",
       "kibanaUtils",
       "lens",
-      "management"
+      "management",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact"

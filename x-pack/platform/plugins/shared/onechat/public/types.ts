@@ -6,11 +6,13 @@
  */
 
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -20,11 +22,14 @@ export interface OnechatSetupDependencies {
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
 }
 
 export interface OnechatStartDependencies {
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  cloud: CloudStart;
+  share: SharePluginStart;
 }
 
 export interface OnechatPluginSetup {}

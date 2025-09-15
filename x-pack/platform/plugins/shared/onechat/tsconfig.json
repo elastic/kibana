@@ -74,5 +74,6 @@
     "@kbn/management-settings-utilities",
     "@kbn/management-plugin",
     "@kbn/react-kibana-context-theme",
+    "@kbn/share-plugin",
   ]
 }

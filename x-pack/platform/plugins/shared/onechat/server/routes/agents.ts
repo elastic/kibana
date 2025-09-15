@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type {
   GetAgentResponse,
@@ -33,7 +34,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // List agents
   router.versioned
     .get({
-      path: '/api/chat/agents',
+      path: `${publicApiPath}/agents`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -63,7 +64,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Get agent by id
   router.versioned
     .get({
-      path: '/api/chat/agents/{id}',
+      path: `${publicApiPath}/agents/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -96,7 +97,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Create agent
   router.versioned
     .post({
-      path: '/api/chat/agents',
+      path: `${publicApiPath}/agents`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -141,7 +142,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Update agent
   router.versioned
     .put({
-      path: '/api/chat/agents/{id}',
+      path: `${publicApiPath}/agents/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -188,7 +189,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Delete agent
   router.versioned
     .delete({
-      path: '/api/chat/agents/{id}',
+      path: `${publicApiPath}/agents/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
