@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { apiPrivileges } from '../../common/features';
+import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { getTechnicalPreviewWarning } from './utils';
@@ -15,7 +16,7 @@ import { getKibanaUrl } from '../utils/get_kibana_url';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
 
-export const A2A_SERVER_PATH = '/api/chat/a2a';
+export const A2A_SERVER_PATH = `${publicApiPath}/a2a`;
 
 export function registerA2ARoutes({
   router,
