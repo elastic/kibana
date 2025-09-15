@@ -6,7 +6,6 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { isDslLifecycle, isIlmLifecycle, type IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
@@ -91,20 +90,20 @@ export class StreamsTelemetryClient {
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {
-    if (isDslLifecycle(lifecycle)) {
+    if ('dsl' in lifecycle) {
       return 'dsl';
     }
-    if (isIlmLifecycle(lifecycle)) {
+    if ('ilm' in lifecycle) {
       return 'ilm';
     }
     return 'inherit';
   }
 
   private getLifecycleValue(lifecycle: IngestStreamLifecycle): string | undefined {
-    if (isDslLifecycle(lifecycle)) {
+    if ('dsl' in lifecycle) {
       return lifecycle.dsl.data_retention;
     }
-    if (isIlmLifecycle(lifecycle)) {
+    if ('ilm' in lifecycle) {
       return lifecycle.ilm.policy;
     }
     return undefined;
