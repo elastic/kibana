@@ -18,6 +18,7 @@ import type {
   ExecuteToolResponse,
   ResolveSearchSourcesResponse,
 } from '../../../common/http_api/tools';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 
 export class ToolsService {
   private readonly http: HttpSetup;
@@ -27,38 +28,38 @@ export class ToolsService {
   }
 
   async list() {
-    const { results } = await this.http.get<ListToolsResponse>('/api/chat/tools', {});
+    const { results } = await this.http.get<ListToolsResponse>(`${publicApiPath}/tools`, {});
     return results;
   }
 
   async get({ toolId }: { toolId: string }) {
-    return await this.http.get<GetToolResponse>(`/api/chat/tools/${toolId}`, {});
+    return await this.http.get<GetToolResponse>(`${publicApiPath}/tools/${toolId}`, {});
   }
 
   async delete({ toolId }: { toolId: string }) {
-    return await this.http.delete<DeleteToolResponse>(`/api/chat/tools/${toolId}`, {});
+    return await this.http.delete<DeleteToolResponse>(`${publicApiPath}/tools/${toolId}`, {});
   }
 
   async bulkDelete(toolsIds: string[]) {
-    return await this.http.post<BulkDeleteToolResponse>(`/internal/chat/tools/_bulk_delete`, {
+    return await this.http.post<BulkDeleteToolResponse>(`${internalApiPath}/tools/_bulk_delete`, {
       body: JSON.stringify({ ids: toolsIds }),
     });
   }
 
   async create(tool: CreateToolPayload) {
-    return await this.http.post<CreateToolResponse>('/api/chat/tools', {
+    return await this.http.post<CreateToolResponse>(`${publicApiPath}/tools`, {
       body: JSON.stringify(tool),
     });
   }
 
   async update(id: string, update: UpdateToolPayload) {
-    return await this.http.put<UpdateToolResponse>(`/api/chat/tools/${id}`, {
+    return await this.http.put<UpdateToolResponse>(`${publicApiPath}/tools/${id}`, {
       body: JSON.stringify(update),
     });
   }
 
   async execute(toolId: string, toolParams: Record<string, unknown>) {
-    return await this.http.post<ExecuteToolResponse>('/api/chat/tools/_execute', {
+    return await this.http.post<ExecuteToolResponse>(`${publicApiPath}/tools/_execute`, {
       body: JSON.stringify({
         tool_id: toolId,
         tool_params: toolParams,
@@ -68,7 +69,7 @@ export class ToolsService {
 
   async resolveSearchSources({ pattern }: { pattern: string }) {
     return await this.http.get<ResolveSearchSourcesResponse>(
-      '/internal/chat/tools/_resolve_search_sources',
+      `${internalApiPath}/tools/_resolve_search_sources`,
       { query: { pattern } }
     );
   }
