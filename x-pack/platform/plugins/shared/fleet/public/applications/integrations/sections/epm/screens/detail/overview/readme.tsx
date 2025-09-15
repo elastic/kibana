@@ -121,8 +121,8 @@ export function Readme({
         <EuiText grow={true}>
           <ReactMarkdown
             components={markdownRenderers(refs, handleImageUri)}
-            rehypePlugins={[rehypeRaw as any, [rehypeSanitize as any]]}
-            remarkPlugins={[remarkGfm as any]}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize]]}
+            remarkPlugins={[remarkGfm]}
           >
             {processedMarkdown}
           </ReactMarkdown>

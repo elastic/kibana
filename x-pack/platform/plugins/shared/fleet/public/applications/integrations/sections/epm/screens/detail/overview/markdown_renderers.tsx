@@ -6,19 +6,20 @@
  */
 
 import {
+  EuiAccordion,
   EuiCode,
   EuiCodeBlock,
   EuiLink,
-  EuiTableHeaderCell,
+  EuiSpacer,
   EuiTable,
+  EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
-  EuiAccordion,
-  EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
 import type { MutableRefObject } from 'react';
+import React from 'react';
 import type { Components } from 'react-markdown';
+
 import styled from 'styled-components';
 
 import { getAnchorId } from './overview';
@@ -103,7 +104,8 @@ export const markdownRenderers = (
         {children}
       </EuiLink>
     ),
-    code: ({ className, children, inline }: any) => {
+    // FIXME: https://github.com/remarkjs/react-markdown/blob/main/changelog.md#remove-extra-props-passed-to-certain-components
+    code: ({ className, children, inline }) => {
       let parsedLang = /language-(\w+)/.exec(className || '')?.[1] ?? '';
 
       // Some integrations export code block content that includes language tags that have since
