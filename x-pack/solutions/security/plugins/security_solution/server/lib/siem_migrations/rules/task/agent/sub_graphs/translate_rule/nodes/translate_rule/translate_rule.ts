@@ -9,7 +9,7 @@ import {
   getTranslateSplToEsql,
   TASK_DESCRIPTION,
   type GetTranslateSplToEsqlParams,
-} from '../../../../../../../common/task/agent/tools/translate_spl_to_esql';
+} from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 import type { GraphNode } from '../../types';
 import {
   getElasticRiskScoreFromOriginalRule,

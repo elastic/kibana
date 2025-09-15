@@ -103,6 +103,14 @@ export const getActPrompt = ({
               2) Ask the user to enable/authorize a needed tool.
           - Do NOT provide ungrounded general knowledge answers.
 
+        TOOL USAGE PROTOCOL
+
+        1.  **Exclusive Tool Call Output:** When you decide to call a tool, your entire response **must** be the tool call. Do not include any text, greetings, or explanations before or after this block.
+
+        2.  **Mandatory Internal Reasoning:** All reasoning, thinking, or justification for making a tool call **must** be placed inside the \`_reasoning\` parameter of that tool call. Do not provide reasoning as plain text outside the tool call.
+
+        This protocol is critical for the automated parsing of your responses.
+
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
         - [ ] All claims are grounded in tool output or user-provided content.
@@ -115,7 +123,7 @@ export const getActPrompt = ({
         OUTPUT STYLE
         - Clear, direct, and scoped. No extraneous commentary.
         - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
-        - Do not mention internal reasoning or tool names unless user explicitly asks.
+        - For final answers, do not mention internal reasoning or tool names unless user explicitly asks.
 
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
@@ -125,7 +133,8 @@ export const getActPrompt = ({
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
-        - Current date: ${formatDate()}`,
+        - Current date: ${formatDate()}
+`,
     ],
     ...messages,
   ];

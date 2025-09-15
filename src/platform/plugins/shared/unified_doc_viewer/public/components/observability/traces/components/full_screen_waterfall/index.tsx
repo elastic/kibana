@@ -17,6 +17,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { Global, css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -30,7 +31,7 @@ export interface FullScreenWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
-  serviceName: string;
+  serviceName?: string;
   onExitFullScreen: () => void;
 }
 
@@ -74,6 +75,15 @@ export const FullScreenWaterfall = ({
 
   return (
     <>
+      {/** This global style is a temporary fix until we migrate to the
+       * new flyout system (with child) instead of full screen */}
+      <Global
+        styles={css`
+          .euiDataGridRowCell__popover {
+            z-index: ${euiTheme.levels.modal} !important;
+          }
+        `}
+      />
       <EuiOverlayMask
         maskRef={overlayMaskRef}
         css={{
@@ -123,7 +133,6 @@ export const FullScreenWaterfall = ({
           </EuiPanel>
         </EuiFocusTrap>
       </EuiOverlayMask>
-
       {isFlyoutVisible && spanId && (
         <EuiFocusTrap>
           <SpanFlyout

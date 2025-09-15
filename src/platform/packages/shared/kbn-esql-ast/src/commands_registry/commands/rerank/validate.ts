@@ -23,12 +23,8 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const { query, targetField, location, inferenceId } = command as ESQLAstRerankCommand;
-  const rerankExpressionType = getExpressionType(
-    query,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const { query, location, inferenceId } = command as ESQLAstRerankCommand;
+  const rerankExpressionType = getExpressionType(query, context?.columns);
 
   // check for supported query types
   if (!supportedQueryTypes.includes(rerankExpressionType)) {
@@ -43,17 +39,6 @@ export const validate = (
   if (inferenceId?.incomplete) {
     messages.push(errors.byId('inferenceIdRequired', command.location, { command: 'RERANK' }));
   }
-
-  const targetName = targetField?.name || 'rerank';
-
-  // Sets the target field so the column is recognized after the command is applied
-  context?.userDefinedColumns.set(targetName, [
-    {
-      name: targetName,
-      location: targetField?.location || location,
-      type: 'keyword',
-    },
-  ]);
 
   messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
