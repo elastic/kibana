@@ -74,6 +74,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  // Resolve state updates before navigation to avoid triggering unsaved changes prompt
+  const deferNavigateToOnechatUrl = useCallback(
+    (...args: Parameters<typeof navigateToOnechatUrl>) => {
+      defer(() => navigateToOnechatUrl(...args));
+    },
+    [navigateToOnechatUrl]
+  );
   const { services } = useKibana();
   const {
     notifications,
@@ -132,17 +139,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     mode: 'onBlur',
     resolver: zodResolver(agentFormSchema),
   });
-  const { control, handleSubmit, reset, formState, watch, getValues } = formMethods;
-  const { errors, isDirty } = formState;
+  const { control, handleSubmit, reset, formState, watch } = formMethods;
+  const { errors, isDirty, isSubmitSuccessful } = formState;
   const hasErrors = Object.keys(errors).length > 0;
 
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: isDirty,
-    history,
-    http,
-    navigateToUrl,
-    openConfirm,
-  });
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (agentState && !isLoading) {
@@ -151,10 +152,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   }, [agentState, isLoading, reset]);
 
   const handleCancel = useCallback(() => {
-    // Bypass unsaved changes prompt
-    reset(getValues());
+    setIsCancelling(true);
     defer(() => navigateToOnechatUrl(appPaths.agents.list));
-  }, [navigateToOnechatUrl, reset, getValues]);
+  }, [navigateToOnechatUrl]);
 
   const handleSave = useCallback(
     async (
@@ -167,15 +167,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       setSubmittingButtonId(buttonId);
       try {
         await submit(data);
-        reset(data);
       } finally {
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        navigateToOnechatUrl(appPaths.agents.list);
+        deferNavigateToOnechatUrl(appPaths.agents.list);
       }
     },
-    [submit, navigateToOnechatUrl, reset]
+    [submit, deferNavigateToOnechatUrl]
   );
 
   const handleSaveAndChat = useCallback(
@@ -184,9 +183,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
     },
-    [navigateToOnechatUrl, handleSave]
+    [deferNavigateToOnechatUrl, handleSave]
   );
 
   const isFormDisabled = isLoading || isSubmitting;
@@ -196,6 +195,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const [isAdditionalActionsMenuOpen, setAdditionalActionsMenuOpen] = useState(false);
 
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty && !isSubmitSuccessful && !isCancelling,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+  });
 
   const agentTools = watch('configuration.tools');
   const activeToolsCount = useMemo(() => {

@@ -92,6 +92,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  // Resolve state updates before navigation to avoid triggering unsaved changes prompt
+  const deferNavigateToOnechatUrl = useCallback(
+    (...args: Parameters<typeof navigateToOnechatUrl>) => {
+      defer(() => navigateToOnechatUrl(...args));
+    },
+    [navigateToOnechatUrl]
+  );
   const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
     OPEN_TEST_FLYOUT_QUERY_PARAM,
     { defaultValue: false }
@@ -109,9 +116,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
-  const { reset, formState, watch, handleSubmit, getValues } = form;
-  const { errors, isDirty } = formState;
+  const { reset, formState, watch, handleSubmit } = form;
+  const { errors, isDirty, isSubmitSuccessful } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
   const { services } = useKibana();
   const {
@@ -132,10 +140,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam]);
 
   const handleCancel = useCallback(() => {
-    // Bypass unsaved changes prompt
-    reset(getValues());
-    defer(() => navigateToOnechatUrl(appPaths.tools.list));
-  }, [navigateToOnechatUrl, reset, getValues]);
+    setIsCancelling(true);
+    deferNavigateToOnechatUrl(appPaths.tools.list);
+  }, [deferNavigateToOnechatUrl]);
 
   const handleSave = useCallback(
     async (
@@ -171,15 +178,14 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               break;
           }
         }
-        reset(data);
       } finally {
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        navigateToOnechatUrl(appPaths.tools.list);
+        deferNavigateToOnechatUrl(appPaths.tools.list);
       }
     },
-    [mode, saveTool, navigateToOnechatUrl, reset]
+    [mode, saveTool, deferNavigateToOnechatUrl]
   );
 
   const handleTestTool = useCallback(() => {
@@ -211,13 +217,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   });
 
   const isViewMode = mode === ToolFormMode.View;
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: !isViewMode && isDirty,
-    history,
-    http,
-    navigateToUrl,
-    openConfirm,
-  });
   const hasErrors = Object.keys(errors).length > 0;
 
   const renderSaveButton = useCallback(
@@ -284,6 +283,14 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       submittingButtonId,
     ]
   );
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: !isViewMode && isDirty && !isSubmitSuccessful && !isCancelling,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+  });
 
   return (
     <FormProvider {...form}>
