@@ -46,19 +46,21 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
   }, [props.dataView.fields]);
 
   const data = useMemo((): TimelineItem[] => {
-    return props.data.map((row) => ({
-      _id: row.raw._id as string,
-      _index: row.raw._index as string,
-      ecs: {
-        ...EcsFlat,
+    return props.data.map((row) => {
+      const ecs = structuredClone(EcsFlat) as unknown as EcsSecurityExtension;
+      ecs._id = row.raw._id as string;
+      ecs._index = row.raw._index as string;
+
+      return {
         _id: row.raw._id as string,
         _index: row.raw._index as string,
-      } as unknown as EcsSecurityExtension,
-      data: [
-        ...Object.entries(row.raw.fields ?? {}).map(([field, value]) => ({ field, value })),
-        { field: '_id', value: [row.raw._id] },
-      ],
-    }));
+        ecs,
+        data: [
+          ...Object.entries(row.raw.fields ?? {}).map(([field, value]) => ({ field, value })),
+          { field: '_id', value: [row.raw._id] },
+        ],
+      };
+    });
   }, [props.data]);
 
   useEffect(() => {
