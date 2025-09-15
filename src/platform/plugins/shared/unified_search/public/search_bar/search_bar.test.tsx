@@ -26,6 +26,7 @@ import { DataViewPicker } from '..';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 
 const noop = jest.fn();
 
@@ -83,11 +84,10 @@ function wrapSearchBarInContext(
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
-      search: {
-        ...searchServiceMock.createStartContract(),
+      search: searchServiceMock.createStartContract({
         isBackgroundSearchEnabled: backgroundSearchEnabled,
-        session: { state$: sessionState$ },
-      },
+        session: getSessionServiceMock({ state$: sessionState$ }),
+      }),
       query: {
         savedQueries: {
           findSavedQueries: () =>
