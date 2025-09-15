@@ -42,7 +42,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
   view,
 }));
 
-const HARDCODED_PROCESSES_LIMIT = 10;
+const PROCESSES_LIMIT = 10;
 
 export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -157,7 +157,7 @@ export const Processes = () => {
                     id="xpack.infra.metrics.nodeDetails.processesHeader"
                     defaultMessage="Top {count} processes"
                     values={{
-                      count: data?.processList.length || HARDCODED_PROCESSES_LIMIT,
+                      count: data?.processList.length || PROCESSES_LIMIT,
                     }}
                   />
                 </span>
