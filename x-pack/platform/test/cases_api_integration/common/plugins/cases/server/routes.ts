@@ -307,7 +307,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
     async (context, req, res) => {
       try {
         const [_, { taskManager }] = await core.getStartServices();
-
+        logger.info(`Request to run scheduler task id: ${CAI_SCHEDULER_TASK_ID}`);
         return res.ok({
           body: await taskManager.runSoon(CAI_SCHEDULER_TASK_ID),
         });
