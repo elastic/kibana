@@ -18,6 +18,7 @@ export class ChatDataRegistryPlugin
       title: 'Chat Data Registry',
       appRoute: '/app/chat-data-registry',
       category: DEFAULT_APP_CATEGORIES.chat,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         return renderApp(params);
