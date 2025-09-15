@@ -1296,7 +1296,6 @@ describe('Both modes', () => {
     });
   });
 
-  // TODO: potentially FTR test
   describe('Keyboard navigation', () => {
     /**
      * GIVEN focus is on any menu item within a menu (primary, footer, or submenu)
