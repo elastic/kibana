@@ -24,7 +24,8 @@ export const buildConstantsDefinitions = (
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
+  documentationValue?: string
 ): ISuggestionItem[] =>
   userConstants.map((label) => ({
     label,
@@ -38,6 +39,7 @@ export const buildConstantsDefinitions = (
       i18n.translate('kbn-esql-ast.esql.autocomplete.constantDefinition', {
         defaultMessage: `Constant`,
       }),
+    ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
     sortText: sortText ?? 'A',
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
@@ -50,10 +52,15 @@ export function getDateLiterals(options?: {
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
       i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
-        defaultMessage: 'Named parameter',
+        defaultMessage: 'Bind to time filter',
       }),
       '1A',
-      options
+      options,
+      // appears when the user opens the second level popover
+      i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
+        defaultMessage:
+          'Use these parameters to automatically bind to the current time filter range.',
+      })
     ),
     {
       label: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePickerLabel', {
