@@ -496,6 +496,18 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
+    // Check for prompt file changes and conditionally add pipeline step
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/local_prompt_object\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
+      ])
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     emitPipeline(pipeline);
