@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
-import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
+import type { ReactNode } from 'react';
+import { EuiPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import { useRovingIndex } from '../../hooks/use_roving_index';
 
@@ -33,7 +34,13 @@ export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
   useRovingIndex(ref);
 
   return (
-    <div ref={ref}>
+    <div
+      role="region"
+      aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
+        defaultMessage: 'Side panel',
+      })}
+      ref={ref}
+    >
       <EuiPanel
         className="side_panel"
         css={css`

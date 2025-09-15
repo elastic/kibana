@@ -91,6 +91,7 @@ export const Default: StoryObj<PropsAndArgs> = {
       );
     },
   ],
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const Collapsed: StoryObj<PropsAndArgs> = {
@@ -108,6 +109,7 @@ export const Collapsed: StoryObj<PropsAndArgs> = {
   args: {
     isCollapsed: true,
   },
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const WithMinimalItems: StoryObj<PropsAndArgs> = {
@@ -128,6 +130,7 @@ export const WithMinimalItems: StoryObj<PropsAndArgs> = {
       footerItems: PRIMARY_MENU_FOOTER_ITEMS.slice(0, 2),
     },
   },
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const WithManyItems: StoryObj<PropsAndArgs> = {
@@ -168,6 +171,24 @@ export const WithManyItems: StoryObj<PropsAndArgs> = {
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
     },
   },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithinLayout: StoryObj<PropsAndArgs> = {
+  name: 'Navigation within Layout',
+  render: (args) => <Layout {...args} />,
+};
+
+const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+
+  return (
+    <Navigation
+      {...props}
+      activeItemId={activeItemId}
+      onItemClick={(item) => setActiveItemId(item.id)}
+    />
+  );
 };
 
 const Layout = ({ ...props }: PropsAndArgs) => {
@@ -212,15 +233,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               backgroundColor={euiTheme.colors.backgroundFilledText}
             />
           }
-          navigation={
-            <Navigation
-              activeItemId={props.activeItemId}
-              isCollapsed={props.isCollapsed}
-              items={props.items}
-              logo={props.logo}
-              setWidth={setNavigationWidth}
-            />
-          }
+          navigation={<ControlledNavigation {...props} setWidth={setNavigationWidth} />}
           sidebar={
             <Box
               label="Global Sidebar"
@@ -259,9 +272,4 @@ const Layout = ({ ...props }: PropsAndArgs) => {
       </ChromeLayoutConfigProvider>
     </>
   );
-};
-
-export const WithinLayout: StoryObj<PropsAndArgs> = {
-  name: 'Navigation within Layout',
-  render: (args) => <Layout {...args} />,
 };

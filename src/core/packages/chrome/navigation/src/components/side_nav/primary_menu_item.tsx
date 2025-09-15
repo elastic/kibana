@@ -24,7 +24,8 @@ export interface SideNavPrimaryMenuItemProps extends MenuItem {
   children: ReactNode;
   hasContent?: boolean;
   iconType: IconType;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   isCollapsed: boolean;
   isHorizontal?: boolean;
   onClick?: () => void;
@@ -38,7 +39,8 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       href,
       iconType,
       id,
-      isActive,
+      isHighlighted,
+      isCurrent,
       isCollapsed,
       isHorizontal,
       badgeType,
@@ -94,7 +96,8 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
         data-test-subj={`sideNavPrimaryMenuItem-${id}`}
         href={href}
         iconType={iconType}
-        isActive={isActive}
+        isHighlighted={isHighlighted}
+        isCurrent={isCurrent}
         isHorizontal={isHorizontal}
         isLabelVisible={isHorizontal ? true : !isCollapsed}
         ref={ref}

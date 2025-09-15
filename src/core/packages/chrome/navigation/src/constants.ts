@@ -12,6 +12,8 @@
  */
 export const EXPANDED_MENU_ITEM_HEIGHT = 67;
 export const COLLAPSED_MENU_ITEM_HEIGHT = 32;
+export const EXPANDED_MENU_GAP = 16;
+export const COLLAPSED_MENU_GAP = 4;
 export const MAX_MENU_ITEMS = 12;
 export const MAX_FOOTER_ITEMS = 5;
 export const POPOVER_HOVER_DELAY = 100;

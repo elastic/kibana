@@ -20,9 +20,10 @@ import { BetaBadge } from '../beta_badge';
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
   iconType: IconType;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
 }
 
@@ -31,7 +32,7 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
   (
-    { badgeType, hasContent, iconType, id, isActive, label, ...props },
+    { badgeType, hasContent, iconType, id, isHighlighted, isCurrent, label, ...props },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     const { euiTheme } = useEuiTheme();
@@ -45,10 +46,12 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
 
     const menuItem = (
       <EuiButtonIcon
+        aria-current={isCurrent ? 'page' : undefined}
         aria-label={label}
-        color={isActive ? 'primary' : 'text'}
+        color={isHighlighted ? 'primary' : 'text'}
+        data-highlighted={isHighlighted ? 'true' : 'false'}
         data-test-subj={`footerMenuItem-${id}`}
-        display={isActive ? 'base' : 'empty'}
+        display={isHighlighted ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
         size="s"
         {...props}
