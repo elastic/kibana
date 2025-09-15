@@ -39,7 +39,15 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
   });
 
   it('should skip creation if connector already exists', async () => {
-    const existingConnector = { id: 'existing-connector' };
+    const existingConnector = {
+      id: 'existing-connector',
+      referenced_by_count: 0,
+      name: 'test-connector',
+      connector_type_id: 'crowdstrike',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_system_action: false
+    };
     mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(existingConnector);
 
     await createCrowdStrikeConnectorIfNeeded({
@@ -58,8 +66,15 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
   });
 
   it('should create new connector if none exists', async () => {
-    mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(null);
-    const newConnector = { id: 'new-connector' };
+    mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(undefined);
+    const newConnector = {
+      id: 'new-connector',
+      actionTypeId: 'crowdstrike',
+      name: 'test-connector',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false
+    };
     mockedConnectorsServices.createConnector.mockResolvedValue(newConnector);
 
     await createCrowdStrikeConnectorIfNeeded({
@@ -84,8 +99,15 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
   });
 
   it('should use custom name when provided', async () => {
-    mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(null);
-    const newConnector = { id: 'new-connector' };
+    mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(undefined);
+    const newConnector = {
+      id: 'new-connector',
+      actionTypeId: 'crowdstrike',
+      name: 'test-connector',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false
+    };
     mockedConnectorsServices.createConnector.mockResolvedValue(newConnector);
 
     await createCrowdStrikeConnectorIfNeeded({

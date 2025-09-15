@@ -224,7 +224,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
     if (existingAgentVms.data.length > 0) {
       log.info(
-        `A Fleet agent VM already exists - will reuse it: ${existingAgentVms.data[0].name}.\nTIP: Use 'multipass delete ${existingAgentVms.data[0].name}' to force creation of a new one`
+        `A Fleet agent VM already exists - will reuse it: ${existingAgentVms.data[0]}.\nTIP: Use 'multipass delete ${existingAgentVms.data[0]}' to force creation of a new one`
       );
 
       agentPolicyVm = await createMultipassHostVmClient(existingAgentVms.data[0], log);
@@ -317,11 +317,10 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   log.info('Running CrowdStrike detection test commands...');
   let detectionCount = 0;
-  let commandFailureCount = 0;
 
   for (const command of crowdStrikeTestCommands) {
     try {
-      const result = await debugExec(command);
+      await debugExec(command);
       log.warning(`⚠️  CrowdStrike test command executed without blocking: ${command}`);
       log.warning('   This may indicate CrowdStrike is not in prevention mode or the test script is not available');
       successCount++;

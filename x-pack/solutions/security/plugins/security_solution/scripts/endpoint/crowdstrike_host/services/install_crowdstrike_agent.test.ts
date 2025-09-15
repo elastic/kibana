@@ -22,24 +22,24 @@ const mockedSpaces = spaces as jest.Mocked<typeof spaces>;
 describe('onboardVmHostWithCrowdStrike', () => {
   let mockKbnClient: jest.Mocked<KbnClient>;
   let mockLog: ReturnType<typeof createToolingLogger>;
-  let mockHostVm: Partial<HostVm>;
+  let mockHostVm: HostVm;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockKbnClient = {
       request: jest.fn(),
-    } as jest.Mocked<KbnClient>;
+    } as unknown as jest.Mocked<KbnClient>;
 
     mockLog = createToolingLogger();
 
     mockHostVm = {
+      type: 'multipass',
       name: 'test-vm',
       upload: jest.fn().mockResolvedValue({ filePath: '/uploaded/path' }),
       exec: jest.fn().mockResolvedValue({ stdout: 'success' }),
       info: jest.fn().mockReturnValue('VM info'),
-    };
-
+    } as unknown as HostVm;
     mockedSpaces.fetchActiveSpace.mockResolvedValue({
       id: 'default',
       name: 'Default',
@@ -55,8 +55,10 @@ describe('onboardVmHostWithCrowdStrike', () => {
       kbnClient: mockKbnClient,
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
+      platform: 'linux',
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
+      customerId: 'test-customer-id',
       apiUrl: 'https://api.crowdstrike.com',
     };
 
@@ -79,14 +81,16 @@ describe('onboardVmHostWithCrowdStrike', () => {
   it('should reuse existing VM when forceNewHost is false', async () => {
     const existingVm = 'existing-vm';
     mockedVmServices.findVm.mockResolvedValue({ data: [existingVm] });
-    mockedVmServices.createMultipassHostVmClient.mockResolvedValue(mockHostVm as HostVm);
+    mockedVmServices.createMultipassHostVmClient.mockReturnValue(mockHostVm);
 
     const options = {
       kbnClient: mockKbnClient,
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
+      platform: 'linux',
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
+      customerId: 'test-customer-id',
       apiUrl: 'https://api.crowdstrike.com',
       forceNewHost: false,
     };
@@ -106,8 +110,10 @@ describe('onboardVmHostWithCrowdStrike', () => {
       kbnClient: mockKbnClient,
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
+      platform: 'linux',
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
+      customerId: 'test-customer-id',
       apiUrl: 'https://api.crowdstrike.com',
       forceNewHost: true,
     };

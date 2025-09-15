@@ -25,17 +25,21 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
 
     mockKbnClient = {
       request: jest.fn(),
-    } as jest.Mocked<KbnClient>;
+    } as unknown as jest.Mocked<KbnClient>;
 
     mockLog = createToolingLogger();
   });
 
   it('should skip creation if rule already exists', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'existing-rule-id',
-    };
+    } as any;
     mockedDetectionRulesServices.findRules.mockResolvedValue({
+      page: 1,
+      perPage: 10,
+      total: 1,
       data: [existingRule],
     });
 
@@ -49,11 +53,12 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
   });
 
   it('should create new rule if none exists', async () => {
-    mockedDetectionRulesServices.findRules.mockResolvedValue({ data: [] });
+    mockedDetectionRulesServices.findRules.mockResolvedValue({ page: 1, perPage: 10, total: 0, data: [] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'new-rule-id',
-    };
+    } as any;
     mockedDetectionRulesServices.createRule.mockResolvedValue(newRule);
 
     const result = await createDetectionEngineCrowdStrikeRuleIfNeeded(mockKbnClient, mockLog);
@@ -70,11 +75,12 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
   });
 
   it('should include namespace in index patterns when provided', async () => {
-    mockedDetectionRulesServices.findRules.mockResolvedValue({ data: [] });
+    mockedDetectionRulesServices.findRules.mockResolvedValue({ page: 1, perPage: 10, total: 0, data: [] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'new-rule-id',
-    };
+    } as any;
     mockedDetectionRulesServices.createRule.mockResolvedValue(newRule);
 
     await createDetectionEngineCrowdStrikeRuleIfNeeded(mockKbnClient, mockLog, 'test-namespace');
