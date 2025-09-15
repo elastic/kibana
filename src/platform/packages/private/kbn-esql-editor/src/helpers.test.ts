@@ -10,7 +10,7 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MonacoMessage } from './helpers';
 import {
-  Parser,
+  parseErrors,
   parseWarning,
   getIndicesList,
   getRemoteIndicesList,
@@ -18,13 +18,13 @@ import {
 } from './helpers';
 
 describe('helpers', function () {
-  describe('Parser.parseErrors', function () {
+  describe('parseErrors', function () {
     it('should return the correct error object from ESQL ES response for an one liner query', function () {
       const error = new Error(
         '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem\nline 1:8: Unknown column [miaou]'
       );
       const errors = [error];
-      expect(Parser.parseErrors(errors, 'SELECT miaou from test')).toEqual([
+      expect(parseErrors(errors, 'SELECT miaou from test')).toEqual([
         {
           endColumn: 14,
           endLineNumber: 1,
@@ -42,7 +42,7 @@ describe('helpers', function () {
       );
       const errors = [error];
       expect(
-        Parser.parseErrors(
+        parseErrors(
           errors,
           `SELECT * 
       FROM "kibana_sample_data_ecommerce" 
@@ -63,7 +63,7 @@ describe('helpers', function () {
     it('should return the generic error object for an error of unknown format', function () {
       const error = new Error('I am an unknown error');
       const errors = [error];
-      expect(Parser.parseErrors(errors, `FROM "kibana_sample_data_ecommerce"`)).toEqual([
+      expect(parseErrors(errors, `FROM "kibana_sample_data_ecommerce"`)).toEqual([
         {
           endColumn: 10,
           endLineNumber: 1,
