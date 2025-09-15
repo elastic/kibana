@@ -253,10 +253,10 @@ export const buildResponseActionResult = (
 export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppContext) => {
   return async (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, CancelActionRequestBody>,
+    request: KibanaRequest,
     logger: Logger
   ): Promise<void> => {
-    const { parameters } = request.body;
+    const { parameters } = request.body as CancelActionRequestBody;
     const actionId = parameters.action_id;
 
     // Get space ID from context
@@ -270,7 +270,7 @@ export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppC
     }
 
     // Validate that endpoint_id (if provided) is associated with the original action
-    const requestEndpointId = request.body.endpoint_ids?.[0];
+    const requestEndpointId = (request.body as CancelActionRequestBody).endpoint_ids?.[0];
     if (requestEndpointId && originalAction.agent?.id) {
       const originalActionAgentIds = Array.isArray(originalAction.agent.id)
         ? originalAction.agent.id
