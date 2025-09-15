@@ -37,6 +37,7 @@ import {
   ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { buildStepExecutionId } from '../utils';
 
 export class StepFactory {
   constructor(
@@ -58,7 +59,11 @@ export class StepFactory {
       throw new Error('Step type is not defined for step: ' + JSON.stringify(step));
     }
     const stepLogger = this.workflowLogger.createStepLogger(
-      this.workflowRuntime.getCurrentStepExecutionId(),
+      buildStepExecutionId(
+        this.workflowRuntime.getWorkflowExecution().id,
+        stepId,
+        this.workflowRuntime.getCurrentNodeScope()
+      ),
       stepId,
       stepId,
       stepType

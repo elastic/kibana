@@ -12,6 +12,7 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/step_base';
+import { buildStepExecutionId } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -102,12 +103,20 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
-    for (const stepId of this.workflowExecutionState.getWorkflowExecution().stack) {
-      if (!this.workflowExecutionGraph.hasStep(stepId)) {
+    const scopePath: string[] = [];
+
+    for (const scopeId of this.workflowExecutionState.getWorkflowExecution().stack) {
+      if (!this.workflowExecutionGraph.hasStep(scopeId)) {
         continue;
       }
 
-      const stepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+      const stepExecution = this.workflowExecutionState.getStepExecution(
+        buildStepExecutionId(
+          this.workflowExecutionState.getWorkflowExecution().id,
+          scopeId,
+          scopePath
+        )
+      );
 
       if (!stepExecution) {
         continue;
@@ -118,6 +127,8 @@ export class WorkflowContextManager {
           stepContext.foreach = this.getStepState(stepExecution.stepId) as any;
           break;
       }
+
+      scopePath.push(scopeId);
     }
   }
 

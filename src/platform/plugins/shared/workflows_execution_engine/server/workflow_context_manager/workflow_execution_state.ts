@@ -67,6 +67,10 @@ export class WorkflowExecutionState {
     return Array.from(this.stepExecutions.values());
   }
 
+  public getStepExecution(stepExecutionId: string): EsWorkflowStepExecution | undefined {
+    return this.stepExecutions.get(stepExecutionId);
+  }
+
   /**
    * Retrieves all executions for a specific workflow step in chronological order.
    * @param stepId The unique identifier of the step

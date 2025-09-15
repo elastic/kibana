@@ -12,10 +12,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
-import crypto from 'crypto';
 import type { RunStepResult } from '../step/step_base';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import { buildStepExecutionId } from '../utils';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -92,30 +92,6 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
-  /**
-   * Generates a deterministic execution ID for the current workflow step.
-   *
-   * The algorithm combines the workflow execution ID, current step path, and step ID
-   * into a single string, then applies SHA-256 hashing and truncates to 16 characters
-   * to create a unique identifier.
-   *
-   * The ID is always predictable and deterministic because it's derived from static
-   * workflow state components (execution ID, path, step ID) rather than random values.
-   * This ensures the same step in the same execution context will always generate
-   * the same ID, enabling reliable step tracking and idempotent operations.
-   *
-   * @returns A 16-character hexadecimal string representing the current step execution ID
-   */
-  public getCurrentStepExecutionId(): string {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const node = this.getCurrentNode();
-    const stepId = node.stepId;
-    const path = this.buildCurrentStepPath();
-    const generatedId = [workflowExecution.id, ...path, stepId].join('_');
-    const hashedId = crypto.createHash('sha256').update(generatedId).digest('hex');
-    return hashedId;
-  }
-
   public getCurrentNode(): GraphNode {
     if (!this.workflowExecution.currentNodeId) {
       return null as any; // TODO: better handling
@@ -190,7 +166,11 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.workflowExecutionState.upsertStep({
-      id: this.getCurrentStepExecutionId(),
+      id: buildStepExecutionId(
+        this.workflowExecution.id,
+        currentNode.stepId,
+        this.buildCurrentStepPath()
+      ),
       stepId: currentNode.stepId,
       path: this.buildCurrentStepPath(),
       input: result.input,
@@ -207,7 +187,7 @@ export class WorkflowExecutionRuntimeManager {
   public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
     const stepId = this.getCurrentNode().stepId;
     this.workflowExecutionState.upsertStep({
-      id: this.getCurrentStepExecutionId(),
+      id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
       stepId,
       path: this.buildCurrentStepPath(),
       state,
@@ -234,7 +214,11 @@ export class WorkflowExecutionRuntimeManager {
         const stepStartedAt = new Date();
 
         const stepExecution = {
-          id: this.getCurrentStepExecutionId(),
+          id: buildStepExecutionId(
+            this.workflowExecution.id,
+            currentNode.stepId,
+            this.buildCurrentStepPath()
+          ),
           stepId: currentNode.stepId,
           stepType: currentNode.stepType,
           path: this.buildCurrentStepPath(),
@@ -279,7 +263,7 @@ export class WorkflowExecutionRuntimeManager {
         const executionTimeMs =
           completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
         const stepExecutionUpdate = {
-          id: this.getCurrentStepExecutionId(),
+          id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
           status: stepStatus,
           completedAt: completedAt.toISOString(),
           executionTimeMs,
@@ -313,7 +297,7 @@ export class WorkflowExecutionRuntimeManager {
         // if there is a last step execution, fail it
         // if not, create a new step execution with fail
         const stepExecutionUpdate = {
-          id: this.getCurrentStepExecutionId(),
+          id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
           status: ExecutionStatus.FAILED,
           output: null,
           error: String(error),
@@ -343,7 +327,7 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         this.workflowExecutionState.upsertStep({
-          id: this.getCurrentStepExecutionId(),
+          id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
           status: ExecutionStatus.WAITING,
         });
 
