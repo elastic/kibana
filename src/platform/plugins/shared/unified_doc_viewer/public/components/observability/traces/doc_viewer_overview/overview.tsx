@@ -37,6 +37,7 @@ import { SimilarSpans } from '../components/similar_spans';
 import { isTransaction } from '../helpers';
 import { TraceRootItemProvider } from './hooks/use_fetch_trace_root_item';
 import { TraceWaterfall } from '../components/trace_waterfall';
+import { Errors } from '../components/errors';
 
 export type OverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -112,6 +113,12 @@ export function Overview({
               docId={docId}
             />
           ) : null}
+          <Errors
+            traceId={traceId}
+            spanId={spanId}
+            transactionId={transactionId}
+            serviceName={flattenedHit[SERVICE_NAME]}
+          />
           {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
           <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
         </div>
