@@ -71,6 +71,12 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
       : i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL;
   }, [listType]);
 
+  const exceptionsTitle = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? i18n.EXCEPTION_UTILITY_ENDPOINT_TITLE
+      : i18n.EXCEPTION_UTILITY_TITLE;
+  }, [listType]);
+
   return (
     <>
       <ExceptionItems
@@ -96,7 +102,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         exceptionsUtilityComponent={() =>
           hideUtility ? null : (
             <ExceptionsUtility
-              exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
+              exceptionsTitle={exceptionsTitle}
               pagination={pagination}
               lastUpdated={lastUpdated}
             />
