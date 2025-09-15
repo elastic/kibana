@@ -31,7 +31,7 @@ export const CaseViewEvents = ({
           const eventAttachment = attachment as unknown as EventAttachment;
 
           return {
-            eventId: eventAttachment.id,
+            eventId: eventAttachment.eventId,
             index: eventAttachment.index,
           };
         }),

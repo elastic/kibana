@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { type DataView } from '@kbn/data-views-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
+import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import * as i18n from './translations';
 import { KibanaServices, useToasts } from '../../common/lib/kibana';
 
@@ -16,9 +17,9 @@ const searchEvents = async (
   signal: AbortSignal | undefined,
   dataView: DataView | undefined,
   parameters: {
-    caseId: string;
     columns: string[];
     eventIds: string[];
+    sort: SortColumnTable[];
   }
 ) => {
   if (!dataView) {
@@ -39,6 +40,9 @@ const searchEvents = async (
           },
         },
         fields: parameters.columns,
+        sort: parameters.sort.map((tableSort) => ({
+          [tableSort.columnId]: tableSort.sortDirection,
+        })),
       },
     })
   );
@@ -47,31 +51,21 @@ const searchEvents = async (
     throw new AbortError();
   }
 
-  // TODO: use timeline items here
-  // return buildDataTableRecordList({
-  //   dataView,
-  //   records: response?.rawResponse?.hits?.hits ?? [],
-  // });
-
-  return [];
+  return response?.rawResponse?.hits?.hits;
 };
 
 export const useGetEvents = (
-  dataView: DataView | undefined,
+  dataView: DataView,
   parameters: {
-    caseId: string;
     columns: string[];
     eventIds: string[];
+    sort: SortColumnTable[];
   }
 ) => {
   const toasts = useToasts();
 
   return useQuery(
-    casesQueriesKeys.caseEvents(parameters.caseId, [
-      dataView?.getIndexPattern(),
-      ...parameters.eventIds,
-      ...parameters.columns,
-    ]),
+    [dataView.getIndexPattern(), parameters.columns, parameters.eventIds, parameters.sort],
     ({ signal }) => searchEvents(signal, dataView, parameters),
     {
       onError: (error: Error) => {

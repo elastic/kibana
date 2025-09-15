@@ -4,3 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+export const ERROR_TITLE = 'TODO';
+
+export const DATA_VIEW_ERROR = 'TODO';

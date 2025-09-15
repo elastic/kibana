@@ -6,7 +6,6 @@
  */
 
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 
 import type {
@@ -366,5 +365,5 @@ export type CaseViewAlertsTableProps = Pick<
 };
 
 export interface CaseViewEventsTableProps {
-  events: { eventId: string; index: string | string[] }[];
+  events: { eventId: string | string[]; index: string | string[] }[];
 }

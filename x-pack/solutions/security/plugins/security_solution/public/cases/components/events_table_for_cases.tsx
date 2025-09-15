@@ -13,6 +13,7 @@ import type {
 import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
+import { type DataView } from '@kbn/data-views-plugin/public';
 import {
   getPageRowIndex,
   addBuildingBlockStyle,
@@ -24,7 +25,7 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import type { TimelineItem, DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
-import React, { useMemo, useEffect, useContext } from 'react';
+import React, { useMemo, useEffect, useContext, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { SecurityCellActionsTrigger } from '../../app/actions/constants';
@@ -47,52 +48,52 @@ export const MAX_ACTION_BUTTON_COUNT = 4;
 
 const defaultModel: SubsetDataTableModel = structuredClone(tableDefaults);
 
-export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
-  const dispatch = useDispatch();
+export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTableProps> = ({
+  dataView,
+  events,
+}) => {
+  const selectTableById = useMemo(() => getTableByIdSelector(), []);
 
-  const events = useGetEvents();
-  const dataView = useCaseEventsDataView();
+  const { defaultColumns, columns, loadingEventIds, itemsPerPage, itemsPerPageOptions, sort } =
+    useSelector(
+      (state: State) => selectTableById(state, EVENTS_TABLE_FOR_CASES_ID) ?? defaultModel
+    );
+
+  const eventsQueryResult = useGetEvents(dataView, {
+    eventIds: events.flatMap((event) =>
+      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
+    ),
+    columns: ['*'],
+    sort,
+  });
+
+  const dispatch = useDispatch();
 
   const browserFields = useMemo(() => {
     return buildBrowserFields(dataView.fields).browserFields;
-  }, [props.dataView.fields]);
+  }, [dataView.fields]);
 
   const data = useMemo((): TimelineItem[] => {
-    return props.data.map((row) => {
-      const ecs = structuredClone(EcsFlat) as unknown as EcsSecurityExtension;
-      ecs._id = row.raw._id as string;
-      ecs._index = row.raw._index as string;
+    return (
+      eventsQueryResult.data?.map((row) => {
+        const ecs = structuredClone(EcsFlat) as unknown as EcsSecurityExtension;
+        ecs._id = row?._id as string;
+        ecs._index = row._index as string;
 
-      return {
-        _id: row.raw._id as string,
-        _index: row.raw._index as string,
-        ecs,
-        data: [
-          ...Object.entries(row.raw.fields ?? {}).map(([field, value]) => ({ field, value })),
-          { field: '_id', value: [row.raw._id] },
-        ],
-      };
-    });
-  }, [props.data]);
+        return {
+          _id: row._id as string,
+          _index: row._index as string,
+          ecs,
+          data: [
+            ...Object.entries(row.fields ?? {}).map(([field, value]) => ({ field, value })),
+            { field: '_id', value: [row._id] },
+          ],
+        };
+      }) ?? []
+    );
+  }, [eventsQueryResult.data]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
-
-  const selectTableById = useMemo(() => getTableByIdSelector(), []);
-  const {
-    defaultColumns,
-    columns,
-    loadingEventIds,
-    itemsPerPage,
-    itemsPerPageOptions,
-    sort,
-    queryFields,
-  } = useSelector(
-    (state: State) => selectTableById(state, EVENTS_TABLE_FOR_CASES_ID) ?? defaultModel
-  );
-
-  useEffect(() => {
-    props.onChangeSorting(sort);
-  }, [props, sort]);
 
   useEffect(() => {
     dispatch(
@@ -113,10 +114,10 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
       pageIndex: 0,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
-      onChangeItemsPerPage: (perPage) => props.onChangePagination({ perPage, pageIndex: 0 }),
-      onChangePage: (pageIndex) => props.onChangePagination({ perPage: itemsPerPage, pageIndex }),
+      onChangeItemsPerPage: (perPage) => {},
+      onChangePage: (pageIndex) => {},
     }),
-    [itemsPerPage, itemsPerPageOptions, props]
+    [itemsPerPage, itemsPerPageOptions]
   );
 
   const leadingControlColumns = useMemo(
@@ -190,4 +191,25 @@ export const EventsTableForCases = (props: CaseViewEventsTableProps) => {
       rowRenderers={defaultRowRenderers as unknown as DeprecatedRowRenderer[]}
     />
   );
+};
+
+export const EventsTableForCases = ({ events }: CaseViewEventsTableProps) => {
+  const patterns = useMemo(
+    () =>
+      [
+        ...new Set(
+          events.flatMap((event) => (Array.isArray(event.index) ? event.index : [event.index]))
+        ),
+      ].join(),
+    [events]
+  );
+
+  const { dataView, status } = useCaseEventsDataView(patterns);
+
+  if (!dataView) {
+    // TODO: show spinner or fallback here
+    return null;
+  }
+
+  return <EventsTableForCasesBody dataView={dataView} events={events} />;
 };

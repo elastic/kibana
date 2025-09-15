@@ -7,10 +7,6 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import { type DataView } from '@kbn/data-views-plugin/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { lastValueFrom } from 'rxjs';
-import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { AlertAttachment, CaseCustomField, User, Attachment } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
