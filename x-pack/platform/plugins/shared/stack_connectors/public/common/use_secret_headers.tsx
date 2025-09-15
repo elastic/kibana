@@ -38,7 +38,7 @@ export function useSecretHeaders(connectorId?: string) {
     },
     {
       enabled: Boolean(connectorId),
-      refetchOnWindowFocus: false,
+      refetchOnMount: 'always',
       onError: (error: ServerError) => {
         toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
           title: 'error fetching secret headers',
