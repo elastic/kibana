@@ -7,247 +7,1441 @@
 
 import expect from 'expect';
 import { range } from 'lodash';
-
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { v4 as uuid } from 'uuid';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
-import type {
-  RuleAction,
-  RuleToImport,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
   getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import type {
+  ReadExceptionListItemRequestQueryInput,
+  ReadExceptionListRequestQueryInput,
+} from '@kbn/securitysolution-exceptions-common/api';
+import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
-  combineArraysToNdJson,
-  combineToNdJson,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
+  importRules,
+  importRulesWithSuccess,
 } from '../../../utils';
 import { createRule } from '../../../../../config/services/detections_response';
 import { deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
 
-const getRuleImportWithActions = (actions: RuleAction[]): RuleToImport => ({
-  id: '53aad690-544e-11ec-a349-11361cc441c4',
-  updated_at: '2021-12-03T15:33:13.271Z',
-  updated_by: 'elastic',
-  created_at: '2021-12-03T15:33:13.271Z',
-  created_by: 'elastic',
-  name: '7.16 test with action',
-  tags: [],
-  interval: '5m',
-  enabled: true,
-  description: 'test',
-  risk_score: 21,
-  severity: 'low',
-  license: '',
-  output_index: '',
-  meta: { from: '1m', kibana_siem_app_url: 'http://0.0.0.0:5601/s/7/app/security' },
-  author: [],
-  false_positives: [],
-  from: 'now-360s',
-  rule_id: 'aa525d7c-8948-439f-b32d-27e00c750246',
-  max_signals: 100,
-  risk_score_mapping: [],
-  severity_mapping: [],
-  threat: [],
-  to: 'now',
-  references: [],
-  version: 1,
-  exceptions_list: [],
-  immutable: false,
-  type: 'query',
-  language: 'kuery',
-  index: [
-    'apm-*-transaction*',
-    'traces-apm*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  query: '*:*',
-  filters: [],
-  throttle: '1h',
-  actions,
-});
-
-const getImportRuleBuffer = (connectorId: string) => {
-  const rule1 = getRuleImportWithActions([
-    {
-      group: 'default',
-      id: connectorId,
-      params: {
-        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-      },
-      action_type_id: '.slack',
-    },
-  ]);
-  const ndjson = combineToNdJson(rule1);
-
-  return Buffer.from(ndjson);
-};
-const getImportRuleWithConnectorsBuffer = (connectorId: string, originId?: string) => {
-  const rule1 = getRuleImportWithActions([
-    {
-      group: 'default',
-      id: connectorId,
-      params: {
-        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-      },
-      action_type_id: '.slack',
-    },
-  ]);
-  const connector = {
-    id: connectorId,
-    originId,
-    type: 'action',
-    updated_at: '2023-01-25T14:35:52.852Z',
-    created_at: '2023-01-25T14:35:52.852Z',
-    version: 'WzUxNTksMV0=',
-    attributes: {
-      actionTypeId: '.slack',
-      name: 'slack',
-      isMissingSecrets: false,
-      config: {},
-      secrets: {},
-    },
-    references: [],
-    migrationVersion: { action: '8.3.0' },
-    coreMigrationVersion: '8.7.0',
-  };
-  const ndjson = combineToNdJson(rule1, connector);
-
-  return Buffer.from(ndjson);
-};
+const RULE_TO_IMPORT_RULE_ID = 'imported-rule';
+const RULE_TO_IMPORT_RULE_ID_2 = 'another-imported-rule';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
+  const securitySolutionExceptionsApi = getService('securitySolutionExceptionsApi');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const spacesServices = getService('spaces');
 
-  // Failing: See https://github.com/elastic/kibana/issues/220971
-  // Failing: See https://github.com/elastic/kibana/issues/220971
-  describe.skip('@ess @serverless @skipInServerlessMKI import_rules', () => {
-    beforeEach(async () => {
-      await deleteAllRules(supertest, log);
+  describe('@ess @serverless @skipInServerlessMKI import custom rules', () => {
+    const spaceId = '4567-space';
+
+    before(async () => {
+      await spacesServices.delete(spaceId);
+      await spacesServices.create({
+        id: spaceId,
+        name: spaceId,
+      });
     });
 
-    describe('threshold validation', () => {
-      it('should result in partial success if no threshold-specific fields are provided', async () => {
-        const { threshold, ...rule } = getThresholdRuleForAlertTesting(['*']);
-        const ndjson = combineToNdJson(rule);
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+      await deleteAllRules(supertest, log, spaceId);
+      await deleteAllExceptions(supertest, log);
+      await deleteAllExceptions(supertest, log, spaceId);
+    });
 
+    describe('validation', () => {
+      it('rejects with an error if the file type is not that of a ndjson', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
+          .attach('file', Buffer.from(''), 'rules.txt')
+          .expect(400);
 
-        expect(body.errors[0]).toEqual({
-          error: { status_code: 400, message: 'threshold: Required' },
+        expect(body).toEqual({
+          status_code: 400,
+          message: 'Invalid file extension .txt',
         });
       });
 
-      it('should result in partial success if more than 3 threshold fields', async () => {
-        const baseRule = getThresholdRuleForAlertTesting(['*']);
-        const rule = {
-          ...baseRule,
-          threshold: {
-            ...baseRule.threshold,
-            field: ['field-1', 'field-2', 'field-3', 'field-4'],
-          },
-        };
-        const ndjson = combineToNdJson(rule);
+      describe('threshold rule type', () => {
+        it('results in partial success if no threshold-specific fields are provided', async () => {
+          const { threshold, ...rule } = getThresholdRuleForAlertTesting(['*']);
 
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
+          const importResponse = await importRules({
+            getService,
+            rules: [rule],
+            overwrite: false,
+          });
 
-        expect(body.errors[0]).toEqual({
-          error: {
-            message: 'Number of fields must be 3 or less',
-            status_code: 400,
-          },
+          expect(importResponse.errors[0]).toEqual({
+            error: { status_code: 400, message: 'threshold: Required' },
+          });
+        });
+
+        it('results in partial success if more than 3 threshold fields', async () => {
+          const baseRule = getThresholdRuleForAlertTesting(['*']);
+          const rule = {
+            ...baseRule,
+            threshold: {
+              ...baseRule.threshold,
+              field: ['field-1', 'field-2', 'field-3', 'field-4'],
+            },
+          };
+
+          const importResponse = await importRules({
+            getService,
+            rules: [rule],
+            overwrite: false,
+          });
+
+          expect(importResponse.errors[0]).toEqual({
+            error: {
+              message: 'Number of fields must be 3 or less',
+              status_code: 400,
+            },
+          });
+        });
+
+        it('results in partial success if threshold value is less than 1', async () => {
+          const baseRule = getThresholdRuleForAlertTesting(['*']);
+          const rule = {
+            ...baseRule,
+            threshold: {
+              ...baseRule.threshold,
+              value: 0,
+            },
+          };
+
+          const importResponse = await importRules({
+            getService,
+            rules: [rule],
+            overwrite: false,
+          });
+
+          expect(importResponse.errors[0]).toEqual({
+            error: {
+              message: 'threshold.value: Number must be greater than or equal to 1',
+              status_code: 400,
+            },
+          });
+        });
+
+        it('results in 400 error if cardinality is also an agg field', async () => {
+          const baseRule = getThresholdRuleForAlertTesting(['*']);
+          const rule = {
+            ...baseRule,
+            threshold: {
+              ...baseRule.threshold,
+              cardinality: [
+                {
+                  field: 'process.name',
+                  value: 5,
+                },
+              ],
+            },
+          };
+
+          const importResponse = await importRules({
+            getService,
+            rules: [rule],
+            overwrite: false,
+          });
+
+          expect(importResponse.errors[0]).toEqual({
+            error: {
+              message: 'Cardinality of a field that is being aggregated on is always 1',
+              status_code: 400,
+            },
+          });
         });
       });
+    });
 
-      it('should result in partial success if threshold value is less than 1', async () => {
-        const baseRule = getThresholdRuleForAlertTesting(['*']);
-        const rule = {
-          ...baseRule,
-          threshold: {
-            ...baseRule.threshold,
-            value: 0,
-          },
-        };
-        const ndjson = combineToNdJson(rule);
+    const testImportingInSpace = (kibanaSpaceId?: string) => {
+      describe('only rules', () => {
+        it('imports a custom query rule', async () => {
+          const IMPORT_PAYLOAD = [
+            getCustomQueryRuleParams({
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+            }),
+          ];
 
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
+          await importRulesWithSuccess({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
 
-        expect(body.errors[0]).toEqual({
-          error: {
-            message: 'threshold.value: Number must be greater than or equal to 1',
-            status_code: 400,
-          },
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule).toMatchObject(IMPORT_PAYLOAD[0]);
         });
-      });
 
-      it('should result in 400 error if cardinality is also an agg field', async () => {
-        const baseRule = getThresholdRuleForAlertTesting(['*']);
-        const rule = {
-          ...baseRule,
-          threshold: {
-            ...baseRule.threshold,
-            cardinality: [
+        it('imports a rule with defined optional fields', async () => {
+          const IMPORT_PAYLOAD = [
+            getCustomQueryRuleParams({
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+              investigation_fields: { field_names: ['foo'] },
+              related_integrations: [
+                {
+                  package: 'somePackage',
+                  version: '^1.0.0',
+                },
+              ],
+              required_fields: [
+                {
+                  name: 'fieldA',
+                  type: 'string',
+                },
+              ],
+            }),
+          ];
+
+          await importRulesWithSuccess({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule).toMatchObject({
+            investigation_fields: { field_names: ['foo'] },
+            related_integrations: [
               {
-                field: 'process.name',
-                value: 5,
+                package: 'somePackage',
+                version: '^1.0.0',
               },
             ],
-          },
-        };
-        const ndjson = combineToNdJson(rule);
+            required_fields: [
+              {
+                name: 'fieldA',
+                type: 'string',
+              },
+            ],
+          });
+        });
 
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+        it('imports rules in bulk', async () => {
+          const IMPORT_PAYLOAD = [
+            getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID }),
+            getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID_2 }),
+          ];
+
+          await importRulesWithSuccess({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          const { body: importedRule1 } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule1).toMatchObject(IMPORT_PAYLOAD[0]);
+
+          const { body: importedRule2 } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID_2 },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule2).toMatchObject(IMPORT_PAYLOAD[1]);
+        });
+      });
+
+      describe('rules with action connectors', () => {
+        it('import a rule with an action connector', async () => {
+          const webHookConnectorParams = getWebHookConnectorParams();
+          const connectorId = await createConnector(
+            supertest,
+            webHookConnectorParams,
+            undefined,
+            kibanaSpaceId
+          );
+          const ACTION = {
+            group: 'default',
+            id: connectorId,
+            action_type_id: webHookConnectorParams.connector_type_id,
+            params: {},
+          };
+          const IMPORT_PAYLOAD = [
+            getCustomQueryRuleParams({
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+              actions: [ACTION],
+            }),
+          ];
+
+          await importRulesWithSuccess({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule.actions[0]).toMatchObject(ACTION);
+        });
+
+        it('imports multiple rules with action connectors in bulk', async () => {
+          const WEBHOOK_CONNECTOR_ID = uuid();
+          const WEBHOOK_CONNECTOR = {
+            id: WEBHOOK_CONNECTOR_ID,
+            type: 'action',
+            updated_at: '2023-01-25T14:35:52.852Z',
+            created_at: '2023-01-25T14:35:52.852Z',
+            version: 'WzUxNTksMV0=',
+            attributes: {
+              actionTypeId: '.webhook',
+              name: 'webhook',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+            },
+            references: [],
+            migrationVersion: { action: '8.3.0' },
+            coreMigrationVersion: '8.7.0',
+          };
+          const INDEX_CONNECTOR_ID = uuid();
+          const INDEX_CONNECTOR = {
+            id: INDEX_CONNECTOR_ID,
+            type: 'action',
+            updated_at: '2023-01-25T14:35:52.852Z',
+            created_at: '2023-01-25T14:35:52.852Z',
+            version: 'WzUxNTksMV0=',
+            attributes: {
+              actionTypeId: '.index',
+              name: 'index',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+            },
+            references: [],
+            migrationVersion: { action: '8.3.0' },
+            coreMigrationVersion: '8.7.0',
+          };
+          const CUSTOM_QUERY_RULE_WITH_WEBHOOK_CONNECTOR = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            actions: [
+              {
+                group: 'default',
+                id: WEBHOOK_CONNECTOR_ID,
+                action_type_id: '.webhook',
+                params: {},
+              },
+            ],
+          });
+          const CUSTOM_QUERY_RULE_WITH_INDEX_CONNECTOR = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID_2,
+            actions: [
+              {
+                group: 'default',
+                id: INDEX_CONNECTOR_ID,
+                action_type_id: '.index',
+                params: {},
+              },
+            ],
+          });
+
+          const IMPORT_PAYLOAD = [
+            CUSTOM_QUERY_RULE_WITH_WEBHOOK_CONNECTOR,
+            CUSTOM_QUERY_RULE_WITH_INDEX_CONNECTOR,
+            WEBHOOK_CONNECTOR,
+            INDEX_CONNECTOR,
+          ];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            success_count: 2,
+            rules_count: 2,
+            errors: [],
+            action_connectors_success: true,
+            action_connectors_success_count: 2,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
+          });
+        });
+      });
+
+      const assertExceptionList = async ({
+        query,
+        expected,
+      }: {
+        query: ReadExceptionListRequestQueryInput;
+        expected: Record<string, unknown>;
+      }) => {
+        const { body: exceptionList } = await securitySolutionExceptionsApi
+          .readExceptionList(
+            {
+              query,
+            },
+            kibanaSpaceId
+          )
           .expect(200);
 
-        expect(body.errors[0]).toEqual({
-          error: {
-            message: 'Cardinality of a field that is being aggregated on is always 1',
-            status_code: 400,
+        expect(exceptionList).toMatchObject(expected);
+      };
+      const assertExceptionListItems = async ({
+        query,
+        expected,
+      }: {
+        query: ReadExceptionListItemRequestQueryInput;
+        expected: Record<string, unknown>;
+      }) => {
+        const { body: exceptionListItem } = await securitySolutionExceptionsApi
+          .readExceptionListItem(
+            {
+              query,
+            },
+            kibanaSpaceId
+          )
+          .expect(200);
+
+        expect(exceptionListItem).toMatchObject(expected);
+      };
+
+      describe('rules with exceptions', () => {
+        it('imports a rule with a single space exception', async () => {
+          const CUSTOM_QUERY_RULE_WITH_EXCEPTION = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            exceptions_list: [
+              {
+                id: 'single',
+                list_id: 'test_list_id',
+                type: 'rule_default',
+                namespace_type: 'single',
+              },
+            ],
+          });
+          const EXCEPTION_LIST = {
+            ...getImportExceptionsListSchemaMock('test_list_id'),
+            type: 'rule_default',
+          };
+          const EXCEPTION_LIST_ITEM = getImportExceptionsListItemNewerVersionSchemaMock(
+            'test_item_id',
+            'test_list_id'
+          );
+          const IMPORT_PAYLOAD = [
+            CUSTOM_QUERY_RULE_WITH_EXCEPTION,
+            EXCEPTION_LIST,
+            EXCEPTION_LIST_ITEM,
+          ];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 1,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule.exceptions_list).toEqual([
+            {
+              ...CUSTOM_QUERY_RULE_WITH_EXCEPTION.exceptions_list?.[0],
+              id: expect.any(String),
+            },
+          ]);
+
+          await assertExceptionList({
+            query: {
+              id: importedRule.exceptions_list[0].id,
+            },
+            expected: EXCEPTION_LIST,
+          });
+          await assertExceptionListItems({
+            query: {
+              item_id: 'test_item_id',
+              namespace_type: 'single',
+            },
+            expected: EXCEPTION_LIST_ITEM,
+          });
+        });
+
+        it('imports a rule with space agnostic exception', async () => {
+          const CUSTOM_QUERY_RULE_WITH_EXCEPTION = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            exceptions_list: [
+              {
+                id: 'agnostic',
+                list_id: 'test_list_agnostic_id',
+                type: 'detection',
+                namespace_type: 'agnostic',
+              },
+            ],
+          });
+          const SPACE_AGNOSTIC_EXCEPTION_LIST = {
+            ...getImportExceptionsListSchemaMock('test_list_agnostic_id'),
+            type: 'detection',
+            namespace_type: 'agnostic',
+          };
+          const SPACE_AGNOSTIC_EXCEPTION_LIST_ITEM = {
+            ...getImportExceptionsListItemNewerVersionSchemaMock(
+              'test_item_id',
+              'test_list_agnostic_id'
+            ),
+            namespace_type: 'agnostic',
+          };
+          const IMPORT_PAYLOAD = [
+            CUSTOM_QUERY_RULE_WITH_EXCEPTION,
+            SPACE_AGNOSTIC_EXCEPTION_LIST,
+            SPACE_AGNOSTIC_EXCEPTION_LIST_ITEM,
+          ];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 1,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule.exceptions_list).toEqual([
+            {
+              ...CUSTOM_QUERY_RULE_WITH_EXCEPTION.exceptions_list?.[0],
+              id: expect.any(String),
+            },
+          ]);
+
+          await assertExceptionList({
+            query: {
+              id: importedRule.exceptions_list[0].id,
+              namespace_type: 'agnostic',
+            },
+            expected: SPACE_AGNOSTIC_EXCEPTION_LIST,
+          });
+          await assertExceptionListItems({
+            query: {
+              item_id: 'test_item_id',
+              namespace_type: 'agnostic',
+            },
+            expected: SPACE_AGNOSTIC_EXCEPTION_LIST_ITEM,
+          });
+        });
+
+        it('imports a rule with exception having comments', async () => {
+          const CUSTOM_QUERY_RULE_WITH_EXCEPTION = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            exceptions_list: [
+              {
+                id: 'abc',
+                list_id: 'i_exist',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          });
+          const EXCEPTION_LIST = {
+            ...getImportExceptionsListSchemaMock('i_exist'),
+            id: 'abc',
+            type: 'detection',
+            namespace_type: 'single',
+          };
+          const EXCEPTION_LIST_ITEM = {
+            comments: [
+              {
+                comment: 'This is an exception to the rule',
+                created_at: '2022-02-04T02:27:40.938Z',
+                created_by: 'elastic',
+                id: '845fc456-91ff-4530-bcc1-5b7ebd2f75b5',
+              },
+              {
+                comment: 'I decided to add a new comment',
+              },
+            ],
+            description: 'some description',
+            entries: [
+              {
+                entries: [
+                  {
+                    field: 'nested.field',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'some value',
+                  },
+                ],
+                field: 'some.parentField',
+                type: 'nested',
+              },
+              {
+                field: 'some.not.nested.field',
+                operator: 'included',
+                type: 'match',
+                value: 'some value',
+              },
+            ],
+            item_id: 'item_id_1',
+            list_id: 'i_exist',
+            name: 'Query with a rule id',
+            type: 'simple',
+          };
+
+          const IMPORT_PAYLOAD = [
+            CUSTOM_QUERY_RULE_WITH_EXCEPTION,
+            EXCEPTION_LIST,
+            EXCEPTION_LIST_ITEM,
+          ];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 1,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule.exceptions_list).toEqual([
+            {
+              ...CUSTOM_QUERY_RULE_WITH_EXCEPTION.exceptions_list?.[0],
+              id: expect.any(String),
+            },
+          ]);
+
+          await assertExceptionList({
+            query: {
+              id: importedRule.exceptions_list[0].id,
+            },
+            expected: {
+              ...EXCEPTION_LIST,
+              id: importedRule.exceptions_list[0].id,
+            },
+          });
+          await assertExceptionListItems({
+            query: {
+              item_id: 'item_id_1',
+            },
+            expected: {
+              ...EXCEPTION_LIST_ITEM,
+              comments: [
+                {
+                  ...EXCEPTION_LIST_ITEM.comments[0],
+                  id: expect.any(String),
+                  created_by: expect.any(String),
+                  created_at: expect.any(String),
+                },
+                EXCEPTION_LIST_ITEM.comments[1],
+              ],
+            },
+          });
+        });
+
+        it('imports 100 rules with exceptions in bulk', async () => {
+          const RULES_TO_IMPORT = range(150).map((i) =>
+            getCustomQueryRuleParams({
+              rule_id: `imported-rule-${i}`,
+              exceptions_list: [
+                {
+                  id: `${i}`,
+                  list_id: `exception-${i}`,
+                  type: 'detection',
+                  namespace_type: 'single',
+                },
+              ],
+            })
+          );
+          const EXCEPTION_LISTS = range(150).map((i) => ({
+            ...getImportExceptionsListSchemaMock(`exception-${i}`),
+            id: `${i}`,
+            type: 'detection',
+            namespace_type: 'single',
+          }));
+          const EXCEPTION_LISTS_ITEMS = range(150).map((i) => ({
+            description: 'some description',
+            entries: [
+              {
+                field: 'some.not.nested.field',
+                operator: 'included',
+                type: 'match',
+                value: 'some value',
+              },
+            ],
+            item_id: `item_id_${i}`,
+            list_id: `exception-${i}`,
+            name: 'Query with a rule id',
+            type: 'simple',
+          }));
+          const IMPORT_PAYLOAD = [...RULES_TO_IMPORT, ...EXCEPTION_LISTS, ...EXCEPTION_LISTS_ITEMS];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            success_count: 150,
+            rules_count: 150,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 150,
+          });
+        });
+
+        it('removes non-existent exception list from the imported rule', async () => {
+          const { body: exceptionBody } = await securitySolutionExceptionsApi
+            .createExceptionList(
+              {
+                body: {
+                  ...getCreateExceptionListMinimalSchemaMock(),
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              },
+              kibanaSpaceId
+            )
+            .expect(200);
+
+          const IMPORT_PAYLOAD = [
+            getCustomQueryRuleParams({
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+              exceptions_list: [
+                {
+                  id: exceptionBody.id,
+                  list_id: 'i_exist',
+                  type: 'detection',
+                  namespace_type: 'single',
+                },
+                {
+                  id: 'i_dont_exist',
+                  list_id: '123',
+                  type: 'detection',
+                  namespace_type: 'single',
+                },
+              ],
+            }),
+          ];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: false,
+            success_count: 1,
+            rules_count: 1,
+            errors: [
+              {
+                rule_id: RULE_TO_IMPORT_RULE_ID,
+                error: {
+                  message: `Rule with rule_id: "${RULE_TO_IMPORT_RULE_ID}" references a non existent exception list of list_id: "123". Reference has been removed.`,
+                  status_code: 400,
+                },
+              },
+            ],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 0,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            kibanaSpaceId
+          );
+
+          expect(importedRule).toMatchObject({
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: 'i_exist',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+            ],
+          });
+        });
+      });
+
+      describe('exceptions not related to rules', () => {
+        it('imports an exception list with list items', async () => {
+          // Custom rules import endpoint expects as minimum one rule in the import payload.
+          // Though provided rule doesn't have to reference the exception list.
+          const CUSTOM_QUERY_RULE = getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID });
+          const EXCEPTION_LIST = getImportExceptionsListSchemaMock('test_list_id');
+          const EXCEPTION_LIST_ITEM = getImportExceptionsListItemNewerVersionSchemaMock(
+            'test_item_id',
+            'test_list_id'
+          );
+          const IMPORT_PAYLOAD = [CUSTOM_QUERY_RULE, EXCEPTION_LIST, EXCEPTION_LIST_ITEM];
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            exceptions_success: true,
+            exceptions_success_count: 1,
+          });
+
+          await assertExceptionList({
+            query: {
+              list_id: 'test_list_id',
+            },
+            expected: EXCEPTION_LIST,
+          });
+          await assertExceptionListItems({
+            query: {
+              item_id: 'test_item_id',
+            },
+            expected: EXCEPTION_LIST_ITEM,
+          });
+        });
+
+        /*
+          Following the release of version 8.7, this test can be considered as an evaluation of exporting
+          an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
+          within the getImportExceptionsListItemSchemaMock, which allows for differentiation between older
+          and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule,
+          thereby enabling simulation of migration scenarios.
+        */
+        it('imports an outdated exception list with list items', async () => {
+          // Custom rules import endpoint expects as minimum one rule in the import payload.
+          // Though provided rule doesn't have to reference the exception list.
+          const CUSTOM_QUERY_RULE = getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID });
+          const EXCEPTION_LIST = getImportExceptionsListSchemaMock('test_list_id');
+          const EXCEPTION_LIST_ITEM = getImportExceptionsListItemSchemaMock(
+            'test_item_id',
+            'test_list_id'
+          );
+          const IMPORT_PAYLOAD = [CUSTOM_QUERY_RULE, EXCEPTION_LIST, EXCEPTION_LIST_ITEM];
+
+          // import old exception version
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            exceptions_success: true,
+            exceptions_success_count: 1,
+          });
+
+          await assertExceptionList({
+            query: {
+              list_id: 'test_list_id',
+            },
+            expected: EXCEPTION_LIST,
+          });
+          await assertExceptionListItems({
+            query: {
+              item_id: 'test_item_id',
+            },
+            expected: EXCEPTION_LIST_ITEM,
+          });
+        });
+      });
+    };
+
+    describe('importing in default space', () => {
+      testImportingInSpace();
+    });
+
+    describe('importing in non-default space', () => {
+      testImportingInSpace(spaceId);
+
+      describe('rules with action connectors (edge cases)', () => {
+        it('overwrites a rule with connector after importing to the default space', async () => {
+          const CONNECTOR_ID = uuid();
+          const SLACK_CONNECTOR = {
+            id: CONNECTOR_ID,
+            type: 'action',
+            updated_at: '2023-01-25T14:35:52.852Z',
+            created_at: '2023-01-25T14:35:52.852Z',
+            version: 'WzUxNTksMV0=',
+            attributes: {
+              actionTypeId: '.slack',
+              name: 'slack',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+            },
+            references: [],
+            migrationVersion: { action: '8.3.0' },
+            coreMigrationVersion: '8.7.0',
+          };
+          const RULE_WITH_ACTION = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            actions: [
+              {
+                group: 'default',
+                id: CONNECTOR_ID,
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                action_type_id: '.slack',
+              },
+            ],
+          });
+          const IMPORT_PAYLOAD = [RULE_WITH_ACTION, SLACK_CONNECTOR];
+
+          await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+          });
+
+          await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId,
+          });
+
+          const overwriteImportResponseBody = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: true,
+            spaceId,
+          });
+
+          expect(overwriteImportResponseBody).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            action_connectors_success: true,
+            action_connectors_success_count: 1,
+            action_connectors_warnings: [],
+            action_connectors_errors: [],
+          });
+        });
+
+        it('imports a rule with connector when connector includes an originId', async () => {
+          const CONNECTOR_ID = uuid();
+          const SLACK_CONNECTOR = {
+            id: CONNECTOR_ID,
+            originId: 'some-origin-id',
+            type: 'action',
+            updated_at: '2023-01-25T14:35:52.852Z',
+            created_at: '2023-01-25T14:35:52.852Z',
+            version: 'WzUxNTksMV0=',
+            attributes: {
+              actionTypeId: '.slack',
+              name: 'slack',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+            },
+            references: [],
+            migrationVersion: { action: '8.3.0' },
+            coreMigrationVersion: '8.7.0',
+          };
+          const RULE_WITH_ACTION = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            actions: [
+              {
+                group: 'default',
+                id: CONNECTOR_ID,
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                action_type_id: '.slack',
+              },
+            ],
+          });
+          const IMPORT_PAYLOAD = [RULE_WITH_ACTION, SLACK_CONNECTOR];
+
+          await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+          });
+
+          const importResponse = await importRules({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId,
+          });
+
+          expect(importResponse).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            action_connectors_success: true,
+            action_connectors_success_count: 1,
+            action_connectors_warnings: [],
+            action_connectors_errors: [],
+          });
+        });
+      });
+    });
+
+    describe('error handling', () => {
+      it('reports a conflict if there is an attempt to import two rules with the same rule_id', async () => {
+        const IMPORT_PAYLOAD = [
+          getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID }),
+          getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID }),
+        ];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          errors: [
+            {
+              error: {
+                message: `More than one rule with rule-id: "${RULE_TO_IMPORT_RULE_ID}" found`,
+                status_code: 400,
+              },
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+            },
+          ],
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+        });
+      });
+
+      it('reports a conflict if there is an attempt to import a rule with a rule_id that already exists', async () => {
+        const existingRule = getCustomQueryRuleParams({ rule_id: RULE_TO_IMPORT_RULE_ID });
+
+        await createRule(supertest, log, existingRule);
+
+        const IMPORT_PAYLOAD = [existingRule];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          errors: [
+            {
+              error: {
+                message: 'Rule with this rule_id already exists',
+                status_code: 409,
+              },
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+            },
+          ],
+          success: false,
+          success_count: 0,
+          rules_count: 1,
+        });
+      });
+
+      it('reports a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'existing-rule',
+          })
+        );
+
+        const IMPORT_PAYLOAD = [
+          getCustomQueryRuleParams({
+            rule_id: 'existing-rule',
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'non-existing-rule-1',
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'non-existing-rule-2',
+          }),
+        ];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          errors: [
+            {
+              error: {
+                message: 'Rule with this rule_id already exists',
+                status_code: 409,
+              },
+              rule_id: 'existing-rule',
+            },
+          ],
+          success: false,
+          success_count: 2,
+          rules_count: 3,
+        });
+      });
+
+      it('reports a mix of conflicts and a mix of successes', async () => {
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'existing-rule-1',
+          })
+        );
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'existing-rule-2',
+          })
+        );
+
+        const IMPORT_PAYLOAD = [
+          getCustomQueryRuleParams({
+            rule_id: 'existing-rule-1',
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'existing-rule-2',
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'non-existing-rule',
+          }),
+        ];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          errors: [
+            {
+              error: {
+                message: 'Rule with this rule_id already exists',
+                status_code: 409,
+              },
+              rule_id: 'existing-rule-1',
+            },
+            {
+              error: {
+                message: 'Rule with this rule_id already exists',
+                status_code: 409,
+              },
+              rule_id: 'existing-rule-2',
+            },
+          ],
+          success: false,
+          success_count: 1,
+          rules_count: 3,
+        });
+      });
+
+      it('reads back a mixed import of different rules even if some cause conflicts', async () => {
+        const existingRule1 = getCustomQueryRuleParams({
+          rule_id: 'existing-rule-1',
+        });
+        const existingRule2 = getCustomQueryRuleParams({
+          rule_id: 'existing-rule-2',
+        });
+        const ruleToImportSuccessfully = getCustomQueryRuleParams({
+          rule_id: 'non-existing-rule',
+        });
+
+        await createRule(supertest, log, existingRule1);
+        await createRule(supertest, log, existingRule2);
+
+        const IMPORT_PAYLOAD = [existingRule1, existingRule2, ruleToImportSuccessfully];
+
+        await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        const rule1 = await fetchRule(supertest, { ruleId: 'existing-rule-1' });
+        const rule2 = await fetchRule(supertest, { ruleId: 'existing-rule-2' });
+        const rule3 = await fetchRule(supertest, { ruleId: 'non-existing-rule' });
+
+        expect(rule1).toMatchObject(existingRule1);
+        expect(rule2).toMatchObject(existingRule2);
+        expect(rule3).toMatchObject(ruleToImportSuccessfully);
+      });
+
+      it('reports a missing connector', async () => {
+        const IMPORT_PAYLOAD = [
+          getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            actions: [
+              {
+                group: 'default',
+                id: '123',
+                action_type_id: '456',
+                params: {},
+              },
+            ],
+          }),
+        ];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          success: false,
+          success_count: 0,
+          rules_count: 1,
+          errors: [
+            {
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+              error: {
+                status_code: 404,
+                message: 'Rule actions reference the following missing action IDs: 123',
+              },
+            },
+          ],
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
+        });
+      });
+
+      it('warns about a missing connector secret', async () => {
+        const WEBHOOK_CONNECTOR_ID = uuid();
+        const WEBHOOK_CONNECTOR = {
+          id: WEBHOOK_CONNECTOR_ID,
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: true,
+            config: {},
+            secrets: {},
           },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+        const CUSTOM_QUERY_RULE = getCustomQueryRuleParams({
+          rule_id: RULE_TO_IMPORT_RULE_ID,
+          actions: [
+            {
+              group: 'default',
+              id: WEBHOOK_CONNECTOR_ID,
+              action_type_id: '.webhook',
+              params: {},
+            },
+          ],
+        });
+
+        const IMPORT_PAYLOAD = [CUSTOM_QUERY_RULE, WEBHOOK_CONNECTOR];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          success: true,
+          success_count: 1,
+          rules_count: 1,
+          errors: [],
+          action_connectors_success: true,
+          action_connectors_success_count: 1,
+          action_connectors_warnings: [
+            {
+              actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
+              buttonLabel: 'Go to connectors',
+              message: '1 connector has sensitive information that require updates.',
+              type: 'action_required',
+            },
+          ],
+          action_connectors_errors: [],
+        });
+      });
+
+      it('imports a mix of rules with actions and connectors while some connectors are missing', async () => {
+        const WEBHOOK_CONNECTOR_ID = uuid();
+        const WEBHOOK_CONNECTOR = {
+          id: WEBHOOK_CONNECTOR_ID,
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+        const CUSTOM_QUERY_RULE_WITH_WEBHOOK_CONNECTOR = getCustomQueryRuleParams({
+          rule_id: RULE_TO_IMPORT_RULE_ID,
+          actions: [
+            {
+              group: 'default',
+              id: WEBHOOK_CONNECTOR_ID,
+              action_type_id: '.webhook',
+              params: {},
+            },
+          ],
+        });
+        const NON_EXISTING_CONNECTOR = uuid();
+        const CUSTOM_QUERY_RULE_2 = getCustomQueryRuleParams({
+          rule_id: RULE_TO_IMPORT_RULE_ID_2,
+          actions: [
+            {
+              group: 'default',
+              id: NON_EXISTING_CONNECTOR, // <-- This does not exist
+              action_type_id: '.index',
+              params: {},
+            },
+          ],
+        });
+
+        const IMPORT_PAYLOAD = [
+          CUSTOM_QUERY_RULE_WITH_WEBHOOK_CONNECTOR,
+          CUSTOM_QUERY_RULE_2,
+          WEBHOOK_CONNECTOR,
+        ];
+
+        const importResponse = await importRules({
+          getService,
+          rules: IMPORT_PAYLOAD,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+          errors: [
+            {
+              rule_id: RULE_TO_IMPORT_RULE_ID_2,
+              error: {
+                status_code: 404,
+                message: `Rule actions reference the following missing action IDs: ${NON_EXISTING_CONNECTOR}`,
+              },
+            },
+          ],
+          action_connectors_success: true,
+          action_connectors_success_count: 1,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
     });
 
     describe('forward compatibility', () => {
-      it('should remove any extra rule fields when importing', async () => {
+      it('removes any extra rule fields when importing', async () => {
         const rule = getCustomQueryRuleParams({
-          rule_id: 'rule-1',
+          rule_id: RULE_TO_IMPORT_RULE_ID,
           extraField: true,
           risk_score_mapping: [
             {
@@ -289,16 +1483,14 @@ export default ({ getService }: FtrProviderContext): void => {
             extraField: true,
           },
         });
-        const ndjson = combineToNdJson(rule);
 
-        await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
+        await importRulesWithSuccess({
+          getService,
+          rules: [rule],
+          overwrite: false,
+        });
 
-        const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        const importedRule = await fetchRule(supertest, { ruleId: RULE_TO_IMPORT_RULE_ID });
 
         expect(Object.hasOwn(importedRule, 'extraField')).toBeFalsy();
         expect(Object.hasOwn(importedRule.risk_score_mapping[0], 'extraField')).toBeFalsy();
@@ -309,1343 +1501,81 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('importing rules with an index', () => {
-      it('should set the response content types to be expected', async () => {
-        const ndjson = combineToNdJson(getCustomQueryRuleParams());
-
-        await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect('Content-Type', 'application/json; charset=utf-8')
-          .expect(200);
-      });
-
-      it('should reject with an error if the file type is not that of a ndjson', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(''), 'rules.txt')
-          .expect(400);
-
-        expect(body).toEqual({
-          status_code: 400,
-          message: 'Invalid file extension .txt',
-        });
-      });
-
-      it('should report that it imported a simple rule successfully', async () => {
-        const ndjson = combineToNdJson(getCustomQueryRuleParams());
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [],
-          success: true,
-          success_count: 1,
-          rules_count: 1,
-        });
-      });
-
-      it('should be able to read an imported rule back out correctly', async () => {
-        const ruleToImport = getCustomQueryRuleParams({ rule_id: 'rule-1' });
-        const ndjson = combineToNdJson(ruleToImport);
-
-        await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });
-
-        expect(importedRule).toMatchObject(ruleToImport);
-      });
-
-      it('should be able to import two rules', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({ rule_id: 'rule-1' }),
-          getCustomQueryRuleParams({ rule_id: 'rule-2' })
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [],
-          success: true,
-          success_count: 2,
-          rules_count: 2,
-        });
-      });
-
-      it('should report a conflict if there is an attempt to import two rules with the same rule_id', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({ rule_id: 'rule-1' }),
-          getCustomQueryRuleParams({ rule_id: 'rule-1' })
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [
-            {
-              error: {
-                message: 'More than one rule with rule-id: "rule-1" found',
-                status_code: 400,
-              },
-              rule_id: 'rule-1',
-            },
-          ],
-          success: false,
-          success_count: 1,
-          rules_count: 2,
-        });
-      });
-
-      it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists', async () => {
-        const existingRule = getCustomQueryRuleParams({ rule_id: 'rule-1' });
-
-        await createRule(supertest, log, existingRule);
-
-        const ndjson = combineToNdJson(existingRule);
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [
-            {
-              error: {
-                message: 'Rule with this rule_id already exists',
-                status_code: 409,
-              },
-              rule_id: 'rule-1',
-            },
-          ],
-          success: false,
-          success_count: 0,
-          rules_count: 1,
-        });
-      });
-
-      it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule',
-          })
-        );
-
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule',
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'non-existing-rule-1',
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'non-existing-rule-2',
-          })
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [
-            {
-              error: {
-                message: 'Rule with this rule_id already exists',
-                status_code: 409,
-              },
-              rule_id: 'existing-rule',
-            },
-          ],
-          success: false,
-          success_count: 2,
-          rules_count: 3,
-        });
-      });
-
-      it('should report a mix of conflicts and a mix of successes', async () => {
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule-1',
-          })
-        );
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule-2',
-          })
-        );
-
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule-1',
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule-2',
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'non-existing-rule',
-          })
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [
-            {
-              error: {
-                message: 'Rule with this rule_id already exists',
-                status_code: 409,
-              },
-              rule_id: 'existing-rule-1',
-            },
-            {
-              error: {
-                message: 'Rule with this rule_id already exists',
-                status_code: 409,
-              },
-              rule_id: 'existing-rule-2',
-            },
-          ],
-          success: false,
-          success_count: 1,
-          rules_count: 3,
-        });
-      });
-
-      it('should be able to correctly read back a mixed import of different rules even if some cause conflicts', async () => {
-        const existingRule1 = getCustomQueryRuleParams({
-          rule_id: 'existing-rule-1',
-        });
-        const existingRule2 = getCustomQueryRuleParams({
-          rule_id: 'existing-rule-2',
-        });
-        const ruleToImportSuccessfully = getCustomQueryRuleParams({
-          rule_id: 'non-existing-rule',
-        });
-
-        await createRule(supertest, log, existingRule1);
-        await createRule(supertest, log, existingRule2);
-
-        const ndjson = combineToNdJson(existingRule1, existingRule2, ruleToImportSuccessfully);
-
-        await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        const rule1 = await fetchRule(supertest, { ruleId: 'existing-rule-1' });
-        const rule2 = await fetchRule(supertest, { ruleId: 'existing-rule-2' });
-        const rule3 = await fetchRule(supertest, { ruleId: 'non-existing-rule' });
-
-        expect(rule1).toMatchObject(existingRule1);
-        expect(rule2).toMatchObject(existingRule2);
-        expect(rule3).toMatchObject(ruleToImportSuccessfully);
-      });
-
-      it('should give single connector error back if we have a single connector error message', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            actions: [
-              {
-                group: 'default',
-                id: '123',
-                action_type_id: '456',
-                params: {},
-              },
-            ],
-          })
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          success: false,
-          success_count: 0,
-          rules_count: 1,
-          errors: [
-            {
-              rule_id: 'rule-1',
-              error: {
-                status_code: 404,
-                message: 'Rule actions reference the following missing action IDs: 123',
-              },
-            },
-          ],
-          action_connectors_success: true,
-          action_connectors_success_count: 0,
-          action_connectors_warnings: [],
-          action_connectors_errors: [],
-        });
-      });
-
-      it('should give single connector warning back if we have a single connector missing secret', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            actions: [
-              {
-                group: 'default',
-                id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf9',
-                action_type_id: '.webhook',
-                params: {},
-              },
-            ],
-          }),
-          {
-            id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf9',
-            type: 'action',
-            updated_at: '2023-01-25T14:35:52.852Z',
-            created_at: '2023-01-25T14:35:52.852Z',
-            version: 'WzUxNTksMV0=',
-            attributes: {
-              actionTypeId: '.webhook',
-              name: 'webhook',
-              isMissingSecrets: true,
-              config: {},
-              secrets: {},
-            },
-            references: [],
-            migrationVersion: { action: '8.3.0' },
-            coreMigrationVersion: '8.7.0',
-          }
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          success: true,
-          success_count: 1,
-          rules_count: 1,
-          errors: [],
-          action_connectors_success: true,
-          action_connectors_success_count: 1,
-          action_connectors_warnings: [
-            {
-              actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
-              buttonLabel: 'Go to connectors',
-              message: '1 connector has sensitive information that require updates.',
-              type: 'action_required',
-            },
-          ],
-          action_connectors_errors: [],
-        });
-      });
-
-      it('should be able to import a rule with an action connector that exists', async () => {
-        const webHookConnectorParams = getWebHookConnectorParams();
-        const connectorId = await createConnector(supertest, webHookConnectorParams);
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            actions: [
-              {
-                group: 'default',
-                id: connectorId,
-                action_type_id: webHookConnectorParams.connector_type_id,
-                params: {},
-              },
-            ],
-          })
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          success: true,
-          success_count: 1,
-          rules_count: 1,
-          errors: [],
-        });
-      });
-
-      it('should be able to import 2 rules with action connectors', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            actions: [
-              {
-                group: 'default',
-                id: 'cabc78e0-9031-11ed-b076-53cc4d57abc6',
-                action_type_id: '.webhook',
-                params: {},
-              },
-            ],
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            actions: [
-              {
-                group: 'default',
-                id: 'f4e74ab0-9e59-11ed-a3db-f9134a9ce951',
-                action_type_id: '.index',
-                params: {},
-              },
-            ],
-          }),
-          {
-            id: 'cabc78e0-9031-11ed-b076-53cc4d57abc6',
-            type: 'action',
-            updated_at: '2023-01-25T14:35:52.852Z',
-            created_at: '2023-01-25T14:35:52.852Z',
-            version: 'WzUxNTksMV0=',
-            attributes: {
-              actionTypeId: '.webhook',
-              name: 'webhook',
-              isMissingSecrets: false,
-              config: {},
-              secrets: {},
-            },
-            references: [],
-            migrationVersion: { action: '8.3.0' },
-            coreMigrationVersion: '8.7.0',
-          },
-          {
-            id: 'f4e74ab0-9e59-11ed-a3db-f9134a9ce951',
-            type: 'action',
-            updated_at: '2023-01-25T14:35:52.852Z',
-            created_at: '2023-01-25T14:35:52.852Z',
-            version: 'WzUxNTksMV0=',
-            attributes: {
-              actionTypeId: '.index',
-              name: 'index',
-              isMissingSecrets: false,
-              config: {},
-              secrets: {},
-            },
-            references: [],
-            migrationVersion: { action: '8.3.0' },
-            coreMigrationVersion: '8.7.0',
-          }
-        );
-
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          success: true,
-          success_count: 2,
-          rules_count: 2,
-          errors: [],
-          action_connectors_success: true,
-          action_connectors_success_count: 2,
-          action_connectors_errors: [],
-          action_connectors_warnings: [],
-        });
-      });
-
-      it('should be able to import 1 rule with an action connector that exists and get 1 other error back for a second rule that does not have the connector', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            actions: [
-              {
-                group: 'default',
-                id: '51b17790-544e-11ec-a349-11361cc441c4',
-                action_type_id: '.webhook',
-                params: {},
-              },
-            ],
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            actions: [
-              {
-                group: 'default',
-                id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22', // <-- This does not exist
-                action_type_id: '.index',
-                params: {},
-              },
-            ],
-          }),
-          {
-            id: '51b17790-544e-11ec-a349-11361cc441c4',
-            type: 'action',
-            updated_at: '2023-01-25T14:35:52.852Z',
-            created_at: '2023-01-25T14:35:52.852Z',
-            version: 'WzUxNTksMV0=',
-            attributes: {
-              actionTypeId: '.webhook',
-              name: 'webhook',
-              isMissingSecrets: false,
-              config: {},
-              secrets: {},
-            },
-            references: [],
-            migrationVersion: { action: '8.3.0' },
-            coreMigrationVersion: '8.7.0',
-          }
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          success: false,
-          success_count: 1,
-          rules_count: 2,
-          errors: [
-            {
-              rule_id: 'rule-2',
-              error: {
-                status_code: 404,
-                message:
-                  'Rule actions reference the following missing action IDs: cabc78e0-9031-11ed-b076-53cc4d57aa22',
-              },
-            },
-          ],
-          action_connectors_success: true,
-          action_connectors_success_count: 1,
-          action_connectors_errors: [],
-          action_connectors_warnings: [],
-        });
-      });
-
-      describe('with a space', () => {
-        const spaceId = '4567-space';
-        before(async () => {
-          await spacesServices.create({
-            id: spaceId,
-            name: spaceId,
-          });
-        });
-        after(async () => {
-          await spacesServices.delete(spaceId);
-        });
-        it('should import rules and update references correctly after overwriting an existing connector', async () => {
-          const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
-
-          const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
-
-          await supertest
-            .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-
-          await supertest
-            .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-
-          const { body: overwriteResponseBody } = await supertest
-            .post(
-              `/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_action_connectors=true`
-            )
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-
-          expect(overwriteResponseBody).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            action_connectors_success: true,
-            action_connectors_success_count: 1,
-            action_connectors_warnings: [],
-            action_connectors_errors: [],
-          });
-        });
-
-        it('should import rules and connectors when connectors include an originId', async () => {
-          const defaultSpaceConnectorId = 'c5548aec-a02f-4d98-8a37-5ed7e1810c0e';
-          const originId = '6f353a28-74c8-4660-8ea5-2485dbe64fbf';
-
-          const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId, originId);
-
-          await supertest
-            .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-
-          const { body } = await supertest
-            .post(
-              `/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_action_connectors=true`
-            )
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            action_connectors_success: true,
-            action_connectors_success_count: 1,
-            action_connectors_warnings: [],
-            action_connectors_errors: [],
-          });
-        });
-      });
-
-      describe('@skipInServerless migrate pre-8.0 action connector ids', () => {
-        const defaultSpaceActionConnectorId = '61b17790-544e-11ec-a349-11361cc441c4';
-        const space714ActionConnectorId = '51b17790-544e-11ec-a349-11361cc441c4';
-
-        beforeEach(async () => {
-          await esArchiver.load(
-            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
-          );
-        });
-        afterEach(async () => {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
-          );
-        });
-
-        describe('should be imported into the non-default space', () => {
-          it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
-            const spaceId = '714-space';
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            const buffer = getImportRuleBuffer(space714ActionConnectorId);
-
-            const { body } = await supertest
-              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: true,
-              success_count: 1,
-              errors: [],
-            });
-          });
-
-          it('should import a non-default-space 7.16 rule with a connector made in the non-default space', async () => {
-            const spaceId = '714-space';
-            const differentSpaceConnectorId = '5272d090-b111-11ed-b56a-a7991a8d8b32';
-
-            const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
-            const { body } = await supertest
-              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: true,
-              success_count: 1,
-              rules_count: 1,
-              errors: [],
-              action_connectors_success: true,
-              action_connectors_success_count: 1,
-              action_connectors_warnings: [],
-              action_connectors_errors: [],
-            });
-          });
-          it('should import a non-default-space 7.16 rule with a connector made in the non-default space into the default space successfully', async () => {
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            const differentSpaceConnectorId = '963ec960-a21a-11ed-84a4-a33e4c2558c9';
-            const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
-
-            const { body } = await supertest
-              .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: true,
-              success_count: 1,
-              rules_count: 1,
-              errors: [],
-              action_connectors_success: true,
-              action_connectors_success_count: 1,
-              action_connectors_warnings: [],
-              action_connectors_errors: [],
-            });
-          });
-
-          it('importing a non-default-space 7.16 rule with a connector made in the non-default space into the default space should result in a 404 if the file does not contain connectors', async () => {
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            const buffer = getImportRuleBuffer(space714ActionConnectorId);
-
-            const { body } = await supertest
-              .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: false,
-              errors: [
-                expect.objectContaining({
-                  error: {
-                    status_code: 404,
-                    message: `Rule actions reference the following missing action IDs: ${space714ActionConnectorId}`,
-                  },
-                }),
-              ],
-            });
-          });
-          // When objects become share-capable we will either add / update this test
-          it('importing a non-default-space 7.16 rule with a connector made in the non-default space into a different non-default space should result in a 404', async () => {
-            const spaceId = '4567-space';
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            // it
-            const buffer = getImportRuleBuffer(space714ActionConnectorId);
-
-            const { body } = await supertest
-              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: false,
-              errors: [
-                expect.objectContaining({
-                  error: {
-                    status_code: 404,
-                    message: `Rule actions reference the following missing action IDs: ${space714ActionConnectorId}`,
-                  },
-                }),
-              ],
-            });
-          });
-        });
-
-        describe('should be imported into the default space', () => {
-          it('should import a default-space 7.16 rule with a connector made in the default space into a non-default space successfully', async () => {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
-            );
-            const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
-
-            const spaceId = '4567-space';
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            // it
-            const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
-
-            const { body } = await supertest
-              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: true,
-              success_count: 1,
-              rules_count: 1,
-              errors: [],
-              action_connectors_success: true,
-              action_connectors_success_count: 1,
-              action_connectors_warnings: [],
-              action_connectors_errors: [],
-            });
-          });
-          // When objects become share-capable we will either add / update this test
-
-          it('importing a default-space 7.16 rule with a connector made in the default space into the default space should result in a 200', async () => {
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            // it
-            const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
-
-            const { body } = await supertest
-              .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: true,
-              success_count: 1,
-              errors: [],
-            });
-          });
-
-          it('importing a default-space 7.16 rule with a connector made in the default space into a non-default space should result in a 404', async () => {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
-            );
-            const spaceId = '4567-space';
-            // connectorId is from the 7.x connector here
-            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
-            // it
-            const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
-
-            const { body } = await supertest
-              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: false,
-              errors: [
-                expect.objectContaining({
-                  error: {
-                    status_code: 404,
-                    message: `Rule actions reference the following missing action IDs: ${defaultSpaceActionConnectorId}`,
-                  },
-                }),
-              ],
-            });
-          });
-        });
-      });
-
-      describe('importing with exceptions', () => {
-        beforeEach(async () => {
-          await deleteAllExceptions(supertest, log);
-        });
-
-        /*
-          Following the release of version 8.7, this test can be considered as an evaluation of exporting
-          an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
-          within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
-          and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule,
-          thereby enabling simulation of migration scenarios.
-        */
-        it('should be able to import a rule and an old version exception list, then delete it successfully', async () => {
-          const ndjson = combineToNdJson(
-            getCustomQueryRuleParams(),
-            getImportExceptionsListSchemaMock('test_list_id'),
-            getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id')
-          );
-
-          // import old exception version
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 1,
-          });
-
-          // delete the exception list item by its item_id
-          await supertest
-            .delete(`${EXCEPTION_LIST_ITEM_URL}?item_id=${'test_item_id'}`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .expect(200);
-        });
-
-        it('should be able to import a rule and an exception list', async () => {
-          const ndjson = combineToNdJson(
-            getCustomQueryRuleParams(),
-            getImportExceptionsListSchemaMock('test_list_id'),
-            getImportExceptionsListItemNewerVersionSchemaMock('test_item_id', 'test_list_id')
-          );
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 1,
-          });
-        });
-
-        it('should be able to import a rule with both single space and space agnostic exception lists', async () => {
-          const ndjson = combineToNdJson(
+    describe('backward compatibility', () => {
+      describe('importing in default space', () => {
+        it('migrates rule level throttle', async () => {
+          const IMPORT_PAYLOAD = [
             getCustomQueryRuleParams({
-              exceptions_list: [
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+              throttle: '1d',
+              actions: [
                 {
-                  id: 'agnostic',
-                  list_id: 'test_list_agnostic_id',
-                  type: 'detection',
-                  namespace_type: 'agnostic',
-                },
-                {
-                  id: 'single',
-                  list_id: 'test_list_id',
-                  type: 'rule_default',
-                  namespace_type: 'single',
+                  group: 'default',
+                  id: PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID,
+                  params: {
+                    message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                  },
+                  action_type_id: '.email',
                 },
               ],
             }),
-            { ...getImportExceptionsListSchemaMock('test_list_id'), type: 'rule_default' },
-            getImportExceptionsListItemNewerVersionSchemaMock('test_item_id', 'test_list_id'),
-            {
-              ...getImportExceptionsListSchemaMock('test_list_agnostic_id'),
-              type: 'detection',
-              namespace_type: 'agnostic',
-            },
-            {
-              ...getImportExceptionsListItemNewerVersionSchemaMock(
-                'test_item_id',
-                'test_list_agnostic_id'
-              ),
-              namespace_type: 'agnostic',
-            }
-          );
+          ];
 
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 2,
-          });
-        });
-
-        it('should only remove non existent exception list references from rule', async () => {
-          // create an exception list
-          const { body: exceptionBody } = await supertest
-            .post(EXCEPTION_LIST_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              ...getCreateExceptionListMinimalSchemaMock(),
-              list_id: 'i_exist',
-              namespace_type: 'single',
-              type: 'detection',
-            })
-            .expect(200);
-
-          const ndjson = combineToNdJson(
-            getCustomQueryRuleParams({
-              rule_id: 'rule-1',
-              exceptions_list: [
-                {
-                  id: exceptionBody.id,
-                  list_id: 'i_exist',
-                  type: 'detection',
-                  namespace_type: 'single',
-                },
-                {
-                  id: 'i_dont_exist',
-                  list_id: '123',
-                  type: 'detection',
-                  namespace_type: 'single',
-                },
-              ],
-            })
-          );
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
-
-          expect(rule).toMatchObject({
-            exceptions_list: [
-              {
-                id: exceptionBody.id,
-                list_id: 'i_exist',
-                namespace_type: 'single',
-                type: 'detection',
-              },
-            ],
+          await importRulesWithSuccess({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
           });
 
-          expect(body).toMatchObject({
-            success: false,
-            success_count: 1,
-            rules_count: 1,
-            errors: [
-              {
-                rule_id: 'rule-1',
-                error: {
-                  message:
-                    'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "123". Reference has been removed.',
-                  status_code: 400,
-                },
-              },
-            ],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 0,
+          const { body: importedRule } = await securitySolutionApi.readRule({
+            query: { rule_id: RULE_TO_IMPORT_RULE_ID },
           });
-        });
 
-        it('should resolve exception references when importing into a clean slate', async () => {
-          // So importing a rule that references an exception list
-          // Keep in mind, no exception lists or rules exist yet
-          const ndjson = combineToNdJson(
-            getCustomQueryRuleParams({
-              rule_id: 'rule-1',
-              exceptions_list: [
-                {
-                  id: 'abc',
-                  list_id: 'i_exist',
-                  type: 'detection',
-                  namespace_type: 'single',
-                },
-              ],
-            }),
-            {
-              ...getImportExceptionsListSchemaMock('i_exist'),
-              id: 'abc',
-              type: 'detection',
-              namespace_type: 'single',
-            },
-            {
-              description: 'some description',
-              entries: [
-                {
-                  entries: [
-                    {
-                      field: 'nested.field',
-                      operator: 'included',
-                      type: 'match',
-                      value: 'some value',
-                    },
-                  ],
-                  field: 'some.parentField',
-                  type: 'nested',
-                },
-                {
-                  field: 'some.not.nested.field',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'some value',
-                },
-              ],
-              item_id: 'item_id_1',
-              list_id: 'i_exist',
-              name: 'Query with a rule id',
-              type: 'simple',
-            }
-          );
-
-          // Importing the "simpleRule", along with the exception list
-          // it's referencing and the list's item
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });
-          const referencedExceptionList = importedRule.exceptions_list[0];
-
-          // create an exception list
-          const { body: exceptionBody } = await supertest
-            .get(
-              `${EXCEPTION_LIST_URL}?list_id=${referencedExceptionList.list_id}&id=${referencedExceptionList.id}`
-            )
-            .set('kbn-xsrf', 'true')
-            .expect(200);
-
-          expect(importedRule.exceptions_list).toEqual([
-            {
-              id: exceptionBody.id,
-              list_id: 'i_exist',
-              namespace_type: 'single',
-              type: 'detection',
-            },
-          ]);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 1,
-          });
-        });
-
-        it('should resolve 100 or more exception references when importing into a clean slate', async () => {
-          const rules = range(150).map((idx) =>
-            getCustomQueryRuleParams({
-              rule_id: `${idx}`,
-              exceptions_list: [
-                {
-                  id: `${idx}`,
-                  list_id: `${idx}`,
-                  type: 'detection',
-                  namespace_type: 'single',
-                },
-              ],
-            })
-          );
-          const exceptionLists = range(150).map((idx) => ({
-            ...getImportExceptionsListSchemaMock(`${idx}`),
-            id: `${idx}`,
-            type: 'detection',
-            namespace_type: 'single',
-          }));
-          const exceptionItems = range(150).map((idx) => ({
-            description: 'some description',
-            entries: [
-              {
-                field: 'some.not.nested.field',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            item_id: `item_id_${idx}`,
-            list_id: `${idx}`,
-            name: 'Query with a rule id',
-            type: 'simple',
-          }));
-          const importPayload = combineArraysToNdJson(rules, exceptionLists, exceptionItems);
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(importPayload), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 150,
-            rules_count: 150,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 150,
-          });
-        });
-
-        it('@skipInServerless should resolve exception references that include comments', async () => {
-          // So importing a rule that references an exception list
-          // Keep in mind, no exception lists or rules exist yet
-          const ndjson = combineToNdJson(
-            getCustomQueryRuleParams({
-              rule_id: 'rule-1',
-              exceptions_list: [
-                {
-                  id: 'abc',
-                  list_id: 'i_exist',
-                  type: 'detection',
-                  namespace_type: 'single',
-                },
-              ],
-            }),
-            {
-              ...getImportExceptionsListSchemaMock('i_exist'),
-              id: 'abc',
-              type: 'detection',
-              namespace_type: 'single',
-            },
-            {
-              comments: [
-                {
-                  comment: 'This is an exception to the rule',
-                  created_at: '2022-02-04T02:27:40.938Z',
-                  created_by: 'elastic',
-                  id: '845fc456-91ff-4530-bcc1-5b7ebd2f75b5',
-                },
-                {
-                  comment: 'I decided to add a new comment',
-                },
-              ],
-              description: 'some description',
-              entries: [
-                {
-                  entries: [
-                    {
-                      field: 'nested.field',
-                      operator: 'included',
-                      type: 'match',
-                      value: 'some value',
-                    },
-                  ],
-                  field: 'some.parentField',
-                  type: 'nested',
-                },
-                {
-                  field: 'some.not.nested.field',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'some value',
-                },
-              ],
-              item_id: 'item_id_1',
-              list_id: 'i_exist',
-              name: 'Query with a rule id',
-              type: 'simple',
-            }
-          );
-
-          // Importing the "simpleRule", along with the exception list
-          // it's referencing and the list's item
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });
-          const referencedExceptionList = importedRule.exceptions_list[0];
-
-          // create an exception list
-          const { body: exceptionBody } = await supertest
-            .get(
-              `${EXCEPTION_LIST_URL}?list_id=${referencedExceptionList.list_id}&id=${referencedExceptionList.id}`
-            )
-            .set('kbn-xsrf', 'true')
-            .expect(200);
-
-          expect(importedRule.exceptions_list).toEqual([
-            {
-              id: exceptionBody.id,
-              list_id: 'i_exist',
-              namespace_type: 'single',
-              type: 'detection',
-            },
-          ]);
-
-          const { body: exceptionItemBody } = await supertest
-            .get(`${EXCEPTION_LIST_ITEM_URL}?item_id="item_id_1"`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
-
-          expect(exceptionItemBody.comments).toEqual([
-            {
-              comment: 'This is an exception to the rule',
-              created_at: `${exceptionItemBody.comments[0].created_at}`,
-              created_by: 'elastic',
-              id: `${exceptionItemBody.comments[0].id}`,
-            },
-            {
-              comment: 'I decided to add a new comment',
-              created_at: `${exceptionItemBody.comments[1].created_at}`,
-              created_by: 'elastic',
-              id: `${exceptionItemBody.comments[1].id}`,
-            },
-          ]);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 1,
+          expect(importedRule.throttle).toBeUndefined();
+          expect(importedRule.actions[0]).toMatchObject({
+            frequency: { summary: true, notifyWhen: 'onThrottleInterval', throttle: '1d' },
           });
         });
       });
 
-      it('should import a rule with "investigation_fields', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            investigation_fields: { field_names: ['foo'] },
-          })
-        );
+      describe('importing in non-default space', () => {
+        it('imports a rule from Kibana v7.14 to the non-default space', async () => {
+          const IMPORT_PAYLOAD = [
+            getCustomQueryRuleParams({
+              rule_id: RULE_TO_IMPORT_RULE_ID,
+              throttle: '1d',
+              actions: [
+                {
+                  group: 'default',
+                  id: PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID,
+                  params: {
+                    message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                  },
+                  action_type_id: '.email',
+                },
+              ],
+            }),
+          ];
 
-        await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect('Content-Type', 'application/json; charset=utf-8')
-          .expect(200);
+          await importRulesWithSuccess({
+            getService,
+            rules: IMPORT_PAYLOAD,
+            overwrite: false,
+            spaceId,
+          });
+
+          const { body: importedRule } = await securitySolutionApi.readRule(
+            {
+              query: { rule_id: RULE_TO_IMPORT_RULE_ID },
+            },
+            spaceId
+          );
+
+          expect(importedRule.throttle).toBeUndefined();
+          expect(importedRule.actions[0]).toMatchObject({
+            frequency: { summary: true, notifyWhen: 'onThrottleInterval', throttle: '1d' },
+          });
+        });
       });
     });
   });
