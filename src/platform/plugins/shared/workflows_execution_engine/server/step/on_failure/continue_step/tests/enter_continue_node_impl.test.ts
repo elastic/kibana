@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterContinueNode } from '@kbn/workflows';
+import type { EnterContinueNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
 
 describe('EnterContinueNodeImpl', () => {
   let underTest: EnterContinueNodeImpl;
-  let step: EnterContinueNode;
+  let node: EnterContinueNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'continueStep1',
       type: 'enter-continue',
       stepId: 'continueStep1',
@@ -30,7 +30,7 @@ describe('EnterContinueNodeImpl', () => {
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
     workflowLogger.logError = jest.fn();
-    underTest = new EnterContinueNodeImpl(step, workflowRuntime, workflowLogger);
+    underTest = new EnterContinueNodeImpl(node, workflowRuntime, workflowLogger);
   });
 
   describe('run', () => {
@@ -44,7 +44,7 @@ describe('EnterContinueNodeImpl', () => {
       expect(workflowRuntime.enterScope).toHaveBeenCalled();
     });
 
-    it('should go to next step', async () => {
+    it('should go to next node', async () => {
       await underTest.run();
       expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
@@ -63,7 +63,7 @@ describe('EnterContinueNodeImpl', () => {
 
     it('should go to exit continue node', async () => {
       await underTest.catchError();
-      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.exitNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitNodeId);
     });
 
     it('should clear workflow error', async () => {

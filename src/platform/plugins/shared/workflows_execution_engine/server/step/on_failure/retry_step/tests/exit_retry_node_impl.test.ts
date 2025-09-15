@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitRetryNode } from '@kbn/workflows';
+import type { ExitRetryNode } from '@kbn/workflows/graph';
 import { ExitRetryNodeImpl } from '../exit_retry_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitIfNode } from '@kbn/workflows';
+import type { ExitIfNode } from '@kbn/workflows/graph';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class ExitIfNodeImpl implements StepImplementation {
   constructor(
-    private step: ExitIfNode,
+    private node: ExitIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 

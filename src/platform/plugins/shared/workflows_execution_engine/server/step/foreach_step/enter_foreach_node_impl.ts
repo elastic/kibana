@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterForeachNode } from '@kbn/workflows';
+import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { StepErrorCatcher, StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -40,9 +40,9 @@ export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatche
 
     if (evaluatedItems.length === 0) {
       this.workflowLogger.logDebug(
-        `Foreach step "${this.node.id}" has no items to iterate over. Skipping execution.`,
+        `Foreach step "${this.node.stepId}" has no items to iterate over. Skipping execution.`,
         {
-          workflow: { step_id: this.node.id },
+          workflow: { step_id: this.node.stepId },
         }
       );
       await this.wfExecutionRuntimeManager.setCurrentStepState({
@@ -55,9 +55,9 @@ export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatche
     }
 
     this.workflowLogger.logDebug(
-      `Foreach step "${this.node.id}" will iterate over ${evaluatedItems.length} items.`,
+      `Foreach step "${this.node.stepId}" will iterate over ${evaluatedItems.length} items.`,
       {
-        workflow: { step_id: this.node.id },
+        workflow: { step_id: this.node.stepId },
       }
     );
 

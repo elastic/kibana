@@ -9,13 +9,13 @@
 
 import { EnterIfNodeImpl } from '../enter_if_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
+import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows/graph';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('EnterIfNodeImpl', () => {
-  let step: EnterIfNode;
+  let node: EnterIfNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: EnterIfNodeImpl;
   let workflowContextLoggerMock: IWorkflowEventLogger;
@@ -29,7 +29,7 @@ describe('EnterIfNodeImpl', () => {
     workflowContextManagerMock.getContext = jest.fn().mockReturnValue({
       event: { type: 'alert' },
     });
-    step = {
+    node = {
       id: 'testStep',
       type: 'enter-if',
       stepId: 'testStep',
@@ -54,7 +54,7 @@ describe('EnterIfNodeImpl', () => {
       } as EnterConditionBranchNode,
     ]);
     impl = new EnterIfNodeImpl(
-      step,
+      node,
       wfExecutionRuntimeManagerMock,
       workflowGraph,
       workflowContextManagerMock,
@@ -170,7 +170,7 @@ describe('EnterIfNodeImpl', () => {
       .fn()
       .mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${step.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
+      `EnterIfNode with id ${node.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
     );
   });
 

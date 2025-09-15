@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WaitGraphNode, WaitStep } from '@kbn/workflows';
+import type { WaitStep } from '@kbn/workflows';
+import type { WaitGraphNode } from '@kbn/workflows/graph';
 import { WaitStepImpl } from './wait_step';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';

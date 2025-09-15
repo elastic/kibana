@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { AtomicGraphNode } from '@kbn/workflows/types/execution/nodes/base';
+import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { StepImplementation } from '../step_base';
 import { ConnectorStepImpl } from '../connector_step';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';

@@ -25,7 +25,7 @@ describe('EnterConditionBranchNodeImpl', () => {
     impl = new EnterConditionBranchNodeImpl(conditionBranchNode, wfExecutionRuntimeManagerMock);
   });
 
-  it('should go to next step', async () => {
+  it('should go to next node', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
   });

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EnterRetryNode } from '@kbn/workflows';
+import type { EnterRetryNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterRetryNodeImpl } from '../enter_retry_node_impl';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';

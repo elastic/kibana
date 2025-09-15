@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitTryBlockNode } from '@kbn/workflows';
+import type { ExitTryBlockNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
 

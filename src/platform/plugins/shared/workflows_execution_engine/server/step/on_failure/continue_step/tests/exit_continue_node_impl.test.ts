@@ -30,7 +30,7 @@ describe('ExitContinueNodeImpl', () => {
       expect(workflowRuntime.exitScope).toHaveBeenCalled();
     });
 
-    it('should go to next step', async () => {
+    it('should go to next node', async () => {
       await underTest.run();
       expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });

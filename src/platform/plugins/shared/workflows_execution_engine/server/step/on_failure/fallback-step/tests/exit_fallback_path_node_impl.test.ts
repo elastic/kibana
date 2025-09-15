@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitFallbackPathNode } from '@kbn/workflows';
+import type { ExitFallbackPathNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitFallbackPathNodeImpl } from '../exit_fallback_path_node_impl';
 

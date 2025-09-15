@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpGraphNode } from '@kbn/workflows';
+import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { UrlValidator } from '../../lib/url_validator';
 import { parseDuration } from '../../utils/parse-duration/parse-duration';

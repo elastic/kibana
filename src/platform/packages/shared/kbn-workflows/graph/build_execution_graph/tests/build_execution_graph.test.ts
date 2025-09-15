@@ -26,7 +26,7 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
-} from '../../../types/execution';
+} from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
 describe('convertToWorkflowGraph', () => {

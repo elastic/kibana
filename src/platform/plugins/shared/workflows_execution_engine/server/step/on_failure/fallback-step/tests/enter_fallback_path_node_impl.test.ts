@@ -28,12 +28,12 @@ describe('EnterFallbackPathNodeImpl', () => {
       expect(workflowRuntime.enterScope).toHaveBeenCalled();
     });
 
-    it('should go to next step', async () => {
+    it('should go to next node', async () => {
       await underTest.run();
       expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
-    it('should execute steps in correct order', async () => {
+    it('should execute functions in correct order', async () => {
       const calls: string[] = [];
       workflowRuntime.enterScope = jest.fn().mockImplementation(() => {
         calls.push('enterScope');

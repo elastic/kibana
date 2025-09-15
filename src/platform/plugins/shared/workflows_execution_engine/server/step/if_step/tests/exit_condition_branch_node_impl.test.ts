@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
+import type { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('ExitConditionBranchNodeImpl', () => {
-  let step: ExitConditionBranchNode;
+  let node: ExitConditionBranchNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let workflowGraphMock: WorkflowGraph;
   let impl: ExitConditionBranchNodeImpl;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'testStep',
       type: 'exit-then-branch',
       stepId: 'testStep',
@@ -31,7 +31,7 @@ describe('ExitConditionBranchNodeImpl', () => {
     wfExecutionRuntimeManagerMock.exitScope = jest.fn();
 
     workflowGraphMock = {} as unknown as WorkflowGraph;
-    impl = new ExitConditionBranchNodeImpl(step, workflowGraphMock, wfExecutionRuntimeManagerMock);
+    impl = new ExitConditionBranchNodeImpl(node, workflowGraphMock, wfExecutionRuntimeManagerMock);
 
     workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
       {
@@ -48,7 +48,7 @@ describe('ExitConditionBranchNodeImpl', () => {
     ]);
 
     await expect(impl.run()).rejects.toThrow(
-      `ExitConditionBranchNode with id ${step.id} must have exactly one successor, but found 2.`
+      `ExitConditionBranchNode with id ${node.id} must have exactly one successor, but found 2.`
     );
   });
 
@@ -56,7 +56,7 @@ describe('ExitConditionBranchNodeImpl', () => {
     workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([]);
 
     await expect(impl.run()).rejects.toThrow(
-      `ExitConditionBranchNode with id ${step.id} must have exactly one successor, but found 0.`
+      `ExitConditionBranchNode with id ${node.id} must have exactly one successor, but found 0.`
     );
   });
 
@@ -65,7 +65,7 @@ describe('ExitConditionBranchNodeImpl', () => {
       .fn()
       .mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `ExitConditionBranchNode with id ${step.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
+      `ExitConditionBranchNode with id ${node.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
     );
   });
 

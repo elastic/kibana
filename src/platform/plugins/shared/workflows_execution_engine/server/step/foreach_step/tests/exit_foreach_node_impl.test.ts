@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitForeachNode } from '@kbn/workflows';
+import type { ExitForeachNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 
 describe('ExitForeachNodeImpl', () => {
-  let step: ExitForeachNode;
+  let node: ExitForeachNode;
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let underTest: ExitForeachNodeImpl;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'testStep',
       stepId: 'testStep',
       stepType: 'foreach',
@@ -35,7 +35,7 @@ describe('ExitForeachNodeImpl', () => {
     wfExecutionRuntimeManager.exitScope = jest.fn();
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
-    underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager, workflowLogger);
+    underTest = new ExitForeachNodeImpl(node, wfExecutionRuntimeManager, workflowLogger);
   });
 
   describe('when no foreach step', () => {
@@ -45,7 +45,7 @@ describe('ExitForeachNodeImpl', () => {
 
     it('should throw an error', async () => {
       await expect(underTest.run()).rejects.toThrow(
-        new Error(`Foreach state for step ${step.startNodeId} not found`)
+        new Error(`Foreach state for step ${node.stepId} not found`)
       );
     });
   });
@@ -63,7 +63,7 @@ describe('ExitForeachNodeImpl', () => {
     it('should go to the start node', async () => {
       await underTest.run();
 
-      expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(step.startNodeId);
+      expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(node.startNodeId);
     });
 
     it('should not finish the foreach step and not set step state', async () => {
@@ -105,8 +105,8 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Exiting foreach step ${step.startNodeId} after processing all items.`,
-        { workflow: { step_id: step.startNodeId } }
+        `Exiting foreach step ${node.startNodeId} after processing all items.`,
+        { workflow: { step_id: node.startNodeId } }
       );
     });
 

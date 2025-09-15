@@ -44,7 +44,7 @@ import type {
   ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
-} from '../../types/execution';
+} from '../types';
 
 const flowControlStepTypes = new Set(['if', 'foreach']);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);

@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterForeachNode, ForEachStep } from '@kbn/workflows';
+import type { ForEachStep } from '@kbn/workflows';
+import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl } from '../enter_foreach_node_impl';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 
 describe('EnterForeachNodeImpl', () => {
-  let step: EnterForeachNode;
+  let node: EnterForeachNode;
   let workflowExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let contextManager: WorkflowContextManager;
   let workflowLogger: IWorkflowEventLogger;
   let underTest: EnterForeachNodeImpl;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'testStep',
       type: 'enter-foreach',
       stepId: 'testStep',
@@ -44,7 +45,7 @@ describe('EnterForeachNodeImpl', () => {
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
     underTest = new EnterForeachNodeImpl(
-      step,
+      node,
       workflowExecutionRuntimeManager,
       contextManager,
       workflowLogger
@@ -89,7 +90,7 @@ describe('EnterForeachNodeImpl', () => {
 
     describe('when foreach configuration is an array with items', () => {
       it('should initialize foreach state if configuration contains JSON', async () => {
-        step.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
+        node.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
         await underTest.run();
 
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
@@ -102,7 +103,7 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should initialize foreach state from the context', async () => {
-        step.configuration.foreach = 'steps.testStep.array';
+        node.configuration.foreach = 'steps.testStep.array';
         (contextManager.readContextPath as jest.Mock).mockReturnValue({
           value: ['item1', 'item2', 'item3'],
           pathExists: true,
@@ -120,7 +121,7 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should initialize foreach state from the context when context contains JSON array', async () => {
-        step.configuration.foreach = 'steps.testStep.array';
+        node.configuration.foreach = 'steps.testStep.array';
         (contextManager.readContextPath as jest.Mock).mockReturnValue({
           value: JSON.stringify(['item1', 'item2', 'item3']),
           pathExists: true,
@@ -149,7 +150,7 @@ describe('EnterForeachNodeImpl', () => {
 
     describe('when foreach configuration is an empty array', () => {
       beforeEach(() => {
-        step.configuration.foreach = JSON.stringify([]);
+        node.configuration.foreach = JSON.stringify([]);
       });
 
       it('should set empty items and total to 0', async () => {
@@ -187,7 +188,7 @@ describe('EnterForeachNodeImpl', () => {
     });
 
     it('should throw an error if foreach configuration is not provided', async () => {
-      step.configuration.foreach = undefined as any;
+      node.configuration.foreach = undefined as any;
 
       await expect(underTest.run()).rejects.toThrowError('Foreach configuration is required');
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
@@ -195,7 +196,7 @@ describe('EnterForeachNodeImpl', () => {
     });
 
     it('should throw an error if foreach configuration is not an array', async () => {
-      step.configuration.foreach = JSON.stringify({ key: 'value' });
+      node.configuration.foreach = JSON.stringify({ key: 'value' });
 
       await expect(underTest.run()).rejects.toThrowError('Foreach configuration must be an array');
       expect(workflowExecutionRuntimeManager.startStep).toHaveBeenCalledTimes(1);
