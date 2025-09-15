@@ -19,6 +19,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
@@ -318,7 +319,7 @@ export default ({ getService }: FtrProviderContext) => {
       const indexName = 'privileged-users-index-pattern';
       const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
       const entitySourceIntegration = createIntegrationEntitySource({
-        name: '.entity_analytics.monitoring.sources.okta-default', // if you need that exact name
+        name: '.entity_analytics.monitoring.sources.okta-default',
       });
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
@@ -451,6 +452,57 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe.only('integrations sync', () => {
+      const nameSpace = 'default';
+      const integrationsName = `entity_analytics.monitoring.sources.okta-${nameSpace}`;
+      const oktaIntegrationsIndexPattern = `logs-entityanalytics_okta.user-${nameSpace}`;
+      const entitySourceIntegration = createIntegrationEntitySource({
+        name: integrationsName,
+        indexPattern: oktaIntegrationsIndexPattern,
+      });
+
+      before(async () => {
+        // await es.indices.createDataStream({ name: 'logs-entityanalytics_okta.user-default' });
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
+          { useCreate: true }
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
+        );
+      });
+
+      beforeEach(async () => {
+        // eslint-disable-next-line no-console
+        console.log(`HELPER CALL ONE`);
+        await helper(es);
+        await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
+        await kibanaServer.uiSettings.update({
+          'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': true,
+        });
+      });
+
+      afterEach(async () => {
+        // delete the okta index
+        await api.deleteMonitoringEngine({ query: { data: true } });
+        await disablePrivmonSetting(kibanaServer); // does this cleanup internal index as well?
+      });
+
+      it('update detection should sync integrations', async () => {
+        // eslint-disable-next-line no-console
+        console.log(`HELPER CALL TWO`);
+        await helper(es);
+      });
+
+      it.skip('deletion detection should delete users on full sync', async () => {
+        // placeholder for deletion detection
+      });
+    });
+
     describe('default entity sources', () => {
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
         await enablePrivmonSetting(kibanaServer);
@@ -468,4 +520,35 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
   });
+};
+
+export const helper = async (es: any) => {
+  const dsName = 'logs-entityanalytics_okta.user-default';
+  const backingPattern = `.ds-${dsName}-*`;
+
+  // 1) Make newly indexed docs visible to search
+  await es.indices.refresh({ index: backingPattern, expand_wildcards: 'all' });
+
+  // 2) Resolve to the concrete backing index (handy for logging/debug)
+  const resolved = await es.indices.resolveIndex({
+    name: backingPattern,
+    expand_wildcards: 'all',
+  });
+  const backing = resolved.indices?.[0]?.name ?? resolved.data_streams?.[0]?.name ?? backingPattern;
+  // eslint-disable-next-line no-console
+  console.log('Resolved backing:', backing);
+  // 3) Count the docs in the backing index (should be >0)
+  await es.indices.refresh({ index: backing });
+  const { count } = await es.count({ index: 'backing' });
+  expect(count).toBeGreaterThan(0);
+
+  // (Optional) peek at a doc for sanity
+  const hit = await es.search({
+    index: backing,
+    size: 1,
+    query: { match_all: {} },
+    track_total_hits: true,
+  });
+  // eslint-disable-next-line no-console
+  console.log('Sample doc _id:', hit.hits.hits[0]?._id);
 };
