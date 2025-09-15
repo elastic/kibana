@@ -15,80 +15,78 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
-const LabelGroup = forwardRef<HTMLDivElement, { labels: string[]; className?: string }>(
-  ({ labels, className }, ref) => {
-    return (
-      <EuiBadgeGroup className={className} gutterSize="s" ref={ref}>
-        {labels.map((label) => (
-          <EuiBadge key={label} color="hollow">
-            {label}
-          </EuiBadge>
-        ))}
-      </EuiBadgeGroup>
-    );
-  }
-);
+const LabelGroup: React.FC<{ labels: string[] }> = ({ labels }) => {
+  return (
+    <EuiBadgeGroup gutterSize="s">
+      {labels.map((label) => (
+        <EuiBadge key={label} color="hollow">
+          {label}
+        </EuiBadge>
+      ))}
+    </EuiBadgeGroup>
+  );
+};
 
-export const Labels: React.FC<{ labels: string[] }> = ({ labels }) => {
-  const [isViewAllPopoverOpen, setIsViewAllPopoverOpen] = useState(false);
-  const [isTruncated, setIsTruncated] = useState(false);
+const ViewMorePopover: React.FC<{ labels: string[] }> = ({ labels }) => {
   const { euiTheme } = useEuiTheme();
-  const viewAllLabelsContainerStyles = css`
+  const popoverPanelStyles = css`
     max-inline-size: calc(${euiTheme.size.xxxxl} * 5);
   `;
-  const truncatedContainerHeight = euiTheme.size.l;
-  const truncatedStyles = css`
-    max-block-size: ${truncatedContainerHeight};
-    overflow: hidden;
-  `;
-  const labelsContainerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <EuiPopover
+      panelProps={{ css: popoverPanelStyles }}
+      isOpen={isOpen}
+      closePopover={() => {
+        setIsOpen(false);
+      }}
+      button={
+        <EuiButtonEmpty
+          size="s"
+          onClick={() => {
+            setIsOpen((open) => !open);
+          }}
+        >
+          <FormattedMessage
+            id="xpack.onechat.labels.viewMore.buttonLabel"
+            defaultMessage="View more ({numLabels})"
+            values={{ numLabels: labels.length }}
+          />
+        </EuiButtonEmpty>
+      }
+    >
+      <LabelGroup labels={labels} />
+    </EuiPopover>
+  );
+};
 
-  useEffect(() => {
-    if (labelsContainerRef.current) {
-      const isContentTruncated =
-        labelsContainerRef.current.scrollHeight > labelsContainerRef.current.clientHeight;
-      setIsTruncated(isContentTruncated);
-    }
-  }, [labels]);
+const NUM_VISIBLE_LABELS = 4;
 
+export const Labels: React.FC<{ labels: string[]; numVisible?: number }> = ({
+  labels,
+  numVisible = NUM_VISIBLE_LABELS,
+}) => {
   if (labels.length === 0) {
     return null;
   }
-  if (!isTruncated) {
-    return <LabelGroup labels={labels} css={truncatedStyles} ref={labelsContainerRef} />;
+
+  const visibleLabels = labels.slice(0, numVisible);
+  const hiddenLabels = labels.slice(numVisible);
+
+  if (hiddenLabels.length === 0) {
+    return <LabelGroup labels={visibleLabels} />;
   }
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <LabelGroup labels={labels} css={truncatedStyles} ref={labelsContainerRef} />
+        <LabelGroup labels={visibleLabels} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          panelProps={{ css: viewAllLabelsContainerStyles }}
-          isOpen={isViewAllPopoverOpen}
-          closePopover={() => {
-            setIsViewAllPopoverOpen(false);
-          }}
-          button={
-            <EuiButtonEmpty
-              size="s"
-              onClick={() => {
-                setIsViewAllPopoverOpen((open) => !open);
-              }}
-            >
-              <FormattedMessage
-                id="xpack.onechat.labels.viewAll.buttonLabel"
-                defaultMessage="View all ({numLabels})"
-                values={{ numLabels: labels.length }}
-              />
-            </EuiButtonEmpty>
-          }
-        >
-          <LabelGroup labels={labels} />
-        </EuiPopover>
+        <ViewMorePopover labels={hiddenLabels} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
