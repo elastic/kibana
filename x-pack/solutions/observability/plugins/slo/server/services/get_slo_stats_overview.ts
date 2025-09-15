@@ -8,6 +8,7 @@
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { type KueryNode, nodeBuilder } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
@@ -49,7 +50,10 @@ export class GetSLOStatsOverview {
     const filters = params?.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
 
-    let ruleFilters: string = '';
+    let ruleFilters: KueryNode = {
+      type: 'literal',
+      def: true,
+    };
     let burnRateFilters: QueryDslQueryContainer[] = [];
 
     let querySLOsForIds = false;
@@ -155,18 +159,14 @@ export class GetSLOStatsOverview {
 
         const sloIdsArray = Array.from(sloRuleKeysFromES);
 
-        const resultString = sloIdsArray.length
-          ? sloIdsArray.reduce((accumulator, currentValue, index) => {
-              const conditionString = `(alert.attributes.params.sloId:${currentValue} )`;
-              if (index === 0 || ruleFilters.length === 0) {
-                return conditionString;
-              } else {
-                return accumulator + ' OR ' + conditionString;
-              }
-            }, ruleFilters)
-          : 'alert.attributes.params.sloId:NO_MATCHES';
+        const resultNodes =
+          sloIdsArray.length > 0
+            ? nodeBuilder.or(
+                sloIdsArray.map((sloId) => nodeBuilder.is(`alert.attributes.params.sloId`, sloId))
+              )
+            : nodeBuilder.is(`alert.attributes.params.sloId`, '%NO%MATCHES%');
 
-        ruleFilters = resultString;
+        ruleFilters = resultNodes;
 
         burnRateFilters = [
           {
@@ -253,11 +253,7 @@ export class GetSLOStatsOverview {
         options: {
           ruleTypeIds: SLO_RULE_TYPE_IDS,
           consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
-          ...(ruleFilters
-            ? {
-                filter: ruleFilters,
-              }
-            : {}),
+          ...(ruleFilters?.def ? {} : { filter: ruleFilters }),
         },
       }),
 
