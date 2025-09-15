@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLaunchpadNavigationTree } from './security_launchpad_navigation_tree';
 import { createDashboardsNavigationTree } from './dashboards_navigation_tree';
 import { createRulesNavigationTree } from './rules_navigation_tree';
 import { createCasesNavigationTree } from './cases_navigation_tree';
@@ -21,6 +22,7 @@ export const defaultNavigationTree = {
   cases: createCasesNavigationTree,
   investigations: createInvestigationsNavigationTree,
   explore: createExploreNavigationTree,
+  launchpad: createLaunchpadNavigationTree,
   assets: createAssetsNavigationTree,
   entityAnalytics: createEntityAnalyticsNavigationTree,
   ml: createMachineLearningNavigationTree,

@@ -4837,6 +4837,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.BULK_ROLLBACK_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_ROLLBACK_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_ROLLBACK_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.EPM_API_ROUTES.LIST_PATTERN",
             "type": "string",
             "tags": [],
@@ -32752,6 +32774,28 @@
             "type": "string",
             "tags": [],
             "label": "BULK_UNINSTALL_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.BULK_ROLLBACK_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_ROLLBACK_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_ROLLBACK_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
