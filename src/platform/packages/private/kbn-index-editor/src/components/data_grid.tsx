@@ -51,6 +51,7 @@ const DEFAULT_ROWS_PER_PAGE = 10;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
+  // test
   const { rows } = props;
 
   const {
