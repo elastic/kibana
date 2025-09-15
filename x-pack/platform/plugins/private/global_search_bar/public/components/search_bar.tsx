@@ -43,6 +43,7 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import type { SearchBarProps } from './types';
 import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_animation';
 import { getOverlayBackdropStyles, getOverlaySearchStyles } from './overlay_styles';
+import { VersionSelectorPanel, type DesignVersion } from './version_selector_panel';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -102,6 +103,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
   const [isOverlayMode, setIsOverlayMode] = useState(false);
+  const [designVersion, setDesignVersion] = useState<DesignVersion>('regular-user');
 
   // Highlight animation hook
   const { isHighlighted, triggerHighlight } = useHighlightAnimation(chromeStyle === 'project');
@@ -174,9 +176,56 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       suggestions: SearchSuggestion[],
       searchTagIds: string[] = []
     ) => {
+      // Filter and modify options based on design version
+      let filteredOptions = _options;
+      let filteredSuggestions = suggestions;
+
+      if (designVersion === 'new-user') {
+        // For new users, prioritize applications and basic features
+        filteredOptions = _options.filter((option) => {
+          // Prioritize applications and basic dashboards
+          return option.type === 'application' || 
+                 (option.type === 'dashboard' && !option.title?.toLowerCase().includes('advanced'));
+        });
+        
+        // Limit to top 5 results for new users to avoid overwhelming
+        filteredOptions = filteredOptions.slice(0, 5);
+        
+        // Add helpful suggestions for new users
+        if (searchValue.length === 0) {
+          filteredSuggestions = [
+            { 
+              key: 'getting-started', 
+              label: 'Getting started', 
+              description: 'Learn the basics of Kibana',
+              icon: 'help',
+              suggestedSearch: 'getting started'
+            },
+            { 
+              key: 'create-dashboard', 
+              label: 'Create dashboard', 
+              description: 'Build your first dashboard',
+              icon: 'dashboardApp',
+              suggestedSearch: 'create dashboard'
+            },
+            { 
+              key: 'sample-data', 
+              label: 'Sample data', 
+              description: 'Explore with sample datasets',
+              icon: 'database',
+              suggestedSearch: 'sample data'
+            },
+            ...suggestions.slice(0, 2)
+          ];
+        }
+      } else {
+        // For regular users, show all results
+        filteredSuggestions = suggestions;
+      }
+
       setOptions([
-        ...suggestions.map(suggestionToOption),
-        ..._options.map((option) =>
+        ...filteredSuggestions.map(suggestionToOption),
+        ...filteredOptions.map((option) =>
           resultToOption(
             option,
             searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
@@ -185,8 +234,36 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         ),
       ]);
     },
-    [setOptions, taggingApi]
+    [setOptions, taggingApi, designVersion, searchValue]
   );
+
+  // When design version changes, refresh the search results immediately
+  useEffect(() => {
+    if (initialLoad && searchableTypes.length > 0) {
+      // Directly trigger the search logic with current parameters
+      const suggestions = loadSuggestions(searchValue.toLowerCase());
+      let aggregatedResults: GlobalSearchResult[] = [];
+
+      const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
+      let tagIds: string[] | undefined;
+      if (taggingApi && rawParams.filters.tags) {
+        tagIds = rawParams.filters.tags.map(
+          (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
+        );
+      } else {
+        tagIds = undefined;
+      }
+
+      // For empty search, show applications
+      if (searchValue.length === 0) {
+        // Create mock application results for immediate display
+        aggregatedResults = [];
+      }
+
+      // Update the options immediately with the new design version logic
+      setDecoratedOptions(aggregatedResults, suggestions, tagIds);
+    }
+  }, [designVersion, initialLoad, searchableTypes, searchValue, loadSuggestions, setDecoratedOptions, taggingApi]);
 
   useDebounce(
     () => {
@@ -263,7 +340,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }
     },
     350,
-    [searchValue, loadSuggestions, searchableTypes, initialLoad]
+    [searchValue, loadSuggestions, searchableTypes, initialLoad, designVersion]
   );
 
   const closeOverlay = useCallback(() => {
@@ -473,6 +550,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         >
           {renderSearchComponent(true)}
         </div>
+      )}
+      
+      {/* Version selector panel - only show in project chrome style */}
+      {chromeStyle === 'project' && (
+        <VersionSelectorPanel
+          selectedVersion={designVersion}
+          onVersionChange={setDesignVersion}
+        />
       )}
     </>
   );
