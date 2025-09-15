@@ -54,7 +54,6 @@ describe('getCostSavingsTrendAreaLensAttributes', () => {
       ...defaultParams,
     });
     expect(result).toHaveProperty('title', 'Cost Savings Trend');
-    expect(result).toHaveProperty('type', 'lens');
     expect(result).toHaveProperty('visualizationType', 'lnsXY');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');

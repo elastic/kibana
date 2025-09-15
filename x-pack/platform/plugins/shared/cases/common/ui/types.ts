@@ -6,8 +6,10 @@
  */
 
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -53,7 +55,6 @@ import type {
   CaseSummaryResponse,
   InferenceConnectorsResponse,
 } from '../types/api';
-import { DataTableRecord } from '@kbn/discover-utils';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -136,9 +137,9 @@ export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export type CasesConfigurationUI = Pick<

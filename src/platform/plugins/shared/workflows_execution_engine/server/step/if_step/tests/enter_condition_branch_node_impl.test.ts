@@ -13,16 +13,35 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 describe('EnterConditionBranchNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: EnterConditionBranchNodeImpl;
+  const conditionBranchNode = {
+    id: 'testStep',
+    type: 'enter-then-branch',
+  } as any;
 
   beforeEach(() => {
     wfExecutionRuntimeManagerMock = {
       goToNextStep: jest.fn(),
+      enterScope: jest.fn(),
     } as any;
-    impl = new EnterConditionBranchNodeImpl(wfExecutionRuntimeManagerMock);
+    impl = new EnterConditionBranchNodeImpl(conditionBranchNode, wfExecutionRuntimeManagerMock);
   });
 
   it('should go to next step', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
+  });
+
+  it('should enter true scope for enter-then-branch', async () => {
+    conditionBranchNode.type = 'enter-then-branch';
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith('true');
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
+  });
+
+  it('should enter false scope for enter-else-branch', async () => {
+    conditionBranchNode.type = 'enter-else-branch';
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith('false');
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
   });
 });
