@@ -10,7 +10,7 @@ import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { GrokProcessor } from '../../../../types/processors';
 import { parseMultiGrokPatterns } from '../../../../types/utils/grok_patterns';
 import { conditionToESQL } from '../condition_to_esql';
-import { castFieldsToGrokTypes, buildWhereCondition } from './common';
+import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } from './common';
 
 /**
  * Converts a Streamlang GrokProcessor into a list of ES|QL AST commands.
@@ -44,6 +44,7 @@ import { castFieldsToGrokTypes, buildWhereCondition } from './common';
  *
  *    Generates (conceptually):
  *    ```txt
+ *    // | WHERE NOT(message IS NULL)  // Only if ignore_missing = false
  *    | EVAL `client.ip` = TO_STRING(`client.ip`)
  *    | EVAL `size` = TO_INTEGER(`size`)
  *    | EVAL `burn_rate` = TO_DOUBLE(`burn_rate`)
@@ -63,14 +64,20 @@ export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCom
   const fromColumn = Builder.expression.column(from);
   const primaryPattern = patterns[0];
   const grokCommand = buildGrokCommand(fromColumn, primaryPattern);
+  const commands: ESQLAstCommand[] = [];
 
-  // Check if conditional execution is needed
-  const needConditional = ignore_missing || Boolean(where);
-  if (!needConditional) {
-    return [grokCommand];
+  // Add missing field filter if needed (ignore_missing = false)
+  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  if (missingFieldFilter) {
+    commands.push(missingFieldFilter);
   }
 
-  const commands: ESQLAstCommand[] = [];
+  // Check if conditional execution is needed for 'where' clauses, return simple command otherwise
+  const needConditional = ignore_missing || Boolean(where);
+  if (!needConditional) {
+    commands.push(grokCommand);
+    return commands;
+  }
 
   // Pre-cast existing target fields to their configured GROK types to avoid ES|QL type conflict errors
   const { allFields } = parseMultiGrokPatterns([primaryPattern]);

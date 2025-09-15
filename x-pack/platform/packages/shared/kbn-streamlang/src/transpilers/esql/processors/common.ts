@@ -68,6 +68,37 @@ export function combineOr(predicates: ESQLAstItem[]): ESQLAstItem | null {
   return predicates.reduce((acc, c) => (acc ? Builder.expression.func.binary('or', [acc, c]) : c));
 }
 
+/**
+ * Creates a WHERE command to filter out documents with missing source fields when `ignore_missing: false`.
+ * This simulates Ingest Pipeline's "field [field] not present" error behavior by pre-filtering documents.
+ *
+ * Behavioral Context:
+ * - ignore_failure is implicitly false (not supported in Streamlang DSL yet)
+ * - When ignore_failure = false, Ingest Pipeline fails on both missing fields AND pattern mismatches
+ * - ES|QL can only simulate the missing field case with WHERE filtering
+ * - Pattern mismatch failures cannot be (in a reasonable fashion) simulated in ES|QL (they nullify target fields instead)
+ *
+ * @param sourceField - The source field name to check for NULL/missing values
+ * @param ignoreMissing - If false, returns WHERE command to filter missing fields
+ * @returns WHERE command if filtering needed, undefined otherwise
+ */
+export function buildIgnoreMissingFilter(
+  sourceField: string,
+  ignoreMissing: boolean
+): ESQLAstCommand | undefined {
+  if (ignoreMissing) {
+    return undefined; // No filtering needed when ignore_missing = true
+  }
+
+  const fromColumn = Builder.expression.column(sourceField);
+  return Builder.command({
+    name: 'where',
+    args: [
+      Builder.expression.func.call('NOT', [Builder.expression.func.postfix('IS NULL', fromColumn)]),
+    ],
+  });
+}
+
 export function buildWhereCondition(
   fromField: string,
   ignoreMissing: boolean,

@@ -96,7 +96,7 @@ streamlangApiTest.describe(
     );
 
     streamlangApiTest(
-      'should produce empty dissections when ignore_missing is false',
+      'should filter the document out when ignore_missing is false',
       async ({ testBed, esql }) => {
         const indexName = 'stream-e2e-test-dissect-fail-missing';
         const streamlangDSL: StreamlangDSL = {
@@ -116,8 +116,8 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents[1]['log.level']).toBeNull(); // Overwritten to null as ignore_missing is false
-        expect(esqlResult.documents[1]['client.ip']).toBeNull();
+        // Should have filtered out the doc missing `message` field
+        expect(esqlResult.documents).toHaveLength(1); // Only the mapping doc
       }
     );
 

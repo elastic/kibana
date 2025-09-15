@@ -10,7 +10,7 @@ import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { DissectProcessor } from '../../../../types/processors';
 import { parseMultiDissectPatterns } from '../../../../types/utils/dissect_patterns';
 import { conditionToESQL } from '../condition_to_esql';
-import { castFieldsToString, buildWhereCondition } from './common';
+import { buildIgnoreMissingFilter, castFieldsToString, buildWhereCondition } from './common';
 
 /**
  * Converts a Streamlang DissectProcessor into a list of ES|QL AST commands.
@@ -47,6 +47,7 @@ import { castFieldsToString, buildWhereCondition } from './common';
  *
  *   Generates (conceptually):
  *    ```txt
+ *      // | WHERE NOT(message IS NULL)  // Only if ignore_missing = false
  *      | EVAL `log.level` = TO_STRING(`log.level`)
  *      | EVAL `client.ip` = TO_STRING(`client.ip`)
  *      | EVAL __temp_dissect_where_message__ = CASE(NOT(message IS NULL) AND NOT(`flags.process` IS NULL), message, "")
@@ -65,16 +66,20 @@ export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQL
 
   const fromColumn = Builder.expression.column(from);
   const dissectCommand = buildDissectCommand(pattern, fromColumn, append_separator);
+  const commands: ESQLAstCommand[] = [];
 
-  // Check if conditional execution is needed
-  const needConditional = ignore_missing || Boolean(where);
-
-  // If no conditional logic needed, just return plain dissect command
-  if (!needConditional) {
-    return [dissectCommand];
+  // Add missing field filter if needed (ignore_missing = false)
+  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  if (missingFieldFilter) {
+    commands.push(missingFieldFilter);
   }
 
-  const commands: ESQLAstCommand[] = [];
+  // Check if conditional execution is needed for 'where' clauses, return simple command otherwise
+  const needConditional = ignore_missing || Boolean(where);
+  if (!needConditional) {
+    commands.push(dissectCommand);
+    return commands;
+  }
 
   // Pre-cast all dissect output fields to string for consistency
   const { allFields } = parseMultiDissectPatterns([pattern]);

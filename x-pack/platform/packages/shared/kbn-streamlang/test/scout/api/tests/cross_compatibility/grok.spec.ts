@@ -479,11 +479,9 @@ streamlangApiTest.describe(
           ]);
         }
       );
-    });
 
-    streamlangApiTest.describe('Incompatible', () => {
       streamlangApiTest(
-        'should fail in ingest, but not in ES|QL when field is missing and ignore_missing is false',
+        'should filter out the document in ingest as well as in ES|QL when ignore_missing is false and the field is missing',
         async ({ testBed, esql }) => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
@@ -508,9 +506,11 @@ streamlangApiTest.describe(
           const mappingDoc = { message: '' };
           await testBed.ingest('esql-grok-fail', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-grok-fail', query);
-          expect(esqlResult.documents[1]['client.ip']).toBeUndefined(); // ES|QL returns undefined for unmapped fields
+          expect(esqlResult.documents.length).toBe(1); // only mapping doc
         }
       );
     });
+
+    streamlangApiTest.describe('Incompatible', () => {});
   }
 );
