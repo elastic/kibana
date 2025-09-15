@@ -263,12 +263,12 @@ export const getControlButtonTitle = () =>
 
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Add control',
+    defaultMessage: 'Filter control',
   });
 
 export const getAddESQLControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
-    defaultMessage: 'Add ES|QL control',
+    defaultMessage: 'Variable control',
   });
 
 export const getEditControlGroupButtonTitle = () =>
@@ -283,5 +283,5 @@ export const getOnlyOneTimeSliderControlMsg = () =>
 
 export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
-    defaultMessage: 'Add time slider control',
+    defaultMessage: 'Time slider control',
   });
