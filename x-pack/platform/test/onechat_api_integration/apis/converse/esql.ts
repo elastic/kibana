@@ -53,13 +53,13 @@ export default function ({ getService }: OneChatFtrProviderContext) {
 
       beforeEach(async () => {
         // mock title
-        llmProxy.interceptors.toolChoice({
+        void llmProxy.interceptors.toolChoice({
           name: 'set_title',
           response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
         });
 
         // intercept the user message and respond with tool call to "platform_core_search"
-        llmProxy.interceptors.userMessage({
+        void llmProxy.interceptors.userMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages)?.content as string;
             return lastMessage.includes(USER_PROMPT);
@@ -70,7 +70,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
         });
 
         //
-        llmProxy.interceptors.toolChoice({
+        void llmProxy.interceptors.toolChoice({
           name: 'select_resources',
           response: toolCallMock('select_resources', {
             targets: [
@@ -84,7 +84,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
           }),
         });
 
-        llmProxy.interceptors.userMessage({
+        void llmProxy.interceptors.userMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages)?.content as string;
             return lastMessage.startsWith('Execute the following user query:');
@@ -96,12 +96,12 @@ export default function ({ getService }: OneChatFtrProviderContext) {
         });
 
         const productDocsToolCall = toolCallMock('structuredOutput', { commands: ['WHERE'] });
-        void llmProxy.interceptors.toolChoice({
+        void void llmProxy.interceptors.toolChoice({
           name: 'structuredOutput',
           response: productDocsToolCall,
         });
 
-        llmProxy.interceptors.toolMessage({
+        void llmProxy.interceptors.toolMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages);
             const contentParsed = JSON.parse(lastMessage?.content as string);
@@ -118,7 +118,7 @@ FROM traces-apm-default
 I've added a \`LIMIT 100\` for safety, as per the directives. If you need more results, please let me know!`,
         });
 
-        llmProxy.interceptors.toolMessage({
+        void llmProxy.interceptors.toolMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages);
             const contentParsed = JSON.parse(lastMessage?.content as string);
