@@ -136,6 +136,61 @@ describe('Elasticsearch function', () => {
     });
   });
 
+  describe('ML jobs', () => {
+    it('returns a list of ML jobs', async () => {
+      const conversation = await chatClient.complete({
+        messages: 'List all ML jobs',
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors or _ml/anomaly_detectors/_all',
+        'Returns the list of ML jobs based on the response from the Elasticsearch function',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+    it('returns the ML job stats', async () => {
+      const conversation = await chatClient.complete({
+        messages: 'What is the ML job stats?',
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors/_stats',
+        'Returns the ML job stats based on the response from the Elasticsearch function',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+    it('returns open ML jobs', async () => {
+      const conversation = await chatClient.complete({
+        messages: 'Which ML jobs are open?',
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors or _ml/anomaly_detectors/_all',
+        'Returns the list of open ML jobs based on the response from the Elasticsearch function',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+    it('returns closed ML jobs', async () => {
+      const conversation = await chatClient.complete({
+        messages: 'Which ML jobs are closed?',
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors or _ml/anomaly_detectors/_all',
+        'Returns the list of closed ML jobs based on the response from the Elasticsearch function',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+  });
+
   describe('other', () => {
     it('returns clusters license', async () => {
       const conversation = await chatClient.complete({
