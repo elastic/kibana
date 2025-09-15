@@ -502,6 +502,7 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            viewModeToggle={viewModeToggle}
           />
         </CellActionsProvider>
       </div>
