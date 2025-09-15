@@ -39,14 +39,13 @@ describe('Access Mode Container', () => {
     jest.clearAllMocks();
   });
 
-  // Helper function to create common props
   const getDefaultProps = (accessControl?: Partial<SavedObjectAccessControl>) => ({
     onChangeAccessMode: jest.fn(),
     accessControl,
     getCurrentUser: mockGetCurrentUser,
     accessControlClient: mockAccessControlClient,
     getActiveSpace: mockGetActiveSpace,
-    entityName: 'dashboard',
+    contentTypeId: 'dashboard',
   });
 
   it('should render access mode container', async () => {

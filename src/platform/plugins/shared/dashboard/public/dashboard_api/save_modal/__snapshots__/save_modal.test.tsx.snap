@@ -89,7 +89,7 @@ exports[`renders DashboardSaveModal 1`] = `
               },
             }
           }
-          entityName="dashboard"
+          contentTypeId="dashboard"
           getActiveSpace={[MockFunction]}
           getCurrentUser={[MockFunction]}
           onChangeAccessMode={[Function]}

@@ -149,7 +149,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
-        <Fragment>
+        <>
           <EuiSpacer size="l" />
           <AccessModeContainer
             accessControl={accessControl}
@@ -157,9 +157,9 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             getActiveSpace={spacesService?.getActiveSpace}
             getCurrentUser={coreServices.userProfile.getCurrent}
             accessControlClient={accessControlClient}
-            entityName={CONTENT_ID}
+            contentTypeId={CONTENT_ID}
           />
-        </Fragment>
+        </>
       </Fragment>
     );
   }, [

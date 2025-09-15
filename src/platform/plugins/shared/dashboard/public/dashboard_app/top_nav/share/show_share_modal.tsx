@@ -346,7 +346,7 @@ export function ShowShareModal({
           getCurrentUser={coreServices.userProfile.getCurrent}
           onChangeAccessMode={handleChangeAccessMode}
           accessControlClient={accessControlClient}
-          entityName={CONTENT_ID}
+          contentTypeId={CONTENT_ID}
         />
       ),
     },

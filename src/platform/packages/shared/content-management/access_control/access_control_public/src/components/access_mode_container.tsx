@@ -53,7 +53,7 @@ interface Props {
   getActiveSpace?: () => Promise<Space>;
   getCurrentUser: () => Promise<GetUserProfileResponse<UserProfileData>>;
   accessControlClient: AccessControlClient;
-  entityName: string;
+  contentTypeId: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
 }
@@ -63,7 +63,7 @@ export const AccessModeContainer = ({
   getActiveSpace,
   getCurrentUser,
   accessControlClient,
-  entityName,
+  contentTypeId,
   accessControl,
   createdBy,
 }: Props) => {
@@ -85,13 +85,13 @@ export const AccessModeContainer = ({
         accessControl,
         createdBy,
         userId: user?.uid,
-        contentTypeId: entityName,
+        contentTypeId,
       });
       setCanManageAccessControl(canManage);
     };
 
     getCanManage();
-  }, [accessControl, createdBy, accessControlClient, entityName, getCurrentUser]);
+  }, [accessControl, createdBy, accessControlClient, contentTypeId, getCurrentUser]);
 
   const selectId = useGeneratedHtmlId({ prefix: 'accessControlSelect' });
 
@@ -149,15 +149,15 @@ export const AccessModeContainer = ({
                       content={
                         <FormattedMessage
                           id="contentManagement.accessControl.accessMode.container.description.tooltipContent"
-                          defaultMessage="Only the {entityName} author can edit permissions."
-                          values={{ entityName }}
+                          defaultMessage="Only the {contentTypeId} author can edit permissions."
+                          values={{ contentTypeId }}
                         />
                       }
                       aria-label={i18n.translate(
                         'contentManagement.accessControl.accessMode.container.description.tooltipAriaLabel',
                         {
-                          defaultMessage: 'Only the {entityName} author can edit permissions.',
-                          values: { entityName },
+                          defaultMessage: 'Only the {contentTypeId} author can edit permissions.',
+                          values: { contentTypeId },
                         }
                       )}
                       position="bottom"
@@ -180,8 +180,8 @@ export const AccessModeContainer = ({
                 aria-label={i18n.translate(
                   'contentManagement.accessControl.accessMode.container.select.ariaLabel',
                   {
-                    defaultMessage: 'Modify access acess mode for the {entityName}.',
-                    values: { entityName },
+                    defaultMessage: 'Modify access acess mode for the {contentTypeId}.',
+                    values: { contentTypeId },
                   }
                 )}
               />
