@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
-import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
@@ -84,7 +85,10 @@ export const StreamDetailGeneralData = ({
       refreshDefinition();
       setOpenEditModal('none');
 
-      telemetryClient.trackRetentionChanged(lifecycle);
+      telemetryClient.trackRetentionChanged(
+        lifecycle,
+        Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic'
+      );
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
           defaultMessage: 'Stream lifecycle updated',

@@ -159,17 +159,23 @@ const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
 };
 
 const streamsRetentionChangedSchema: RootSchema<StreamsRetentionChangedProps> = {
-  type: {
+  lifecycle_type: {
     type: 'keyword',
     _meta: {
-      description: 'The type of retention: dsl, ilm, inherit',
+      description: 'The type of lifecycle: dsl, ilm, inherit',
     },
   },
-  value: {
+  lifecycle_value: {
     type: 'keyword',
     _meta: {
-      description: 'The retention value, if applicable',
+      description: 'The lifecycle value, if applicable',
       optional: true,
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
     },
   },
 };
@@ -203,6 +209,12 @@ const streamsSchemaFieldUpdatedSchema: RootSchema<StreamsSchemaFieldUpdatedProps
       optional: true,
     },
   },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
 };
 
 const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
@@ -214,6 +226,12 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
           'The time (in milliseconds) it took to generate significant events suggestions',
       },
     },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
   };
 
 const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEventsCreatedProps> = {
@@ -221,6 +239,12 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
     type: 'long',
     _meta: {
       description: 'The number of significant events created',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
     },
   },
 };

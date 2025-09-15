@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle, type IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
@@ -64,10 +64,11 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_PROCESSING_SAVED_EVENT_TYPE, params);
   }
 
-  public trackRetentionChanged(lifecycle: IngestStreamLifecycle) {
+  public trackRetentionChanged(lifecycle: IngestStreamLifecycle, streamType: 'wired' | 'classic') {
     this.analytics.reportEvent(STREAMS_RETENTION_CHANGED_EVENT_TYPE, {
-      type: this.getLifecycleType(lifecycle),
-      value: this.getLifecycleValue(lifecycle),
+      lifecycle_type: this.getLifecycleType(lifecycle),
+      lifecycle_value: this.getLifecycleValue(lifecycle),
+      stream_type: streamType,
     });
   }
 
@@ -90,20 +91,20 @@ export class StreamsTelemetryClient {
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {
-    if ('dsl' in lifecycle) {
+    if (isDslLifecycle(lifecycle)) {
       return 'dsl';
     }
-    if ('ilm' in lifecycle) {
+    if (isIlmLifecycle(lifecycle)) {
       return 'ilm';
     }
     return 'inherit';
   }
 
   private getLifecycleValue(lifecycle: IngestStreamLifecycle): string | undefined {
-    if ('dsl' in lifecycle) {
+    if (isDslLifecycle(lifecycle)) {
       return lifecycle.dsl.data_retention;
     }
-    if ('ilm' in lifecycle) {
+    if (isIlmLifecycle(lifecycle)) {
       return lifecycle.ilm.policy;
     }
     return undefined;

@@ -7,7 +7,8 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -116,6 +117,9 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                       });
                       telemetryClient.trackSignificantEventsSuggestionsGenerate({
                         duration_ms: Date.now() - startTime,
+                        stream_type: Streams.WiredStream.Definition.is(definition)
+                          ? 'wired'
+                          : 'classic',
                       });
                       setIsGenerating(false);
                     },

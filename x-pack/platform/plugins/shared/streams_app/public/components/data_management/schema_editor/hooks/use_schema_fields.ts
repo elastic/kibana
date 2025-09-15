@@ -204,6 +204,7 @@ export const useSchemaFields = ({
           field_name: field.name,
           field_type: nextFieldDefinitionConfig.type,
           field_status: 'mapped',
+          stream_type: Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic',
         });
 
         refreshFields();
@@ -278,6 +279,7 @@ export const useSchemaFields = ({
         telemetryClient.trackSchemaFieldUpdated({
           field_name: fieldName,
           field_status: 'unmapped',
+          stream_type: Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic',
         });
 
         refreshFields();

@@ -40,8 +40,9 @@ interface StreamsProcessingSavedProps {
 }
 
 interface StreamsRetentionChangedProps {
-  type: 'dsl' | 'ilm' | 'inherit';
-  value?: string;
+  lifecycle_type: 'dsl' | 'ilm' | 'inherit';
+  lifecycle_value?: string;
+  stream_type: 'wired' | 'classic';
 }
 
 interface StreamsChildStreamCreatedProps {
@@ -52,14 +53,17 @@ interface StreamsSchemaFieldUpdatedProps {
   field_name: string;
   field_status: 'mapped' | 'unmapped';
   field_type?: string;
+  stream_type: 'wired' | 'classic';
 }
 
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
+  stream_type: 'wired' | 'classic';
 }
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
+  stream_type: 'wired' | 'classic';
 }
 
 export {
