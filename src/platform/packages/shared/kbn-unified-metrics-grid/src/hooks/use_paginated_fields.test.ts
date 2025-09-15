@@ -72,7 +72,7 @@ describe('usePaginatedFields', () => {
     });
 
     expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field4', 'field44']);
-    expect(result.current?.totalPages).toBe(3);
+    expect(result.current?.totalPages).toBe(1);
   });
 
   it('returns correct pagination for second page', async () => {
