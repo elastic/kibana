@@ -10,12 +10,7 @@
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
-interface Args {
-  file: File;
-  fileName?: string;
-}
-
-export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHeaders {
+export function getDownloadHeadersForFile(file: File): ResponseHeaders {
   return {
     'content-type': file.data.mimeType ?? 'application/octet-stream',
     'cache-control': 'max-age=31536000, immutable',

@@ -56,7 +56,7 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     return res.file({
       body,
       filename: fileName ?? getDownloadedFileName(file),
-      headers: getDownloadHeadersForFile({ file, fileName }),
+      headers: getDownloadHeadersForFile(file),
     });
   } catch (e) {
     if (

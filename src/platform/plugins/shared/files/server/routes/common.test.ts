@@ -19,46 +19,16 @@ describe('getDownloadHeadersForFile', () => {
   }
 
   const file = { data: { name: 'test', mimeType: undefined } } as unknown as File;
-  test('no mime type and name from file object', () => {
-    expect(getDownloadHeadersForFile({ file, fileName: undefined })).toEqual(
+  test('no mime type', () => {
+    expect(getDownloadHeadersForFile(file)).toEqual(
       expectHeaders({ contentType: 'application/octet-stream' })
     );
   });
 
-  test('no mime type and name (without ext)', () => {
-    expect(getDownloadHeadersForFile({ file, fileName: 'myfile' })).toEqual(
-      expectHeaders({ contentType: 'application/octet-stream' })
-    );
-  });
-
-  test('no mime type and name (with ext) - secure: ignores filename extension', () => {
-    expect(getDownloadHeadersForFile({ file, fileName: 'myfile.png' })).toEqual(
-      expectHeaders({ contentType: 'application/octet-stream' })
-    );
-  });
-
-  test('mime type and no name', () => {
+  test('mime type', () => {
     const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile({ file: fileWithMime, fileName: undefined })).toEqual(
+    expect(getDownloadHeadersForFile(fileWithMime)).toEqual(
       expectHeaders({ contentType: 'application/pdf' })
     );
-  });
-
-  test('mime type and name - secure: uses stored mime type, ignores filename', () => {
-    const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile({ file: fileWithMime, fileName: 'malicious.html' })).toEqual(
-      expectHeaders({ contentType: 'application/pdf' })
-    );
-  });
-
-  test('security: prevents MIME type manipulation via filename extension', () => {
-    // Scenario: Attacker uploads legitimate file but tries to serve it as HTML for XSS
-    const imageFile = { data: { ...file.data, mimeType: 'image/png' } } as File;
-
-    // Attacker tries to download with .html extension to trigger XSS
-    const result = getDownloadHeadersForFile({ file: imageFile, fileName: 'script.html' });
-
-    // Security fix: Should use stored MIME type, NOT filename extension
-    expect(result['content-type']).toBe('image/png'); // NOT text/html!
   });
 });
