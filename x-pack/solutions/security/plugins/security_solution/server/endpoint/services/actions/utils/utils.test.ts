@@ -132,7 +132,10 @@ describe('When using Actions service utilities', () => {
         id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
         type: 'ACTION_REQUEST',
         parameters: undefined,
-        meta: { machineActionId },
+        alertIds: undefined,
+        ruleId: undefined,
+        ruleName: undefined,
+        error: undefined,
       });
     });
   });
