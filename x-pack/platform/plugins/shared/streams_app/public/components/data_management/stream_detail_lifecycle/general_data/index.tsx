@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
@@ -22,7 +22,6 @@ import { getFormattedError } from '../../../../util/errors';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
-import { useLifecycleState } from '../hooks/use_lifecycle_state';
 export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
@@ -37,16 +36,10 @@ export const StreamDetailGeneralData = ({
         streams: { streamsRepositoryClient },
       },
     },
-    isServerless,
   } = useKibana();
 
-  const {
-    lifecycleActions,
-    openEditModal,
-    setOpenEditModal,
-    updateInProgress,
-    setUpdateInProgress,
-  } = useLifecycleState({ definition, isServerless });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [updateInProgress, setUpdateInProgress] = useState(false);
 
   const {
     stats,
@@ -81,7 +74,7 @@ export const StreamDetailGeneralData = ({
       });
 
       refreshDefinition();
-      setOpenEditModal('none');
+      setIsEditModalOpen(false);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
@@ -102,14 +95,15 @@ export const StreamDetailGeneralData = ({
 
   return (
     <>
-      <EditLifecycleModal
-        action={openEditModal}
-        definition={definition}
-        closeModal={() => setOpenEditModal('none')}
-        updateLifecycle={updateLifecycle}
-        getIlmPolicies={getIlmPolicies}
-        updateInProgress={updateInProgress}
-      />
+      {isEditModalOpen && (
+        <EditLifecycleModal
+          definition={definition}
+          closeModal={() => setIsEditModalOpen(false)}
+          updateLifecycle={updateLifecycle}
+          getIlmPolicies={getIlmPolicies}
+          updateInProgress={updateInProgress}
+        />
+      )}
       <EuiText>
         <h4>
           {i18n.translate('xpack.streams.streamDetailLifecycle.generalData', {
@@ -119,11 +113,7 @@ export const StreamDetailGeneralData = ({
       </EuiText>
       <EuiFlexGroup gutterSize="m" css={flexRowCss}>
         <EuiFlexItem grow={1} css={flexItemCss}>
-          <RetentionCard
-            definition={definition}
-            lifecycleActions={lifecycleActions}
-            openEditModal={setOpenEditModal}
-          />
+          <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         </EuiFlexItem>
         <EuiFlexItem grow={1} css={flexItemCss}>
           <StorageSizeCard definition={definition} stats={stats} statsError={statsError} />
