@@ -124,7 +124,7 @@ export class WorkflowContextManager {
 
       switch (stepExecution.stepType) {
         case 'foreach':
-          stepContext.foreach = this.getStepState(stepExecution.stepId) as any;
+          stepContext.foreach = stepExecution.state as StepContext['foreach'];
           break;
       }
 
@@ -139,8 +139,8 @@ export class WorkflowContextManager {
   private getStepResult(stepId: string): RunStepResult {
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId)!;
     return {
-      input: latestStepExecution.input || {},
-      output: latestStepExecution.output || {},
+      input: latestStepExecution.input,
+      output: latestStepExecution.output,
       error: latestStepExecution.error,
     };
   }
