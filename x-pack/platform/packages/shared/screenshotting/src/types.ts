@@ -33,6 +33,7 @@ export interface SaveScreenshotOptions {
 export interface ScreenshotUploadSuccess {
   ok: true;
   size: number;
+  fileId: string;
 }
 
 export const FILE_KIND_DELIMITER = 'FilesCases';

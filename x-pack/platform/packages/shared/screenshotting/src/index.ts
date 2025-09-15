@@ -8,4 +8,5 @@
 export * from './capture_screenshot/from_url';
 export * from './capture_screenshot/current_page';
 export * from './save_screenshot/save';
+export * from './hooks/use_capture_screenshot';
 export { type CaptureScreenshotOptions, type SaveScreenshotOptions } from './types';

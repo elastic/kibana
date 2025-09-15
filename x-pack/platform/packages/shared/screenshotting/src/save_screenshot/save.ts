@@ -31,14 +31,17 @@ export const saveScreenshot = async (
 
   if (createResult) {
     try {
+      const fileId = createResult.file.id;
       const uploadResult = await filesClient.upload({
-        id: createResult.file.id,
+        id: fileId,
         kind: createResult.file.fileKind,
         body: blob,
         contentType: 'image/png',
       });
-
-      return uploadResult;
+      return {
+        ...uploadResult,
+        fileId,
+      };
     } catch (err) {
       await filesClient.bulkDelete({
         ids: [createResult.file.id],
