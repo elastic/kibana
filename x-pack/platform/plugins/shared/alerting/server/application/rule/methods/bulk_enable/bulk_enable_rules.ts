@@ -210,6 +210,24 @@ const bulkEnableRulesWithOCC = async (
         async (rule) => {
           const ruleName = rule.attributes.name;
 
+          const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+          const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
+          const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
+
+          if (isLifecycleAlert && context.alertsService) {
+            try {
+              await context.alertsService.clearAlertFlappingHistory({
+                indices,
+                ruleIds: [rule.id],
+              });
+            } catch (error) {
+              // Don't throw if we can't clear the flapping history for whatever reason
+              context.logger.error(
+                `Failure to clear flapping history from rule ${rule.id} - ${error.message}`
+              );
+            }
+          }
+
           try {
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);

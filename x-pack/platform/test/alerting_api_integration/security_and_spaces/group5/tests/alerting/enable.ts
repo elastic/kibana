@@ -7,7 +7,9 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_UUID } from '@kbn/rule-data-utils';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
@@ -18,6 +20,8 @@ import {
   ObjectRemover,
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
+
+const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -371,5 +375,92 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
         });
       });
     }
+
+    describe('Clearing flapping tests', () => {
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: alertAsDataIndex,
+          query: {
+            match_all: {},
+          },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+        await objectRemover.removeAll();
+      });
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should clear flapping history when enabling rules', async () => {
+        const rule = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.always-firing-alert-as-data',
+              schedule: { interval: '24h' },
+              throttle: undefined,
+              notify_when: undefined,
+              params: {
+                index: ES_TEST_INDEX_NAME,
+                reference: 'test',
+              },
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+
+        let ids: string[] = [];
+        await retry.try(async () => {
+          const result = await es.search({
+            index: alertAsDataIndex,
+            query: {
+              match_all: {},
+            },
+          });
+          expect(result.hits.hits.length).eql(2);
+          result.hits.hits.forEach((alert: any) => {
+            expect(alert._source[ALERT_FLAPPING]).eql(false);
+            expect(alert._source[ALERT_FLAPPING_HISTORY]).eql([true]);
+          });
+          ids = result.hits.hits.map((alert: any) => alert._source[ALERT_UUID]);
+        });
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${rule.body.id}/_disable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send()
+          .expect(204);
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${rule.body.id}/_enable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send()
+          .expect(204);
+
+        await retry.try(async () => {
+          const result = await es.search({
+            index: alertAsDataIndex,
+            query: {
+              bool: {
+                must: {
+                  terms: {
+                    [ALERT_UUID]: ids,
+                  },
+                },
+              },
+            },
+          });
+
+          expect(result.hits.hits.length).eql(2);
+          result.hits.hits.forEach((alert: any) => {
+            expect(alert._source[ALERT_FLAPPING]).eql(false);
+            expect(alert._source[ALERT_FLAPPING_HISTORY]).eql([]);
+          });
+        });
+      });
+    });
   });
 }
