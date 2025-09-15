@@ -47,7 +47,7 @@ import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
   getESQLSources,
-  Parser,
+  parseErrors,
   parseWarning,
   useDebounceWithOptions,
   onKeyDownResizeHandler,
@@ -172,7 +172,7 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
   }>({
-    errors: serverErrors ? Parser.parseErrors(serverErrors, code) : [],
+    errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
   const onQueryUpdate = useCallback(
@@ -681,7 +681,7 @@ const ESQLEditorInternal = function ESQLEditor({
       if (!editorModel.current) return;
       const subscription = { active: true };
       if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
-        const parsedErrors = Parser.parseErrors(serverErrors || [], code);
+        const parsedErrors = parseErrors(serverErrors || [], code);
         const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
         setEditorMessages({
           errors: parsedErrors,
