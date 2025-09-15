@@ -79,7 +79,7 @@ const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
 describe('MigrationReadyPanel', () => {
   beforeEach(() => {
     useGetMissingResourcesMock.mockReturnValue({
-      mutate: jest.fn().mockResolvedValue([]),
+      getMissingResources: jest.fn().mockResolvedValue([]),
       isLoading: false,
     });
 
@@ -154,7 +154,7 @@ describe('MigrationReadyPanel', () => {
     beforeEach(() => {
       useGetMissingResourcesMock.mockImplementation((type, setterFn: Function) => {
         return {
-          mutate: jest.fn().mockImplementation(() => {
+          getMissingResources: jest.fn().mockImplementation(() => {
             setterFn(missingResources);
           }),
           isLoading: false,

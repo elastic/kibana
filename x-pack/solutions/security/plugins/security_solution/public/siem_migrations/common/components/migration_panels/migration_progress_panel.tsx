@@ -44,11 +44,11 @@ export function MigrationProgressPanel<T extends MigrationTaskStats>({
   migrationType,
 }: MigrationProgressPanelProps<T>) {
   const { euiTheme } = useEuiTheme();
-  const { mutate: stopMutation, isLoading: isStopping } = useStopSiemMigration(migrationType);
+  const { mutate: stopMigration, isLoading: isStopping } = useStopSiemMigration(migrationType);
 
   const onStopMigration = useCallback(() => {
-    stopMutation({ migrationId: migrationStats.id });
-  }, [migrationStats.id, stopMutation]);
+    stopMigration({ migrationId: migrationStats.id });
+  }, [migrationStats.id, stopMigration]);
 
   const { items } = migrationStats;
   const finishedCount = items.completed + items.failed;

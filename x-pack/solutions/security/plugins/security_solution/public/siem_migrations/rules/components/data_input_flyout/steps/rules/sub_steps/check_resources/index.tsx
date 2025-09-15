@@ -22,11 +22,10 @@ export const useCheckResourcesStep = ({
   migrationStats,
   onMissingResourcesFetched,
 }: CheckResourcesStepProps): EuiStepProps => {
-  const {
-    mutate: getMissingResources,
-    isLoading,
-    error,
-  } = useGetMissingResources('rule', onMissingResourcesFetched);
+  const { getMissingResources, isLoading, error } = useGetMissingResources(
+    'rule',
+    onMissingResourcesFetched
+  );
 
   useEffect(() => {
     if (status === 'current' && migrationStats?.id) {

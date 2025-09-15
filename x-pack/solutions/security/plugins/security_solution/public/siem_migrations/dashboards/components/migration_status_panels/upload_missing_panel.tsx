@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -31,7 +31,7 @@ interface DashboardMigrationsUploadMissingPanelProps {
 export const DashboardMigrationsUploadMissingPanel =
   React.memo<DashboardMigrationsUploadMissingPanelProps>(({ migrationStats, topSpacerSize }) => {
     const [missingResources, setMissingResources] = useState<SiemMigrationResourceBase[]>([]);
-    const { mutate: getMissingResources, isLoading } = useGetMissingResources(
+    const { getMissingResources, isLoading } = useGetMissingResources(
       'dashboard',
       setMissingResources
     );

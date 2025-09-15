@@ -35,10 +35,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { openFlyout } = useRuleMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
   const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
-  const { mutate: getMissingResources, isLoading } = useGetMissingResources(
-    'rule',
-    setMissingResources
-  );
+  const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
 
   useEffect(() => {
     getMissingResources(migrationStats.id);

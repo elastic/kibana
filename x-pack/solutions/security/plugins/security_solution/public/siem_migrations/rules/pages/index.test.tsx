@@ -161,7 +161,7 @@ describe('Migrations: Translated Rules Page', () => {
     useCalloutStorageSpy.mockReturnValue(mockHiddenCallStorageResult);
     useGetMigrationRulesSpy.mockImplementation(mockUseGetMigrationRules);
     useGetMissingResourcesSpy.mockReturnValue({
-      mutate: jest.fn(() => []),
+      getMissingResources: jest.fn(() => []),
       isLoading: false,
     } as unknown as ReturnType<typeof useGetMissingResourcesModule.useGetMissingResources>);
 

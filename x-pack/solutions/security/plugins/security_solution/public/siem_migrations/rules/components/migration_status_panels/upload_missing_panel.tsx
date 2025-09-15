@@ -33,10 +33,7 @@ interface RuleMigrationsUploadMissingPanelProps {
 export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadMissingPanelProps>(
   ({ migrationStats, topSpacerSize }) => {
     const [missingResources, setMissingResources] = useState<SiemMigrationResourceBase[]>([]);
-    const { mutate: getMissingResources, isLoading } = useGetMissingResources(
-      'rule',
-      setMissingResources
-    );
+    const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
 
     useEffect(() => {
       getMissingResources(migrationStats.id);
