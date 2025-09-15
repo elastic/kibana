@@ -108,7 +108,7 @@ export const onboardVmHostWithCrowdStrike = async ({
     // CrowdStrike tags should be comma-separated and can contain alphanumeric characters, hyphens, and underscores
     const devTag = `ElasticDev_${userInfo().username.toLowerCase().replaceAll('.', '_')}`;
     await hostVm.exec(`sudo /opt/CrowdStrike/falconctl -s --tags=${devTag}`);
-    
+
     log.debug(`Configured sensor with tag: ${devTag}`);
 
     log.info(`Starting CrowdStrike Falcon sensor`);

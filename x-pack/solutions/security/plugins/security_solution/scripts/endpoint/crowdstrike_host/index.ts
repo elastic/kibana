@@ -322,7 +322,9 @@ const runCli: RunFn = async ({ log, flags }) => {
     try {
       await debugExec(command);
       log.warning(`⚠️  CrowdStrike test command executed without blocking: ${command}`);
-      log.warning('   This may indicate CrowdStrike is not in prevention mode or the test script is not available');
+      log.warning(
+        '   This may indicate CrowdStrike is not in prevention mode or the test script is not available'
+      );
       successCount++;
     } catch (err) {
       detectionCount++;
@@ -335,7 +337,9 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.info(
       `🎉 CrowdStrike successfully blocked ${detectionCount} out of ${crowdStrikeTestCommands.length} malicious test commands!`
     );
-    log.info('   This indicates CrowdStrike is actively protecting the host. Check CrowdStrike console for detection alerts.');
+    log.info(
+      '   This indicates CrowdStrike is actively protecting the host. Check CrowdStrike console for detection alerts.'
+    );
   } else if (successCount > 0) {
     log.warning(
       `⚠️  All ${crowdStrikeTestCommands.length} CrowdStrike test commands executed without being blocked.`
