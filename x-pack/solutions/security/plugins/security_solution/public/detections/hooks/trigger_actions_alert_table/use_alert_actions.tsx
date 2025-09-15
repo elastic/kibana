@@ -109,7 +109,10 @@ export const useBulkAlertActionItems = ({
             ids = undefined;
           }
 
-          if (status === 'closed' && !(await promptAlertCloseConfirmation(ids ? {ids} : {query: JSON.stringify(query)}))) {
+          if (
+            status === 'closed' &&
+            !(await promptAlertCloseConfirmation(ids ? { ids } : { query: JSON.stringify(query) }))
+          ) {
             return;
           }
 

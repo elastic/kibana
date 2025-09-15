@@ -16,7 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { get } from 'lodash';
-import { set } from '@kbn/safer-lodash-set'
+import { set } from '@kbn/safer-lodash-set';
 import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
@@ -54,38 +54,40 @@ const continueSuppressionMessageComponent = (
   />
 );
 
-const hasAlertsInSuppressionWindow = async (params: { query?: string, ids?: string[] }) => {
-  let query
+const hasAlertsInSuppressionWindow = async (params: { query?: string; ids?: string[] }) => {
+  let query;
   if (params.ids && params.ids.length > 0) {
     query = {
       bool: {
-        filter: [{
-          "ids": {
-            "values": params.ids
-          }
-        }]
-      }
-    }
+        filter: [
+          {
+            ids: {
+              values: params.ids,
+            },
+          },
+        ],
+      },
+    };
   } else if (params.query) {
-    query = JSON.parse(params.query)
+    query = JSON.parse(params.query);
   } else {
-    throw new Error("either query or a non empty list of alert ids must be defined")
+    throw new Error('either query or a non empty list of alert ids must be defined');
   }
 
-  const boolFilters = get(query, 'bool.filter', [])
+  const boolFilters = get(query, 'bool.filter', []);
   query.bool?.filter.push({
-    "exists": {
-      "field": "kibana.alert.rule.parameters.alert_suppression.duration.value"
-    }
-  })
+    exists: {
+      field: 'kibana.alert.rule.parameters.alert_suppression.duration.value',
+    },
+  });
 
-  set(query, 'bool.filter', boolFilters)
+  set(query, 'bool.filter', boolFilters);
 
   const abortCtrl = new AbortController();
-  const results = await fetchQueryAlerts({ query: { query, size: 0 }, signal: abortCtrl.signal })
+  const results = await fetchQueryAlerts({ query: { query, size: 0 }, signal: abortCtrl.signal });
 
-  return results.hits.total.value > 0
-}
+  return results.hits.total.value > 0;
+};
 
 const AlertCloseConfirmationModal = ({
   onConfirmationResult,
@@ -113,13 +115,13 @@ const AlertCloseConfirmationModal = ({
   const { title, message } =
     currentSettingValue === SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
       ? {
-        title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
-        message: continueSuppressionMessageComponent,
-      }
+          title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
+          message: continueSuppressionMessageComponent,
+        }
       : {
-        title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
-        message: restartSuppressionMessageComponent,
-      };
+          title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
+          message: restartSuppressionMessageComponent,
+        };
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
@@ -157,31 +159,33 @@ export const useAlertCloseInfoModal = () => {
   const { overlays, services } = useKibana();
   const { storage } = services;
 
-  const promptAlertCloseConfirmation = useCallback(async (params: { query?: string, ids?: string[] }): Promise<boolean> => {
-    try {
-      if (!experimentalFeatureEnabled) {
+  const promptAlertCloseConfirmation = useCallback(
+    async (params: { query?: string; ids?: string[] }): Promise<boolean> => {
+      try {
+        if (!experimentalFeatureEnabled) {
+          return Promise.resolve(true);
+        }
+
+        if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
+          return Promise.resolve(true);
+        }
+
+        if (!(await hasAlertsInSuppressionWindow(params))) {
+          return Promise.resolve(true);
+        }
+
+        return new Promise((resolvePromise) => {
+          setUserConfirmationResolver(() => resolvePromise);
+          setShouldShowModal(true);
+        });
+      } catch (error) {
+        // We do not want to break alert closure. If the endpoint breaks somehow,
+        // users should still be able to close alerts.
         return Promise.resolve(true);
       }
-
-      if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
-        return Promise.resolve(true);
-      }
-
-      if (!(await hasAlertsInSuppressionWindow(params))) {
-        return Promise.resolve(true)
-      }
-
-      return new Promise((resolvePromise) => {
-        setUserConfirmationResolver(() => resolvePromise);
-        setShouldShowModal(true);
-      });
-    } catch (error) {
-      // We do not want to break alert closure. If the endpoint breaks somehow,
-      // users should still be able to close alerts.
-      return Promise.resolve(true)
-    }
-
-  }, [storage, experimentalFeatureEnabled]);
+    },
+    [storage, experimentalFeatureEnabled]
+  );
 
   const handleConfirmationResult = useCallback(
     (isConfirmed: boolean) => {

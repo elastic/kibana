@@ -120,7 +120,6 @@ export const closeFirstAlert = () => {
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 
-
 export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
