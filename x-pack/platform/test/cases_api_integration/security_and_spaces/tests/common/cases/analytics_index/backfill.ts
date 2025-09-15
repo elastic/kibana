@@ -12,7 +12,6 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { join } from 'path';
 import {
   runActivityBackfillTask,
   runAttachmentsBackfillTask,
@@ -56,18 +55,8 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         auth: authSpace1,
       });
-      await supertest
-        .post('/api/saved_objects/_import')
-        .query({ overwrite: true })
-        .attach(
-          'file',
-          join(
-            __dirname,
-            '../../../../../common/fixtures/saved_object_exports/single_case_user_actions_one_comment.ndjson'
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      await createCase(supertest, postCaseReq, 200);
+      await createCase(supertest, postCaseReq, 200, authSpace1);
 
       await runSchedulerTask(supertest);
     });
@@ -81,6 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         getConfigurationRequest({
           overrides: {
+            owner: SECURITY_SOLUTION_OWNER,
             customFields: [
               {
                 key: 'test_custom_field',
@@ -93,18 +83,22 @@ export default ({ getService }: FtrProviderContext): void => {
         })
       );
 
-      const postCaseRequest = getPostCaseRequest({
-        category: 'foobar',
-        customFields: [
-          {
-            key: 'test_custom_field',
-            type: CustomFieldTypes.TEXT,
-            value: 'value',
-          },
-        ],
-      });
-
-      const caseToBackfill = await createCase(supertest, postCaseRequest, 200);
+      const caseToBackfill = await createCase(
+        supertest,
+        {
+          ...postCaseReq,
+          category: 'foobar',
+          customFields: [
+            {
+              key: 'test_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: 'value',
+            },
+          ],
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        200
+      );
 
       await runCasesBackfillTask(supertest);
 
@@ -148,7 +142,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           description: 'This is a brand new case of a bad meanie defacing data',
           observables: [],
-          owner: 'securitySolutionFixture',
+          owner: 'securitySolution',
           severity: 'low',
           severity_sort: 0,
           space_ids: ['default'],
@@ -165,9 +159,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // This test passes locally but fails in the flaky test runner.
     // Increasing the timeout did not work.
-    it.skip('should backfill the cases attachments index', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
-      await runSchedulerTask(supertest);
+    it('should backfill the cases attachments index', async () => {
+      const postedCase = await createCase(
+        supertest,
+        {
+          ...postCaseReq,
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        200,
+        authSpace1
+      );
 
       await createFileAttachment({
         supertest,
@@ -192,28 +193,35 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.default-securitysolution',
+          index: '.internal.cases-attachments.space1-securitysolution',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
         });
 
         expect(firstAttachmentAnalytics.found).to.be(true);
-      });
 
-      const secondAttachmentAnalytics = await esClient.get({
-        index: '.internal.cases-attachments.default-securitysolution',
-        id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
-      });
+        const secondAttachmentAnalytics = await esClient.get({
+          index: '.internal.cases-attachments.space1-securitysolution',
+          id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
+        });
 
-      expect(secondAttachmentAnalytics.found).to.be(true);
+        expect(secondAttachmentAnalytics.found).to.be(true);
+      });
     });
 
     it('should backfill the cases comments index', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200);
+      const postedCase = await createCase(
+        supertest,
+        {
+          ...postCaseReq,
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        200
+      );
       await runSchedulerTask(supertest);
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postCommentUserReq,
+        params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
       await runCommentsBackfillTask(supertest);
 
@@ -246,14 +254,18 @@ export default ({ getService }: FtrProviderContext): void => {
             full_name: null,
             username: 'elastic',
           },
-          owner: 'securitySolutionFixture',
+          owner: 'securitySolution',
           space_ids: ['default'],
         });
       });
     });
 
     it('should backfill the activity index', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200);
+      const postedCase = await createCase(
+        supertest,
+        { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
+        200
+      );
       await runSchedulerTask(supertest);
       await updateCase({
         supertest,
@@ -277,10 +289,9 @@ export default ({ getService }: FtrProviderContext): void => {
         caseIDs: [caseToDelete.id],
       });
 
-      await runActivityBackfillTask(supertest);
-
       let activityArray: any[] = [];
       await retry.try(async () => {
+        await runActivityBackfillTask(supertest);
         const activityAnalytics = await esClient.search({
           index: '.internal.cases-activity.default-securitysolution',
         });
@@ -296,7 +307,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const categoryActivity = activityArray.find(
         (activity) => activity._source.type === 'category'
       );
-      expect(categoryActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(categoryActivity?._source.owner).to.be('securitySolution');
       expect(categoryActivity?._source.action).to.be('update');
       expect(categoryActivity?._source.case_id).to.be(postedCase.id);
       expect(categoryActivity?._source.payload?.category).to.be('categoryValue');
@@ -304,13 +315,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const severityActivity = activityArray.find(
         (activity) => activity._source.type === 'severity'
       );
-      expect(severityActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(severityActivity?._source.owner).to.be('securitySolution');
       expect(severityActivity?._source.action).to.be('update');
       expect(severityActivity?._source.case_id).to.be(postedCase.id);
       expect(severityActivity?._source.payload?.severity).to.be('medium');
 
       const statusActivity = activityArray.find((activity) => activity._source.type === 'status');
-      expect(statusActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(statusActivity?._source.owner).to.be('securitySolution');
       expect(statusActivity?._source.action).to.be('update');
       expect(statusActivity?._source.case_id).to.be(postedCase.id);
       expect(statusActivity?._source.payload?.status).to.be('in-progress');
