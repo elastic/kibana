@@ -12,7 +12,6 @@ import { render } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { getColumns } from './get_columns';
 import type { ErrorsByTraceId } from '@kbn/apm-types';
-import { TRACE_ID, SPAN_ID, PROCESSOR_EVENT, EVENT_NAME, ERROR_ID } from '@kbn/apm-types';
 
 // Mock the i18n module
 jest.mock('@kbn/i18n', () => ({
