@@ -194,6 +194,7 @@ export class StreamsPlugin
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
           const licensing = pluginsStart.licensing;
+          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
           return {
             scopedClusterClient,
@@ -204,6 +205,7 @@ export class StreamsPlugin
             inferenceClient,
             contentClient,
             queryClient,
+            fieldsMetadataClient,
             licensing,
             uiSettingsClient,
           };
