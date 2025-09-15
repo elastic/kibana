@@ -14,6 +14,7 @@ import { map, getOrElse } from 'fp-ts/Option';
 
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ErrorCategorizationOverrides,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
 
@@ -29,7 +30,8 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 
-import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
@@ -47,6 +49,17 @@ import { buildConnectorAuth } from '../../../common/auth/utils';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
+const errorCategorizationOverrides: ErrorCategorizationOverrides = {
+  '400': 'user',
+  '404': 'user',
+  '405': 'user',
+  '406': 'user',
+  '410': 'user',
+  '411': 'user',
+  '414': 'user',
+  '428': 'user',
+  '431': 'user',
+};
 
 // connector type definition
 export function getConnectorType(): WebhookConnectorType {
@@ -186,6 +199,7 @@ export async function executor(
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
+      errorCategorizationOverrides,
     })
   );
 
@@ -227,12 +241,7 @@ export async function executor(
           getOrElse(() => retryResult(actionId, message))
         );
       }
-
-      if (status === 404) {
-        return errorResultInvalid(actionId, message, TaskErrorSource.USER);
-      }
-
-      return errorResultInvalid(actionId, message);
+      return errorResultInvalid(actionId, message, getErrorSource(error));
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
@@ -272,7 +281,8 @@ function errorResultInvalid(
 
 function errorResultRequestFailed(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.requestFailedErrorMessage', {
     defaultMessage: 'error calling webhook, request failed',
@@ -282,6 +292,7 @@ function errorResultRequestFailed(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

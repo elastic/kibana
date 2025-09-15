@@ -31,6 +31,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { handleActionHttpUserErrors } from '@kbn/actions-plugin/server/lib/categorize_http_errors';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 export type SlackConnectorType = ConnectorType<
@@ -189,6 +190,8 @@ async function slackExecutor(
         getOrElse(() => retryResult(actionId, err.message, TaskErrorSource.USER))
       );
     }
+
+    handleActionHttpUserErrors(err.original);
 
     const errMessage = i18n.translate(
       'xpack.stackConnectors.slack.unexpectedHttpResponseErrorMessage',
