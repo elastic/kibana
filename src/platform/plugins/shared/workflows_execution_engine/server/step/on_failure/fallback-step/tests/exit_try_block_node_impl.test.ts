@@ -13,13 +13,15 @@ import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
 
 describe('ExitTryBlockNodeImpl', () => {
   let underTest: ExitTryBlockNodeImpl;
-  let step: ExitTryBlockNode;
+  let node: ExitTryBlockNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'exitOnFailureZone1',
       type: 'exit-try-block',
+      stepId: 'exitOnFailureZone1',
+      stepType: 'on-failure',
       enterNodeId: 'onFailureZone1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
@@ -30,7 +32,7 @@ describe('ExitTryBlockNodeImpl', () => {
     workflowRuntime.exitScope = jest.fn();
     workflowRuntime.navigateToNextNode = jest.fn();
 
-    underTest = new ExitTryBlockNodeImpl(step, workflowRuntime);
+    underTest = new ExitTryBlockNodeImpl(node, workflowRuntime);
   });
 
   describe('run', () => {
@@ -45,12 +47,12 @@ describe('ExitTryBlockNodeImpl', () => {
 
       it('should get step state for enter node', async () => {
         await underTest.run();
-        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith(step.enterNodeId);
+        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith();
       });
 
       it('should fail the step with the stored error', async () => {
         await underTest.run();
-        expect(workflowRuntime.failStep).toHaveBeenCalledWith(step.enterNodeId, mockError);
+        expect(workflowRuntime.failStep).toHaveBeenCalledWith(mockError);
       });
 
       it('should set workflow error with the stored error', async () => {
@@ -81,12 +83,12 @@ describe('ExitTryBlockNodeImpl', () => {
 
       it('should get step state for enter node', async () => {
         await underTest.run();
-        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith(step.enterNodeId);
+        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith();
       });
 
       it('should finish the step', async () => {
         await underTest.run();
-        expect(workflowRuntime.finishStep).toHaveBeenCalledWith(step.enterNodeId);
+        expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
       });
 
       it('should exit scope', async () => {
@@ -117,7 +119,7 @@ describe('ExitTryBlockNodeImpl', () => {
 
       it('should handle null step state gracefully', async () => {
         await underTest.run();
-        expect(workflowRuntime.finishStep).toHaveBeenCalledWith(step.enterNodeId);
+        expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
         expect(workflowRuntime.exitScope).toHaveBeenCalled();
         expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
       });

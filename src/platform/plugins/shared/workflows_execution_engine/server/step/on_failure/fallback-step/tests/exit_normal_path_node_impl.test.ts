@@ -13,13 +13,15 @@ import { ExitNormalPathNodeImpl } from '../exit_normal_path_node_impl';
 
 describe('ExitNormalPathNodeImpl', () => {
   let underTest: ExitNormalPathNodeImpl;
-  let step: ExitNormalPathNode;
+  let node: ExitNormalPathNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'exitNormalPath1',
       type: 'exit-normal-path',
+      stepId: 'exitNormalPath1',
+      stepType: 'on-failure',
       exitOnFailureZoneNodeId: 'exitOnFailureZone1',
       enterNodeId: 'enterNormalPath1',
     };
@@ -27,7 +29,7 @@ describe('ExitNormalPathNodeImpl', () => {
     workflowRuntime.exitScope = jest.fn();
     workflowRuntime.navigateToNode = jest.fn();
 
-    underTest = new ExitNormalPathNodeImpl(step, workflowRuntime);
+    underTest = new ExitNormalPathNodeImpl(node, workflowRuntime);
   });
 
   describe('run', () => {
@@ -38,7 +40,7 @@ describe('ExitNormalPathNodeImpl', () => {
 
     it('should go to exit on failure zone node', async () => {
       await underTest.run();
-      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.exitOnFailureZoneNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitOnFailureZoneNodeId);
     });
 
     it('should execute steps in correct order', async () => {

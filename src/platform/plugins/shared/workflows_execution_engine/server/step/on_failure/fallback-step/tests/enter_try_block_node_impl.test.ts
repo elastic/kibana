@@ -13,13 +13,15 @@ import { EnterTryBlockNodeImpl } from '../enter_try_block_node_impl';
 
 describe('EnterTryBlockNodeImpl', () => {
   let underTest: EnterTryBlockNodeImpl;
-  let step: EnterTryBlockNode;
+  let node: EnterTryBlockNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'onFailureZone1',
       type: 'enter-try-block',
+      stepId: 'onFailureZone1',
+      stepType: 'on-failure',
       enterNormalPathNodeId: 'enterNormalPath1',
       exitNodeId: 'exitOnFailureZone1',
     };
@@ -28,13 +30,13 @@ describe('EnterTryBlockNodeImpl', () => {
     workflowRuntime.enterScope = jest.fn();
     workflowRuntime.navigateToNode = jest.fn();
 
-    underTest = new EnterTryBlockNodeImpl(step, workflowRuntime);
+    underTest = new EnterTryBlockNodeImpl(node, workflowRuntime);
   });
 
   describe('run', () => {
     it('should start the step with correct node id', async () => {
       await underTest.run();
-      expect(workflowRuntime.startStep).toHaveBeenCalledWith(step.id);
+      expect(workflowRuntime.startStep).toHaveBeenCalledWith();
     });
 
     it('should enter scope', async () => {
@@ -44,7 +46,7 @@ describe('EnterTryBlockNodeImpl', () => {
 
     it('should go to normal path entry node', async () => {
       await underTest.run();
-      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.enterNormalPathNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.enterNormalPathNodeId);
     });
 
     it('should execute steps in correct order', async () => {

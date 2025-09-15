@@ -21,7 +21,7 @@ export class ExitRetryNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     this.workflowRuntime.exitScope();
-    await this.workflowRuntime.finishStep(this.step.startNodeId);
+    await this.workflowRuntime.finishStep();
     const retryState = this.workflowRuntime.getCurrentStepState()!;
     this.workflowLogger.logDebug(
       `Exiting retry step ${this.step.startNodeId} after ${retryState.attempt} attempts.`

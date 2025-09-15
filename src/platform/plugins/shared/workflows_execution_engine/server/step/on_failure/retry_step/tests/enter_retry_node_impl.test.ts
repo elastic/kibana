@@ -14,15 +14,17 @@ import type { WorkflowTaskManager } from '../../../../workflow_task_manager/work
 
 describe('EnterRetryNodeImpl', () => {
   let underTest: EnterRetryNodeImpl;
-  let step: EnterRetryNode;
+  let node: EnterRetryNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let workflowTaskManager: WorkflowTaskManager;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'retryStep1',
       type: 'enter-retry',
+      stepId: 'retryStep1',
+      stepType: 'retry',
       configuration: { 'max-attempts': 3 },
       exitNodeId: 'afterRetry',
     };
@@ -31,7 +33,7 @@ describe('EnterRetryNodeImpl', () => {
     workflowTaskManager = {} as unknown as WorkflowTaskManager;
     workflowLogger.logDebug = jest.fn();
     workflowLogger.logError = jest.fn();
-    underTest = new EnterRetryNodeImpl(step, workflowRuntime, workflowTaskManager, workflowLogger);
+    underTest = new EnterRetryNodeImpl(node, workflowRuntime, workflowTaskManager, workflowLogger);
   });
 
   beforeAll(() => {
@@ -75,12 +77,12 @@ describe('EnterRetryNodeImpl', () => {
 
       it('should start step', async () => {
         await underTest.run();
-        expect(workflowRuntime.startStep).toHaveBeenCalledWith(step.id);
+        expect(workflowRuntime.startStep).toHaveBeenCalledWith();
       });
 
       it('should set attempt to 0 in step state', async () => {
         await underTest.run();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.id, { attempt: 0 });
+        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 0 });
       });
 
       it('should go to next step', async () => {
@@ -105,7 +107,7 @@ describe('EnterRetryNodeImpl', () => {
 
       it('should increment attempt in step state', async () => {
         await underTest.run();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.id, { attempt: 2 });
+        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 2 });
       });
 
       it('should log debug message about retrying', async () => {
@@ -138,7 +140,6 @@ describe('EnterRetryNodeImpl', () => {
       it('should fail the step with appropriate error', async () => {
         await underTest.catchError();
         expect(workflowRuntime.failStep).toHaveBeenCalledWith(
-          step.id,
           new Error('Retry step "retryStep1" has exceeded the maximum number of attempts.')
         );
       });
@@ -160,7 +161,7 @@ describe('EnterRetryNodeImpl', () => {
 
         it('should go to retry step again', async () => {
           await underTest.catchError();
-          expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.id);
+          expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.id);
         });
       });
     });
@@ -168,7 +169,7 @@ describe('EnterRetryNodeImpl', () => {
     describe('delay configured', () => {
       describe('long delay configured', () => {
         beforeEach(() => {
-          step.configuration.delay = '6s';
+          node.configuration.delay = '6s';
           workflowTaskManager.scheduleResumeTask = jest.fn().mockResolvedValue({
             taskId: 'fake-task-id',
           });
@@ -189,7 +190,7 @@ describe('EnterRetryNodeImpl', () => {
 
         it('should set step to wait status', async () => {
           await underTest.catchError();
-          expect(workflowRuntime.setWaitStep).toHaveBeenCalledWith(step.id);
+          expect(workflowRuntime.setWaitStep).toHaveBeenCalledWith();
         });
 
         it('should schedule resume task of current execution', async () => {
@@ -216,7 +217,7 @@ describe('EnterRetryNodeImpl', () => {
             attempt: 1,
           });
           await underTest.catchError();
-          expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.id, {
+          expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({
             attempt: 1,
             resumeExecutionTaskId: 'fake-task-id',
           });
@@ -225,7 +226,7 @@ describe('EnterRetryNodeImpl', () => {
 
       describe('short delay configured', () => {
         beforeEach(() => {
-          step.configuration.delay = '5s';
+          node.configuration.delay = '5s';
           workflowRuntime.navigateToNode = jest.fn();
           workflowRuntime.setWorkflowError = jest.fn();
         });
@@ -245,7 +246,7 @@ describe('EnterRetryNodeImpl', () => {
           await jest.advanceTimersByTimeAsync(5000);
           await runPromise;
 
-          expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.id);
+          expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.id);
         });
       });
     });

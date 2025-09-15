@@ -14,14 +14,16 @@ import { EnterNormalPathNodeImpl } from '../enter_normal_path_node_impl';
 
 describe('EnterNormalPathNodeImpl', () => {
   let underTest: EnterNormalPathNodeImpl;
-  let step: EnterNormalPathNode;
+  let node: EnterNormalPathNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'enterNormalPath1',
       type: 'enter-normal-path',
+      stepId: 'enterNormalPath1',
+      stepType: 'on-failure',
       enterZoneNodeId: 'onFailureZone1',
       enterFailurePathNodeId: 'enterFailurePath1',
     };
@@ -37,7 +39,7 @@ describe('EnterNormalPathNodeImpl', () => {
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logError = jest.fn();
 
-    underTest = new EnterNormalPathNodeImpl(step, workflowRuntime, workflowLogger);
+    underTest = new EnterNormalPathNodeImpl(node, workflowRuntime, workflowLogger);
   });
 
   describe('run', () => {
@@ -75,12 +77,12 @@ describe('EnterNormalPathNodeImpl', () => {
 
       it('should get step state for current node', async () => {
         await underTest.catchError();
-        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith(step.enterZoneNodeId);
+        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith();
       });
 
       it('should set step state with error on enter zone node', async () => {
         await underTest.catchError();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.enterZoneNodeId, {
+        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({
           error: mockWorkflowError,
         });
       });
@@ -92,7 +94,7 @@ describe('EnterNormalPathNodeImpl', () => {
 
       it('should redirect to failure path', async () => {
         await underTest.catchError();
-        expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.enterFailurePathNodeId);
+        expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.enterFailurePathNodeId);
       });
     });
 
@@ -103,7 +105,7 @@ describe('EnterNormalPathNodeImpl', () => {
 
       it('should handle null step state gracefully', async () => {
         await underTest.catchError();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.enterZoneNodeId, {
+        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({
           error: mockWorkflowError,
         });
       });

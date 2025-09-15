@@ -8,7 +8,7 @@
  */
 
 import crypto from 'crypto';
-import { buildStepExecutionId } from './build_step_document_id';
+import { buildStepExecutionId } from './build_step_execution_id';
 
 describe('buildStepExecutionId', () => {
   describe('basic functionality', () => {

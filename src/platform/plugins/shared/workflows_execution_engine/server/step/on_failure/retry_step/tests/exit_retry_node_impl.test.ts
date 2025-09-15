@@ -14,21 +14,23 @@ import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/wor
 
 describe('ExitRetryNodeImpl', () => {
   let underTest: ExitRetryNodeImpl;
-  let step: ExitRetryNode;
+  let node: ExitRetryNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'exit-retry-1',
       type: 'exit-retry',
+      stepId: 'exit-retry-1',
+      stepType: 'retry',
       startNodeId: 'enter-retry-1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
     workflowLogger.logError = jest.fn();
-    underTest = new ExitRetryNodeImpl(step, workflowRuntime, workflowLogger);
+    underTest = new ExitRetryNodeImpl(node, workflowRuntime, workflowLogger);
   });
 
   describe('run', () => {
@@ -48,13 +50,13 @@ describe('ExitRetryNodeImpl', () => {
     it('should finish the retry step', async () => {
       workflowRuntime.finishStep = jest.fn();
       await underTest.run();
-      expect(workflowRuntime.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
     });
 
     it('should reset the retry step state', async () => {
       workflowRuntime.setCurrentStepState = jest.fn();
       await underTest.run();
-      expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(step.startNodeId, undefined);
+      expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(undefined);
     });
 
     it('should log debug message', async () => {

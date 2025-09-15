@@ -37,7 +37,7 @@ describe('ExitContinueNodeImpl', () => {
 
     it('should exit scope before going to next step', async () => {
       const exitScopeSpy = jest.spyOn(workflowRuntime, 'exitScope');
-      const goToNextStepSpy = jest.spyOn(workflowRuntime, 'goToNextStep');
+      const goToNextStepSpy = jest.spyOn(workflowRuntime, 'navigateToNextNode');
 
       await underTest.run();
 

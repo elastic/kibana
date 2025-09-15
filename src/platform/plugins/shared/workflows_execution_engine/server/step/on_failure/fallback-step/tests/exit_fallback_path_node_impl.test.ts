@@ -13,13 +13,15 @@ import { ExitFallbackPathNodeImpl } from '../exit_fallback_path_node_impl';
 
 describe('ExitFallbackPathNodeImpl', () => {
   let underTest: ExitFallbackPathNodeImpl;
-  let step: ExitFallbackPathNode;
+  let node: ExitFallbackPathNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'exitFailurePath1',
       type: 'exit-fallback-path',
+      stepId: 'exitFailurePath1',
+      stepType: 'on-failure',
       exitOnFailureZoneNodeId: 'exitOnFailureZone1',
       enterNodeId: 'enterFailurePath1',
     };
@@ -27,7 +29,7 @@ describe('ExitFallbackPathNodeImpl', () => {
     workflowRuntime.exitScope = jest.fn();
     workflowRuntime.navigateToNode = jest.fn();
 
-    underTest = new ExitFallbackPathNodeImpl(step, workflowRuntime);
+    underTest = new ExitFallbackPathNodeImpl(node, workflowRuntime);
   });
 
   describe('run', () => {
@@ -38,7 +40,7 @@ describe('ExitFallbackPathNodeImpl', () => {
 
     it('should go to exit on failure zone node', async () => {
       await underTest.run();
-      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(step.exitOnFailureZoneNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitOnFailureZoneNodeId);
     });
 
     it('should execute steps in correct order', async () => {

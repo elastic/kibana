@@ -22,6 +22,8 @@ describe('EnterContinueNodeImpl', () => {
     step = {
       id: 'continueStep1',
       type: 'enter-continue',
+      stepId: 'continueStep1',
+      stepType: 'continue',
       exitNodeId: 'exitContinue(continueStep1)',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
