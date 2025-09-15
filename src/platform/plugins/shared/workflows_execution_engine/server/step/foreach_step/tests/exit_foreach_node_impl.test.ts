@@ -10,29 +10,15 @@
 import type { ExitForeachNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 
 describe('ExitForeachNodeImpl', () => {
   let step: ExitForeachNode;
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
+  let workflowLogger: IWorkflowEventLogger;
   let underTest: ExitForeachNodeImpl;
-  let startStep: jest.Mock<any, any, any>;
-  let getCurrentStepState: jest.Mock<any, any, any>;
-  let setCurrentStepState: jest.Mock<any, any, any>;
-  let navigateToNextNode: jest.Mock<any, any, any>;
-  let navigateToNode: jest.Mock<any, any, any>;
-  let exitScope: jest.Mock<any, any, any>;
-  let finishStep: jest.Mock<any, any, any>;
-  let logDebug: jest.Mock<any, any, any>;
 
   beforeEach(() => {
-    startStep = jest.fn();
-    getCurrentStepState = jest.fn();
-    setCurrentStepState = jest.fn();
-    navigateToNextNode = jest.fn();
-    exitScope = jest.fn();
-    finishStep = jest.fn();
-    navigateToNode = jest.fn();
-    logDebug = jest.fn();
     step = {
       id: 'testStep',
       stepId: 'testStep',
@@ -40,24 +26,21 @@ describe('ExitForeachNodeImpl', () => {
       type: 'exit-foreach',
       startNodeId: 'foreachStartNode',
     };
-    wfExecutionRuntimeManager = {
-      startStep,
-      getCurrentStepState,
-      setCurrentStepState,
-      navigateToNextNode,
-      navigateToNode,
-      finishStep,
-      exitScope,
-    } as any;
-    const workflowLogger = {
-      logDebug,
-    } as any;
+    wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
+    wfExecutionRuntimeManager.navigateToNode = jest.fn();
+    wfExecutionRuntimeManager.finishStep = jest.fn();
+    wfExecutionRuntimeManager.getCurrentStepState = jest.fn();
+    wfExecutionRuntimeManager.setCurrentStepState = jest.fn();
+    wfExecutionRuntimeManager.exitScope = jest.fn();
+    workflowLogger = {} as unknown as IWorkflowEventLogger;
+    workflowLogger.logDebug = jest.fn();
     underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager, workflowLogger);
   });
 
   describe('when no foreach step', () => {
     beforeEach(() => {
-      getCurrentStepState.mockReturnValue(undefined);
+      wfExecutionRuntimeManager.getCurrentStepState = jest.fn().mockReturnValue(undefined);
     });
 
     it('should throw an error', async () => {
@@ -69,7 +52,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when there are more items to process', () => {
     beforeEach(() => {
-      getCurrentStepState.mockReturnValue({
+      wfExecutionRuntimeManager.getCurrentStepState = jest.fn().mockReturnValue({
         items: ['item1', 'item2', 'item3'],
         index: 1,
         item: 'item2',
@@ -92,13 +75,13 @@ describe('ExitForeachNodeImpl', () => {
 
     it('should exit iteration scope', async () => {
       await underTest.run();
-      expect(exitScope).toHaveBeenCalledTimes(1);
+      expect(wfExecutionRuntimeManager.exitScope).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('when no more items to process', () => {
     beforeEach(() => {
-      getCurrentStepState.mockReturnValue({
+      wfExecutionRuntimeManager.getCurrentStepState = jest.fn().mockReturnValue({
         items: ['item1', 'item2', 'item3'],
         index: 2,
         item: 'item3',
@@ -121,7 +104,7 @@ describe('ExitForeachNodeImpl', () => {
     it('should log debug message', async () => {
       await underTest.run();
 
-      expect(logDebug).toHaveBeenCalledWith(
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
         `Exiting foreach step ${step.startNodeId} after processing all items.`,
         { workflow: { step_id: step.startNodeId } }
       );
@@ -129,7 +112,7 @@ describe('ExitForeachNodeImpl', () => {
 
     it('should exit iteration scope and whole foreach scope', async () => {
       await underTest.run();
-      expect(exitScope).toHaveBeenCalledTimes(2);
+      expect(wfExecutionRuntimeManager.exitScope).toHaveBeenCalledTimes(2);
     });
   });
 });

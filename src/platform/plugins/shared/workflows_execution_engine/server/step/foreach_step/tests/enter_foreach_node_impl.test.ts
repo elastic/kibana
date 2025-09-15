@@ -10,31 +10,17 @@
 import type { EnterForeachNode, ForEachStep } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl } from '../enter_foreach_node_impl';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 
 describe('EnterForeachNodeImpl', () => {
   let step: EnterForeachNode;
   let workflowExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
+  let contextManager: WorkflowContextManager;
+  let workflowLogger: IWorkflowEventLogger;
   let underTest: EnterForeachNodeImpl;
-  let startStep: jest.Mock<any, any, any>;
-  let finishStep: jest.Mock<any, any, any>;
-  let getCurrentStepState: jest.Mock<any, any, any>;
-  let setCurrentStepState: jest.Mock<any, any, any>;
-  let navigateToNextNode: jest.Mock<any, any, any>;
-  let navigateToNode: jest.Mock<any, any, any>;
-  let enterScope: jest.Mock<any, any, any>;
-  let readContextPath: jest.Mock<any, any, any>;
-  let logDebug: jest.Mock<any, any, any>;
 
   beforeEach(() => {
-    startStep = jest.fn();
-    finishStep = jest.fn();
-    getCurrentStepState = jest.fn();
-    setCurrentStepState = jest.fn();
-    navigateToNextNode = jest.fn();
-    navigateToNode = jest.fn();
-    enterScope = jest.fn();
-    readContextPath = jest.fn();
-    logDebug = jest.fn();
     step = {
       id: 'testStep',
       type: 'enter-foreach',
@@ -45,19 +31,18 @@ describe('EnterForeachNodeImpl', () => {
         foreach: JSON.stringify(['item1', 'item2', 'item3']),
       } as ForEachStep,
     };
-    workflowExecutionRuntimeManager = {
-      startStep,
-      finishStep,
-      getCurrentStepState,
-      setCurrentStepState,
-      navigateToNextNode,
-      navigateToNode,
-      enterScope,
-    } as any;
-    const contextManager = { readContextPath } as any;
-    const workflowLogger = {
-      logDebug,
-    } as any;
+    workflowExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
+    workflowExecutionRuntimeManager.startStep = jest.fn();
+    workflowExecutionRuntimeManager.finishStep = jest.fn();
+    workflowExecutionRuntimeManager.getCurrentStepState = jest.fn();
+    workflowExecutionRuntimeManager.setCurrentStepState = jest.fn();
+    workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
+    workflowExecutionRuntimeManager.navigateToNode = jest.fn();
+    workflowExecutionRuntimeManager.enterScope = jest.fn();
+    contextManager = {} as unknown as WorkflowContextManager;
+    contextManager.readContextPath = jest.fn();
+    workflowLogger = {} as unknown as IWorkflowEventLogger;
+    workflowLogger.logDebug = jest.fn();
     underTest = new EnterForeachNodeImpl(
       step,
       workflowExecutionRuntimeManager,
@@ -68,31 +53,31 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on the first enter', () => {
     beforeEach(() => {
-      getCurrentStepState.mockReturnValue(undefined);
+      (workflowExecutionRuntimeManager.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
     });
 
     it('should enter the whole foreach scope', async () => {
       await underTest.run();
 
-      expect(enterScope).toHaveBeenCalledWith();
+      expect(workflowExecutionRuntimeManager.enterScope as jest.Mock).toHaveBeenCalledWith();
     });
 
     it('should enter the iteration scope', async () => {
       await underTest.run();
 
-      expect(enterScope).toHaveBeenCalledWith('0');
+      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
     });
 
     it('should enter scopes in correct order', async () => {
       await underTest.run();
-      expect(enterScope).toHaveBeenNthCalledWith(1);
-      expect(enterScope).toHaveBeenNthCalledWith(2, '0');
+      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenNthCalledWith(1);
+      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenNthCalledWith(2, '0');
     });
 
     it('should enter scope twice', async () => {
       await underTest.run();
 
-      expect(enterScope).toHaveBeenCalledTimes(2);
+      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledTimes(2);
     });
 
     it('should start step', async () => {
@@ -118,13 +103,13 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should initialize foreach state from the context', async () => {
         step.configuration.foreach = 'steps.testStep.array';
-        readContextPath.mockReturnValue({
+        (contextManager.readContextPath as jest.Mock).mockReturnValue({
           value: ['item1', 'item2', 'item3'],
           pathExists: true,
         });
         await underTest.run();
 
-        expect(readContextPath).toHaveBeenCalledWith('steps.testStep.array');
+        expect(contextManager.readContextPath).toHaveBeenCalledWith('steps.testStep.array');
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
           items: ['item1', 'item2', 'item3'],
@@ -136,13 +121,13 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should initialize foreach state from the context when context contains JSON array', async () => {
         step.configuration.foreach = 'steps.testStep.array';
-        readContextPath.mockReturnValue({
+        (contextManager.readContextPath as jest.Mock).mockReturnValue({
           value: JSON.stringify(['item1', 'item2', 'item3']),
           pathExists: true,
         });
         await underTest.run();
 
-        expect(readContextPath).toHaveBeenCalledWith('steps.testStep.array');
+        expect(contextManager.readContextPath).toHaveBeenCalledWith('steps.testStep.array');
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(workflowExecutionRuntimeManager.setCurrentStepState).toHaveBeenCalledWith({
           items: ['item1', 'item2', 'item3'],
@@ -155,7 +140,7 @@ describe('EnterForeachNodeImpl', () => {
       it('should log debug message about items count', async () => {
         await underTest.run();
 
-        expect(logDebug).toHaveBeenCalledWith(
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
           `Foreach step "testStep" will iterate over 3 items.`,
           { workflow: { step_id: 'testStep' } }
         );
@@ -187,7 +172,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should log debug message', async () => {
         await underTest.run();
-        expect(logDebug).toHaveBeenCalledWith(
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
           `Foreach step "testStep" has no items to iterate over. Skipping execution.`,
           { workflow: { step_id: 'testStep' } }
         );
@@ -220,7 +205,7 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on next iterations', () => {
     beforeEach(() => {
-      getCurrentStepState.mockReturnValue({
+      (workflowExecutionRuntimeManager.getCurrentStepState as jest.Mock).mockReturnValue({
         items: ['item1', 'item2', 'item3'],
         item: 'item1',
         index: 0,
@@ -231,13 +216,13 @@ describe('EnterForeachNodeImpl', () => {
     it('should enter iteration scope', async () => {
       await underTest.run();
 
-      expect(enterScope).toHaveBeenCalledWith('1');
+      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('1');
     });
 
     it('should enter scope only once', async () => {
       await underTest.run();
 
-      expect(enterScope).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledTimes(1);
     });
 
     it('should not start step', async () => {
@@ -261,7 +246,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should go to next node', async () => {
       await underTest.run();
 
-      expect(navigateToNextNode).toHaveBeenCalled();
+      expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
     });
   });
 });
