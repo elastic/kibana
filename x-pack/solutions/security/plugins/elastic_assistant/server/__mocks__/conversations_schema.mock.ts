@@ -263,6 +263,9 @@ export const getEsConversationSchemaMock = (
     model: 'test',
     provider: 'Azure OpenAI',
   },
+  summary: {
+    content: 'test',
+  },
   category: 'assistant',
   users: [
     {

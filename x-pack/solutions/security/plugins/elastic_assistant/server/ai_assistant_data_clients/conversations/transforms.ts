@@ -28,6 +28,7 @@ export const transformESToConversation = (
       })) ?? [],
     title: conversationSchema.title,
     category: conversationSchema.category,
+    summary: conversationSchema.summary,
     ...(conversationSchema.api_config
       ? {
           apiConfig: {
