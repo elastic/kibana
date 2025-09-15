@@ -64,6 +64,7 @@ export class WorkflowExecutionRuntimeManager {
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
+    this.currentNodeId = this.workflowGraph.topologicalOrder[0];
   }
 
   public get workflowExecution() {
@@ -134,7 +135,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNodeScope(): string[] {
-    return [...this.workflowExecution.stack];
+    return [...this.stack];
   }
 
   public enterScope(scopeId?: string): void {
@@ -545,7 +546,7 @@ export class WorkflowExecutionRuntimeManager {
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {};
-    if (!this.currentNodeId) {
+    if (!workflowExecution.currentNodeId) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 

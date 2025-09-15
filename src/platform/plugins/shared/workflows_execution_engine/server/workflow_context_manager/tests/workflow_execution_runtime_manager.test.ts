@@ -115,6 +115,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
         const currentNode = underTest.getCurrentNode();
         expect(currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
       });
+
+      it('should change current node id in workflow execution state', () => {
+        underTest.navigateToNode('node3');
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            currentNodeId: 'node3',
+          })
+        );
+      });
     });
 
     describe('navigateToNextNode()', () => {
@@ -124,15 +133,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
         expect(currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
       });
 
-      it('should change current node id to null if no next node after calling saveState', async () => {
+      it('should change current node id to undefined if no next node after calling saveState', async () => {
         workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
           currentNodeId: 'node3',
         } as EsWorkflowExecution);
-        underTest.navigateToNextNode();
         await underTest.saveState();
+        underTest.navigateToNextNode();
         expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
           expect.objectContaining({
-            currentNodeId: null,
+            currentNodeId: undefined,
           })
         );
       });
@@ -324,7 +333,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
         currentNodeId: 'node3',
       } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
-      underTest.navigateToNode('node3');
     });
 
     it('should upsertStep with id built from execution id, current scopes and current node', async () => {
@@ -332,7 +340,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId3',
+          id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
         } as Partial<EsWorkflowStepExecution>)
       );
     });
@@ -342,9 +350,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          stepId: 'fakeStepId3',
+          stepId: 'fakeStepId1',
           path: ['firstScope', 'secondScope'],
-          topologicalIndex: 2,
+          topologicalIndex: 0,
           status: ExecutionStatus.RUNNING,
           startedAt: mockDateNow.toISOString(),
         })
@@ -353,18 +361,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should log the start of step execution', async () => {
       await underTest.startStep();
-      expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId3' started`, {
+      expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' started`, {
         event: { action: 'step-start', category: ['workflow', 'step'] },
         tags: ['workflow', 'step', 'start'],
         workflow: {
-          step_id: 'fakeStepId3',
-          step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId3',
+          step_id: 'fakeStepId1',
+          step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
         },
         labels: {
-          connector_type: 'fakeStepType3',
-          step_id: 'fakeStepId3',
-          step_name: 'fakeStepId3',
-          step_type: 'fakeStepType3',
+          connector_type: 'fakeStepType1',
+          step_id: 'fakeStepId1',
+          step_name: 'fakeStepId1',
+          step_type: 'fakeStepType1',
         },
       });
     });
@@ -382,20 +390,20 @@ describe('WorkflowExecutionRuntimeManager', () => {
       await underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          stepType: 'fakeStepType3',
+          stepType: 'fakeStepType1',
         })
       );
     });
   });
 
   describe('finishStep', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       mockDateNow = new Date('2025-08-06T00:00:00.000Z');
       (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
         (stepExecutionId) => {
-          if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2') {
+          if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1') {
             return {
-              stepId: 'fakeStepId2',
+              stepId: 'fakeStepId1',
               startedAt: '2025-08-06T00:00:00.000Z',
             } as Partial<EsWorkflowStepExecution>;
           }
@@ -425,7 +433,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       beforeEach(async () => {
         (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
           (stepExecutionId) => {
-            if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2') {
+            if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1') {
               return {
                 stepId: 'node1',
                 startedAt: '2025-08-05T00:00:00.000Z',
@@ -442,7 +450,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
+            id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
           } as Partial<EsWorkflowStepExecution>)
         );
       });
@@ -469,7 +477,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('should log successful step execution', async () => {
         await underTest.finishStep();
-        expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId2' completed`, {
+        expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' completed`, {
           event: {
             action: 'step-complete',
             category: ['workflow', 'step'],
@@ -477,15 +485,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
           },
           tags: ['workflow', 'step', 'complete'],
           workflow: {
-            step_id: 'fakeStepId2',
-            step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
+            step_id: 'fakeStepId1',
+            step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
           },
           labels: {
-            connector_type: 'fakeStepType2',
+            connector_type: 'fakeStepType1',
             execution_time_ms: 86400000,
-            step_id: 'fakeStepId2',
-            step_name: 'fakeStepId2',
-            step_type: 'fakeStepType2',
+            step_id: 'fakeStepId1',
+            step_name: 'fakeStepId1',
+            step_type: 'fakeStepType1',
           },
         });
       });
@@ -495,9 +503,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       beforeEach(async () => {
         (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
           (stepExecutionId) => {
-            if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2') {
+            if (stepExecutionId === 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1') {
               return {
-                stepId: 'fakeStepId2',
+                stepId: 'fakeStepId1',
                 startedAt: '2025-08-06T00:00:00.000Z',
                 output: null,
                 error: 'Step execution failed',
@@ -512,7 +520,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
+            id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
           } as Partial<EsWorkflowStepExecution>)
         );
       });
@@ -534,20 +542,20 @@ describe('WorkflowExecutionRuntimeManager', () => {
         await underTest.failStep(error);
 
         expect(workflowLogger.logError).toHaveBeenCalledWith(
-          `Step 'fakeStepId2' failed: Step execution failed`,
+          `Step 'fakeStepId1' failed: Step execution failed`,
           error,
           {
             event: { action: 'step-fail', category: ['workflow', 'step'] },
             tags: ['workflow', 'step', 'fail'],
             labels: {
-              step_type: 'fakeStepType2',
-              connector_type: 'fakeStepType2',
-              step_name: 'fakeStepId2',
-              step_id: 'fakeStepId2',
+              step_type: 'fakeStepType1',
+              connector_type: 'fakeStepType1',
+              step_name: 'fakeStepId1',
+              step_id: 'fakeStepId1',
             },
             workflow: {
-              step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2',
-              step_id: 'fakeStepId2',
+              step_execution_id: 'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1',
+              step_id: 'fakeStepId1',
             },
           }
         );
@@ -625,9 +633,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('saveState', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       mockDateNow = new Date('2025-08-06T00:00:04.000Z');
       underTest.navigateToNode('node3');
+    });
+
+    it('should update local currentNodeId', async () => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        currentNodeId: 'node3',
+      } as EsWorkflowExecution);
+      await underTest.saveState();
+      expect(underTest.getCurrentNode()).toEqual(expect.objectContaining({ id: 'node3' }));
+    });
+
+    it('should update local stack', async () => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        currentNodeId: 'node3',
+        stack: ['firstScope', 'secondScope', 'thirdScope'],
+      } as EsWorkflowExecution);
+      await underTest.saveState();
+      expect(underTest.getCurrentNodeScope()).toEqual(['firstScope', 'secondScope', 'thirdScope']);
     });
 
     it('should save the current workflow execution state', async () => {
@@ -637,8 +662,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should complete workflow execution if no nodes to process', async () => {
-      workflowExecution.currentNodeId = 'node3';
-      underTest.navigateToNextNode(); // go to next node that will make current index to -1
+      workflowExecution.currentNodeId = undefined;
       await underTest.saveState();
 
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -651,8 +675,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow completion', async () => {
-      workflowExecution.currentNodeId = 'node3';
-      underTest.navigateToNextNode(); // go to next node that will make current index to -1
+      workflowExecution.currentNodeId = undefined;
       await underTest.saveState();
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(
         `Workflow execution completed successfully`,
@@ -716,33 +739,28 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.navigateToNode('node1');
     });
 
-    it('should not change workflow execution stack before savingState', () => {
+    it('should enter a new scope with step id when no name is provided', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         currentNodeId: 'node1',
+        stack: ['firstScope', 'secondScope'],
       } as Partial<EsWorkflowExecution>);
       underTest.enterScope();
-      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith();
-    });
-
-    it('should enter a new scope when no name is provided after savingState', async () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        currentNodeId: 'node1',
-      } as Partial<EsWorkflowExecution>);
-      underTest.enterScope();
-      await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
-          stack: ['fakeStepId1'],
+          stack: ['firstScope', 'secondScope', 'fakeStepId1'],
         })
       );
     });
 
-    it('should enter a new scope with the provided name after savingState', async () => {
+    it('should enter a new scope with the provided name', async () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        currentNodeId: 'node1',
+        stack: ['firstScope', 'secondScope'],
+      } as Partial<EsWorkflowExecution>);
       underTest.enterScope('my-scope');
-      await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
-          stack: ['my-scope'],
+          stack: ['firstScope', 'secondScope', 'my-scope'],
         })
       );
     });
@@ -753,23 +771,17 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.navigateToNode('node1');
     });
 
-    it('should pop the last element after saveState', async () => {
-      underTest.enterScope('scope1');
-      underTest.enterScope('scope2');
+    it('should pop the last element', async () => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        currentNodeId: 'node1',
+        stack: ['scope1', 'scope2'],
+      } as Partial<EsWorkflowExecution>);
       underTest.exitScope();
-      await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           stack: ['scope1'],
         })
       );
-    });
-
-    it('should not change executoin scope before saveState', () => {
-      underTest.enterScope('scope1');
-      underTest.enterScope('scope2');
-      underTest.exitScope();
-      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith();
     });
   });
 
@@ -782,7 +794,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       } as Partial<EsWorkflowExecution>);
 
       expect(underTest.getCurrentStepExecutionId()).toBe(
-        'testWorkflowExecutionId_firstScope_secondScope_fakeStepId2'
+        'testWorkflowExecutionId_firstScope_secondScope_fakeStepId1'
       );
     });
   });
