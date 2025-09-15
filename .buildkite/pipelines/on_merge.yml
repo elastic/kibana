@@ -693,10 +693,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
 
-  - trigger: kibana-backstage-catalog-sync
-    label: ':catalog: Backstage catalog sync'
+  - label: ':rocket: Create entries in Catalog Info'
+    command: buildkite-agent pipeline upload .buildkite/pipelines/catalog/backstage_catalog_sync.yml
     async: true
-    build:
-      branch: '${BUILDKITE_BRANCH}'
-      env:
-        BASE: main
+    if: build.branch == "main" && build.pull_request.id == null

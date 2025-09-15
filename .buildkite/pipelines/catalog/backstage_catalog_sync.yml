@@ -3,7 +3,7 @@
 # ==============================================================
 # Pipeline: Sync Kibana packages to elastic/catalog-info (Backstage)
 # Description: Scans Kibana packages and updates catalog-info repo with Backstage component YAMLs.
-# Trigger: manual or via upstream meta pipeline (configure in Buildkite UI)
+# Trigger: when PR merged to main branch
 # ==============================================================
 #
 
