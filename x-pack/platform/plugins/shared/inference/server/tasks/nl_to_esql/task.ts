@@ -37,11 +37,10 @@ export function naturalLanguageToEsql({
     switchMap((docBase) => {
       const systemMessage = `You are a helpful assistant for generating and executing ES|QL queries.
 Your goal is to help the user construct an ES|QL query for their data.
-
 VERY IMPORTANT: When writing ES|QL queries, make sure to ONLY use commands, functions
 and operators listed in the current documentation.
-
 ${docBase.getSystemMessage()}`;
+
       const messages: Message[] =
         'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 
