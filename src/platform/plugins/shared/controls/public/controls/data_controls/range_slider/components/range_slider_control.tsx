@@ -30,6 +30,7 @@ export interface Props {
   value: RangeSliderValue | undefined;
   fieldFormatter?: (value: string) => string;
   onChange: (value: RangeSliderValue | undefined) => void;
+  isEdit: boolean;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -45,6 +46,7 @@ export const RangeSliderControl: FC<Props> = ({
   value,
   fieldFormatter,
   onChange,
+  isEdit,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -193,7 +195,7 @@ export const RangeSliderControl: FC<Props> = ({
 
   return (
     <span
-      css={[styles.rangeSliderControl, isInvalid && styles.invalid]}
+      css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${uuid}`}
     >

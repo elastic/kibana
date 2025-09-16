@@ -88,6 +88,12 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
     `,
 
+    editMode: css`
+      .euiFormControlLayout {
+        padding-right: ${euiTheme.size.s};
+      }
+    `,
+
     // Inputs
     fieldNumbers: {
       rangeSliderFieldNumber: css`

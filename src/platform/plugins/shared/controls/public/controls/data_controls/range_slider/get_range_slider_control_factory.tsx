@@ -8,11 +8,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, first, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
 
 import type { Filter, RangeFilterParams } from '@kbn/es-query';
 import { buildRangeFilter } from '@kbn/es-query';
-import { fetch$, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiPublishesViewMode,
+  fetch$,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
@@ -207,6 +211,10 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         selectionHasNoResults$.next(hasNoResults);
       });
 
+      const viewMode$ = apiPublishesViewMode(parentApi)
+        ? parentApi.viewMode$
+        : new BehaviorSubject<boolean>(true);
+
       return {
         api,
         Component: () => {
@@ -219,6 +227,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             step,
             value,
             fieldName,
+            viewMode,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -227,7 +236,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             selectionHasNoResults$,
             editorStateManager.api.step$,
             selections.value$,
-            dataControlManager.api.fieldName$
+            dataControlManager.api.fieldName$,
+            viewMode$
           );
 
           useEffect(() => {
@@ -246,6 +256,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
+              isEdit={viewMode === 'edit'}
               max={max}
               min={min}
               onChange={selections.setValue}
