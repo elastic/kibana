@@ -70,7 +70,7 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_PROCESSING_SAVED_EVENT_TYPE, params);
   }
 
-  public trackRetentionChanged(lifecycle: IngestStreamLifecycle, streamType: 'wired' | 'classic') {
+  public trackRetentionChanged(lifecycle: IngestStreamLifecycle, streamType: string) {
     this.analytics.reportEvent(STREAMS_RETENTION_CHANGED_EVENT_TYPE, {
       lifecycle_type: this.getLifecycleType(lifecycle),
       lifecycle_value: this.getLifecycleValue(lifecycle),
