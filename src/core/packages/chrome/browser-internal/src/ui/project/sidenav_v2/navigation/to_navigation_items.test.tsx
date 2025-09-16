@@ -253,3 +253,16 @@ describe('panel opener href', () => {
     expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
   });
 });
+
+describe('empty panel opener', () => {
+  it('should not return panel opener if it has no children', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    tree.body[0]!.children![2].children = []; // 'securityGroup:rules' panel opener has no children now
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    expect(primaryItems.find((item) => item.id === 'securityGroup:rules')).toBeUndefined();
+  });
+});

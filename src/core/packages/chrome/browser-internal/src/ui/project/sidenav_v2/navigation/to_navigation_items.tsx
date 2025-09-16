@@ -274,6 +274,11 @@ export const toNavigationItems = (
           })
         ).filter((section) => section.items.length > 0); // Filter out empty sections;
       }
+
+      // If after all filtering there are no sections, we skip this menu item
+      if (secondarySections.length === 0) {
+        return null;
+      }
     }
 
     warnUnsupportedNavNodeOptions(navNode);
