@@ -105,6 +105,7 @@ export function Overview({
             isOtelSpan={isOtelSpan}
             duration={duration || 0}
           />
+          <EuiSpacer size="m" />
           {showWaterfall && docId ? (
             <TraceWaterfall
               dataView={dataView}
@@ -113,11 +114,11 @@ export function Overview({
               docId={docId}
             />
           ) : null}
+          <EuiSpacer size="m" />
           {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
           <EuiSpacer size="m" />
-          {docId ? (
-            <ErrorsTable traceId={traceId} spanId={spanId} transactionId={transactionId} />
-          ) : null}
+          <ErrorsTable traceId={traceId} docId={docId} />
+          <EuiSpacer size="m" />
           <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
         </div>
       </TraceRootItemProvider>

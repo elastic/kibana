@@ -65,8 +65,7 @@ export interface ObservabilityTracesFetchErrorsFeature {
   fetchErrorsByTraceId: (
     params: {
       traceId: string;
-      transactionId?: string;
-      spanId?: string;
+      docId?: string;
       start: string;
       end: string;
     },

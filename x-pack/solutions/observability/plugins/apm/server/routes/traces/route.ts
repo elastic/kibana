@@ -229,7 +229,7 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: t.intersection([rangeRt, t.partial({ spanId: t.string, transactionId: t.string })]),
+    query: t.intersection([rangeRt, t.partial({ docId: t.string })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorsByTraceId> => {
@@ -238,12 +238,12 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
 
     const { params } = resources;
     const { traceId } = params.path;
-    const { start, end, spanId } = params.query;
+    const { start, end, docId } = params.query;
 
     const { apmErrors, unprocessedOtelErrors } = await getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
-      spanId,
+      docId,
       traceId,
       start,
       end,

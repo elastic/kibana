@@ -13,14 +13,12 @@ type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}
 export const fetchErrorsByTraceId = (
   {
     traceId,
-    transactionId,
-    spanId,
+    docId,
     start,
     end,
   }: {
     traceId: string;
-    transactionId?: string;
-    spanId?: string;
+    docId?: string;
     start: string;
     end: string;
   },
@@ -30,8 +28,7 @@ export const fetchErrorsByTraceId = (
     params: {
       path: { traceId },
       query: {
-        transactionId,
-        spanId,
+        docId,
         start,
         end,
       },

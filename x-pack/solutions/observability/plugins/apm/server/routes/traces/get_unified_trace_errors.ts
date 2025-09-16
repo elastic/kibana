@@ -14,7 +14,6 @@ import {
   SPAN_ID,
   TRACE_ID,
   OTEL_EVENT_NAME,
-  TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
@@ -30,20 +29,18 @@ export async function getUnifiedTraceErrors({
   apmEventClient,
   logsClient,
   traceId,
-  transactionId,
-  spanId,
+  docId,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
   traceId: string;
-  transactionId?: string;
-  spanId?: string;
+  docId?: string;
   start: number;
   end: number;
 }): Promise<UnifiedTraceErrors> {
-  const commonParams = { traceId, spanId, transactionId, start, end };
+  const commonParams = { traceId, docId, start, end };
 
   const [apmErrors, unprocessedOtelErrors] = await Promise.all([
     getApmTraceError({ apmEventClient, ...commonParams }),
@@ -73,15 +70,13 @@ interface OtelError {
 async function getUnprocessedOtelErrors({
   logsClient,
   traceId,
-  transactionId,
-  spanId,
+  docId,
   start,
   end,
 }: {
   logsClient: LogsClient;
   traceId: string;
-  transactionId?: string;
-  spanId?: string;
+  docId?: string;
   start: number;
   end: number;
 }) {
@@ -91,8 +86,7 @@ async function getUnprocessedOtelErrors({
         filter: [
           ...rangeQuery(start, end),
           ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, spanId),
-          ...termQuery(TRANSACTION_ID, transactionId),
+          ...termQuery(SPAN_ID, docId),
         ],
         should: [
           ...termQuery(OTEL_EVENT_NAME, 'exception'),

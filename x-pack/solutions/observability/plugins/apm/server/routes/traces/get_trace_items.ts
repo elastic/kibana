@@ -135,15 +135,13 @@ const excludedLogLevels = ['debug', 'info', 'warning'];
 export async function getApmTraceError({
   apmEventClient,
   traceId,
-  transactionId,
-  spanId,
+  docId,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
   traceId: string;
-  transactionId?: string;
-  spanId?: string;
+  docId?: string;
   start: number;
   end: number;
 }) {
@@ -162,8 +160,7 @@ export async function getApmTraceError({
       bool: {
         filter: [
           ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, spanId),
-          ...termQuery(TRANSACTION_ID, transactionId),
+          ...termQuery(SPAN_ID, docId),
           ...rangeQuery(start, end),
         ],
         must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },

@@ -25,15 +25,7 @@ const INITIAL_VALUE: ErrorsByTraceId = {
   source: 'apm',
 };
 
-export function useFetchErrorsByTraceId({
-  traceId,
-  transactionId,
-  spanId,
-}: {
-  traceId: string;
-  transactionId?: string;
-  spanId?: string;
-}) {
+export function useFetchErrorsByTraceId({ traceId, docId }: { traceId: string; docId?: string }) {
   const { discoverShared, data } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
@@ -48,15 +40,14 @@ export function useFetchErrorsByTraceId({
       return fetchErrors.fetchErrorsByTraceId(
         {
           traceId,
-          transactionId,
-          spanId,
+          docId,
           start: timeFilter.from,
           end: timeFilter.to,
         },
         signal
       );
     },
-    [fetchErrors, traceId, spanId, timeFilter.from, timeFilter.to]
+    [fetchErrors, traceId, docId, timeFilter.from, timeFilter.to]
   );
 
   return { loading, error, response: value || INITIAL_VALUE };

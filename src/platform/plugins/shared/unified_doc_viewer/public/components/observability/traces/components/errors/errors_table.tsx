@@ -30,33 +30,29 @@ import { createTraceContextWhereClause } from '../../common/create_trace_context
 
 export interface Props {
   traceId: string;
-  transactionId?: string;
-  spanId?: string;
+  docId?: string;
 }
 
 const sorting: EuiInMemoryTableProps['sorting'] = {
   sort: { field: 'lastSeen', direction: 'desc' as const },
 };
 
-export function ErrorsTable({ transactionId, traceId, spanId }: Props) {
+export function ErrorsTable({ traceId, docId }: Props) {
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.errors });
 
   const { loading, error, response } = useFetchErrorsByTraceId({
     traceId,
-    transactionId,
-    spanId,
+    docId,
   });
 
   const { columns, openInDiscoverLink } = useMemo(() => {
-    const cols = getColumns({ traceId, spanId, generateDiscoverLink, source: response.source });
+    const cols = getColumns({ traceId, docId, generateDiscoverLink, source: response.source });
 
-    const link = generateDiscoverLink(
-      createTraceContextWhereClause({ traceId, spanId, transactionId })
-    );
+    const link = generateDiscoverLink(createTraceContextWhereClause({ traceId, spanId: docId }));
 
     return { columns: cols, openInDiscoverLink: link };
-  }, [traceId, spanId, transactionId, generateDiscoverLink, response.source]);
+  }, [traceId, docId, generateDiscoverLink, response.source]);
 
   if (loading || (!error && response.traceErrors.length === 0)) {
     return null;

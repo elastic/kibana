@@ -32,12 +32,12 @@ const getErrorMessage = (error: ErrorData) => {
 export const getColumns = ({
   generateDiscoverLink,
   traceId,
-  spanId,
+  docId,
   source,
 }: {
   generateDiscoverLink: GenerateDiscoverLink;
   traceId: string;
-  spanId?: string;
+  docId?: string;
   source: string;
 }): Array<EuiBasicTableColumn<ErrorsByTraceId['traceErrors'][0]>> => [
   {
@@ -50,7 +50,7 @@ export const getColumns = ({
     render: (_, item) => {
       const href = generateDiscoverLink({
         [TRACE_ID]: traceId,
-        ...(spanId && { [SPAN_ID]: spanId }),
+        ...(docId && { [SPAN_ID]: docId }),
         ...(source === 'apm' ? { [PROCESSOR_EVENT]: 'error', [ERROR_ID]: item.error.id } : null),
         ...(source === 'unprocessedOtel' ? { [EVENT_NAME]: 'exception' } : null),
       });
