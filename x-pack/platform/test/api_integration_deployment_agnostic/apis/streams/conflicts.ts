@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams, type RoutingStatus } from '@kbn/streams-schema';
+import { Streams, emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { putStream, disableStreams, enableStreams, forkStream } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -90,21 +90,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                lifecycle: {
-                  dsl: {},
-                },
-                processing: {
-                  steps: [],
-                },
+                lifecycle: { dsl: {} },
+                processing: { steps: [] },
+                settings: {},
                 wired: {
                   routing: [],
                   fields: {},
                 },
               },
             },
-            queries: [],
-            dashboards: [],
-            rules: [],
+            ...emptyAssets,
           },
           200
         );
@@ -136,21 +131,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                lifecycle: {
-                  dsl: {},
-                },
-                processing: {
-                  steps: [],
-                },
+                lifecycle: { dsl: {} },
+                processing: { steps: [] },
+                settings: {},
                 wired: {
                   routing: [],
                   fields: {},
                 },
               },
             },
-            queries: [],
-            dashboards: [],
-            rules: [],
+            ...emptyAssets,
           },
           200
         );
