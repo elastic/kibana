@@ -45,7 +45,7 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isLogsFlyoutVisible, setIsLogsFlyoutVisible] = useState(false);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isTraceFlyoutVisible, setIsTraceFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
@@ -59,12 +59,16 @@ export const FullScreenWaterfall = ({
           serviceName,
           scrollElement: overlayMaskRef.current,
           onErrorClick: (params: { traceId: string; docId: string; errorCount: number }) => {
-            setIsLogsFlyoutVisible(true);
+            if (params.errorCount > 1) {
+              setIsTraceFlyoutVisible(true);
+            } else {
+              setIsLogsFlyoutVisible(true);
+            }
             setSpanId(params.docId);
           },
           onNodeClick: (nodeSpanId: string) => {
             setSpanId(nodeSpanId);
-            setIsFlyoutVisible(true);
+            setIsTraceFlyoutVisible(true);
           },
           mode: 'full',
         },
@@ -133,13 +137,13 @@ export const FullScreenWaterfall = ({
           </EuiPanel>
         </EuiFocusTrap>
       </EuiOverlayMask>
-      {isFlyoutVisible && spanId && (
+      {isTraceFlyoutVisible && spanId && (
         <EuiFocusTrap>
           <SpanFlyout
             spanId={spanId}
             dataView={dataView}
             onCloseFlyout={() => {
-              setIsFlyoutVisible(false);
+              setIsTraceFlyoutVisible(false);
             }}
           />
         </EuiFocusTrap>

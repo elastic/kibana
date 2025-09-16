@@ -49,10 +49,6 @@ export function LogsFlyout({ onCloseFlyout, traceId, docId, dataView }: SpanFlyo
     };
   }, [docId, logDoc]);
 
-  if (!documentAsHit) {
-    return null;
-  }
-
   return (
     <EuiFlyout
       includeFixedHeadersInFocusTrap={false}
@@ -69,12 +65,14 @@ export function LogsFlyout({ onCloseFlyout, traceId, docId, dataView }: SpanFlyo
         </EuiSkeletonTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <LogsOverview
-          hit={documentAsHit}
-          dataView={dataView}
-          indexes={indexes}
-          showTraceWaterfall={false}
-        />
+        {documentAsHit && (
+          <LogsOverview
+            hit={documentAsHit}
+            dataView={dataView}
+            indexes={indexes}
+            showTraceWaterfall={false}
+          />
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
