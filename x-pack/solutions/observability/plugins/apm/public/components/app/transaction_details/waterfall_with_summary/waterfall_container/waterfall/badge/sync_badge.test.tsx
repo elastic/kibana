@@ -103,7 +103,9 @@ describe('SyncBadge Component', () => {
       expect(badge).toBeInTheDocument();
 
       await user.hover(badge);
-      expect(screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')
+      ).toBeInTheDocument();
     });
 
     it('renders async badge with tooltip for python', async () => {
@@ -114,7 +116,9 @@ describe('SyncBadge Component', () => {
       expect(badge).toBeInTheDocument();
 
       await user.hover(badge);
-      expect(screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')
+      ).toBeInTheDocument();
     });
 
     it('renders async badge with tooltip for go', async () => {
@@ -125,7 +129,9 @@ describe('SyncBadge Component', () => {
       expect(badge).toBeInTheDocument();
 
       await user.hover(badge);
-      expect(screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')
+      ).toBeInTheDocument();
     });
 
     it('does not render badge when sync is undefined', () => {

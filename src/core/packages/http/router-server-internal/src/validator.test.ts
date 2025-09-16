@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import { RouteValidationError } from '@kbn/core-http-server';
@@ -138,12 +137,12 @@ describe('Router validator', () => {
       const result = validator.getQuery({
         fields: 'id',
         search: 'test',
-        tags: 'important'
+        tags: 'important',
       });
       expect(result).toStrictEqual({
         fields: ['id'],
         search: 'test',
-        tags: ['important']
+        tags: ['important'],
       });
     });
 

@@ -61,9 +61,13 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getQuery(data: unknown, namespace?: string): Readonly<Q> {
-
     const preprocessedData = this.preprocessQueryData(data, this.config.query);
-    return this.validate(this.config.query, this.options.unsafe?.query, preprocessedData, namespace) as Q;
+    return this.validate(
+      this.config.query,
+      this.options.unsafe?.query,
+      preprocessedData,
+      namespace
+    ) as Q;
   }
 
   /**
@@ -96,16 +100,12 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     const processedData = { ...data } as Record<string, any>;
 
     try {
-
       const joiSchema = validationRule.getSchema();
 
-
       if (joiSchema && joiSchema.type === 'object' && joiSchema.$_terms && joiSchema.$_terms.keys) {
-
         for (const keyDef of joiSchema.$_terms.keys) {
           const fieldName = keyDef.key;
           const fieldSchema = keyDef.schema;
-
 
           if (fieldSchema && fieldSchema.type === 'array' && fieldName in processedData) {
             const value = processedData[fieldName];
@@ -117,7 +117,6 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
         }
       }
     } catch (error) {
-
       return data;
     }
 
