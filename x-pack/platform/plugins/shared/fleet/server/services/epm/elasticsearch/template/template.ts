@@ -17,13 +17,14 @@ import { isResponseError } from '@kbn/es-errors';
 
 import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
-  OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-  OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
+  OTEL_LOGS_COMPONENT_TEMPLATES,
+  OTEL_METRICS_COMPONENT_TEMPLATES,
+  OTEL_TRACES_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
 import {
   MAX_CONCURRENT_DATASTREAM_OPERATIONS,
-  OTEL_COMPONENT_TEMPLATES,
+  OTEL_BASE_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
@@ -163,9 +164,11 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
 
 const getOtelEsComponents = (type: string): string[] => {
   if (type === 'metrics') {
-    return [...OTEL_COMPONENT_TEMPLATES, OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS];
+    return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_METRICS_COMPONENT_TEMPLATES];
   } else if (type === 'logs') {
-    return [...OTEL_COMPONENT_TEMPLATES, OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS];
+    return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_LOGS_COMPONENT_TEMPLATES];
+  } else if (type === 'traces') {
+    return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_TRACES_COMPONENT_TEMPLATES];
   }
 
   return [];

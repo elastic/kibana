@@ -665,7 +665,7 @@ export function prepareTemplate({
     fieldCount: countFields(validFields),
     type: dataStream.type,
   });
-  console.log('## componentTemplates', componentTemplates);
+
   const template = getTemplate({
     templateIndexPattern,
     packageName,
