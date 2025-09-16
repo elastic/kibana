@@ -30,7 +30,7 @@ export const createOptionsListControlAction =
     return {
       id: OPTIONS_LIST_ACTION,
       type: OPTIONS_LIST_CONTROL,
-      order: 0,
+      order: 1,
       getIconType: () => 'editorChecklist',
       getDisplayName: () =>
         i18n.translate('controls.optionsList.displayName', {

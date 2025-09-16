@@ -19,7 +19,7 @@ import type { CreateControlTypeContext } from './control_panel_actions';
 
 export const createControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_CONTROL,
-  order: 1,
+  order: 0,
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {
