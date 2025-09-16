@@ -310,6 +310,7 @@ export const useGroupTakeActionsItems = ({
                 selectedGroup,
                 status: FILTER_CLOSED as AlertWorkflowStatus,
                 tableId,
+                reason,
               });
             },
           }).map((panel) => ({

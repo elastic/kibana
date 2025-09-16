@@ -43,6 +43,7 @@ export interface UpdateAlertStatusByQueryProps {
   query: object;
   status: Status;
   signal?: AbortSignal;
+  reason?: AlertClosingReason;
 }
 
 export interface UpdateAlertStatusByIdsProps {

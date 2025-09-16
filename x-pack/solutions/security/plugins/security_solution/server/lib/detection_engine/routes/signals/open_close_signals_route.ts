@@ -122,7 +122,8 @@ export const setSignalsStatusRoute = (
               { conflicts: conflicts ?? 'abort' },
               spaceId,
               esClient,
-              user
+              user,
+              reason
             );
 
             return response.ok({ body });
@@ -170,13 +171,14 @@ const updateSignalsStatusByQuery = async (
   options: { conflicts: 'abort' | 'proceed' },
   spaceId: string,
   esClient: ElasticsearchClient,
-  user: AuthenticatedUser | null
+  user: AuthenticatedUser | null,
+  reason?: string
 ) =>
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
-    script: getUpdateSignalStatusScript(status, user),
+    script: getUpdateSignalStatusScript(status, user, reason),
     query: {
       bool: {
         filter: query,

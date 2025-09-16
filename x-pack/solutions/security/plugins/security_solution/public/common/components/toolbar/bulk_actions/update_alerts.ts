@@ -53,7 +53,7 @@ export const updateAlertStatus = ({
       version_conflicts: 0,
     }));
   } else if (query) {
-    return updateAlertStatusByQuery({ status, query, signal }).then(
+    return updateAlertStatusByQuery({ status, query, signal, reason }).then(
       ({ updated, version_conflicts: conflicts }) => ({
         updated: updated ?? 0,
         version_conflicts: conflicts,
