@@ -49,7 +49,7 @@ export function StreamTree({
           name: stream.name,
           expanded: true,
           selected: true,
-          parent: next && isDescendantOf(stream.name, next.name),
+          parent: !!(next && isDescendantOf(stream.name, next.name)),
         };
         return map;
       }, {} as Record<string, StreamRow>)
@@ -181,7 +181,10 @@ export function StreamTree({
 
               <EuiCheckbox
                 id={`checkbox-${item.name}`}
-                checked={rows[item.name].selected}
+                checked={item.selected}
+                indeterminate={
+                  item.selected && item.parent && !allDescendantsSelected(item.name, rows)
+                }
                 label={item.name}
                 onChange={(e) => {
                   const selection = { ...rows };
@@ -227,4 +230,10 @@ export function StreamTree({
       })}
     </EuiPanel>
   );
+}
+
+function allDescendantsSelected(parent: string, rows: Record<string, StreamRow>) {
+  return Object.values(rows)
+    .filter(({ name }) => isDescendantOf(parent, name))
+    .every(({ selected }) => selected);
 }
