@@ -130,6 +130,8 @@ export function getTemplate({
     Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
 
   template.composed_of = [
+    // otel component templates are first to give precedence to otel@mappings
+    ...(isOtelInputType ? getOtelEsComponents(type) : []),
     ...esBaseComponents,
     ...(template.composed_of || []),
     STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
@@ -140,11 +142,9 @@ export function getTemplate({
     ...(isEventIngestedEnabled(appContextService.getConfig())
       ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
-    ...(isOtelInputType ? getOtelEsComponents(type) : []),
   ];
 
   template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
-
   return template;
 }
 
@@ -170,7 +170,6 @@ const getOtelEsComponents = (type: string): string[] => {
   } else if (type === 'traces') {
     return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_TRACES_COMPONENT_TEMPLATES];
   }
-
   return [];
 };
 

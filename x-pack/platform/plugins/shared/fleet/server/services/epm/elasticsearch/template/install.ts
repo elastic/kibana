@@ -366,6 +366,7 @@ export function buildComponentTemplates(params: {
   lifecycle?: IndexTemplate['template']['lifecycle'];
   fieldCount?: number;
   type?: string;
+  isOtelInputType?: boolean;
 }) {
   const {
     templateName,
@@ -378,6 +379,7 @@ export function buildComponentTemplates(params: {
     lifecycle,
     fieldCount,
     type,
+    isOtelInputType,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -459,6 +461,7 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
+        ...(isOtelInputType ? { dynamic: true } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
@@ -664,6 +667,7 @@ export function prepareTemplate({
     lifecycle: lifecyle,
     fieldCount: countFields(validFields),
     type: dataStream.type,
+    isOtelInputType,
   });
 
   const template = getTemplate({
