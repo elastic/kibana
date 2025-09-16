@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useSendMessage } from '../../../context/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
-import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 
@@ -39,10 +38,6 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     onSubmit();
   };
 
-  const contentStyles = css`
-    ${fullHeightStyles}
-    align-items: stretch;
-  `;
   const formContainerStyles = css`
     ${fullHeightStyles}
     padding: ${euiTheme.size.base};
@@ -56,29 +51,27 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   `;
 
   return (
-    <ConversationContent css={contentStyles}>
-      <EuiFlexGroup
-        css={formContainerStyles}
-        direction="column"
-        gutterSize="s"
-        responsive={false}
-        alignItems="stretch"
-        justifyContent="center"
-        aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
-          defaultMessage: 'Message input form',
-        })}
-      >
-        <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
-        <ConversationInputActions
-          onSubmit={handleSubmit}
-          isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              setInput(pendingMessage);
-            }
-          }}
-        />
-      </EuiFlexGroup>
-    </ConversationContent>
+    <EuiFlexGroup
+      css={formContainerStyles}
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+      alignItems="stretch"
+      justifyContent="center"
+      aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
+        defaultMessage: 'Message input form',
+      })}
+    >
+      <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
+      <ConversationInputActions
+        onSubmit={handleSubmit}
+        isSubmitDisabled={isSubmitDisabled}
+        resetToPendingMessage={() => {
+          if (pendingMessage) {
+            setInput(pendingMessage);
+          }
+        }}
+      />
+    </EuiFlexGroup>
   );
 };
