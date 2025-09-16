@@ -31,6 +31,10 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
+   * Content to display inside the side panel footer.
+   */
+  sidePanelFooter?: React.ReactNode;
+  /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
   isCollapsed: boolean;
@@ -58,6 +62,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
+  sidePanelFooter,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -341,7 +346,7 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
-        <SideNav.Panel>
+        <SideNav.Panel footer={sidePanelFooter}>
           <SecondaryMenu
             badgeType={sidePanelContent.badgeType}
             isPanel
