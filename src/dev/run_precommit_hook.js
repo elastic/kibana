@@ -10,7 +10,7 @@
 import SimpleGit from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
-import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
@@ -18,6 +18,28 @@ import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
+
+// Add a result class to standardize check results
+class CheckResult {
+  constructor(checkName) {
+    this.checkName = checkName;
+    this.errors = [];
+    this.succeeded = true;
+  }
+
+  addError(error) {
+    this.succeeded = false;
+    this.errors.push(error);
+  }
+
+  toString() {
+    if (this.succeeded) {
+      return `✓ ${this.checkName}: Passed`;
+    }
+
+    return [`✗ ${this.checkName}: Failed`, ...this.errors.map((err) => `  - ${err}`)].join('\n');
+  }
+}
 
 // New code: Define check interfaces
 class PrecommitCheck {
@@ -28,6 +50,22 @@ class PrecommitCheck {
   // eslint-disable-next-line no-unused-vars
   async execute(_log, _files, _options) {
     throw new Error('execute() must be implemented by check class');
+  }
+
+  // Add wrapper method to standardize error handling
+  async run(log, files, options) {
+    const result = new CheckResult(this.name);
+    try {
+      await this.execute(log, files, options);
+    } catch (error) {
+      if (error.errors) {
+        // Handle case where check throws multiple errors
+        error.errors.forEach((err) => result.addError(err.message || err.toString()));
+      } else {
+        result.addError(error.message || error.toString());
+      }
+    }
+    return result;
   }
 }
 
@@ -100,7 +138,7 @@ class YamlLintCheck extends PrecommitCheck {
     }
 
     if (errors.length > 0) {
-      throw new Error('YAML validation failed:\n' + errors.join('\n\n'));
+      throw new Error(errors.join('\n\n'));
     }
   }
 }
@@ -118,7 +156,6 @@ run(
     process.env.IS_KIBANA_PRECOMIT_HOOK = 'true';
 
     const files = await getFilesForCommit(flags.ref);
-    const errors = [];
 
     const maxFilesCount = flags['max-files']
       ? Number.parseInt(String(flags['max-files']), 10)
@@ -134,22 +171,35 @@ run(
       return;
     }
 
-    // Execute all checks
-    for (const check of PRECOMMIT_CHECKS) {
-      try {
-        log.info(`Running ${check.name} check...`);
-        await check.execute(log, files, {
+    // Run all checks concurrently and collect results
+    log.info('Running pre-commit checks...');
+    const results = await Promise.all(
+      PRECOMMIT_CHECKS.map(async (check) => {
+        const startTime = Date.now();
+        const result = await check.run(log, files, {
           fix: flags.fix,
           stage: flags.stage,
         });
-      } catch (error) {
-        errors.push(error);
-      }
+        const duration = Date.now() - startTime;
+        log.info(`${check.name} completed in ${duration}ms`);
+        return result;
+      })
+    );
+
+    // Process results
+    const failedChecks = results.filter((result) => !result.succeeded);
+
+    if (failedChecks.length > 0) {
+      const errorReport = [
+        '\nPre-commit checks failed:',
+        ...results.map((result) => result.toString()),
+        '\nPlease fix the above issues before committing.',
+      ].join('\n');
+
+      throw new Error(errorReport);
     }
 
-    if (errors.length) {
-      throw combineErrors(errors);
-    }
+    log.success('All pre-commit checks passed!');
   },
   {
     description: `
