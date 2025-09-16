@@ -71,6 +71,7 @@ export function TraceContextLogEvents({
       title={logsTitle}
       description={logsDescription}
       id="traceContextLogEvents"
+      initialIsOpen={false}
       actions={
         openInDiscoverLink
           ? [
