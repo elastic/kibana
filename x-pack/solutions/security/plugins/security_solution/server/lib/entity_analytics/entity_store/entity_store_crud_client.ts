@@ -197,9 +197,11 @@ function convertToECSCustomFormat(key: string): string {
 }
 
 function buildDocumentToUpdate(type: APIEntityType, data: Partial<CustomECSDocument>) {
+  const now = new Date().toISOString();
+
   if (type === 'generic') {
     return {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': now,
       ...data,
     };
   }
@@ -213,7 +215,7 @@ function buildDocumentToUpdate(type: APIEntityType, data: Partial<CustomECSDocum
   typeData.entity = data.entity;
 
   const doc: Record<string, unknown> = {
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': now,
     ...data,
   };
 
