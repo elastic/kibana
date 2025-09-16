@@ -100,7 +100,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.allow_cloud_features',
       {
-        defaultMessage: "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
+        defaultMessage:
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -110,7 +111,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
+        defaultMessage:
+          'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
@@ -120,7 +122,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.tls.verify_peer',
       {
-        defaultMessage: 'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
+        defaultMessage:
+          'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -131,7 +134,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.tls.verify_hostname',
       {
         defaultMessage:
-          "Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.",
+          'Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -141,7 +144,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.tls.ca_cert',
       {
-        defaultMessage: 'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
       }
     ),
   },
@@ -270,7 +274,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.base_url',
       {
-        defaultMessage: 'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
+        defaultMessage:
+          'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
       }
     ),
   },
@@ -336,7 +341,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.allow_cloud_features',
       {
-        defaultMessage: "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
+        defaultMessage:
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -346,7 +352,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
+        defaultMessage:
+          'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
@@ -356,7 +363,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.tls.verify_peer',
       {
-        defaultMessage: 'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
+        defaultMessage:
+          'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -367,7 +375,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.tls.verify_hostname',
       {
         defaultMessage:
-          "Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.",
+          'Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -377,7 +385,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.tls.ca_cert',
       {
-        defaultMessage: 'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
       }
     ),
   },
@@ -442,7 +451,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.connect',
       {
-        defaultMessage: 'Control whether to connect to the kernel driver. Warning: disabling this will break most features. Default: true.',
+        defaultMessage:
+          'Control whether to connect to the kernel driver. Warning: disabling this will break most features. Default: true.',
       }
     ),
   },
@@ -527,7 +537,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.base_url',
       {
-        defaultMessage: 'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
+        defaultMessage:
+          'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
       }
     ),
   },
@@ -593,7 +604,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.allow_cloud_features',
       {
-        defaultMessage: "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
+        defaultMessage:
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -603,7 +615,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
+        defaultMessage:
+          'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
@@ -613,7 +626,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.tls.verify_peer',
       {
-        defaultMessage: 'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
+        defaultMessage:
+          'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -624,7 +638,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.tls.verify_hostname',
       {
         defaultMessage:
-          "Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.",
+          'Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -634,7 +648,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.tls.ca_cert',
       {
-        defaultMessage: 'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
       }
     ),
   },
@@ -699,7 +714,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.connect',
       {
-        defaultMessage: 'Control whether to connect to the kernel driver. Warning: disabling this will break most features. Default: true.',
+        defaultMessage:
+          'Control whether to connect to the kernel driver. Warning: disabling this will break most features. Default: true.',
       }
     ),
   },
@@ -753,8 +769,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
       {
-        defaultMessage:
-          'Report loopback network events. Default: true.',
+        defaultMessage: 'Report loopback network events. Default: true.',
       }
     ),
   },
@@ -820,7 +835,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registryaccess',
       {
         defaultMessage:
-          "Report limited registry access (queryvalue, savekey) events. Additional paths can be monitored via windows.advanced.events.event_on_access.registry_paths. Default: true.",
+          'Report limited registry access (queryvalue, savekey) events. Additional paths can be monitored via windows.advanced.events.event_on_access.registry_paths. Default: true.',
       }
     ),
   },
@@ -830,7 +845,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.process_handle',
       {
-        defaultMessage: "Enable process and thread handle events. 'false' disables them even if they are needed by other features. Default: true.",
+        defaultMessage:
+          "Enable process and thread handle events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -840,8 +856,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.enabled',
       {
-        defaultMessage:
-          "Enable diagnostic features. Default: true.",
+        defaultMessage: 'Enable diagnostic features. Default: true.',
       }
     ),
   },
@@ -851,8 +866,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.diagnostic.enabled',
       {
-        defaultMessage:
-          "Enable diagnostic features. Default: true.",
+        defaultMessage: 'Enable diagnostic features. Default: true.',
       }
     ),
   },
@@ -862,8 +876,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.diagnostic.enabled',
       {
-        defaultMessage:
-          "Enable diagnostic features. Default: true.",
+        defaultMessage: 'Enable diagnostic features. Default: true.',
       }
     ),
   },
@@ -874,7 +887,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.cloud_lookup',
       {
         defaultMessage:
-          "Check a cloud service for known false positives before generating malware alerts. Default: true.",
+          'Check a cloud service for known false positives before generating malware alerts. Default: true.',
       }
     ),
   },
@@ -884,7 +897,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.cloud_lookup',
       {
-        defaultMessage: "Check a cloud service for known false positives before generating malware alerts. Default: true.",
+        defaultMessage:
+          'Check a cloud service for known false positives before generating malware alerts. Default: true.',
       }
     ),
   },
@@ -894,7 +908,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.mbr',
       {
-        defaultMessage: "Enable ransomware MBR protection. Default: true.",
+        defaultMessage: 'Enable ransomware MBR protection. Default: true.',
       }
     ),
   },
@@ -904,7 +918,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
       {
-        defaultMessage: "Enable ransomware canary protection. Default: true.",
+        defaultMessage: 'Enable ransomware canary protection. Default: true.',
       }
     ),
   },
@@ -1068,7 +1082,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.ca_cert',
       {
-        defaultMessage: 'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
       }
     ),
   },
@@ -1078,7 +1093,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.ca_cert',
       {
-        defaultMessage: 'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
       }
     ),
   },
@@ -1088,7 +1104,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.ca_cert',
       {
-        defaultMessage: 'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
       }
     ),
   },
@@ -1108,7 +1125,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.rollback_telemetry_enabled',
       {
-        defaultMessage: 'Enable diagnostic self-healing features without affecting other diagnostic features. Default: true.',
+        defaultMessage:
+          'Enable diagnostic self-healing features without affecting other diagnostic features. Default: true.',
       }
     ),
   },
@@ -1641,7 +1659,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_disabled',
       {
-        defaultMessage: 'Provide a comma-separated list of API names to selectively disable. Default: none.',
+        defaultMessage:
+          'Provide a comma-separated list of API names to selectively disable. Default: none.',
       }
     ),
   },
@@ -1706,8 +1725,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',
       {
-        defaultMessage:
-          'Apply malware protection to dev drives. Default: false.',
+        defaultMessage: 'Apply malware protection to dev drives. Default: false.',
       }
     ),
   },
@@ -1717,8 +1735,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.networkshare',
       {
-        defaultMessage:
-          'Apply malware protection to network drives. Default: true.',
+        defaultMessage: 'Apply malware protection to network drives. Default: true.',
       }
     ),
   },
@@ -1860,8 +1877,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.sample_collection',
       {
-        defaultMessage:
-          "Allow Elastic to collect samples of unknown malware files. Default: true.",
+        defaultMessage: 'Allow Elastic to collect samples of unknown malware files. Default: true.',
       }
     ),
   },
@@ -1871,8 +1887,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
       {
-        defaultMessage:
-          "Allow Elastic to collect samples of unknown malware files. Default: true.",
+        defaultMessage: 'Allow Elastic to collect samples of unknown malware files. Default: true.',
       }
     ),
   },
@@ -1882,8 +1897,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
       {
-        defaultMessage:
-          "Allow Elastic to collect samples of unknown malware files. Default: true.",
+        defaultMessage: 'Allow Elastic to collect samples of unknown malware files. Default: true.',
       }
     ),
   },
@@ -2015,7 +2029,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.file_paths',
       {
         defaultMessage:
-          "Provide a comma-separated list of additional wildcard patterns that will be monitored for read access. At most one match per pattern per process will be reported. If possible, drive letters will be converted to NT paths (e.g. '\Device\HarddiskVolume4'), but conversion will fail for per-user drives, such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. Check Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules. Default: none.",
+          "Provide a comma-separated list of additional wildcard patterns that will be monitored for read access. At most one match per pattern per process will be reported. If possible, drive letters will be converted to NT paths (e.g. 'DeviceHarddiskVolume4'), but conversion will fail for per-user drives, such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. Check Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules. Default: none.",
       }
     ),
   },
@@ -2047,7 +2061,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
       {
-        defaultMessage: "Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. Default: <=8.14: false, >=8.15: true.",
+        defaultMessage:
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. Default: <=8.14: false, >=8.15: true.',
       }
     ),
   },
@@ -2057,7 +2072,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
       {
-        defaultMessage: "Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. Default: <=8.14: false, >=8.15: true.",
+        defaultMessage:
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. Default: <=8.14: false, >=8.15: true.',
       }
     ),
   },
@@ -2067,7 +2083,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
       {
-        defaultMessage: "Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. Default: <=8.14: false, >=8.15: true.",
+        defaultMessage:
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. Default: <=8.14: false, >=8.15: true.',
       }
     ),
   },
@@ -2078,7 +2095,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events_below_bytes',
       {
         defaultMessage:
-          "Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).",
+          'Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).',
       }
     ),
   },
@@ -2089,7 +2106,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events_below_bytes',
       {
         defaultMessage:
-          "Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).",
+          'Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).',
       }
     ),
   },
@@ -2100,7 +2117,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events_below_bytes',
       {
         defaultMessage:
-          "Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).",
+          'Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).',
       }
     ),
   },
@@ -2353,7 +2370,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          "Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. Default: <=8.17: true, >=8.18: false.",
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. Default: <=8.17: true, >=8.18: false.',
       }
     ),
   },
