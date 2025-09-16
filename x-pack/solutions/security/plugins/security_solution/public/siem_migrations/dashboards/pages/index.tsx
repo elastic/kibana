@@ -7,8 +7,9 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiTitle } from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -20,6 +21,8 @@ import * as i18n from './translations';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
+import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
+import { PageTitle } from '../../common/components/page_title';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -52,13 +55,20 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
     };
 
     const invalidateGetMigrationDashboards = useInvalidateGetMigrationDashboards();
+    const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
     const refetchData = useCallback(() => {
       if (!migrationId) {
         return;
       }
       refreshStats();
       invalidateGetMigrationDashboards(migrationId);
-    }, [invalidateGetMigrationDashboards, migrationId, refreshStats]);
+      invalidateGetMigrationTranslationStats(migrationId);
+    }, [
+      invalidateGetMigrationDashboards,
+      invalidateGetMigrationTranslationStats,
+      migrationId,
+      refreshStats,
+    ]);
 
     const content = useMemo(() => {
       if (dashboardMigrationsStats.length === 0 && !migrationId) {
@@ -70,29 +80,47 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       }
       return (
         <>
-          <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
+          {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
+            <>
+              {/* TODO: uncomment once panels are merged */}
+              {/* <DashboardMigrationsUploadMissingPanel
+                migrationStats={migrationStats}
+                topSpacerSize="s"
+              /> */}
+              <EuiSpacer size="m" />
+              <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
+            </>
+          )}
+          {[
+            SiemMigrationTaskStatus.READY,
+            SiemMigrationTaskStatus.INTERRUPTED,
+            SiemMigrationTaskStatus.STOPPED,
+          ].includes(migrationStats.status) && (
+            // TODO: uncomment once panels are merged
+            // <MigrationReadyPanel migrationStats={migrationStats} />
+            <>{'Migration read panel...'}</>
+          )}
+          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+            // TODO: uncomment once panels are merged
+            // <MigrationProgressPanel migrationStats={migrationStats} />
+            <>{'Migration progress panel...'}</>
+          )}
         </>
       );
     }, [dashboardMigrationsStats, migrationId, refetchData]);
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage
-          title={
-            <EuiTitle data-test-subj="siemMigrationsPageTitle" size="l">
-              <h1>{i18n.PAGE_TITLE}</h1>
-            </EuiTitle>
-          }
-          border
-        >
+        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} isBeta={true} />} border>
           <HeaderButtons
+            migrationType="dashboard"
             migrationsStats={dashboardMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
           />
         </HeaderPage>
         <EuiSkeletonLoading
-          data-test-subj="migrationRulesPageLoading"
+          data-test-subj="migrationDashboardsPageLoading"
           isLoading={isLoading}
           loadingContent={
             <>
