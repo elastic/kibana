@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { isCondition } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { AssetImage } from '../../asset_image';
@@ -129,7 +129,6 @@ const SamplePreviewPanel = () => {
   }>();
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | undefined>(undefined);
   const [currentDoc, setExpandedDoc] = useState<DataTableRecordWithIndex | undefined>(undefined);
 
   const docViewsRegistry = useDocViewerSetup();
@@ -138,27 +137,18 @@ const SamplePreviewPanel = () => {
     return toDataTableRecordWithIndex(documents);
   }, [documents]);
 
-  const onRowSelected = useCallback(
-    (rowIndex: number) => {
-      if (selectedRowIndex === rowIndex) {
-        // If the same row is clicked, collapse it
-        setSelectedRowIndex(undefined);
-        setExpandedDoc(undefined);
-      } else {
-        // Expand the clicked row
-        setSelectedRowIndex(rowIndex);
-        setExpandedDoc(hits[rowIndex]);
-      }
-    },
-    [selectedRowIndex, hits]
-  );
+  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
+  currentDocRef.current = currentDoc;
+  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
+  hitsRef.current = hits;
 
-  const handleSetExpandedDoc = useCallback((doc?: DataTableRecordWithIndex) => {
-    setExpandedDoc(doc);
-    if (!doc) {
-      // If no document is provided (flyout is being closed), reset the selected row
-      setSelectedRowIndex(undefined);
+  const onRowSelected = useCallback((rowIndex: number) => {
+    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
+      // If the same row is clicked, we collapse the flyout
+      setExpandedDoc(undefined);
+      return;
     }
+    setExpandedDoc(hitsRef.current[rowIndex]);
   }, []);
 
   useEffect(() => {
@@ -169,10 +159,10 @@ const SamplePreviewPanel = () => {
         setExpandedDoc(hit);
       } else if (!hit && currentDoc) {
         // if the current doc is not found in the hits, reset it
-        handleSetExpandedDoc(undefined);
+        setExpandedDoc(undefined);
       }
     }
-  }, [currentDoc, hits, handleSetExpandedDoc]);
+  }, [currentDoc, hits]);
 
   let content: React.ReactNode | null = null;
 
@@ -234,13 +224,13 @@ const SamplePreviewPanel = () => {
           toolbarVisibility={true}
           displayColumns={visibleColumns}
           setVisibleColumns={setVisibleColumns}
-          selectedRowIndex={selectedRowIndex}
+          selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
           onRowSelected={onRowSelected}
         />
         <PreviewFlyout
           currentDoc={currentDoc}
           hits={hits}
-          setExpandedDoc={handleSetExpandedDoc}
+          setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
         />
