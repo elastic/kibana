@@ -110,7 +110,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
                       data-test-subj="agentBuilderMenuItem"
                     >
                       <FormattedMessage
-                        id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToAgentBuilder"
+                        id="xpack.searchHomepage.shared.createIndex.ingestSampleData.linkToAgentBuilder"
                         defaultMessage="Chat"
                       />
                     </EuiContextMenuItem>,
