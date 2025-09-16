@@ -5,9 +5,25 @@
  * 2.0.
  */
 
+import { SAVE_BUTTON, SAVE_EDIT_BUTTON } from '../../screens/asset_inventory/common';
+import {
+  ACCESS_KEY,
+  AWS_CLOUD_FORMATION_TEST_ID,
+  AWS_CREDENTIALS_SELECTOR_TEST_ID,
+  AWS_MANUAL_SETUP_TEST_ID,
+  AWS_ORGANIZATION_ACCOUNT_TEST_ID,
+  AWS_SINGLE_ACCOUNT_TEST_ID,
+  LAUNCH_CLOUD_FORMATION_LATER_TEST_ID,
+  ROLE_ARN,
+  SECRET_KEY,
+  SHARED_CREDENTIAL_FILE,
+  SHARED_CREDENTIAL_PROFILE,
+  TEMPORARY_KEY_ACCESS_KEY,
+  TEMPORARY_KEY_SECRET_KEY,
+  TEMPORARY_KEY_SESSION,
+} from '../../screens/asset_inventory/onboarding_aws';
 import {
   checkInputValue,
-  getDataTestSubjectSelector,
   shouldBeChecked,
   shouldBeDisabled,
   shouldBeEnabled,
@@ -16,8 +32,6 @@ import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ASSET_INVENTORY_INTEGRATION_URL } from '../../urls/navigation';
 import {
-  SAVE_BUTTON,
-  SAVE_EDIT_BUTTON,
   changePolicyName,
   checkPolicyName,
   clickSaveEditButton,
@@ -26,36 +40,9 @@ import {
   selectPolicyForEditing,
 } from '../../tasks/asset_inventory/common';
 
-const ROLE_ARN = getDataTestSubjectSelector('awsRoleArnInput');
-const ACCESS_KEY = getDataTestSubjectSelector('awsDirectAccessKeyId');
-const SECRET_KEY = getDataTestSubjectSelector('passwordInput-secret-access-key');
-
-const TEMPORARY_KEY_ACCESS_KEY = getDataTestSubjectSelector('awsTemporaryKeysAccessKeyId');
-const TEMPORARY_KEY_SECRET_KEY = getDataTestSubjectSelector('passwordInput-secret-access-key');
-const TEMPORARY_KEY_SESSION = getDataTestSubjectSelector('awsTemporaryKeysSessionToken');
-
-const SHARED_CREDENTIAL_FILE = getDataTestSubjectSelector('awsSharedCredentialFile');
-const SHARED_CREDENTIAL_PROFILE = getDataTestSubjectSelector('awsCredentialProfileName');
-
-const AWS_SINGLE_ACCOUNT_TEST_ID = `${getDataTestSubjectSelector('awsSingleTestId')} input`;
-const AWS_ORGANIZATION_ACCOUNT_TEST_ID = `${getDataTestSubjectSelector(
-  'awsOrganizationTestId'
-)} input`;
-const AWS_CLOUD_FORMATION_TEST_ID = `${getDataTestSubjectSelector(
-  'aws-cloudformation-setup-option'
-)} input`;
-const AWS_MANUAL_SETUP_TEST_ID = `${getDataTestSubjectSelector('aws-manual-setup-option')} input`;
-const AWS_CREDENTIALS_SELECTOR_TEST_ID = getDataTestSubjectSelector(
-  'aws-credentials-type-selector'
-);
-
 const AWS_ACCESS_KEY = 'test-temporary-access-key';
 const AWS_SECRET_KEY = 'test-temporary-secret-key';
 const AWS_TEMPORARY_SESSION = 'test-temporary-key-session';
-
-const LAUNCH_CLOUD_FORMATION_LATER_TEST_ID = getDataTestSubjectSelector(
-  'confirmCloudFormationModalCancelButton'
-);
 
 describe('Asset Inventory integration onboarding - AWS', { tags: ['@ess'] }, () => {
   beforeEach(() => {

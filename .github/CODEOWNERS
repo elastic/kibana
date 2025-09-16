@@ -2853,6 +2853,8 @@ x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_secu
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/kibana-cloud-security-posture
 
 # Security Service Integrations
 x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations

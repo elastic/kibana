@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+import { SAVE_BUTTON, SAVE_EDIT_BUTTON } from '../../screens/asset_inventory/common';
+import {
+  AZURE_ARM_TEMPLATE_TEST_ID,
+  AZURE_CLIENT_CERTIFICATE_PASSWORD_TEST_ID,
+  AZURE_CLIENT_SECRET_TEST_ID,
+  AZURE_CREDENTIALS_SELECTOR_TEST_ID,
+  AZURE_LAUNCH_CLOUD_FORMATION_LATER_TEST_ID,
+  AZURE_SECRET_TEST_ID,
+} from '../../screens/asset_inventory/onboarding_azure';
 import {
   checkInputValue,
-  getDataTestSubjectSelector,
   shouldBeChecked,
   shouldBeDisabled,
   shouldBeEnabled,
@@ -16,42 +24,26 @@ import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ASSET_INVENTORY_INTEGRATION_URL } from '../../urls/navigation';
 import {
-  SAVE_BUTTON,
-  SAVE_EDIT_BUTTON,
   changePolicyName,
   checkPolicyName,
   clickSaveEditButton,
   findPolicyLink,
   saveIntegration,
-  selectPolicyForEditing,
   selectCloudProvider,
+  selectPolicyForEditing,
 } from '../../tasks/asset_inventory/common';
 
 const AZURE_ORGANIZATION_ACCOUNT_TEST_ID = '#organization-account';
 const AZURE_SINGLE_ACCOUNT_TEST_ID = '#single-account';
 const AZURE_MANUAL_SETUP_TEST_ID = '#manual';
-
-const AZURE_ARM_TEMPLATE_TEST_ID = `${getDataTestSubjectSelector('caiAzureArmTemplate')} input`;
-const AZURE_LAUNCH_CLOUD_FORMATION_LATER_TEST_ID = getDataTestSubjectSelector(
-  'confirmAzureArmTemplateModalCancelButton'
-);
-const AZURE_CREDENTIALS_SELECTOR_TEST_ID = getDataTestSubjectSelector(
-  'azure-credentials-type-selector'
-);
-
 const AZURE_CLIENT_ID_TEST_ID = '#azure\\.credentials\\.client_id';
 const AZURE_CLIENT_ID = 'azure-client-id';
 const AZURE_TENANT_ID_TEST_ID = '#azure\\.credentials\\.tenant_id';
 const AZURE_TENANT_ID = 'azure-tenant-id';
-const AZURE_SECRET_TEST_ID = getDataTestSubjectSelector('passwordInput-client-secret');
 const AZURE_SECRET = 'azure-client-secret';
 const AZURE_CLIENT_CERTIFICATE_PATH_TEST_ID = '#azure\\.credentials\\.client_certificate_path';
 const AZURE_CLIENT_CERTIFICATE_PATH = 'azure-client-certificate-path';
-const AZURE_CLIENT_CERTIFICATE_PASSWORD_TEST_ID = getDataTestSubjectSelector(
-  'passwordInput-client-certificate-password'
-);
 const AZURE_CLIENT_CERTIFICATE_PASSWORD = 'azure-client-certificate-password';
-const AZURE_CLIENT_SECRET_TEST_ID = getDataTestSubjectSelector('passwordInput-client-secret');
 const AZURE_CLIENT_SECRET = 'azure-client-secret';
 
 describe('Asset Inventory integration onboarding - Azure', { tags: ['@ess'] }, () => {

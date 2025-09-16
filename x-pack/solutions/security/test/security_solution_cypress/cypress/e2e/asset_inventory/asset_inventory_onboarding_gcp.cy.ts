@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { selectAccountType } from '../../tasks/asset_inventory/onboarding_gcp';
+import {
+  GCP_PROVIDER_TEST_ID,
+  SAVE_BUTTON,
+  SAVE_EDIT_BUTTON,
+} from '../../screens/asset_inventory/common';
 import {
   checkInputValue,
-  getDataTestSubjectSelector,
   shouldBeChecked,
   shouldBeDisabled,
   shouldBeEnabled,
@@ -17,9 +22,6 @@ import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ASSET_INVENTORY_INTEGRATION_URL } from '../../urls/navigation';
 import {
-  GCP_PROVIDER_TEST_ID,
-  SAVE_BUTTON,
-  SAVE_EDIT_BUTTON,
   changePolicyName,
   checkPolicyName,
   clickSaveEditButton,
@@ -28,51 +30,27 @@ import {
   selectCloudProvider,
   selectPolicyForEditing,
 } from '../../tasks/asset_inventory/common';
+import {
+  GCP_CLOUDSHELL_CANCEL_BUTTON_TEST_ID,
+  GCP_CLOUDSHELL_TEST_ID,
+  GCP_CREDENTIALS_FILE_TEST_ID,
+  GCP_CREDENTIALS_JSON_TEST_ID,
+  GCP_CREDENTIALS_SELECTOR_TEST_ID,
+  GCP_CREDENTIALS_TYPE_FILE_TEST_ID,
+  GCP_CREDENTIALS_TYPE_JSON_TEST_ID,
+  GCP_LAUNCH_GOOGLE_CLOUD_SHELL_TEST_ID,
+  GCP_MANUAL_SETUP_TEST_ID,
+  GCP_ORGANIZATION_ACCOUNT_TEST_ID,
+  GCP_ORGANIZATION_ID_TEST_ID,
+  GCP_PROJECT_ID_TEST_ID,
+  GCP_SINGLE_ACCOUNT_TEST_ID,
+} from '../../screens/asset_inventory/onboarding_gcp';
 
-const GCP_CLOUDSHELL_TEST_ID = `${getDataTestSubjectSelector(
-  'gcpGoogleCloudShellOptionTestId'
-)} input`;
-
-const GCP_LAUNCH_GOOGLE_CLOUD_SHELL_TEST_ID = getDataTestSubjectSelector(
-  'launchGoogleCloudShellAgentlessButton'
-);
-const GCP_MANUAL_SETUP_TEST_ID = `${getDataTestSubjectSelector('gcpManualOptionTestId')} input`;
-
-const GCP_SINGLE_ACCOUNT_TEST_ID = `${getDataTestSubjectSelector('gcpSingleAccountTestId')} input`;
-const GCP_ORGANIZATION_ACCOUNT_TEST_ID = `${getDataTestSubjectSelector(
-  'gcpOrganizationAccountTestId'
-)} input`;
-const GCP_CLOUDSHELL_CANCEL_BUTTON_TEST_ID = getDataTestSubjectSelector(
-  'confirmGoogleCloudShellModalCancelButton'
-);
-
-const GCP_CREDENTIALS_TYPE_FILE_TEST_ID = getDataTestSubjectSelector(
-  'credentials_file_option_test_id'
-);
-const GCP_CREDENTIALS_TYPE_JSON_TEST_ID = getDataTestSubjectSelector(
-  'credentials_json_option_test_id'
-);
-
-const GCP_ORGANIZATION_ID_TEST_ID = getDataTestSubjectSelector('organization_id_test_id');
 const GCP_ORGANIZATION_ID = 'org-123456789012';
-
-const GCP_PROJECT_ID_TEST_ID = getDataTestSubjectSelector('project_id_test_id');
 const GCP_PROJECT_ID = 'project-123456789012';
-
-const GCP_CREDENTIALS_SELECTOR_TEST_ID = getDataTestSubjectSelector('credentials_type_test_id');
-const GCP_CREDENTIALS_FILE_TEST_ID = getDataTestSubjectSelector('credentials_file_test_id');
 const GCP_CREDENTIALS_FILE = 'gcp_credentials.json';
-
-const GCP_CREDENTIALS_JSON_TEST_ID = getDataTestSubjectSelector('textAreaInput-credentials-json');
 const GCP_CREDENTIALS_JSON =
   '{ "type": "service_account", "project_id": "project-123456789012", "private_key_id": "key-id", "private_key": "-----BEGIN PRIVATE KEY-----\\FakEpRIVateKey...\\n-----END PRIVATE KEY-----\\n", "client_email": "test@example.com" }';
-
-const selectAccountType = (accountType: 'single' | 'organization') => {
-  const accountTypeSelector =
-    accountType === 'single' ? GCP_SINGLE_ACCOUNT_TEST_ID : GCP_ORGANIZATION_ACCOUNT_TEST_ID;
-
-  cy.get(accountTypeSelector).click();
-};
 
 describe('Asset Inventory integration onboarding - GCP', { tags: ['@ess'] }, () => {
   beforeEach(() => {
