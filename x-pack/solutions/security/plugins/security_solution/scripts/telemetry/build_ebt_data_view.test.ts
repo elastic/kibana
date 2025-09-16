@@ -63,9 +63,9 @@ describe('upsertRuntimeFields', () => {
   test('ignores non-string field values', async () => {
     const fields = {
       ok: 'ip',
-      skipNull: null as any,
-      skipObj: { t: 'keyword' } as any,
-      skipNum: 123 as any,
+      skipNull: null,
+      skipObj: { t: 'keyword' },
+      skipNum: 123,
     };
 
     await upsertRuntimeFields(fields as any, url, headers);
@@ -106,7 +106,7 @@ describe('upsertRuntimeFields', () => {
         h: { type: 'lookup' },
         i: { type: 'geo_point' },
         j: { type: 'composite' },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -137,7 +137,7 @@ describe('upsertRuntimeFields', () => {
             },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -156,7 +156,7 @@ describe('upsertRuntimeFields', () => {
             baz: { type: 'long' },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -174,7 +174,7 @@ describe('upsertRuntimeFields', () => {
             x: { type: 'long' },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -202,7 +202,7 @@ describe('upsertRuntimeFields', () => {
           },
         },
         lone: { type: 'ip' },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -221,7 +221,7 @@ describe('upsertRuntimeFields', () => {
         b: 42,
         c: 'str',
         d: undefined,
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -233,7 +233,7 @@ describe('upsertRuntimeFields', () => {
         tags: { type: 'array', items: { type: 'keyword' } },
         counts: { type: 'array', items: { type: 'long' } },
         dates: { type: 'array', items: { type: 'date' } },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -260,7 +260,7 @@ describe('upsertRuntimeFields', () => {
             },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -274,7 +274,7 @@ describe('upsertRuntimeFields', () => {
     test('array without items is emitted as array', () => {
       const schema = {
         unknown: { type: 'array' },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -286,7 +286,7 @@ describe('upsertRuntimeFields', () => {
     test('array with unknown item shape is emitted as array', () => {
       const schema = {
         misc: { type: 'array', items: {} },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -306,7 +306,7 @@ describe('upsertRuntimeFields', () => {
             },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -335,7 +335,7 @@ describe('upsertRuntimeFields', () => {
             },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 
@@ -362,7 +362,7 @@ describe('upsertRuntimeFields', () => {
             },
           },
         },
-      } as any;
+      };
 
       const out = flattenSchema(schema);
 

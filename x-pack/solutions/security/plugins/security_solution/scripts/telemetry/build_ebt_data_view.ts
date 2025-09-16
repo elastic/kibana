@@ -9,6 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/telemetry/event_based_telemetry';
 
+import { isObject } from 'lodash';
 import { events as securityEvents } from '../../server/lib/telemetry/event_based/events';
 import { telemetryEvents } from '../../public/common/lib/telemetry/events/telemetry_events';
 // uncomment and add to run script, but do not commit as creates circular dependency
@@ -139,71 +140,21 @@ async function cli(): Promise<void> {
   }
 }
 
-function removeTrailingSlash(url: string) {
-  if (url.endsWith('/')) {
-    return url.slice(0, -1);
-  } else {
-    return url;
-  }
-}
 interface NestedSchemaNode {
   type?: string;
-  properties?: NestedObject;
+  properties?: NestedSchemaNode;
   items?: NestedSchemaNode;
   [key: string]: unknown;
 }
-interface NestedObject {
-  [key: string]: NestedSchemaNode;
-}
 
 interface InspectSchemaNodeResult {
-  childToInspect?: NestedObject;
+  childToInspect?: NestedSchemaNode;
   nodeType?: string;
 }
 
-function isObjectRecord(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null;
-}
-
-function inspectArraySchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
-  const item = node.items;
-
-  if (!isObjectRecord(item)) {
-    return { nodeType: 'array' };
-  }
-
-  if ('type' in item && (item as NestedSchemaNode).type) {
-    const t = String((item as NestedSchemaNode).type);
-    if (t === 'array') return { nodeType: 'array' }; // array-of-arrays -> keep "array"
-    return { nodeType: t }; // array of primitives
-  }
-
-  if (
-    (item as NestedSchemaNode).properties &&
-    isObjectRecord((item as NestedSchemaNode).properties)
-  ) {
-    return { childToInspect: (item as NestedSchemaNode).properties as NestedObject }; // array of objects
-  }
-
-  return { nodeType: 'array' };
-}
-
-function inspectSchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
-  if (!node.type) {
-    const objectNode = node.properties ?? (node as unknown as NestedObject);
-    return { childToInspect: objectNode };
-  }
-
-  if (node.type === 'array') {
-    return inspectArraySchemaNode(node);
-  }
-
-  return { nodeType: String(node.type) };
-}
-
-export function flattenSchema(inputObj: NestedObject): Record<string, string> {
+export function flattenSchema(inputObj: NestedSchemaNode): Record<string, string> {
   const result: Record<string, string> = {};
-  const queue: Array<{ obj: NestedObject; prefix: string }> = [{ obj: inputObj, prefix: '' }];
+  const queue: Array<{ obj: NestedSchemaNode; prefix: string }> = [{ obj: inputObj, prefix: '' }];
 
   while (queue.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -211,10 +162,10 @@ export function flattenSchema(inputObj: NestedObject): Record<string, string> {
 
     for (const [key, node] of Object.entries(obj)) {
       // eslint-disable-next-line no-continue
-      if (!isObjectRecord(node)) continue;
+      if (!isObject(node)) continue;
 
       const newKey = `${prefix}${key}`;
-      const { childToInspect, nodeType } = inspectSchemaNode(node);
+      const { childToInspect, nodeType } = inspectSchemaNode(node as NestedSchemaNode);
 
       if (childToInspect) {
         queue.push({ obj: childToInspect, prefix: `${newKey}.` });
@@ -251,5 +202,46 @@ export async function upsertRuntimeFields(
         throw new Error(`Error upserting field '${fieldName}: ${fieldType}' - ${error.message}`);
       }
     }
+  }
+}
+
+function inspectArraySchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
+  const item = node.items;
+
+  if (!isObject(item)) {
+    return { nodeType: 'array' };
+  }
+
+  if ('type' in item && (item as NestedSchemaNode).type) {
+    const t = String((item as NestedSchemaNode).type);
+    if (t === 'array') return { nodeType: 'array' }; // array-of-arrays -> keep "array"
+    return { nodeType: t }; // array of primitives
+  }
+
+  if ((item as NestedSchemaNode).properties && isObject((item as NestedSchemaNode).properties)) {
+    return { childToInspect: item.properties }; // array of objects
+  }
+
+  return { nodeType: 'array' };
+}
+
+function inspectSchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
+  if (!node.type) {
+    const objectNode = node.properties ?? node;
+    return { childToInspect: objectNode };
+  }
+
+  if (node.type === 'array') {
+    return inspectArraySchemaNode(node);
+  }
+
+  return { nodeType: String(node.type) };
+}
+
+function removeTrailingSlash(url: string) {
+  if (url.endsWith('/')) {
+    return url.slice(0, -1);
+  } else {
+    return url;
   }
 }
