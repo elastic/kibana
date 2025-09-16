@@ -226,16 +226,16 @@ describe('MetricsService', () => {
     describe('ELU multi-window behavior', () => {
       it('should handle transition points and mathematical relationships across all windows', async () => {
         // Test the complete lifecycle: mean periods → EMA transitions → steady state
-        // This covers transition timing, mathematical properties, and window responsiveness
+        // Uses realistic ELU values based on actual Kibana startup and operation patterns
         const testPattern = [
           // Startup: high initial values (intervals 0-2, all windows in mean period)
           1.0, 1.0, 0.48,
-          // Early phase: (intervals 3-5, short transitions to EMA, others still mean)
-          0.03, 0.03, 0.1,
-          // Mid phase: (intervals 6-11, medium transitions to EMA, long still mean)
-          0.02, 0.02, 0.02, 0.02, 0.02, 0.04,
-          // Settled: (intervals 12+, all windows using EMA)
-          0.04, 0.02, 0.02,
+          // Early settling: (intervals 3-5, short transitions to EMA, others still mean)
+          0.031, 0.029, 0.099,
+          // Steady state: (intervals 6-11, medium transitions to EMA, long still mean)
+          0.022, 0.022, 0.023, 0.018, 0.021, 0.024,
+          // Normal operations: (intervals 12+, all windows using EMA)
+          0.036, 0.019, 0.018,
         ];
 
         testPattern.forEach((value) => {
@@ -263,12 +263,15 @@ describe('MetricsService', () => {
         const longTransitioned = results[12]; // After long window EMA transition
         const final = results[results.length - 1];
 
-        // Verify mathematical properties during transitions
+        // Verify realistic ELU value ranges during transitions
         results.forEach((result, index) => {
-          // All values must be non-negative
-          expect(result.short).toBeGreaterThanOrEqual(0);
-          expect(result.medium).toBeGreaterThanOrEqual(0);
-          expect(result.long).toBeGreaterThanOrEqual(0);
+          // ELU values should be meaningful fractions (0-1 range typically)
+          expect(result.short).toBeGreaterThan(0);
+          expect(result.short).toBeLessThan(1);
+          expect(result.medium).toBeGreaterThan(0);
+          expect(result.medium).toBeLessThan(1);
+          expect(result.long).toBeGreaterThan(0);
+          expect(result.long).toBeLessThan(1);
 
           // During mean periods, values should increase monotonically for constant positive input
           if (index > 0 && index < 12) {
@@ -297,16 +300,17 @@ describe('MetricsService', () => {
 
       it('should demonstrate realistic load pattern response differences', async () => {
         // Focus on realistic operational scenarios: steady state → spike → recovery
+        // Based on actual Kibana operational patterns from logs
         const realisticPattern = [
-          // Steady state baseline
+          // Steady state baseline (typical normal operation)
           ...Array(6).fill(0.02),
-          // Load spike and recovery
-          0.48,
-          0.1,
-          0.03,
-          0.03,
-          0.02,
-          0.04,
+          // Load spike and recovery (similar to GC or intensive operation)
+          0.093, // Brief spike (like actual log value 0.09299)
+          0.042, // Recovery
+          0.025, // Settling
+          0.019, // Back to normal
+          0.023, // Normal variation
+          0.018, // Normal variation
         ];
 
         realisticPattern.forEach((value) => {
@@ -328,23 +332,28 @@ describe('MetricsService', () => {
         const results = await eluMetricsPromise;
 
         const baseline = results[5]; // Last steady state
-        const afterLoad = results[results.length - 1]; // After load pattern
+        const afterSpike = results[results.length - 1]; // After load pattern
 
         // All windows should respond to load changes
-        expect(afterLoad.short).toBeGreaterThan(baseline.short);
-        expect(afterLoad.medium).toBeGreaterThan(baseline.medium);
-        expect(afterLoad.long).toBeGreaterThan(baseline.long);
+        expect(afterSpike.short).toBeGreaterThan(baseline.short);
+        expect(afterSpike.medium).toBeGreaterThan(baseline.medium);
+        expect(afterSpike.long).toBeGreaterThan(baseline.long);
 
-        // Values should be meaningful and positive
-        expect(afterLoad.short).toBeGreaterThan(0);
-        expect(afterLoad.medium).toBeGreaterThan(0);
-        expect(afterLoad.long).toBeGreaterThan(0);
+        // Values should be within expected ELU ranges based on realistic patterns
+        expect(afterSpike.short).toBeGreaterThan(0.001); // Should reflect recent low activity
+        expect(afterSpike.short).toBeLessThan(0.05); // Reasonable for recent 0.018-0.023 values
+        expect(afterSpike.medium).toBeGreaterThan(0.001); // Should show some historical influence
+        expect(afterSpike.medium).toBeLessThan(0.04); // Moderate response to pattern
+        // Long window calculation: (6*0.02 + 0.093 + 0.042 + 0.025 + 0.019 + 0.023 + 0.018) * 100 / 60000 ≈ 0.000567
+        expect(afterSpike.long).toBeGreaterThan(0.0005); // Should show long-term trend
+        expect(afterSpike.long).toBeLessThan(0.0007); // Conservative response due to longer averaging
       });
     });
 
     describe('ELU autoscaling scenario tests', () => {
       it('should handle critical autoscaling scenarios: sustained high load and spike recovery', async () => {
         // Combined test covering both sustained load (for autoscaling threshold) and spike handling
+        // Based on realistic Kibana patterns: normal operation → brief startup-like spike → moderate sustained load
         const scenarioPattern = [
           // Normal operation baseline (realistic steady state)
           ...Array(5).fill(0.02),
@@ -352,8 +361,9 @@ describe('MetricsService', () => {
           1.0,
           1.0,
           0.48,
-          // Recovery to moderate sustained load (potential autoscaling scenario)
-          ...Array(15).fill(0.3),
+          // Recovery to moderate sustained load (realistic autoscaling scenario)
+          // Based on actual log patterns where sustained load is 0.04-0.08, not 0.3
+          ...Array(15).fill(0.065),
         ];
 
         scenarioPattern.forEach((value) => {
@@ -384,13 +394,20 @@ describe('MetricsService', () => {
         expect(spikeResponse.medium).toBeGreaterThan(spikeResponse.long);
 
         // Verify sustained load behavior for autoscaling decisions
+        // Long window should reflect sustained moderate load (6.5%) but not be excessive
         expect(sustainedLoad.long).toBeGreaterThan(baseline.long);
-        expect(sustainedLoad.long).toBeLessThan(0.6); // Below autoscaling threshold
-        expect(sustainedLoad.long).toBeGreaterThan(0.005); // Meaningful value
+        expect(sustainedLoad.long).toBeLessThan(0.1); // Below extreme autoscaling threshold
+        expect(sustainedLoad.long).toBeGreaterThan(0.005); // Meaningful sustained load value
+
+        // Medium window should show stronger response to recent sustained load
+        expect(sustainedLoad.medium).toBeGreaterThan(sustainedLoad.long);
+        expect(sustainedLoad.medium).toBeLessThan(0.08); // Reasonable upper bound
       });
 
       it('should transition from mean-to-EMA over long window', async () => {
-        const transitionPattern = Array(15).fill(0.8); // High values
+        // Focus on long window transition behavior using realistic sustained load values
+        // Based on actual Kibana patterns where sustained higher load is 0.06-0.12, not 0.8
+        const transitionPattern = Array(15).fill(0.08); // Realistic higher load (8%)
 
         transitionPattern.forEach((value) => {
           mockOpsCollector.collect.mockResolvedValueOnce(
@@ -410,21 +427,23 @@ describe('MetricsService', () => {
 
         const results = await eluMetricsPromise;
 
-        // test critical transition points for autoscaling
+        // Test critical transition points for autoscaling
         const beforeTransition = results[11]; // Last mean calculation
         const atTransition = results[12]; // First EMA calculation
         const stabilized = results[14]; // Established EMA
 
-        // Mean should detect gradual increase
-        expect(beforeTransition.long).toBeGreaterThan(0);
-        expect(beforeTransition.long).toBeLessThan(0.8);
+        // Mean should detect gradual increase with realistic values
+        expect(beforeTransition.long).toBeGreaterThan(0.001); // Should be accumulating
+        expect(beforeTransition.long).toBeLessThan(0.08); // But below input due to averaging
 
         // EMA transition should detect progression
         expect(atTransition.long).toBeGreaterThan(beforeTransition.long);
         expect(stabilized.long).toBeGreaterThan(atTransition.long);
 
         // Final values should be meaningful for autoscaling decisions
-        expect(stabilized.long).toBeGreaterThan(0.01);
+        // With 8% input over 15 samples: (15 * 0.08 * 100) / 60000 = 0.002
+        expect(stabilized.long).toBeGreaterThan(0.0015); // Meaningful threshold
+        expect(stabilized.long).toBeLessThan(0.0025); // Reasonable upper bound for 8% input
       });
     });
 
