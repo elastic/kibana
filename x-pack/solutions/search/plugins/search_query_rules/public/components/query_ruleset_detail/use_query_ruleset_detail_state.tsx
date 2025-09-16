@@ -23,6 +23,20 @@ interface UseQueryRulesetDetailStateProps {
   createMode: boolean;
 }
 
+const getSearchableFields = (rule: SearchQueryRulesQueryRule): string[] => {
+  return [
+    rule.actions.docs?.flatMap((doc) => [doc._id, doc._index]),
+    rule.actions.ids,
+    rule.criteria.flatMap((criterion) => [
+      criterion.type,
+      ...(criterion.values || []),
+      criterion.metadata,
+    ]),
+  ]
+    .flat()
+    .filter((field) => !!field);
+};
+
 const filterRules = (
   rules: SearchQueryRulesQueryRule[],
   searchFilter: string
@@ -33,21 +47,8 @@ const filterRules = (
 
   const lowerCaseFilter = searchFilter.toLowerCase();
   const shouldFilter = (rule: SearchQueryRulesQueryRule) => {
-    return (
-      rule.actions.docs?.some(
-        (doc) =>
-          doc._id.toLowerCase().includes(lowerCaseFilter) ||
-          doc._index?.toLowerCase().includes(lowerCaseFilter)
-      ) ||
-      rule.actions.ids?.some((id) => id.toLowerCase().includes(lowerCaseFilter)) ||
-      rule.criteria.some((criterion) => {
-        return (
-          criterion.type.toLowerCase().includes(lowerCaseFilter) ||
-          criterion.values?.some((value) => value.toLowerCase().includes(lowerCaseFilter)) ||
-          criterion.metadata?.toLowerCase().includes(lowerCaseFilter)
-        );
-      })
-    );
+    const searchableFields = getSearchableFields(rule);
+    return searchableFields.some((field) => field.toLowerCase().includes(lowerCaseFilter));
   };
   return rules.filter(shouldFilter);
 };
