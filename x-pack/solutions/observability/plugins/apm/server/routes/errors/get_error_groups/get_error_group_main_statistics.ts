@@ -8,7 +8,6 @@
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -29,6 +28,20 @@ import { getErrorName } from '../../../lib/helpers/get_error_name';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+
+export interface ErrorGroupMainStatisticsResponse {
+  errorGroups: Array<{
+    groupId: string;
+    name: string;
+    lastSeen: number;
+    occurrences: number;
+    culprit: string | undefined;
+    handled: boolean | undefined;
+    type: string | undefined;
+    traceId: string | undefined;
+  }>;
+  maxCountExceeded: boolean;
+}
 
 export async function getErrorGroupMainStatistics({
   kuery,

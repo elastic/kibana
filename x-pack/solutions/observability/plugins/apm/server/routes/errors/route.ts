@@ -8,11 +8,11 @@
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { notFound } from '@hapi/boom';
-import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import type { ErrorDistributionResponse } from './distribution/get_distribution';
 import { getErrorDistribution } from './distribution/get_distribution';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import type { ErrorGroupMainStatisticsResponse } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import type { ErrorGroupPeriodsResponse } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
