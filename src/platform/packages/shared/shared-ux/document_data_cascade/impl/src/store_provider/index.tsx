@@ -21,6 +21,7 @@ import {
 export type { GroupNode, LeafNode, IStoreState } from './reducers';
 
 interface IDataCascadeProviderProps {
+  initialGroupColumn?: string;
   cascadeGroups: string[];
 }
 
@@ -67,6 +68,7 @@ export function useCascadeLeafNode<G extends GroupNode, L extends LeafNode>(cach
 
 export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   cascadeGroups,
+  initialGroupColumn,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStoreContext<G, L>();
@@ -78,7 +80,11 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
       groupNodes: [] as G[],
       leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
       groupByColumns: cascadeGroups,
-      currentGroupByColumns: cascadeGroups.length ? [cascadeGroups[0]] : [],
+      currentGroupByColumns: cascadeGroups.length
+        ? initialGroupColumn && cascadeGroups.includes(initialGroupColumn)
+          ? [initialGroupColumn]
+          : [cascadeGroups[0]]
+        : [],
     },
     reducers: storeReducers,
   });

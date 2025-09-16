@@ -17,10 +17,11 @@ export type { GroupNode, LeafNode } from '../store_provider';
 
 export function DataCascade<G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   cascadeGroups,
+  initialGroupColumn,
   ...props
 }: DataCascadeImplProps<G, L> & ComponentProps<typeof DataCascadeProvider>) {
   return (
-    <DataCascadeProvider cascadeGroups={cascadeGroups}>
+    <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
       <DataCascadeImpl<G, L> {...props} />
     </DataCascadeProvider>
   );
