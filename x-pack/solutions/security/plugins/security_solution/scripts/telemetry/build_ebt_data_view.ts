@@ -156,7 +156,7 @@ interface NestedObject {
   [key: string]: NestedSchemaNode;
 }
 
-function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
+export function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
   const result: { [key: string]: string } = {};
   const queue: Array<{ obj: NestedObject; prefix: string }> = [{ obj: inputObj, prefix: '' }];
   while (queue.length > 0) {
@@ -207,7 +207,7 @@ function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
   return result;
 }
 
-async function upsertRuntimeFields(
+export async function upsertRuntimeFields(
   fields: { [key: string]: string },
   requestUrl: string,
   requestHeaders: { [key: string]: string }
