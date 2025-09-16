@@ -22,6 +22,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
+  getAdhocDataviews,
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
@@ -342,7 +343,7 @@ function getValueColumns(layer: MetricStateESQL) {
 }
 
 export function fromAPItoLensState(config: MetricState): LensAttributes {
-  const dataviews: Record<string, { index: string; timeFieldName: string }> = {};
+  const dataviews: Record<string, { id: string; index: string; timeFieldName: string }> = {};
 
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
@@ -353,27 +354,53 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     _buildDataLayer,
     getValueColumns
   );
+
+  const visualization = buildVisualizationState(config);
+
+  const adHocDataViews = getAdhocDataviews(dataviews);
+  const references = buildReferences(
+      Object.fromEntries(Object.entries(adHocDataViews).map(([key, value]) => ["layer_0", value.id]))
+  );
+
   return {
     title: config.title ?? '',
     description: config.description ?? '',
     visualizationType: 'lnsMetric',
-    references: buildReferences(
-      Object.fromEntries(Object.entries(dataviews).map(([key, value]) => [key, value.index]))
-    ),
+    references,
     state: {
       datasourceStates,
       internalReferences: [],
       filters: [],
       query: { language: 'kuery', query: '' },
-      visualization: buildVisualizationState(config),
-      adHocDataViews: {},
+      visualization,
+      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
 }
 
+const injectReferences = (config: LensAttributes) => {
+  const { references } = config;
+  for (const ref of references) {
+    if (ref.type === 'index-pattern') {
+      const layerId = ref.name.split('-').pop()!;
+      const { layers } = config.state.datasourceStates.formBased || { layers: {}};
+      if (layers[layerId]) {
+        if (config.state.adHocDataViews?.[ref.id]) {
+            // @ts-expect-error: IndexPatternId does not exist on this property
+            layers[layerId].indexPatternId = config.state.adHocDataViews[ref.id].title;
+        } else {
+          // @ts-expect-error: IndexPatternId does not exist on this property
+          layers[layerId].indexPatternId = ref.id;
+        }
+      }
+    }
+  }
+};
+
 export function fromLensStateToAPI(
   config: LensAttributes
 ): Extract<LensApiState, { type: 'metric' }> {
+  injectReferences(config);
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
   const layers =

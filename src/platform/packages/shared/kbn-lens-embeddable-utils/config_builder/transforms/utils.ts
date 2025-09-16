@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   FormBasedLayer,
@@ -81,6 +81,36 @@ function isTextBasedLayer(
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
 }
+
+const getAdhocDataView = (dataView: {index: string, timeFieldName: string }) => {
+  const id = uuidv4();
+  return {
+    [id]: {
+          id: id,
+          title: dataView.index,
+          name: dataView.index,
+          timeFieldName: dataView.timeFieldName,
+          sourceFilters: [],
+          fieldFormats: {},
+          runtimeFieldMap: {},
+          fieldAttrs: {},
+          allowNoIndex: false,
+          allowHidden: false
+        }
+  };
+}
+
+export const getAdhocDataviews = (dataviews: Record<string, { index: string, timeFieldName: string }>) => {
+  let adHocDataViews: Record<string, { id: string, timeFieldName: string }> = {};
+  [...new Set(Object.values(dataviews))].forEach((d) => {
+    adHocDataViews = {
+      ...adHocDataViews,
+      ...getAdhocDataView(d),
+    };
+  });
+
+  return adHocDataViews;
+};
 
 /**
  * Builds dataset state from the layer configuration
