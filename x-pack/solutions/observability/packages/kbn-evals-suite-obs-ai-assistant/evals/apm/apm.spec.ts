@@ -35,7 +35,7 @@ const evaluate = base.extend<{
   ],
 });
 
-evaluate.describe('APM Service', { tag: '@svlOblt' }, () => {
+evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
   const ruleIds: string[] = [];
 
   evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, log }) => {
