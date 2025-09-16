@@ -6,27 +6,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ToolMessage } from './types';
+import type { ChatCompletionMessage } from 'openai/resources/chat/completions';
 
-export function toolCallMock(toolName: string, toolArg: Record<string, any>): ToolMessage {
+export function toolCallMock(
+  toolName: string,
+  toolArg: Record<string, any>
+): Omit<ChatCompletionMessage, 'refusal'> {
   return {
     role: 'assistant' as const,
     content: '',
-    tool_call_id: uuidv4().slice(0, 8),
     tool_calls: [
       {
         function: {
           name: toolName,
           arguments: JSON.stringify(toolArg),
         },
-        index: 0,
         id: `call_${uuidv4()}`,
         type: 'function',
       },
     ],
-  } as unknown as ToolMessage;
-}
-
-export function getToolCallId(message: any): string {
-  return message?.tool_call_id ?? message?.tool_calls?.[0]?.id;
+  };
 }

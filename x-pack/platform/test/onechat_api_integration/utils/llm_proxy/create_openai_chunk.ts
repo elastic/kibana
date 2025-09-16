@@ -10,7 +10,16 @@ import type OpenAI from 'openai';
 import type { ToolMessage } from './types';
 
 export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
-  const message = typeof msg === 'string' ? { role: 'user' as const, content: msg } : msg;
+  let delta: OpenAI.ChatCompletionChunk.Choice.Delta;
+  if (typeof msg === 'string') {
+    delta = { role: 'user', content: msg };
+  } else {
+    delta = {
+      role: msg.role,
+      content: msg.content,
+      tool_calls: msg.tool_calls?.map((tc) => ({ ...tc, index: 0 })),
+    };
+  }
 
   return {
     id: v4(),
@@ -19,7 +28,7 @@ export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatComplet
     model: 'gpt-4',
     choices: [
       {
-        delta: message,
+        delta,
         index: 0,
         finish_reason: null,
       },

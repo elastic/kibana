@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import type http from 'http';
+import type { ChatCompletionMessage } from 'openai/resources';
 
 export type HttpRequest = http.IncomingMessage;
 export type HttpResponse = http.ServerResponse<http.IncomingMessage>;
 
 export type LLMMessage = string[] | ToolMessage | string | undefined;
 
-export interface ToolMessage {
-  role: 'assistant';
-  content?: string;
-  tool_calls?: ChatCompletionChunkToolCall[];
-}
+export type ToolMessage = Omit<ChatCompletionMessage, 'refusal'>;
