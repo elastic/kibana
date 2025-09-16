@@ -11,6 +11,7 @@ import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/type
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
 import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
 import { useGenerateRuleId } from '../../hooks/use_generate_rule_id';
@@ -54,6 +55,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
 }) => {
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
   const [flyoutMode, setFlyoutMode] = React.useState<'create' | 'edit'>('edit');
+  const hasSearchFilter = searchFilter.trim() !== '';
 
   const useTracker = useUsageTracker();
 
@@ -136,7 +138,12 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
               <EuiFlexItem>
                 <EuiFieldSearch
                   data-test-subj="queryRulesetDetailSearchFilter"
-                  placeholder={'Search rules...'}
+                  placeholder={i18n.translate(
+                    'xpack.queryRules.queryRulesetDetail.searchFilterPlaceholder',
+                    {
+                      defaultMessage: 'Search rules...',
+                    }
+                  )}
                   value={searchFilter}
                   onChange={(e) => {
                     setSearchFilter(e.target.value);
@@ -146,15 +153,20 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                   }}
                   fullWidth
                   incremental={true}
-                  aria-label="Search rules"
+                  aria-label={i18n.translate(
+                    'xpack.queryRules.queryRulesetDetail.searchFilterAriaLabel',
+                    {
+                      defaultMessage: 'Search rules by ID, criteria, or actions',
+                    }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          {rules.length === 0 && <RulesetDetailEmptyPrompt isFilter={searchFilter.trim() !== ''} />}
-          {rules.length > 0 && searchFilter.trim() === '' && (
+          {rules.length === 0 && <RulesetDetailEmptyPrompt isFilter={hasSearchFilter} />}
+          {rules.length > 0 && !hasSearchFilter && (
             <QueryRuleDraggableList
               rules={rules}
               rulesetId={rulesetId}
@@ -177,7 +189,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
               }}
             />
           )}
-          {rules.length > 0 && searchFilter.trim() !== '' && (
+          {rules.length > 0 && hasSearchFilter && (
             <QueryRuleSearchResultsList
               rules={rules}
               unfilteredRules={unfilteredRules}
