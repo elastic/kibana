@@ -9,12 +9,13 @@
 
 import { EuiErrorBoundary, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import Overview from '../../../doc_viewer_overview';
-import DocViewerTable from '../../../../../doc_viewer_table';
+import React, { useEffect, useState } from 'react';
 import DocViewerSource from '../../../../../doc_viewer_source';
+import DocViewerTable from '../../../../../doc_viewer_table';
+import Overview from '../../../doc_viewer_overview';
+import type { OverviewApi, TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { useDataSourcesContext } from '../../../hooks/use_data_sources';
 
 const tabIds = {
@@ -52,12 +53,14 @@ export interface SpanFlyoutProps {
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   onCloseFlyout: () => void;
+  activeSection?: TraceOverviewSections;
 }
 
-export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
+export const SpanFlyoutBody = ({ hit, loading, dataView, activeSection }: SpanFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const { indexes } = useDataSourcesContext();
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
+  const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
 
   const renderTabs = () => {
     return tabs.map((tab) => (
@@ -71,6 +74,12 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
     ));
   };
 
+  useEffect(() => {
+    if (activeSection && flyoutRef) {
+      flyoutRef.openAndScrollToSection(activeSection);
+    }
+  }, [activeSection, flyoutRef]);
+
   return (
     <>
       {loading || !hit ? (
@@ -82,6 +91,7 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
             {selectedTabId === tabIds.OVERVIEW && (
               <EuiErrorBoundary>
                 <Overview
+                  ref={setFlyoutRef}
                   hit={hit}
                   indexes={indexes}
                   showWaterfall={false}

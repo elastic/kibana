@@ -23,6 +23,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useSpan } from '../hooks/use_span';
 import { SpanFlyoutBody } from './span_flyout_body';
 import { isSpanHit } from '../helpers/is_span';
+import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 
 const flyoutId = 'spanDetailFlyout';
 
@@ -30,9 +31,10 @@ export interface SpanFlyoutProps {
   spanId: string;
   dataView: DocViewRenderProps['dataView'];
   onCloseFlyout: () => void;
+  activeSection?: TraceOverviewSections;
 }
 
-export const SpanFlyout = ({ spanId, dataView, onCloseFlyout }: SpanFlyoutProps) => {
+export const SpanFlyout = ({ spanId, dataView, onCloseFlyout, activeSection }: SpanFlyoutProps) => {
   const { span, docId, loading } = useSpan({ spanId });
   const { euiTheme } = useEuiTheme();
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
@@ -90,6 +92,7 @@ export const SpanFlyout = ({ spanId, dataView, onCloseFlyout }: SpanFlyoutProps)
           dataView={dataView}
           loading={loading}
           onCloseFlyout={onCloseFlyout}
+          activeSection={activeSection}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

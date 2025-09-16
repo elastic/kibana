@@ -25,6 +25,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { LogsFlyout } from './logs_flyout';
 import { SpanFlyout } from './span_flyout';
+import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -46,6 +47,7 @@ export const FullScreenWaterfall = ({
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isLogsFlyoutVisible, setIsLogsFlyoutVisible] = useState(false);
   const [isTraceFlyoutVisible, setIsTraceFlyoutVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
@@ -61,12 +63,14 @@ export const FullScreenWaterfall = ({
           onErrorClick: (params: { traceId: string; docId: string; errorCount: number }) => {
             if (params.errorCount > 1) {
               setIsTraceFlyoutVisible(true);
+              setActiveSection('errors-table');
             } else {
               setIsLogsFlyoutVisible(true);
             }
             setSpanId(params.docId);
           },
           onNodeClick: (nodeSpanId: string) => {
+            setActiveSection(undefined);
             setSpanId(nodeSpanId);
             setIsTraceFlyoutVisible(true);
           },
@@ -145,6 +149,7 @@ export const FullScreenWaterfall = ({
             onCloseFlyout={() => {
               setIsTraceFlyoutVisible(false);
             }}
+            activeSection={activeSection}
           />
         </EuiFocusTrap>
       )}
