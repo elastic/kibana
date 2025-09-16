@@ -50,6 +50,33 @@ export const ServiceNowGetIncidentParamsSchema = z.object({
   id: z.string(),
 });
 
+export const ServiceNowGetFieldsParamsSchema = z.object({
+  // Common fields parameters - usually empty object
+});
+
+export const ServiceNowGetChoicesParamsSchema = z.object({
+  fields: z.array(z.string()),
+});
+
+export const ServiceNowCloseIncidentParamsSchema = z.object({
+  incidentId: z.string(),
+  closeCode: z.string().optional(),
+  closeNotes: z.string().optional(),
+});
+
+// ServiceNow ITOM specific schemas
+export const ServiceNowAddEventParamsSchema = z.object({
+  source: z.string(),
+  node: z.string(),
+  type: z.string(),
+  resource: z.string().optional(),
+  metric_name: z.string().optional(),
+  event_class: z.string().optional(),
+  severity: z.string().optional(),
+  description: z.string().optional(),
+  additional_info: z.record(z.string(), z.any()).optional(),
+});
+
 // ServiceNow SIR connector parameter schemas
 export const ServiceNowCreateSecurityIncidentParamsSchema = z.object({
   incident: z.object({
@@ -76,4 +103,27 @@ export const ServiceNowIncidentResponseSchema = z.object({
   priority: z.string().optional(),
   sys_created_on: z.string(),
   sys_updated_on: z.string(),
+});
+
+export const ServiceNowFieldsResponseSchema = z.array(z.object({
+  name: z.string(),
+  label: z.string(),
+  type: z.string(),
+  mandatory: z.boolean(),
+  choices: z.array(z.object({
+    label: z.string(),
+    value: z.string(),
+  })).optional(),
+}));
+
+export const ServiceNowChoicesResponseSchema = z.record(z.string(), z.array(z.object({
+  label: z.string(),
+  value: z.string(),
+})));
+
+export const ServiceNowEventResponseSchema = z.object({
+  sys_id: z.string(),
+  number: z.string(),
+  state: z.string(),
+  sys_created_on: z.string(),
 });

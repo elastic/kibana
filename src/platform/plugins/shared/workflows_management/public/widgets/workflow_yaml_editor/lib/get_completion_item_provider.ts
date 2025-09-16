@@ -920,9 +920,6 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
   if (connectorType === 'console') {
     return monaco.languages.CompletionItemKind.Variable; // Will use custom Console icon
   }
-  if (connectorType.startsWith('inference')) {
-    return monaco.languages.CompletionItemKind.Snippet; // Will use custom HTTP icon
-  }
 
   if (connectorType === 'http') {
     return monaco.languages.CompletionItemKind.Reference; // Will use custom HTTP icon
@@ -955,7 +952,7 @@ function getConnectorTypeSuggestions(
   const builtInStepTypes = getBuiltInStepTypesFromSchema();
 
   // Get all connectors
-        const allConnectors = getCachedAllConnectors();
+  const allConnectors = getCachedAllConnectors();
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {

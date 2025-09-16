@@ -31,16 +31,30 @@ import {
   EmailResponseSchema,
   WebhookParamsSchema,
   WebhookResponseSchema,
-  JiraCreateIssueParamsSchema,
-  JiraUpdateIssueParamsSchema,
+  JiraPushToServiceParamsSchema,
+  JiraGetIncidentParamsSchema,
+  JiraGetFieldsParamsSchema,
+  JiraGetIssueTypesParamsSchema,
+  JiraGetFieldsByIssueTypeParamsSchema,
+  JiraGetIssuesParamsSchema,
   JiraGetIssueParamsSchema,
   JiraIssueResponseSchema,
-  JiraCreateIssueResponseSchema,
+  JiraPushToServiceResponseSchema,
+  JiraFieldsResponseSchema,
+  JiraIssueTypesResponseSchema,
+  JiraIssuesResponseSchema,
   ServiceNowCreateIncidentParamsSchema,
   ServiceNowUpdateIncidentParamsSchema,
   ServiceNowGetIncidentParamsSchema,
+  ServiceNowGetFieldsParamsSchema,
+  ServiceNowGetChoicesParamsSchema,
+  ServiceNowCloseIncidentParamsSchema,
+  ServiceNowAddEventParamsSchema,
   ServiceNowCreateSecurityIncidentParamsSchema,
   ServiceNowIncidentResponseSchema,
+  ServiceNowFieldsResponseSchema,
+  ServiceNowChoicesResponseSchema,
+  ServiceNowEventResponseSchema,
   PagerDutyParamsSchema,
   PagerDutyResponseSchema,
   TeamsParamsSchema,
@@ -63,11 +77,8 @@ import {
   ResilientAddCommentParamsSchema,
   ResilientIncidentResponseSchema,
   SwimlaneCreateRecordParamsSchema,
-  SwimlaneUpdateRecordParamsSchema,
   SwimlaneResponseSchema,
   CasesWebhookCreateCaseParamsSchema,
-  CasesWebhookUpdateCaseParamsSchema,
-  CasesWebhookCreateCommentParamsSchema,
   CasesWebhookResponseSchema,
   SentinelOneIsolateHostParamsSchema,
   SentinelOneReleaseHostParamsSchema,
@@ -105,6 +116,12 @@ import {
   CrowdStrikeExecuteActiveResponderRTRParamsSchema,
   CrowdStrikeExecuteAdminRTRParamsSchema,
   CrowdStrikeGetRTRCloudScriptsParamsSchema,
+  // TheHive connector schemas
+  TheHivePushToServiceParamsSchema,
+  TheHiveCreateAlertParamsSchema,
+  TheHiveGetIncidentParamsSchema,
+  TheHiveIncidentResponseSchema,
+  TheHiveCreateAlertResponseSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -157,16 +174,24 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
   if (actionTypeId === '.jira') {
     switch (subActionName) {
       case 'pushToService':
-        return JiraCreateIssueParamsSchema;
-      case 'updateIncident':
-        return JiraUpdateIssueParamsSchema;
+        return JiraPushToServiceParamsSchema;
       case 'getIncident':
+        return JiraGetIncidentParamsSchema;
+      case 'getFields':
+        return JiraGetFieldsParamsSchema;
+      case 'issueTypes':
+        return JiraGetIssueTypesParamsSchema;
+      case 'fieldsByIssueType':
+        return JiraGetFieldsByIssueTypeParamsSchema;
+      case 'issues':
+        return JiraGetIssuesParamsSchema;
+      case 'issue':
         return JiraGetIssueParamsSchema;
     }
   }
 
-  // Handle ServiceNow sub-actions
-  if (actionTypeId === '.servicenow' || actionTypeId === '.servicenow-itom' || actionTypeId === '.servicenow-itsm') {
+  // Handle ServiceNow ITSM sub-actions
+  if (actionTypeId === '.servicenow-itsm') {
     switch (subActionName) {
       case 'pushToService':
         return ServiceNowCreateIncidentParamsSchema;
@@ -174,14 +199,36 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
         return ServiceNowUpdateIncidentParamsSchema;
       case 'getIncident':
         return ServiceNowGetIncidentParamsSchema;
+      case 'getFields':
+        return ServiceNowGetFieldsParamsSchema;
+      case 'getChoices':
+        return ServiceNowGetChoicesParamsSchema;
+      case 'closeIncident':
+        return ServiceNowCloseIncidentParamsSchema;
     }
   }
 
-  // Handle ServiceNow SIR
+  // Handle ServiceNow SIR sub-actions
   if (actionTypeId === '.servicenow-sir') {
     switch (subActionName) {
       case 'pushToService':
         return ServiceNowCreateSecurityIncidentParamsSchema;
+      case 'getIncident':
+        return ServiceNowGetIncidentParamsSchema;
+      case 'getFields':
+        return ServiceNowGetFieldsParamsSchema;
+      case 'getChoices':
+        return ServiceNowGetChoicesParamsSchema;
+    }
+  }
+
+  // Handle ServiceNow ITOM sub-actions
+  if (actionTypeId === '.servicenow-itom') {
+    switch (subActionName) {
+      case 'addEvent':
+        return ServiceNowAddEventParamsSchema;
+      case 'getChoices':
+        return ServiceNowGetChoicesParamsSchema;
     }
   }
 
@@ -212,8 +259,6 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     switch (subActionName) {
       case 'pushToService':
         return SwimlaneCreateRecordParamsSchema;
-      case 'updateIncident':
-        return SwimlaneUpdateRecordParamsSchema;
     }
   }
 
@@ -222,10 +267,6 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     switch (subActionName) {
       case 'pushToService':
         return CasesWebhookCreateCaseParamsSchema;
-      case 'updateIncident':
-        return CasesWebhookUpdateCaseParamsSchema;
-      case 'addComment':
-        return CasesWebhookCreateCommentParamsSchema;
     }
   }
 
@@ -313,6 +354,18 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     }
   }
 
+  // Handle TheHive sub-actions
+  if (actionTypeId === '.thehive') {
+    switch (subActionName) {
+      case 'pushToService':
+        return TheHivePushToServiceParamsSchema;
+      case 'createAlert':
+        return TheHiveCreateAlertParamsSchema;
+      case 'getIncident':
+        return TheHiveGetIncidentParamsSchema;
+    }
+  }
+
   // Generic fallback for unknown sub-actions
   return z.object({
     subAction: z.literal(subActionName),
@@ -370,16 +423,57 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   if (actionTypeId === '.jira') {
     switch (subActionName) {
       case 'pushToService':
-        return JiraCreateIssueResponseSchema;
-      case 'updateIncident':
+        return JiraPushToServiceResponseSchema;
       case 'getIncident':
+      case 'issue':
         return JiraIssueResponseSchema;
+      case 'getFields':
+        return JiraFieldsResponseSchema;
+      case 'issueTypes':
+        return JiraIssueTypesResponseSchema;
+      case 'fieldsByIssueType':
+        return JiraFieldsResponseSchema; // Same as getFields
+      case 'issues':
+        return JiraIssuesResponseSchema;
     }
   }
 
-  // Handle ServiceNow sub-actions
-  if (actionTypeId === '.servicenow' || actionTypeId === '.servicenow-itom' || actionTypeId === '.servicenow-itsm' || actionTypeId === '.servicenow-sir') {
-    return ServiceNowIncidentResponseSchema;
+  // Handle ServiceNow ITSM sub-actions
+  if (actionTypeId === '.servicenow-itsm') {
+    switch (subActionName) {
+      case 'pushToService':
+      case 'updateIncident':
+      case 'getIncident':
+      case 'closeIncident':
+        return ServiceNowIncidentResponseSchema;
+      case 'getFields':
+        return ServiceNowFieldsResponseSchema;
+      case 'getChoices':
+        return ServiceNowChoicesResponseSchema;
+    }
+  }
+
+  // Handle ServiceNow SIR sub-actions
+  if (actionTypeId === '.servicenow-sir') {
+    switch (subActionName) {
+      case 'pushToService':
+      case 'getIncident':
+        return ServiceNowIncidentResponseSchema;
+      case 'getFields':
+        return ServiceNowFieldsResponseSchema;
+      case 'getChoices':
+        return ServiceNowChoicesResponseSchema;
+    }
+  }
+
+  // Handle ServiceNow ITOM sub-actions
+  if (actionTypeId === '.servicenow-itom') {
+    switch (subActionName) {
+      case 'addEvent':
+        return ServiceNowEventResponseSchema;
+      case 'getChoices':
+        return ServiceNowChoicesResponseSchema;
+    }
   }
 
   // Handle Opsgenie sub-actions
@@ -425,6 +519,17 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   // Handle Jira Service Management sub-actions
   if (actionTypeId === '.jira-service-management') {
     return JiraServiceManagementResponseSchema;
+  }
+
+  // Handle TheHive sub-actions
+  if (actionTypeId === '.thehive') {
+    switch (subActionName) {
+      case 'pushToService':
+      case 'getIncident':
+        return TheHiveIncidentResponseSchema;
+      case 'createAlert':
+        return TheHiveCreateAlertResponseSchema;
+    }
   }
 
   // Generic fallback

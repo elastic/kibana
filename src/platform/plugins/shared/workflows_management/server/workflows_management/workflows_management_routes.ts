@@ -61,6 +61,46 @@ function formatSubActionName(action: string): string {
 function createSubActionsMapping() {
   const mapping: Record<string, Array<{ name: string; displayName: string }>> = {};
   
+  
+  // Define legacy connector sub-actions (connectors using older ActionType pattern)
+  const JIRA_SUB_ACTIONS = {
+    GET_FIELDS: 'getFields',
+    GET_INCIDENT: 'getIncident', 
+    PUSH_TO_SERVICE: 'pushToService',
+    ISSUE_TYPES: 'issueTypes',
+    FIELDS_BY_ISSUE_TYPE: 'fieldsByIssueType',
+    ISSUES: 'issues',
+    ISSUE: 'issue',
+  };
+
+  const SERVICENOW_ITSM_SUB_ACTIONS = {
+    GET_FIELDS: 'getFields',
+    PUSH_TO_SERVICE: 'pushToService',
+    GET_CHOICES: 'getChoices',
+    GET_INCIDENT: 'getIncident',
+    CLOSE_INCIDENT: 'closeIncident',
+  };
+
+  const SERVICENOW_SIR_SUB_ACTIONS = {
+    GET_FIELDS: 'getFields',
+    PUSH_TO_SERVICE: 'pushToService',
+    GET_CHOICES: 'getChoices',
+    GET_INCIDENT: 'getIncident',
+  };
+
+  const SERVICENOW_ITOM_SUB_ACTIONS = {
+    ADD_EVENT: 'addEvent',
+    GET_CHOICES: 'getChoices',
+  };
+
+  const SWIMLANE_SUB_ACTIONS = {
+    PUSH_TO_SERVICE: 'pushToService',
+  };
+
+  const CASES_WEBHOOK_SUB_ACTIONS = {
+    PUSH_TO_SERVICE: 'pushToService',
+  };
+
   // Define all connector sub-actions
   const connectorSubActions = [
     { id: INFERENCE_CONNECTOR_ID, actions: INFERENCE_SUB_ACTION },
@@ -76,6 +116,13 @@ function createSubActionsMapping() {
     { id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID, actions: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION },
     { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
     { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
+    // Legacy connectors (using older ActionType pattern)
+    { id: '.jira', actions: JIRA_SUB_ACTIONS },
+    { id: '.servicenow-itsm', actions: SERVICENOW_ITSM_SUB_ACTIONS },
+    { id: '.servicenow-sir', actions: SERVICENOW_SIR_SUB_ACTIONS },
+    { id: '.servicenow-itom', actions: SERVICENOW_ITOM_SUB_ACTIONS },
+    { id: '.swimlane', actions: SWIMLANE_SUB_ACTIONS },
+    { id: '.cases-webhook', actions: CASES_WEBHOOK_SUB_ACTIONS },
   ];
   
   connectorSubActions.forEach(({ id, actions }) => {

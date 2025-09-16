@@ -41,11 +41,18 @@ export {
 
 // Jira connector schemas
 export {
-  JiraCreateIssueParamsSchema,
-  JiraUpdateIssueParamsSchema,
+  JiraPushToServiceParamsSchema,
+  JiraGetIncidentParamsSchema,
+  JiraGetFieldsParamsSchema,
+  JiraGetIssueTypesParamsSchema,
+  JiraGetFieldsByIssueTypeParamsSchema,
+  JiraGetIssuesParamsSchema,
   JiraGetIssueParamsSchema,
   JiraIssueResponseSchema,
-  JiraCreateIssueResponseSchema,
+  JiraPushToServiceResponseSchema,
+  JiraFieldsResponseSchema,
+  JiraIssueTypesResponseSchema,
+  JiraIssuesResponseSchema,
 } from './jira';
 
 // ServiceNow connector schemas
@@ -53,8 +60,15 @@ export {
   ServiceNowCreateIncidentParamsSchema,
   ServiceNowUpdateIncidentParamsSchema,
   ServiceNowGetIncidentParamsSchema,
+  ServiceNowGetFieldsParamsSchema,
+  ServiceNowGetChoicesParamsSchema,
+  ServiceNowCloseIncidentParamsSchema,
+  ServiceNowAddEventParamsSchema,
   ServiceNowCreateSecurityIncidentParamsSchema,
   ServiceNowIncidentResponseSchema,
+  ServiceNowFieldsResponseSchema,
+  ServiceNowChoicesResponseSchema,
+  ServiceNowEventResponseSchema,
 } from './servicenow';
 
 // PagerDuty connector schemas
@@ -180,3 +194,12 @@ export {
   JiraServiceManagementCloseAlertParamsSchema,
   JiraServiceManagementResponseSchema,
 } from './jira_service_management';
+
+// TheHive connector schemas
+export {
+  TheHivePushToServiceParamsSchema,
+  TheHiveCreateAlertParamsSchema,
+  TheHiveGetIncidentParamsSchema,
+  TheHiveIncidentResponseSchema,
+  TheHiveCreateAlertResponseSchema,
+} from './thehive';

@@ -7,7 +7,7 @@
 
 import OpenAILogo from '../connector_types/openai/logo';
 import BedrockLogo from '../connector_types/bedrock/logo';
-import GeminiLogo from '../connector_types/bedrock/logo';
+import GeminiLogo from '../connector_types/gemini/logo';
 import SentinelOneLogo from '../connector_types/sentinelone/logo';
 import CrowdstrikeLogo from '../connector_types/crowdstrike/logo';
 import TeamsLogo from '../connector_types/teams/logo';

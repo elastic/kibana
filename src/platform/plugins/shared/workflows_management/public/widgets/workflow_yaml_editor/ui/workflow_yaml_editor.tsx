@@ -361,7 +361,6 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
     style.id = styleId;
     style.textContent = css;
     document.head.appendChild(style);
-    console.log('✅ Dynamic connector CSS injected:', css.length, 'characters');
   }
 }
 
@@ -370,7 +369,7 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
  * This creates CSS rules for each connector type to show custom icons in the editor
  */
 async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, services: any) {
-  console.log('🎯 injectDynamicShadowIcons called with:', Object.keys(connectorTypes).length, 'connectors');
+  // console.log('🎯 injectDynamicShadowIcons called with:', Object.keys(connectorTypes).length, 'connectors');
   
   const styleId = 'dynamic-shadow-icons';
   
@@ -387,7 +386,7 @@ async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, ser
     const connectorType = (connector as any).actionTypeId;
     
     // Skip if we already have hardcoded CSS for this connector
-    if (['elasticsearch', 'kibana', 'inference', 'console', 'http', 'foreach', 'if', 'parallel', 'merge', 'wait'].some(type => connectorType.includes(type))) {
+    if (['elasticsearch', 'kibana', 'console', 'http', 'foreach', 'if', 'parallel', 'merge', 'wait'].some(type => connectorType.includes(type))) {
       continue;
     }
     
@@ -403,8 +402,6 @@ async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, ser
           className = 'elasticsearch';
         } else if (connectorType.startsWith('kibana.')) {
           className = 'kibana';
-        } else if (connectorType.startsWith('inference')) {
-          className = 'inference';
         } else {
           // Handle connectors with dot notation properly
           if (connectorType.startsWith('.')) {
@@ -438,7 +435,7 @@ async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, ser
     style.id = styleId;
     style.textContent = css;
     document.head.appendChild(style);
-    console.log('✅ Dynamic shadow icon CSS injected:', css.length, 'characters');
+    // console.log('✅ Dynamic shadow icon CSS injected:', css.length, 'characters');
   }
 }
 
@@ -464,20 +461,55 @@ async function getConnectorIconBase64(connectorType: string, services: any): Pro
     if (connectorType in STACK_CONNECTOR_LOGOS) {
       const LogoComponent = STACK_CONNECTOR_LOGOS[connectorType as keyof typeof STACK_CONNECTOR_LOGOS];
       
-      // Render the actual logo component to SVG string
+      // Render the actual logo component to HTML string
       const logoElement = React.createElement(LogoComponent, { width: 32, height: 32 });
-      const svgString = renderToStaticMarkup(logoElement);
-      const base64 = btoa(svgString);
-      if(connectorType === '.bedrock') {
-        console.log('🔍 Generated stack connector logo for', connectorType, base64);
+      let htmlString = renderToStaticMarkup(logoElement);
+      
+      // Check if it's an <img> tag (imported SVG) or direct <svg>
+      const isImgTag = htmlString.includes('<img');
+      
+      if (isImgTag) {
+        // Extract the src attribute from the img tag
+        const srcMatch = htmlString.match(/src="([^"]+)"/);
+        if (srcMatch && srcMatch[1]) {
+          const srcValue = srcMatch[1];
+          
+          // If it's already a data URL, extract the base64 part
+          if (srcValue.startsWith('data:image/svg+xml;base64,')) {
+            const base64 = srcValue.replace('data:image/svg+xml;base64,', '');
+            return base64;
+          }
+          
+          // If it's a different data URL format, return it as is
+          if (srcValue.startsWith('data:')) {
+            // Convert to base64 if needed
+            const base64 = btoa(srcValue);
+            return base64;
+          }
+          
+          // If it's a regular URL/path, we can't easily convert it here
+          console.warn('🔍 Cannot convert external image URL to base64:', srcValue);
+        }
+      } else {
+        // It's a direct SVG - handle as before
+        const hasFillNone = /fill="none"/i.test(htmlString);
+        
+        if (hasFillNone) {
+          // Remove fill="none" and add currentColor fill
+          htmlString = htmlString
+            .replace(/fill="none"/gi, '')
+            .replace(/fill='none'/gi, '')
+            .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
+          
+        }
       }
       
-      // console.log('🎨 Generated stack connector logo for', connectorType);
+      const base64 = btoa(htmlString);
+      
       return base64;
     }
     
     // Fallback to default icon for other connector types
-    // console.log('🔍 Using default icon for', connectorType);
     return btoa(DEFAULT_CONNECTOR_SVG);
   } catch (error) {
     console.warn('🔍 Failed to generate icon for', connectorType, ':', error);
@@ -1318,8 +1350,6 @@ export const WorkflowYAMLEditor = ({
       return { className: 'elasticsearch' };
     } else if (connectorType.startsWith('kibana.')) {
       return { className: 'kibana' };
-    } else if (connectorType.startsWith('inference')) {
-      return { className: 'inference' };
     } else {
       // Handle connectors with dot notation properly
       let className: string;

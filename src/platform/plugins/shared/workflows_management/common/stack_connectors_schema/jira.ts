@@ -15,7 +15,7 @@
 import { z } from '@kbn/zod';
 
 // Jira connector parameter schemas for different sub-actions
-export const JiraCreateIssueParamsSchema = z.object({
+export const JiraPushToServiceParamsSchema = z.object({
   incident: z.object({
     summary: z.string(),
     description: z.string().optional(),
@@ -24,18 +24,30 @@ export const JiraCreateIssueParamsSchema = z.object({
     labels: z.array(z.string()).optional(),
     otherFields: z.record(z.string(), z.any()).optional(),
   }),
+  comments: z.array(z.object({
+    comment: z.string(),
+    commentId: z.string(),
+  })).optional(),
 });
 
-export const JiraUpdateIssueParamsSchema = z.object({
-  incident: z.object({
-    summary: z.string().optional(),
-    description: z.string().optional(),
-    issueType: z.string().optional(),
-    priority: z.string().optional(),
-    labels: z.array(z.string()).optional(),
-    otherFields: z.record(z.string(), z.any()).optional(),
-  }),
-  incidentId: z.string(),
+export const JiraGetIncidentParamsSchema = z.object({
+  id: z.string(),
+});
+
+export const JiraGetFieldsParamsSchema = z.object({
+  // Common fields parameters - usually empty object
+});
+
+export const JiraGetIssueTypesParamsSchema = z.object({
+  // Issue types parameters - usually empty object  
+});
+
+export const JiraGetFieldsByIssueTypeParamsSchema = z.object({
+  id: z.string(), // Issue type ID
+});
+
+export const JiraGetIssuesParamsSchema = z.object({
+  title: z.string(),
 });
 
 export const JiraGetIssueParamsSchema = z.object({
@@ -56,9 +68,36 @@ export const JiraIssueResponseSchema = z.object({
   labels: z.array(z.string()).optional(),
 });
 
-export const JiraCreateIssueResponseSchema = z.object({
+export const JiraPushToServiceResponseSchema = z.object({
   id: z.string(),
   key: z.string(),
   title: z.string(),
   url: z.string(),
 });
+
+export const JiraFieldsResponseSchema = z.array(z.object({
+  id: z.string(),
+  name: z.string(),
+  schema: z.object({
+    type: z.string(),
+    system: z.string().optional(),
+  }),
+  required: z.boolean(),
+}));
+
+export const JiraIssueTypesResponseSchema = z.array(z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  iconUrl: z.string().optional(),
+  subtask: z.boolean(),
+}));
+
+export const JiraIssuesResponseSchema = z.array(z.object({
+  id: z.string(),
+  key: z.string(),
+  summary: z.string(),
+  status: z.string(),
+  created: z.string(),
+  updated: z.string(),
+}));
