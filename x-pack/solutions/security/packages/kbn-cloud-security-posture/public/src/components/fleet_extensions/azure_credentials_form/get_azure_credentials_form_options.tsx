@@ -77,7 +77,7 @@ const I18N_CLIENT_ID = i18n.translate(
 const I18N_CLOUD_CONNECTOR_ID = i18n.translate(
   'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorIdLabel',
   {
-    defaultMessage: 'Elastic Cloud Connector ID',
+    defaultMessage: 'Cloud Connector ID',
   }
 );
 
@@ -151,7 +151,7 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
           label: I18N_CLIENT_ID,
           testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
         },
-        'azure.credentials.cloud_connector_id': {
+        azure_credentials_cloud_connector_id: {
           label: I18N_CLOUD_CONNECTOR_ID,
           testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
         },

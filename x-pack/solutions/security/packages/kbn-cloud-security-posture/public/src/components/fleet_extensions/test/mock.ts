@@ -181,6 +181,7 @@ const getPolicyMock = (
     'azure.credentials.client_certificate_password': { type: 'text' },
     'azure.credentials.client_username': { type: 'text' },
     'azure.credentials.client_password': { type: 'text' },
+    azure_credentials_cloud_connector_id: { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
@@ -283,30 +284,32 @@ export const getPackageInfoMock = (props?: {
       ]
     : undefined;
 
-  const azureTemplates = [
-    {
-      name: 'arm_template_url',
-      type: 'text',
-      title: 'ARM Template URL',
-      multi: false,
-      required: true,
-      show_user: false,
-      description: 'A URL to the ARM Template for creating a new deployment',
-      default:
-        'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2F8.19%2Fdeploy%2Fazure%2FARM-for-ACCOUNT_TYPE.json',
-    },
-    {
-      name: 'arm_template_cloud_connectors_url',
-      type: 'text',
-      title: 'ARM Cloud Connectors Template URL',
-      multi: false,
-      required: true,
-      show_user: false,
-      description: 'A URL to the ARM Template for creating a Cloud Connectors managed identity',
-      default:
-        'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2Fmain%2Fdeploy%2Fazure%2FARM-for-cloud-connectors-ACCOUNT_TYPE.json',
-    },
-  ];
+  const azureTemplates = props?.includeAzureTemplates
+    ? [
+        {
+          name: 'arm_template_url',
+          type: 'text',
+          title: 'ARM Template URL',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'A URL to the ARM Template for creating a new deployment',
+          default:
+            'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2F8.19%2Fdeploy%2Fazure%2FARM-for-ACCOUNT_TYPE.json',
+        },
+        {
+          name: 'arm_template_cloud_connectors_url',
+          type: 'text',
+          title: 'ARM Cloud Connectors Template URL',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'A URL to the ARM Template for creating a Cloud Connectors managed identity',
+          default:
+            'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2Fmain%2Fdeploy%2Fazure%2FARM-for-cloud-connectors-ACCOUNT_TYPE.json',
+        },
+      ]
+    : undefined;
 
   return {
     version: CLOUD_CONNECTOR_ENABLED_VERSION,
@@ -341,7 +344,7 @@ export const getPackageInfoMock = (props?: {
         title: 'Cloud Security Posture Findings',
         streams: [
           {
-            input: 'cloudbeat/cis_aws',
+            input: CLOUDBEAT_AWS,
             template_path: 'aws.yml.hbs',
             title: 'CIS AWS Benchmark',
             vars: [
@@ -367,7 +370,7 @@ export const getPackageInfoMock = (props?: {
             ],
           },
           {
-            input: 'cloudbeat/cis_azure',
+            input: CLOUDBEAT_AZURE,
             template_path: 'azure.yml.hbs',
             title: 'CIS Azure Benchmark',
             vars: [
@@ -397,6 +400,14 @@ export const getPackageInfoMock = (props?: {
                 show_user: true,
                 title: 'Client Certificate Password',
                 type: 'text' as RegistryVarType,
+              },
+              {
+                name: 'azure_credentials_cloud_connector_id',
+                type: 'text',
+                title: 'Elastic Cloud Connector ID',
+                multi: false,
+                required: false,
+                show_user: true,
               },
             ],
           },
@@ -465,7 +476,7 @@ export const getAwsPackageInfoMock = () => {
                   'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-8.18.0.yml&param_ElasticResourceId=RESOURCE_ID',
               },
             ],
-            type: 'cloudbeat/cis_aws',
+            type: CLOUDBEAT_AWS,
             description: 'CIS Benchmark for Amazon Web Services Foundations',
           },
         ],
@@ -497,7 +508,7 @@ export const getAwsPackageInfoMock = () => {
 };
 
 export const mockConfig: CloudSetupConfig = {
-  policyTemplate: 'test-template',
+  policyTemplate: TEMPLATE_NAME,
   defaultProvider: 'aws',
   namespaceSupportEnabled: true,
   name: 'Test Integration',
@@ -507,19 +518,19 @@ export const mockConfig: CloudSetupConfig = {
   showCloudTemplates: true,
   providers: {
     aws: {
-      type: 'cloudbeat/cis_aws',
+      type: CLOUDBEAT_AWS,
       enableOrganization: true,
       getStartedPath: '/aws/start',
       cloudConnectorEnabledVersion: '3.0.0',
     },
     gcp: {
-      type: 'cloudbeat/cis_gcp',
+      type: CLOUDBEAT_GCP,
       enabled: true,
       enableOrganization: true,
       getStartedPath: '/gcp/start',
     },
     azure: {
-      type: 'cloudbeat/cis_azure',
+      type: CLOUDBEAT_AZURE,
       enableOrganization: true,
       getStartedPath: '/azure/start',
     },

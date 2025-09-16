@@ -34,6 +34,7 @@ import {
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
   AZURE_PROVIDER_TEST_SUBJ,
   AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_PROVIDER_TEST_SUBJ,
@@ -112,7 +113,8 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       services: {
         cloud: {
           csp: 'aws',
-          cloudId: 'mock-cloud-id',
+          cloudId:
+            'my-deployment:ZXhhbXBsZS5jbG91ZC5lbGFzdGljLmNvJGRlZmF1bHQkY2liYW5hLWNvbXBvbmVudC1pZCRvdGhlcg==',
           deploymentId: 'mock-deployment-id',
           serverless: { projectId: '' },
           isCloudEnabled: true,
@@ -1118,7 +1120,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connector in ess gcp environment', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connector in cloud GCP environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {

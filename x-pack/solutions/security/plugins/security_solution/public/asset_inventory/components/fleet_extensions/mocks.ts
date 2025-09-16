@@ -136,6 +136,7 @@ const getPolicyMock = (
     'azure.credentials.client_certificate_password': { type: 'text' },
     'azure.credentials.client_username': { type: 'text' },
     'azure.credentials.client_password': { type: 'text' },
+    'azure.credentials.cloud_connector_id': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_asset_inventory.asset_inventory' };

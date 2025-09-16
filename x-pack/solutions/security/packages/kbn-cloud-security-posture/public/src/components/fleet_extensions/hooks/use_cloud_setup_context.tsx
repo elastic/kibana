@@ -71,7 +71,7 @@ const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => 
 };
 
 const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
-  if (!cloudId) return undefined;
+  if (!cloudId || !cloudId.includes(':')) return undefined;
 
   const base64Part = cloudId.split(':')[1];
   const decoded = atob(base64Part);
