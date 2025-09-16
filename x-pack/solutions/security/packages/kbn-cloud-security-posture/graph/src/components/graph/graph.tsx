@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useRef, memo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
@@ -117,6 +117,12 @@ export const Graph = memo<GraphProps>(
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
+    // Filter the ids of those nodes that are origin events
+    const originNodeIds = useMemo(
+      () => nodes.filter((node) => node.isOrigin || node.isOriginAlert).map((node) => node.id),
+      [nodes]
+    );
+
     useEffect(() => {
       // On nodes or edges changes reset the graph and re-layout
       if (
@@ -183,7 +189,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
             </Panel>
           )}
           {children}
