@@ -43,6 +43,10 @@ function expand(name: string, patterns: string[], knownPaths: string[]) {
     matcher: makeMatcher([pattern]),
   }));
 
+  if (!knownPaths) {
+    throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+  }
+
   const selected = matchers.map(({ matcher, pattern }) => ({
     pattern,
     matches: knownPaths.filter(matcher),
