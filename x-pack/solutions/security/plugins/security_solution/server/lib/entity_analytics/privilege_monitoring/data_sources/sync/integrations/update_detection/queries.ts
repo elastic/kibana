@@ -96,7 +96,13 @@ if (params.new_privileged_status == false) {
   if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
     ctx._source.labels.sources.add(params.sourceLabel);
   }
-}`;
+}
+if(params.containsKey('new_roles')&& params.new_roles != null) {
+    if (ctx._source.user == null) { ctx._source.user = new HashMap(); }
+    if (ctx._source.user.roles == null) { ctx._source.user.roles = new ArrayList(); }
+    ctx._source.user.roles = new ArrayList(params.new_roles);
+  }
+`;
 
 export const buildBulkUpsertBody = async (
   // merge with the index sync code, they are very similar
@@ -122,6 +128,7 @@ export const buildBulkUpsertBody = async (
             params: {
               new_privileged_status: user.isPrivileged,
               sourceLabel,
+              new_roles: user.roles ?? [],
             },
           },
         }
