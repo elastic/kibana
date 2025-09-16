@@ -14,17 +14,16 @@ import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useToolbarActions } from '../hooks/use_toolbar_actions';
 
-interface RightSideActionsProps {
+interface RightSideActionsProps
+  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
   'data-test-subj'?: string;
   fields: MetricField[];
   indexPattern: string;
-  renderToggleActions: () => React.ReactElement | undefined;
-  requestParams: any;
-  setDebouncedSearchTerm: (value: string) => void;
 }
 
 export const RightSideActions = ({
@@ -35,7 +34,6 @@ export const RightSideActions = ({
   indexPattern,
   renderToggleActions,
   requestParams,
-  setDebouncedSearchTerm,
 }: RightSideActionsProps) => {
   const { onShowSearch, showSearchInput, isFullscreen, onToggleFullscreen, onClearSearch } =
     useToolbarActions({
@@ -43,7 +41,6 @@ export const RightSideActions = ({
       indexPattern,
       renderToggleActions,
       requestParams,
-      setDebouncedSearchTerm,
     });
 
   const onSearchChange = useCallback(

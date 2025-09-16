@@ -10,7 +10,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useMetricsGridState } from '../../../hooks';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -19,14 +18,12 @@ interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
   indexPattern: string;
-  setDebouncedSearchTerm: (value: string) => void;
 }
 export const useToolbarActions = ({
   fields,
   requestParams,
   indexPattern,
   renderToggleActions,
-  setDebouncedSearchTerm,
 }: UseToolbarActionsProps) => {
   const {
     dimensions,
@@ -38,18 +35,9 @@ export const useToolbarActions = ({
     onClearSearchTerm,
     isFullscreen,
     onToggleFullscreen,
-    searchTerm,
   } = useMetricsGridState();
 
   const [showSearchInput, setShowSearchInput] = useState(false);
-
-  useDebounce(
-    () => {
-      setDebouncedSearchTerm(searchTerm);
-    },
-    300,
-    [searchTerm]
-  );
 
   const onShowSearch = useCallback(() => {
     setShowSearchInput(true);
@@ -58,8 +46,7 @@ export const useToolbarActions = ({
   const onClearSearch = useCallback(() => {
     setShowSearchInput(false);
     onClearSearchTerm();
-    setDebouncedSearchTerm('');
-  }, [onClearSearchTerm, setDebouncedSearchTerm]);
+  }, [onClearSearchTerm]);
 
   const leftSideActions = useMemo(
     () => [

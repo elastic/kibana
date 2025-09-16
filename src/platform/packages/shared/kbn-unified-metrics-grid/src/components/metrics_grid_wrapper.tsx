@@ -66,7 +66,6 @@ export interface MetricsGridWrapperProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   indexPattern: string;
   chartToolbarCss?: SerializedStyles;
-  setDebouncedSearchTerm: (value: string) => void;
   fields: MetricField[];
   children?: React.ReactNode;
 }
@@ -76,7 +75,6 @@ export const MetricsGridWrapper = ({
   renderToggleActions,
   chartToolbarCss,
   requestParams,
-  setDebouncedSearchTerm,
   fields,
   children,
 }: MetricsGridWrapperProps) => {
@@ -84,7 +82,6 @@ export const MetricsGridWrapper = ({
     fields,
     indexPattern,
     renderToggleActions,
-    setDebouncedSearchTerm,
     requestParams,
   });
   const { searchTerm, onSearchTermChange, isFullscreen } = useMetricsGridState();
@@ -106,7 +103,6 @@ export const MetricsGridWrapper = ({
                 indexPattern={indexPattern}
                 renderToggleActions={renderToggleActions}
                 requestParams={requestParams}
-                setDebouncedSearchTerm={setDebouncedSearchTerm}
                 data-test-subj="metricsExperienceToolbarSearchInput"
               />
             ),

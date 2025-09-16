@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
@@ -45,9 +45,8 @@ export const MetricsExperienceGrid = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
+  const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
   const { getTimeRange, updateTimeRange } = requestParams;
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -75,7 +74,7 @@ export const MetricsExperienceGrid = ({
     dimensions,
     pageSize: 20,
     currentPage,
-    searchTerm: debouncedSearchTerm,
+    searchTerm,
   }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
@@ -109,7 +108,6 @@ export const MetricsExperienceGrid = ({
       renderToggleActions={renderToggleActions}
       chartToolbarCss={chartToolbarCss}
       requestParams={requestParams}
-      setDebouncedSearchTerm={setDebouncedSearchTerm}
       fields={fields}
     >
       <EuiFlexGroup
