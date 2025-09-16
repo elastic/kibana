@@ -63,7 +63,6 @@ const canManageSpaces = (core: CoreStart) => {
 
 // the tour is shown only once for the first admin user, presumably the one who created the deployment
 const hasCompletedTour = (core: CoreStart) => {
-  return false;
   const showTourUiSettingValue = core.settings.globalClient.get<boolean | undefined>(
     SHOW_SPACE_SOLUTION_TOUR_SETTING
   );
