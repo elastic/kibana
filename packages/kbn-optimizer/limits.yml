@@ -12,7 +12,7 @@ pageLoadAssetSize:
   cases: 153204
   charts: 40269
   chatDataRegistry: 4162
-  cloud: 8836
+  cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 14281
+  onechat: 15709
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
