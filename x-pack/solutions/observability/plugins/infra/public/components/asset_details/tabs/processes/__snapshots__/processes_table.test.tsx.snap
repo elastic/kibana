@@ -188,7 +188,7 @@ Object {
                       data-euiicon-type="arrowRight"
                     />
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                     />
                   </span>
                 </button>
@@ -466,7 +466,7 @@ Object {
                     data-euiicon-type="arrowRight"
                   />
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                   />
                 </span>
               </button>

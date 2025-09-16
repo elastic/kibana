@@ -39,7 +39,7 @@ exports[`Header renders 1`] = `
               class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate"
+                class="eui-textTruncate css-1ryezsz-s"
               >
                 Skip to main content
               </span>
@@ -118,7 +118,7 @@ exports[`Header renders 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   <span
                     class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
@@ -161,7 +161,7 @@ exports[`Header renders 1`] = `
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 <span
                   class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"

@@ -190,7 +190,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Delete
                   </span>
@@ -223,7 +223,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page
                   : 
@@ -285,7 +285,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       1
                     </span>
@@ -591,7 +591,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                     >
                       Delete
                     </span>
@@ -624,7 +624,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -686,7 +686,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>

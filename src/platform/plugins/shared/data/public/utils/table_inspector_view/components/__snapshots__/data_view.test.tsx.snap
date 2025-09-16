@@ -309,7 +309,7 @@ Array [
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page: 20
                 </span>
@@ -369,7 +369,7 @@ Array [
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       1
                     </span>
@@ -448,7 +448,7 @@ Array [
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     Table 1
                   </span>
@@ -594,7 +594,7 @@ Array [
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page: 20
                 </span>
@@ -654,7 +654,7 @@ Array [
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       1
                     </span>
