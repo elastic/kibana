@@ -43,19 +43,15 @@ export function useUpdateSiemMigration<T extends MigrationType>(
   const { addSuccess, addError } = useAppToasts();
   const { siemMigrations } = useKibana().services;
 
+  const updateMigration =
+    migrationType === 'rule'
+      ? siemMigrations?.rules?.api?.updateMigration
+      : siemMigrations?.dashboards?.api?.updateDashboardMigration;
+
   return useMutation<void, Error, UpdateMigrationArgs<T>>({
     mutationKey: ['siemMigration', migrationType, 'update'],
     mutationFn: async ({ migrationId, body }) => {
-      if (migrationType === 'rule') {
-        return siemMigrations.rules.api.updateMigration({
-          migrationId,
-          body: body as UpdateRuleMigrationRequestBody,
-        });
-      }
-      return siemMigrations.dashboards.api.updateDashboardMigration({
-        migrationId,
-        body: body as UpdateDashboardMigrationRequestBody,
-      });
+      return updateMigration({ migrationId, body });
     },
     onSuccess: () => {
       addSuccess(UPDATE_MIGRATION_SUCCESS);
