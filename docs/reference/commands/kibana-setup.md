@@ -1,6 +1,10 @@
 ---
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/kibana-setup.html
+navigation_title: kibana-setup
+applies_to:
+  deployment:
+    self: ga
+products:
+  - id: kibana
 ---
 
 # kibana-setup [kibana-setup]
