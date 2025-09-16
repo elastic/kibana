@@ -126,7 +126,7 @@ export function ExportContentPackFlyout({
               />
             ) : null}
 
-            <EuiSpacer />
+            <EuiSpacer size="xl" />
 
             <ContentPackObjectsList
               definition={definition}
