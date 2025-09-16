@@ -409,6 +409,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 learnMoreLink: (
                   <EuiLink
                     href="#"
+                    target="_blank"
                     external
                     aria-label={i18n.translate(
                       'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',

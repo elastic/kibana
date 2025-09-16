@@ -29,7 +29,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   activeToolsCount,
   warningThreshold,
 }) => {
-  const { navigateToOnechatUrl } = useNavigation();
+  const { createOnechatUrl } = useNavigation();
   const isOverThreshold = activeToolsCount > warningThreshold;
   const isZeroTools = activeToolsCount === 0;
   const shouldShowWarning = isOverThreshold || isZeroTools;
@@ -97,7 +97,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   defaultMessage="{toolsLink} enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options."
                   values={{
                     toolsLink: (
-                      <EuiLink onClick={() => navigateToOnechatUrl(appPaths.tools.list)}>
+                      <EuiLink href={createOnechatUrl(appPaths.tools.list)}>
                         {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
                           defaultMessage: 'Tools',
                         })}

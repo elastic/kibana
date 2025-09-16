@@ -29,7 +29,7 @@ const fullHeightStyles = css`
 
 export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { createOnechatUrl } = useNavigation();
   const promptStyles = css`
     max-inline-size: calc(${euiTheme.size.l} * 19);
     padding: ${euiTheme.size.l};
@@ -48,14 +48,14 @@ export const NewConversationPrompt: React.FC<{}> = () => {
         defaultMessage="Work interactively with your AI {agentsLink} using the chat interface. Your selected agent answers questions by searching your data with its assigned {toolsLink}."
         values={{
           agentsLink: (
-            <EuiLink onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
+            <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
               {i18n.translate('xpack.onechat.newConversationPrompt.agentsLinkText', {
                 defaultMessage: 'agents',
               })}
             </EuiLink>
           ),
           toolsLink: (
-            <EuiLink onClick={() => navigateToOnechatUrl(appPaths.tools.list)}>
+            <EuiLink href={createOnechatUrl(appPaths.tools.list)}>
               {i18n.translate('xpack.onechat.newConversationPrompt.toolsLinkText', {
                 defaultMessage: 'tools',
               })}
@@ -90,8 +90,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             href="#"
-            iconType="popout"
-            iconSide="right"
+            target="_blank"
             size="m"
             aria-label={i18n.translate(
               'xpack.onechat.newConversationPrompt.agentBuilderDocsAriaLabel',

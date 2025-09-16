@@ -323,6 +323,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                   learnMoreLink: (
                     <EuiLink
                       href="#"
+                      target="_blank"
                       external
                       aria-label={i18n.translate(
                         'xpack.onechat.tools.createToolDocumentationAriaLabel',

@@ -22,7 +22,7 @@ export const OnechatAgents = () => {
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border: none;
   `;
-  const { createOnechatUrl, navigateToOnechatUrl } = useNavigation();
+  const { createOnechatUrl } = useNavigation();
   const headerButtons = [
     <EuiButton
       iconType="plus"
@@ -50,7 +50,7 @@ export const OnechatAgents = () => {
               defaultMessage="Define agents with custom instructions and assign them {toolsLink} to answer questions about your data and take actions on your behalf. {learnMoreLink}"
               values={{
                 toolsLink: (
-                  <EuiLink onClick={() => navigateToOnechatUrl(appPaths.tools.list)}>
+                  <EuiLink href={createOnechatUrl(appPaths.tools.list)}>
                     {i18n.translate('xpack.onechat.agents.toolsLinkText', {
                       defaultMessage: 'tools',
                     })}
@@ -59,7 +59,7 @@ export const OnechatAgents = () => {
                 learnMoreLink: (
                   <EuiLink
                     href="#"
-                    external
+                    target="_blank"
                     aria-label={i18n.translate(
                       'xpack.onechat.agents.agentsDocumentationAriaLabel',
                       {

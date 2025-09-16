@@ -21,7 +21,7 @@ import { McpConnectionButton } from './mcp_server/mcp_connection_button';
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { createOnechatUrl } = useNavigation();
 
   return (
     <KibanaPageTemplate>
@@ -33,7 +33,7 @@ export const OnechatTools = () => {
             defaultMessage="Tools are modular, reusable Elasticsearch operations. {agentsLink} use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
             values={{
               agentsLink: (
-                <EuiLink onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
+                <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
                   {i18n.translate('xpack.onechat.tools.agentsLinkText', {
                     defaultMessage: 'Agents',
                   })}
@@ -42,6 +42,7 @@ export const OnechatTools = () => {
               learnMoreLink: (
                 <EuiLink
                   href="#"
+                  target="_blank"
                   external
                   aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
                     defaultMessage: 'Learn more about tools in the documentation',
