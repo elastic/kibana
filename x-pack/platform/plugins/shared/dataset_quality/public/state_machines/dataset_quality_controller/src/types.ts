@@ -6,7 +6,6 @@
  */
 
 import type { DoneInvokeEvent } from 'xstate';
-import type { QualityIndicators } from '@kbn/data-quality/common';
 import type {
   DataStreamDocsStat,
   DatasetUserPrivileges,
@@ -20,7 +19,12 @@ import type {
   GetDataStreamsTypesPrivilegesResponse,
 } from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
-import type { DataStreamType, TableCriteria, TimeRangeConfig } from '../../../../common/types';
+import type {
+  DataStreamType,
+  QualityIndicators,
+  TableCriteria,
+  TimeRangeConfig,
+} from '../../../../common/types';
 import type { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {

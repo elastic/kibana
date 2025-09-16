@@ -17,6 +17,7 @@ import {
   EuiSkeletonTitle,
 } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import type { InfoIndicators } from '../../../../common/types';
 import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelQualityDegradedText,
@@ -27,8 +28,6 @@ import {
 } from '../../../../common/translations';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
 import { VerticalRule } from '../../common/vertical_rule';
-
-type InfoIndicators = 'success' | 'danger' | 'warning';
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();

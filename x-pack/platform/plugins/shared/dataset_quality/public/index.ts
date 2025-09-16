@@ -17,4 +17,5 @@ export function plugin() {
   return new DatasetQualityPlugin();
 }
 
-export { DatasetQualityIndicator } from './components/quality_indicator/dataset_quality_indicator';
+export { DatasetQualityIndicator } from './components/quality_indicator';
+export { calculatePercentage } from './utils/calculate_percentage';

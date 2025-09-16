@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { QualityIndicators } from '@kbn/data-quality/common';
 import { _IGNORED } from './es_fields';
-import type { DataStreamType } from './types';
+import type { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
 export const DATASET_QUALITY_ALL_SIGNALS_ID = 'datasetQuality:all-signals-available';
@@ -15,6 +14,8 @@ export const DEFAULT_DATASET_TYPE: DataStreamType = 'logs';
 export const DEFAULT_LOGS_DATA_VIEW = 'logs-*-*';
 
 export const DEFAULT_DATASET_QUALITY: QualityIndicators = 'good';
+export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
+export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
 
 export const DEFAULT_SORT_FIELD = 'title';
 export const DEFAULT_SORT_DIRECTION = 'asc';

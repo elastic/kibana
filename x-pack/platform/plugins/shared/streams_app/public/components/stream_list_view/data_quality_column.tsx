@@ -8,8 +8,8 @@
 import React from 'react';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
-import { mapPercentageToQuality, calculatePercentage } from '@kbn/data-quality/common';
-import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
+import { DatasetQualityIndicator, calculatePercentage } from '@kbn/dataset-quality-plugin/public';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';

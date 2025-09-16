@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './deep_compact_object';
-export * from './quality_helpers';
+export function calculatePercentage({ totalDocs, count }: { totalDocs?: number; count?: number }) {
+  return totalDocs && count ? (count / totalDocs) * 100 : 0;
+}

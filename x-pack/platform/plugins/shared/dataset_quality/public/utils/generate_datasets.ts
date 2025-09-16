@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { mapPercentageToQuality, calculatePercentage } from '@kbn/data-quality/common';
 import { DEFAULT_QUALITY_DOC_STATS } from '../../common/constants';
 import type { DataStreamDocsStat } from '../../common/api_types';
 import type { DataStreamStatType } from '../../common/data_streams_stats/types';
+import { mapPercentageToQuality } from '../../common/utils';
 import type { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import type { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
 import { flattenStats } from './flatten_stats';
+import { calculatePercentage } from './calculate_percentage';
 
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],
