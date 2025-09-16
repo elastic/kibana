@@ -13,10 +13,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import type { StopRuleMigrationResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type { StopDashboardsMigrationResponse } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 
 export const STOP_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.service.stopMigrationSuccess',
@@ -35,19 +33,15 @@ interface UseStopOptions {
   onSuccess?: () => void;
 }
 
-export type StopMigrationResponse<T extends MigrationType> = T extends 'rule'
-  ? StopRuleMigrationResponse
-  : StopDashboardsMigrationResponse;
-
 export function useStopSiemMigration<T extends MigrationType>(
   migrationType: T,
   { onSuccess }: UseStopOptions = {}
 ) {
   const { siemMigrations } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
-  return useMutation<StopMigrationResponse<T>, Error, StopArgs>({
+  return useMutation({
     mutationKey: ['siemMigration', migrationType, 'stop'],
-    mutationFn: async ({ migrationId }) => {
+    mutationFn: async ({ migrationId }: StopArgs) => {
       if (migrationType === 'rule') {
         return siemMigrations.rules.stopRuleMigration(migrationId);
       }

@@ -11,7 +11,7 @@ import '@testing-library/jest-dom';
 import { DashboardMigrationResultPanel } from './migration_result_panel';
 import { TestProviders } from '../../../../common/mock';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type { DashboardMigrationStats } from '../../types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -34,7 +34,7 @@ const baseProps = {
     created_at: '2023-01-01T00:00:00Z',
     last_updated_at: '2024-01-01T01:00:00Z',
     last_execution: {},
-  },
+  } as DashboardMigrationStats,
   isCollapsed: false,
   onToggleCollapsed: jest.fn(),
 };
@@ -73,7 +73,7 @@ describe('DashboardMigrationResultPanel', () => {
       migrationStats: {
         ...baseProps.migrationStats,
         last_execution: { error: 'Something went wrong' },
-      } as unknown as MigrationTaskStats,
+      },
     });
     expect(screen.getByTestId(/dashboardMigrationLastError/)).toBeVisible();
   });
