@@ -13,6 +13,8 @@ export const EMPTY_LABEL = i18n.translate('fieldFormats.string.emptyLabel', {
   defaultMessage: '(empty)',
 });
 
-export const NULL_LABEL = '(missing value)';
+export const NULL_LABEL = i18n.translate('fieldFormats.string.missingLabel', {
+  defaultMessage: '(missing value)',
+});
 
 export const NAN_LABEL = 'NaN';
