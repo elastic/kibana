@@ -29,7 +29,42 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
   customRender
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { label, meta, icon, append } = option;
+  const { label, meta, icon, append, type } = option;
+
+  // Determine the right-side label and icon based on item type
+  const getRightSideContent = () => {
+    // Check if this is an information/documentation type
+    if (type === 'information' || (option as any).itemType === 'information') {
+      return {
+        label: 'Documentation',
+        icon: 'popout'
+      };
+    }
+    
+    // For existing navigation types (applications, dashboards, etc.), show "Navigate"
+    if (type === 'application' || type === 'dashboard' || type === 'visualization' || 
+        type === 'search' || type === 'index-pattern' || type === 'lens' || 
+        type === 'map' || type === 'canvas-workpad' || type === 'integration' ||
+        (option as any).itemType === 'navigate') {
+      return {
+        label: 'Navigate',
+        icon: null
+      };
+    }
+
+    // For suggestions, keep the original meta
+    if (type === '__suggestion__') {
+      return null; // Use original meta
+    }
+
+    // Default fallback - use original meta or show Navigate
+    return {
+      label: 'Navigate',
+      icon: null
+    };
+  };
+
+  const rightSideContent = getRightSideContent();
 
   const handleClick = (event: React.MouseEvent) => {
     onClick(option, event);
@@ -128,22 +163,41 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
         </div>
         
         {/* Meta on the right */}
-        {meta && meta.length > 0 && (
-          <div
-            css={css`
-              flex-shrink: 0;
-              color: ${isSelected ? euiTheme.colors.ghost : euiTheme.colors.subduedText};
-              margin-left: 16px;
-            `}
-          >
-            {meta.map((metaItem, index) => (
-              <span key={index}>
-                {metaItem.text}
-                {index < meta.length - 1 && ' • '}
-              </span>
-            ))}
-          </div>
-        )}
+        <div
+          css={css`
+            flex-shrink: 0;
+            color: ${isSelected ? euiTheme.colors.ghost : euiTheme.colors.subduedText};
+            margin-left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          `}
+        >
+          {rightSideContent ? (
+            <>
+              <span>{rightSideContent.label}</span>
+              {rightSideContent.icon && (
+                <EuiIcon 
+                  type={rightSideContent.icon} 
+                  size="s"
+                  color={isSelected ? 'ghost' : 'subdued'}
+                />
+              )}
+            </>
+          ) : (
+            // Fallback to original meta for suggestions
+            meta && meta.length > 0 && (
+              <>
+                {meta.map((metaItem, index) => (
+                  <span key={index}>
+                    {metaItem.text}
+                    {index < meta.length - 1 && ' • '}
+                  </span>
+                ))}
+              </>
+            )
+          )}
+        </div>
       </div>
       
       {/* Append content (tags, etc.) */}

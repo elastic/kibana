@@ -7,3 +7,5 @@
 
 export { resultToOption } from './result_to_option';
 export { suggestionToOption } from './suggestion_to_option';
+export { createInformationOption, createNavigationOption } from './create_custom_options';
+export type { InformationOption, NavigationOption } from './create_custom_options';

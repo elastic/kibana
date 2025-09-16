@@ -33,7 +33,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
 import { blurEvent, isMac, sort } from '.';
-import { resultToOption, suggestionToOption } from '../lib';
+import { resultToOption, suggestionToOption, createInformationOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import type { SearchSuggestion } from '../suggestions';
@@ -244,8 +244,27 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         filteredSuggestions = suggestions;
       }
 
+      // Create some example information items for demonstration
+      const exampleInfoItems = searchValue.length === 0 ? [
+        createInformationOption({
+          id: 'kibana-docs',
+          title: 'Kibana Documentation',
+          description: 'Complete guide to using Kibana',
+          url: 'https://www.elastic.co/guide/en/kibana/current/index.html',
+          icon: 'documentation'
+        }),
+        createInformationOption({
+          id: 'elasticsearch-docs', 
+          title: 'Elasticsearch Guide',
+          description: 'Learn about Elasticsearch features',
+          url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html',
+          icon: 'logoElasticsearch'
+        })
+      ] : [];
+
       setOptions([
         ...filteredSuggestions.map(suggestionToOption),
+        ...exampleInfoItems,
         ...filteredOptions.map((option) =>
           resultToOption(
             option,
