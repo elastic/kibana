@@ -19,6 +19,7 @@ import {
   useEuiMinBreakpoint,
   EuiPopover,
   EuiFieldSearch,
+  useEuiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -91,6 +92,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const isMounted = useMountedState();
   const { euiTheme, colorMode } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
+  const popoverShadow = useEuiShadow('l');
 
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
@@ -512,8 +514,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           .euiFormControlLayout {
             ${isOverlay ? `
               border-radius: ${euiTheme.border.radius.medium};
-              box-shadow: 0 6px 36px -4px rgba(69, 90, 100, 0.3), 0 24px 64px -8px rgba(69, 90, 100, 0.3);
-              background-color: ${euiTheme.colors.backgroundBasePlain};
+              ${popoverShadow};
+              background-color: ${euiTheme.colors.body};
+              border: 1px solid ${euiTheme.colors.borderBaseSubdued};
             ` : ''}
           }
           ${highlightStyles}
@@ -582,8 +585,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
               z-index: ${Number(euiTheme.levels.modal) + 1};
               margin-top: 8px;
               border-radius: ${euiTheme.border.radius.medium};
-              box-shadow: 0 6px 36px -4px rgba(69, 90, 100, 0.3), 0 24px 64px -8px rgba(69, 90, 100, 0.3);
-              background-color: ${euiTheme.colors.backgroundBasePlain};
+              ${popoverShadow};
+              background-color: ${euiTheme.colors.body};
+              border: 1px solid ${euiTheme.colors.borderBaseSubdued};
             `}
           >
             {popoverContent}

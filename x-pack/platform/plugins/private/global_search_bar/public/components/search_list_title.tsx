@@ -19,7 +19,7 @@ export const SearchListTitle: React.FC<SearchListTitleProps> = ({ title }) => {
   const titleStyles = css`
     padding: 8px 16px;
     margin: 0;
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    background-color: ${euiTheme.colors.backgroundBaseHighlighted};
     border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
     border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0;
     font-weight: ${euiTheme.font.weight.medium};

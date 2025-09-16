@@ -80,19 +80,12 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
         border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
         transition: background-color 0.2s ease;
         outline: none;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
         
         &:hover {
-          background-color: ${euiTheme.colors.lightestShade};
+          background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
         }
-        
-        ${isSelected && `
-          background-color: ${euiTheme.colors.primary};
-          color: ${euiTheme.colors.ghost};
-          
-          &:hover {
-            background-color: ${euiTheme.colors.primary};
-          }
-        `}
+      
       `}
       data-test-subj={`nav-search-option-${option.key}`}
     >
