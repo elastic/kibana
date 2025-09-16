@@ -16,6 +16,7 @@ import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { MenuItem } from '../../../types';
 import { useTooltip } from '../../hooks/use_tooltip';
 import { BetaBadge } from '../beta_badge';
+import { TOOLTIP_OFFSET } from '../../constants';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
@@ -81,6 +82,7 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
           onMouseOut={handleMouseOut}
           position="right"
           repositionOnScroll
+          offset={TOOLTIP_OFFSET}
         >
           {menuItem}
         </EuiToolTip>
