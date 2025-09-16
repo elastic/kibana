@@ -137,18 +137,6 @@
 
     <example>
         <natural-language>
-            Return all first names for each first letter
-        </natural-language>
-        <esql>
-            FROM employees
-            | EVAL first_letter = SUBSTRING(first_name, 0, 1)
-            | STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter
-            | SORT first_letter
-        </esql>
-    </example>
-
-    <example>
-        <natural-language>
             What is the min, max and average value of the numbers in the bag?
         </natural-language>
         <esql>
@@ -192,16 +180,6 @@
             | EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
             | KEEP user_name, birth
             | SORT birth
-        </esql>
-    </example>
-
-    <example>
-        <natural-language>
-            How many unique IP addresses are there in the logs?
-        </natural-language>
-        <esql>
-            FROM logs
-            | STATS COUNT_DISTINCT(ip)
         </esql>
     </example>
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export const runGenerateEsql = ({}: {}) => {
-  // TODO
-}
+import Path from 'path';
+import { readdir, readFile } from 'fs/promises';
+
+const loadSystemMessage = async () => {
+  return (await readFile(Path.join(__dirname, '../system_message.txt'))).toString('utf-8');
+};
