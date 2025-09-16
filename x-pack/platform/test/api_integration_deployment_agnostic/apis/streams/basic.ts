@@ -250,6 +250,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:10.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
@@ -303,7 +304,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const accessLogDoc = {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: JSON.stringify({
-          '@timestamp': '2024-01-01T00:00:00.000Z',
+          '@timestamp': '2024-01-01T00:00:20.000Z',
           'log.level': 'info',
           'log.logger': 'nginx',
           message: 'test',
@@ -370,7 +371,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             'log.level': 'error',
             'log.logger': 'nginx',
             message: 'test',
@@ -404,7 +405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             code: '500',
             message: 'test',
           }),
@@ -412,7 +413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc2 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             code: 500,
             message: 'test',
           }),
@@ -442,13 +443,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'status_code: 500',
           }),
         };
         const doc2 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'status_code: 400',
           }),
         };
