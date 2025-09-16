@@ -63,6 +63,7 @@ describe('APMSection', () => {
         alertDetails: {
           uptime: { enabled: false },
         },
+        managedOtlpServiceUrl: '',
       },
     };
 

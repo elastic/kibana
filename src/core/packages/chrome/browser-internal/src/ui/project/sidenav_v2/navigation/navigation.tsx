@@ -26,6 +26,7 @@ import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
+import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -60,7 +61,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId } = state;
+  const { navItems, logoItem, activeItemId, solutionId } = state;
 
   return (
     <>
@@ -69,6 +70,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         <NavigationComponent
           items={navItems}
           logo={logoItem}
+          sidePanelFooter={<NavigationFeedbackSnippet solutionId={solutionId} />}
           isCollapsed={props.isCollapsed}
           setWidth={props.setWidth}
           activeItemId={activeItemId}
