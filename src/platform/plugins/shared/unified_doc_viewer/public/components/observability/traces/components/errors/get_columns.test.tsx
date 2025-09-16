@@ -23,7 +23,7 @@ jest.mock('@kbn/i18n', () => ({
 describe('getColumns', () => {
   const mockGenerateDiscoverLink = jest.fn();
   const traceId = 'trace-123';
-  const spanId = 'span-456';
+  const docId = 'span-456';
   const errorId = 'error-789';
 
   const mockErrorItem: ErrorsByTraceId['traceErrors'][0] = {
@@ -56,7 +56,6 @@ describe('getColumns', () => {
         type: 'Error',
       },
     },
-    timestamp: null,
   };
 
   beforeEach(() => {
@@ -69,7 +68,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -78,7 +77,7 @@ describe('getColumns', () => {
 
       expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
         'trace.id': traceId,
-        'span.id': spanId,
+        'span.id': docId,
         'processor.event': 'error',
         'error.id': errorId,
       });
@@ -89,7 +88,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -98,17 +97,17 @@ describe('getColumns', () => {
 
       expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
         'trace.id': traceId,
-        'span.id': spanId,
+        'span.id': docId,
         'event.name': 'exception',
       });
     });
 
-    it('should call generateDiscoverLink with only traceId and spanId for unknown source', () => {
+    it('should call generateDiscoverLink with only traceId and docId for unknown source', () => {
       const source = 'unknown';
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -117,11 +116,11 @@ describe('getColumns', () => {
 
       expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
         'trace.id': traceId,
-        'span.id': spanId,
+        'span.id': docId,
       });
     });
 
-    it('should not include SPAN_ID when spanId is not provided', () => {
+    it('should not include SPAN_ID when docId is not provided', () => {
       const source = 'apm';
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
@@ -145,7 +144,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -161,7 +160,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -180,7 +179,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -196,7 +195,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -212,7 +211,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -230,7 +229,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
@@ -246,7 +245,7 @@ describe('getColumns', () => {
       const columns = getColumns({
         generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
-        spanId,
+        docId,
         source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
