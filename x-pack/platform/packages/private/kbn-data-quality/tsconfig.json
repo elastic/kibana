@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/dataset-quality-plugin",
+    "@kbn/data-quality",
   ]
 }
