@@ -16,9 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { isCondition } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
+import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import {
@@ -29,7 +30,6 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
-import type { DataTableRecordWithIndex } from '../shared';
 import { MemoPreviewTable, PreviewFlyout } from '../shared';
 
 export function PreviewPanel() {
@@ -129,7 +129,6 @@ const SamplePreviewPanel = () => {
   }>();
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
-  const [currentDoc, setExpandedDoc] = useState<DataTableRecordWithIndex | undefined>(undefined);
 
   const docViewsRegistry = useDocViewerSetup();
 
@@ -137,32 +136,8 @@ const SamplePreviewPanel = () => {
     return toDataTableRecordWithIndex(documents);
   }, [documents]);
 
-  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
-  currentDocRef.current = currentDoc;
-  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
-  hitsRef.current = hits;
-
-  const onRowSelected = useCallback((rowIndex: number) => {
-    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
-      // If the same row is clicked, we collapse the flyout
-      setExpandedDoc(undefined);
-      return;
-    }
-    setExpandedDoc(hitsRef.current[rowIndex]);
-  }, []);
-
-  useEffect(() => {
-    if (currentDoc) {
-      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
-      const hit = hits.find((h) => h.index === currentDoc.index);
-      if (hit && hit !== currentDoc) {
-        setExpandedDoc(hit);
-      } else if (!hit && currentDoc) {
-        // if the current doc is not found in the hits, reset it
-        setExpandedDoc(undefined);
-      }
-    }
-  }, [currentDoc, hits]);
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
 
   let content: React.ReactNode | null = null;
 
@@ -224,7 +199,7 @@ const SamplePreviewPanel = () => {
           toolbarVisibility={true}
           displayColumns={visibleColumns}
           setVisibleColumns={setVisibleColumns}
-          selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
+          selectedRowIndex={selectedRowIndex}
           onRowSelected={onRowSelected}
         />
         <PreviewFlyout

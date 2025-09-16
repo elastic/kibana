@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
+import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
@@ -46,7 +47,6 @@ import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
-import type { DataTableRecordWithIndex } from '../shared';
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 
@@ -357,35 +357,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return toDataTableRecordWithIndex(previewDocuments);
   }, [previewDocuments]);
 
-  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    if (currentDoc) {
-      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
-      const hit = hits.find((h) => h.index === currentDoc.index);
-      if (hit && hit !== currentDoc) {
-        setExpandedDoc(hit);
-      } else if (!hit && currentDoc) {
-        // if the current doc is not found in the hits, reset it
-        setExpandedDoc(undefined);
-      }
-    }
-  }, [currentDoc, hits]);
-
-  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
-  currentDocRef.current = currentDoc;
-  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
-  hitsRef.current = hits;
-  const onRowSelected = useCallback((rowIndex: number) => {
-    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
-      // If the same row is clicked, we collapse the flyout
-      setExpandedDoc(undefined);
-      return;
-    }
-    setExpandedDoc(hitsRef.current[rowIndex]);
-  }, []);
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
 
   const docViewerContext = useMemo(
     () => ({
@@ -411,7 +384,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         originalSamples={originalSamples}
         showRowSourceAvatars={shouldShowRowSourceAvatars}
         onRowSelected={onRowSelected}
-        selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
+        selectedRowIndex={selectedRowIndex}
         displayColumns={previewColumns}
         rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
         toolbarVisibility
