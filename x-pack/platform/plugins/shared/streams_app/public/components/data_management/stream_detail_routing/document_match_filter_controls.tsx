@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -33,8 +32,6 @@ export const DocumentMatchFilterControls = ({
   matchedDocumentPercentage,
   isDisabled = false,
 }: DocumentMatchFilterControlsProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const [selectedFilter, setSelectedFilter] = useState<DocumentMatchFilterOptions>(initialFilter);
 
   const isIdleState = useStreamsRoutingSelector((snapshot) => snapshot).matches({
