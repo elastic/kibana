@@ -7,6 +7,8 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { css as cssClassName } from '@emotion/css';
+import { css } from '@emotion/react';
 
 import {
   EuiFlexGroup,
@@ -17,6 +19,7 @@ import {
   EuiTimelineItem,
   EuiSplitPanel,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +31,21 @@ import type { FormInternal } from '../../../types';
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
 
-import './phase.scss';
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    settingsAccordionButtonClassName: cssClassName`
+      color: ${euiTheme.colors.primary};
+      padding-top: ${euiTheme.size.s};
+      padding-bottom: ${euiTheme.size.s};
+    `,
+    halfWidth: css`
+      max-width: 50%;
+    `,
+  };
+};
+
 import { PhaseTitle } from './phase_title';
 
 interface Props {
@@ -41,6 +58,7 @@ interface Props {
 }
 
 export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
+  const styles = useStyles();
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
@@ -68,7 +86,7 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner>
-          <EuiText color="subdued" size="s" style={{ maxWidth: '50%' }}>
+          <EuiText color="subdued" size="s" css={styles.halfWidth}>
             {i18nTexts.editPolicy.descriptions[phase]}
           </EuiText>
 
@@ -86,14 +104,13 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
               {children ? (
                 <EuiAccordion
                   id={`${phase}-settingsSwitch`}
-                  className="ilmSettingsAccordion"
                   buttonContent={
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
                       defaultMessage="Advanced settings"
                     />
                   }
-                  buttonClassName="ilmSettingsButton"
+                  buttonClassName={styles.settingsAccordionButtonClassName}
                   extraAction={!isDeletePhase && <PhaseFooter phase={phase} />}
                 >
                   <EuiSpacer />
