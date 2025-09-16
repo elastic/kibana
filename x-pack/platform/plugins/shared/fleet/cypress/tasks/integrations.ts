@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+
 import {
   ADD_INTEGRATION_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
@@ -85,12 +87,23 @@ export function scrollToIntegration(selector: string) {
   cy.getBySel(INTEGRATION_LIST);
 
   return cy.window().then(async (win) => {
+    const container = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+
     let found = false;
     let i = 0;
     while (!found && i < 20) {
-      win.scroll(0, i++ * 250);
+      if (container) {
+        container.scrollTop = i++ * 250;
+      } else {
+        win.scroll(0, i++ * 250);
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 200));
-      if (win.document.querySelector(`[data-test-subj="${selector}"]`)) {
+
+      if (
+        (container && container.querySelector(`[data-test-subj="${selector}"]`)) ||
+        (!container && win.document.querySelector(`[data-test-subj="${selector}"]`))
+      ) {
         found = true;
       }
     }
