@@ -23,16 +23,19 @@ export function useUpdateFailureStore() {
       name: string,
       options: { failureStoreEnabled: boolean; customRetentionPeriod?: string }
     ) => {
-      const data = await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/_failure_store', {
-        params: {
-          path: { name },
-          body: {
-            failureStoreEnabled: options.failureStoreEnabled,
-            customRetentionPeriod: options.customRetentionPeriod,
+      const data = await streamsRepositoryClient.fetch(
+        'PUT /internal/streams/{name}/_failure_store',
+        {
+          params: {
+            path: { name },
+            body: {
+              failureStoreEnabled: options.failureStoreEnabled,
+              customRetentionPeriod: options.customRetentionPeriod,
+            },
           },
-        },
-        signal,
-      });
+          signal,
+        }
+      );
       return data;
     },
     [streamsRepositoryClient, signal]

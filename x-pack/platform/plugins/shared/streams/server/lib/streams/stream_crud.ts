@@ -20,11 +20,11 @@ import type {
   FailureStore,
   FailureStoreStatsResponse,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import type {
   ClassicIngestStreamEffectiveLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
