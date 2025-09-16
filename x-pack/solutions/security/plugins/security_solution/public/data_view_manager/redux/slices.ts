@@ -7,7 +7,7 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 import type {
@@ -59,10 +59,6 @@ export const sharedDataViewManagerSlice = createSlice({
 
         state.dataViews.push(dataViewSpec);
       } else {
-        if (state.adhocDataViews.find((dv) => dv.title === dataViewSpec.title)) {
-          return;
-        }
-
         state.adhocDataViews.push(dataViewSpec);
       }
     },

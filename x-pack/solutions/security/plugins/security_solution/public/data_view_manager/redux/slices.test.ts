@@ -7,10 +7,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  sharedDataViewManagerSlice,
   createDataViewSelectionSlice,
-  initialSharedState,
   initialScopeState,
+  initialSharedState,
+  sharedDataViewManagerSlice,
 } from './slices';
 import { selectDataViewAsync } from './actions';
 import { DataViewManagerScopeName } from '../constants';
@@ -77,24 +77,6 @@ describe('slices', () => {
 
         expect(state.adhocDataViews).toHaveLength(1);
         expect(state.adhocDataViews[0]).toEqual({ title: 'new ad hoc view' });
-      });
-
-      it('should not add a duplicate ad hoc data view', () => {
-        const initialState = {
-          ...initialSharedState,
-          adhocDataViews: [{ title: 'test ad hoc view' }],
-        };
-
-        const duplicateDataView = {
-          title: 'test ad hoc view',
-          isPersisted: () => false,
-          toSpec: () => ({ title: 'test ad hoc view' }),
-        } as unknown as DataView;
-
-        const state = reducer(initialState, actions.addDataView(duplicateDataView));
-
-        expect(state.adhocDataViews).toHaveLength(1);
-        expect(state.adhocDataViews[0]).toEqual({ title: 'test ad hoc view' });
       });
     });
 
