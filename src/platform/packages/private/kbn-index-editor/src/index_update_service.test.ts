@@ -60,7 +60,7 @@ describe('IndexUpdateService', () => {
   });
 
   describe('Unsaved changes', () => {
-    it('unsaved changes should be falseafter adding a new empty row', async () => {
+    it('unsaved changes should be false after adding a new empty row', async () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
