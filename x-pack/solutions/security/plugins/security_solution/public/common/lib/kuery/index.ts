@@ -225,7 +225,7 @@ export const convertToBuildEsQuery = ({
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
   try {
-    const newDataViewExists = dataView?.id && dataView?.title;
+    const newDataViewExists = dataView?.id && dataView?.getIndexPattern();
     return [
       JSON.stringify(
         buildEsQuery(
