@@ -447,6 +447,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                         trigger: addControlMenuTrigger,
                         embeddable: parentApi,
                         state: editorState,
+                        controlId,
                       });
                     } catch (e) {
                       coreServices.notifications.toasts.addError(e, {
