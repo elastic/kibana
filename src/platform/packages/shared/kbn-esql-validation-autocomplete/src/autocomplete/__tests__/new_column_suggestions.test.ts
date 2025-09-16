@@ -34,9 +34,9 @@ describe('autocomplete.suggest', () => {
           )
         ).map((s) => s.text);
 
-        expect(suggestions).toContain('col2 = ');
+        expect(suggestions).toContain('col0 = ');
         expect(suggestions).not.toContain('col1 = ');
-        expect(suggestions).not.toContain('col0 = ');
+        expect(suggestions).not.toContain('col2 = ');
       });
     });
 
