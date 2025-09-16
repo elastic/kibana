@@ -146,37 +146,6 @@ describe('Both modes', () => {
       expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
     });
 
-    // TODO: potentially move to an FTR test
-    /**
-     * GIVEN the screen size is less than `s` (767px)
-     * WHEN I resize the window to be larger
-     * THEN the navigation should be in expanded mode
-     */
-    /* it('should render in expanded mode if the screen size is less than `s` (767px) and I resize the window to be larger', () => {
-      resizeWindow(640, 480);
-      render(
-        <Navigation
-          activeItemId={basicMock.logo.id}
-          isCollapsed={false}
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          setWidth={() => {}}
-        />
-      );
-
-      const solutionLogo = screen.getByRole('link', {
-        name: 'Solution homepage',
-      });
-
-      // The label is wrapped with `<EuiScreenReaderOnly />` in collapsed mode
-      // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
-
-      cleanUp = resizeWindow(1024, 768);
-
-      expect(solutionLogo.children[1].className).not.toContain('euiScreenReaderOnly');
-    }); */
-
     /**
      * GIVEN the screen size is more or equal to `s` (767px)
      * WHEN the navigation renders
