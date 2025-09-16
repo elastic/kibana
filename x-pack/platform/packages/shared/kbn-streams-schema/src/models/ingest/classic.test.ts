@@ -15,12 +15,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
@@ -28,12 +25,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream-with-fields',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {
             field_overrides: {
               xxx: {
@@ -53,12 +47,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: null,
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
@@ -73,12 +64,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
           wired: {},
         },
@@ -95,16 +83,16 @@ describe('ClassicStream', () => {
           name: 'classic-stream',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
         effective_lifecycle: {
           dsl: {},
         },
+        effective_settings: {},
         privileges: {
           lifecycle: true,
           manage: true,
@@ -125,18 +113,16 @@ describe('ClassicStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: {
-              steps: [],
-            },
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
         effective_lifecycle: {
           dsl: {},
         },
+        effective_settings: {},
         privileges: {
           lifecycle: true,
           manage: true,
@@ -159,12 +145,9 @@ describe('ClassicStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: {
-              steps: [],
-            },
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
@@ -183,10 +166,9 @@ describe('ClassicStream', () => {
           name: 'my-name',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
