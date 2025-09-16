@@ -27,7 +27,6 @@ export function getFieldNamesFromRecords(previewRecords?: FlattenRecord[]): stri
   return Array.from(fieldNames).sort();
 }
 
-
 /**
  * Create field suggestions from simulation records
  */

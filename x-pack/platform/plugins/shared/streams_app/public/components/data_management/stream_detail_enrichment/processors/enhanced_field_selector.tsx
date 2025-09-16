@@ -106,7 +106,6 @@ export const EnhancedFieldSelector = ({
     { defaultMessage: 'Select or type a field name...' }
   );
 
-
   return (
     <>
       <EuiFormRow
