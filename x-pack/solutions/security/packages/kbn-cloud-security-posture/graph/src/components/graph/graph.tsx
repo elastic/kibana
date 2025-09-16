@@ -199,7 +199,7 @@ export const Graph = memo<GraphProps>(
           }
 
           if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
-            // With empty array or unknown return, do nothing
+            // With empty array or non-array return value, do nothing
             return;
           }
 
