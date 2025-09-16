@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
@@ -201,5 +202,14 @@ describe('MetricsExperienceGrid', () => {
     await waitFor(() =>
       expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument()
     );
+  });
+
+  it('renders the technical preview badge', () => {
+    const { getByText, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(getByTestId('metricsExperienceTechnicalPreviewBadge')).toBeInTheDocument();
+    expect(getByText('Technical preview')).toBeInTheDocument();
   });
 });
