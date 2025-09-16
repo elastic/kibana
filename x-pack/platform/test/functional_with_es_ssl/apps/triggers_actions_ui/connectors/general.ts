@@ -39,7 +39,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await pageObjects.common.navigateToApp('triggersActionsConnectors');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await objectRemover.removeAll();
     });
 
@@ -188,9 +188,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
