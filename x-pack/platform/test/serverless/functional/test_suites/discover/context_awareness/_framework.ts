@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   message: 'This is a debug log',
                   'service.name': 'product',
                   'service.name.text': 'product',
-                  'agent.version': null,
                 },
                 null,
                 2

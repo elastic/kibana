@@ -398,15 +398,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) =>
-            zipObject(
-              columnNames,
-              hasEmptyColumns
-                ? // fill up with nulls if emptyColumns are returned by ES|QL
-                  row.concat(Array.from({ length: columnNames.length - row.length }).fill(null))
-                : row
-            )
-          );
+          const rows = body.values.map((row) => zipObject(columnNames, row));
 
           return {
             type: 'datatable',
