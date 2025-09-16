@@ -20,13 +20,14 @@ jest.mock('../../../../../kibana_react/public', () => ({
   },
 }));
 
+let mockConvert = jest.fn();
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
     uiSettings: {
       get: jest.fn(),
     },
     fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => mockConvert(value) })),
     },
   }),
 }));
@@ -77,6 +78,10 @@ const flatten = (hit: ElasticSearchHit): Record<string, unknown> => {
 };
 
 describe('Discover grid cell rendering', function () {
+  beforeEach(() => {
+    mockConvert = jest.fn((value) => (value ? value : '-'));
+  });
+
   it('renders bytes column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
@@ -664,5 +669,41 @@ describe('Discover grid cell rendering', function () {
         width={370}
       />
     `);
+  });
+
+  it('passes values through default formatter for unmapped objects', () => {
+    mockConvert = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
+    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const rowsFieldsUnmapped: ElasticSearchHit[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: {
+          'foo.data': ['my foo value'],
+        },
+      },
+    ];
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsUnmapped,
+      rowsFieldsUnmapped.map(flatten),
+      true,
+      ['unmapped'],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="foo"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(mockConvert).toHaveBeenCalled();
+    expect(component.html()).toContain('my bar value');
   });
 });
