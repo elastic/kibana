@@ -152,15 +152,6 @@ const trackedAlert2Raw = {
   },
 };
 
-const trackedAlert3Raw = {
-  state: { foo: false },
-  meta: {
-    flapping: false,
-    flappingHistory: [true, false, false],
-    uuid: 'xyz',
-  },
-};
-
 const fetchedAlert1 = {
   [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
   [EVENT_ACTION]: 'open',
