@@ -1451,7 +1451,7 @@ export class CstToAstConverter {
         } else {
           // User typed something like `ON col0 =` and stopped.
           // Build an assignment with only the left operand, mark it as incomplete,
-          assignment.args.push(left);
+          assignment.args.push(left, []);
           assignment.incomplete = true;
           assignment.location = {
             min: left.location.min,
