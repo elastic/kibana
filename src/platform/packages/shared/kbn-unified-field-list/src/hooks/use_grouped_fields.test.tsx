@@ -781,19 +781,10 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
   describe('recommendedFields filtering', () => {
     it('should filter recommendedFields to only include available fields', async () => {
-      // Use existing fields from allFields that we know are available
-      const availableField1 = allFields.find((f) => f.name === 'bytes')!;
-      const availableField2 = allFields.find((f) => f.name === 'extension')!;
-
       // Create a field that is not in allFields (will be unavailable)
-      const unavailableField = new DataViewField({
-        name: 'unavailable_field',
-        type: 'keyword',
-        searchable: true,
-        aggregatable: true,
-      });
+      const unavailableField = 'unavailable_field';
 
-      const recommendedFields = [availableField1, unavailableField, availableField2];
+      const recommendedFields = ['bytes', unavailableField, 'extension'];
 
       const props: GroupedFieldsParams<DataViewField> = {
         dataViewId: dataView.id!,
@@ -827,20 +818,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     });
 
     it('should not show RecommendedFields group when no recommended fields are available', async () => {
-      const unavailableField1 = new DataViewField({
-        name: 'unavailable_field_1',
-        type: 'keyword',
-        searchable: true,
-        aggregatable: true,
-      });
-      const unavailableField2 = new DataViewField({
-        name: 'unavailable_field_2',
-        type: 'text',
-        searchable: true,
-        aggregatable: false,
-      });
-
-      const recommendedFields = [unavailableField1, unavailableField2];
+      const recommendedFields = ['unavailable_field_1', 'unavailable_field_2'];
 
       const props: GroupedFieldsParams<DataViewField> = {
         dataViewId: dataView.id!,
@@ -936,17 +914,12 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     });
 
     it('should show all recommended fields when they are all available', async () => {
-      // Using existing fields from dataView
-      const field1 = allFields.find((f) => f.name === 'bytes')!;
-      const field2 = allFields.find((f) => f.name === 'extension')!;
-      const field3 = allFields.find((f) => f.name === '@timestamp')!;
-
       const props: GroupedFieldsParams<DataViewField> = {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
         additionalFieldGroups: {
-          recommendedFields: [field1, field2, field3],
+          recommendedFields: ['bytes', 'extension', '@timestamp'],
         },
       };
 

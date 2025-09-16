@@ -44,7 +44,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
-  additionalFieldGroups?: AdditionalFieldGroups<T>;
+  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -188,11 +188,14 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     let recommendedFields: T[] = [];
 
     if (additionalFieldGroups?.recommendedFields?.length) {
-      const allRecommendedFields = additionalFieldGroups?.recommendedFields ?? ([] as T[]);
+      const allRecommendedFieldNames = additionalFieldGroups.recommendedFields;
       // Filter recommended fields to only include those that are also available in availableFields
       const availableFieldNames = new Set(groupedFields.availableFields.map((field) => field.name));
-      recommendedFields = allRecommendedFields.filter((field) =>
-        availableFieldNames.has(field.name)
+      const filteredRecommendedFieldNames = allRecommendedFieldNames.filter((fieldName) =>
+        availableFieldNames.has(fieldName)
+      );
+      recommendedFields = groupedFields.availableFields.filter((field) =>
+        filteredRecommendedFieldNames.includes(field.name)
       );
     }
 

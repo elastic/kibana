@@ -80,7 +80,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   /**
    * Prop to pass additional field groups to the field list
    */
-  additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
+  additionalFieldGroups?: AdditionalFieldGroups;
 };
 
 interface UnifiedFieldListSidebarInternalProps {

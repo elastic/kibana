@@ -85,7 +85,7 @@ export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
 
-export interface AdditionalFieldGroups<T extends FieldListItem = FieldListItem> {
+export interface AdditionalFieldGroups {
   recommendedFields?: Array<DataViewField['name']>;
 }
 
