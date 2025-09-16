@@ -16,7 +16,7 @@ interface BasicDiffInfo {
   diff_outcome?: ThreeWayDiffOutcome;
 }
 
-export type BasicRuleFieldsDiff = Record<string, BasicDiffInfo>;
+type BasicRuleFieldsDiff = Record<string, BasicDiffInfo>;
 
 type UpdateRuleFinalResult = 'SUCCESS' | 'SKIP' | 'ERROR';
 
