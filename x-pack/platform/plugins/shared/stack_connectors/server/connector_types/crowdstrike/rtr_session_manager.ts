@@ -57,9 +57,7 @@ export class CrowdStrikeSessionManager {
 
         if (!response.batch_id || typeof response.batch_id !== 'string') {
           this.logger.error(
-            `Invalid batch_id received from CrowdStrike API: ${
-              response.batch_id
-            }. Response: ${JSON.stringify(response)}`
+            `Invalid batch_id received from CrowdStrike API: ${response.batch_id}.`
           );
           throw new Error('Invalid batch_id received from CrowdStrike API');
         }
