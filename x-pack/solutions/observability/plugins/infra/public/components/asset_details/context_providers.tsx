@@ -49,11 +49,7 @@ export const ContextProviders = ({
     <RenderWithOptionalSearchSessionProvider renderMode={renderMode}>
       <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
         <LoadingStateProvider>
-          <MetadataStateProvider
-            entityId={entityId}
-            entityType={entityType}
-            preferredSchema={preferredSchema}
-          >
+          <MetadataStateProvider entityId={entityId} entityType={entityType}>
             <EntityDetailsTimeRangeMetadataProvider entityType={entityType} entityId={entityId}>
               <AssetDetailsRenderPropsProvider
                 entityId={entityId}

@@ -20,16 +20,3 @@ export const unflattenMetadataInfoFields = (result = {}, hit: InfraMetadataField
     }
   }
 };
-
-// Helper function to unflatten metadata from _source instead of fields
-export const unflattenMetadataFromSource = (result = {}, sourceData: any) => {
-  for (const [field, value] of Object.entries(sourceData ?? {})) {
-    if (value !== null && value !== undefined) {
-      if (isArray(value) && value.length > 1) {
-        set(result, field, value);
-      } else {
-        set(result, field, castArray(value)[0]);
-      }
-    }
-  }
-};

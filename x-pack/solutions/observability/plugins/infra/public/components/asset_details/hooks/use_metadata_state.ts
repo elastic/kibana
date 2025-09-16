@@ -14,15 +14,11 @@ import { useDatePickerContext } from './use_date_picker';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 import { useRequestObservable } from './use_request_observable';
 
-export type UseMetadataProviderProps = Pick<
-  AssetDetailsProps,
-  'entityId' | 'entityType' | 'preferredSchema'
->;
+export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'entityId' | 'entityType'>;
 
 export function useMetadataProvider({
   entityId: entityId,
   entityType: entityType,
-  preferredSchema: schema,
 }: UseMetadataProviderProps) {
   const { request$ } = useRequestObservable();
   const [, setUrlState] = useAssetDetailsUrlState();
@@ -37,7 +33,6 @@ export function useMetadataProvider({
     sourceId,
     timeRange,
     request$,
-    schema,
   });
 
   useEffect(() => {
