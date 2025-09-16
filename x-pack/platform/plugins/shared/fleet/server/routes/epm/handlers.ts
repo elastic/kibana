@@ -59,6 +59,7 @@ import type {
   RollbackPackageRequestSchema,
   GetKnowledgeBaseRequestSchema,
 } from '../../types';
+import { KibanaSavedObjectType } from '../../types';
 import {
   bulkInstallPackages,
   getCategories,
@@ -259,7 +260,9 @@ export const getBulkAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const { assetIds } = request.body;
-  const savedObjectsClient = coreContext.savedObjects.client;
+  const savedObjectsClient = coreContext.savedObjects.getClient({
+    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
+  });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(
     savedObjectsClient,
@@ -634,6 +637,7 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+    return response.ok({ body });
   } else if (format === 'yml' || format === 'yaml') {
     body = await getTemplateInputs(
       soClient,
@@ -644,8 +648,10 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+
+    return response.ok({ body, headers: { 'content-type': 'text/yaml;charset=utf-8' } });
   }
-  return response.ok({ body });
+  throw new FleetError(`Fleet error template format not supported ${format}`);
 };
 
 export const getKnowledgeBaseHandler: FleetRequestHandler<
@@ -684,6 +690,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       experimental_data_stream_features: attributes.experimental_data_stream_features,
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
+      previous_version: attributes.previous_version,
     };
 
     return {
