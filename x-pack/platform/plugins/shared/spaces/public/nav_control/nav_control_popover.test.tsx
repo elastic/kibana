@@ -74,6 +74,8 @@ describe('NavControlPopover', () => {
         eventTracker={eventTracker}
         showTour$={Rx.of(false)}
         onFinishTour={jest.fn()}
+        manageSpacesLink={'/manage/spaces'}
+        manageSpacesDocsLink={'https://elastic.co/docs'}
         {...props}
       />
     );
@@ -100,6 +102,8 @@ describe('NavControlPopover', () => {
         eventTracker={eventTracker}
         showTour$={Rx.of(false)}
         onFinishTour={jest.fn()}
+        manageSpacesLink={'/manage/spaces'}
+        manageSpacesDocsLink={'https://elastic.co/docs'}
       />
     );
     expect(baseElement).toMatchSnapshot();
@@ -129,6 +133,8 @@ describe('NavControlPopover', () => {
         eventTracker={eventTracker}
         showTour$={Rx.of(false)}
         onFinishTour={jest.fn()}
+        manageSpacesLink={'/manage/spaces'}
+        manageSpacesDocsLink={'https://elastic.co/docs'}
       />
     );
 
