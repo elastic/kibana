@@ -27,3 +27,51 @@ export const DASHBOARD_MIGRATION_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.panel.uploadMacros.button',
   { defaultMessage: 'Upload' }
 );
+
+export const DASHBOARD_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.dashboards.panel.result.description', {
+    defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',
+    values: { createdAt, finishedAt },
+  });
+
+export const DASHBOARD_MIGRATION_COMPLETE_BADGE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.badge',
+  { defaultMessage: `Translation complete` }
+);
+export const DASHBOARD_MIGRATION_SUMMARY_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.summary.title',
+  { defaultMessage: 'Translation Summary' }
+);
+
+export const DASHBOARD_MIGRATION_SUMMARY_CHART_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.summary.chartTitle',
+  { defaultMessage: 'Dashboards by translation status' }
+);
+
+export const DASHBOARD_MIGRATION_VIEW_TRANSLATED_DASHBOARDS_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.summary.button',
+  { defaultMessage: 'View dashboards' }
+);
+
+export const DASHBOARD_MIGRATION_TRANSLATION_FAILED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.summary.failed',
+  { defaultMessage: 'Failed' }
+);
+
+export const DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.summary.tableColumn.status',
+  { defaultMessage: 'Status' }
+);
+export const DASHBOARD_MIGRATION_TABLE_COLUMN_DASHBOARDS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.result.summary.tableColumn.dashboards',
+  { defaultMessage: 'Dashboards' }
+);
+
+export const DASHBOARD_MIGRATION_EXPAND = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.expand',
+  { defaultMessage: 'Expand dashboard migration' }
+);
+export const DASHBOARD_MIGRATION_COLLAPSE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.collapse',
+  { defaultMessage: 'Collapse dashboard migration' }
+);

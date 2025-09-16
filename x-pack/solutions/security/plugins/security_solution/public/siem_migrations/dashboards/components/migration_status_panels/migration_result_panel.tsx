@@ -21,26 +21,25 @@ import {
   EuiSpacer,
   EuiBadge,
   type EuiBasicTableColumn,
-  useEuiTheme,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { css } from '@emotion/react';
+import type { DashboardMigrationTranslationStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { convertTranslationResultIntoText, useResultVisColors } from '../../../common/utils';
-import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
-import type { RuleMigrationStats } from '../../types';
+import type { DashboardMigrationStats } from '../../types';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
+import { DashboardMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
+import { useCompleteBadgeStyles } from '../../../common/hooks/use_complete_status_badge_styles';
 
 const headerStyle = css`
   &:hover {
@@ -49,25 +48,13 @@ const headerStyle = css`
   }
 `;
 
-const useCompleteBadgeStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaIsDarkMode();
-  return css`
-    background-color: ${isDarkMode
-      ? euiTheme.colors.success
-      : euiTheme.colors.backgroundBaseSuccess};
-    color: ${isDarkMode ? euiTheme.colors.plainDark : euiTheme.colors.textSuccess};
-    text-decoration: none;
-  `;
-};
-
-export interface RuleMigrationResultPanelProps {
-  migrationStats: RuleMigrationStats;
+export interface DashboardMigrationResultPanelProps {
+  migrationStats: DashboardMigrationStats;
   isCollapsed: boolean;
   onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
-export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps>(
+export const DashboardMigrationResultPanel = React.memo<DashboardMigrationResultPanelProps>(
   ({ migrationStats, isCollapsed = false, onToggleCollapsed }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
       useGetMigrationTranslationStats(migrationStats.id);
@@ -85,12 +72,16 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
             <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
+                  <MigrationPanelTitle
+                    migrationStats={migrationStats}
+                    migrationType="dashboard"
+                    data-test-subj="migrationPanelTitle"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <PanelText size="s" subdued>
+                  <PanelText size="s" subdued data-test-subj="migrationPanelDescription">
                     <p>
-                      {i18n.RULE_MIGRATION_COMPLETE_DESCRIPTION(
+                      {i18n.DASHBOARD_MIGRATION_COMPLETE_DESCRIPTION(
                         moment(migrationStats.created_at).format('MMMM Do YYYY, h:mm:ss a'),
                         moment(migrationStats.last_updated_at).fromNow()
                       )}
@@ -100,13 +91,18 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge css={completeBadgeStyles}>{i18n.RULE_MIGRATION_COMPLETE_BADGE}</EuiBadge>
+              <EuiBadge css={completeBadgeStyles} data-test-subj="migrationCompleteBadge">
+                {i18n.DASHBOARD_MIGRATION_COMPLETE_BADGE}
+              </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
                 onClick={toggleCollapsed}
-                aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
+                aria-label={
+                  isCollapsed ? i18n.DASHBOARD_MIGRATION_EXPAND : i18n.DASHBOARD_MIGRATION_COLLAPSE
+                }
+                data-test-subj="collapseButton"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -123,7 +119,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
               <>
                 <MigrationsLastError
                   message={migrationStats.last_execution.error}
-                  migrationType="rule"
+                  migrationType="dashboard"
                 />
                 <EuiSpacer size="m" />
               </>
@@ -136,7 +132,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <PanelText size="s" semiBold>
-                      <p>{i18n.RULE_MIGRATION_SUMMARY_TITLE}</p>
+                      <p>{i18n.DASHBOARD_MIGRATION_SUMMARY_TITLE}</p>
                     </PanelText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -151,7 +147,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                         translationStats && (
                           <>
                             <EuiText size="m" css={{ textAlign: 'center' }}>
-                              <b>{i18n.RULE_MIGRATION_SUMMARY_CHART_TITLE}</b>
+                              <b>{i18n.DASHBOARD_MIGRATION_SUMMARY_CHART_TITLE}</b>
                             </EuiText>
                             <TranslationResultsChart translationStats={translationStats} />
                             <TranslationResultsTable translationStats={translationStats} />
@@ -163,10 +159,10 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                       <EuiFlexGroup direction="column" alignItems="center">
                         <EuiFlexItem>
                           <SecuritySolutionLinkButton
-                            deepLinkId={SecurityPageName.siemMigrationsRules}
+                            deepLinkId={SecurityPageName.siemMigrationsDashboards}
                             path={migrationStats.id}
                           >
-                            {i18n.RULE_MIGRATION_VIEW_TRANSLATED_RULES_BUTTON}
+                            {i18n.DASHBOARD_MIGRATION_VIEW_TRANSLATED_DASHBOARDS_BUTTON}
                           </SecuritySolutionLinkButton>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -175,40 +171,43 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} topSpacerSize="s" />
+            <DashboardMigrationsUploadMissingPanel
+              migrationStats={migrationStats}
+              topSpacerSize="s"
+            />
           </EuiPanel>
         </EuiAccordion>
       </EuiPanel>
     );
   }
 );
-RuleMigrationResultPanel.displayName = 'MigrationResultPanel';
+DashboardMigrationResultPanel.displayName = 'MigrationResultPanel';
 
 const TranslationResultsChart = React.memo<{
-  translationStats: RuleMigrationTranslationStats;
+  translationStats: DashboardMigrationTranslationStats;
 }>(({ translationStats }) => {
   const baseTheme = useElasticChartsTheme();
   const translationResultColors = useResultVisColors();
   const data = [
     {
-      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
+      category: i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
-      value: translationStats.rules.success.result.full,
+      value: translationStats.dashboards.success.result.full,
     },
     {
-      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
+      category: i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
-      value: translationStats.rules.success.result.partial,
+      value: translationStats.dashboards.success.result.partial,
     },
     {
-      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
+      category: i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
-      value: translationStats.rules.success.result.untranslatable,
+      value: translationStats.dashboards.success.result.untranslatable,
     },
     {
-      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
-      value: translationStats.rules.failed,
+      category: i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS,
+      type: i18n.DASHBOARD_MIGRATION_TRANSLATION_FAILED,
+      value: translationStats.dashboards.failed,
     },
   ];
 
@@ -220,11 +219,11 @@ const TranslationResultsChart = React.memo<{
   ];
 
   return (
-    <Chart size={{ height: 130 }}>
+    <Chart size={{ height: 130 }} data-test-subj="translationResultsChart">
       <Settings showLegend={false} rotation={90} baseTheme={baseTheme} />
       <BarSeries
         id="results"
-        name={i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS}
+        name={i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS}
         data={data}
         xAccessor="category"
         yAccessors={['value']}
@@ -248,7 +247,7 @@ interface TranslationResultsTableItem {
 const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
   {
     field: 'title',
-    name: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
+    name: i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_STATUS,
     render: (title: string, { color }) => (
       <EuiHealth color={color} textSize="xs">
         <span data-test-subj={`translationStatus-${title}`}>{title} </span>
@@ -257,7 +256,7 @@ const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
   },
   {
     field: 'value',
-    name: i18n.RULE_MIGRATION_TABLE_COLUMN_RULES,
+    name: i18n.DASHBOARD_MIGRATION_TABLE_COLUMN_DASHBOARDS,
     align: 'right',
     render: (value: string, { title }) => (
       <EuiText size="xs" data-test-subj={`translationStatusCount-${title}`}>
@@ -268,29 +267,29 @@ const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
 ];
 
 const TranslationResultsTable = React.memo<{
-  translationStats: RuleMigrationTranslationStats;
+  translationStats: DashboardMigrationTranslationStats;
 }>(({ translationStats }) => {
   const translationResultColors = useResultVisColors();
   const items = useMemo<TranslationResultsTableItem[]>(
     () => [
       {
         title: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
-        value: translationStats.rules.success.result.full,
+        value: translationStats.dashboards.success.result.full,
         color: translationResultColors[MigrationTranslationResult.FULL],
       },
       {
         title: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
-        value: translationStats.rules.success.result.partial,
+        value: translationStats.dashboards.success.result.partial,
         color: translationResultColors[MigrationTranslationResult.PARTIAL],
       },
       {
         title: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
-        value: translationStats.rules.success.result.untranslatable,
+        value: translationStats.dashboards.success.result.untranslatable,
         color: translationResultColors[MigrationTranslationResult.UNTRANSLATABLE],
       },
       {
-        title: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
-        value: translationStats.rules.failed,
+        title: i18n.DASHBOARD_MIGRATION_TRANSLATION_FAILED,
+        value: translationStats.dashboards.failed,
         color: translationResultColors.error,
       },
     ],
