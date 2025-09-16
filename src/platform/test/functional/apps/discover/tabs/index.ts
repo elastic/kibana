@@ -26,6 +26,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -42,13 +45,18 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
       await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./_duplication'));
+    loadTestFile(require.resolve('./_on_tab_change'));
     loadTestFile(require.resolve('./_new_tab'));
     loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_restorable_state'));
+    loadTestFile(require.resolve('./_save_and_load'));
   });
 }

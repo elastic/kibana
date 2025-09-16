@@ -308,7 +308,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             />
           </EuiFormRow>
         )}
-
         <EuiFormRow
           data-test-subj="shared-field"
           display="rowCompressed"
