@@ -140,6 +140,7 @@ export function LensRenderer({
     <EmbeddableRenderer<LensSerializedState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
+      // TODO type this ParentApi, all these are untyped and some unused
       getParentApi={() => ({
         // forward the Lens components to the embeddable
         ...props,
