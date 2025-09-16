@@ -7848,7 +7848,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-feedback-snippet@link:src/platform/packages/shared/shared-ux/feedback_snippet/impl":
+"@kbn/shared-ux-feedback-snippet@link:src/platform/packages/shared/shared-ux/feedback_snippet":
   version "0.0.0"
   uid ""
 
