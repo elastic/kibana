@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getTimeFieldFromESQLQuery, getIndexPatternFromESQLQuery } from './query_parsing_helpers';
 
@@ -33,36 +33,34 @@ async function sha256(str: string) {
 export async function getESQLAdHocDataview(
   query: string,
   dataViewsService: DataViewsPublicPluginStart,
-  options?: {
-    allowNoIndex?: boolean;
-    createNewInstanceEvenIfCachedOneAvailable?: boolean;
-  }
-) {
+  allowNoIndex?: boolean
+): Promise<DataView> {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const dataViewId = await sha256(`esql-${indexPattern}`);
-
-  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
-    // overwise it might return a cached data view with a different time field
-    dataViewsService.clearInstanceCache(dataViewId);
-  }
 
   const dataView = await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
-    id: dataViewId,
-    allowNoIndex: options?.allowNoIndex,
+    id: await sha256(`esql-${indexPattern}`),
+    allowNoIndex,
   });
 
-  dataView.timeFieldName = timeField;
+  // create a shallow copy of the data view to be able to override the timeFieldName
+  // without mutating the cached data view inside the data view service
+  const shallowDataViewCopy = Object.assign(
+    Object.create(Object.getPrototypeOf(dataView)),
+    dataView
+  );
+
+  shallowDataViewCopy.timeFieldName = timeField;
 
   // If the indexPattern is empty string means that the user used either the ROW, SHOW INFO commands
   // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
   if (!timeField && indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
-    dataView.timeFieldName = '@timestamp';
+    shallowDataViewCopy.timeFieldName = '@timestamp';
   }
 
-  return dataView;
+  return shallowDataViewCopy;
 }
 
 /**
