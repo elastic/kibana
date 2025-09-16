@@ -10,10 +10,11 @@ import React, { type FC } from 'react';
 import {
   EuiLoadingSpinner,
   EuiFlexGroup,
-  useEuiTheme,
   EuiCallOut,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,12 +26,22 @@ import { useGetTransformStats } from '../../../../hooks';
 import type { SectionConfig } from './expanded_row_column_view';
 import { ExpandedRowColumnView } from './expanded_row_column_view';
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    flexGroup: css`
+      height: ${euiTheme.size.xxxxl};
+    `,
+  };
+};
+
 const NoStatsFallbackTabContent = ({
   transformsStatsLoading,
 }: {
   transformsStatsLoading: boolean;
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
 
   const content = transformsStatsLoading ? (
     <EuiLoadingSpinner />
@@ -50,7 +61,7 @@ const NoStatsFallbackTabContent = ({
     </EuiFlexItem>
   );
   return (
-    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxxxl }}>
+    <EuiFlexGroup justifyContent="center" alignItems="center" css={styles.flexGroup}>
       {content}
     </EuiFlexGroup>
   );
