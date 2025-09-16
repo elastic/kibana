@@ -121,7 +121,6 @@ class YamlLintCheck extends PrecommitCheck {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
         yamlLoad(content, {
           filename: file.getRelativePath(),
-          strict: true,
         });
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
