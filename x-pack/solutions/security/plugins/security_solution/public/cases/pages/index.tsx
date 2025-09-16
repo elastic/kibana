@@ -155,6 +155,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
+            events: { enabled: true },
           },
           refreshRef,
           actionsNavigation: {

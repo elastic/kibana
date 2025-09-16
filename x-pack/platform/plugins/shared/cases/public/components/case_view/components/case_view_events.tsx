@@ -38,9 +38,8 @@ export const CaseViewEvents = ({
     [caseData.comments]
   );
 
-  // TODO: skip entire tab if events table is not there
   if (!EventsTable) {
-    return null;
+    throw new Error('renderEventsTable has not been specified during case plugin init');
   }
 
   return (

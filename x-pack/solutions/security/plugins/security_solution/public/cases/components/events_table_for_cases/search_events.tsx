@@ -1,11 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { EcsFlat } from '@elastic/ecs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { KibanaServices } from '@kbn/security-solution-plugin/public/common/lib/kibana';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { lastValueFrom } from 'rxjs';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 export const searchEvents = async (
   signal: AbortSignal | undefined,
@@ -14,6 +21,8 @@ export const searchEvents = async (
     columns: string[];
     eventIds: string[];
     sort: SortColumnTable[];
+    pageIndex: number;
+    itemsPerPage: number;
   }
 ): Promise<TimelineItem[]> => {
   if (!dataView) {
@@ -37,6 +46,8 @@ export const searchEvents = async (
         sort: parameters.sort.map((tableSort) => ({
           [tableSort.columnId]: tableSort.sortDirection,
         })),
+        from: parameters.pageIndex * parameters.itemsPerPage,
+        size: parameters.itemsPerPage,
       },
     })
   );

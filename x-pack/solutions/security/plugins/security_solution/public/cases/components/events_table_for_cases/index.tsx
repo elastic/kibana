@@ -23,8 +23,9 @@ import {
   tableDefaults,
 } from '@kbn/securitysolution-data-table';
 import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
-import React, { useMemo, useEffect, useContext, type FC } from 'react';
+import React, { useMemo, useEffect, useContext, type FC, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeContext } from 'styled-components';
 import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { RowAction } from '../../../common/components/control_columns/row_action';
@@ -42,9 +43,8 @@ const noop = () => {};
 export const emptyObject = {} as const;
 export const emptyArray = [];
 
-export const MAX_ACTION_BUTTON_COUNT = 4;
-
-const defaultModel: SubsetDataTableModel = structuredClone(tableDefaults);
+const MAX_ACTION_BUTTON_COUNT = 4;
+const DEFAULT_MODEL: SubsetDataTableModel = structuredClone(tableDefaults);
 
 export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTableProps> = ({
   dataView,
@@ -54,16 +54,8 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
 
   const { defaultColumns, columns, loadingEventIds, itemsPerPage, itemsPerPageOptions, sort } =
     useSelector(
-      (state: State) => selectTableById(state, EVENTS_TABLE_FOR_CASES_ID) ?? defaultModel
+      (state: State) => selectTableById(state, EVENTS_TABLE_FOR_CASES_ID) ?? DEFAULT_MODEL
     );
-
-  const { data = [] } = useGetEvents(dataView, {
-    eventIds: events.flatMap((event) =>
-      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
-    ),
-    columns: ['*'],
-    sort,
-  });
 
   const dispatch = useDispatch();
 
@@ -72,6 +64,8 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
   }, [dataView.fields]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   useEffect(() => {
     dispatch(
@@ -92,11 +86,27 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
       pageIndex: 0,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
-      onChangeItemsPerPage: (perPage) => {},
-      onChangePage: (pageIndex) => {},
+      onChangeItemsPerPage: (perPage) =>
+        dispatch(
+          dataTableActions.updateItemsPerPage({
+            id: EVENTS_TABLE_FOR_CASES_ID,
+            itemsPerPage: perPage,
+          })
+        ),
+      onChangePage: setCurrentPageIndex,
     }),
-    [itemsPerPage, itemsPerPageOptions]
+    [dispatch, itemsPerPage, itemsPerPageOptions]
   );
+
+  const { data = [] } = useGetEvents(dataView, {
+    eventIds: events.flatMap((event) =>
+      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
+    ),
+    columns: ['*'],
+    sort,
+    pageIndex: currentPageIndex,
+    itemsPerPage,
+  });
 
   const leadingControlColumns = useMemo(
     () =>

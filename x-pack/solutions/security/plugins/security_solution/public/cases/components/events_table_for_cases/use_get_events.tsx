@@ -19,6 +19,8 @@ export const useGetEvents = (
     columns: string[];
     eventIds: string[];
     sort: SortColumnTable[];
+    pageIndex: number;
+    itemsPerPage: number;
   }
 ) => {
   const toasts = useToasts();
