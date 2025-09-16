@@ -81,7 +81,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   <EuiText size="m" color={statusColor}>
                     <strong aria-label={statusMessage}>
                       {i18n.translate('xpack.onechat.activeToolsStatus.title', {
-                        defaultMessage: 'You have {count} active tools',
+                        defaultMessage: 'This agent has {count} active tools',
                         values: { count: activeToolsCount },
                       })}
                     </strong>
