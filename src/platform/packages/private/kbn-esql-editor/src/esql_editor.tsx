@@ -952,10 +952,6 @@ const ESQLEditorInternal = function ESQLEditor({
                       await addLookupIndicesDecorator();
                     }
 
-                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
-                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
-                    });
-
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
