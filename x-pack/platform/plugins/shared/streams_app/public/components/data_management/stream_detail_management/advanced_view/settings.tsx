@@ -8,8 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import type { IngestStreamSettings } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { IngestStreamSettings, Streams } from '@kbn/streams-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,10 +23,10 @@ import {
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { Row, RowMetadata } from './row';
 import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
-import { LinkToStream } from '../../stream_detail_lifecycle/general_data/modal';
 
 interface Setting {
   invalid: boolean;
@@ -399,3 +398,22 @@ const isInvalidInteger = (value: string) => {
   const num = Number(value);
   return isNaN(num) || num < 0 || num % 1 > 0;
 };
+
+function LinkToStream({ name }: { name: string }) {
+  const router = useStreamsAppRouter();
+
+  return (
+    <EuiLink
+      data-test-subj="streamsAppLinkToStreamLink"
+      target="_blank"
+      href={router.link('/{key}/{tab}', {
+        path: {
+          key: name,
+          tab: 'overview',
+        },
+      })}
+    >
+      [{name}]
+    </EuiLink>
+  );
+}
