@@ -109,22 +109,22 @@ class YamlLintCheck extends PrecommitCheck {
     const yamlFiles = files.filter((file) => this.isYamlFile(file.getRelativePath()));
 
     if (yamlFiles.length === 0) {
-      log.info('No YAML files to check');
+      log.verbose('No YAML files to check');
       return;
     }
 
-    log.info(`Checking ${yamlFiles.length} YAML files for syntax errors`);
+    log.verbose(`Checking ${yamlFiles.length} YAML files for syntax errors`);
 
     const errors = [];
     for (const file of yamlFiles) {
       try {
-        const content = await readFile(file, 'utf8');
+        const content = await readFile(file.getAbsolutePath(), 'utf8');
         yamlLoad(content, {
-          filename: file,
+          filename: file.getRelativePath(),
           strict: true,
         });
       } catch (error) {
-        errors.push(`Error in ${file}:\n${error.message}`);
+        errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }
     }
 
@@ -161,7 +161,7 @@ run(
       return;
     }
 
-    log.info('Running pre-commit checks...');
+    log.verbose('Running pre-commit checks...');
     const results = await Promise.all(
       PRECOMMIT_CHECKS.map(async (check) => {
         const startTime = Date.now();
@@ -170,7 +170,7 @@ run(
           stage: flags.stage,
         });
         const duration = Date.now() - startTime;
-        log.info(`${check.name} completed in ${duration}ms`);
+        log.verbose(`${check.name} completed in ${duration}ms`);
         return result;
       })
     );
