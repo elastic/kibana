@@ -23,15 +23,12 @@ export async function getEsqlDataView(
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   const newTimeField = getTimeFieldFromESQLQuery(query.esql);
-  const onlyTimeFieldChanged =
-    indexPatternFromQuery === currentDataView?.getIndexPattern() &&
-    newTimeField !== currentDataView?.timeFieldName;
-
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern() ||
     // here the pattern hasn't changed but the time field has
-    onlyTimeFieldChanged
+    (newTimeField !== currentDataView?.timeFieldName &&
+      indexPatternFromQuery === currentDataView?.getIndexPattern())
   ) {
     return await getESQLAdHocDataview(query.esql, services.dataViews);
   }
