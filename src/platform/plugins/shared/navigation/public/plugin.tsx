@@ -134,6 +134,7 @@ export class NavigationPublicPlugin
         userProfiles: core.userProfile,
         capabilities: core.application.capabilities,
         isCloudTrialUser: this.isCloudTrialUser,
+        featureFlags: core.featureFlags,
       });
       void tourManager.startTour();
     }
