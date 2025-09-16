@@ -7,7 +7,7 @@
 
 import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { type Errors, type ErrorsByTraceId } from '@kbn/apm-types';
+import { type ErrorsByTraceId } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -34,9 +34,9 @@ import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
-import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import { normalizeErrors } from './normalize_errors';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -249,30 +249,15 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
       end,
     });
 
-    const normalizeApmErrors = (errors: UnifiedTraceErrors['apmErrors']): Errors[] =>
-      errors.map(
-        ({ error, timestamp }): Errors => ({
-          error: {
-            ...error,
-            exception: Array.isArray(error?.exception) ? error.exception[0] : error?.exception,
-          },
-          timestamp,
-        })
-      );
-
     if (apmErrors.length > 0) {
-      return { traceErrors: normalizeApmErrors(apmErrors), source: 'apm' };
+      return {
+        traceErrors: normalizeErrors(apmErrors),
+        source: 'apm',
+      };
     }
 
-    const normalizeOtelErrors = (errors: UnifiedTraceErrors['unprocessedOtelErrors']): Errors[] =>
-      errors.map(
-        ({ error }): Errors => ({
-          error,
-        })
-      );
-
     return {
-      traceErrors: normalizeOtelErrors(unprocessedOtelErrors),
+      traceErrors: normalizeErrors(unprocessedOtelErrors),
       source: 'unprocessedOtel',
     };
   },

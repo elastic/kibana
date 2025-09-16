@@ -14,10 +14,12 @@ import {
   SPAN_ID,
   TRACE_ID,
   OTEL_EVENT_NAME,
+  TIMESTAMP_US,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
 
 export interface UnifiedTraceErrors {
   apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
@@ -55,7 +57,11 @@ export async function getUnifiedTraceErrors({
 }
 
 export const requiredFields = asMutableArray([SPAN_ID] as const);
-export const optionalFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
+export const optionalFields = asMutableArray([
+  EXCEPTION_TYPE,
+  EXCEPTION_MESSAGE,
+  TIMESTAMP_US,
+] as const);
 
 interface OtelError {
   span: {
@@ -65,6 +71,7 @@ interface OtelError {
     type: string;
     message: string;
   };
+  timestamp?: TimestampUs;
 }
 
 async function getUnprocessedOtelErrors({
@@ -108,6 +115,7 @@ async function getUnprocessedOtelErrors({
 
       return {
         id: event.span?.id,
+        timestamp: event?.timestamp,
         error: {
           exception: {
             type: event.exception?.type,
@@ -121,6 +129,7 @@ async function getUnprocessedOtelErrors({
         doc
       ): doc is {
         id: string;
+        timestamp: TimestampUs | undefined;
         error: { exception: { type: string | undefined; message: string | undefined } };
       } => !!doc
     );

@@ -18,12 +18,12 @@ export interface ErrorData {
   };
 }
 
-export interface Errors {
+export interface Error {
   error: ErrorData;
-  timestamp?: TimestampUs | null;
+  timestamp?: TimestampUs | undefined;
 }
 
 export interface ErrorsByTraceId {
-  traceErrors: Errors[];
+  traceErrors: Error[];
   source: 'apm' | 'unprocessedOtel';
 }
