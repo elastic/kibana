@@ -18,6 +18,7 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
+  useEuiTheme,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
@@ -49,8 +50,18 @@ export function ChatMessageText({
   steps: stepsFromCurrentRound,
   contentReferences,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
   const containerClassName = css`
     overflow-wrap: anywhere;
+
+    /* Standardize spacing between numbered list items */
+    ol > li:not(:first-child) {
+      margin-top: ${euiTheme.size.s};
+    }
+
+    ol > li > p {
+      margin-bottom: ${euiTheme.size.s};
+    }
   `;
 
   const { startDependencies } = useOnechatServices();

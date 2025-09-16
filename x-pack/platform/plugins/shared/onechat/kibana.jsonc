@@ -8,7 +8,10 @@
     "id": "onechat",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "onechat"],
+    "configPath": [
+      "xpack",
+      "onechat"
+    ],
     "requiredPlugins": [
       "actions",
       "data",
@@ -19,12 +22,21 @@
       "inference",
       "kibanaUtils",
       "lens",
+<<<<<<< HEAD
       "spaces",
       "stackConnectors",
       "triggersActionsUi"
+=======
+      "management",
+      "share"
     ],
-    "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["cloud"],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "optionalPlugins": [
+      "cloud"
+>>>>>>> upstream/main
+    ],
     "extraPublicDirs": []
   }
 }

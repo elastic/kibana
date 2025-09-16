@@ -19,6 +19,7 @@ import {
   isConversationCreatedEvent,
 } from '@kbn/onechat-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
@@ -79,7 +80,7 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse',
+      path: `${publicApiPath}/converse`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -141,7 +142,7 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse/async',
+      path: `${publicApiPath}/converse/async`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },

@@ -10,6 +10,7 @@ import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/onechat-common';
+import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';
 
@@ -38,7 +39,7 @@ export class ChatService {
       tool_parameters: params.toolParameters,
     };
     return defer(() => {
-      return this.http.post('/api/chat/converse/async', {
+      return this.http.post(`${publicApiPath}/converse/async`, {
         signal: params.signal,
         asResponse: true,
         rawResponse: true,

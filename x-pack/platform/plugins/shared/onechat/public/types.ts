@@ -7,6 +7,7 @@
 
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
@@ -16,6 +17,8 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { OnechatInternalService } from './services';
 import type { OnechatServicesContext } from './application/context/onechat_services_context';
 import type { ContentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
@@ -30,6 +33,8 @@ export interface OnechatSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   discover: DiscoverSetup;
+  management: ManagementSetup;
+  share: SharePluginSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -38,6 +43,8 @@ export interface OnechatStartDependencies {
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   discover: DiscoverStart;
+  cloud: CloudStart;
+  share: SharePluginStart;
 }
 
 export interface OnechatPluginSetup {}

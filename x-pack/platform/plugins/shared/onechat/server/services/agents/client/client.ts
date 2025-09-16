@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -16,7 +15,6 @@ import {
   type AgentDefinition,
   createAgentNotFoundError,
   createBadRequestError,
-  isAgentNotFoundError,
   oneChatDefaultAgentId,
   type ToolSelection,
   type UserIdAndName,
@@ -30,7 +28,7 @@ import type {
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
-import { createRequestToEs, type Document, fromEs, updateProfile } from './converters';
+import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { ensureValidId, validateToolSelection } from './utils';
 import { createDefaultAgentDefinition } from './default_definitions';
 
@@ -94,22 +92,16 @@ class AgentClientImpl implements AgentClient {
   }
 
   async get(agentId: string): Promise<AgentDefinition> {
-    let document: Document;
-    try {
-      document = await this.storage.getClient().get({ id: agentId });
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        // if the config for the default agent isn't persisted, we return the default definition
-        if (agentId === oneChatDefaultAgentId) {
-          return createDefaultAgentDefinition();
-        }
-        throw createAgentNotFoundError({ agentId });
+    const document = await this._get(agentId);
+    if (!document) {
+      if (agentId === oneChatDefaultAgentId) {
+        return createDefaultAgentDefinition();
       } else {
-        throw e;
+        throw createAgentNotFoundError({ agentId });
       }
     }
 
-    if (!hasAccess({ profile: document, user: this.user })) {
+    if (!hasAccess({ document, user: this.user })) {
       throw createAgentNotFoundError({ agentId });
     }
 
@@ -122,15 +114,8 @@ class AgentClientImpl implements AgentClient {
       return true;
     }
 
-    try {
-      await this.get(agentId);
-      return true;
-    } catch (e) {
-      if (isAgentNotFoundError(e)) {
-        return false;
-      }
-      throw e;
-    }
+    const document = await this._get(agentId);
+    return document !== undefined;
   }
 
   async list(options: AgentListOptions = {}): Promise<AgentDefinition[]> {
@@ -170,7 +155,6 @@ class AgentClientImpl implements AgentClient {
     });
 
     await this.storage.getClient().index({
-      id: profile.id,
       document: attributes,
     });
 
@@ -183,22 +167,14 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(`Default agent cannot be updated.`);
     }
 
-    const now = new Date();
-
-    let document: Document;
-    try {
-      document = await this.storage.getClient().get({ id: agentId });
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        throw createAgentNotFoundError({
-          agentId,
-        });
-      } else {
-        throw e;
-      }
+    const document = await this._get(agentId);
+    if (!document) {
+      throw createAgentNotFoundError({
+        agentId,
+      });
     }
 
-    if (!hasAccess({ profile: document, user: this.user })) {
+    if (!hasAccess({ document, user: this.user })) {
       throw createAgentNotFoundError({ agentId });
     }
 
@@ -206,14 +182,15 @@ class AgentClientImpl implements AgentClient {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
     }
 
-    const updatedConversation = updateProfile({
-      profile: document._source!,
+    const updatedConversation = updateRequestToEs({
+      agentId,
+      currentProps: document._source!,
       update: profileUpdate,
-      updateDate: now,
+      updateDate: new Date(),
     });
 
     await this.storage.getClient().index({
-      id: agentId,
+      id: document._id,
       document: updatedConversation,
     });
 
@@ -227,22 +204,16 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(`Default agent cannot be deleted.`);
     }
 
-    let document: Document;
-    try {
-      document = await this.storage.getClient().get({ id });
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        throw createAgentNotFoundError({ agentId: id });
-      } else {
-        throw e;
-      }
-    }
-
-    if (!hasAccess({ profile: document, user: this.user })) {
+    const document = await this._get(id);
+    if (!document) {
       throw createAgentNotFoundError({ agentId: id });
     }
 
-    const deleteResponse = await this.storage.getClient().delete({ id });
+    if (!hasAccess({ document, user: this.user })) {
+      throw createAgentNotFoundError({ agentId: id });
+    }
+
+    const deleteResponse = await this.storage.getClient().delete({ id: document._id });
     return deleteResponse.result === 'deleted';
   }
 
@@ -264,25 +235,43 @@ class AgentClientImpl implements AgentClient {
     if (agentId === oneChatDefaultAgentId) {
       return true;
     }
-    try {
-      await this.storage.getClient().get({ id: agentId });
-      return true;
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        return false;
-      } else {
-        throw e;
-      }
+    const document = await this._get(agentId);
+    return !!document;
+  }
+
+  private async _get(agentId: string): Promise<Document | undefined> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                // BWC compatibility with M1 - agentId was stored as the _id
+                should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+    if (response.hits.hits.length === 0) {
+      return undefined;
+    } else {
+      return response.hits.hits[0] as Document;
     }
   }
 }
 
 const hasAccess = ({
-  profile,
+  document,
   user,
 }: {
-  profile: Pick<Document, '_source'>;
-  user?: UserIdAndName;
+  document: Pick<Document, '_source'>;
+  user: UserIdAndName;
 }) => {
   // no access control for now
   return true;
