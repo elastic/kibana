@@ -7,5 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isValidUTCDate, formatTime, getPlaywrightGrepTag, execPromise } from './runner_utils';
-export { createLocator, type SelectorInput } from './locator_helper';
+import fs from 'fs';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+const getEuiVersion = () => {
+  const packageJsonPath = path.join(REPO_ROOT, 'package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+  return packageJson.dependencies['@elastic/eui'];
+};
+
+export const getEuiBaseUrlWithVersion = () => {
+  const currentVersion = getEuiVersion();
+  return `https://eui.elastic.co/v${currentVersion}`;
+};

@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isValidUTCDate, formatTime, getPlaywrightGrepTag, execPromise } from './runner_utils';
-export { createLocator, type SelectorInput } from './locator_helper';
+import { EuiComboBoxWrapper } from './combo_box';
+import { EuiSelectableWrapper } from './selectable';
+import { EuiCheckBoxWrapper } from './check_box';
+
+export { EuiComboBoxWrapper, EuiSelectableWrapper, EuiCheckBoxWrapper };

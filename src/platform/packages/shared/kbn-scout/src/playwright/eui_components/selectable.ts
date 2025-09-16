@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { subj } from '@kbn/test-subj-selector';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { ScoutPage } from '../fixtures/scope/test/scout_page';
+import { createLocator, type SelectorInput } from '../utils';
+
+// https://eui.elastic.co/docs/components/forms/selection/selectable/
+export class EuiSelectableWrapper {
+  private readonly selectableWrapper: Locator;
+  private readonly selectableList: Locator;
+  private readonly selectableSearchInput: Locator;
+  private readonly selectableClearButton: Locator;
+  private readonly selectedOptions: Locator;
+
+  /**
+   * Create a new EuiSelectableWrapper instance.
+   * new EuiSelectableWrapper(page, { dataTestSubj: 'mySelectable' })
+   * new EuiSelectableWrapper(page, 'mySelectable') // backward compatibility
+   * new EuiSelectableWrapper(page, { locator: 'role=combobox[name="Searchable example"]' })
+   */
+  constructor(page: ScoutPage, selector: SelectorInput) {
+    this.selectableWrapper = createLocator(page, selector);
+
+    this.selectableList = this.selectableWrapper.locator(subj('euiSelectableList'));
+    this.selectableSearchInput = this.selectableWrapper.locator('.euiFieldSearch');
+    this.selectableClearButton = this.selectableWrapper.locator(subj('clearSearchButton'));
+    this.selectedOptions = this.selectableList.locator('li[role="option"][aria-checked="true"]');
+  }
+
+  async getSelectedOptions() {
+    const selectedOptionElements = await this.selectedOptions.all();
+
+    const selectedOptions = [];
+    for (const element of selectedOptionElements) {
+      const title = await element.getAttribute('title');
+      if (title) {
+        selectedOptions.push(title);
+      }
+    }
+    return selectedOptions;
+  }
+
+  private async checkIfSelected(value: string): Promise<boolean> {
+    const selectedOptions = await this.getSelectedOptions();
+    return selectedOptions.includes(value);
+  }
+
+  private async clickOption(value: string) {
+    await this.selectableList.locator(`li[role="option"][title="${value}"]`).click();
+  }
+
+  async searchAndSelectFirst(value: string) {
+    await this.selectableSearchInput.click();
+    await this.selectableSearchInput.pressSequentially(value, { delay: 50 });
+    await this.clickOption(value);
+    await this.selectableClearButton.click();
+  }
+
+  async select(value: string) {
+    if (await this.checkIfSelected(value)) {
+      throw Error(`Value "${value}" is already selected in the selectable`);
+    }
+    await this.clickOption(value);
+    await expect(
+      this.selectableList.locator(`li[role="option"][title="${value}"]`)
+    ).toHaveAttribute('aria-checked', 'true');
+  }
+
+  async unselect(value: string) {
+    if (!(await this.checkIfSelected(value))) {
+      throw Error(`Value "${value}" is not selected in the selectable`);
+    }
+    await this.clickOption(value);
+    await expect(
+      this.selectableList.locator(`li[role="option"][title="${value}"]`)
+    ).toHaveAttribute('aria-checked', 'false');
+  }
+}
