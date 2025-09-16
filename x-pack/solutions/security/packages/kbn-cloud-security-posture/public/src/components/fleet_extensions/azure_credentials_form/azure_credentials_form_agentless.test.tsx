@@ -61,7 +61,7 @@ const uiSettingsClient = coreMock.createStart().uiSettings;
 
 const AzureCredentialsFormAgentlessWrapper = ({
   initialPolicy = getMockPolicyAWS(),
-  packageInfo = getPackageInfoMock({ includeCloudFormationTemplates: true }) as PackageInfo,
+  packageInfo = getPackageInfoMock({ includeAzureTemplates: true }) as PackageInfo,
   setupTechnology = SetupTechnology.AGENTLESS,
   hasInvalidRequiredVars = false,
   cloud,
@@ -160,9 +160,6 @@ describe('AzureCredentialsFormAgentless', () => {
             AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
           )
         );
-        expect(
-          screen.getByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
-        ).toBeInTheDocument();
 
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
@@ -220,6 +217,9 @@ describe('AzureCredentialsFormAgentless', () => {
         ).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
+        ).toBeInTheDocument();
       });
     });
   });
@@ -243,6 +243,9 @@ describe('AzureCredentialsFormAgentless', () => {
         ).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
+        ).toBeInTheDocument();
       });
 
       it('shows client, tenant and secret key when selecting service principal with client secret credential', async () => {
@@ -260,17 +263,11 @@ describe('AzureCredentialsFormAgentless', () => {
             AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
           )
         );
-        expect(
-          screen.getByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
-        ).toBeInTheDocument();
 
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
-        ).toBeInTheDocument();
-        expect(
-          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
         ).toBeInTheDocument();
       });
 

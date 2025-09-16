@@ -35,6 +35,11 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 );
 
 describe('useCloudSetup', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCloud.cloudId =
+      'my-deployment:ZXhhbXBsZS5jbG91ZC5lbGFzdGljLmNvJGRlZmF1bHQkY2liYW5hLWNvbXBvbmVudC1pZCRvdGhlcg==';
+  });
   it('throws if used outside provider', () => {
     expect(() => renderHook(() => useCloudSetup())).toThrow(
       'useCloudSetup must be used within a CloudSetupProvider'
@@ -44,7 +49,7 @@ describe('useCloudSetup', () => {
   it('returns correct defaultProvider and templateName', () => {
     const { result } = renderHook(() => useCloudSetup(), { wrapper });
     expect(result.current.defaultProvider).toBe(AWS_PROVIDER);
-    expect(result.current.templateName).toBe('test-template');
+    expect(result.current.templateName).toBe('cspm');
   });
 
   it('returns correct awsPolicyType and awsOverviewPath', () => {
