@@ -43,7 +43,8 @@ export function getImportTransformsFactory(
       const typeSupportsAccessControl = typeRegistry.supportsAccessControl(obj.type);
       const { title } = obj.attributes;
 
-      if (typeSupportsAccessControl && !obj.accessControl) {
+      // Require at least the mode, or nothing at all
+      if (typeSupportsAccessControl && obj.accessControl && !obj.accessControl.accessMode) {
         errors.push({
           id: obj.id,
           type: obj.type,

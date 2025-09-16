@@ -196,6 +196,7 @@ export const performBulkCreate = async <T>(
     };
   });
 
+  // ToDo: need to pass in overwrite flag to check owned objects!
   const authorizationResult = await securityExtension?.authorizeBulkCreate({
     namespace,
     objects: authObjects,
