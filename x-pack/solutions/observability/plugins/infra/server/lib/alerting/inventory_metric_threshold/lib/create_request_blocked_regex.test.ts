@@ -20,7 +20,7 @@ describe('ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX', () => {
   });
 
   it('should not match unrelated fields', () => {
-    const unrelatedFields = [
+    const allowedFields = [
       'host.memory.usage',
       'host.cpu',
       'hos*.cpu.**',
@@ -32,20 +32,20 @@ describe('ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX', () => {
       'cloud.instance.id',
       'labels.env',
     ];
-    for (const field of unrelatedFields) {
+    for (const field of allowedFields) {
       expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test(field)).toBe(false);
     }
   });
 
   it('should match fields with any suffix after the wildcard', () => {
-    expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test('host.cpu.total')).toBe(true);
-    expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test('host.disk.read')).toBe(true);
-    expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test('host.network.in')).toBe(true);
+    const fields = ['host.cpu.total', 'host.disk.read', 'host.network.in'];
+    fields.forEach((field) => expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test(field)).toBe(true));
   });
 
   it('should not match partial field names', () => {
-    expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test('host.cpu')).toBe(false);
-    expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test('host.disk')).toBe(false);
-    expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test('host.network')).toBe(false);
+    const fields = ['host.cpu', 'host.disk', 'host.network'];
+    fields.forEach((field) =>
+      expect(ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test(field)).toBe(false)
+    );
   });
 });
