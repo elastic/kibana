@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import type { Streams } from '@kbn/streams-schema';
 import type {
   ContentPackEntry,
@@ -15,6 +16,7 @@ import type {
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +24,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
@@ -30,7 +34,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
-import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
 import { hasSelectedObjects } from './helpers';
 
@@ -69,53 +72,83 @@ export function ImportContentPackFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiFilePicker
-          id={'streams-content-import'}
-          multiple={false}
-          initialPromptText="Select a streams content file"
-          fullWidth
-          onChange={async (files) => {
-            if (files?.length) {
-              const archiveFile = files.item(0);
-              if (!archiveFile) return;
-
-              setFile(archiveFile);
-
-              try {
-                const contentPackParsed = await previewContent({
-                  http,
-                  definition,
-                  file: archiveFile,
-                });
-
-                setManifest({
-                  name: contentPackParsed.name,
-                  version: contentPackParsed.version,
-                  description: contentPackParsed.description,
-                });
-                setContentPackObjects(contentPackParsed.entries);
-              } catch (err) {
-                setFile(null);
-
-                notifications.toasts.addError(err, {
-                  title: i18n.translate('xpack.streams.failedToPreviewContentError', {
-                    defaultMessage: 'Failed to preview content pack',
-                  }),
-                  toastMessage: getFormattedError(err).message,
-                });
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+        `}
+      >
+        {!file && (
+          <EuiFilePicker
+            css={css`
+              height: 100%;
+              > div {
+                height: 100%;
               }
-            } else {
-              setFile(null);
-            }
-          }}
-          display={'large'}
-        />
+            `}
+            id={'streams-content-import'}
+            multiple={false}
+            initialPromptText="Select a streams content file"
+            fullWidth
+            onChange={async (files) => {
+              if (files?.length) {
+                const archiveFile = files.item(0);
+                if (!archiveFile) return;
+
+                setFile(archiveFile);
+
+                try {
+                  const contentPackParsed = await previewContent({
+                    http,
+                    definition,
+                    file: archiveFile,
+                  });
+
+                  setManifest({
+                    name: contentPackParsed.name,
+                    version: contentPackParsed.version,
+                    description: contentPackParsed.description,
+                  });
+                  setContentPackObjects(contentPackParsed.entries);
+                } catch (err) {
+                  setFile(null);
+
+                  notifications.toasts.addError(err, {
+                    title: i18n.translate('xpack.streams.failedToPreviewContentError', {
+                      defaultMessage: 'Failed to preview content pack',
+                    }),
+                    toastMessage: getFormattedError(err).message,
+                  });
+                }
+              } else {
+                setFile(null);
+              }
+            }}
+            display={'large'}
+          />
+        )}
 
         {file && manifest ? (
           <>
-            <EuiSpacer />
-            <ContentPackMetadata manifest={manifest} readonly={true} />
+            <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexGroup alignItems="center" gutterSize="m">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="package" />
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    {manifest.name} {manifest.version}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="cross" color="danger" onClick={() => setFile(null)} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+
             <EuiSpacer />
 
             <ContentPackObjectsList
