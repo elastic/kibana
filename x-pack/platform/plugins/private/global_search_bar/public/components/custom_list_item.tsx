@@ -55,10 +55,6 @@ export const CustomListItem: React.FC<CustomListItemProps> = ({
         css={css`
           cursor: pointer;
           outline: none;
-          &:focus {
-            outline: 2px solid ${euiTheme.colors.primary};
-            outline-offset: -2px;
-          }
         `}
         data-test-subj={`nav-search-option-${option.key}`}
       >
@@ -81,17 +77,12 @@ export const CustomListItem: React.FC<CustomListItemProps> = ({
         gap: 8px;
         padding: 8px 12px;
         cursor: pointer;
-        border-radius: 6px;
+        border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
         transition: background-color 0.2s ease;
         outline: none;
         
         &:hover {
           background-color: ${euiTheme.colors.lightestShade};
-        }
-        
-        &:focus {
-          outline: 2px solid ${euiTheme.colors.primary};
-          outline-offset: -2px;
         }
         
         ${isSelected && `
@@ -149,7 +140,6 @@ export const CustomListItem: React.FC<CustomListItemProps> = ({
             css={css`
               flex-shrink: 0;
               color: ${isSelected ? euiTheme.colors.ghost : euiTheme.colors.subduedText};
-              font-size: ${euiTheme.size.s};
               margin-left: 16px;
             `}
           >

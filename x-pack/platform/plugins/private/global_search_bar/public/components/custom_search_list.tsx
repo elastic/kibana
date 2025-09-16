@@ -117,7 +117,6 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
       css={css`
         height: 600px;
         overflow-y: auto;
-        padding: 8px;
         outline: none;
         
         &::-webkit-scrollbar {
@@ -149,7 +148,7 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
       
       {/* Search options */}
       {options.map((option, index) => (
-        <div key={option.key || index} css={css`margin-bottom: 2px;`}>
+        <div key={option.key || index} >
           <CustomListItem
             option={option}
             searchValue={searchValue}

@@ -7,14 +7,22 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 interface PopoverFooterProps {
   isMac: boolean;
 }
 
 export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
+  const { euiTheme } = useEuiTheme();
+  
+  const footerStyles = css`
+    border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    padding: 8px 16px;
+  `;
+  
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -22,6 +30,7 @@ export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
       gutterSize="s"
       responsive={false}
       wrap
+      css={footerStyles}
     >
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
