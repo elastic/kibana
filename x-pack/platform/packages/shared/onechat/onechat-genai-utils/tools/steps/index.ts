@@ -20,3 +20,9 @@ export {
   type EsSearchSource,
   type ListSourcesResponse,
 } from './list_search_sources';
+export {
+  scoreRelevance,
+  RelevanceScore,
+  type RelevanceCandidate,
+  type RatingWithReason,
+} from './score_relevance';
