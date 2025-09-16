@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentFrameworkSection } from './section';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { ContentFrameworkSectionProps } from './section/section';
 
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default ContentFrameworkSection;
+const LazyContentFrameworkSection = React.lazy(() => import('./section'));
+export const ContentFrameworkSection = withSuspense<ContentFrameworkSectionProps>(
+  LazyContentFrameworkSection,
+  <></>
+);

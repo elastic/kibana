@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { StacktraceContent } from './sub_components/stacktrace/stacktrace_content';
 import type { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
 import { ScrollableSectionWrapper } from './scrollable_section_wrapper';
-import { ContentFrameworkSection } from '../content_framework/section';
+import { ContentFrameworkSection } from '../..';
 
 const stacktraceAccordionTitle = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.accordion.title.stacktrace',

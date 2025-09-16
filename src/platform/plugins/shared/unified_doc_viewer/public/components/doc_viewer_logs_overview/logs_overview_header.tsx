@@ -16,7 +16,7 @@ import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/pu
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
-import { ContentFrameworkSection } from '../content_framework/section';
+import { ContentFrameworkSection } from '../..';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
