@@ -26,7 +26,11 @@ import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import {
+  DocumentDetailsPreviewPanelKey,
+  DocumentDetailsGroupPreviewPanelKey,
+} from '../../shared/constants/panel_keys';
+import { GROUP_PREVIEW_BANNER } from '../../group_preview/constants';
 import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
 import { useToasts } from '../../../../common/lib/kibana';
 
@@ -65,6 +69,104 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onOpenGroupPreview = useCallback(
+    (node: NodeViewModel) => {
+      openPreviewPanel({
+        id: DocumentDetailsGroupPreviewPanelKey,
+        params: {
+          id: node.id,
+          scopeId,
+          isPreviewMode: true,
+          banner: GROUP_PREVIEW_BANNER,
+          items: [
+            {
+              type: 'entity',
+              id: `${node.id}-entity`,
+              icon: node.icon || 'storage',
+              tag: node.tag || 'host',
+              label: node.label || node.id,
+              timestamp: new Date().toISOString(), // TODO where do I get it?
+              risk: 80,
+              ip: '10.200.0.202',
+              countryCode: 'US',
+            },
+            {
+              type: 'entity',
+              id: `${node.id}-entity-long`,
+              icon: node.icon || 'storage',
+              tag:
+                node.tag ||
+                'super long name here to prove that ellipsis is rendered fine or else we are screwed so fix it and dont forget a tooltip',
+              label: node.label || node.id,
+              timestamp: new Date().toISOString(), // TODO where do I get it?
+              risk: 80,
+              ip: '10.200.0.202',
+              countryCode: 'US',
+            },
+            {
+              type: 'event',
+              id: `${node.id}-event`,
+              actor: {
+                id: 'actor-id',
+                icon: 'user',
+                label: 'tin@elastic.co',
+              },
+              target: {
+                id: 'target-id',
+                icon: 'storage',
+                label: 'esd-security',
+              },
+              action: 'user.authentication',
+              timestamp: new Date().toISOString(), // TODO where do I get it?
+            },
+            {
+              type: 'alert',
+              id: `${node.id}-alert`,
+              actor: {
+                id: 'actor-id',
+                icon: 'user',
+                label: 'tin@elastic.co',
+              },
+              target: {
+                id: 'target-id',
+                icon: 'storage',
+                label: 'esd-security',
+              },
+              action: 'user.authentication',
+              timestamp: new Date().toISOString(), // TODO where do I get it?
+            },
+          ],
+        },
+      });
+
+      // if (
+      //   getNodeDocumentMode(node) === 'grouped-events' ||
+      //   getNodeDocumentMode(node) === 'grouped-entities'
+      // ) {
+      //   openPreviewPanel({
+      //     id: DocumentDetailsGroupPreviewPanelKey,
+      //     params: {
+      //       id: node.id,
+      //       count: node.count, // if we're here, count is a number > 1
+      //       title: node.tag || node.label, // need to pluralize "host" -> "hosts"
+      //     },
+      //   });
+      // } else {
+      //   toasts.addDanger({
+      //     title: i18n.translate(
+      //       'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
+      //       {
+      //         defaultMessage: 'Failed showing preview',
+      //       }
+      //     ),
+      //   });
+      // }
+    },
+    // [toasts, openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId]
+  );
+
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
       const documentData = getSingleDocumentData(node);
@@ -165,7 +267,9 @@ export const GraphVisualization: React.FC = memo(() => {
             showInvestigateInTimeline={true}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
-            onOpenEventPreview={onOpenEventPreview}
+            // onOpenEventPreview={onOpenEventPreview}
+            onOpenEventPreview={onOpenGroupPreview}
+            onOpenGroupPreview={onOpenGroupPreview}
           />
         </React.Suspense>
       )}
