@@ -204,7 +204,7 @@ describe('StartMigrationsBody', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('migrationProgressPanel')).toBeVisible();
+      expect(screen.getByTestId('ruleMigrationProgressPanel')).toBeVisible();
     });
   });
 
