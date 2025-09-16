@@ -44,7 +44,6 @@ import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_ani
 import { getOverlayBackdropStyles } from './overlay_styles';
 import { VersionSelectorPanel, type DesignVersion } from './version_selector_panel';
 import { SearchList } from './search_list';
-import { addCustomComponent, createDemoCustomComponent } from './search_list_utils';
 
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
@@ -106,19 +105,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
   const [isOverlayMode, setIsOverlayMode] = useState(false);
   const [designVersion, setDesignVersion] = useState<DesignVersion>('regular-user');
-  const [customComponents, setCustomComponents] = useState<React.ReactNode[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Highlight animation hook
   const { isHighlighted, triggerHighlight } = useHighlightAnimation(chromeStyle === 'project');
 
-  // Add demo custom components
-  useEffect(() => {
-    if (searchValue === '' && customComponents.length === 0) {
-      const demoComponent = createDemoCustomComponent('demo-custom');
-      addCustomComponent(demoComponent, setCustomComponents);
-    }
-  }, [searchValue, customComponents.length]);
 
   const defaultStyles = css({
     [useEuiBreakpoint(['m', 'l'])]: {
@@ -156,12 +147,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   // Control popover visibility
   useEffect(() => {
-    if (initialLoad && (options.length > 0 || customComponents.length > 0)) {
+    if (initialLoad && options.length > 0) {
       setIsPopoverOpen(true);
     } else {
       setIsPopoverOpen(false);
     }
-  }, [initialLoad, options.length, customComponents.length]);
+  }, [initialLoad, options.length]);
 
   // When overlay mode is activated, ensure popover shows immediately and focus input
   useEffect(() => {
@@ -536,11 +527,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         return <SearchCharLimitExceededMessage {...props} />;
       }
       
-      if (!initialLoad || (!options.length && !customComponents.length && isLoading)) {
+      if (!initialLoad || (!options.length && isLoading)) {
         return <EmptyMessage />;
       }
       
-      if (!options.length && !customComponents.length) {
+      if (!options.length) {
         return <SearchPopoverPlaceholder basePath={props.basePathUrl} />;
       }
 
@@ -550,7 +541,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchValue={searchValue}
           onOptionClick={handleOptionClick}
           isLoading={isLoading}
-          customComponents={customComponents}
+          customComponents={[]}
           emptyMessage={<SearchPopoverPlaceholder basePath={props.basePathUrl} />}
           showSuggestedTitle={true}
         />

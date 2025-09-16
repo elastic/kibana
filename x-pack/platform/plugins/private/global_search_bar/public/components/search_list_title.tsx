@@ -19,8 +19,9 @@ export const SearchListTitle: React.FC<SearchListTitleProps> = ({ title }) => {
   const titleStyles = css`
     padding: 8px 16px;
     margin: 0;
-    background-color: ${euiTheme.colors.lightestShade};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0;
     font-weight: ${euiTheme.font.weight.medium};
     color: ${euiTheme.colors.textSubdued};
   `;
@@ -28,9 +29,9 @@ export const SearchListTitle: React.FC<SearchListTitleProps> = ({ title }) => {
   return (
     <div css={titleStyles} data-test-subj="search-title">
       <EuiText size="s">
-        <h3 css={css`margin: 0; font-weight: inherit;`}>
+        <h5 css={css`margin: 0; font-weight: inherit;`}>
           {title}
-        </h3>
+        </h5>
       </EuiText>
     </div>
   );
