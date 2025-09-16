@@ -14,18 +14,13 @@ import { getProcessingPipelineName } from './name';
 
 export function generateIngestPipeline(
   name: string,
-  definition: Streams.all.Definition,
-  {
-    isServerless,
-  }: {
-    isServerless: boolean;
-  }
+  definition: Streams.all.Definition
 ): IngestPutPipelineRequest {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
   return {
     id: getProcessingPipelineName(name),
     processors: [
-      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors(isServerless) : []),
+      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors() : []),
       ...(!isRoot(definition.name) && isWiredStream
         ? [
             {
@@ -60,12 +55,8 @@ export function generateIngestPipeline(
         },
       },
     ],
-    // root doesn't need flexible access pattern because it can't contain custom processing and default special case processing doesn't work properly with it
-    ...(!isRoot(definition.name)
-      ? {
-          field_access_pattern: 'flexible',
-        }
-      : {}),
+    // @ts-expect-error @elastic/elasticsearch field - missing in types
+    field_access_pattern: 'flexible',
     _meta: {
       description: `Default pipeline for the ${name} stream`,
       managed: true,
