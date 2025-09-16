@@ -43,10 +43,6 @@ function expand(name: string, patterns: string[], knownPaths: string[]) {
     matcher: makeMatcher([pattern]),
   }));
 
-  if (!knownPaths) {
-    throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
-  }
-
   const selected = matchers.map(({ matcher, pattern }) => ({
     pattern,
     matches: knownPaths.filter(matcher),
@@ -75,6 +71,10 @@ export class TsProject {
     }
 
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
+
+    if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
+      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+    }
 
     const ignores = expand('ignore', options.ignore, tsConfigRepoRels);
     const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
