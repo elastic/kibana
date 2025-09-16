@@ -156,6 +156,10 @@ describe('JOIN Autocomplete', () => {
         filterText: 'new_join_index',
         kind: 'Issue',
         label: 'Create lookup index "new_join_index"',
+        rangeToReplace: {
+          end: 37,
+          start: 23,
+        },
         sortText: '1A',
         text: 'new_join_index',
       });
