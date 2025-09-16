@@ -42,8 +42,7 @@
     "@kbn/search-types",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/presentation-util",
-    "@kbn/timerange"
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }
