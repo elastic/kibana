@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ContentPackIncludedObjects } from '@kbn/content-packs-schema';
+import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { isIncludeAll } from '@kbn/content-packs-schema';
 
 export function hasSelectedObjects(includedObjects: ContentPackIncludedObjects): boolean {
@@ -14,4 +14,8 @@ export function hasSelectedObjects(includedObjects: ContentPackIncludedObjects):
     includedObjects.objects.queries.length > 0 ||
     includedObjects.objects.routing.length > 0
   );
+}
+
+export function containsAssets(streams: ContentPackStream[]): boolean {
+  return streams.some((stream) => stream.request.queries.length > 0);
 }

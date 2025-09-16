@@ -14,10 +14,11 @@ import type {
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { getSegments, isChildOf } from '@kbn/streams-schema';
-import { EuiCheckbox, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { StreamTree } from './tree';
+import { containsAssets } from '../helpers';
 
 export function ContentPackObjectsList({
   definition,
@@ -33,19 +34,18 @@ export function ContentPackObjectsList({
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.available;
-  const [includeAssets, setIncludeAssets] = useState<boolean>(isSignificantEventsEnabled);
+  const [includeAssets, setIncludeAssets] = useState<boolean>(false);
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({});
 
   useEffect(() => {
     if (!significantEvents) return;
-    setIncludeAssets(significantEvents.available);
+    const streams = objects.filter((entry): entry is ContentPackStream => entry.type === 'stream');
+    setIncludeAssets(significantEvents.available && containsAssets(streams));
     setSelection({
-      ...objects
-        .filter((entry): entry is ContentPackStream => entry.type === 'stream')
-        .reduce((map, stream) => {
-          map[stream.name] = { selected: true };
-          return map;
-        }, {} as Record<string, { selected: boolean }>),
+      ...streams.reduce((map, stream) => {
+        map[stream.name] = { selected: true };
+        return map;
+      }, {} as Record<string, { selected: boolean }>),
     });
   }, [significantEvents?.available, objects]);
 
@@ -73,6 +73,7 @@ export function ContentPackObjectsList({
         {isSignificantEventsEnabled ? (
           <EuiCheckbox
             id="include-all-assets"
+            disabled={!containsAssets([rootEntry, ...descendants])}
             checked={includeAssets}
             label={i18n.translate('xpack.streams.contentPackObjectsList.includeAllAssets', {
               defaultMessage:
