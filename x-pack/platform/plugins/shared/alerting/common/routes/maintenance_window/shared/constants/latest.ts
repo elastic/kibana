@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export type { MaintenanceWindowCategoryIdTypes } from './v1';
-
-export {
-  maintenanceWindowCategoryIdTypes,
-  maxMaintenanceWindowDocs,
-  maintenanceWindowStatus,
-} from './v1';
+export { maintenanceWindowCategoryIdTypes, maintenanceWindowStatus } from './v1';

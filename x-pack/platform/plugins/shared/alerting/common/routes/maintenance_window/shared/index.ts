@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export {
-  maintenanceWindowCategoryIdTypes,
-  maxMaintenanceWindowDocs,
-  maintenanceWindowStatus,
-} from './constants/latest';
-export type { MaintenanceWindowCategoryIdTypes } from './constants/latest';
+export { maintenanceWindowCategoryIdTypes, maintenanceWindowStatus } from './constants/latest';
 export {
   maintenanceWindowCategoryIdsSchema,
   maintenanceWindowStatusSchema,
@@ -19,10 +14,8 @@ export type { MaintenanceWindowCategoryIds } from './types/latest';
 
 export {
   maintenanceWindowCategoryIdTypes as maintenanceWindowCategoryIdTypesV1,
-  maxMaintenanceWindowDocs as maxMaintenanceWindowDocsV1,
   maintenanceWindowStatus as maintenanceWindowStatusV1,
 } from './constants/v1';
-export type { MaintenanceWindowCategoryIdTypes as MaintenanceWindowCategoryIdTypesV1 } from './constants/v1';
 export {
   maintenanceWindowCategoryIdsSchema as maintenanceWindowCategoryIdsSchemaV1,
   maintenanceWindowStatusSchema as maintenanceWindowStatusSchemaV1,

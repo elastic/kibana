@@ -26,3 +26,21 @@ export const maintenanceWindowStatusSchema = schema.oneOf([
   schema.literal(maintenanceWindowStatus.UPCOMING),
   schema.literal(maintenanceWindowStatus.ARCHIVED),
 ]);
+
+export const maintenanceWindowPageSchema = schema.number({
+  defaultValue: 1,
+  min: 1,
+  max: 100,
+  meta: {
+    description: 'The page number to return.',
+  },
+});
+
+export const maintenanceWindowPerPageSchema = schema.number({
+  defaultValue: 10,
+  min: 1,
+  max: 100,
+  meta: {
+    description: 'The number of maintenance windows to return per page.',
+  },
+});
