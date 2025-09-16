@@ -37,16 +37,16 @@ export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
           <p>
             <FormattedMessage
               id="xpack.globalSearchBar.searchBar.helpText.helpTextPrefix"
-              defaultMessage="Filter by"
+              defaultMessage="Search by"
             />
             &nbsp;
-            <EuiCode>type:</EuiCode>&nbsp;
+            <EuiCode>type</EuiCode>&nbsp;
             <FormattedMessage
               id="xpack.globalSearchBar.searchBar.helpText.helpTextConjunction"
               defaultMessage="or"
             />
             &nbsp;
-            <EuiCode>tag:</EuiCode>
+            <EuiCode>tag</EuiCode>
           </p>
         </EuiText>
       </EuiFlexItem>

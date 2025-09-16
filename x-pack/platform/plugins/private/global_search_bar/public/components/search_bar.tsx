@@ -559,7 +559,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     const popoverContent = (
       <div
         css={css`
-          width: 600px;
+          width: 700px;
           max-width: 90vw;
         `}
       >
@@ -574,7 +574,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         <div
           css={css`
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             position: relative;
             ${highlightStyles}
           `}
