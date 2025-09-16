@@ -84440,12 +84440,12 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         - type: object
           properties:
-            '@timestamp':
-              format: date-time
-              type: string
             event:
               type: object
               properties:
+                '@timestamp':
+                  format: date-time
+                  type: string
                 ingested:
                   format: date-time
                   type: string
@@ -84788,6 +84788,24 @@ components:
     Security_Entity_Analytics_API_UserName:
       type: object
       properties:
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  source:
+                    enum:
+                      - api
+                      - csv
+                      - index_sync
+                    type: string
+                  value:
+                    type: string
+              type: array
         user:
           type: object
           properties:
