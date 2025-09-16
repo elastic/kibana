@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { boomify, isBoom } from '@hapi/boom';
-import type { TypeOf } from '@kbn/config-schema';
 
 import {
   LENS_VIS_API_PATH,
@@ -16,18 +14,18 @@ import {
   LENS_CONTENT_TYPE,
 } from '../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
-import type { RegisterAPIRouteFn } from '../../types';
-import { ConfigBuilderStub } from '../../../../common/transforms';
+import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
+  lensUpdateRequestQuerySchema,
   lensUpdateResponseBodySchema,
 } from './schema';
-import { getLensResponseItem } from '../utils';
+import { getLensRequestConfig, getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -56,6 +54,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
         request: {
           params: lensUpdateRequestParamsSchema,
           body: lensUpdateRequestBodySchema,
+          query: lensUpdateRequestQuerySchema,
         },
         response: {
           200: {
@@ -86,26 +85,20 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { references, ...lensItem } = omit(
-        ConfigBuilderStub.in({
-          id: '', // TODO: Find a better way to conditionally omit id
-          ...req.body.data,
-        }),
-        'id'
-      );
+      // Note: these types are to enforce loose param typings of client methods
+      const { references, ...data } = getLensRequestConfig(builder, req.body);
+      const options: LensUpdateIn['options'] = { ...req.query, references };
 
       try {
-        // Note: these types are to enforce loose param typings of client methods
-        const data: LensUpdateIn['data'] = lensItem;
-        const options: LensUpdateIn['options'] = { references };
         const { result } = await client.update(req.params.id, data, options);
 
         if (result.item.error) {
           throw result.item.error;
         }
 
-        return res.ok<TypeOf<typeof lensUpdateResponseBodySchema>>({
-          body: getLensResponseItem(result.item),
+        const responseItem = getLensResponseItem(builder, result.item);
+        return res.ok<LensUpdateResponseBody>({
+          body: responseItem,
         });
       } catch (error) {
         if (isBoom(error)) {

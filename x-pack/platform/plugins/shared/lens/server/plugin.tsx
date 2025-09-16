@@ -29,6 +29,7 @@ import type {
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -107,9 +108,11 @@ export class LensServerPlugin
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
 
+    const builder = new LensConfigBuilder();
     registerLensAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,
+      builder,
       logger: this.logger,
     });
 
