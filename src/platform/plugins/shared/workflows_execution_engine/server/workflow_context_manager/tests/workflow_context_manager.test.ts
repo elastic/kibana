@@ -24,15 +24,27 @@ describe('WorkflowContextManager', () => {
       workflowDefinition: workflow,
     } as EsWorkflowExecution);
 
+    // Provide a dummy esClient as required by ContextManagerInit
+    const esClient = {
+      // Add only the minimal mock implementation needed for tests
+      search: jest.fn(),
+      index: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    } as any;
+
     const underTest = new WorkflowContextManager({
       workflowExecutionGraph,
       workflowExecutionRuntime,
+      esClient,
     });
 
     return {
       workflowExecutionGraph,
       workflowExecutionRuntime,
       underTest,
+      esClient,
     };
   }
 

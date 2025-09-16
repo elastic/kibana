@@ -37,6 +37,8 @@ import {
   ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { KibanaActionStepImpl } from './kibana_action_step';
 
 export class StepFactory {
   constructor(
@@ -57,12 +59,18 @@ export class StepFactory {
     if (!stepType) {
       throw new Error('Step type is not defined for step: ' + JSON.stringify(step));
     }
+
     const stepLogger = this.workflowLogger.createStepLogger(
       this.workflowRuntime.getCurrentStepExecutionId(),
       stepId,
       stepId,
       stepType
     );
+
+    // Check if it's an internal action type
+    const isElasticsearchAction = stepType && stepType.startsWith('elasticsearch.');
+    const isKibanaAction = stepType && stepType.startsWith('kibana.');
+
     switch (stepType) {
       case 'enter-foreach':
         return new EnterForeachNodeImpl(
@@ -126,6 +134,7 @@ export class StepFactory {
           this.workflowTaskManager
         );
       case 'atomic':
+        // Default atomic step (connector-based)
         return new AtomicStepImpl(
           step as any,
           this.contextManager,
@@ -142,10 +151,37 @@ export class StepFactory {
           this.workflowRuntime
         );
       case 'parallel':
-      // return new ParallelStepImpl(step as ParallelStep, contextManager);
+        throw new Error(`Parallel step not implemented yet: ${stepType}`);
       case 'merge':
-      // return new MergeStepImpl(step as MergeStep, contextManager);
+        throw new Error(`Merge step not implemented yet: ${stepType}`);
       default:
+        // Handle elasticsearch.* and kibana.* actions
+        if (isElasticsearchAction) {
+          this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${stepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'elasticsearch', 'internal-action'],
+          });
+          return new ElasticsearchActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
+        if (isKibanaAction) {
+          this.workflowLogger.logInfo(`Creating Kibana action step: ${stepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'kibana', 'internal-action'],
+          });
+          return new KibanaActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
         throw new Error(`Unknown node type: ${stepType}`);
     }
   }
