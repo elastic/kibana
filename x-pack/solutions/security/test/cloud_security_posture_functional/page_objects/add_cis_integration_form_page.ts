@@ -329,6 +329,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
     const radioGroup = await testSubjects.find(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+    await radioGroup.scrollIntoView();
     const radio = await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
     await radio.click();
   };
