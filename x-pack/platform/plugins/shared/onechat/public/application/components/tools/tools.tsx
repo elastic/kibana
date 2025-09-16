@@ -11,6 +11,7 @@ import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useToolsActions } from '../../context/tools_provider';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
@@ -27,34 +28,35 @@ export const OnechatTools = () => {
       <KibanaPageTemplate.Header
         pageTitle={labels.tools.title}
         description={
-          <>
-            {i18n.translate('xpack.onechat.tools.toolsDescriptionPart1', {
-              defaultMessage: 'Tools are modular, reusable Elasticsearch operations. ',
-            })}
-            <EuiLink
-              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-              style={{ cursor: 'pointer' }}
-            >
-              {i18n.translate('xpack.onechat.tools.agentsLinkText', {
-                defaultMessage: 'Agents',
-              })}
-            </EuiLink>
-            {i18n.translate('xpack.onechat.tools.toolsDescriptionPart2', {
-              defaultMessage:
-                ' use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. ',
-            })}
-            <EuiLink
-              href="#"
-              aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
-                defaultMessage: 'Learn more about tools in the documentation',
-              })}
-            >
-              {i18n.translate('xpack.onechat.tools.toolsDocumentation', {
-                defaultMessage: 'Learn more',
-              })}{' '}
-              <EuiIcon type="popout" />
-            </EuiLink>
-          </>
+          <FormattedMessage
+            id="xpack.onechat.tools.toolsDescription"
+            defaultMessage="Tools are modular, reusable Elasticsearch operations. {agentsLink} use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
+            values={{
+              agentsLink: (
+                <EuiLink
+                  onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {i18n.translate('xpack.onechat.tools.agentsLinkText', {
+                    defaultMessage: 'Agents',
+                  })}
+                </EuiLink>
+              ),
+              learnMoreLink: (
+                <EuiLink
+                  href="#"
+                  aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
+                    defaultMessage: 'Learn more about tools in the documentation',
+                  })}
+                >
+                  {i18n.translate('xpack.onechat.tools.toolsDocumentation', {
+                    defaultMessage: 'Learn more',
+                  })}{' '}
+                  <EuiIcon type="popout" />
+                </EuiLink>
+              ),
+            }}
+          />
         }
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};

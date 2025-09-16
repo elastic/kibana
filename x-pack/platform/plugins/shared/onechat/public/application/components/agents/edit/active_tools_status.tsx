@@ -16,6 +16,7 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
@@ -91,19 +92,23 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
-                <EuiLink
-                  onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
-                    defaultMessage: 'Tools',
-                  })}
-                </EuiLink>{' '}
-                {i18n.translate('xpack.onechat.activeToolsStatus.description', {
-                  defaultMessage:
-                    'enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options.',
-                  values: { threshold: warningThreshold },
-                })}
+                <FormattedMessage
+                  id="xpack.onechat.activeToolsStatus.description"
+                  defaultMessage="{toolsLink} enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options."
+                  values={{
+                    toolsLink: (
+                      <EuiLink
+                        onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
+                          defaultMessage: 'Tools',
+                        })}
+                      </EuiLink>
+                    ),
+                    threshold: warningThreshold,
+                  }}
+                />
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

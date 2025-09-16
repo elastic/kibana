@@ -18,6 +18,7 @@ import {
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { ConversationContent } from './conversation_grid';
@@ -42,34 +43,32 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       defaultMessage: 'Welcome to Elastic Agent Builder',
     }),
     subtitle: (
-      <>
-        {i18n.translate('xpack.onechat.newConversationPrompt.subtitlePart1', {
-          defaultMessage: 'Work interactively with your AI ',
-        })}
-        <EuiLink
-          onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-          style={{ cursor: 'pointer' }}
-        >
-          {i18n.translate('xpack.onechat.newConversationPrompt.agentsLinkText', {
-            defaultMessage: 'agents',
-          })}
-        </EuiLink>
-        {i18n.translate('xpack.onechat.newConversationPrompt.subtitlePart2', {
-          defaultMessage:
-            ' using the chat interface. Your selected agent answers questions by searching your data with its assigned ',
-        })}
-        <EuiLink
-          onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
-          style={{ cursor: 'pointer' }}
-        >
-          {i18n.translate('xpack.onechat.newConversationPrompt.toolsLinkText', {
-            defaultMessage: 'tools',
-          })}
-        </EuiLink>
-        {i18n.translate('xpack.onechat.newConversationPrompt.subtitlePart3', {
-          defaultMessage: '.',
-        })}
-      </>
+      <FormattedMessage
+        id="xpack.onechat.newConversationPrompt.subtitle"
+        defaultMessage="Work interactively with your AI {agentsLink} using the chat interface. Your selected agent answers questions by searching your data with its assigned {toolsLink}."
+        values={{
+          agentsLink: (
+            <EuiLink
+              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
+              style={{ cursor: 'pointer' }}
+            >
+              {i18n.translate('xpack.onechat.newConversationPrompt.agentsLinkText', {
+                defaultMessage: 'agents',
+              })}
+            </EuiLink>
+          ),
+          toolsLink: (
+            <EuiLink
+              onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
+              style={{ cursor: 'pointer' }}
+            >
+              {i18n.translate('xpack.onechat.newConversationPrompt.toolsLinkText', {
+                defaultMessage: 'tools',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
     ),
   };
   return (

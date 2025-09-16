@@ -36,8 +36,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { css } from '@emotion/react';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { defer } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -402,26 +401,31 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         }
         description={
           isCreateMode ? (
-            <>
-              {i18n.translate('xpack.onechat.createAgent.description', {
-                defaultMessage:
-                  'Create an AI agent with custom instructions, assign it tools to work with your data, and make it easily findable for your team.',
-              })}{' '}
-              <EuiLink
-                href="#"
-                aria-label={i18n.translate(
-                  'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
-                  {
-                    defaultMessage: 'Learn more about agents in the documentation',
-                  }
-                )}
-              >
-                {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesLearnMore', {
-                  defaultMessage: 'Learn more',
-                })}{' '}
-                <EuiIcon type="popout" />
-              </EuiLink>
-            </>
+            <FormattedMessage
+              id="xpack.onechat.createAgent.description"
+              defaultMessage="Create an AI agent with custom instructions, assign it tools to work with your data, and make it easily findable for your team. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href="#"
+                    aria-label={i18n.translate(
+                      'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
+                      {
+                        defaultMessage: 'Learn more about agents in the documentation',
+                      }
+                    )}
+                  >
+                    {i18n.translate(
+                      'xpack.onechat.agents.form.settings.systemReferencesLearnMore',
+                      {
+                        defaultMessage: 'Learn more',
+                      }
+                    )}{' '}
+                    <EuiIcon type="popout" />
+                  </EuiLink>
+                ),
+              }}
+            />
           ) : (
             agentDescription
           )
