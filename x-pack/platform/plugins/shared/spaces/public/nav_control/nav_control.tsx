@@ -63,6 +63,7 @@ export function initSpacesNavControl(
               showTour$={tour.showTour$}
               onFinishTour={() => tour.finishTour()}
               manageSpacesDocsLink={core.docLinks.links.spaces.kibanaManageSpaces}
+              manageSpacesLink={core.http.basePath.prepend('/app/management/kibana/spaces')}
             />
           </Suspense>
         ),

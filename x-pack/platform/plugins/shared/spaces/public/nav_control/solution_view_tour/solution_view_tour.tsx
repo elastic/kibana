@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 import type { SolutionView } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
@@ -21,13 +22,13 @@ const solutionMap: Record<SolutionId, string> = {
     defaultMessage: 'Elasticsearch',
   }),
   security: i18n.translate('xpack.spaces.navControl.tour.securitySolution', {
-    defaultMessage: 'Security',
+    defaultMessage: 'Elastic Security',
   }),
   oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
-    defaultMessage: 'Observability',
+    defaultMessage: 'Elastic Observability',
   }),
   chat: i18n.translate('xpack.spaces.navControl.tour.chatSolution', {
-    defaultMessage: 'Workchat',
+    defaultMessage: 'Elastic Workchat',
   }),
 };
 
@@ -37,6 +38,7 @@ interface Props extends PropsWithChildren<{}> {
   onFinishTour: () => void;
   manageSpacesDocsLink: string;
   manageSpacesLink: string;
+  navigateToUrl: (url: string) => void;
 }
 
 export const SolutionViewTour: FC<Props> = ({
@@ -46,6 +48,7 @@ export const SolutionViewTour: FC<Props> = ({
   onFinishTour,
   manageSpacesLink,
   manageSpacesDocsLink,
+  navigateToUrl,
 }) => {
   const solutionLabel = solution && solution !== SOLUTION_VIEW_CLASSIC ? solutionMap[solution] : '';
   if (!solutionLabel) {
@@ -59,13 +62,22 @@ export const SolutionViewTour: FC<Props> = ({
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"
-              defaultMessage="Only {solution} features are visible. To access other solution features, you can change this from your {spacesLink}.{br}{learnMore}"
+              defaultMessage="Only {solution} features are visible.{br}To access feature from other solutions, edit your {spacesLink} or create new spaces.{br}{learnMore}"
               values={{
                 solution: solutionLabel,
                 spacesLink: (
-                  <EuiLink href={manageSpacesLink} target="_blank" external>
+                  <EuiLink
+                    href={manageSpacesLink}
+                    onClick={(e) => {
+                      if (!hasActiveModifierKey(e)) {
+                        e.preventDefault();
+                        onFinishTour();
+                        navigateToUrl(manageSpacesLink);
+                      }
+                    }}
+                  >
                     {i18n.translate('xpack.spaces.navControl.tour.spaceSettingsLink', {
-                      defaultMessage: 'spaces settings',
+                      defaultMessage: 'space settings',
                     })}
                   </EuiLink>
                 ),

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiTourStep, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiTourStep, EuiButton, EuiButtonEmpty, findElementBySelectorOrRef } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { TourManager } from './tour_manager';
+import type { TourState } from './types';
 
 export interface TourProps {
   tourManager: TourManager;
@@ -20,6 +21,19 @@ export const Tour: React.FC<TourProps> = ({ tourManager }) => {
   const state = useObservable(tourManager.state$);
 
   if (!state) return null;
+  if (state.status !== 'active') return null;
+
+  const currentStep = state.steps[state.currentStepIndex];
+  if (!currentStep) return null;
+
+  return <ActiveTour state={state} tourManager={tourManager} />;
+};
+
+function ActiveTour({ state, tourManager }: { state: TourState; tourManager: TourManager }) {
+  useFinishTourIfNoAnchorFound(state, tourManager);
+
+  const currentStep = state.steps[state.currentStepIndex];
+  if (!currentStep) return null;
 
   const handleNext = () => {
     tourManager.nextStep();
@@ -32,11 +46,6 @@ export const Tour: React.FC<TourProps> = ({ tourManager }) => {
   const handleFinish = () => {
     tourManager.finishTour();
   };
-
-  if (state.status !== 'active') return null;
-
-  const currentStep = state.steps[state.currentStepIndex];
-  if (!currentStep) return null;
 
   return (
     <EuiTourStep
@@ -69,4 +78,27 @@ export const Tour: React.FC<TourProps> = ({ tourManager }) => {
       maxWidth={360}
     />
   );
-};
+}
+
+// in case your can't continue because the target element is missing, we should end the tour
+// this is likely an unforeseen edge case, but we want to avoid trapping the user in a broken tour
+function useFinishTourIfNoAnchorFound(state: TourState, tourManager: TourManager) {
+  useEffect(() => {
+    if (state && state.status === 'active') {
+      const currentStep = state.steps[state.currentStepIndex];
+      if (currentStep) {
+        const timeout = setTimeout(() => {
+          const target = findElementBySelectorOrRef(currentStep.target);
+          if (!target) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `EUI Tour: Unable to find target element for step id "${currentStep.id}". Ending tour.`
+            );
+            tourManager.skipTour();
+          }
+        });
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [state, tourManager]);
+}

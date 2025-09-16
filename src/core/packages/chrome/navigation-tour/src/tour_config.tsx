@@ -26,7 +26,7 @@ export const tourSteps: TourStep[] = [
           <FormattedMessage
             id="core.chrome.navigationTour.sidenavHomeMessage"
             defaultMessage="The navigation now gives you more workspace and lets you access submenus on hover. Its
-    improved collapsed mode preserves quick access to all menus using icons. {learnMore}"
+    improved collapsed mode preserves quick access to all menus using icons.{br}{learnMore}"
             values={{
               learnMore: (
                 <EuiLink href={newNavBlogPost} target="_blank" external>
@@ -35,6 +35,7 @@ export const tourSteps: TourStep[] = [
                   })}
                 </EuiLink>
               ),
+              br: <br />,
             }}
           />
         </p>
@@ -48,8 +49,11 @@ export const tourSteps: TourStep[] = [
     content: (
       <EuiText>
         <p>
-          Ingest and data management features moved to their own menu and are now faster to access.
-          Other administration options remain in the Stack management menu.
+          <FormattedMessage
+            id="core.chrome.navigationTour.sidenavDataManagementMessage"
+            defaultMessage="Ingest and data management features moved to their own menu and are now faster to access.
+          Other administration options remain in the Stack management menu."
+          />
         </p>
       </EuiText>
     ),

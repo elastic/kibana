@@ -142,6 +142,7 @@ class NavControlPopoverUI extends Component<Props, State> {
         onFinishTour={this.props.onFinishTour}
         manageSpacesLink={this.props.manageSpacesLink}
         manageSpacesDocsLink={this.props.manageSpacesDocsLink}
+        navigateToUrl={this.props.navigateToUrl}
       >
         <EuiPopover
           id="spcMenuPopover"

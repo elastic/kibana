@@ -32,11 +32,11 @@ export class TourManager {
     });
   }
 
-  async waitForTourEnd(): Promise<void> {
+  async waitForTourEnd(): Promise<'completed' | 'skipped'> {
     return firstValueFrom(
       this.state$.pipe(
         first((state) => state.status === 'completed' || state.status === 'skipped'),
-        map(() => void 0)
+        map((state) => state.status as 'completed' | 'skipped')
       )
     );
   }
@@ -83,9 +83,5 @@ export class TourManager {
   isLastStep(): boolean {
     const currentState = this._state$.value;
     return currentState.currentStepIndex === currentState.steps.length - 1;
-  }
-
-  destroy(): void {
-    this._state$.complete();
   }
 }
