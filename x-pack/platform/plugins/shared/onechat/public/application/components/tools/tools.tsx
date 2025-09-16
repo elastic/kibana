@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { useToolsActions } from '../../context/tools_table_provider';
+import { useToolsActions } from '../../context/tools_provider';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
@@ -31,7 +31,7 @@ export const OnechatTools = () => {
           <EuiButton
             key="new-esql-tool-button"
             fill
-            iconType="plusInCircleFilled"
+            iconType="plus"
             onClick={() => createTool(ToolType.esql)}
           >
             <EuiText size="s">{labels.tools.newToolButton}</EuiText>
