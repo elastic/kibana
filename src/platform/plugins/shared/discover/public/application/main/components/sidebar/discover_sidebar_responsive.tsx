@@ -328,8 +328,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const searchBarCustomization = useDiscoverCustomization('search_bar');
   const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
   const additionalFieldGroups = useMemo(() => {
-    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))(sidebarState.allFields);
-  }, [getRecommendedFieldsAccessor, sidebarState.allFields]);
+    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))();
+  }, [getRecommendedFieldsAccessor]);
 
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 

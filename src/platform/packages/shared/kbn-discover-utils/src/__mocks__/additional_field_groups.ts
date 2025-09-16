@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-
-const recommendedFields = [
-  new DataViewField({
-    name: 'log.level',
-    type: 'recommended_field',
-    searchable: false,
-    aggregatable: false,
-  }),
-];
+const recommendedFields = ['message', 'log.level'];
 
 export const additionalFieldGroups = {
   recommendedFields,

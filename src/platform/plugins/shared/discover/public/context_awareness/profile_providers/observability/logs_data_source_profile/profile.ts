@@ -19,7 +19,6 @@ import {
   getPaginationConfig,
   getColumnsConfiguration,
   createRecommendedFields,
-  DEFAULT_LOGS_RECOMMENDED_FIELD_NAMES,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
@@ -56,9 +55,7 @@ export const createLogsDataSourceProfileProvider = (
     getRowAdditionalLeadingControls,
     getPaginationConfig,
     getColumnsConfiguration,
-    getRecommendedFields: createRecommendedFields({
-      defaultFields: DEFAULT_LOGS_RECOMMENDED_FIELD_NAMES,
-    }),
+    getRecommendedFields: createRecommendedFields({}),
   },
   resolve: (params) => {
     if (params.rootContext.solutionType !== SolutionType.Observability) {

@@ -63,7 +63,7 @@ export interface FieldListExtension {
    * @param recommendedFields The field list
    * @returns The updated field list
    */
-  recommendedFields: DataViewField[];
+  recommendedFields: Array<DataViewField['name']>;
 }
 
 /**
@@ -462,7 +462,7 @@ export interface Profile {
 
   /**
    * Allows passing additional fields (recommended fields) to the field list area.
-   * @returns The additional fields to display in the Field List
+   * @returns The additional fields to display in the Field List under Recommended fields section
    */
-  getRecommendedFields: (fields?: DataViewField[] | null) => FieldListExtension;
+  getRecommendedFields: () => FieldListExtension;
 }
