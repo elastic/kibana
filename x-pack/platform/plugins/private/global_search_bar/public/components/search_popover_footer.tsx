@@ -21,6 +21,7 @@ export const SearchPopoverFooter: FC<SearchPopoverFooterProps> = ({ isMac }) => 
   const footerStyles = css`
     border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
     padding: 8px 16px;
+    overflow: hidden;
   `;
   
   return (

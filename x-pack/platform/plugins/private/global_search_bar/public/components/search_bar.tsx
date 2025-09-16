@@ -516,7 +516,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
               border-radius: ${euiTheme.border.radius.medium};
               ${popoverShadow};
               background-color: ${euiTheme.colors.body};
-              border: 1px solid ${euiTheme.colors.borderBaseSubdued};
             ` : ''}
           }
           ${highlightStyles}
@@ -586,8 +585,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
               margin-top: 8px;
               border-radius: ${euiTheme.border.radius.medium};
               ${popoverShadow};
-              background-color: ${euiTheme.colors.body};
-              border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+              background-color: ${euiTheme.colors.backgroundBasePlain};
             `}
           >
             {popoverContent}
