@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src';
+export {
+  isMultiTermColumn,
+  getMultiTermsFormatterParams,
+  transformEsqlMultiTermBreakdown,
+} from './src';
