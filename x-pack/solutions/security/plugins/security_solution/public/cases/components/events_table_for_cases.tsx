@@ -182,10 +182,9 @@ export const EventsTableForCases = ({ events }: CaseViewEventsTableProps) => {
     [events]
   );
 
-  const { dataView, status } = useCaseEventsDataView(patterns);
+  const { dataView } = useCaseEventsDataView(patterns);
 
   if (!dataView) {
-    // TODO: show spinner or fallback here
     return null;
   }
 
