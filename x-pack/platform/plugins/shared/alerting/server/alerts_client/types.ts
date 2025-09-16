@@ -7,7 +7,11 @@
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { SearchRequest, SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkResponse,
+  SearchRequest,
+  SearchResponseBody,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -82,7 +86,7 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
-  persistAlerts(): Promise<void>;
+  persistAlerts(): Promise<BulkResponse | undefined>;
   updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
     alertIds: string[];
     maintenanceWindowIds: string[];
@@ -161,6 +165,7 @@ export interface PublicAlertsClient<
   setAlertLimitReached: (reached: boolean) => void;
   getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
   search: (queryBody: SearchRequest) => Promise<SearchResult<AlertData>>;
+  flushAlerts: () => Promise<BulkResponse | undefined>;
 }
 
 export interface ReportedAlert<
@@ -170,6 +175,7 @@ export interface ReportedAlert<
   ActionGroupIds extends string
 > {
   id: string; // alert instance id
+  uuid?: string; // optional alert UUID, if not provided one will be generated
   actionGroup: ActionGroupIds;
   state?: State;
   context?: Context;

@@ -60,9 +60,8 @@ export const filterDuplicateAlerts = async <T extends { _id: string }>({
       },
       size: 0,
     };
-    // TODO - consider space ID
+    // TODO - alerts client should already handle space ID but double check
     const response = await alertsClient.search(request);
-    // const response = await ruleDataClient.getReader({ namespace: spaceId }).search(request);
     const uuidsMap: Record<string, boolean> = {};
     const aggs = response.aggregations as
       | Record<estypes.AggregateName, { buckets: Array<{ key: string }> }>

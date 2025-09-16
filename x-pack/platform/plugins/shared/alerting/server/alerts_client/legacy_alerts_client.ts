@@ -225,7 +225,7 @@ export class LegacyAlertsClient<
   }
 
   public determineFlappingAlerts() {
-    if (this.flappingSettings.enabled) {
+    if (this.flappingSettings.enabled && this.options.ruleType.autoRecoverAlerts) {
       const alerts = determineFlappingAlerts({
         newAlerts: this.processedAlerts.new,
         activeAlerts: this.processedAlerts.active,
@@ -244,22 +244,24 @@ export class LegacyAlertsClient<
   }
 
   public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
-    const alerts = determineDelayedAlerts({
-      newAlerts: this.processedAlerts.new,
-      activeAlerts: this.processedAlerts.active,
-      trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
-      recoveredAlerts: this.processedAlerts.recovered,
-      trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
-      alertDelay: opts.alertDelay,
-      startedAt: this.startedAtString,
-      ruleRunMetricsStore: opts.ruleRunMetricsStore,
-    });
+    if (this.options.ruleType.autoRecoverAlerts) {
+      const alerts = determineDelayedAlerts({
+        newAlerts: this.processedAlerts.new,
+        activeAlerts: this.processedAlerts.active,
+        trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
+        recoveredAlerts: this.processedAlerts.recovered,
+        trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
+        alertDelay: opts.alertDelay,
+        startedAt: this.startedAtString,
+        ruleRunMetricsStore: opts.ruleRunMetricsStore,
+      });
 
-    this.processedAlerts.new = alerts.newAlerts;
-    this.processedAlerts.active = alerts.activeAlerts;
-    this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
-    this.processedAlerts.recovered = alerts.recoveredAlerts;
-    this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+      this.processedAlerts.new = alerts.newAlerts;
+      this.processedAlerts.active = alerts.activeAlerts;
+      this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
+      this.processedAlerts.recovered = alerts.recoveredAlerts;
+      this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+    }
   }
 
   public hasReachedAlertLimit(): boolean {

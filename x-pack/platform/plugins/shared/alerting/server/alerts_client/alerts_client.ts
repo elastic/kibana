@@ -130,6 +130,7 @@ export class AlertsClient<
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
+  private _hasFlushedAlerts: boolean = false;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -288,7 +289,7 @@ export class AlertsClient<
     return { hits, total, aggregations };
   }
 
-  public async msearch<Aggregation = unknown>(
+  public async msearch(
     searches: MsearchRequestItem[]
   ): Promise<Array<MsearchResponseItem<Alert & AlertData>>> {
     const esClient = await this.options.elasticsearchClientPromise;
@@ -465,10 +466,19 @@ export class AlertsClient<
     };
   }
 
-  public async persistAlerts() {
-    if (!this.ruleType.alerts?.shouldWrite) {
-      this.options.logger.debug(
-        `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false ${this.ruleInfoMessage}.`,
+  private async persistLifecycleAlerts() {}
+
+  public async persistAlerts(): Promise<BulkResponse | undefined> {
+    // if (!this.ruleType.alerts?.shouldWrite) {
+    //   this.options.logger.debug(
+    //     `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false ${this.ruleInfoMessage}.`,
+    //     this.logTags
+    //   );
+    //   return;
+    // }
+    if (this._hasFlushedAlerts) {
+      this.options.logger.info(
+        `Skipping persisting alerts because they have already been flushed ${this.ruleInfoMessage}.`,
         this.logTags
       );
       return;
@@ -623,6 +633,8 @@ export class AlertsClient<
         })
       );
 
+      console.log(`bulkBody ${JSON.stringify(bulkBody)}`);
+
       try {
         const response = await esClient.bulk({
           // On serverless we can force a refresh to we don't wait for the longer refresh interval
@@ -652,6 +664,8 @@ export class AlertsClient<
             ruleType: this.ruleType.id,
           });
         }
+
+        return response;
       } catch (err) {
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
@@ -687,6 +701,14 @@ export class AlertsClient<
         },
       };
     }
+  }
+
+  public async flushAlerts(): Promise<BulkResponse | undefined> {
+    console.log(`flushAlerts called, _hasFlushedAlerts: ${this._hasFlushedAlerts}`);
+    await this.processAlerts();
+    const response = await this.persistAlerts();
+    this._hasFlushedAlerts = true;
+    return response;
   }
 
   private async getMaintenanceWindowScopedQueryAlerts({
@@ -910,6 +932,7 @@ export class AlertsClient<
         }));
       },
       search: (queryBody: SearchRequest) => this.search(queryBody),
+      flushAlerts: () => this.flushAlerts(),
     };
   }
 

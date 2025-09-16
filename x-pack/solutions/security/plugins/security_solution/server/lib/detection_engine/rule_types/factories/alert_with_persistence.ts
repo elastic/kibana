@@ -14,11 +14,15 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import { mapKeys, snakeCase } from 'lodash';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SecurityActionGroupId } from '../types';
 import { filterDuplicateAlerts } from './filter_duplicate_alerts';
 import { augmentAlerts } from './augment_alerts';
 import { getViewInAppRelativeUrl } from '../create_security_rule_type_wrapper';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+// eslint-disable-next-line no-restricted-imports
+import { formatAlertForNotificationActions } from '../../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 
 export interface GenericAlert<T> {
   _id: string;
@@ -59,16 +63,23 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
     ruleParams,
     spaceId,
   } = opts;
+
+  if (!alertsClient) {
+    throw new AlertsClientError();
+  }
+
   const numAlerts = alerts.length;
 
   logger.debug(`Found ${numAlerts} alerts.`);
 
   if (numAlerts > 0) {
+    console.log(`alerts ${JSON.stringify(alerts)}`);
     const filteredAlerts: typeof alerts = await filterDuplicateAlerts({
       alerts,
       alertsClient,
       spaceId,
     });
+    console.log(`filtered alerts ${JSON.stringify(filteredAlerts)}`);
 
     if (filteredAlerts.length === 0) {
       return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
@@ -82,6 +93,7 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
         enrichedAlerts = await enrichAlerts(filteredAlerts, {
           spaceId,
         });
+        console.log(`enriched alerts ${JSON.stringify(enrichedAlerts)}`);
       } catch (e) {
         logger.debug('Enrichments failed');
       }
@@ -97,6 +109,7 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
       alerts: enrichedAlerts,
       currentTimeOverride: undefined,
     });
+    console.log(`augmented alerts ${JSON.stringify(augmentedAlerts)}`);
 
     // const response = await ruleDataClientWriter.bulk({
     //   body: mapAlertsToBulkCreate(augmentedAlerts),
@@ -108,6 +121,7 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
     // }
 
     // why do we write building block alerts but don't report building block alerts?
+    // don't want notifications about it but we want the alerts
     // const createdAlerts = augmentedAlerts
     //   .map((alert, idx) => {
     //     const responseItem = response.body.items[idx].create;
@@ -122,28 +136,53 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
     //   // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
     //   .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
 
+    // report alerts
+    // persist the alerts, without the processing of the alerting framework
+    // return the created alerts
+    // set the alert context, including the actual alert information
     augmentedAlerts.forEach((alert) => {
+      console.log(`reporting alert ${alert._id}`);
       alertsClient.report({
         id: alert._id,
+        uuid: alert._id,
         actionGroup: 'default',
-        context: {
-          rule: mapKeys(snakeCase, {
-            ...ruleParams,
-            name: rule.name,
-            id: rule.id,
-          }),
-          results_link: getViewInAppRelativeUrl({
-            rule: { ...rule, params: ruleParams },
-            start: Date.parse(alert[TIMESTAMP]),
-            end: Date.parse(alert[TIMESTAMP]),
-          }),
-          alerts: [formatAlert?.(alert) ?? alert],
-        },
         payload: { ...alert._source },
       });
     });
 
+    const response = await alertsClient.flushAlerts();
+
+    console.log(`flush response ${JSON.stringify(response)}`);
+
+    // augmentedAlerts.forEach((alert) => {
+    //   // TODO context.rule doesn't have the rule information
+    //   const context = {
+    //     rule: mapKeys(snakeCase, {
+    //       ...ruleParams,
+    //       name: rule.name,
+    //       id: rule.id,
+    //     }),
+    //     results_link: getViewInAppRelativeUrl({
+    //       rule: { ...rule.ruleConfig, params: ruleParams },
+    //       start: Date.parse(alert._source[TIMESTAMP]),
+    //       end: Date.parse(alert._source[TIMESTAMP]),
+    //     }),
+    //     // doesn't contain the full alert information because it's not yet populated.
+    //     // no id, index, and the stuff set in augment alert
+    //     alerts: [formatAlertForNotificationActions(alert._source) ?? alert._source],
+    //   };
+    //   console.log(`reporting alert ${alert._id} with context ${JSON.stringify(context)}`);
+    //   alertsClient.report({
+    //     id: alert._id,
+    //     uuid: alert._id,
+    //     actionGroup: 'default',
+    //     // context,
+    //     payload: { ...alert._source },
+    //   });
+    // });
+
     // flush alerts, have to get the response
+    // iterate over the response and set the context for each alert
 
     // createdAlerts.forEach((alert) =>
     //   options.services.alertFactory

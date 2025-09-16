@@ -9,7 +9,6 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { makeFloatString } from '../utils/utils';
 import type {
   DetectionAlertLatest,
@@ -22,7 +21,6 @@ import { alertWithPersistence } from './alert_with_persistence';
 
 export interface BulkCreateParams<T extends DetectionAlertLatest> {
   wrappedAlerts: Array<WrappedAlert<T>>;
-  rule: SanitizedRuleConfig;
   services: SecurityRuleServices;
   sharedParams: SecuritySharedParams;
   maxAlerts?: number;
@@ -41,12 +39,12 @@ export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
 
 export const bulkCreate = async <T extends DetectionAlertLatest>({
   wrappedAlerts,
-  rule,
   services,
   sharedParams,
   maxAlerts,
 }: BulkCreateParams<T>): Promise<GenericBulkCreateResponse<T>> => {
   const {
+    completeRule,
     ruleExecutionLogger,
     refreshOnIndexingAlerts: refreshForBulkCreate,
     spaceId,
@@ -96,8 +94,8 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
     refresh: refreshForBulkCreate,
     logger: sharedParams.ruleExecutionLogger,
     maxAlerts,
-    rule,
-    ruleParams: sharedParams.completeRule.ruleParams,
+    rule: completeRule.ruleConfig,
+    ruleParams: completeRule.ruleParams,
     spaceId,
     enrichAlerts: enrichAlertsWrapper,
   });
