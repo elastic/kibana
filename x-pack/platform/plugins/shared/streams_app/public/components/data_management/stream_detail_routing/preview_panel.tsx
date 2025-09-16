@@ -129,16 +129,11 @@ const SamplePreviewPanel = () => {
   }>();
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
-
-  // Add row expansion state
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | undefined>(undefined);
-
-  // Add flyout state and document conversion
   const [currentDoc, setExpandedDoc] = useState<DataTableRecordWithIndex | undefined>(undefined);
 
   const docViewsRegistry = useDocViewerSetup();
 
-  // Convert SampleDocument[] to DataTableRecordWithIndex[] for flyout compatibility
   const hits = useMemo(() => {
     return toDataTableRecordWithIndex(documents);
   }, [documents]);
@@ -158,7 +153,6 @@ const SamplePreviewPanel = () => {
     [selectedRowIndex, hits]
   );
 
-  // Enhanced setExpandedDoc that also resets selectedRowIndex when flyout is closed
   const handleSetExpandedDoc = useCallback((doc?: DataTableRecordWithIndex) => {
     setExpandedDoc(doc);
     if (!doc) {
@@ -167,7 +161,6 @@ const SamplePreviewPanel = () => {
     }
   }, []);
 
-  // Update currentDoc when hits change
   useEffect(() => {
     if (currentDoc) {
       // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
