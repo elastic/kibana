@@ -37,7 +37,7 @@ describe('useLensProps', () => {
     },
   ];
   const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
-  const timeRange: TimeRange = { from: 'now-1h', to: 'now' };
+  const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
   beforeEach(() => {
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
@@ -58,7 +58,7 @@ describe('useLensProps', () => {
         query: 'FROM metrics-*',
         seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
-        timeRange,
+        getTimeRange,
         discoverFetch$,
       })
     );
@@ -82,7 +82,7 @@ describe('useLensProps', () => {
         query: 'FROM metrics-*',
         seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
-        timeRange,
+        getTimeRange,
         discoverFetch$,
       })
     );
@@ -122,7 +122,7 @@ describe('useLensProps', () => {
         query: 'FROM metrics-*',
         seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
-        timeRange,
+        getTimeRange,
         discoverFetch$,
       })
     );
@@ -142,7 +142,7 @@ describe('useLensProps', () => {
         id: 'metricsExperienceLensComponent',
         noPadding: true,
         searchSessionId: undefined,
-        timeRange,
+        timeRange: getTimeRange(),
         viewMode: 'view',
       });
     });

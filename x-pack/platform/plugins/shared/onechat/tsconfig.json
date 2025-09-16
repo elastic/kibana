@@ -56,7 +56,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server-mocks",
     "@kbn/cloud-plugin",
-    "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
     "@kbn/inference-common",
     "@kbn/core-ui-settings-server-mocks",
@@ -75,5 +74,6 @@
     "@kbn/management-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/share-plugin",
+    "@kbn/unsaved-changes-prompt",
   ]
 }
