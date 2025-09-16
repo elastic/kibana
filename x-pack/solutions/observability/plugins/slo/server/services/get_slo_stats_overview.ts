@@ -14,6 +14,7 @@ import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
 import type {
+  AggregationsAggregate,
   FieldValue,
   QueryDslQueryContainer,
   SearchTotalHits,
@@ -25,7 +26,9 @@ import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_ge
 
 const ES_PAGESIZE_LIMIT = 5000;
 
-function getAfterKey(agg: unknown): Record<string, FieldValue> | undefined {
+function getAfterKey(
+  agg: AggregationsAggregate | undefined
+): Record<string, FieldValue> | undefined {
   if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
     return agg.after_key as Record<string, FieldValue>;
   }
@@ -58,26 +61,26 @@ export class GetSLOStatsOverview {
 
     let querySLOsForIds = false;
 
+    const kqlQueriesProvided = !!params?.kqlQuery && params?.kqlQuery?.length > 0;
+
     try {
       querySLOsForIds = !!(
-        (params?.filters &&
-          Object.values(JSON.parse(params.filters)).some(
-            (value) => Array.isArray(value) && value.length > 0
-          )) ||
-        (params?.kqlQuery && params?.kqlQuery?.length > 0)
+        (!!parsedFilters &&
+          parsedFilters.some((value: Array<string>) => Array.isArray(value) && value.length > 0)) ||
+        kqlQueriesProvided
       );
     } catch (error) {
-      querySLOsForIds = !!(params?.kqlQuery && params?.kqlQuery?.length > 0);
+      querySLOsForIds = kqlQueriesProvided;
       this.logger.error(`Error parsing filters: ${error}`);
     }
 
     let sloKeysFromES: QueryDslQueryContainer[] = [];
     const sloRuleKeysFromES: string[] = [];
-    let afterKey: Record<string, FieldValue> | undefined;
+    let afterKey: AggregationsAggregate | undefined;
 
     let totalHits = 0;
 
-    const boolFilters = JSON.parse(params.filters || '{}');
+    const boolFilters = parsedFilters;
     if (params.kqlQuery) {
       boolFilters.must.push({
         kql: { query: params.kqlQuery },
@@ -96,7 +99,7 @@ export class GetSLOStatsOverview {
             aggs: {
               sloIds: {
                 composite: {
-                  after: afterKey,
+                  after: afterKey as Record<string, FieldValue>,
                   size: ES_PAGESIZE_LIMIT,
                   sources: [
                     {
@@ -157,12 +160,12 @@ export class GetSLOStatsOverview {
           }
         } while (afterKey);
 
-        const sloIdsArray = Array.from(sloRuleKeysFromES);
-
         const resultNodes =
-          sloIdsArray.length > 0
+          sloRuleKeysFromES.length > 0
             ? nodeBuilder.or(
-                sloIdsArray.map((sloId) => nodeBuilder.is(`alert.attributes.params.sloId`, sloId))
+                sloRuleKeysFromES.map((sloId) =>
+                  nodeBuilder.is(`alert.attributes.params.sloId`, sloId)
+                )
               )
             : nodeBuilder.is(`alert.attributes.params.sloId`, '%NO%MATCHES%');
 
