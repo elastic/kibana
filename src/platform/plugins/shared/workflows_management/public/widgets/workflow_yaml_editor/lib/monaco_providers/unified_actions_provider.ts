@@ -335,7 +335,7 @@ export class UnifiedActionsProvider {
       }
 
       // Extract step information
-      const stepName = (stepNode as any)?.get?.('name')?.value || `step_${stepIndex}`;
+      const stepName = (stepNode as any)?.get?.('name', true)?.value || `step_${stepIndex}`;
       const typeNode = (stepNode as any)?.get?.('type', true);
       const stepType = typeNode?.value;
 
@@ -471,12 +471,6 @@ export class UnifiedActionsProvider {
   private updateActionButtons(actions: any[], position: monaco.Position): void {
     // Clear existing buttons
     this.clearActionButtons();
-
-    if (actions.length === 0) {
-      // Hide the actions container when no actions
-      this.updateEditorActionsCss({ display: 'none' });
-      return;
-    }
 
     /*
     console.log(
@@ -624,7 +618,8 @@ export class UnifiedActionsProvider {
 
       // Detect step context
       const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
-      if (!stepContext?.stepType?.startsWith('elasticsearch.')) {
+
+      if (!stepContext?.stepType) {
         return null;
       }
 
@@ -646,6 +641,7 @@ export class UnifiedActionsProvider {
         data,
         stepNode: stepContext.stepNode,
         typeNode: stepContext.typeNode,
+        name: stepContext.stepName,
       };
     } catch (error) {
       // console.warn('UnifiedActionsProvider: Error getting current Elasticsearch step', error);

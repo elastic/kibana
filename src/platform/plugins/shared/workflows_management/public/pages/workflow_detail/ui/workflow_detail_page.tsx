@@ -305,6 +305,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   activeTab={activeTab}
                   selectedExecutionId={selectedExecutionId}
                   originalValue={workflow?.yaml ?? ''}
+                  onStepActionClicked={handleStepRun}
                 />
               </React.Suspense>
             </EuiFlexItem>

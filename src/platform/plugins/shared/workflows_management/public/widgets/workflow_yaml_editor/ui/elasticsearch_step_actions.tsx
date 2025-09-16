@@ -10,6 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
+import { RunStepButton } from './step_actions/run_step/run_step_button';
 
 export interface ElasticsearchStepActionsProps {
   actionsProvider: any; // We'll make this optional since we're transitioning to unified providers
@@ -17,6 +18,7 @@ export interface ElasticsearchStepActionsProps {
   notifications: NotificationsSetup;
   esHost?: string;
   kibanaHost?: string;
+  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> = ({
@@ -25,6 +27,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   notifications,
   esHost,
   kibanaHost,
+  onStepActionClicked,
 }) => {
   // Use state to force re-renders when actions change
   const [, setRefreshTrigger] = useState(0);
@@ -36,19 +39,28 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTrigger((prev) => prev + 1);
-    }, 100);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Show actions only when we have current actions
-  if (!currentActions || currentActions.length === 0) {
-    return null;
-  }
+  const currentStep = actionsProvider?.getCurrentElasticsearchStep();
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {currentActions.map((action: any, index: number) => (
+      {currentStep && (
+        <EuiFlexItem grow={false}>
+          <RunStepButton
+            onClick={() =>
+              onStepActionClicked?.({
+                stepId: currentStep.name as string,
+                actionType: 'run',
+              })
+            }
+          />
+        </EuiFlexItem>
+      )}
+      {currentActions?.map((action: any, index: number) => (
         <EuiFlexItem key={action.id || index} grow={false}>
           <EuiToolTip content={action.tooltip || action.label}>
             <EuiButtonIcon

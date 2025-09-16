@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -17,17 +17,23 @@ export interface RunStepButtonProps {
 
 export const RunStepButton: React.FC<RunStepButtonProps> = ({ onClick }) => {
   return (
-    <EuiButtonIcon
-      iconType="play"
-      onClick={onClick}
-      data-test-subj="runStep"
-      size="xs"
-      aria-label={i18n.translate(
-        'workflows.workflowDetail.yamlEditor.stepActions.runStep.ariaLabel',
-        {
-          defaultMessage: 'Run step',
-        }
-      )}
-    />
+    <EuiToolTip
+      content={i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {
+        defaultMessage: 'Run step',
+      })}
+    >
+      <EuiButtonIcon
+        iconType="play"
+        onClick={onClick}
+        data-test-subj="runStep"
+        size="xs"
+        aria-label={i18n.translate(
+          'workflows.workflowDetail.yamlEditor.stepActions.runStep.ariaLabel',
+          {
+            defaultMessage: 'Run step',
+          }
+        )}
+      />
+    </EuiToolTip>
   );
 };

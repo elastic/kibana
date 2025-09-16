@@ -237,6 +237,7 @@ export interface WorkflowYAMLEditorProps {
   activeTab?: string;
   selectedExecutionId?: string;
   originalValue?: string;
+  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -256,6 +257,7 @@ export const WorkflowYAMLEditor = ({
   activeTab,
   selectedExecutionId,
   originalValue,
+  onStepActionClicked,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -1359,28 +1361,25 @@ export const WorkflowYAMLEditor = ({
     <div css={styles.container}>
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
-      {unifiedProvidersRef.current?.actions && (
-        <EuiFlexGroup
-          className="elasticsearch-step-actions"
-          gutterSize="xs"
-          responsive={false}
-          style={editorActionsCss}
-          justifyContent="center"
-          alignItems="center"
-        >
-          <EuiFlexItem grow={false}>
-            {http && notifications && (
-              <ElasticsearchStepActions
-                actionsProvider={unifiedProvidersRef.current?.actions}
-                http={http}
-                notifications={notifications as any}
-                esHost={esHost}
-                kibanaHost={kibanaHost}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup
+        className="elasticsearch-step-actions"
+        gutterSize="xs"
+        responsive={false}
+        style={editorActionsCss}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <EuiFlexItem grow={false}>
+          <ElasticsearchStepActions
+            actionsProvider={unifiedProvidersRef.current?.actions}
+            http={http}
+            notifications={notifications as any}
+            esHost={esHost}
+            kibanaHost={kibanaHost}
+            onStepActionClicked={onStepActionClicked}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
