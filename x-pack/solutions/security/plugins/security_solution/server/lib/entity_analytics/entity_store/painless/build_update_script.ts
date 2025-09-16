@@ -45,7 +45,7 @@ function convertToPainlessObjectAccess(path: string[]) {
 function convertToPainlessValue(value: unknown): string {
   switch (typeof value) {
     case 'string':
-      return `'${value.replaceAll(`'`, `\\'`)}'`; // scape strings
+      return `'${value.replaceAll(`'`, `\\'`)}'`; // escape strings
     case 'number':
     case 'bigint':
     case 'boolean':
@@ -57,20 +57,3 @@ function convertToPainlessValue(value: unknown): string {
       throw new Error(`Can't convert ${typeof value} to a painless expression`);
   }
 }
-
-/*
-ctx._source['host'] = ctx._source['host'] == null ? [:] : ctx._source['host'];
-ctx._source['host']['name'] = ctx._source['host']['name'] == null ? [:] : ctx._source['host']['name'];
-ctx._source['host']['name'] = 'not-allowed';
-ctx._source['host']['id'] = ctx._source['host']['id'] == null ? [:] : ctx._source['host']['id'];
-ctx._source['host']['id'] = ['123'];
-ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];
-ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];
-ctx._source['entity']['attributes']['Privileged'] = ctx._source['entity']['attributes']['Privileged'] == null ? [:] : ctx._source['entity']['attributes']['Privileged'];
-ctx._source['entity']['attributes']['Privileged'] = true;
-ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];
-ctx._source['entity']['lifecycle']['FirstSeen'] = ctx._source['entity']['lifecycle']['FirstSeen'] == null ? [:] : ctx._source['entity']['lifecycle']['FirstSeen'];
-ctx._source['entity']['lifecycle']['FirstSeen'] = '1995-12-17T03:24:00';
-
-
-*/
