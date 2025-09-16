@@ -9,12 +9,20 @@ import { EuiFlexItem, EuiNotificationBadge, EuiText, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import React from 'react';
 
-export interface ToolFilterOptionProps {
+export interface FilterOptionWithMatchesBadgeProps {
   name: string;
   matches: number;
 }
 
-export const ToolFilterOption = ({ name, matches }: ToolFilterOptionProps) => {
+const truncateTextStyles = css`
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+export const FilterOptionWithMatchesBadge: React.FC<FilterOptionWithMatchesBadgeProps> = ({
+  name,
+  matches,
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -23,10 +31,13 @@ export const ToolFilterOption = ({ name, matches }: ToolFilterOptionProps) => {
         justify-content: space-between;
         align-items: center;
         margin-block: ${euiTheme.size.xs};
+        gap: ${euiTheme.size.xs};
         width: 100%;
       `}
     >
-      <EuiText size="s">{name}</EuiText>
+      <EuiText css={truncateTextStyles} size="s">
+        {name}
+      </EuiText>
       <EuiFlexItem
         grow={false}
         css={css`
