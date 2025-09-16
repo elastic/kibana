@@ -14,7 +14,7 @@ import type {
   Output,
 } from '../../../common/types';
 import type { NewOutput } from '../../../common';
-import type { PolicySecretReference } from '../../types';
+import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 import { appContextService } from '../app_context';
 import { settingsService } from '..';
@@ -75,7 +75,7 @@ export async function extractAndWriteOutputSecrets(opts: {
   output: NewOutput;
   esClient: ElasticsearchClient;
   secretHashes?: Record<string, any>;
-}): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ output: NewOutput; secretReferences: SecretReference[] }> {
   const { output, esClient, secretHashes = {} } = opts;
   const secretPaths = getOutputSecretPaths(output.type, output).filter(
     (path) => typeof path.value === 'string'
@@ -96,8 +96,8 @@ export async function extractAndUpdateOutputSecrets(opts: {
   secretHashes?: Record<string, any>;
 }): Promise<{
   outputUpdate: Partial<Output>;
-  secretReferences: PolicySecretReference[];
-  secretsToDelete: PolicySecretReference[];
+  secretReferences: SecretReference[];
+  secretsToDelete: SecretReference[];
 }> {
   const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
@@ -130,8 +130,8 @@ export async function deleteOutputSecrets(opts: {
   await deleteSOSecrets(esClient, outputSecretPaths);
 }
 
-export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
-  const outputSecretPaths: PolicySecretReference[] = [];
+export function getOutputSecretReferences(output: Output): SecretReference[] {
+  const outputSecretPaths: SecretReference[] = [];
 
   if (typeof output.secrets?.ssl?.key === 'object') {
     outputSecretPaths.push({

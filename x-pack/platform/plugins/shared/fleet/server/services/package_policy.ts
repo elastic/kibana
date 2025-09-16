@@ -74,7 +74,7 @@ import type {
   RegistryDataStream,
   Installation,
   DeletePackagePoliciesResponse,
-  PolicySecretReference,
+  SecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
 } from '../../common/types';
@@ -300,7 +300,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectType,
     });
 
-    let secretReferences: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
 
     this.keepPolicyIdInSync(packagePolicy);
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
@@ -1128,8 +1128,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
-    let secretReferences: PolicySecretReference[] | undefined;
-    let secretsToDelete: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
+    let secretsToDelete: SecretReference[] | undefined;
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
@@ -1476,7 +1476,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       new Map<string, PackageInfo>()
     );
 
-    const allSecretsToDelete: PolicySecretReference[] = [];
+    const allSecretsToDelete: SecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
       logger,
@@ -1578,7 +1578,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        let secretReferences: PolicySecretReference[] | undefined;
+        let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
         // id and version are not part of the saved object attributes

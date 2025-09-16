@@ -19,7 +19,7 @@ import type {
   AgentActionType,
   NewAgentAction,
   FleetServerAgentAction,
-  PolicySecretReference,
+  SecretReference,
 } from '../../../common/types/models';
 import {
   AGENT_ACTIONS_INDEX,
@@ -66,7 +66,7 @@ export async function createAgentAction(
   const timestamp = new Date(now).toISOString();
 
   let data;
-  let secretReferences: PolicySecretReference[] | undefined;
+  let secretReferences: SecretReference[] | undefined;
   // Store secret values if enabled, otherwise store them as plain text.
   if (await isActionSecretStorageEnabled(esClient, soClient)) {
     const secretsRes = await extractAndWriteActionSecrets({

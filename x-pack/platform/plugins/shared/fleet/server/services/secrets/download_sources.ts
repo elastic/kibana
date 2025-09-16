@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { SOSecretPath, DownloadSource, DownloadSourceBase } from '../../../common/types';
-import type { PolicySecretReference } from '../../types';
+import type { SecretReference } from '../../types';
 
 import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
 
@@ -16,7 +16,7 @@ export async function extractAndWriteDownloadSourcesSecrets(opts: {
   downloadSource: DownloadSourceBase;
   esClient: ElasticsearchClient;
   secretHashes?: Record<string, any>;
-}): Promise<{ downloadSource: DownloadSourceBase; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ downloadSource: DownloadSourceBase; secretReferences: SecretReference[] }> {
   const { downloadSource, esClient, secretHashes = {} } = opts;
 
   const secretPaths = getDownloadSourcesSecretPaths(downloadSource).filter(
@@ -41,8 +41,8 @@ export async function extractAndUpdateDownloadSourceSecrets(opts: {
   secretHashes?: Record<string, any>;
 }): Promise<{
   downloadSourceUpdate: Partial<DownloadSourceBase>;
-  secretReferences: PolicySecretReference[];
-  secretsToDelete: PolicySecretReference[];
+  secretReferences: SecretReference[];
+  secretsToDelete: SecretReference[];
 }> {
   const { oldDownloadSource, downloadSourceUpdate, esClient, secretHashes } = opts;
   const oldSecretPaths = getDownloadSourcesSecretPaths(oldDownloadSource);
@@ -72,8 +72,8 @@ export async function deleteDownloadSourceSecrets(opts: {
 
 export function getDownloadSourceSecretReferences(
   downloadSource: DownloadSource
-): PolicySecretReference[] {
-  const secretPaths: PolicySecretReference[] = [];
+): SecretReference[] {
+  const secretPaths: SecretReference[] = [];
 
   if (typeof downloadSource.secrets?.ssl?.key === 'object') {
     secretPaths.push({

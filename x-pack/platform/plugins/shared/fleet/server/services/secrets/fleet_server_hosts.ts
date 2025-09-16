@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { NewFleetServerHost, FleetServerHost, SOSecretPath } from '../../../common/types';
-import type { PolicySecretReference } from '../../types';
+import type { SecretReference } from '../../types';
 
 import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
 
@@ -16,7 +16,7 @@ export async function extractAndWriteFleetServerHostsSecrets(opts: {
   fleetServerHost: NewFleetServerHost;
   esClient: ElasticsearchClient;
   secretHashes?: Record<string, any>;
-}): Promise<{ fleetServerHost: NewFleetServerHost; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ fleetServerHost: NewFleetServerHost; secretReferences: SecretReference[] }> {
   const { fleetServerHost, esClient, secretHashes = {} } = opts;
 
   const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
@@ -40,8 +40,8 @@ export async function extractAndUpdateFleetServerHostsSecrets(opts: {
   secretHashes?: Record<string, any>;
 }): Promise<{
   fleetServerHostUpdate: Partial<NewFleetServerHost>;
-  secretReferences: PolicySecretReference[];
-  secretsToDelete: PolicySecretReference[];
+  secretReferences: SecretReference[];
+  secretsToDelete: SecretReference[];
 }> {
   const { oldFleetServerHost, fleetServerHostUpdate, esClient, secretHashes } = opts;
   const oldSecretPaths = getFleetServerHostsSecretPaths(oldFleetServerHost);
@@ -72,8 +72,8 @@ export async function deleteFleetServerHostsSecrets(opts: {
 
 export function getFleetServerHostsSecretReferences(
   fleetServerHost: FleetServerHost
-): PolicySecretReference[] {
-  const secretPaths: PolicySecretReference[] = [];
+): SecretReference[] {
+  const secretPaths: SecretReference[] = [];
 
   if (typeof fleetServerHost.secrets?.ssl?.key === 'object') {
     secretPaths.push({

@@ -27,7 +27,7 @@ import type {
   PackagePolicyPackage,
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
-import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { SecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
 import type {
   KafkaPartitionType,
@@ -138,7 +138,7 @@ export interface PackagePolicySOAttributes {
   updated_by: string;
   description?: string;
   is_managed?: boolean;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
   elasticsearch?: {

@@ -22,7 +22,7 @@ import type {
   RegistryVarsEntry,
   Secret,
   VarSecretReference,
-  PolicySecretReference,
+  SecretReference,
   SecretPath,
 } from '../../types';
 import { appContextService } from '../app_context';
@@ -40,7 +40,7 @@ export async function extractAndWriteSecrets(opts: {
   packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   esClient: ElasticsearchClient;
-}): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: SecretReference[] }> {
   const { packagePolicy, packageInfo, esClient } = opts;
   const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
 
@@ -63,7 +63,7 @@ export async function extractAndWriteSecrets(opts: {
 
   return {
     packagePolicy: policyWithSecretRefs,
-    secretReferences: secrets.reduce((acc: PolicySecretReference[], secret) => {
+    secretReferences: secrets.reduce((acc: SecretReference[], secret) => {
       if (Array.isArray(secret)) {
         return [...acc, ...secret.map(({ id }) => ({ id }))];
       }
@@ -85,8 +85,8 @@ export async function extractAndUpdateSecrets(opts: {
   esClient: ElasticsearchClient;
 }): Promise<{
   packagePolicyUpdate: UpdatePackagePolicy;
-  secretReferences: PolicySecretReference[];
-  secretsToDelete: PolicySecretReference[];
+  secretReferences: SecretReference[];
+  secretsToDelete: SecretReference[];
 }> {
   const { oldPackagePolicy, packagePolicyUpdate, packageInfo, esClient } = opts;
   const oldSecretPaths = getPolicySecretPaths(oldPackagePolicy, packageInfo);
@@ -112,13 +112,13 @@ export async function extractAndUpdateSecrets(opts: {
   );
 
   const secretReferences = [
-    ...noChange.reduce((acc: PolicySecretReference[], secretPath) => {
+    ...noChange.reduce((acc: SecretReference[], secretPath) => {
       if (secretPath.value.value.ids) {
         return [...acc, ...secretPath.value.value.ids.map((id: string) => ({ id }))];
       }
       return [...acc, { id: secretPath.value.value.id }];
     }, []),
-    ...createdSecrets.reduce((acc: PolicySecretReference[], secret) => {
+    ...createdSecrets.reduce((acc: SecretReference[], secret) => {
       if (Array.isArray(secret)) {
         return [...acc, ...secret.map(({ id }) => ({ id }))];
       }
@@ -126,7 +126,7 @@ export async function extractAndUpdateSecrets(opts: {
     }, []),
   ];
 
-  const secretsToDelete: PolicySecretReference[] = [];
+  const secretsToDelete: SecretReference[] = [];
 
   toDelete.forEach((secretPath) => {
     // check if the previous secret is actually a secret refrerence

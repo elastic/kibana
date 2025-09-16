@@ -13,7 +13,7 @@ import type {
   AgentStatuses,
 } from '../../constants';
 
-import type { PolicySecretReference, SOSecret } from './secret';
+import type { SecretReference, SOSecret } from './secret';
 
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
@@ -486,7 +486,7 @@ export interface FleetServerAgentAction {
   /**
    * List of secret references associated with the action.
    */
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
 
   [k: string]: unknown;
 }

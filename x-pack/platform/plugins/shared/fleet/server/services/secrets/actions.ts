@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type {
   AgentAction,
   NewAgentAction,
-  PolicySecretReference,
+  SecretReference,
   SOSecretPath,
 } from '../../../common/types';
 import { appContextService } from '../app_context';
@@ -83,7 +83,7 @@ export async function extractAndWriteActionSecrets(opts: {
   action: NewAgentAction;
   esClient: ElasticsearchClient;
   secretHashes?: Record<string, any>;
-}): Promise<{ actionWithSecrets: NewAgentAction; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ actionWithSecrets: NewAgentAction; secretReferences: SecretReference[] }> {
   const { action, esClient, secretHashes = {} } = opts;
   const secretPaths = getActionSecretPaths(action).filter((path) => typeof path.value === 'string');
   const secretRes = await extractAndWriteSOSecrets<NewAgentAction>({

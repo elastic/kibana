@@ -15,7 +15,7 @@ import type {
   DeletedSecretResponse,
   DeletedSecretReference,
 } from '../../../common/types';
-import type { PolicySecretReference } from '../../types';
+import type { SecretReference } from '../../types';
 import { FleetError } from '../../errors';
 import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
@@ -208,7 +208,7 @@ export async function extractAndWriteSOSecrets<T>(opts: {
   esClient: ElasticsearchClient;
   secretPaths: SOSecretPath[];
   secretHashes?: Record<string, any>;
-}): Promise<{ soObjectWithSecrets: T; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ soObjectWithSecrets: T; secretReferences: SecretReference[] }> {
   const { soObject, esClient, secretPaths, secretHashes = {} } = opts;
 
   if (secretPaths.length === 0) {
@@ -235,7 +235,7 @@ export async function extractAndWriteSOSecrets<T>(opts: {
 
   return {
     soObjectWithSecrets: objectWithSecretRefs,
-    secretReferences: secrets.reduce((acc: PolicySecretReference[], secret) => {
+    secretReferences: secrets.reduce((acc: SecretReference[], secret) => {
       if (Array.isArray(secret)) {
         return [...acc, ...secret.map(({ id }) => ({ id }))];
       }
@@ -256,8 +256,8 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
   secretHashes?: Record<string, any>;
 }): Promise<{
   updatedSoObject: Partial<T>;
-  secretReferences: PolicySecretReference[];
-  secretsToDelete: PolicySecretReference[];
+  secretReferences: SecretReference[];
+  secretsToDelete: SecretReference[];
 }> {
   const { updatedSoObject, oldSecretPaths, updatedSecretPaths, esClient, secretHashes } = opts;
 
@@ -287,7 +287,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
   });
 
   const secretReferences = [
-    ...noChange.reduce((acc: PolicySecretReference[], secretPath) => {
+    ...noChange.reduce((acc: SecretReference[], secretPath) => {
       const currentValue = secretPath.value as { id: string } | { ids: string[] };
       if ('ids' in currentValue) {
         return [...acc, ...currentValue.ids.map((id: string) => ({ id }))];
@@ -295,7 +295,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
         return [...acc, { id: currentValue.id }];
       }
     }, []),
-    ...createdSecrets.reduce((acc: PolicySecretReference[], secret) => {
+    ...createdSecrets.reduce((acc: SecretReference[], secret) => {
       if (Array.isArray(secret)) {
         return [...acc, ...secret.map(({ id }) => ({ id }))];
       }
