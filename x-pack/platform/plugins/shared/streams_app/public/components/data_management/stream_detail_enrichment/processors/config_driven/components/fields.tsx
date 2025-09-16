@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { configDrivenProcessors } from '..';
 import type { ConfigDrivenProcessorType } from '../types';
-import { ProcessorFieldSelector } from '../../processor_field_selector';
+import { EnhancedFieldSelector } from '../../enhanced_field_selector';
 import { FieldsAccordion } from '../../optional_fields_accordion';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../../ignore_toggles';
 import { TextField } from './text_field';
@@ -28,9 +28,10 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
 
   return (
     <>
-      <ProcessorFieldSelector
+      <EnhancedFieldSelector
         helpText={processor.fieldOptions.fieldHelpText}
         fieldKey={processor.fieldOptions.fieldKey}
+        processorType={type}
       />
       {processor.fieldConfigurations
         .filter((fieldConfiguration) => fieldConfiguration.required)

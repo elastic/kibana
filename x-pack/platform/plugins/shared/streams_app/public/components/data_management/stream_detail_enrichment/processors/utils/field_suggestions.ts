@@ -27,15 +27,14 @@ export function getFieldNamesFromRecords(previewRecords?: FlattenRecord[]): stri
   return Array.from(fieldNames).sort();
 }
 
+
 /**
  * Create field suggestions from simulation records
  */
 export function createFieldSuggestions(previewRecords?: FlattenRecord[]): FieldSuggestion[] {
   const fieldNames = getFieldNamesFromRecords(previewRecords);
 
-  return fieldNames.map((fieldName) => ({
-    name: fieldName,
-  }));
+  return fieldNames.map((fieldName) => ({ name: fieldName }));
 }
 
 /**
@@ -48,20 +47,17 @@ export function sortFieldsByProcessorType(
   if (!processorType) return fields;
 
   return [...fields].sort((a, b) => {
-    switch (processorType) {
-      case 'date':
-        // Prioritize fields that likely contain dates based on naming
-        const aIsDateField =
-          a.name.includes('time') || a.name.includes('date') || a.name.includes('timestamp');
-        const bIsDateField =
-          b.name.includes('time') || b.name.includes('date') || b.name.includes('timestamp');
-        if (aIsDateField && !bIsDateField) return -1;
-        if (!aIsDateField && bIsDateField) return 1;
-        return 0;
+    // For grok processor, prioritize message-like fields
+    if (processorType === 'grok') {
+      const messageFields = ['message', 'log', 'event', 'text'];
+      const aIsMessage = messageFields.some((field) => a.name.toLowerCase().includes(field));
+      const bIsMessage = messageFields.some((field) => b.name.toLowerCase().includes(field));
 
-      default:
-        // No special sorting for other processors (grok works on any text field)
-        return 0;
+      if (aIsMessage && !bIsMessage) return -1;
+      if (!aIsMessage && bIsMessage) return 1;
     }
+
+    // Default alphabetical sort
+    return a.name.localeCompare(b.name);
   });
 }

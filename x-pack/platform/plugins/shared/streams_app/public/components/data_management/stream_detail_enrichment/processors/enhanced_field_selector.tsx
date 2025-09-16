@@ -23,6 +23,7 @@ export interface EnhancedFieldSelectorProps {
   placeholder?: string;
   label?: string;
   isRequired?: boolean;
+  onChange?: (value: string) => void;
 }
 
 export const EnhancedFieldSelector = ({
@@ -32,6 +33,7 @@ export const EnhancedFieldSelector = ({
   placeholder,
   label,
   isRequired = true,
+  onChange,
 }: EnhancedFieldSelectorProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -69,8 +71,9 @@ export const EnhancedFieldSelector = ({
           : selectedOption.value?.name || selectedOption.label
         : '';
       field.onChange(fieldValue);
+      onChange?.(fieldValue);
     },
-    [field]
+    [field, onChange]
   );
 
   const handleCreateOption = useCallback(
@@ -102,6 +105,7 @@ export const EnhancedFieldSelector = ({
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.enhancedFieldSelectorPlaceholder',
     { defaultMessage: 'Select or type a field name...' }
   );
+
 
   return (
     <>

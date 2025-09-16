@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { ProcessorFieldSelector } from '../processor_field_selector';
+import { EnhancedFieldSelector } from '../enhanced_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
@@ -18,8 +18,9 @@ import { SetValueOrCopyFromField } from './set_value_or_copy_from_field';
 export const SetProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector
+      <EnhancedFieldSelector
         fieldKey="to"
+        processorType="set"
         helpText={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.setFieldHelpText',
           { defaultMessage: 'The field to insert, upsert, or update.' }
