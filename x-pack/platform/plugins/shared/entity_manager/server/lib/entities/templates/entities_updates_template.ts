@@ -18,6 +18,8 @@ import {
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
 } from '../../../../common/constants_entities';
 
+const DATA_RETENTION_PERIOD = '1d';
+
 export const generateEntitiesUpdatesIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
@@ -29,6 +31,7 @@ export const generateEntitiesUpdatesIndexTemplateConfig = (
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
+  data_stream: {}, // creates data stream
   ignore_missing_component_templates: getCustomLatestTemplateComponents(definition),
   composed_of: [
     ECS_MAPPINGS_COMPONENT_TEMPLATE,
@@ -44,6 +47,9 @@ export const generateEntitiesUpdatesIndexTemplateConfig = (
   ],
   priority: 200,
   template: {
+    lifecycle: {
+      data_retention: DATA_RETENTION_PERIOD,
+    },
     settings: {
       index: {
         codec: 'best_compression',

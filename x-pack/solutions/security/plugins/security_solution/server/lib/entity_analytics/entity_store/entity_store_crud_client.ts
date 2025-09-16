@@ -18,7 +18,7 @@ import type { EntityStoreDataClient } from './entity_store_data_client';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
-import { getEntityUpdatesIndexName } from './elasticsearch_assets/updates_entity_index';
+import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_entity_data_stream';
 
 interface CustomEntityFieldsAttributesHolder {
   attributes?: Record<string, unknown>;
@@ -95,7 +95,7 @@ export class EntityStoreCrudClient {
 
     await this.esClient.create({
       id: uuidv4(),
-      index: getEntityUpdatesIndexName(type, this.namespace),
+      index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
     });
   }
