@@ -135,7 +135,7 @@ export const RightSideActions = ({
             aria-label={i18n.translate('metricsExperience.searchInputAriaLabel', {
               defaultMessage: 'Search metrics',
             })}
-            data-test-subj={`${dataTestSubj}`}
+            data-test-subj={dataTestSubj}
             css={css`
               border-top-right-radius: 0;
               border-bottom-right-radius: 0;
