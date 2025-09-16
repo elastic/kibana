@@ -49,6 +49,7 @@ import {
   getNormalizedDataStreams,
   getNormalizedInputs,
   isRootPrivilegesRequired,
+  checkIntegrationFipsLooseCompatibility,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -454,6 +455,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy.package = {
         ...enrichedPackagePolicy.package,
         requires_root: requiresRoot,
+        fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
       };
     }
 
@@ -660,6 +662,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           packagePolicy.package = {
             ...packagePolicy.package,
             requires_root: requiresRoot,
+            fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
           };
         }
 
@@ -1234,6 +1237,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       restOfPackagePolicy.package = {
         ...restOfPackagePolicy.package,
         requires_root: requiresRoot,
+        fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
       };
     }
 
@@ -1628,6 +1632,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           restOfPackagePolicy.package = {
             ...restOfPackagePolicy.package,
             requires_root: requiresRoot,
+            fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
           };
         }
 
@@ -2318,6 +2323,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       .toString()
                       .substring(0, 1000)}`
                 );
+
+                // Convert schema validation errors to Fleet errors
+                if (
+                  callbackError.constructor.name === 'ValidationError' ||
+                  callbackError.name === 'ValidationError'
+                ) {
+                  throw new PackagePolicyValidationError(callbackError.message);
+                }
+
                 throw callbackError;
               }
             }
@@ -3373,7 +3387,6 @@ export function updatePackageInputs(
         packageInfo.type === 'input' &&
         update.streams.length === 1 &&
         originalInput?.streams.length === 1;
-
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -3384,6 +3397,7 @@ export function updatePackageInputs(
         if (!originalStream && isInputPkgUpdate) {
           originalStream = {
             ...update.streams[0],
+            id: originalInput?.streams[0]?.id,
             vars: originalInput?.streams[0].vars,
           };
         }

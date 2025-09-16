@@ -57,7 +57,7 @@ import type {
   DeletePackagePoliciesResponse,
   PackagePolicyAssetsMap,
 } from '../../common/types';
-import { packageToPackagePolicy } from '../../common/services';
+import { packageToPackagePolicy, packageToPackagePolicyInputs } from '../../common/services';
 
 import { FleetError, PackagePolicyValidationError } from '../errors';
 
@@ -3798,6 +3798,49 @@ describe('Package policy service', () => {
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
     });
+
+    describe('with validation errors', () => {
+      it('should convert ValidationError to PackagePolicyValidationError', async () => {
+        const soClient = createSavedObjectClientMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Create a callback that returns an invalid package policy (uppercase namespace)
+        const invalidCallback: CombinedExternalCallback = jest.fn(async (ds) => {
+          return {
+            ...ds,
+            namespace: 'InvalidNamespace', // This should cause a validation error
+          };
+        });
+
+        appContextService.addExternalCallback('packagePolicyCreate', invalidCallback);
+
+        await expect(
+          packagePolicyService.runExternalCallbacks(
+            'packagePolicyCreate',
+            newPackagePolicy,
+            soClient,
+            esClient,
+            coreMock.createCustomRequestHandlerContext(context),
+            request
+          )
+        ).rejects.toThrow(PackagePolicyValidationError);
+
+        // Verify the error message contains the validation details
+        try {
+          await packagePolicyService.runExternalCallbacks(
+            'packagePolicyCreate',
+            newPackagePolicy,
+            soClient,
+            esClient,
+            coreMock.createCustomRequestHandlerContext(context),
+            request
+          );
+        } catch (error) {
+          expect(error).toBeInstanceOf(PackagePolicyValidationError);
+          expect(error.message).toContain('Namespace must be lowercase');
+        }
+      });
+    });
   });
 
   describe('runPackagePolicyPostCreateCallback', () => {
@@ -5564,6 +5607,98 @@ describe('Package policy service', () => {
         expect(result.inputs.length).toBe(1);
         expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
         expect(result.inputs[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
+        expect(result.inputs[0]?.policy_template).toBe('template_1');
+      });
+    });
+
+    describe('when updating to an input package ', () => {
+      it('it should keep stream ids', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              id: 'input-1',
+              type: 'logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'dataset.test123',
+                    type: 'log',
+                  },
+                  vars: {
+                    path: {
+                      type: 'text',
+                      value: ['/var/log/test123.log'],
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          type: 'input',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              input: 'logs',
+              type: 'logs',
+              vars: [
+                {
+                  name: 'path',
+                  type: 'text',
+                },
+                {
+                  name: 'path_2',
+                  type: 'text',
+                  default: '/var/log/custom.log',
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = packageToPackagePolicyInputs(packageInfo);
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(1);
+        expect(result.inputs[0]?.streams[0]?.id).toEqual('stream-1');
+        expect(result.inputs[0]?.streams[0]?.vars?.path.value).toEqual(['/var/log/test123.log']);
+        expect(result.inputs[0]?.streams[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
         expect(result.inputs[0]?.policy_template).toBe('template_1');
       });
     });
