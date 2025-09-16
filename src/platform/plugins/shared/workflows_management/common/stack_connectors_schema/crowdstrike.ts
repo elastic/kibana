@@ -65,17 +65,23 @@ export const CrowdStrikeResponseSchema = z.object({
     powered_by: z.string(),
     trace_id: z.string(),
   }),
-  resources: z.array(z.object({
-    device_id: z.string(),
-    hostname: z.string(),
-    local_ip: z.string().optional(),
-    external_ip: z.string().optional(),
-    os_version: z.string().optional(),
-    status: z.string().optional(),
-    last_seen: z.string().optional(),
-  })),
-  errors: z.array(z.object({
-    code: z.number(),
-    message: z.string(),
-  })).optional(),
+  resources: z.array(
+    z.object({
+      device_id: z.string(),
+      hostname: z.string(),
+      local_ip: z.string().optional(),
+      external_ip: z.string().optional(),
+      os_version: z.string().optional(),
+      status: z.string().optional(),
+      last_seen: z.string().optional(),
+    })
+  ),
+  errors: z
+    .array(
+      z.object({
+        code: z.number(),
+        message: z.string(),
+      })
+    )
+    .optional(),
 });

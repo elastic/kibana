@@ -105,21 +105,32 @@ export const ServiceNowIncidentResponseSchema = z.object({
   sys_updated_on: z.string(),
 });
 
-export const ServiceNowFieldsResponseSchema = z.array(z.object({
-  name: z.string(),
-  label: z.string(),
-  type: z.string(),
-  mandatory: z.boolean(),
-  choices: z.array(z.object({
+export const ServiceNowFieldsResponseSchema = z.array(
+  z.object({
+    name: z.string(),
     label: z.string(),
-    value: z.string(),
-  })).optional(),
-}));
+    type: z.string(),
+    mandatory: z.boolean(),
+    choices: z
+      .array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+        })
+      )
+      .optional(),
+  })
+);
 
-export const ServiceNowChoicesResponseSchema = z.record(z.string(), z.array(z.object({
-  label: z.string(),
-  value: z.string(),
-})));
+export const ServiceNowChoicesResponseSchema = z.record(
+  z.string(),
+  z.array(
+    z.object({
+      label: z.string(),
+      value: z.string(),
+    })
+  )
+);
 
 export const ServiceNowEventResponseSchema = z.object({
   sys_id: z.string(),

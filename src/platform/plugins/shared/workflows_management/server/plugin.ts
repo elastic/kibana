@@ -177,19 +177,34 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.spaces = plugins.spaces?.spacesService;
 
     // Create function to get actions client (available after start)
-    const getActionsClient = () => 
-      core.getStartServices().then(([, pluginsStart]) => 
-        (pluginsStart as WorkflowsExecutionEnginePluginStartDeps).actions.getUnsecuredActionsClient()
-      );
+    const getActionsClient = () =>
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) =>
+          (
+            pluginsStart as WorkflowsExecutionEnginePluginStartDeps
+          ).actions.getUnsecuredActionsClient()
+        );
 
     // Create function to get actions client with request (for listTypes)
     const getActionsClientWithRequest = (request: KibanaRequest) =>
-      core.getStartServices().then(([, pluginsStart]) => 
-        (pluginsStart as WorkflowsExecutionEnginePluginStartDeps).actions.getActionsClientWithRequest(request)
-      );
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) =>
+          (
+            pluginsStart as WorkflowsExecutionEnginePluginStartDeps
+          ).actions.getActionsClientWithRequest(request)
+        );
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces!, getActionsClient, getActionsClientWithRequest);
+    defineRoutes(
+      router,
+      this.api,
+      this.logger,
+      this.spaces!,
+      getActionsClient,
+      getActionsClientWithRequest
+    );
 
     return {
       management: this.api,

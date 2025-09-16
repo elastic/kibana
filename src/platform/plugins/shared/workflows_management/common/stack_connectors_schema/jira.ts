@@ -24,10 +24,14 @@ export const JiraPushToServiceParamsSchema = z.object({
     labels: z.array(z.string()).optional(),
     otherFields: z.record(z.string(), z.any()).optional(),
   }),
-  comments: z.array(z.object({
-    comment: z.string(),
-    commentId: z.string(),
-  })).optional(),
+  comments: z
+    .array(
+      z.object({
+        comment: z.string(),
+        commentId: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export const JiraGetIncidentParamsSchema = z.object({
@@ -39,7 +43,7 @@ export const JiraGetFieldsParamsSchema = z.object({
 });
 
 export const JiraGetIssueTypesParamsSchema = z.object({
-  // Issue types parameters - usually empty object  
+  // Issue types parameters - usually empty object
 });
 
 export const JiraGetFieldsByIssueTypeParamsSchema = z.object({
@@ -75,29 +79,35 @@ export const JiraPushToServiceResponseSchema = z.object({
   url: z.string(),
 });
 
-export const JiraFieldsResponseSchema = z.array(z.object({
-  id: z.string(),
-  name: z.string(),
-  schema: z.object({
-    type: z.string(),
-    system: z.string().optional(),
-  }),
-  required: z.boolean(),
-}));
+export const JiraFieldsResponseSchema = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    schema: z.object({
+      type: z.string(),
+      system: z.string().optional(),
+    }),
+    required: z.boolean(),
+  })
+);
 
-export const JiraIssueTypesResponseSchema = z.array(z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  iconUrl: z.string().optional(),
-  subtask: z.boolean(),
-}));
+export const JiraIssueTypesResponseSchema = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    iconUrl: z.string().optional(),
+    subtask: z.boolean(),
+  })
+);
 
-export const JiraIssuesResponseSchema = z.array(z.object({
-  id: z.string(),
-  key: z.string(),
-  summary: z.string(),
-  status: z.string(),
-  created: z.string(),
-  updated: z.string(),
-}));
+export const JiraIssuesResponseSchema = z.array(
+  z.object({
+    id: z.string(),
+    key: z.string(),
+    summary: z.string(),
+    status: z.string(),
+    created: z.string(),
+    updated: z.string(),
+  })
+);

@@ -24,25 +24,31 @@ export const EsIndexParamsSchema = z.object({
 export const EsIndexResponseSchema = z.object({
   took: z.number(),
   errors: z.boolean(),
-  items: z.array(z.object({
-    index: z.object({
-      _index: z.string(),
-      _id: z.string(),
-      _version: z.number(),
-      result: z.string(),
-      _shards: z.object({
-        total: z.number(),
-        successful: z.number(),
-        failed: z.number(),
-      }),
-      status: z.number(),
-    }).optional(),
-    create: z.object({
-      _index: z.string(),
-      _id: z.string(),
-      _version: z.number(),
-      result: z.string(),
-      status: z.number(),
-    }).optional(),
-  })),
+  items: z.array(
+    z.object({
+      index: z
+        .object({
+          _index: z.string(),
+          _id: z.string(),
+          _version: z.number(),
+          result: z.string(),
+          _shards: z.object({
+            total: z.number(),
+            successful: z.number(),
+            failed: z.number(),
+          }),
+          status: z.number(),
+        })
+        .optional(),
+      create: z
+        .object({
+          _index: z.string(),
+          _id: z.string(),
+          _version: z.number(),
+          result: z.string(),
+          status: z.number(),
+        })
+        .optional(),
+    })
+  ),
 });

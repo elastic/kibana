@@ -28,13 +28,15 @@ export const SlackResponseSchema = z.object({
   ok: z.boolean(),
   channel: z.string().optional(),
   ts: z.string().optional(),
-  message: z.object({
-    text: z.string(),
-    username: z.string().optional(),
-    bot_id: z.string().optional(),
-    type: z.string().optional(),
-    subtype: z.string().optional(),
-    ts: z.string().optional(),
-  }).optional(),
+  message: z
+    .object({
+      text: z.string(),
+      username: z.string().optional(),
+      bot_id: z.string().optional(),
+      type: z.string().optional(),
+      subtype: z.string().optional(),
+      ts: z.string().optional(),
+    })
+    .optional(),
   error: z.string().optional(),
 });

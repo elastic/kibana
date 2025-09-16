@@ -19,14 +19,18 @@ const AIMessageZodSchema = z.object({
   role: z.string(),
   content: z.string().nullable().optional(),
   name: z.string().optional(),
-  tool_calls: z.array(z.object({
-    id: z.string(),
-    function: z.object({
-      arguments: z.string().optional(),
-      name: z.string().optional(),
-    }),
-    type: z.string(),
-  })).optional(),
+  tool_calls: z
+    .array(
+      z.object({
+        id: z.string(),
+        function: z.object({
+          arguments: z.string().optional(),
+          name: z.string().optional(),
+        }),
+        type: z.string(),
+      })
+    )
+    .optional(),
   tool_call_id: z.string().optional(),
 });
 
@@ -54,17 +58,22 @@ export const InferenceUnifiedCompletionParamsSchema = z.object({
     max_tokens: z.number().optional(),
     metadata: z.record(z.string(), z.string()).optional(),
     n: z.number().optional(),
-    stop: z.union([z.string(), z.array(z.string())]).nullable().optional(),
+    stop: z
+      .union([z.string(), z.array(z.string())])
+      .nullable()
+      .optional(),
     temperature: z.number().optional(),
-    tool_choice: z.union([
-      z.string(),
-      z.object({
-        type: z.string(),
-        function: z.object({
-          name: z.string(),
+    tool_choice: z
+      .union([
+        z.string(),
+        z.object({
+          type: z.string(),
+          function: z.object({
+            name: z.string(),
+          }),
         }),
-      }),
-    ]).optional(),
+      ])
+      .optional(),
     tools: z.array(AIToolZodSchema).optional(),
     top_p: z.number().optional(),
     user: z.string().optional(),
@@ -94,46 +103,77 @@ export const InferenceSparseEmbeddingParamsSchema = z.object({
 // Inference response schemas
 export const InferenceUnifiedCompletionResponseSchema = z.object({
   id: z.string(),
-  choices: z.array(z.object({
-    finish_reason: z.enum(['stop', 'length', 'tool_calls', 'content_filter', 'function_call']).nullable().optional(),
-    index: z.number().optional(),
-    message: z.object({
-      content: z.string().nullable().optional(),
-      refusal: z.string().nullable().optional(),
-      role: z.string().optional(),
-      tool_calls: z.array(z.object({
-        id: z.string().optional(),
+  choices: z
+    .array(
+      z.object({
+        finish_reason: z
+          .enum(['stop', 'length', 'tool_calls', 'content_filter', 'function_call'])
+          .nullable()
+          .optional(),
         index: z.number().optional(),
-        function: z.object({
-          arguments: z.string().optional(),
-          name: z.string().optional(),
-        }).optional(),
-        type: z.string().optional(),
-      })).default([]).optional(),
-    }),
-  })).default([]),
+        message: z.object({
+          content: z.string().nullable().optional(),
+          refusal: z.string().nullable().optional(),
+          role: z.string().optional(),
+          tool_calls: z
+            .array(
+              z.object({
+                id: z.string().optional(),
+                index: z.number().optional(),
+                function: z
+                  .object({
+                    arguments: z.string().optional(),
+                    name: z.string().optional(),
+                  })
+                  .optional(),
+                type: z.string().optional(),
+              })
+            )
+            .default([])
+            .optional(),
+        }),
+      })
+    )
+    .default([]),
   created: z.number().optional(),
   model: z.string().optional(),
   object: z.string().optional(),
-  usage: z.object({
-    completion_tokens: z.number().optional(),
-    prompt_tokens: z.number().optional(),
-    total_tokens: z.number().optional(),
-  }).nullable().optional(),
+  usage: z
+    .object({
+      completion_tokens: z.number().optional(),
+      prompt_tokens: z.number().optional(),
+      total_tokens: z.number().optional(),
+    })
+    .nullable()
+    .optional(),
 });
 
-export const InferenceCompletionResponseSchema = z.array(z.object({
-  result: z.string(),
-})).default([]);
+export const InferenceCompletionResponseSchema = z
+  .array(
+    z.object({
+      result: z.string(),
+    })
+  )
+  .default([]);
 
-export const InferenceRerankResponseSchema = z.array(z.object({
-  text: z.string().optional(),
-  index: z.number(),
-  score: z.number(),
-})).default([]);
+export const InferenceRerankResponseSchema = z
+  .array(
+    z.object({
+      text: z.string().optional(),
+      index: z.number(),
+      score: z.number(),
+    })
+  )
+  .default([]);
 
-export const InferenceTextEmbeddingResponseSchema = z.array(z.object({
-  embedding: z.array(z.any()).default([]),
-})).default([]);
+export const InferenceTextEmbeddingResponseSchema = z
+  .array(
+    z.object({
+      embedding: z.array(z.any()).default([]),
+    })
+  )
+  .default([]);
 
-export const InferenceSparseEmbeddingResponseSchema = z.array(z.object({}).passthrough()).default([]);
+export const InferenceSparseEmbeddingResponseSchema = z
+  .array(z.object({}).passthrough())
+  .default([]);

@@ -29,7 +29,6 @@ import OpsGenieLogo from '../connector_types/opsgenie/logo';
 import ResilientLogo from '../connector_types/resilient/logo';
 // email + inference + cases
 
-
 export { GEMINI_CONNECTOR_ID } from '../../common/gemini/constants';
 
 export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';

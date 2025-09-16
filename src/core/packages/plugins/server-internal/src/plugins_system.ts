@@ -135,7 +135,7 @@ export class PluginsSystem<T extends PluginType> {
         });
       }
 
-      if(plugin.name === 'workflowsManagement') {
+      if (plugin.name === 'workflowsManagement') {
         console.log('🚀 Setting up workflowsManagement plugin...');
       }
       await plugin.init();

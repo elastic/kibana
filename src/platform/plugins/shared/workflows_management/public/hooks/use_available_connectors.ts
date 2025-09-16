@@ -49,12 +49,7 @@ export function useAvailableConnectors(): UseAvailableConnectorsResult {
     services: { http },
   } = useKibana<CoreStart>();
 
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['workflows', 'connectors'],
     queryFn: async (): Promise<ConnectorsResponse> => {
       try {
@@ -89,7 +84,7 @@ export function useAvailableConnectors(): UseAvailableConnectorsResult {
  */
 export function useConnectorInstances(actionTypeId: string): ConnectorInstance[] {
   const { data } = useAvailableConnectors();
-  
+
   return data?.connectorTypes[actionTypeId]?.instances || [];
 }
 
@@ -98,6 +93,6 @@ export function useConnectorInstances(actionTypeId: string): ConnectorInstance[]
  */
 export function useConnectorTypes(): ConnectorTypeInfo[] {
   const { data } = useAvailableConnectors();
-  
+
   return data ? Object.values(data.connectorTypes) : [];
 }

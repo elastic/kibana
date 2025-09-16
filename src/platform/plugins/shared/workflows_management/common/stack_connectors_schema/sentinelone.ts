@@ -87,17 +87,21 @@ export const SentinelOneGetActivitiesParamsSchema = z.object({
 
 // SentinelOne connector response schema
 export const SentinelOneResponseSchema = z.object({
-  data: z.array(z.object({
-    id: z.string(),
-    computerName: z.string(),
-    uuid: z.string(),
-    osType: z.string(),
-    infected: z.boolean(),
-    isActive: z.boolean(),
-    networkStatus: z.string(),
-  })),
-  pagination: z.object({
-    totalItems: z.number(),
-    nextCursor: z.string().optional(),
-  }).optional(),
+  data: z.array(
+    z.object({
+      id: z.string(),
+      computerName: z.string(),
+      uuid: z.string(),
+      osType: z.string(),
+      infected: z.boolean(),
+      isActive: z.boolean(),
+      networkStatus: z.string(),
+    })
+  ),
+  pagination: z
+    .object({
+      totalItems: z.number(),
+      nextCursor: z.string().optional(),
+    })
+    .optional(),
 });

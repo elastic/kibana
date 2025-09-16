@@ -409,10 +409,12 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
   }
 
   // Generic fallback for unknown sub-actions
-  return z.object({
-    subAction: z.literal(subActionName),
-    subActionParams: z.any(),
-  }).required();
+  return z
+    .object({
+      subAction: z.literal(subActionName),
+      subActionParams: z.any(),
+    })
+    .required();
 }
 
 /**
@@ -695,19 +697,27 @@ function generateKibanaConnectors(): ConnectorContract[] {
  * Convert dynamic connector data from actions client to ConnectorContract format
  */
 export function convertDynamicConnectorsToContracts(
-  connectorTypes: Record<string, {
-    actionTypeId: string;
-    displayName: string;
-    instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
-    enabled?: boolean;
-    enabledInConfig?: boolean;
-    enabledInLicense?: boolean;
-    minimumLicenseRequired?: string;
-    subActions?: Array<{
-      name: string;
+  connectorTypes: Record<
+    string,
+    {
+      actionTypeId: string;
       displayName: string;
-    }>;
-  }>
+      instances: Array<{
+        id: string;
+        name: string;
+        isPreconfigured: boolean;
+        isDeprecated: boolean;
+      }>;
+      enabled?: boolean;
+      enabledInConfig?: boolean;
+      enabledInLicense?: boolean;
+      minimumLicenseRequired?: string;
+      subActions?: Array<{
+        name: string;
+        displayName: string;
+      }>;
+    }
+  >
 ): ConnectorContract[] {
   const connectorContracts: ConnectorContract[] = [];
 
@@ -715,23 +725,31 @@ export function convertDynamicConnectorsToContracts(
     try {
       // Create connector ID schema with available instances
       // If no instances exist, use a generic string schema
-      const connectorIdSchema = connectorType.instances.length > 0 
-        ? z.enum([connectorType.instances[0].id, ...connectorType.instances.slice(1).map(i => i.id)] as [string, ...string[]])
-        : z.string();
+      const connectorIdSchema =
+        connectorType.instances.length > 0
+          ? z.enum([
+              connectorType.instances[0].id,
+              ...connectorType.instances.slice(1).map((i) => i.id),
+            ] as [string, ...string[]])
+          : z.string();
 
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
-          const subActionType = `${connectorType.actionTypeId.replace(/^\./, '')}.${subAction.name}`;
-          
+          const subActionType = `${connectorType.actionTypeId.replace(/^\./, '')}.${
+            subAction.name
+          }`;
+
           connectorContracts.push({
             type: subActionType,
             paramsSchema: getSubActionParamsSchema(connectorType.actionTypeId, subAction.name),
             connectorIdRequired: true,
             connectorId: connectorIdSchema,
             outputSchema: getSubActionOutputSchema(connectorType.actionTypeId, subAction.name),
-            description: `${connectorType.displayName} - ${subAction.displayName}${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
+            description: `${connectorType.displayName} - ${subAction.displayName}${
+              connectorType.instances.length === 0 ? ' (no instances configured)' : ''
+            }`,
           });
         });
       } else {
@@ -742,7 +760,9 @@ export function convertDynamicConnectorsToContracts(
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
           outputSchema: z.any(),
-          description: `${connectorType.displayName} connector${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
+          description: `${connectorType.displayName} connector${
+            connectorType.instances.length === 0 ? ' (no instances configured)' : ''
+          }`,
         });
       }
     } catch (error) {
@@ -770,19 +790,27 @@ let allConnectorsCache: ConnectorContract[] | null = null;
  * Call this when dynamic connector data is fetched from the API
  */
 export function addDynamicConnectorsToCache(
-  dynamicConnectorTypes: Record<string, {
-    actionTypeId: string;
-    displayName: string;
-    instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
-    enabled?: boolean;
-    enabledInConfig?: boolean;
-    enabledInLicense?: boolean;
-    minimumLicenseRequired?: string;
-    subActions?: Array<{
-      name: string;
+  dynamicConnectorTypes: Record<
+    string,
+    {
+      actionTypeId: string;
       displayName: string;
-    }>;
-  }>
+      instances: Array<{
+        id: string;
+        name: string;
+        isPreconfigured: boolean;
+        isDeprecated: boolean;
+      }>;
+      enabled?: boolean;
+      enabledInConfig?: boolean;
+      enabledInLicense?: boolean;
+      minimumLicenseRequired?: string;
+      subActions?: Array<{
+        name: string;
+        displayName: string;
+      }>;
+    }
+  >
 ) {
   // Get base connectors if cache is empty
   if (allConnectorsCache === null) {
@@ -790,16 +818,16 @@ export function addDynamicConnectorsToCache(
     const kibanaConnectors = generateKibanaConnectors();
     allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
   }
-  
+
   // Convert dynamic connectors to ConnectorContract format
   const dynamicConnectors = convertDynamicConnectorsToContracts(dynamicConnectorTypes);
-  
+
   // Get existing connector types to avoid duplicates
-  const existingTypes = new Set(allConnectorsCache.map(c => c.type));
-  
+  const existingTypes = new Set(allConnectorsCache.map((c) => c.type));
+
   // Add only new dynamic connectors
-  const newDynamicConnectors = dynamicConnectors.filter(c => !existingTypes.has(c.type));
-  
+  const newDynamicConnectors = dynamicConnectors.filter((c) => !existingTypes.has(c.type));
+
   if (newDynamicConnectors.length > 0) {
     allConnectorsCache.push(...newDynamicConnectors);
     console.debug(`Added ${newDynamicConnectors.length} new dynamic connectors to cache`);
@@ -812,12 +840,12 @@ export function getAllConnectors(): ConnectorContract[] {
   if (allConnectorsCache !== null) {
     return allConnectorsCache;
   }
-  
+
   // Initialize cache with static and generated connectors
   const elasticsearchConnectors = generateElasticsearchConnectors();
   const kibanaConnectors = generateKibanaConnectors();
   allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
-  
+
   return allConnectorsCache;
 }
 
@@ -846,35 +874,45 @@ export const getOutputSchemaForStepType = (stepType: string) => {
  * Get all connectors including dynamic ones from actions client
  */
 export function getAllConnectorsWithDynamic(
-  dynamicConnectorTypes?: Record<string, {
-    actionTypeId: string;
-    displayName: string;
-    instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
-    enabled?: boolean;
-    enabledInConfig?: boolean;
-    enabledInLicense?: boolean;
-    minimumLicenseRequired?: string;
-    subActions?: Array<{
-      name: string;
+  dynamicConnectorTypes?: Record<
+    string,
+    {
+      actionTypeId: string;
       displayName: string;
-    }>;
-  }>
+      instances: Array<{
+        id: string;
+        name: string;
+        isPreconfigured: boolean;
+        isDeprecated: boolean;
+      }>;
+      enabled?: boolean;
+      enabledInConfig?: boolean;
+      enabledInLicense?: boolean;
+      minimumLicenseRequired?: string;
+      subActions?: Array<{
+        name: string;
+        displayName: string;
+      }>;
+    }
+  >
 ): ConnectorContract[] {
   const staticAndGeneratedConnectors = getAllConnectors();
-  
+
   // Graceful fallback if dynamic connectors are not available
   if (!dynamicConnectorTypes || Object.keys(dynamicConnectorTypes).length === 0) {
     console.debug('Dynamic connectors not available, using static connectors only');
     return staticAndGeneratedConnectors;
   }
-  
+
   try {
     const dynamicConnectors = convertDynamicConnectorsToContracts(dynamicConnectorTypes);
-    
+
     // Filter out any duplicates (dynamic connectors override static ones with same type)
-    const staticConnectorTypes = new Set(staticAndGeneratedConnectors.map(c => c.type));
-    const uniqueDynamicConnectors = dynamicConnectors.filter(c => !staticConnectorTypes.has(c.type));
-    
+    const staticConnectorTypes = new Set(staticAndGeneratedConnectors.map((c) => c.type));
+    const uniqueDynamicConnectors = dynamicConnectors.filter(
+      (c) => !staticConnectorTypes.has(c.type)
+    );
+
     console.debug(`Added ${uniqueDynamicConnectors.length} dynamic connectors to schema`);
     return [...staticAndGeneratedConnectors, ...uniqueDynamicConnectors];
   } catch (error) {

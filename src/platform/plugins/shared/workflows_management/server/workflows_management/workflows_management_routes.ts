@@ -20,52 +20,92 @@ import {
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+
+// Import SUB_ACTION enums from all stack connectors
+import {
+  SUB_ACTION as INFERENCE_SUB_ACTION,
+  INFERENCE_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/inference/constants';
+import {
+  SUB_ACTION as BEDROCK_SUB_ACTION,
+  BEDROCK_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import {
+  SUB_ACTION as OPENAI_SUB_ACTION,
+  OPENAI_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/openai/constants';
+import {
+  SUB_ACTION as GEMINI_SUB_ACTION,
+  GEMINI_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import {
+  SUB_ACTION as THEHIVE_SUB_ACTION,
+  THEHIVE_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/thehive/constants';
+import {
+  SUB_ACTION as TINES_SUB_ACTION,
+  TINES_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/tines/constants';
+import {
+  SUB_ACTION as XSOAR_SUB_ACTION,
+  XSOAR_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/xsoar/constants';
+import {
+  SUB_ACTION as SENTINELONE_SUB_ACTION,
+  SENTINELONE_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import {
+  SUB_ACTION as D3SECURITY_SUB_ACTION,
+  D3_SECURITY_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/d3security/constants';
+import {
+  SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
+  CROWDSTRIKE_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import {
+  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import {
+  JiraServiceManagementSubActions,
+  JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
+} from '@kbn/stack-connectors-plugin/common/jira-service-management/constants';
+import {
+  OpsgenieSubActions,
+  OpsgenieConnectorTypeId,
+} from '@kbn/stack-connectors-plugin/common/opsgenie';
+import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
+import { type GetWorkflowsParams } from './workflows_management_api';
+import type { WorkflowsManagementApi } from './workflows_management_api';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
   isWorkflowValidationError,
 } from '../../common/lib/errors';
-import type { WorkflowsManagementApi } from './workflows_management_api';
-import { type GetWorkflowsParams } from './workflows_management_api';
-import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
-
-// Import SUB_ACTION enums from all stack connectors
-import { SUB_ACTION as INFERENCE_SUB_ACTION, INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
-import { SUB_ACTION as BEDROCK_SUB_ACTION, BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { SUB_ACTION as OPENAI_SUB_ACTION, OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { SUB_ACTION as GEMINI_SUB_ACTION, GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import { SUB_ACTION as THEHIVE_SUB_ACTION, THEHIVE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/thehive/constants';
-import { SUB_ACTION as TINES_SUB_ACTION, TINES_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/tines/constants';
-import { SUB_ACTION as XSOAR_SUB_ACTION, XSOAR_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/xsoar/constants';
-import { SUB_ACTION as SENTINELONE_SUB_ACTION, SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { SUB_ACTION as D3SECURITY_SUB_ACTION, D3_SECURITY_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/d3security/constants';
-import { SUB_ACTION as CROWDSTRIKE_SUB_ACTION, CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION, MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
-import { JiraServiceManagementSubActions, JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID } from '@kbn/stack-connectors-plugin/common/jira-service-management/constants';
-import { OpsgenieSubActions, OpsgenieConnectorTypeId } from '@kbn/stack-connectors-plugin/common/opsgenie';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {
   // Handle both snake_case and camelCase
-  return action
-    // First, split camelCase: insertCamelCaseSpaces
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    // Then split on underscores and other separators
-    .split(/[_\s-]+/)
-    // Capitalize each word
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+  return (
+    action
+      // First, split camelCase: insertCamelCaseSpaces
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      // Then split on underscores and other separators
+      .split(/[_\s-]+/)
+      // Capitalize each word
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  );
 }
 
 // Helper function to create sub-actions mapping
 function createSubActionsMapping() {
   const mapping: Record<string, Array<{ name: string; displayName: string }>> = {};
-  
-  
+
   // Define legacy connector sub-actions (connectors using older ActionType pattern)
   const JIRA_SUB_ACTIONS = {
     GET_FIELDS: 'getFields',
-    GET_INCIDENT: 'getIncident', 
+    GET_INCIDENT: 'getIncident',
     PUSH_TO_SERVICE: 'pushToService',
     ISSUE_TYPES: 'issueTypes',
     FIELDS_BY_ISSUE_TYPE: 'fieldsByIssueType',
@@ -113,7 +153,10 @@ function createSubActionsMapping() {
     { id: SENTINELONE_CONNECTOR_ID, actions: SENTINELONE_SUB_ACTION },
     { id: D3_SECURITY_CONNECTOR_ID, actions: D3SECURITY_SUB_ACTION },
     { id: CROWDSTRIKE_CONNECTOR_ID, actions: CROWDSTRIKE_SUB_ACTION },
-    { id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID, actions: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION },
+    {
+      id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+      actions: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+    },
     { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
     { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
     // Legacy connectors (using older ActionType pattern)
@@ -124,14 +167,14 @@ function createSubActionsMapping() {
     { id: '.swimlane', actions: SWIMLANE_SUB_ACTIONS },
     { id: '.cases-webhook', actions: CASES_WEBHOOK_SUB_ACTIONS },
   ];
-  
+
   connectorSubActions.forEach(({ id, actions }) => {
-    mapping[id] = Object.values(actions).map(action => ({
+    mapping[id] = Object.values(actions).map((action) => ({
       name: action,
       displayName: formatSubActionName(action),
     }));
   });
-  
+
   return mapping;
 }
 
@@ -259,7 +302,7 @@ export function defineRoutes(
       }
     }
   );
-  
+
   // Get available connectors for dynamic schema generation
   router.get(
     {
@@ -283,44 +326,52 @@ export function defineRoutes(
         const spaceId = spaces.getSpaceId(request);
         const actionsClient = await getActionsClient();
         const actionsClientWithRequest = await getActionsClientWithRequest(request);
-        
+
         // Get both connectors and action types
         const [connectors, actionTypes] = await Promise.all([
           actionsClient.getAll(spaceId),
-          actionsClientWithRequest.listTypes({ includeSystemActionTypes: false })
+          actionsClientWithRequest.listTypes({ includeSystemActionTypes: false }),
         ]);
-        
+
         // Note: We now get display names directly from actionTypes, no need for the map
-        
+
         // Initialize connectorsByType with ALL available action types
-        const connectorsByType: Record<string, {
-          actionTypeId: string;
-          displayName: string;
-          instances: Array<{ id: string; name: string; isPreconfigured: boolean; isDeprecated: boolean }>;
-          enabled: boolean;
-          enabledInConfig: boolean;
-          enabledInLicense: boolean;
-          minimumLicenseRequired: string;
-          subActions?: Array<{
-            name: string;
+        const connectorsByType: Record<
+          string,
+          {
+            actionTypeId: string;
             displayName: string;
-          }>;
-        }> = {};
-        
+            instances: Array<{
+              id: string;
+              name: string;
+              isPreconfigured: boolean;
+              isDeprecated: boolean;
+            }>;
+            enabled: boolean;
+            enabledInConfig: boolean;
+            enabledInLicense: boolean;
+            minimumLicenseRequired: string;
+            subActions?: Array<{
+              name: string;
+              displayName: string;
+            }>;
+          }
+        > = {};
+
         // Define connector types to filter out
         // These are connectors that are not supported in the workflows management UI
         const FILTERED_CONNECTOR_TYPES = ['.index', '.webhook', '.cases-webhook', '.server-log'];
-        
+
         // First, add all action types (even those without instances), excluding filtered types
         actionTypes.forEach((actionType: any) => {
           // Skip filtered connector types
           if (FILTERED_CONNECTOR_TYPES.includes(actionType.id)) {
             return;
           }
-          
+
           // Get sub-actions from our static mapping
           const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
-          
+
           connectorsByType[actionType.id] = {
             actionTypeId: actionType.id,
             displayName: actionType.name,
@@ -332,7 +383,7 @@ export function defineRoutes(
             ...(subActions && { subActions }),
           };
         });
-        
+
         // Then, populate instances for action types that have connectors
         connectors.forEach((connector: FindActionResult) => {
           if (connectorsByType[connector.actionTypeId]) {
@@ -345,11 +396,11 @@ export function defineRoutes(
           }
         });
 
-        return response.ok({ 
+        return response.ok({
           body: {
             connectorTypes: connectorsByType,
             totalConnectors: connectors.length,
-          }
+          },
         });
       } catch (error) {
         logger.error(`Failed to fetch connectors: ${error.message}`);
@@ -362,7 +413,7 @@ export function defineRoutes(
       }
     }
   );
-  
+
   router.post(
     {
       path: '/api/workflows/search',

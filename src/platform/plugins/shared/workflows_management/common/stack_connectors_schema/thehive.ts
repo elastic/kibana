@@ -41,10 +41,15 @@ export const TheHivePushToServiceParamsSchema = z.object({
     tlp: z.number().default(TheHiveTLP.AMBER).nullable().optional(),
     tags: z.array(z.string()).nullable().optional(),
   }),
-  comments: z.array(z.object({
-    comment: z.string(),
-    commentId: z.string(),
-  })).nullable().optional(),
+  comments: z
+    .array(
+      z.object({
+        comment: z.string(),
+        commentId: z.string(),
+      })
+    )
+    .nullable()
+    .optional(),
 });
 
 export const TheHiveCreateAlertParamsSchema = z.object({

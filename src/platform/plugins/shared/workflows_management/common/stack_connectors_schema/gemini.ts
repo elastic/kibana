@@ -25,18 +25,24 @@ export const GeminiParamsSchema = z.object({
 
 // Gemini connector response schema
 export const GeminiResponseSchema = z.object({
-  candidates: z.array(z.object({
-    content: z.object({
-      parts: z.array(z.object({
-        text: z.string(),
-      })),
-      role: z.string(),
-    }),
-    finishReason: z.string().optional(),
-  })),
-  usageMetadata: z.object({
-    promptTokenCount: z.number(),
-    candidatesTokenCount: z.number(),
-    totalTokenCount: z.number(),
-  }).optional(),
+  candidates: z.array(
+    z.object({
+      content: z.object({
+        parts: z.array(
+          z.object({
+            text: z.string(),
+          })
+        ),
+        role: z.string(),
+      }),
+      finishReason: z.string().optional(),
+    })
+  ),
+  usageMetadata: z
+    .object({
+      promptTokenCount: z.number(),
+      candidatesTokenCount: z.number(),
+      totalTokenCount: z.number(),
+    })
+    .optional(),
 });

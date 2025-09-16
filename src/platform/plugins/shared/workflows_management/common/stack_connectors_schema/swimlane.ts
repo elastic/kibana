@@ -24,10 +24,14 @@ export const SwimlaneCreateRecordParamsSchema = z.object({
       severity: z.string().optional(),
       description: z.string().optional(),
     }),
-    comments: z.array(z.object({
-      comment: z.string(),
-      commentId: z.string(),
-    })).optional(),
+    comments: z
+      .array(
+        z.object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+      )
+      .optional(),
   }),
 });
 
@@ -41,10 +45,14 @@ export const SwimlaneUpdateRecordParamsSchema = z.object({
       description: z.string().optional(),
     }),
     incidentId: z.string(),
-    comments: z.array(z.object({
-      comment: z.string(),
-      commentId: z.string(),
-    })).optional(),
+    comments: z
+      .array(
+        z.object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+      )
+      .optional(),
   }),
 });
 

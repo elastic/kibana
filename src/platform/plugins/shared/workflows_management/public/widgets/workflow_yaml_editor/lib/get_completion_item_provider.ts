@@ -654,7 +654,7 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
   }
 
   try {
-        const allConnectors = getCachedAllConnectors();
+    const allConnectors = getCachedAllConnectors();
     const connector = allConnectors.find((c: any) => c.type === connectorType);
 
     if (!connector || !connector.paramsSchema) {
@@ -808,7 +808,7 @@ function getRequiredParamsForConnector(
   connectorType: string
 ): Array<{ name: string; example?: string; defaultValue?: string }> {
   // Get all connectors (both static and generated)
-        const allConnectors = getCachedAllConnectors();
+  const allConnectors = getCachedAllConnectors();
 
   // Find the connector by type
   const connector = allConnectors.find((c: any) => c.type === connectorType);
@@ -914,7 +914,7 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
   if (connectorType.startsWith('elasticsearch')) {
     return monaco.languages.CompletionItemKind.Struct; // Will use custom Elasticsearch logo
   }
-  if (connectorType.startsWith('kibana')){
+  if (connectorType.startsWith('kibana')) {
     return monaco.languages.CompletionItemKind.Module; // Will use custom Kibana logo
   }
   if (connectorType === 'console') {
@@ -926,7 +926,6 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
   }
   return monaco.languages.CompletionItemKind.Function;
 }
-
 
 /**
  * Get connector type suggestions with better grouping and filtering
@@ -971,12 +970,14 @@ function getConnectorTypeSuggestions(
 
     // Find display name for this connector type - only for dynamic connectors
     const connector = allConnectors.find((c: any) => c.type === connectorType);
-    
+
     // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
-    const isDynamicConnector = !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
-    const displayName = isDynamicConnector && connector?.description
-      ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
-      : connectorType;
+    const isDynamicConnector =
+      !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
+    const displayName =
+      isDynamicConnector && connector?.description
+        ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
+        : connectorType;
 
     return {
       label: displayName, // Show display name for dynamic connectors, technical name for ES/Kibana

@@ -29,16 +29,20 @@ export const OpenAIParamsSchema = z.object({
 
 // OpenAI connector response schema
 export const OpenAIResponseSchema = z.object({
-  choices: z.array(z.object({
-    message: z.object({
-      role: z.string(),
-      content: z.string(),
-    }),
-    finish_reason: z.string().optional(),
-  })),
-  usage: z.object({
-    prompt_tokens: z.number(),
-    completion_tokens: z.number(),
-    total_tokens: z.number(),
-  }).optional(),
+  choices: z.array(
+    z.object({
+      message: z.object({
+        role: z.string(),
+        content: z.string(),
+      }),
+      finish_reason: z.string().optional(),
+    })
+  ),
+  usage: z
+    .object({
+      prompt_tokens: z.number(),
+      completion_tokens: z.number(),
+      total_tokens: z.number(),
+    })
+    .optional(),
 });

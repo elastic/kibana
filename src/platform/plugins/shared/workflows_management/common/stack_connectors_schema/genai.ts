@@ -22,63 +22,93 @@ export const GenAIRunParamsSchema = z.object({
 
 // Gen AI connector parameter schema for invokeAI action
 export const GenAIInvokeAIParamsSchema = z.object({
-  messages: z.array(z.object({
-    role: z.string(),
-    content: z.string(),
-    name: z.string().optional(),
-    function_call: z.object({
-      arguments: z.string(),
-      name: z.string(),
-    }).optional(),
-    tool_calls: z.array(z.object({
-      id: z.string(),
-      function: z.object({
-        arguments: z.string(),
-        name: z.string(),
-      }),
-      type: z.string(),
-    })).optional(),
-    tool_call_id: z.string().optional(),
-  })).describe('Array of messages for the conversation'),
+  messages: z
+    .array(
+      z.object({
+        role: z.string(),
+        content: z.string(),
+        name: z.string().optional(),
+        function_call: z
+          .object({
+            arguments: z.string(),
+            name: z.string(),
+          })
+          .optional(),
+        tool_calls: z
+          .array(
+            z.object({
+              id: z.string(),
+              function: z.object({
+                arguments: z.string(),
+                name: z.string(),
+              }),
+              type: z.string(),
+            })
+          )
+          .optional(),
+        tool_call_id: z.string().optional(),
+      })
+    )
+    .describe('Array of messages for the conversation'),
   model: z.string().optional().describe('The model to use for the request'),
-  tools: z.array(z.object({
-    type: z.literal('function'),
-    function: z.object({
-      description: z.string().optional(),
-      name: z.string(),
-      parameters: z.record(z.any()),
-      strict: z.boolean().optional(),
-    }),
-  })).optional().describe('Available tools for the AI to use'),
-  tool_choice: z.union([
-    z.literal('none'),
-    z.literal('auto'),
-    z.literal('required'),
-    z.object({
-      type: z.literal('function'),
-      function: z.object({
+  tools: z
+    .array(
+      z.object({
+        type: z.literal('function'),
+        function: z.object({
+          description: z.string().optional(),
+          name: z.string(),
+          parameters: z.record(z.any()),
+          strict: z.boolean().optional(),
+        }),
+      })
+    )
+    .optional()
+    .describe('Available tools for the AI to use'),
+  tool_choice: z
+    .union([
+      z.literal('none'),
+      z.literal('auto'),
+      z.literal('required'),
+      z.object({
+        type: z.literal('function'),
+        function: z.object({
+          name: z.string(),
+        }),
+      }),
+    ])
+    .optional()
+    .describe('How the AI should choose tools'),
+  functions: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        parameters: z.object({
+          type: z.string(),
+          properties: z.record(z.any()),
+          additionalProperties: z.boolean(),
+        }),
+      })
+    )
+    .optional()
+    .describe('Available functions (deprecated, use tools instead)'),
+  function_call: z
+    .union([
+      z.literal('none'),
+      z.literal('auto'),
+      z.object({
         name: z.string(),
       }),
-    }),
-  ]).optional().describe('How the AI should choose tools'),
-  functions: z.array(z.object({
-    name: z.string(),
-    description: z.string(),
-    parameters: z.object({
-      type: z.string(),
-      properties: z.record(z.any()),
-      additionalProperties: z.boolean(),
-    }),
-  })).optional().describe('Available functions (deprecated, use tools instead)'),
-  function_call: z.union([
-    z.literal('none'),
-    z.literal('auto'),
-    z.object({
-      name: z.string(),
-    }),
-  ]).optional().describe('Function call behavior (deprecated, use tool_choice instead)'),
+    ])
+    .optional()
+    .describe('Function call behavior (deprecated, use tool_choice instead)'),
   n: z.number().optional().describe('Number of completions to generate'),
-  stop: z.union([z.string(), z.array(z.string())]).nullable().optional().describe('Stop sequences'),
+  stop: z
+    .union([z.string(), z.array(z.string())])
+    .nullable()
+    .optional()
+    .describe('Stop sequences'),
   temperature: z.number().optional().describe('Sampling temperature'),
   response_format: z.any().optional().describe('Response format specification'),
   timeout: z.number().optional().describe('Request timeout in milliseconds'),
@@ -112,14 +142,16 @@ export const GenAIRunResponseSchema = z.object({
     completion_tokens: z.number(),
     total_tokens: z.number(),
   }),
-  choices: z.array(z.object({
-    message: z.object({
-      role: z.string(),
-      content: z.string().nullable().optional(),
-    }),
-    finish_reason: z.string().optional(),
-    index: z.number().optional(),
-  })),
+  choices: z.array(
+    z.object({
+      message: z.object({
+        role: z.string(),
+        content: z.string().nullable().optional(),
+      }),
+      finish_reason: z.string().optional(),
+      index: z.number().optional(),
+    })
+  ),
 });
 
 export const GenAIInvokeAIResponseSchema = z.object({

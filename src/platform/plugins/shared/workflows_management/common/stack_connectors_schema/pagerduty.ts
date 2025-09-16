@@ -26,15 +26,23 @@ export const PagerDutyParamsSchema = z.object({
   group: z.string().optional(),
   class: z.string().optional(),
   customDetails: z.record(z.string(), z.any()).optional(),
-  links: z.array(z.object({
-    href: z.string(),
-    text: z.string().optional(),
-  })).optional(),
-  images: z.array(z.object({
-    src: z.string(),
-    href: z.string().optional(),
-    alt: z.string().optional(),
-  })).optional(),
+  links: z
+    .array(
+      z.object({
+        href: z.string(),
+        text: z.string().optional(),
+      })
+    )
+    .optional(),
+  images: z
+    .array(
+      z.object({
+        src: z.string(),
+        href: z.string().optional(),
+        alt: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 // PagerDuty connector response schema

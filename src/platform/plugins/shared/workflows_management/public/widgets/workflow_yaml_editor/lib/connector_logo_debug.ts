@@ -33,13 +33,14 @@ export function debugConnectorLogos(services: any): void {
       title: actionType.actionTypeTitle || 'N/A',
       iconType: typeof actionType.iconClass,
       hasLogo: actionType.iconClass && typeof actionType.iconClass !== 'string',
-      iconClass: typeof actionType.iconClass === 'string' ? actionType.iconClass : '[Component]'
+      iconClass: typeof actionType.iconClass === 'string' ? actionType.iconClass : '[Component]',
     }))
   );
 
   // Show connectors with logo components
   const connectorsWithLogos = actionTypes.filter(
-    (actionType: ActionTypeModel) => actionType.iconClass && typeof actionType.iconClass !== 'string'
+    (actionType: ActionTypeModel) =>
+      actionType.iconClass && typeof actionType.iconClass !== 'string'
   );
 
   console.log('\n🎨 Connectors with Logo Components:');
@@ -64,12 +65,12 @@ export function debugConnectorLogos(services: any): void {
 export function showStackConnectorLogos(): void {
   try {
     const availableLogos = Object.keys(STACK_CONNECTOR_LOGOS);
-    
+
     console.log('🎨 Available Stack Connector Logos:');
-    availableLogos.forEach(connectorType => {
+    availableLogos.forEach((connectorType) => {
       console.log(`- ${connectorType}`);
     });
-    
+
     console.log(`\n📊 Total: ${availableLogos.length} stack connector logos available`);
   } catch (error) {
     console.log('❌ Failed to load stack connector logos:', error);
@@ -86,24 +87,25 @@ export async function testConnectorLogo(connectorId: string, services: any): Pro
   }
 
   const actionTypeRegistry = services.triggersActionsUi.actionTypeRegistry;
-  
+
   if (!actionTypeRegistry.has(connectorId)) {
     console.log(`❌ Connector '${connectorId}' not found in registry`);
     return;
   }
 
   console.log(`🔍 Testing connector: ${connectorId}`);
-  
+
   // Check if it has a stack connector logo
   if (connectorId in STACK_CONNECTOR_LOGOS) {
     console.log(`🎨 Has stack connector logo!`);
-    
+
     try {
-      const LogoComponent = STACK_CONNECTOR_LOGOS[connectorId as keyof typeof STACK_CONNECTOR_LOGOS];
+      const LogoComponent =
+        STACK_CONNECTOR_LOGOS[connectorId as keyof typeof STACK_CONNECTOR_LOGOS];
       const logoElement = React.createElement(LogoComponent, { width: 32, height: 32 });
       const svgString = renderToStaticMarkup(logoElement);
       const base64 = btoa(svgString);
-      
+
       console.log(`✅ Successfully extracted stack connector logo (${base64.length} chars)`);
       console.log(`🖼️ Data URL: data:image/svg+xml;base64,${base64}`);
       return;
@@ -111,12 +113,12 @@ export async function testConnectorLogo(connectorId: string, services: any): Pro
       console.log(`❌ Failed to extract stack connector logo:`, error);
     }
   }
-  
+
   // Fallback to action registry
   const actionTypeModel = actionTypeRegistry.get(connectorId);
   console.log(`📋 Title: ${actionTypeModel.actionTypeTitle || 'N/A'}`);
   console.log(`🎨 Icon type: ${typeof actionTypeModel.iconClass}`);
-  
+
   if (typeof actionTypeModel.iconClass === 'string') {
     console.log(`🎨 Has EUI icon: ${actionTypeModel.iconClass}`);
     console.log(`ℹ️ This would use a simple EUI icon (not extracted in this debug function)`);
@@ -134,9 +136,10 @@ export async function testConnectorLogo(connectorId: string, services: any): Pro
 export function addDebugToWindow(services: any): void {
   if (typeof window !== 'undefined') {
     (window as any).debugConnectorLogos = () => debugConnectorLogos(services);
-    (window as any).testConnectorLogo = (connectorId: string) => testConnectorLogo(connectorId, services);
+    (window as any).testConnectorLogo = (connectorId: string) =>
+      testConnectorLogo(connectorId, services);
     (window as any).showStackConnectorLogos = () => showStackConnectorLogos();
-    
+
     console.log('🔧 Debug functions added to window:');
     console.log('- debugConnectorLogos() - List all available connectors');
     console.log('- testConnectorLogo(connectorId) - Test extracting a specific connector logo');

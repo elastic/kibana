@@ -19,18 +19,26 @@ export const JiraServiceManagementCreateAlertParamsSchema = z.object({
   message: z.string(),
   alias: z.string().optional(),
   description: z.string().optional(),
-  responders: z.array(z.object({
-    type: z.enum(['team', 'user', 'escalation', 'schedule']),
-    name: z.string().optional(),
-    id: z.string().optional(),
-    username: z.string().optional(),
-  })).optional(),
-  visibleTo: z.array(z.object({
-    type: z.enum(['team', 'user']),
-    name: z.string().optional(),
-    id: z.string().optional(),
-    username: z.string().optional(),
-  })).optional(),
+  responders: z
+    .array(
+      z.object({
+        type: z.enum(['team', 'user', 'escalation', 'schedule']),
+        name: z.string().optional(),
+        id: z.string().optional(),
+        username: z.string().optional(),
+      })
+    )
+    .optional(),
+  visibleTo: z
+    .array(
+      z.object({
+        type: z.enum(['team', 'user']),
+        name: z.string().optional(),
+        id: z.string().optional(),
+        username: z.string().optional(),
+      })
+    )
+    .optional(),
   actions: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   details: z.record(z.string(), z.string()).optional(),
