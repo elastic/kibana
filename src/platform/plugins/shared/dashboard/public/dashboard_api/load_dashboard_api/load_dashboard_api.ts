@@ -73,8 +73,6 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
-  console.log({ savedObjectResult, combinedSessionState, overrideState });
-
   // --------------------------------------------------------------------------------------
   // get dashboard Api
   // --------------------------------------------------------------------------------------

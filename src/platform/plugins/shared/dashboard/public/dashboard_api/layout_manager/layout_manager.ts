@@ -72,7 +72,6 @@ export function initializeLayoutManager(
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
-  // console.log({ initialControls, references: references$.value });
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     initialControls,
@@ -80,7 +79,6 @@ export function initializeLayoutManager(
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
-  console.log({ initialLayout });
 
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
@@ -234,7 +232,6 @@ export function initializeLayoutManager(
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
     if (!childApi || !childLayout) throw new PanelNotFoundError();
-    // console.log('getDashboardPanelFromId');
     return {
       type: childLayout.type,
       gridData: childLayout.gridData,
@@ -394,7 +391,6 @@ export function initializeLayoutManager(
   return {
     internalApi: {
       getSerializedStateForPanel: (panelId: string) => {
-        // console.log('getSerializedStateForPanel', currentChildState[panelId]);
         return currentChildState[panelId];
       },
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
@@ -418,7 +414,6 @@ export function initializeLayoutManager(
                 )
               ),
               tap(({ layout, childState }) => {
-                console.log({ lastSavedChildState, childState });
                 lastSavedChildState = childState;
                 lastSavedLayout = layout;
               })
@@ -435,7 +430,6 @@ export function initializeLayoutManager(
       },
 
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
-        // console.log('SET CHILD STATE', { uuid, state });
         currentChildState[uuid] = state;
       },
       isSectionCollapsed,
@@ -443,7 +437,6 @@ export function initializeLayoutManager(
     api: {
       layout$,
       registerChildApi: (api: DefaultEmbeddableApi) => {
-        // console.log('register', api.type, api);
         children$.next({
           ...children$.value,
           [api.uuid]: api,

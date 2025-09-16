@@ -45,15 +45,13 @@ export function serializeLayout(
     }
   });
 
-  console.log({ panels });
   return {
     panels: [...panels, ...Object.values(sections)],
     controlGroupInput: {
       controls: Object.values(layout.controls)
         .sort(({ order: orderA }, { order: orderB }) => orderA - orderB)
         .map((control) => {
-          console.log({ control, test: childState[control.id!] });
-          return { id: control.id, ...childState[control.id!].rawState };
+          return { type: control.type, id: control.id, ...childState[control.id!].rawState };
         }),
     },
     references,

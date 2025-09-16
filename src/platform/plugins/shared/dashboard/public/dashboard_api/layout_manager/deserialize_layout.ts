@@ -19,7 +19,6 @@ export function deserializeLayout(
   references: Reference[],
   getReferences: (id: string) => Reference[]
 ) {
-  // console.log({ panels, initialControls });
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
@@ -51,7 +50,6 @@ export function deserializeLayout(
         i: panelId,
       },
     };
-    // console.log('OTHER REFS', getReferences(panelId));
     childState[panelId] = {
       rawState: {
         ...panel.panelConfig,

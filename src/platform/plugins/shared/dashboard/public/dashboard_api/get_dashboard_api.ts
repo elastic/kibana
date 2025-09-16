@@ -59,11 +59,9 @@ export function getDashboardApi({
 
   const references$ = new BehaviorSubject<Reference[] | undefined>(initialState.references);
   const getReferences = (id: string) => {
-    // console.log(references$.value);
     return getReferencesForPanelId(id, references$.value ?? []);
   };
 
-  console.log({ initialState });
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
