@@ -58,7 +58,13 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       };
     }
 
-    throw new Error('Unable to extract references from Map state, unexpected state');
+    return {
+      state: {
+        ...state,
+        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+      } as StoredMapEmbeddableState,
+      references: enhancementsReferences,
+    };
   }
   return transformIn;
 }

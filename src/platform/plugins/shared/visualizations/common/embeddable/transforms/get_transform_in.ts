@@ -68,7 +68,13 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       };
     }
 
-    throw new Error('Unable to extract references from Visualization state, unexpected state');
+    return {
+      state: {
+        ...state,
+        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+      } as StoredVisualizeEmbeddableState,
+      references: enhancementsReferences,
+    };
   }
   return transformIn;
 }

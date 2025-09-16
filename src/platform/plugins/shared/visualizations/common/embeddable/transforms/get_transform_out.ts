@@ -46,7 +46,10 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       };
     }
 
-    throw new Error('Unable to inject references from Visualization state, unexpected state');
+    return {
+      ...state,
+      ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+    };
   }
   return transformOut;
 }
