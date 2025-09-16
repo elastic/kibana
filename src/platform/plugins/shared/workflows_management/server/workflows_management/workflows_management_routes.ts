@@ -307,8 +307,17 @@ export function defineRoutes(
           }>;
         }> = {};
         
-        // First, add all action types (even those without instances)
+        // Define connector types to filter out
+        // These are connectors that are not supported in the workflows management UI
+        const FILTERED_CONNECTOR_TYPES = ['.index', '.webhook', '.cases-webhook', '.server-log'];
+        
+        // First, add all action types (even those without instances), excluding filtered types
         actionTypes.forEach((actionType: any) => {
+          // Skip filtered connector types
+          if (FILTERED_CONNECTOR_TYPES.includes(actionType.id)) {
+            return;
+          }
+          
           // Get sub-actions from our static mapping
           const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
           

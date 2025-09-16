@@ -24,7 +24,6 @@ import {
   InferenceRerankResponseSchema,
   InferenceTextEmbeddingResponseSchema,
   InferenceSparseEmbeddingResponseSchema,
-  // Other connector schemas
   SlackParamsSchema,
   SlackResponseSchema,
   EmailParamsSchema,
@@ -122,6 +121,21 @@ import {
   TheHiveGetIncidentParamsSchema,
   TheHiveIncidentResponseSchema,
   TheHiveCreateAlertResponseSchema,
+  // D3 Security connector schemas
+  D3SecurityRunParamsSchema,
+  D3SecurityTestParamsSchema,
+  D3SecurityResponseSchema,
+  // Gen AI connector schemas
+  GenAIRunParamsSchema,
+  GenAIInvokeAIParamsSchema,
+  GenAIStreamParamsSchema,
+  GenAIDashboardParamsSchema,
+  GenAITestParamsSchema,
+  GenAIRunResponseSchema,
+  GenAIInvokeAIResponseSchema,
+  GenAIStreamResponseSchema,
+  GenAIDashboardResponseSchema,
+  GenAITestResponseSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -366,6 +380,34 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     }
   }
 
+  // Handle D3 Security sub-actions
+  if (actionTypeId === '.d3security') {
+    switch (subActionName) {
+      case 'run':
+        return D3SecurityRunParamsSchema;
+      case 'test':
+        return D3SecurityTestParamsSchema;
+    }
+  }
+
+  // Handle Gen AI sub-actions
+  if (actionTypeId === '.gen-ai') {
+    switch (subActionName) {
+      case 'run':
+        return GenAIRunParamsSchema;
+      case 'invokeAI':
+        return GenAIInvokeAIParamsSchema;
+      case 'invokeStream':
+      case 'invokeAsyncIterator':
+      case 'stream':
+        return GenAIStreamParamsSchema;
+      case 'getDashboard':
+        return GenAIDashboardParamsSchema;
+      case 'test':
+        return GenAITestParamsSchema;
+    }
+  }
+
   // Generic fallback for unknown sub-actions
   return z.object({
     subAction: z.literal(subActionName),
@@ -532,6 +574,29 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
     }
   }
 
+  // Handle D3 Security sub-actions
+  if (actionTypeId === '.d3security') {
+    return D3SecurityResponseSchema;
+  }
+
+  // Handle Gen AI sub-actions
+  if (actionTypeId === '.gen-ai') {
+    switch (subActionName) {
+      case 'run':
+        return GenAIRunResponseSchema;
+      case 'invokeAI':
+        return GenAIInvokeAIResponseSchema;
+      case 'invokeStream':
+      case 'invokeAsyncIterator':
+      case 'stream':
+        return GenAIStreamResponseSchema;
+      case 'getDashboard':
+        return GenAIDashboardResponseSchema;
+      case 'test':
+        return GenAITestResponseSchema;
+    }
+  }
+
   // Generic fallback
   return z.any();
 }
@@ -546,18 +611,6 @@ const staticConnectors: ConnectorContract[] = [
       })
       .required(),
     outputSchema: z.string(),
-  },
-  {
-    type: 'slack',
-    connectorIdRequired: true,
-    paramsSchema: z
-      .object({
-        message: z.string(),
-      })
-      .required(),
-    outputSchema: z.object({
-      message: z.string(),
-    }),
   },
   // Note: inference sub-actions are now generated dynamically
   // Generic request types for raw API calls

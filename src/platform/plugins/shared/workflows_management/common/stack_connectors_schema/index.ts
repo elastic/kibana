@@ -203,3 +203,24 @@ export {
   TheHiveIncidentResponseSchema,
   TheHiveCreateAlertResponseSchema,
 } from './thehive';
+
+// D3 Security connector schemas
+export {
+  D3SecurityRunParamsSchema,
+  D3SecurityTestParamsSchema,
+  D3SecurityResponseSchema,
+} from './d3security';
+
+// Gen AI connector schemas
+export {
+  GenAIRunParamsSchema,
+  GenAIInvokeAIParamsSchema,
+  GenAIStreamParamsSchema,
+  GenAIDashboardParamsSchema,
+  GenAITestParamsSchema,
+  GenAIRunResponseSchema,
+  GenAIInvokeAIResponseSchema,
+  GenAIStreamResponseSchema,
+  GenAIDashboardResponseSchema,
+  GenAITestResponseSchema,
+} from './genai';
