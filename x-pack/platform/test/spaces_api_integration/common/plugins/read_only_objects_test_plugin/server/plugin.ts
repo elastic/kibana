@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 
-const READ_ONLY_TYPE = 'read_only_type';
-const NON_READ_ONLY_TYPE = 'non_read_only_type';
+export const READ_ONLY_TYPE = 'read_only_type';
+export const NON_READ_ONLY_TYPE = 'non_read_only_type';
 
 export class ReadOnlyObjectsPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -290,6 +290,63 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: error.message,
           });
         }
+      }
+    );
+
+    // non read only routes
+    router.get(
+      {
+        path: '/non_read_only_objects/{objectId}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          params: schema.object({
+            objectId: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const soClient = (await context.core).savedObjects.client;
+          const result = await soClient.get(NON_READ_ONLY_TYPE, request.params.objectId);
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          if (error.output && error.output.statusCode === 404) {
+            return response.notFound({
+              body: error.message,
+            });
+          }
+          return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
+    router.get(
+      {
+        path: '/non_read_only_objects/_find',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        const result = await soClient.find({
+          type: NON_READ_ONLY_TYPE,
+        });
+        return response.ok({
+          body: result,
+        });
       }
     );
   }

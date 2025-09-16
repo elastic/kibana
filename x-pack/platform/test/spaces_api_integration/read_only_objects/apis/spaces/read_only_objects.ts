@@ -70,7 +70,32 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
     });
-    describe('create and access read only objects', () => {
+    describe('#create', () => {
+      it('should create a read only object', async () => {
+        const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
+        const response = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        expect(response.body.type).to.eql('read_only_type');
+        expect(response.body).to.have.property('accessControl');
+        expect(response.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(response.body.accessControl).to.have.property('owner', profileUid);
+      });
+
+      it('should throw when trying to create read only object with no user', async () => {
+        await supertest
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(400);
+      });
+    });
+
+    // ToDo: bulk create
+    describe('#bulk_create', () => {
       it('should create a read only object', async () => {
         const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
         const response = await supertestWithoutAuth
@@ -147,9 +172,76 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.body).to.have.property('message');
         expect(updateResponse.body.message).to.contain('Unable to update read_only_type');
       });
+
+      // ToDo: 'should update read only objects if admin'?
     });
 
-    describe('delete read only objects', () => {
+    describe('#update', () => {
+      it('should update read only objects owned by the same user', async () => {
+        const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
+          'test_user',
+          'changeme'
+        );
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+
+        const updateResponse = await supertestWithoutAuth
+          .put('/read_only_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' })
+          .expect(200);
+
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+      });
+
+      it('should throw when updating read only objects owned by a different user when not admin', async () => {
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+
+        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+        const updateResponse = await supertestWithoutAuth
+          .put('/read_only_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', notOwnerCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' })
+          .expect(403);
+        expect(updateResponse.body).to.have.property('message');
+        expect(updateResponse.body.message).to.contain('Unable to update read_only_type');
+      });
+
+      // ToDo: 'should update read only objects if admin'
+
+      // ToDo: 'should not remove existing access control properties'
+    });
+
+    // ToDo: bulk update
+    // ToDo: 'should not remove existing access control properties'
+    describe('#bulk_update', () => {});
+
+    describe('#delete', () => {
       it('allow owner to delete object marked as read only', async () => {
         const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
@@ -225,7 +317,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('transfer ownership of read only objects', () => {
+    // ToDo: bulk delete
+    describe('#bulk_delete', () => {});
+
+    describe('transfer ownership', () => {
       it('should transfer ownership of read only objects by owner', async () => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
 
@@ -380,7 +475,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('change access mode of read only objects', () => {
+    describe('change access mode', () => {
       it('should allow admins to change access mode of any object', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
@@ -527,5 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
     });
+
+    // ToDo: delete space
   });
 }
