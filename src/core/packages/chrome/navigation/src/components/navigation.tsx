@@ -195,106 +195,71 @@ export const Navigation = ({
                 </SideNav.PrimaryMenuItem>
               }
             >
-              {(closePopover) =>
-                isCollapsed ? (
-                  <NestedSecondaryMenu>
-                    <NestedSecondaryMenu.Panel
-                      id="main"
-                      title={i18n.translate(
-                        'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
-                        { defaultMessage: 'More' }
-                      )}
-                    >
-                      <NestedSecondaryMenu.Section hasGap>
-                        {overflowMenuItems.map((item) => {
-                          const hasSubItems = getHasSubmenu(item);
-                          const { sections, ...itemProps } = item;
-                          return (
-                            <NestedSecondaryMenu.PrimaryMenuItem
-                              key={item.id}
-                              isHighlighted={item.id === visuallyActivePageId}
-                              isCollapsed={isCollapsed}
-                              hasSubmenu={hasSubItems}
-                              submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
-                              onClick={() => {
-                                onItemClick?.(item);
-                                if (!hasSubItems) {
-                                  closePopover();
-                                  focusMainContent();
-                                }
-                              }}
-                              {...itemProps}
-                            >
-                              {item.label}
-                            </NestedSecondaryMenu.PrimaryMenuItem>
-                          );
-                        })}
-                      </NestedSecondaryMenu.Section>
-                    </NestedSecondaryMenu.Panel>
-                    {overflowMenuItems.filter(getHasSubmenu).map((item) => (
-                      <NestedSecondaryMenu.Panel
-                        key={`submenu-${item.id}`}
-                        id={`submenu-${item.id}`}
-                      >
-                        <NestedSecondaryMenu.Header title={item.label} />
-                        {item.sections?.map((section) => (
-                          <NestedSecondaryMenu.Section
-                            key={section.id}
-                            label={section.label}
-                            hasGap={!!section.label}
-                          >
-                            {section.items.map((subItem) => (
-                              <NestedSecondaryMenu.Item
-                                key={subItem.id}
-                                isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                isCurrent={actualActiveItemId === subItem.id}
-                                onClick={() => {
-                                  onItemClick?.(subItem);
-                                  closePopover();
-                                  focusMainContent();
-                                }}
-                                {...subItem}
-                              >
-                                {subItem.label}
-                              </NestedSecondaryMenu.Item>
-                            ))}
-                          </NestedSecondaryMenu.Section>
-                        ))}
-                      </NestedSecondaryMenu.Panel>
-                    ))}
-                  </NestedSecondaryMenu>
-                ) : (
-                  <SecondaryMenu
-                    title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
-                      defaultMessage: 'More',
-                    })}
+              {(closePopover) => (
+                <NestedSecondaryMenu>
+                  <NestedSecondaryMenu.Panel
+                    id="main"
+                    title={i18n.translate(
+                      'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
+                      { defaultMessage: 'More' }
+                    )}
                   >
-                    <SecondaryMenu.Section hasGap>
+                    <NestedSecondaryMenu.Section hasGap>
                       {overflowMenuItems.map((item) => {
+                        const hasSubItems = getHasSubmenu(item);
                         const { sections, ...itemProps } = item;
                         return (
-                          <SideNav.PrimaryMenuItem
+                          <NestedSecondaryMenu.PrimaryMenuItem
                             key={item.id}
                             isHighlighted={item.id === visuallyActivePageId}
-                            isCurrent={actualActiveItemId === item.id}
                             isCollapsed={isCollapsed}
-                            hasContent
+                            hasSubmenu={hasSubItems}
+                            submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
                             onClick={() => {
                               onItemClick?.(item);
-                              closePopover();
-                              focusMainContent();
+                              if (!hasSubItems) {
+                                closePopover();
+                                focusMainContent();
+                              }
                             }}
-                            isHorizontal
                             {...itemProps}
                           >
                             {item.label}
-                          </SideNav.PrimaryMenuItem>
+                          </NestedSecondaryMenu.PrimaryMenuItem>
                         );
                       })}
-                    </SecondaryMenu.Section>
-                  </SecondaryMenu>
-                )
-              }
+                    </NestedSecondaryMenu.Section>
+                  </NestedSecondaryMenu.Panel>
+                  {overflowMenuItems.filter(getHasSubmenu).map((item) => (
+                    <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={`submenu-${item.id}`}>
+                      <NestedSecondaryMenu.Header title={item.label} />
+                      {item.sections?.map((section) => (
+                        <NestedSecondaryMenu.Section
+                          key={section.id}
+                          label={section.label}
+                          hasGap={!!section.label}
+                        >
+                          {section.items.map((subItem) => (
+                            <NestedSecondaryMenu.Item
+                              key={subItem.id}
+                              isHighlighted={subItem.id === visuallyActiveSubpageId}
+                              isCurrent={actualActiveItemId === subItem.id}
+                              onClick={() => {
+                                onItemClick?.(subItem);
+                                closePopover();
+                                focusMainContent();
+                              }}
+                              {...subItem}
+                            >
+                              {subItem.label}
+                            </NestedSecondaryMenu.Item>
+                          ))}
+                        </NestedSecondaryMenu.Section>
+                      ))}
+                    </NestedSecondaryMenu.Panel>
+                  ))}
+                </NestedSecondaryMenu>
+              )}
             </SideNav.Popover>
           )}
         </SideNav.PrimaryMenu>
