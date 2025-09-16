@@ -139,7 +139,6 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
       buildUpdateParams: (user, sourceLabel) => ({
         new_privileged_status: user.isPrivileged,
         sourceLabel,
-        new_roles: user.roles ?? [],
       }),
       buildCreateDoc: (user, sourceLabel) => ({
         user: { name: user.username, is_privileged: user.isPrivileged },
