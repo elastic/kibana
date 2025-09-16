@@ -26,7 +26,6 @@ export class SolutionNavigationTourManager {
       userProfiles: UserProfileServiceStart;
       capabilities: ApplicationStart['capabilities'];
       featureFlags: FeatureFlagsStart;
-      isCloudTrialUser: boolean;
     }
   ) {}
 
@@ -39,7 +38,6 @@ export class SolutionNavigationTourManager {
 
     // when completes, maybe start the navigation tour (if applicable)
     if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
-    if (this.deps.isCloudTrialUser) return;
     const hasCompletedTour = await checkTourCompletion(this.deps.userProfiles);
     if (hasCompletedTour) return;
 

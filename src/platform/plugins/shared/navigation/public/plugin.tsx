@@ -128,15 +128,17 @@ export class NavigationPublicPlugin
     if (spaces) {
       const { project } = core.chrome as InternalChromeStart;
 
-      const tourManager = new SolutionNavigationTourManager({
-        navigationTourManager: project.navigationTourManager,
-        spacesSolutionViewTourManager: spaces.solutionViewTourManager,
-        userProfiles: core.userProfile,
-        capabilities: core.application.capabilities,
-        isCloudTrialUser: this.isCloudTrialUser,
-        featureFlags: core.featureFlags,
-      });
-      void tourManager.startTour();
+      const shouldHideAnnouncement = core.settings.client.get('hideAnnouncements', false);
+      if (this.isSolutionNavEnabled && !shouldHideAnnouncement) {
+        const tourManager = new SolutionNavigationTourManager({
+          navigationTourManager: project.navigationTourManager,
+          spacesSolutionViewTourManager: spaces.solutionViewTourManager,
+          userProfiles: core.userProfile,
+          capabilities: core.application.capabilities,
+          featureFlags: core.featureFlags,
+        });
+        void tourManager.startTour();
+      }
     }
 
     return {

@@ -19,7 +19,7 @@ const newNavBlogPost = 'https://ela.st/new-kibana-navigation';
 export const tourSteps: TourStep[] = [
   {
     id: 'sidenav-home',
-    title: 'New compact and efficient navigation',
+    title: 'Improved navigation menu',
     content: (
       <EuiText>
         <p>
