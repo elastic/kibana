@@ -1771,6 +1771,10 @@ describe('XYChart component', () => {
           layers: [
             {
               ...(args.layers[0] as DataLayerConfig),
+              table: {
+                ...(args.layers[0] as DataLayerConfig).table,
+                rows: [],
+              },
               xAccessor: undefined,
               splitAccessors: ['e'],
               seriesType: 'bar',
@@ -2426,10 +2430,7 @@ describe('XYChart component', () => {
         { id: 'b', name: 'b', meta: { type: 'number' } },
         { id: 'c', name: 'c', meta: { type: 'string' } },
       ],
-      rows: [
-        { a: undefined, b: undefined, c: undefined },
-        { a: undefined, b: undefined, c: undefined },
-      ],
+      rows: [],
     };
 
     const args: XYProps = {

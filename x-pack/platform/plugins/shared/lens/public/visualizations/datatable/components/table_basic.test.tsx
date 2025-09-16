@@ -306,7 +306,7 @@ describe('DatatableComponent', () => {
     renderDatatableComponent({
       data: {
         ...data,
-        rows: [{ a: undefined, b: undefined, c: undefined }],
+        rows: [],
       },
     });
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');

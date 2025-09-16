@@ -246,10 +246,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [firstTableRef, columnConfig, getType]
   );
 
-  const isEmpty =
-    firstLocalTable.rows.length === 0 ||
-    (bucketedColumns.length > 0 &&
-      props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
+  const isEmpty = firstLocalTable.rows.length === 0;
 
   const visibleColumns = useMemo(
     () =>
