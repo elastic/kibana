@@ -44,6 +44,7 @@ import type {
   MicrosoftDefenderEndpointActionRequestFileMeta,
   MicrosoftDefenderEndpointLogEsDoc,
   ResponseActionCancelParameters,
+  ResponseActionCancelOutputContent,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
   UploadedFileInfo,
@@ -392,6 +393,87 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       };
     }
 
+    // For cancel actions, perform comprehensive validation
+    if (payload.command === 'cancel') {
+      const { microsoftDefenderEndpointCancelEnabled } =
+        this.options.endpointService.experimentalFeatures;
+
+      if (!microsoftDefenderEndpointCancelEnabled) {
+        throw new ResponseActionsClientError(
+          'Cancel operation is not enabled for Microsoft Defender for Endpoint',
+          400
+        );
+      }
+
+      const actionId = payload.parameters?.id;
+      if (!actionId) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            'id is required in parameters for cancel action',
+            400
+          ),
+        };
+      }
+
+      try {
+        // Fetch the original action to validate cancel request
+        const originalAction = await this.fetchActionDetails(actionId);
+
+        // Check if action is already completed
+        if (originalAction.isCompleted) {
+          const statusMessage = originalAction.wasSuccessful ? 'completed successfully' : 'failed';
+          return {
+            isValid: false,
+            error: new ResponseActionsClientError(
+              `Cannot cancel action [${actionId}] because it has already ${statusMessage}.`,
+              400
+            ),
+          };
+        }
+
+        // Validate endpoint ID association if provided
+        const requestEndpointId = payload.endpoint_ids?.[0];
+        if (requestEndpointId && originalAction.agents) {
+          const originalActionAgentIds = Array.isArray(originalAction.agents)
+            ? originalAction.agents
+            : [originalAction.agents];
+
+          if (!originalActionAgentIds.includes(requestEndpointId)) {
+            return {
+              isValid: false,
+              error: new ResponseActionsClientError(
+                `Endpoint '${requestEndpointId}' is not associated with action '${actionId}'`,
+                400
+              ),
+            };
+          }
+        }
+
+        // Validate command information exists
+        if (!originalAction.command) {
+          return {
+            isValid: false,
+            error: new ResponseActionsClientError(
+              `Unable to determine command type for action '${actionId}'`,
+              500
+            ),
+          };
+        }
+      } catch (error) {
+        // If we can't fetch the action details (e.g., action not found),
+        // return a validation error
+        if (error instanceof Error && error.message.includes('not found')) {
+          return {
+            isValid: false,
+            error: new ResponseActionsClientError(`Action with id '${actionId}' not found.`, 404),
+          };
+        }
+        // For other errors, let them bubble up
+        throw error;
+      }
+    }
+
     return super.validateRequest(payload);
   }
 
@@ -563,12 +645,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   async cancel(
     actionRequest: CancelActionRequestBody,
     options: CommonResponseActionMethodOptions = {}
-  ): Promise<ActionDetails> {
-    const actionId = actionRequest.parameters?.action_id;
-
-    if (!actionId) {
-      throw new ResponseActionsClientError('action_id is required in parameters', 400);
-    }
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    const actionId = actionRequest.parameters?.id;
 
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionCancelParameters,
@@ -598,7 +676,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           if (!externalActionId) {
             throw new ResponseActionsClientError(
               `Unable to resolve Microsoft Defender machine action ID for action [${actionId}]`,
-              400
+              500
             );
           }
 
@@ -631,7 +709,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
-    return actionDetails;
+    return actionDetails as ActionDetails<
+      ResponseActionCancelOutputContent,
+      ResponseActionCancelParameters
+    >;
   }
 
   async processPendingActions({
@@ -695,6 +776,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 { downloadResult: true }
               )
             );
+            break;
         }
       }
     }

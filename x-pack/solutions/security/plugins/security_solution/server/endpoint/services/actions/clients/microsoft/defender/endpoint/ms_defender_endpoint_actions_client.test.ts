@@ -779,6 +779,21 @@ describe('MS Defender response actions client', () => {
   describe('#cancel()', () => {
     beforeEach(() => {
       const generator = new EndpointActionGenerator('seed');
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointCancelEnabled =
+        true;
+
+      // Reset mock and ensure it returns a valid pending action
+      getActionDetailsByIdMock.mockReset();
+      getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+        return new EndpointActionGenerator('seed').generateActionDetails({
+          id,
+          isCompleted: false,
+          wasSuccessful: false,
+          command: 'isolate',
+          agents: ['1-2-3'],
+        });
+      });
 
       // Mock the search for original action request to get external action ID
       const originalActionSearchResponse = generator.toEsSearchResponse([
@@ -808,7 +823,7 @@ describe('MS Defender response actions client', () => {
       await msClientMock.cancel({
         endpoint_ids: ['1-2-3'],
         comment: 'cancel test comment',
-        parameters: { action_id: 'original-action-id' },
+        parameters: { id: 'original-action-id' },
       });
 
       expect(connectorActionsMock.execute).toHaveBeenCalledWith({
@@ -828,7 +843,7 @@ describe('MS Defender response actions client', () => {
       await msClientMock.cancel({
         endpoint_ids: ['1-2-3'],
         comment: 'cancel test comment',
-        parameters: { action_id: 'original-action-id' },
+        parameters: { id: 'original-action-id' },
       });
 
       expect(clientConstructorOptionsMock.esClient.index).toHaveBeenCalledWith(
@@ -885,7 +900,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'original-action-id' },
+          parameters: { id: 'original-action-id' },
         })
       ).resolves.toEqual(
         expect.objectContaining({
@@ -897,14 +912,14 @@ describe('MS Defender response actions client', () => {
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
     });
 
-    it('should throw error when action_id parameter is missing', async () => {
+    it('should throw error when id parameter is missing', async () => {
       await expect(
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: '' },
+          parameters: { id: '' },
         })
-      ).rejects.toThrow('action_id is required in parameters');
+      ).rejects.toThrow('id is required in parameters');
     });
 
     it('should throw error when parameters are undefined', async () => {
@@ -914,7 +929,7 @@ describe('MS Defender response actions client', () => {
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
         })
-      ).rejects.toThrow('action_id is required in parameters');
+      ).rejects.toThrow('id is required in parameters');
     });
 
     it('should throw error when external action ID cannot be resolved', async () => {
@@ -932,7 +947,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'non-existent-action' },
+          parameters: { id: 'non-existent-action' },
         })
       ).rejects.toThrow("Action with id 'non-existent-action' not found.");
     });
@@ -967,7 +982,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'action-without-external-id' },
+          parameters: { id: 'action-without-external-id' },
         })
       ).rejects.toThrow(
         'Unable to resolve Microsoft Defender machine action ID for action [action-without-external-id]'
@@ -987,7 +1002,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'original-action-id' },
+          parameters: { id: 'original-action-id' },
         })
       ).rejects.toThrow('Microsoft Defender cancel API error');
     });
@@ -1010,7 +1025,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'original-action-id' },
+          parameters: { id: 'original-action-id' },
         })
       ).rejects.toThrow(
         'Attempt to send [cancelAction] to Microsoft Defender for Endpoint failed: Status code: 400. Message: API Error: [Bad Request] Request failed with status code 400'
@@ -1032,7 +1047,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'original-action-id' },
+          parameters: { id: 'original-action-id' },
         })
       ).rejects.toThrow(
         'Cancel request was sent to Microsoft Defender, but Machine Action Id was not provided!'
@@ -1100,7 +1115,7 @@ describe('MS Defender response actions client', () => {
         msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'original-action-id' },
+          parameters: { id: 'original-action-id' },
         })
       ).rejects.toThrow("Action with id 'original-action-id' not found.");
 
@@ -1110,12 +1125,267 @@ describe('MS Defender response actions client', () => {
       );
     });
 
+    describe('validation scenarios', () => {
+      it('should reject cancel request for already completed action', async () => {
+        // Mock getActionDetailsById to return a completed action
+        getActionDetailsByIdMock.mockResolvedValue({
+          id: 'completed-action-id',
+          command: 'isolate',
+          isCompleted: true,
+          wasSuccessful: true,
+          agents: ['1-2-3'],
+        });
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'completed-action-id' },
+          })
+        ).rejects.toThrow(
+          'Cannot cancel action [completed-action-id] because it has already completed successfully'
+        );
+
+        // Should not call connector if validation fails
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+
+      it('should reject cancel request for already failed action', async () => {
+        // Mock getActionDetailsById to return a failed action
+        getActionDetailsByIdMock.mockResolvedValue({
+          id: 'failed-action-id',
+          command: 'isolate',
+          isCompleted: true,
+          wasSuccessful: false,
+          agents: ['1-2-3'],
+        });
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'failed-action-id' },
+          })
+        ).rejects.toThrow('Cannot cancel action [failed-action-id] because it has already failed.');
+
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+
+      it('should reject cancel request when endpoint ID is not associated with action', async () => {
+        // Mock getActionDetailsById to return an action for a different agent
+        getActionDetailsByIdMock.mockResolvedValue({
+          id: 'other-agent-action-id',
+          command: 'isolate',
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['different-agent-id'],
+        });
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'other-agent-action-id' },
+          })
+        ).rejects.toThrow("Endpoint '1-2-3' is not associated with action 'other-agent-action-id'");
+
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+
+      it('should reject cancel request when action command information is missing', async () => {
+        // Mock getActionDetailsById to return an action without command info
+        getActionDetailsByIdMock.mockResolvedValue({
+          id: 'no-command-action-id',
+          command: undefined, // Missing command
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['1-2-3'],
+        });
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'no-command-action-id' },
+          })
+        ).rejects.toThrow("Unable to determine command type for action 'no-command-action-id'");
+
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+
+      it('should reject cancel request when action is not found', async () => {
+        // Mock getActionDetailsById to throw "not found" error
+        getActionDetailsByIdMock.mockRejectedValue(
+          new Error("Action with id 'non-existent-action' not found")
+        );
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'non-existent-action' },
+          })
+        ).rejects.toThrow("Action with id 'non-existent-action' not found.");
+
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+
+      it('should allow cancel request for valid pending action', async () => {
+        // Mock getActionDetailsById to return a valid pending action
+        getActionDetailsByIdMock.mockResolvedValue({
+          id: 'valid-pending-action',
+          command: 'isolate',
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['1-2-3'],
+        });
+
+        // Mock successful external action lookup
+        const generator = new EndpointActionGenerator('seed');
+        const originalActionSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+            undefined,
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: {
+              action_id: 'valid-pending-action',
+              data: { command: 'isolate' },
+              input_type: 'microsoft_defender_endpoint',
+            },
+            meta: { machineActionId: 'external-machine-action-id-456' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: originalActionSearchResponse,
+        });
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'valid-pending-action' },
+          })
+        ).resolves.toMatchObject({
+          id: expect.any(String),
+          command: expect.any(String),
+          isCompleted: expect.any(Boolean),
+        });
+
+        // Should call connector for valid request
+        expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+          params: {
+            subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+            subActionParams: {
+              actionId: 'external-machine-action-id-456',
+              comment: expect.any(String),
+            },
+          },
+        });
+      });
+
+      it('should handle multiple agents array in validation', async () => {
+        // Mock getActionDetailsById to return an action with multiple agents
+        getActionDetailsByIdMock.mockResolvedValue({
+          id: 'multi-agent-action-id',
+          command: 'isolate',
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['agent-1', '1-2-3', 'agent-3'], // Array with our target agent
+        });
+
+        // Mock successful external action lookup
+        const generator = new EndpointActionGenerator('seed');
+        const originalActionSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+            undefined,
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: {
+              action_id: 'multi-agent-action-id',
+              data: { command: 'isolate' },
+              input_type: 'microsoft_defender_endpoint',
+            },
+            meta: { machineActionId: 'external-machine-action-id-789' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: originalActionSearchResponse,
+        });
+
+        // Should succeed because 1-2-3 is in the agents array
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'multi-agent-action-id' },
+          })
+        ).resolves.toMatchObject({
+          id: expect.any(String),
+          command: expect.any(String),
+          isCompleted: expect.any(Boolean),
+        });
+      });
+
+      it('should handle unexpected errors during validation gracefully', async () => {
+        // Mock getActionDetailsById to throw an unexpected error (not "not found")
+        const unexpectedError = new Error('Database connection failed');
+        getActionDetailsByIdMock.mockRejectedValue(unexpectedError);
+
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: 'some-action-id' },
+          })
+        ).rejects.toThrow('Database connection failed');
+
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+
+      it('should validate id parameter is not empty string', async () => {
+        await expect(
+          msClientMock.cancel({
+            endpoint_ids: ['1-2-3'],
+            comment: 'cancel test comment',
+            parameters: { id: '' }, // Empty string should be rejected
+          })
+        ).rejects.toThrow('id is required in parameters');
+
+        // getActionDetailsById may be called during validation but should fail before connector call
+        expect(connectorActionsMock.execute).not.toHaveBeenCalled();
+      });
+    });
+
     describe('telemetry events', () => {
+      beforeEach(() => {
+        // Reset mock and ensure it returns a valid pending action
+        getActionDetailsByIdMock.mockReset();
+        getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+          return new EndpointActionGenerator('seed').generateActionDetails({
+            id,
+            isCompleted: false, // Ensure not completed so cancel can proceed
+            wasSuccessful: false,
+            command: 'isolate',
+            agents: ['1-2-3'],
+          });
+        });
+      });
+
       it('should send cancel action creation telemetry event', async () => {
         await msClientMock.cancel({
           endpoint_ids: ['1-2-3'],
           comment: 'cancel test comment',
-          parameters: { action_id: 'original-action-id' },
+          parameters: { id: 'original-action-id' },
         });
 
         expect(
@@ -1855,8 +2125,18 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
         true;
-
-      getActionDetailsByIdMock.mockResolvedValue({});
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointCancelEnabled =
+        true;
+      getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+        return new EndpointActionGenerator('seed').generateActionDetails({
+          id,
+          isCompleted: false, // Ensure not completed so cancel can proceed
+          wasSuccessful: false,
+          command: 'isolate',
+          agents: ['1-2-3'],
+        });
+      });
     });
     afterEach(() => {
       getActionDetailsByIdMock.mockReset();

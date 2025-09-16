@@ -1133,7 +1133,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: { canIsolateHost: true },
           version: '2023-10-31',
@@ -1146,7 +1146,7 @@ describe('Response actions', () => {
         );
         expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
           endpoint_ids: ['test-endpoint-id'],
-          parameters: { action_id: 'test-action-id' },
+          parameters: { id: 'test-action-id' },
         });
       });
 
@@ -1163,7 +1163,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: false, canIsolateHost: true }, // Has permission for the command being cancelled
           version: '2023-10-31',
@@ -1182,7 +1182,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canIsolateHost: false },
           version: '2023-10-31',
@@ -1195,7 +1195,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: true },
           version: '2023-10-31',
@@ -1203,7 +1203,7 @@ describe('Response actions', () => {
         expect(mockResponse.ok).toBeCalled();
         expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
           endpoint_ids: ['test-endpoint-id'],
-          parameters: { action_id: 'test-action-id' },
+          parameters: { id: 'test-action-id' },
         });
       });
 
@@ -1212,7 +1212,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: false },
           version: '2023-10-31',
@@ -1225,7 +1225,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'non-existent-action' },
+            parameters: { id: 'non-existent-action' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true },
           version: '2023-10-31',
@@ -1243,7 +1243,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: {},
           version: '2023-10-31',
@@ -1262,7 +1262,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'action-from-different-space' },
+            parameters: { id: 'action-from-different-space' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true },
           version: '2023-10-31',
@@ -1292,7 +1292,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'already-completed-action' },
+            parameters: { id: 'already-completed-action' },
           } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canIsolateHost: true },
           version: '2023-10-31',
@@ -1316,7 +1316,7 @@ describe('Response actions', () => {
         await callRoute(CANCEL_ROUTE, {
           body: {
             endpoint_ids: ['test-endpoint-id'],
-            parameters: { action_id: 'test-action-id' },
+            parameters: { id: 'test-action-id' },
           } as CancelActionRequestBody,
           authz: { canIsolateHost: true },
           version: '2023-10-31',

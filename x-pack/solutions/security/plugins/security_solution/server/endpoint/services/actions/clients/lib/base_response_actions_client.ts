@@ -82,6 +82,8 @@ import type {
   ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
@@ -1049,7 +1051,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   public async cancel(
     actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
     options?: CommonResponseActionMethodOptions
-  ): Promise<ActionDetails> {
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
     throw new ResponseActionsNotSupportedError('cancel');
   }
 

@@ -33,7 +33,7 @@ const cancelPayload: CancelActionRequestBody = {
   endpoint_ids: ['test-endpoint-id'],
   agent_type: 'endpoint',
   parameters: {
-    action_id: 'test-action-id',
+    id: 'test-action-id',
   },
 };
 

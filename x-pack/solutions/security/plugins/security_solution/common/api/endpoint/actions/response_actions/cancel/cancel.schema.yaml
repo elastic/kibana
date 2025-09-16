@@ -25,7 +25,7 @@ paths:
                     - 'ed518850-681a-4d60-bb98-e22640cae2a8'
                   agent_type: 'microsoft_defender_endpoint'
                   parameters:
-                    action_id: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
+                    id: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
                   comment: 'Cancelling action due to change in requirements'
       responses:
         '200':
@@ -45,10 +45,10 @@ components:
           properties:
             parameters:
               required:
-                - action_id
+                - id
               type: object
               properties:
-                action_id:
+                id:
                   type: string
                   minLength: 1
                   description: ID of the response action to cancel

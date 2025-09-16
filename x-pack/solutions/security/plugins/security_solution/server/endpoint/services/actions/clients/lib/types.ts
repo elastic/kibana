@@ -25,6 +25,8 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
@@ -182,14 +184,14 @@ export interface ResponseActionsClient {
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   >;
   /**
-   * Run a script
+   * Cancel a response action
    * @param actionRequest
    * @param options
    */
   cancel: (
     actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
     options?: CommonResponseActionMethodOptions
-  ) => Promise<ActionDetails>;
+  ) => Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>>;
 }
 
 /**

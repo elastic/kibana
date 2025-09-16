@@ -30,7 +30,7 @@ export const CancelActionResult = memo<
           endpoint_ids: [endpointId],
           comment: comment?.[0],
           parameters: {
-            action_id: action[0],
+            id: action[0],
           },
         }
       : undefined;

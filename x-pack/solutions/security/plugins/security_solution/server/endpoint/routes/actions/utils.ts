@@ -176,7 +176,7 @@ export const ensureUserHasAuthzToFilesForAction = async (
       hasAuthzToCommand = userAuthz.canWriteExecuteOperations;
       break;
     case 'cancel':
-      hasAuthzToCommand = userAuthz.canReadActionsLogManagement;
+      hasAuthzToCommand = userAuthz.canAccessResponseConsole;
       break;
   }
 
@@ -247,8 +247,9 @@ export const buildResponseActionResult = (
 };
 
 /**
- * Creates additional checks function for cancel action that handles dynamic authorization
- * based on the original action type and agent type
+ * Creates additional authorization checks function for cancel action.
+ * Business logic validation has been moved to the service layer (validateRequest).
+ * This function only handles HTTP-specific authorization checks.
  */
 export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppContext) => {
   return async (
@@ -257,7 +258,7 @@ export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppC
     logger: Logger
   ): Promise<void> => {
     const { parameters } = request.body as CancelActionRequestBody;
-    const actionId = parameters.action_id;
+    const actionId = parameters.id;
 
     // Get space ID from context
     const spaceId = (await context.securitySolution).getSpaceId();
@@ -267,20 +268,6 @@ export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppC
 
     if (!originalAction) {
       throw new CustomHttpRequestError(`Action with id '${actionId}' not found.`, 404);
-    }
-
-    // Validate that endpoint_id (if provided) is associated with the original action
-    const requestEndpointId = (request.body as CancelActionRequestBody).endpoint_ids?.[0];
-    if (requestEndpointId && originalAction.agent?.id) {
-      const originalActionAgentIds = Array.isArray(originalAction.agent.id)
-        ? originalAction.agent.id
-        : [originalAction.agent.id];
-      if (!originalActionAgentIds.includes(requestEndpointId)) {
-        throw new CustomHttpRequestError(
-          `Endpoint '${requestEndpointId}' is not associated with action '${actionId}'`,
-          403
-        );
-      }
     }
 
     // Extract command and agent type from original action

@@ -12,11 +12,11 @@ import { BaseActionRequestSchema } from '../../common/base';
 const CancelActionRequestBodySchema = schema.object({
   ...BaseActionRequestSchema,
   parameters: schema.object({
-    action_id: schema.string({
+    id: schema.string({
       minLength: 1,
       validate: (value) => {
         if (!value.trim().length) {
-          return 'action_id cannot be an empty string';
+          return 'id cannot be an empty string';
         }
       },
     }),
