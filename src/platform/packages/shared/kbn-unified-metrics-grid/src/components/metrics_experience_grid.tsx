@@ -128,7 +128,7 @@ export const MetricsExperienceGrid = ({
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {isLoading ? (
                 <EuiLoadingSpinner size="s" />
