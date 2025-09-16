@@ -13,7 +13,7 @@ import type { Row, CellContext } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps } from '../../lib/core/virtualizer';
-import type { SelectionDropdownProps } from './group_selection_combobox/selection_dropdown';
+import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
  * Sizing options for the cascade components, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
@@ -45,7 +45,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
-  children: (args: { data: L[] | null }) => React.ReactNode;
+  children: (args: { data: L[] | null; cellId: string }) => React.ReactNode;
 }
 
 interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
@@ -157,7 +157,24 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
   children: React.ReactElement<DataCascadeRowCellProps<G, L>>;
 };
 
-export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
+export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
+  tableRows: Array<Row<G>>;
+  onCascadeGroupingChange: SelectionDropdownProps['onSelectionChange'];
+  customTableHeader?: (props: {
+    currentSelectedColumns: string[];
+    availableColumns: string[];
+    onSelectionChange: (groupByColumn: string[]) => void;
+  }) => React.ReactNode;
+  /**
+   * Slot for the table title.
+   */
+  tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
+}
+
+/**
+ * @internal
+ */
+interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
   extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
@@ -173,10 +190,6 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
    */
   size?: CascadeRowPrimitiveProps<G, L>['size'];
   /**
-   * Slot for the table title.
-   */
-  tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
-  /**
    * Enabling this options causes the group header to stick to the top of the table when toggled and scrolling. Default is true.
    */
   enableStickyGroupHeader?: boolean;
@@ -186,3 +199,21 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
   allowMultipleRowToggle?: boolean;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
 }
+
+export type DataCascadeImplProps<
+  G extends GroupNode,
+  L extends LeafNode
+> = DataCascadeImplBaseProps<G, L> &
+  (
+    | {
+        customTableHeader: NonNullable<CascadeHeaderPrimitiveProps<G>['customTableHeader']>;
+        tableTitleSlot?: never;
+      }
+    | {
+        customTableHeader?: never;
+        /**
+         * Slot for the table title.
+         */
+        tableTitleSlot: CascadeHeaderPrimitiveProps<G>['tableTitleSlot'];
+      }
+  );

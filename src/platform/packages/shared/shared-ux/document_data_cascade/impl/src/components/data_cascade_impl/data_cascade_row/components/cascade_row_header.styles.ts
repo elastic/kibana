@@ -16,6 +16,10 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) =
     minWidth: 0,
     overflow: 'hidden',
     justifyContent: 'center',
+
+    '& > *': {
+      fontVariantNumeric: 'tabular-nums',
+    },
   }),
   rowHeaderSlotWrapper: css({ overflow: 'scroll', flexGrow: 0 }),
   rowHeaderSlotInner: css({

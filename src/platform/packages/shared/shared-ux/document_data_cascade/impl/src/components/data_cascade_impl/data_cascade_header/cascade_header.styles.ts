@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createRestorableStateProvider } from '@kbn/restorable-state';
+import { css } from '@emotion/react';
+import { type UseEuiTheme } from '@elastic/eui';
 
-export interface DiscoverLayoutRestorableState {
-  sidebarWidth: number;
-  supportsCascade: boolean;
-  availableCascadeFields: string[];
-}
-
-export const { withRestorableState, useRestorableState } =
-  createRestorableStateProvider<DiscoverLayoutRestorableState>();
+export const styles = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  cascadeHeaderWrapper: css({
+    padding: euiTheme.size.s,
+  }),
+});
