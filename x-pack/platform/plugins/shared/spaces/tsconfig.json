@@ -58,7 +58,6 @@
     "@kbn/spaces-utils",
     "@kbn/css-utils",
     "@kbn/licensing-types",
-    "@kbn/core-chrome-navigation-tour"
   ],
   "exclude": ["target/**/*"]
 }

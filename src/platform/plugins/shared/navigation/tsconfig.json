@@ -28,6 +28,9 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/router-utils",
+    "@kbn/core-chrome-navigation-tour",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",
