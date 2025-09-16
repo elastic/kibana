@@ -12,7 +12,7 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
-import { render } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
@@ -151,54 +151,46 @@ describe('QueryBarTopRowTopRow', () => {
       cancelId: 'queryCancelSplitButton',
     },
   ])('when background search is $description', ({ value, submitId, cancelId }) => {
-    const data = dataPluginMock.createStartContract();
-    data.search.isBackgroundSearchEnabled = value;
-
     describe('when it is NOT loading', () => {
       it('should render the submit button', () => {
         const { getByTestId } = render(
-          wrapQueryBarTopRowInContext(
-            {
-              query: kqlQuery,
-              screenTitle: 'Another Screen',
-              isDirty: false,
-              indexPatterns: [stubIndexPattern],
-              timeHistory: mockTimeHistory,
-            },
-            { servicesOverride: { data } }
-          )
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            useBackgroundSearchButton: value,
+          })
         );
 
-        expect(getByTestId(submitId)).toBeVisible();
+        expect(within(getByTestId(submitId)).getByText('Refresh')).toBeVisible();
       });
     });
 
     describe('when it is loading', () => {
       it('should render the cancel button', () => {
         const { getByTestId } = render(
-          wrapQueryBarTopRowInContext(
-            {
-              query: kqlQuery,
-              screenTitle: 'Another Screen',
-              isDirty: false,
-              indexPatterns: [stubIndexPattern],
-              timeHistory: mockTimeHistory,
-              isLoading: true,
-              onCancel: jest.fn(),
-            },
-            { servicesOverride: { data } }
-          )
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            isLoading: true,
+            onCancel: jest.fn(),
+            submitButtonStyle: 'withText',
+            useBackgroundSearchButton: value,
+          })
         );
 
-        expect(getByTestId(cancelId)).toBeVisible();
+        expect(within(getByTestId(cancelId)).getByText('Cancel')).toBeVisible();
       });
     });
   });
 
   describe('when background search is enabled', () => {
     const data = dataPluginMock.createStartContract();
-    data.search.isBackgroundSearchEnabled = true;
-
     const session = getSessionServiceMock({
       state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
     });
@@ -221,6 +213,7 @@ describe('QueryBarTopRowTopRow', () => {
                 indexPatterns: [stubIndexPattern],
                 timeHistory: mockTimeHistory,
                 onSubmit,
+                useBackgroundSearchButton: true,
               },
               { servicesOverride: { data } }
             )
@@ -248,6 +241,7 @@ describe('QueryBarTopRowTopRow', () => {
                 indexPatterns: [stubIndexPattern],
                 timeHistory: mockTimeHistory,
                 onSendToBackground,
+                useBackgroundSearchButton: true,
               },
               { servicesOverride: { data } }
             )
@@ -280,6 +274,7 @@ describe('QueryBarTopRowTopRow', () => {
                 timeHistory: mockTimeHistory,
                 isLoading,
                 onCancel,
+                useBackgroundSearchButton: true,
               },
               { servicesOverride: { data } }
             )
@@ -309,6 +304,7 @@ describe('QueryBarTopRowTopRow', () => {
                 isLoading,
                 onCancel: jest.fn(),
                 onSendToBackground,
+                useBackgroundSearchButton: true,
               },
               { servicesOverride: { data } }
             )

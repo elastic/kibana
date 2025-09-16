@@ -598,7 +598,7 @@ export class SessionService {
       await extendSearchesPromise;
     }
 
-    return { formattedName };
+    return searchSessionSavedObject;
   }
 
   /**

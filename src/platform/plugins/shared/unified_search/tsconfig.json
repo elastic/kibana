@@ -2,7 +2,6 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
-    "outDir": "target/types"
   },
   "include": ["public/**/*", "public/**/*.json", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
@@ -50,6 +49,7 @@
     "@kbn/esql-ast",
     "@kbn/split-button",
     "@kbn/background-search",
+    "@kbn/split-button"
   ],
   "exclude": ["target/**/*"]
 }

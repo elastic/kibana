@@ -194,6 +194,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
+
+  useBackgroundSearchButton?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -284,7 +286,6 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
-    const isBackgroundSearchEnabled = data.search.isBackgroundSearchEnabled;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
@@ -590,20 +591,20 @@ export const QueryBarTopRow = React.memo(
     function renderCancelButton() {
       const buttonLabelCancel = strings.getCancelQueryLabel();
 
-      if (isBackgroundSearchEnabled) {
+      if (props.useBackgroundSearchButton) {
         return (
           <SplitButton
+            aria-label={buttonLabelCancel}
+            color="text"
+            data-test-subj="queryCancelSplitButton"
+            iconType="cross"
+            isSecondaryButtonDisabled={!canSendToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
-            aria-label={buttonLabelCancel}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-            iconType="cross"
-            data-test-subj="queryCancelSplitButton"
-            color="text"
+            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
             secondaryButtonIcon="clock"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            isSecondaryButtonDisabled={!canSendToBackground}
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
           >
             {buttonLabelCancel}
           </SplitButton>
@@ -652,21 +653,21 @@ export const QueryBarTopRow = React.memo(
         ? strings.getRunButtonLabel()
         : strings.getUpdateButtonLabel();
 
-      const updateButton = isBackgroundSearchEnabled ? (
+      const updateButton = props.useBackgroundSearchButton ? (
         <SplitButton
+          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+          color={props.isDirty ? 'success' : 'primary'}
           data-test-subj="querySubmitSplitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
+          isSecondaryButtonDisabled={!canSendToBackground}
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-          color={props.isDirty ? 'success' : 'primary'}
-          secondaryButtonIcon="clock"
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
+          secondaryButtonIcon="clock"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-          isSecondaryButtonDisabled={!canSendToBackground}
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
         >
           {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
         </SplitButton>
