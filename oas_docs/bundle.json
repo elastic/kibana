@@ -43480,7 +43480,7 @@
             "required": false,
             "schema": {
               "default": 1,
-              "maximum": 10000,
+              "maximum": 100,
               "minimum": 1,
               "type": "number"
             }
@@ -43491,9 +43491,9 @@
             "name": "per_page",
             "required": false,
             "schema": {
-              "default": 1000,
+              "default": 10,
               "maximum": 100,
-              "minimum": 0,
+              "minimum": 1,
               "type": "number"
             }
           }
