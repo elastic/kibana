@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +33,8 @@ export const NavControlWithProvider = ({
   coreStart,
   pluginsStart,
   isServerless,
-}: NavControlWithProviderDeps) => {
+  iconOnly = false,
+}: NavControlWithProviderDeps & { iconOnly?: boolean }) => {
   return (
     <SharedProviders
       coreStart={coreStart}
@@ -41,12 +42,19 @@ export const NavControlWithProvider = ({
       service={appService}
       theme$={coreStart.theme.theme$}
     >
-      <NavControl isServerless={isServerless} />
+      <NavControl isServerless={isServerless} iconOnly={iconOnly} />
     </SharedProviders>
   );
 };
 
-export function NavControl({ isServerless }: { isServerless?: boolean }) {
+export function NavControl({
+  isServerless,
+  iconOnly = false,
+}: {
+  isServerless?: boolean;
+  iconOnly?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
   const service = useAIAssistantAppService();
 
   const {
@@ -142,35 +150,87 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   }, [service.conversations]);
 
   const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
+  const ButtonComponent = iconOnly ? EuiButtonIcon : EuiButtonBasicOrEmpty;
 
   return (
     <>
       <EuiToolTip
+        delay="long"
         content={i18n.translate(
           'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
           { defaultMessage: 'Keyboard shortcut Ctrl ;' }
         )}
       >
-        <EuiButtonBasicOrEmpty
-          aria-label={i18n.translate(
-            'xpack.observabilityAiAssistant.navControl.assistantNavLinkAriaLabel',
-            { defaultMessage: 'Open the AI Assistant' }
-          )}
-          data-test-subj="observabilityAiAssistantAppNavControlButton"
-          onClick={() => {
-            service.conversations.openNewConversation({
-              messages: [],
-            });
+        <div
+          css={{
+            position: 'relative',
+            display: 'inline-block',
+            overflow: 'hidden',
+            marginTop: '4px',
+            borderRadius: '4px', // Match EUI button border radius
+            '&:hover > div:first-of-type': {
+              transform: iconOnly
+                ? 'translateX(45px) translateY(40px) rotate(11deg)'
+                : 'translateX(185px) translateY(85px) rotate(22deg)',
+            },
           }}
-          color="primary"
-          size="s"
-          iconType={AssistantIcon}
-          isLoading={chatService.loading}
         >
-          {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
-            defaultMessage: 'AI Assistant',
-          })}
-        </EuiButtonBasicOrEmpty>
+          <div
+            css={{
+              position: 'absolute',
+              backgroundImage: 'linear-gradient(20deg, #0B64DD 18%, #48EFCF 70%)',
+              height: iconOnly ? '100px' : '200px',
+              width: iconOnly ? '100px' : '320px',
+              top: iconOnly ? '-50px' : '-140px',
+              left: iconOnly ? '-60px' : '-190px',
+              borderRadius: '4px',
+              zIndex: -1,
+              transition: 'transform 0.8s ease',
+              transform: 'translateX(0px)',
+            }}
+          />
+          <ButtonComponent
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.navControl.assistantNavLinkAriaLabel',
+              { defaultMessage: 'Open the AI Assistant' }
+            )}
+            data-test-subj="observabilityAiAssistantAppNavControlButton"
+            onClick={() => {
+              service.conversations.openNewConversation({
+                messages: [],
+              });
+            }}
+            color="text"
+            size="s"
+            display={iconOnly ? 'empty' : undefined}
+            iconType={() => <AssistantIcon multicolor={false} />}
+            isLoading={chatService.loading}
+            css={
+              iconOnly
+                ? undefined
+                : {
+                    position: 'relative',
+                    zIndex: 1,
+                    color: '#2b394f',
+                    backgroundColor: 'transparent !important',
+                    overflow: 'hidden',
+                    transition: 'color 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: 'transparent !important',
+                      color: '#2b394f',
+                    },
+                    '&::before': {
+                      backgroundColor: 'transparent !important',
+                    },
+                  }
+            }
+          >
+            {!iconOnly &&
+              i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
+                defaultMessage: 'AI Assistant',
+              })}
+          </ButtonComponent>
+        </div>
       </EuiToolTip>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>

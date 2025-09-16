@@ -41,6 +41,7 @@ export const NavControlInitiator = ({
       coreStart={coreStart}
       pluginsStart={pluginsStart}
       isServerless={isServerless}
+      iconOnly={true}
     />
   );
 };

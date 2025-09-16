@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiToolTip, EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiButtonEmpty, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
@@ -26,7 +26,11 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
   defaultMessage: 'AI Assistant',
 });
 
-export const AssistantNavLink: FC = () => {
+interface AssistantNavLinkProps {
+  iconOnly?: boolean;
+}
+
+export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }) => {
   const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
@@ -47,6 +51,7 @@ export const AssistantNavLink: FC = () => {
   }
 
   const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const ButtonComponent = iconOnly ? EuiButtonIcon : EuiButtonBasicOrEmpty;
 
   return (
     <EuiToolTip delay="long" content={TOOLTIP_CONTENT}>
@@ -58,46 +63,54 @@ export const AssistantNavLink: FC = () => {
           marginTop: '4px',
           borderRadius: '4px', // Match EUI button border radius
           '&:hover > div:first-of-type': {
-            transform: 'translateX(185px) translateY(85px) rotate(22deg)',
+            transform: iconOnly
+              ? 'translateX(45px) translateY(40px) rotate(11deg)'
+              : 'translateX(185px) translateY(85px) rotate(22deg)',
           },
         }}
       >
         <div
           css={{
             position: 'absolute',
-            backgroundImage:
-              'linear-gradient(-40deg, #61A2FF 18%,rgb(198, 133, 235) 33%,rgb(232, 101, 208) 52%,rgb(247, 120, 167) 70%)',
-            height: '200px',
-            width: '320px',
-            top: '-140px',
-            left: '-190px',
+            // backgroundImage:
+            //   'linear-gradient(-40deg, #61A2FF 18%,rgb(198, 133, 235) 33%,rgb(232, 101, 208) 52%,rgb(247, 120, 167) 70%)',
+            backgroundImage: 'linear-gradient(20deg, #0B64DD 18%, #48EFCF 70%)',
+            height: iconOnly ? '100px' : '200px',
+            width: iconOnly ? '100px' : '320px',
+            top: iconOnly ? '-50px' : '-140px',
+            left: iconOnly ? '-60px' : '-190px',
             borderRadius: '4px',
             zIndex: -1,
             transition: 'transform 0.8s ease',
             transform: 'translateX(0px)',
           }}
         />
-        <EuiButtonBasicOrEmpty
+        <ButtonComponent
           onClick={showOverlay}
           size="s"
+          color="text"
+          display={iconOnly ? 'fill' : undefined}
           iconType={() => <AssistantIcon multicolor={false} />}
           data-test-subj="assistantNavLink"
+          aria-label={iconOnly ? LINK_LABEL : undefined}
           css={{
             position: 'relative',
             zIndex: 1,
-            color: euiTheme.colors.ink,
+            color: '#2b394f',
             backgroundColor: 'transparent !important',
             overflow: 'hidden',
+            transition: 'color 0.3s ease',
             '&:hover': {
               backgroundColor: 'transparent !important',
+              color: '#2b394f',
             },
             '&::before': {
               backgroundColor: 'transparent !important',
             },
           }}
         >
-          {LINK_LABEL}
-        </EuiButtonBasicOrEmpty>
+          {!iconOnly && LINK_LABEL}
+        </ButtonComponent>
       </div>
     </EuiToolTip>
   );
