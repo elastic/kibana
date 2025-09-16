@@ -7,18 +7,20 @@
 
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   createBuiltinToolRegistry,
-  registerBuiltinTools,
   createBuiltInToolSource,
+  registerBuiltinTools,
   type BuiltinToolRegistry,
 } from './builtin';
-import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { createPersistedToolSource } from './persisted';
 import { createToolRegistry } from './tool_registry';
+import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
+  workflowsManagement?: WorkflowsPluginSetup;
 }
 
 export interface ToolsServiceStartDeps {
@@ -36,7 +38,10 @@ export class ToolsService {
 
   setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
     this.setupDeps = deps;
-    registerBuiltinTools({ registry: this.builtinRegistry });
+    registerBuiltinTools({
+      registry: this.builtinRegistry,
+      workflowsManagement: deps.workflowsManagement,
+    });
 
     return {
       register: (reg) => this.builtinRegistry.register(reg),

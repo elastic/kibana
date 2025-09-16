@@ -27,7 +27,8 @@
       "kibanaReact"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "workflowsManagement"
     ],
     "extraPublicDirs": []
   }

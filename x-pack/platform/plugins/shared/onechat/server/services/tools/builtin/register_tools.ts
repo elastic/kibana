@@ -6,18 +6,29 @@
  */
 
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import {
-  getDocumentByIdTool,
   executeEsqlTool,
-  searchTool,
+  executeWorkflowTool,
   generateEsqlTool,
+  getDocumentByIdTool,
   getIndexMappingsTool,
-  listIndicesTool,
+  getWorkflowDetailsTool,
+  getWorkflowResultTool,
   indexExplorerTool,
+  listIndicesTool,
+  listWorkflowsTool,
+  searchTool,
 } from './definitions';
 
-export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
+export const registerBuiltinTools = ({
+  registry,
+  workflowsManagement,
+}: {
+  registry: BuiltinToolRegistry;
+  workflowsManagement?: WorkflowsPluginSetup;
+}) => {
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool(),
     getDocumentByIdTool(),
@@ -27,6 +38,16 @@ export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegist
     listIndicesTool(),
     indexExplorerTool(),
   ];
+
+  // Only register workflow tools if workflows management plugin is available
+  if (workflowsManagement) {
+    tools.push(
+      listWorkflowsTool(workflowsManagement),
+      getWorkflowDetailsTool(workflowsManagement),
+      executeWorkflowTool(workflowsManagement),
+      getWorkflowResultTool(workflowsManagement)
+    );
+  }
 
   tools.forEach((tool) => {
     registry.register(tool);

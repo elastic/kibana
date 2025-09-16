@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { RunAgentFn, RunToolFn } from '@kbn/onechat-server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentClient } from './services/agents';
+import type { ToolRegistry, ToolsServiceSetup } from './services/tools';
 
 export interface OnechatSetupDependencies {
   inference: InferenceServerSetup;
   cloud?: CloudSetup;
   features: FeaturesPluginSetup;
+  workflowsManagement?: WorkflowsPluginSetup;
 }
 
 export interface OnechatStartDependencies {

@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
+import { registerFeatures } from './features';
+import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
@@ -15,8 +17,6 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { registerFeatures } from './features';
-import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin
@@ -44,6 +44,7 @@ export class OnechatPlugin
   ): OnechatPluginSetup {
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
+      workflowsManagement: pluginsSetup.workflowsManagement,
     });
 
     registerFeatures({ features: pluginsSetup.features });
