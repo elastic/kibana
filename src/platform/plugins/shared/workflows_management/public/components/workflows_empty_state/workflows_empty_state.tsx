@@ -17,6 +17,7 @@ import {
   EuiImage,
   EuiLink,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -58,17 +59,32 @@ export function WorkflowsEmptyState({
             </h2>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={
+            <EuiToolTip
+              title={
                 <FormattedMessage
                   id="workflows.emptyState.technicalPreviewBadge"
                   defaultMessage="Technical Preview"
                 />
               }
-              title="Technical Preview"
-              size="s"
-              style={{ alignSelf: 'center', verticalAlign: 'middle' }}
-            />
+              content={
+                <FormattedMessage
+                  id="workflows.emptyState.technicalPreviewTooltip"
+                  defaultMessage="This functionality is experimental and not supported. It may change or be removed at any time."
+                />
+              }
+            >
+              <EuiBetaBadge
+                label={
+                  <FormattedMessage
+                    id="workflows.emptyState.technicalPreviewBadge"
+                    defaultMessage="Technical Preview"
+                  />
+                }
+                title="Technical Preview"
+                size="s"
+                style={{ alignSelf: 'center', verticalAlign: 'middle' }}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

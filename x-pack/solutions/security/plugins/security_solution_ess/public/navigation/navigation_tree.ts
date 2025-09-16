@@ -7,8 +7,8 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
-import { securityLink, i18nStrings } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
@@ -35,21 +35,21 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         },
         defaultNavigationTree.dashboards(),
         {
-          link: 'workflows',
-          withBadge: true,
-          badgeTypeV2: 'techPreview' as const,
-          badgeOptions: {
-            icon: 'beaker',
-            tooltip: i18nStrings.workflows.badgeTooltip,
-          },
-        },
-        {
           breadcrumbStatus: 'hidden',
           children: [
             defaultNavigationTree.rules(),
             {
               id: SecurityPageName.alerts,
               link: securityLink(SecurityPageName.alerts),
+            },
+            {
+              link: 'workflows',
+              withBadge: true,
+              badgeTypeV2: 'techPreview' as const,
+              badgeOptions: {
+                icon: 'beaker',
+                tooltip: i18nStrings.workflows.badgeTooltip,
+              },
             },
             {
               id: SecurityPageName.attackDiscovery,

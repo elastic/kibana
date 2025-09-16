@@ -52,26 +52,26 @@ export const createNavigationTree = async (
           },
           defaultNavigationTree.dashboards(),
           {
-            link: 'workflows',
-            withBadge: true,
-            badgeTypeV2: 'techPreview' as const,
-            badgeOptions: {
-              icon: 'beaker',
-              tooltip: i18n.translate(
-                'xpack.securitySolutionServerless.nav.workflowsBadgeTooltip',
-                {
-                  defaultMessage: 'Technical preview',
-                }
-              ),
-            },
-          },
-          {
             breadcrumbStatus: 'hidden',
             children: [
               defaultNavigationTree.rules(),
               {
                 id: SecurityPageName.alerts,
                 link: securityLink(SecurityPageName.alerts),
+              },
+              {
+                link: 'workflows',
+                withBadge: true,
+                badgeTypeV2: 'techPreview' as const,
+                badgeOptions: {
+                  icon: 'beaker',
+                  tooltip: i18n.translate(
+                    'xpack.securitySolutionServerless.nav.workflowsBadgeTooltip',
+                    {
+                      defaultMessage: 'Technical preview',
+                    }
+                  ),
+                },
               },
               {
                 id: SecurityPageName.attackDiscovery,
