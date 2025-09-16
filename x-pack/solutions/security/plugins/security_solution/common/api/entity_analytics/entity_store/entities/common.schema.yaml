@@ -8,6 +8,7 @@ components:
   schemas:
     EngineMetadata: 
       type: object
+      additionalProperties: false
       required: 
         - Type
       properties:
@@ -16,6 +17,7 @@ components:
 
     EntityField:
       type: object
+      additionalProperties: false
       required:
         - id
       properties:
@@ -33,13 +35,16 @@ components:
           $ref: '#/components/schemas/EngineMetadata'
         attributes:
           type: object
+          additionalProperties: false
           properties:
             privileged:
               type: boolean
         behavior: 
           type: object
+          additionalProperties: false
         lifecycle:
           type: object
+          additionalProperties: false
           properties:
             first_seen:
               type: string
@@ -47,6 +52,7 @@ components:
 
     UserEntity:
       type: object
+      additionalProperties: false
       required:
         - entity
       properties:
@@ -57,6 +63,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         user:
           type: object
+          additionalProperties: false
           properties:
             full_name:
               type: array
@@ -86,10 +93,12 @@ components:
                 type: string
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              additionalProperties: false
           required:
             - name
         asset:
           type: object
+          additionalProperties: false
           properties:
             criticality:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
@@ -97,6 +106,7 @@ components:
             - criticality
         event:
           type: object
+          additionalProperties: false
           properties:
             ingested:
               type: string
@@ -104,6 +114,7 @@ components:
     
     HostEntity:
       type: object
+      additionalProperties: false
       required:
         - entity
       properties:
@@ -114,6 +125,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         host:
           type: object
+          additionalProperties: false
           properties:
             hostname:
               type: array
@@ -153,6 +165,7 @@ components:
             - name
         asset:
           type: object
+          additionalProperties: false
           properties:
             criticality:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
@@ -160,6 +173,7 @@ components:
             - criticality
         event:
           type: object
+          additionalProperties: false
           properties:
             ingested:
               type: string
@@ -167,6 +181,7 @@ components:
    
     ServiceEntity:
       type: object
+      additionalProperties: false
       required:
         - entity
       properties:
@@ -177,6 +192,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         service:
           type: object
+          additionalProperties: false
           properties:
             name:
               type: string
@@ -188,6 +204,7 @@ components:
             - name
         asset:
           type: object
+          additionalProperties: false
           properties:
             criticality:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
@@ -195,6 +212,7 @@ components:
             - criticality
         event:
           type: object
+          additionalProperties: false
           properties:
             ingested:
               type: string
@@ -208,6 +226,7 @@ components:
     # in the schema just add it.              
     GenericEntity:
       type: object
+      additionalProperties: false
       required:
         - entity
       properties:
@@ -218,6 +237,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         asset:
           type: object
+          additionalProperties: false
           properties:
             criticality:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'

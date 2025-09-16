@@ -20,122 +20,146 @@ import { EntityRiskScoreRecord } from '../../common/common.gen';
 import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
 
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
-export const EngineMetadata = z.object({
-  Type: z.string(),
-});
+export const EngineMetadata = z
+  .object({
+    Type: z.string(),
+  })
+  .strict();
 
 export type EntityField = z.infer<typeof EntityField>;
-export const EntityField = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  type: z.string().optional(),
-  sub_type: z.string().optional(),
-  source: z.string().optional(),
-  EngineMetadata: EngineMetadata.optional(),
-  attributes: z
-    .object({
-      privileged: z.boolean().optional(),
-    })
-    .optional(),
-  behavior: z.object({}).optional(),
-  lifecycle: z
-    .object({
-      first_seen: z.string().datetime().optional(),
-    })
-    .optional(),
-});
+export const EntityField = z
+  .object({
+    id: z.string(),
+    name: z.string().optional(),
+    type: z.string().optional(),
+    sub_type: z.string().optional(),
+    source: z.string().optional(),
+    EngineMetadata: EngineMetadata.optional(),
+    attributes: z
+      .object({
+        privileged: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    behavior: z.object({}).strict().optional(),
+    lifecycle: z
+      .object({
+        first_seen: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export type UserEntity = z.infer<typeof UserEntity>;
-export const UserEntity = z.object({
-  '@timestamp': z.string().datetime().optional(),
-  entity: EntityField,
-  user: z
-    .object({
-      full_name: z.array(z.string()).optional(),
-      domain: z.array(z.string()).optional(),
-      roles: z.array(z.string()).optional(),
-      name: z.string(),
-      id: z.array(z.string()).optional(),
-      email: z.array(z.string()).optional(),
-      hash: z.array(z.string()).optional(),
-      risk: EntityRiskScoreRecord.optional(),
-    })
-    .optional(),
-  asset: z
-    .object({
-      criticality: AssetCriticalityLevel,
-    })
-    .optional(),
-  event: z
-    .object({
-      ingested: z.string().datetime().optional(),
-    })
-    .optional(),
-});
+export const UserEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField,
+    user: z
+      .object({
+        full_name: z.array(z.string()).optional(),
+        domain: z.array(z.string()).optional(),
+        roles: z.array(z.string()).optional(),
+        name: z.string(),
+        id: z.array(z.string()).optional(),
+        email: z.array(z.string()).optional(),
+        hash: z.array(z.string()).optional(),
+        risk: EntityRiskScoreRecord.optional(),
+      })
+      .strict()
+      .optional(),
+    asset: z
+      .object({
+        criticality: AssetCriticalityLevel,
+      })
+      .strict()
+      .optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export type HostEntity = z.infer<typeof HostEntity>;
-export const HostEntity = z.object({
-  '@timestamp': z.string().datetime().optional(),
-  entity: EntityField,
-  host: z
-    .object({
-      hostname: z.array(z.string()).optional(),
-      domain: z.array(z.string()).optional(),
-      ip: z.array(z.string()).optional(),
-      name: z.string(),
-      id: z.array(z.string()).optional(),
-      type: z.array(z.string()).optional(),
-      mac: z.array(z.string()).optional(),
-      architecture: z.array(z.string()).optional(),
-      risk: EntityRiskScoreRecord.optional(),
-      entity: EntityField.optional(),
-    })
-    .optional(),
-  asset: z
-    .object({
-      criticality: AssetCriticalityLevel,
-    })
-    .optional(),
-  event: z
-    .object({
-      ingested: z.string().datetime().optional(),
-    })
-    .optional(),
-});
+export const HostEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField,
+    host: z
+      .object({
+        hostname: z.array(z.string()).optional(),
+        domain: z.array(z.string()).optional(),
+        ip: z.array(z.string()).optional(),
+        name: z.string(),
+        id: z.array(z.string()).optional(),
+        type: z.array(z.string()).optional(),
+        mac: z.array(z.string()).optional(),
+        architecture: z.array(z.string()).optional(),
+        risk: EntityRiskScoreRecord.optional(),
+        entity: EntityField.optional(),
+      })
+      .strict()
+      .optional(),
+    asset: z
+      .object({
+        criticality: AssetCriticalityLevel,
+      })
+      .strict()
+      .optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export type ServiceEntity = z.infer<typeof ServiceEntity>;
-export const ServiceEntity = z.object({
-  '@timestamp': z.string().datetime().optional(),
-  entity: EntityField,
-  service: z
-    .object({
-      name: z.string(),
-      risk: EntityRiskScoreRecord.optional(),
-      entity: EntityField.optional(),
-    })
-    .optional(),
-  asset: z
-    .object({
-      criticality: AssetCriticalityLevel,
-    })
-    .optional(),
-  event: z
-    .object({
-      ingested: z.string().datetime().optional(),
-    })
-    .optional(),
-});
+export const ServiceEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField,
+    service: z
+      .object({
+        name: z.string(),
+        risk: EntityRiskScoreRecord.optional(),
+        entity: EntityField.optional(),
+      })
+      .strict()
+      .optional(),
+    asset: z
+      .object({
+        criticality: AssetCriticalityLevel,
+      })
+      .strict()
+      .optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export type GenericEntity = z.infer<typeof GenericEntity>;
-export const GenericEntity = z.object({
-  '@timestamp': z.string().datetime().optional(),
-  entity: EntityField,
-  asset: z
-    .object({
-      criticality: AssetCriticalityLevel,
-    })
-    .optional(),
-});
+export const GenericEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField,
+    asset: z
+      .object({
+        criticality: AssetCriticalityLevel,
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity, GenericEntity]);
 
