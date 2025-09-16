@@ -18,7 +18,14 @@ const SiemReadinessDashboard = () => {
       <EuiPageSection>
         <ReadinessSummary />
       </EuiPageSection>
-      <EuiPageSection>
+      <EuiPageSection
+        // removes redundant padding around the middle cards
+        contentProps={{
+          style: {
+            paddingBlock: '0',
+          },
+        }}
+      >
         <ReadinessPillarCards />
       </EuiPageSection>
       <EuiPageSection>
