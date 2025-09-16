@@ -209,7 +209,7 @@ describe('logo node', () => {
     const { logoItem } = createNavigationItems(treeWithLogo);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
-        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
+        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome nav-item-home",
         "href": "/tzo/s/sec/app/security/get_started",
         "iconType": "launch",
         "id": "securityHome",
