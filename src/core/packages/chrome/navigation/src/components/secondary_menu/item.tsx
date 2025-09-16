@@ -20,7 +20,8 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
   href: string;
   iconType?: IconType;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   key: string;
   onClick?: () => void;
   testSubjPrefix?: string;
@@ -35,7 +36,8 @@ export const SecondaryMenuItemComponent = ({
   children,
   iconType,
   id,
-  isActive,
+  isHighlighted,
+  isCurrent,
   isExternal,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
@@ -79,13 +81,14 @@ export const SecondaryMenuItemComponent = ({
 
   return (
     <li>
-      {isActive ? (
+      {isHighlighted ? (
         <EuiButton
+          aria-current={isCurrent ? 'page' : undefined}
           css={styles}
+          data-highlighted="true"
           data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
           size="s"
-          tabIndex={0}
           textProps={false}
           {...iconProps}
           {...props}
@@ -94,11 +97,12 @@ export const SecondaryMenuItemComponent = ({
         </EuiButton>
       ) : (
         <EuiButtonEmpty
+          aria-current={isCurrent ? 'page' : undefined}
           css={styles}
           color="text"
+          data-highlighted="false"
           data-test-subj={`${testSubjPrefix}-${id}`}
           size="s"
-          tabIndex={0}
           textProps={false}
           {...iconProps}
           {...props}

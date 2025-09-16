@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefObject } from 'react';
-
-import { getFocusableElements } from './get_focusable_elements';
-
-/**
- * Utility function for focusing the first interactive element
- */
-export const focusFirstElement = (ref: RefObject<HTMLElement>) => {
-  const container = ref?.current;
-  if (!container) return;
-
-  const elements = getFocusableElements(container);
-
-  if (elements.length > 0) {
-    elements[0].focus();
-  }
-};
+export const createBoundingClientRectMock = (height: number) =>
+  jest.fn(() => ({
+    width: 100,
+    height,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    x: 0,
+    y: 0,
+    toJSON: () => '',
+  }));
