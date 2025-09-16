@@ -13,3 +13,5 @@ export const MAX_TAB_WIDTH = 280;
 export const MIN_TAB_WIDTH = 112;
 
 export const PREVIEW_WIDTH = 280;
+
+export const MAX_ITEMS_COUNT = 25;

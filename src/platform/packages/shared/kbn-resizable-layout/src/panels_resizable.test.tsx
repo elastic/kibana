@@ -54,7 +54,7 @@ describe('Panels resizable', () => {
   }: {
     className?: string;
     direction?: ResizableLayoutDirection;
-    initialFixedPanelSize?: number;
+    initialFixedPanelSize?: number | 'max-content';
     minFixedPanelSize?: number;
     minFlexPanelSize?: number;
     fixedPanel?: ReactElement;
@@ -247,5 +247,24 @@ describe('Panels resizable', () => {
       initialFixedPanelSize,
     });
     expectCorrectPanelSizes(component, containerWidth, initialFixedPanelSize);
+  });
+
+  it('should set the initial fixed panel size to max-content', () => {
+    const minFlexPanelSize = 200;
+
+    const component = mountComponent({
+      minFlexPanelSize,
+      initialFixedPanelSize: 'max-content',
+    });
+
+    const flexPanelSizePct = (minFlexPanelSize / containerHeight) * 100;
+
+    expect(
+      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
+    ).toBe(100 - flexPanelSizePct);
+
+    expect(
+      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
+    ).toBe(flexPanelSizePct);
   });
 });
