@@ -45,6 +45,9 @@ export {
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
+  getKqlSearchQueries,
+  getRemoteClustersFromESQLQuery,
+  getLookupIndicesFromQuery,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
@@ -17,34 +18,15 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
   description: '',
   ingest: {
     lifecycle: { dsl: {} },
-    processing: {
-      steps: [],
-    },
+    processing: { steps: [] },
+    settings: {},
     wired: {
       routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
         },
-        'scope.dropped_attributes_count': {
-          type: 'long',
-        },
-        dropped_attributes_count: {
-          type: 'long',
-        },
-        'resource.dropped_attributes_count': {
-          type: 'long',
-        },
-        'resource.schema_url': {
-          type: 'keyword',
-        },
         'scope.name': {
-          type: 'keyword',
-        },
-        'scope.schema_url': {
-          type: 'keyword',
-        },
-        'scope.version': {
           type: 'keyword',
         },
         trace_id: {
@@ -96,9 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow processing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -127,9 +107,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow fields changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -156,9 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should allow routing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {

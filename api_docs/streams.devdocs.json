@@ -600,7 +600,7 @@
             },
             "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
-            ", undefined, { enabled: boolean | \"conflict\"; }>; security: ",
+            ", undefined, { enabled: boolean | \"conflict\"; can_manage: boolean; }>; security: ",
             "RouteSecurity",
             "; }; \"POST /api/streams/_resync 2023-10-31\": ",
             {
@@ -1124,20 +1124,105 @@
         },
         {
           "parentPluginId": "streams",
-          "id": "def-public.StreamsPluginStart.status$",
+          "id": "def-public.StreamsPluginStart.navigationStatus$",
           "type": "Object",
           "tags": [],
-          "label": "status$",
+          "label": "navigationStatus$",
           "description": [],
           "signature": [
             "Observable",
             "<",
-            "StreamsStatus",
+            "StreamsNavigationStatus",
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "streams",
+          "id": "def-public.StreamsPluginStart.wiredStatus$",
+          "type": "Object",
+          "tags": [],
+          "label": "wiredStatus$",
+          "description": [],
+          "signature": [
+            "Observable",
+            "<",
+            "WiredStreamsStatus",
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "streams",
+          "id": "def-public.StreamsPluginStart.enableWiredMode",
+          "type": "Function",
+          "tags": [],
+          "label": "enableWiredMode",
+          "description": [],
+          "signature": [
+            "(signal: AbortSignal) => Promise<",
+            "EnableStreamsResponse",
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "streams",
+              "id": "def-public.StreamsPluginStart.enableWiredMode.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "signal",
+              "description": [],
+              "signature": [
+                "AbortSignal"
+              ],
+              "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "streams",
+          "id": "def-public.StreamsPluginStart.disableWiredMode",
+          "type": "Function",
+          "tags": [],
+          "label": "disableWiredMode",
+          "description": [],
+          "signature": [
+            "(signal: AbortSignal) => Promise<",
+            "DisableStreamsResponse",
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "streams",
+              "id": "def-public.StreamsPluginStart.disableWiredMode.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "signal",
+              "description": [],
+              "signature": [
+                "AbortSignal"
+              ],
+              "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "streams",
@@ -1796,7 +1881,7 @@
           },
           "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
-          ", undefined, { enabled: boolean | \"conflict\"; }>; security: ",
+          ", undefined, { enabled: boolean | \"conflict\"; can_manage: boolean; }>; security: ",
           "RouteSecurity",
           "; }; \"POST /api/streams/_resync 2023-10-31\": ",
           {
