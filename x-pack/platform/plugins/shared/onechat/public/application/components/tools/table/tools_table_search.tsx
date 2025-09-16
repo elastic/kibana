@@ -14,7 +14,7 @@ import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
-import { ToolFilterOption } from './tools_table_filter_option';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
 const toValidSearchQuery = (query: string | null): string => {
   try {
@@ -46,7 +46,7 @@ const getToolsTableSearchConfig = ({
       options: tags.map((tag) => ({
         value: tag,
         name: tag,
-        view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+        view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
       })),
       searchThreshold: 1,
     },

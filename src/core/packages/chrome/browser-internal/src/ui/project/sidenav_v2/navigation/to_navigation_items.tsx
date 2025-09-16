@@ -22,6 +22,7 @@ import type {
   SecondaryMenuSection,
   SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
@@ -31,6 +32,7 @@ export interface NavigationItems {
   logoItem: SideNavLogo;
   navItems: NavigationStructure;
   activeItemId?: string;
+  solutionId: SolutionId;
 }
 
 /**
@@ -313,7 +315,12 @@ export const toNavigationItems = (
   // Check for duplicate icons
   warnAboutDuplicateIcons(logoItem, primaryItems);
 
-  return { logoItem, navItems: { primaryItems, footerItems }, activeItemId: deepestActiveItemId };
+  return {
+    logoItem,
+    navItems: { primaryItems, footerItems },
+    activeItemId: deepestActiveItemId,
+    solutionId: navigationTree.id,
+  };
 };
 
 // =====================
