@@ -53,7 +53,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.exceeded.description"
-            defaultMessage="The maximum supported number of privileged users has been exceeded (current count {currentCount} of a max {maxAllowed}). Please remove privileged users to prevent performance degradation."
+            defaultMessage="You have {currentCount} privileged users, which exceeds the limit of {maxAllowed}. Remove some privileged users to prevent performance degradation."
             values={{
               currentCount: <strong>{currentCount.toLocaleString()}</strong>,
               maxAllowed: <strong>{maxAllowed.toLocaleString()}</strong>,
