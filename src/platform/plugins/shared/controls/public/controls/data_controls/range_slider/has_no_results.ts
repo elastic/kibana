@@ -10,10 +10,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import type { FetchContext, PublishesDataViews } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
-import type { ControlGroupApi } from '../../../control_group/types';
 import { dataService } from '../../../services/kibana_services';
 import type { DataControlApi } from '../types';
 
@@ -21,27 +20,25 @@ export function hasNoResults$({
   controlFetch$,
   dataViews$,
   rangeFilters$,
-  ignoreParentSettings$,
   setIsLoading,
 }: {
-  controlFetch$: Observable<ControlFetchContext>;
+  controlFetch$: Observable<FetchContext>;
   dataViews$?: PublishesDataViews['dataViews$'];
-  rangeFilters$: DataControlApi['filters$'];
-  ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
+  rangeFilters$: DataControlApi['appliedFilters$'];
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, rangeFilters$, ignoreParentSettings$]).pipe(
+  return combineLatest([controlFetch$, rangeFilters$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, rangeFilters, ignoreParentSettings]) => {
+    switchMap(async ([controlFetchContext, rangeFilters]) => {
       const dataView = dataViews$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
-      if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
+      if (!dataView || !rangeFilter) {
         return false;
       }
 

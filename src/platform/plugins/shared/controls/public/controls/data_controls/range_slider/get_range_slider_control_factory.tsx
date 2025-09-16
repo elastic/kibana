@@ -7,84 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import type { Filter, RangeFilterParams } from '@kbn/es-query';
 import { buildRangeFilter } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiPublishesViewMode,
+  fetch$,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
 } from '../data_control_manager';
-import type { DataControlFactory } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
-import type { RangesliderControlApi, RangesliderControlState } from './types';
+import type { RangeSliderControlApi } from './types';
+import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 
-export const getRangesliderControlFactory = (): DataControlFactory<
-  RangesliderControlState,
-  RangesliderControlApi
+export const getRangesliderControlFactory = (): EmbeddableFactory<
+  RangeSliderControlState,
+  RangeSliderControlApi
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
-    getIconType: () => 'controlsHorizontal',
-    getDisplayName: RangeSliderStrings.control.getDisplayName,
-    isFieldCompatible: (field) => {
-      return field.aggregatable && field.type === 'number';
-    },
-    CustomOptionsComponent: ({ initialState, updateState, setControlEditorValid }) => {
-      const [step, setStep] = useState(initialState.step ?? 1);
-
-      return (
-        <>
-          <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
-            <EuiFieldNumber
-              compressed
-              value={step}
-              onChange={(event) => {
-                const newStep = event.target.valueAsNumber;
-                setStep(newStep);
-                updateState({ step: newStep });
-                setControlEditorValid(newStep > 0);
-              }}
-              min={0}
-              isInvalid={step === undefined || step <= 0}
-              data-test-subj="rangeSliderControl__stepAdditionalSetting"
-            />
-          </EuiFormRow>
-        </>
-      );
-    },
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState.rawState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-      const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
 
-      const dataControlManager = initializeDataControlManager<
-        Pick<RangesliderControlState, 'step'>
-      >(
-        uuid,
-        RANGE_SLIDER_CONTROL,
-        initialState,
-        () => ({ step: step$.getValue() }),
-        (editorState: Pick<RangesliderControlState, 'step'>) => {
-          if (editorState.step !== step$.getValue()) step$.next(editorState.step);
-        },
-        controlGroupApi
-      );
+      const editorStateManager = initializeEditorStateManager(state);
+
+      const dataControlManager = await initializeDataControlManager<
+        Pick<RangeSliderControlState, 'step'>
+      >({
+        controlId: uuid,
+        controlType: RANGE_SLIDER_CONTROL,
+        typeDisplayName: RangeSliderStrings.control.getDisplayName(),
+        state,
+        parentApi,
+        editorStateManager,
+      });
 
       const selections = initializeRangeControlSelections(
-        initialState,
+        state,
         dataControlManager.internalApi.onSelectionChange
       );
 
@@ -92,31 +69,32 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         return {
           rawState: {
             ...dataControlManager.getLatestState(),
-            step: step$.getValue(),
+            ...editorStateManager.getLatestState(),
             value: selections.value$.getValue(),
           },
-          references: dataControlManager.internalApi.extractReferences('rangeSliderDataView'),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<RangesliderControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
-        anyStateChange$: merge(dataControlManager.anyStateChange$, selections.value$, step$).pipe(
-          map(() => undefined)
-        ),
+        anyStateChange$: merge(
+          dataControlManager.anyStateChange$,
+          selections.value$,
+          editorStateManager.anyStateChange$
+        ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
+            ...editorComparators,
             ...defaultDataControlComparators,
             value: 'referenceEquality',
-            step: (a, b) => (a ?? 1) === (b ?? 1),
           };
         },
         onReset: (lastSaved) => {
           dataControlManager.reinitializeState(lastSaved?.rawState);
+          editorStateManager.reinitializeState(lastSaved?.rawState);
           selections.setValue(lastSaved?.rawState.value);
-          step$.next(lastSaved?.rawState.step ?? 1);
         },
       });
 
@@ -124,7 +102,6 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         ...unsavedChangesApi,
         ...dataControlManager.api,
         dataLoading$,
-        getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
         serializeState,
         clearSelections: () => {
           selections.setValue(undefined);
@@ -152,14 +129,15 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          step$.next(1);
+          editorStateManager.api.setStep(1);
           selections.setValue(undefined);
         });
 
+      const controlFetch$ = fetch$({ uuid, parentApi });
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
-        // controlFetch$,
+        controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
         setIsLoading: (isLoading: boolean) => {
@@ -169,7 +147,6 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           }
           loadingMinMax$.next(isLoading);
         },
-        controlGroupApi,
       }).subscribe(
         ({
           error,
@@ -212,6 +189,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             rangeFilter.meta.key = fieldName;
             rangeFilter.meta.type = 'range';
             rangeFilter.meta.params = params;
+            rangeFilter.meta.controlledBy = uuid;
           }
           dataControlManager.internalApi.setOutputFilter(rangeFilter);
         });
@@ -220,8 +198,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const hasNotResultsSubscription = hasNoResults$({
         controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
-        rangeFilters$: dataControlManager.api.filters$,
-        ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
+        rangeFilters$: dataControlManager.api.appliedFilters$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
         },
@@ -229,13 +206,13 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         selectionHasNoResults$.next(hasNoResults);
       });
 
-      if (selections.hasInitialSelections) {
-        await dataControlManager.api.untilFiltersReady();
-      }
+      const viewMode$ = apiPublishesViewMode(parentApi)
+        ? parentApi.viewMode$
+        : new BehaviorSubject<boolean>(true);
 
       return {
         api,
-        Component: ({ className: controlPanelClassName }) => {
+        Component: () => {
           const [
             dataLoading,
             fieldFormatter,
@@ -245,15 +222,17 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             step,
             value,
             fieldName,
+            viewMode,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
             max$,
             min$,
             selectionHasNoResults$,
-            step$,
+            editorStateManager.api.step$,
             selections.value$,
-            dataControlManager.api.fieldName$
+            dataControlManager.api.fieldName$,
+            viewMode$
           );
 
           useEffect(() => {
@@ -268,11 +247,11 @@ export const getRangesliderControlFactory = (): DataControlFactory<
 
           return (
             <RangeSliderControl
-              controlPanelClassName={controlPanelClassName}
               fieldName={fieldName}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
+              isEdit={viewMode === 'edit'}
               max={max}
               min={min}
               onChange={selections.setValue}

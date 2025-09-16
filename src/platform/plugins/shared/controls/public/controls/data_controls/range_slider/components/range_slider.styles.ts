@@ -27,11 +27,47 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       .euiPopover,
       .euiFormControlLayoutDelimited {
         height: 100%;
+        width: 100%;
       }
 
+      /**
+       * Workarounds for removing the border from EuiDualRange
+       * Border is rendered with a combination of outline, border on ::after, and box-shadows
+       */
       .euiFormControlLayout {
         border: none;
         border-radius: 0;
+        box-shadow: none;
+
+        &::after {
+          display: none;
+        }
+
+        &:hover {
+          z-index: 0 !important;
+          outline: none !important;
+        }
+      }
+
+      .euiFormControlLayout__childrenWrapper {
+        /* Additional border removal workarounds */
+        box-shadow: none;
+
+        &:hover {
+          outline: none !important;
+        }
+
+        /** Don't deform the control when rendering the loading spinner. 
+        * Instead, render the spinner on top of the control with a light background,
+        * ensuring that it covers up the up/down arrow buttons rendered at all times by some browsers.
+        * Add 16px of right padding to get it out of the way of the drag handle.
+        */
+        & .euiFormControlLayoutIcons:last-child {
+          position: absolute;
+          right: 0;
+          padding-right: 16px;
+          background: ${euiTheme.colors.backgroundBaseSubdued};
+        }
       }
     `,
     invalid: css`
@@ -54,6 +90,12 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       /* Remove the append background so the caution icon looks more natural */
       .euiFormControlLayout__append {
         background-color: transparent;
+      }
+    `,
+
+    editMode: css`
+      .euiFormControlLayout {
+        padding-right: ${euiTheme.size.s};
       }
     `,
 
