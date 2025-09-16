@@ -15,15 +15,6 @@ import type {
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
-import { formatChangePointDetectionUrl } from './formatters/aiops';
-import {
-  formatExplorerUrl,
-  formatSingleMetricViewerUrl,
-  formatDataFrameAnalyticsExplorationUrl,
-  formatDataFrameAnalyticsMapUrl,
-  formatGenericMlUrl,
-} from './formatters';
-
 export type { MlLocatorParams, MlLocator };
 
 export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
@@ -31,6 +22,15 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
   private validPaths = new Set(Object.values(ML_PAGES));
 
   public readonly getLocation = async (params: MlLocatorParams): Promise<KibanaLocation> => {
+    const { formatChangePointDetectionUrl } = await import('./formatters/aiops');
+    const {
+      formatExplorerUrl,
+      formatSingleMetricViewerUrl,
+      formatDataFrameAnalyticsExplorationUrl,
+      formatDataFrameAnalyticsMapUrl,
+      formatGenericMlUrl,
+    } = await import('./formatters');
+
     let path: string = '';
 
     if (!this.validPaths.has(params.page)) {
