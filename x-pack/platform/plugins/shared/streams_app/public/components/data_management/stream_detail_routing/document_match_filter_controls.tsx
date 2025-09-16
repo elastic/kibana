@@ -14,8 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   useStreamsRoutingSelector,
   type DocumentMatchFilterOptions,
@@ -59,18 +58,6 @@ export const DocumentMatchFilterControls = ({
     }
   }, [isIdleState, handleFilterChanged]);
 
-  const filterButtonCss = useMemo(
-    () => css`
-      background-color: transparent !important;
-      border: 0px !important;
-
-      &[aria-pressed='true']:not(:disabled) {
-        color: ${euiTheme.colors.textParagraph} !important;
-      }
-    `,
-    [euiTheme]
-  );
-
   return (
     <EuiFlexItem grow={false} data-test-subj="routingPreviewFilterControls">
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -92,7 +79,6 @@ export const DocumentMatchFilterControls = ({
               numActiveFilters={
                 isNaN(matchedDocumentPercentage) ? '' : `${matchedDocumentPercentage}%`
               }
-              css={filterButtonCss}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.matched', {
                 defaultMessage: 'Matched',
@@ -114,7 +100,6 @@ export const DocumentMatchFilterControls = ({
               numActiveFilters={
                 isNaN(matchedDocumentPercentage) ? '' : `${100 - matchedDocumentPercentage}%`
               }
-              css={filterButtonCss}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {
                 defaultMessage: 'Unmatched',
