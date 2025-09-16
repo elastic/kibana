@@ -348,4 +348,4 @@ POST kbn://internal/kibana/settings
 }
 ```
 
-Or, set the default LLM in in UI under Management > GenAI Settings.
+Or, set the default LLM in the UI under Management > GenAI Settings.
