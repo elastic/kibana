@@ -15,5 +15,8 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/**/*.{ts,tsx}',
   ],
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/test/setup.ts',
+  ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };

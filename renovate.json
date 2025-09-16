@@ -794,7 +794,7 @@
         "unified"
       ],
       "reviewers": [
-        "team:response-ops",
+        "team:kibana-cases",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3224,6 +3224,7 @@
         "ts-easing",
         "typescript-fsa",
         "typescript-fsa-reducers",
+        "type-fest",
         "unidiff"
       ],
       "reviewers": [
@@ -4259,6 +4260,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "separateMajorMinor": true,
+      "allowedVersions": "<5.0.0",
       "enabled": true
     },
     {
@@ -4429,17 +4431,30 @@
         "email-addresses",
         "json-stringify-safe",
         "murmurhash",
-        "mdast-util-to-hast",
-        "pretty-ms",
-        "p-settle",
-        "p-reflect",
-        "remark-stringify",
         "stats-lite",
-        "textarea-caret",
-        "type-fest"
+        "textarea-caret"
       ],
       "reviewers": [
         "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Kibana Cases misc dependencies",
+      "matchDepNames": [
+        "pretty-ms",
+        "remark-stringify"
+      ],
+      "reviewers": [
+        "team:kibana-cases"
       ],
       "matchBaseBranches": [
         "main"
@@ -4662,6 +4677,25 @@
         "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "canvas-confetti",
+      "matchDepNames": [
+        "canvas-confetti",
+        "@types/canvas-confetti"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:current-major"
+      ],
       "enabled": true
     }
   ],

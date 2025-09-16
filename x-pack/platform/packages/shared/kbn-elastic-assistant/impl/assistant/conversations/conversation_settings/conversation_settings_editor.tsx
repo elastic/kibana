@@ -33,6 +33,7 @@ import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 export interface ConversationSettingsEditorProps {
   allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
+  currentUser?: User;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
   isDisabled?: boolean;
@@ -50,6 +51,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
   ({
     allSystemPrompts,
     conversationsSettingsBulkActions,
+    currentUser,
     http,
     isDisabled = false,
     selectedConversation,
@@ -308,19 +310,20 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             />
           </EuiFormRow>
         )}
-
-        <EuiFormRow
-          data-test-subj="shared-field"
-          display="rowCompressed"
-          fullWidth
-          label={i18n.SHARING_OPTIONS}
-        >
-          <ShareSelect
-            selectedConversation={selectedConversation}
-            onSharedSelectionChange={handleOnSharedSelectionChange}
-            onUsersUpdate={handleUsersUpdate}
-          />
-        </EuiFormRow>
+        {currentUser && (
+          <EuiFormRow
+            data-test-subj="shared-field"
+            display="rowCompressed"
+            fullWidth
+            label={i18n.SHARING_OPTIONS}
+          >
+            <ShareSelect
+              selectedConversation={selectedConversation}
+              onSharedSelectionChange={handleOnSharedSelectionChange}
+              onUsersUpdate={handleUsersUpdate}
+            />
+          </EuiFormRow>
+        )}
       </>
     );
   }

@@ -93,6 +93,18 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'Failed to start scan',
       }
     ),
+    partialScanError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.partialScanError',
+      {
+        defaultMessage: 'Insight scan failed',
+      }
+    ),
+    partialScanErrorBody: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.partialScanErrorBody',
+      {
+        defaultMessage: 'Some insights could not be generated. Please try again.',
+      }
+    ),
     fetchInsightsError: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchInsightsError',
       {
