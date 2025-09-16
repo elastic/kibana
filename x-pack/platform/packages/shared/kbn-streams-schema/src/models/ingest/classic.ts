@@ -15,6 +15,8 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import type { IngestStreamSettings } from './settings';
+import { ingestStreamSettingsSchema } from './settings';
 import type { FieldDefinition } from '../../fields';
 import { fieldDefinitionSchema } from '../../fields';
 import type { FailureStore } from './failure_store';
@@ -53,6 +55,7 @@ export namespace ClassicStream {
     data_stream_exists: boolean;
     effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
     failure_store?: FailureStore;
+    effective_settings: IngestStreamSettings;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -81,6 +84,7 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
         data_stream_exists: z.boolean(),
         effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
         failure_store: z.optional(failureStoreSchema),
+        effective_settings: ingestStreamSettingsSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

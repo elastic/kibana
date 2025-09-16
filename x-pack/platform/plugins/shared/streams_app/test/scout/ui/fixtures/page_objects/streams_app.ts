@@ -25,19 +25,19 @@ export class StreamsApp {
   }
 
   async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'route');
+    await this.gotoStreamManagementTab(streamName, 'partitioning');
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+    await this.gotoStreamManagementTab(streamName, 'retention');
   }
 
   async gotoProcessingTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'enrich');
+    await this.gotoStreamManagementTab(streamName, 'processing');
   }
 
   async gotoSchemaEditorTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+    await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
   async gotoSignificantEventsTab(streamName: string) {
@@ -82,6 +82,14 @@ export class StreamsApp {
   }
 
   async confirmDeleteInModal() {
+    await this.getModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getModal()).toBeHidden();
+  }
+
+  async confirmStreamDeleteInModal(streamName: string) {
+    await this.getModal()
+      .getByTestId('streamsAppDeleteStreamModalStreamNameInput')
+      .fill(streamName);
     await this.getModal().getByRole('button', { name: 'Delete' }).click();
     await expect(this.getModal()).toBeHidden();
   }

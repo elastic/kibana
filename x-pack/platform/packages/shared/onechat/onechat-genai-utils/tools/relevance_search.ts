@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { PerformMatchSearchResponse } from './steps';
 import { performMatchSearch } from './steps';
-import { resolveResource } from './steps/resolve_resource';
+import { resolveResource } from './utils/resources';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 

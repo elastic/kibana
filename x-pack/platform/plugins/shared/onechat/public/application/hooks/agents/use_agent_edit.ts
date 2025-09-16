@@ -7,12 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  ToolType,
-  type AgentDefinition,
-  type ToolSelection,
-  defaultAgentToolIds,
-} from '@kbn/onechat-common';
+import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/onechat-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
@@ -25,7 +20,6 @@ export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
-    type: ToolType.builtin,
     tool_ids: [...defaultAgentToolIds],
   },
 ];
@@ -57,11 +51,7 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const {
-    tools,
-    isLoading: toolsLoading,
-    error: toolsError,
-  } = useToolsService({ includeSystemTools: true });
+  const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
@@ -110,12 +100,12 @@ export function useAgentEdit({
   }, [agentId, agent, isClone]);
 
   const submit = useCallback(
-    (data: AgentEditState) => {
+    async (data: AgentEditState) => {
       if (editingAgentId) {
         const { id, ...updatedAgent } = data;
-        updateMutation.mutate(updatedAgent);
+        await updateMutation.mutateAsync(updatedAgent);
       } else {
-        createMutation.mutate(data);
+        await createMutation.mutateAsync(data);
       }
     },
     [editingAgentId, createMutation, updateMutation]

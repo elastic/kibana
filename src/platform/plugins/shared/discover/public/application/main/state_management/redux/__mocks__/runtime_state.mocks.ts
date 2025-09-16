@@ -8,7 +8,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ScopedDiscoverEBTManager } from '../../../../../ebt_manager';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
@@ -18,6 +17,7 @@ import {
   createRuntimeStateManager,
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
+  type UnifiedHistogramConfig,
 } from '../runtime_state';
 
 export function getTabRuntimeStateMock(
@@ -28,9 +28,9 @@ export function getTabRuntimeStateMock(
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
-    unifiedHistogramLayoutProps$: new BehaviorSubject<
-      UnifiedHistogramPartialLayoutProps | undefined
-    >(undefined),
+    unifiedHistogramConfig$: new BehaviorSubject<UnifiedHistogramConfig>({
+      layoutPropsMap: {},
+    }),
     scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
       {} as unknown as ScopedProfilesManager
     ),

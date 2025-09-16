@@ -9,13 +9,16 @@ import {
   Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
+  getInheritedSettings,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
   getFailureStore,
+  getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
@@ -73,15 +76,21 @@ export async function readStream({
   }
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, privileges] = await Promise.all([
+  const [ancestors, dataStream, privileges, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name).catch((e) => {
-      if (e.statusCode === 404) {
+      if (isNotFoundError(e)) {
         return null;
       }
       throw e;
     }),
     streamsClient.getPrivileges(name),
+    scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
+      if (isNotFoundError(e)) {
+        return null;
+      }
+      throw e;
+    }),
   ]);
 
   const failureStore = dataStream
@@ -101,6 +110,7 @@ export async function readStream({
           : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_settings: getDataStreamSettings(dataStreamSettings?.data_streams[0]),
       dashboards,
       rules,
       queries,
@@ -120,6 +130,7 @@ export async function readStream({
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
+    effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
     failure_store: failureStore,
   };

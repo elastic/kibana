@@ -99,7 +99,7 @@ export function RoutingStreamEntry({
         )}
         <EuiLink
           href={router.link('/{key}/management/{tab}', {
-            path: { key: routingRule.destination, tab: 'route' },
+            path: { key: routingRule.destination, tab: 'partitioning' },
           })}
           data-test-subj="streamsAppRoutingStreamEntryButton"
         >
@@ -140,14 +140,7 @@ export function RoutingStreamEntry({
             onConditionChange={(cond) => onChange({ where: cond })}
             onStatusChange={(status) => onChange({ status })}
           />
-          <EditRoutingRuleControls
-            relatedStreams={availableStreams.filter(
-              (streamName) =>
-                streamName === routingRule.destination ||
-                isDescendantOf(routingRule.destination, streamName)
-            )}
-            routingRule={routingRule}
-          />
+          <EditRoutingRuleControls routingRule={routingRule} />
         </EuiFlexGroup>
       )}
     </EuiPanel>

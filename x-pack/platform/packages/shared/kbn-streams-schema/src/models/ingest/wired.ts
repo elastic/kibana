@@ -18,6 +18,8 @@ import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 import { failureStoreSchema, type FailureStore } from './failure_store';
+import type { WiredIngestStreamEffectiveSettings } from './settings';
+import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -60,6 +62,7 @@ export namespace WiredStream {
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
     failure_store?: FailureStore;
+    effective_settings: WiredIngestStreamEffectiveSettings;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -81,6 +84,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
         inherited_fields: inheritedFieldDefinitionSchema,
         effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
         failure_store: z.optional(failureStoreSchema),
+        effective_settings: wiredIngestStreamEffectiveSettingsSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
