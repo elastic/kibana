@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { Response as SupertestResponse } from 'supertest';
 import { RuleNotifyWhen, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
