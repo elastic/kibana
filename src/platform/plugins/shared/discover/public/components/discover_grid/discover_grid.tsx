@@ -14,18 +14,15 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
-import {
-  ESQLDataCascade,
-  getESQLStatsQueryMeta,
-} from '../../application/context/components/data_cascade/esql_data_cascade';
+import { ESQLDataCascade } from '../../application/context/components/data_cascade/esql_data_cascade';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
-  viewModeToggle: React.ReactNode;
+  viewModeToggle?: React.ReactNode;
+  cascadeGroups?: string[] | null;
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
 }
 
@@ -36,6 +33,7 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
+  cascadeGroups,
   viewModeToggle,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   ...props
@@ -80,16 +78,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     return getColumnsConfigurationAccessor(() => ({}))();
   }, [getColumnsConfigurationAccessor]);
 
-  // Determine the cascade groups from the query if it's of ESQL type
-  const cascadeGroups = useMemo(() => {
-    if (!isOfAggregateQueryType(query)) return [];
-    return getESQLStatsQueryMeta(query.esql).groupByFields.map((group) => group.field);
-  }, [query]);
-
-  return Boolean(cascadeGroups.length) ? (
+  return Boolean(cascadeGroups?.length) ? (
     <ESQLDataCascade
       {...props}
-      cascadeGroups={cascadeGroups}
+      cascadeGroups={cascadeGroups!}
       dataView={dataView}
       // stateContainer={stateContainer}
       viewModeToggle={viewModeToggle}

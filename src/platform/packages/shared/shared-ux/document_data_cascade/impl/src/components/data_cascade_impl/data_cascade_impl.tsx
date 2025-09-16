@@ -9,7 +9,7 @@
 
 import React, { Children, isValidElement, useRef, useMemo, useCallback } from 'react';
 import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
+import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { type GroupNode, type LeafNode } from '../../store_provider';
@@ -49,6 +49,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   onCascadeGroupingChange,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
+  customTableHeader,
   overscan = 10,
   children,
   enableRowSelection = false,
@@ -82,21 +83,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
       const { rows: tableRows } = table.getGroupedRowModel();
 
       return (
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          css={styles.cascadeHeaderWrapper}
-        >
-          <EuiFlexItem id="treegrid-label">
-            <TableTitleSlot rows={tableRows} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SelectionDropdown onSelectionChange={onCascadeGroupingChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CascadeHeaderPrimitive<G>
+          customTableHeader={customTableHeader}
+          tableTitleSlot={TableTitleSlot!}
+          tableRows={tableRows}
+          onCascadeGroupingChange={onCascadeGroupingChange}
+        />
       );
     },
-    [TableTitleSlot, onCascadeGroupingChange, styles.cascadeHeaderWrapper]
+    [TableTitleSlot, customTableHeader, onCascadeGroupingChange]
   );
 
   const cascadeRowCell = useCallback(

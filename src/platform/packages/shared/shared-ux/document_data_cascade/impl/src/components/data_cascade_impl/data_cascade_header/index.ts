@@ -7,13 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createRestorableStateProvider } from '@kbn/restorable-state';
-
-export interface DiscoverLayoutRestorableState {
-  sidebarWidth: number;
-  supportsCascade: boolean;
-  availableCascadeFields: string[];
-}
-
-export const { withRestorableState, useRestorableState } =
-  createRestorableStateProvider<DiscoverLayoutRestorableState>();
+export { CascadeHeaderPrimitive } from './cascade_header';
