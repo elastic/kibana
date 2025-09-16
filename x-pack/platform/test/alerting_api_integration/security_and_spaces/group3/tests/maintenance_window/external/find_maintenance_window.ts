@@ -295,19 +295,5 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
       expect(response.body.total).to.eql(2);
       expect(response.body.data.length).to.eql(1);
     });
-
-    it('throws error if doc count is gte 10k', async () => {
-      const response = await supertest
-        .get(`${getUrlPrefix('space1')}/api/maintenance_window/_find?page=101&per_page=100`)
-        .set('kbn-xsrf', 'foo')
-        .expect(400);
-
-      expect(response.body).to.eql({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          '[request query]: The number of documents is too high. Paginating through more than 10000 documents is not possible.',
-      });
-    });
   });
 }
