@@ -179,7 +179,7 @@ export const useAlertCloseInfoModal = () => {
           setShouldShowModal(true);
         });
       } catch (error) {
-        // We do not want to break alert closure. If the endpoint breaks somehow,
+        // We do not want to break alert closure if the logic that decides whether to show the modal breaks
         // users should still be able to close alerts.
         return Promise.resolve(true);
       }
