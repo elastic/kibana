@@ -126,6 +126,20 @@ export const STACK_COMPONENT_TEMPLATES = [
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
 ];
 
+export const OTEL_COMPONENT_TEMPLATE_MAPPINGS = 'otel@mappings';
+export const OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS = 'metrics-otel@mappings';
+export const OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS = 'logs-otel@mappings';
+export const OTEL_COMPONENT_TRACES_OTEL_MAPPINGS = 'traces-otel@mappings';
+export const OTEL_COMPONENT_ECS_TDSB_MAPPINGS = 'ecs-tsdb@mappings';
+export const OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS = 'semconv-resource-to-ecs@mappings';
+
+export const OTEL_COMPONENT_TEMPLATES = [
+  OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+  OTEL_COMPONENT_TRACES_OTEL_MAPPINGS,
+  OTEL_COMPONENT_ECS_TDSB_MAPPINGS,
+  OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+];
+
 export const FLEET_EVENT_INGESTED_PIPELINE_VERSION = 1;
 
 // If the content is updated you probably need to update the FLEET_EVENT_INGESTED_PIPELINE_VERSION too to allow upgrade of the pipeline

@@ -50,6 +50,8 @@ import {
 import { appContextService } from '../../../app_context';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../common/constants';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -626,7 +628,10 @@ export function prepareTemplate({
     fieldAssetsMap,
     dataStream.path
   );
-
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  const isOtelInputType =
+    experimentalFeature.enableOtelIntegrations &&
+    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb;
@@ -635,7 +640,7 @@ export function prepareTemplate({
 
   const mappings = generateMappings(validFields, isIndexModeTimeSeries);
   const templateName = generateTemplateName(dataStream);
-  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream, isOtelInputType);
   const templatePriority = getTemplatePriority(dataStream);
 
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
@@ -660,7 +665,7 @@ export function prepareTemplate({
     fieldCount: countFields(validFields),
     type: dataStream.type,
   });
-
+  console.log('## componentTemplates', componentTemplates);
   const template = getTemplate({
     templateIndexPattern,
     packageName,
@@ -668,9 +673,9 @@ export function prepareTemplate({
     templatePriority,
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
-    mappings,
     isIndexModeTimeSeries,
     type: dataStream.type,
+    isOtelInputType,
   });
 
   return {

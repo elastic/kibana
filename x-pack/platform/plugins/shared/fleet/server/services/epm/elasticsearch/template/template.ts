@@ -17,9 +17,14 @@ import { isResponseError } from '@kbn/es-errors';
 
 import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
-import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
+import {
+  MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+  OTEL_COMPONENT_TEMPLATES,
+} from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -89,19 +94,19 @@ export function getTemplate({
   templatePriority,
   hidden,
   registryElasticsearch,
-  mappings,
   isIndexModeTimeSeries,
   type,
+  isOtelInputType,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
-  mappings: IndexTemplateMappings;
   type: string;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
+  isOtelInputType?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
     templateIndexPattern,
@@ -110,7 +115,6 @@ export function getTemplate({
     templatePriority,
     registryElasticsearch,
     hidden,
-    mappings,
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
@@ -135,6 +139,7 @@ export function getTemplate({
     ...(isEventIngestedEnabled(appContextService.getConfig())
       ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
+    ...(isOtelInputType ? getOtelEsComponents(type) : []),
   ];
 
   template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
@@ -151,6 +156,16 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
     return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
   } else if (type === 'logs') {
     return [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS, STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
+  }
+
+  return [];
+};
+
+const getOtelEsComponents = (type: string): string[] => {
+  if (type === 'metrics') {
+    return [...OTEL_COMPONENT_TEMPLATES, OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS];
+  } else if (type === 'logs') {
+    return [...OTEL_COMPONENT_TEMPLATES, OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS];
   }
 
   return [];
@@ -819,13 +834,16 @@ async function getIndexTemplate(
   return dataStream.data_streams[0].template;
 }
 
-export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
+export function generateTemplateIndexPattern(
+  dataStream: RegistryDataStream,
+  isOtelInputType?: boolean
+): string {
   // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
   if (!dataStream.dataset_is_prefix) {
-    return getRegistryDataStreamAssetBaseName(dataStream) + '-*';
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-*';
   } else {
-    return getRegistryDataStreamAssetBaseName(dataStream) + '.*-*';
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-*';
   }
 }
 
@@ -891,7 +909,6 @@ function getBaseTemplate({
   templatePriority,
   hidden,
   registryElasticsearch,
-  mappings,
   isIndexModeTimeSeries,
 }: {
   templateIndexPattern: string;
@@ -900,7 +917,6 @@ function getBaseTemplate({
   templatePriority: number;
   hidden?: boolean;
   registryElasticsearch: RegistryElasticsearch | undefined;
-  mappings: IndexTemplateMappings;
   isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });

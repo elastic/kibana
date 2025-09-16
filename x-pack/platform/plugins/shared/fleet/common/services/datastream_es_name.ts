@@ -11,12 +11,16 @@ import type { USER_SETTINGS_TEMPLATE_SUFFIX, PACKAGE_TEMPLATE_SUFFIX } from '../
  * Creates the base name for Elasticsearch assets in the form of
  * {type}-{dataset}
  */
-export function getRegistryDataStreamAssetBaseName(dataStream: {
-  dataset: string;
-  type: string;
-  hidden?: boolean;
-}): string {
+export function getRegistryDataStreamAssetBaseName(
+  dataStream: {
+    dataset: string;
+    type: string;
+    hidden?: boolean;
+  },
+  isOtelInputType?: boolean
+): string {
   const baseName = `${dataStream.type}-${dataStream.dataset.toLowerCase()}`;
+  if (isOtelInputType) return `${baseName}.otel`;
   return dataStream.hidden ? `.${baseName}` : baseName;
 }
 
