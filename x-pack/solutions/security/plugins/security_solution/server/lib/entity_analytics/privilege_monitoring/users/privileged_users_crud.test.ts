@@ -587,6 +587,420 @@ describe('createPrivilegedUsersCrudService', () => {
     });
   });
 
+  describe('label functionality', () => {
+    describe('create with labels', () => {
+      it('should create new user with API labels', async () => {
+        const userWithLabels: CreatePrivMonUserRequestBody = {
+          user: {
+            name: 'test-user',
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'department', value: 'engineering', source: 'api' },
+              { field: 'role', value: 'admin', source: 'api' },
+            ],
+          },
+        };
+
+        // Mock search for username uniqueness check - no existing user found
+        mockEsClient.asCurrentUser.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 0, relation: 'eq' as const },
+            max_score: null,
+            hits: [],
+          },
+        });
+
+        // Mock count to return under limit
+        mockEsClient.asCurrentUser.count.mockResolvedValue({
+          count: 5,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        });
+
+        // Mock successful index
+        mockEsClient.asCurrentUser.index.mockResolvedValue({
+          _id: 'new-user-id',
+          _index: TEST_INDEX,
+          _version: 1,
+          result: 'created',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        });
+
+        // Mock get response for created user
+        const createdUser = {
+          id: 'new-user-id',
+          user: {
+            name: 'test-user',
+            is_privileged: true,
+          },
+          labels: {
+            sources: ['api'],
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'department', value: 'engineering', source: 'api' },
+              { field: 'role', value: 'admin', source: 'api' },
+            ],
+          },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        };
+
+        mockEsClient.asCurrentUser.get.mockResolvedValue({
+          _id: 'new-user-id',
+          _index: TEST_INDEX,
+          _source: createdUser,
+          found: true,
+          _version: 1,
+        });
+
+        const result = await crudService.create(userWithLabels, mockSource, maxUsersAllowed);
+
+        expect(mockEsClient.asCurrentUser.index).toHaveBeenCalledWith({
+          index: TEST_INDEX,
+          refresh: 'wait_for',
+          document: expect.objectContaining({
+            user: expect.objectContaining({
+              name: 'test-user',
+              is_privileged: true,
+            }),
+            labels: {
+              sources: ['api'],
+            },
+            entity_analytics_monitoring: {
+              labels: [
+                { field: 'department', value: 'engineering', source: 'api' },
+                { field: 'role', value: 'admin', source: 'api' },
+              ],
+            },
+          }),
+        });
+        expect(result).toEqual(expect.objectContaining(createdUser));
+      });
+
+      it('should merge API labels with existing CSV labels when updating existing user', async () => {
+        const userWithLabels: CreatePrivMonUserRequestBody = {
+          user: {
+            name: 'existing-user',
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'department', value: 'engineering', source: 'api' },
+            ],
+          },
+        };
+
+        const existingUser = {
+          id: 'existing-user-id',
+          user: {
+            name: 'existing-user',
+            is_privileged: true,
+          },
+          labels: {
+            sources: ['csv'],
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'location', value: 'NYC', source: 'csv' },
+            ],
+          },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        };
+
+        // Mock search for existing user
+        mockEsClient.asCurrentUser.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' as const },
+            max_score: 1.0,
+            hits: [
+              {
+                _id: 'existing-user-id',
+                _source: existingUser,
+                _score: 1.0,
+              },
+            ],
+          },
+        });
+
+        // Mock successful update
+        mockEsClient.asCurrentUser.update.mockResolvedValue({
+          _id: 'existing-user-id',
+          _index: TEST_INDEX,
+          _version: 2,
+          result: 'updated',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        });
+
+        // Mock get response for updated user
+        const updatedUser = {
+          ...existingUser,
+          labels: {
+            sources: ['csv', 'api'],
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'location', value: 'NYC', source: 'csv' },
+              { field: 'department', value: 'engineering', source: 'api' },
+            ],
+          },
+        };
+
+        mockEsClient.asCurrentUser.get.mockResolvedValue({
+          _id: 'existing-user-id',
+          _index: TEST_INDEX,
+          _source: updatedUser,
+          found: true,
+          _version: 2,
+        });
+
+        const result = await crudService.create(userWithLabels, mockSource, maxUsersAllowed);
+
+        expect(mockEsClient.asCurrentUser.update).toHaveBeenCalledWith({
+          index: TEST_INDEX,
+          id: 'existing-user-id',
+          refresh: 'wait_for',
+          doc: expect.objectContaining({
+            user: expect.objectContaining({
+              name: 'existing-user',
+              is_privileged: true,
+            }),
+            labels: {
+              sources: ['csv', 'api'],
+            },
+            entity_analytics_monitoring: {
+              labels: [
+                { field: 'location', value: 'NYC', source: 'csv' },
+                { field: 'department', value: 'engineering', source: 'api' },
+              ],
+            },
+          }),
+        });
+        expect(result).toEqual(expect.objectContaining(updatedUser));
+      });
+    });
+
+    describe('update with labels', () => {
+      it('should update user with new API labels', async () => {
+        const existingUser = {
+          id: 'test-user-id',
+          user: {
+            name: 'test-user',
+            is_privileged: true,
+          },
+          labels: {
+            sources: ['csv', 'api'],
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'location', value: 'NYC', source: 'csv' },
+              { field: 'department', value: 'engineering', source: 'api' },
+            ],
+          },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        };
+
+        const updateRequest = {
+          user: {
+            name: 'test-user',
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'department', value: 'product', source: 'api' },
+              { field: 'level', value: 'senior', source: 'api' },
+            ],
+          },
+        };
+
+        // Mock get for existing user
+        mockEsClient.asCurrentUser.get.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _source: existingUser,
+          found: true,
+          _version: 1,
+        });
+
+        // Mock successful update
+        mockEsClient.asCurrentUser.update.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _version: 2,
+          result: 'updated',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        });
+
+        // Mock get response for updated user
+        const updatedUser = {
+          ...existingUser,
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'location', value: 'NYC', source: 'csv' },
+              { field: 'department', value: 'product', source: 'api' },
+              { field: 'level', value: 'senior', source: 'api' },
+            ],
+          },
+        };
+
+        mockEsClient.asCurrentUser.get.mockResolvedValueOnce({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _source: existingUser,
+          found: true,
+          _version: 1,
+        }).mockResolvedValueOnce({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _source: updatedUser,
+          found: true,
+          _version: 2,
+        });
+
+        const result = await crudService.update('test-user-id', updateRequest);
+
+        expect(mockEsClient.asCurrentUser.update).toHaveBeenCalledWith({
+          index: TEST_INDEX,
+          id: 'test-user-id',
+          refresh: 'wait_for',
+          doc: expect.objectContaining({
+            user: expect.objectContaining({
+              name: 'test-user',
+            }),
+            entity_analytics_monitoring: {
+              labels: [
+                { field: 'location', value: 'NYC', source: 'csv' },
+                { field: 'department', value: 'product', source: 'api' },
+                { field: 'level', value: 'senior', source: 'api' },
+              ],
+            },
+          }),
+        });
+        expect(result).toEqual(expect.objectContaining(updatedUser));
+      });
+    });
+
+    describe('delete with source-aware logic', () => {
+      it('should only remove API labels when user has non-API sources', async () => {
+        const existingUser = {
+          id: 'test-user-id',
+          user: {
+            name: 'test-user',
+            is_privileged: true,
+          },
+          labels: {
+            sources: ['csv', 'api'],
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'location', value: 'NYC', source: 'csv' },
+              { field: 'department', value: 'engineering', source: 'api' },
+            ],
+          },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        };
+
+        // Mock get for existing user
+        mockEsClient.asCurrentUser.get.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _source: existingUser,
+          found: true,
+          _version: 1,
+        });
+
+        // Mock successful update (not delete)
+        mockEsClient.asCurrentUser.update.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _version: 2,
+          result: 'updated',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        });
+
+        await crudService.delete('test-user-id');
+
+        expect(mockEsClient.asCurrentUser.update).toHaveBeenCalledWith({
+          index: TEST_INDEX,
+          id: 'test-user-id',
+          refresh: 'wait_for',
+          doc: {
+            labels: {
+              sources: ['csv'],
+            },
+            entity_analytics_monitoring: {
+              labels: [
+                { field: 'location', value: 'NYC', source: 'csv' },
+              ],
+            },
+          },
+        });
+        expect(mockEsClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      });
+
+      it('should delete entire user when only API source exists', async () => {
+        const existingUser = {
+          id: 'test-user-id',
+          user: {
+            name: 'test-user',
+            is_privileged: true,
+          },
+          labels: {
+            sources: ['api'],
+          },
+          entity_analytics_monitoring: {
+            labels: [
+              { field: 'department', value: 'engineering', source: 'api' },
+            ],
+          },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        };
+
+        // Mock get for existing user
+        mockEsClient.asCurrentUser.get.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _source: existingUser,
+          found: true,
+          _version: 1,
+        });
+
+        // Mock successful delete
+        mockEsClient.asCurrentUser.delete.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          _version: 2,
+          result: 'deleted',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        });
+
+        await crudService.delete('test-user-id');
+
+        expect(mockEsClient.asCurrentUser.delete).toHaveBeenCalledWith({
+          index: TEST_INDEX,
+          id: 'test-user-id',
+        });
+        expect(mockEsClient.asCurrentUser.update).not.toHaveBeenCalled();
+      });
+
+      it('should throw error when user not found during delete', async () => {
+        // Mock get to return not found
+        mockEsClient.asCurrentUser.get.mockResolvedValue({
+          _id: 'test-user-id',
+          _index: TEST_INDEX,
+          found: false,
+        });
+
+        await expect(crudService.delete('test-user-id')).rejects.toThrow(
+          'User with id test-user-id not found'
+        );
+      });
+    });
+  });
+
   describe('error handling', () => {
     it('should propagate elasticsearch errors on create', async () => {
       // Mock search for username uniqueness check - no existing user found

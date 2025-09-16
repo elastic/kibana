@@ -47,6 +47,25 @@ export const createPrivilegedUsersCrudService = ({
             ? existingSources
             : [...existingSources, source];
 
+          // Handle API labels if provided
+          const apiLabels = user.entity_analytics_monitoring?.labels || [];
+          const existingLabels = existingUserDoc?.entity_analytics_monitoring?.labels || [];
+          
+          // Merge API labels with existing labels, avoiding duplicates
+          const mergedLabels = [...existingLabels];
+          for (const apiLabel of apiLabels) {
+            const existingLabelIndex = mergedLabels.findIndex(
+              (label) => label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
+            );
+            if (existingLabelIndex >= 0) {
+              // Update existing API label
+              mergedLabels[existingLabelIndex] = { ...apiLabel, source: 'api' };
+            } else {
+              // Add new API label
+              mergedLabels.push({ ...apiLabel, source: 'api' });
+            }
+          }
+
           await esClient.update({
             index,
             id: existingUserId,
@@ -55,6 +74,9 @@ export const createPrivilegedUsersCrudService = ({
               ...user,
               user: { ...user.user, is_privileged: true },
               labels: { sources: updatedSources },
+              entity_analytics_monitoring: {
+                labels: mergedLabels,
+              },
             },
           });
 
@@ -81,6 +103,12 @@ export const createPrivilegedUsersCrudService = ({
       throw new Error(`Cannot create user: Maximum user limit of ${maxUsersAllowed} reached`);
     }
 
+    // Prepare API labels with source 'api'
+    const apiLabels = user.entity_analytics_monitoring?.labels?.map(label => ({
+      ...label,
+      source: 'api'
+    })) || [];
+
     // Create new user
     const doc = merge(user, {
       '@timestamp': new Date().toISOString(),
@@ -89,6 +117,9 @@ export const createPrivilegedUsersCrudService = ({
       },
       labels: {
         sources: [source],
+      },
+      entity_analytics_monitoring: {
+        labels: apiLabels,
       },
     });
 
@@ -116,11 +147,40 @@ export const createPrivilegedUsersCrudService = ({
     id: string,
     user: UpdatePrivMonUserRequestBody
   ): Promise<MonitoredUserDoc | undefined> => {
+    // Get existing user to merge labels properly
+    const existingUser = await get(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+
+    const existingLabels = existingUser?.entity_analytics_monitoring?.labels || [];
+    const apiLabels = user.entity_analytics_monitoring?.labels || [];
+    
+    // Merge API labels with existing labels, avoiding duplicates
+    const mergedLabels = [...existingLabels];
+    for (const apiLabel of apiLabels) {
+      const existingLabelIndex = mergedLabels.findIndex(
+        (label) => label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
+      );
+      if (existingLabelIndex >= 0) {
+        // Update existing API label
+        mergedLabels[existingLabelIndex] = { ...apiLabel, source: 'api' };
+      } else {
+        // Add new API label
+        mergedLabels.push({ ...apiLabel, source: 'api' });
+      }
+    }
+
     await esClient.update<MonitoredUserDoc>({
       index,
       refresh: 'wait_for',
       id,
-      doc: user,
+      doc: {
+        ...user,
+        entity_analytics_monitoring: {
+          labels: mergedLabels,
+        },
+      },
     });
     return get(id);
   };
@@ -139,7 +199,38 @@ export const createPrivilegedUsersCrudService = ({
   };
 
   const _delete = async (id: string): Promise<void> => {
-    await esClient.delete({ index, id });
+    // Get existing user to check if it has non-API sources
+    const existingUser = await get(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+
+    const sources = existingUser?.labels?.sources || [];
+    const hasNonApiSources = sources.some(source => source !== 'api');
+    
+    if (hasNonApiSources) {
+      // User has non-API sources, only remove API labels and API source
+      const existingLabels = existingUser?.entity_analytics_monitoring?.labels || [];
+      const nonApiLabels = existingLabels.filter(label => label.source !== 'api');
+      const nonApiSources = sources.filter(source => source !== 'api');
+      
+      await esClient.update({
+        index,
+        id,
+        refresh: 'wait_for',
+        doc: {
+          labels: {
+            sources: nonApiSources,
+          },
+          entity_analytics_monitoring: {
+            labels: nonApiLabels,
+          },
+        },
+      });
+    } else {
+      // User only has API source, delete the entire user
+      await esClient.delete({ index, id });
+    }
   };
 
   return { create, get, update, list, delete: _delete };

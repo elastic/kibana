@@ -26,6 +26,19 @@ export const UserName = z.object({
       name: z.string().optional(),
     })
     .optional(),
+  entity_analytics_monitoring: z
+    .object({
+      labels: z
+        .array(
+          z.object({
+            field: z.string().optional(),
+            value: z.string().optional(),
+            source: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
 });
 
 export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
