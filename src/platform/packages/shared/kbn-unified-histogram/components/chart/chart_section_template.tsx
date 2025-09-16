@@ -60,27 +60,18 @@ export const ChartSectionTemplate = ({
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
+          {toolbar?.additionalControls?.prependRight ? (
+            <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
+          ) : null}
           {rightSide.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                direction="row"
-                responsive={false}
-                gutterSize="none"
-                alignItems="center"
-              >
-                {toolbar?.additionalControls?.prependRight ? (
-                  <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
-                ) : null}
-                <EuiFlexItem grow={false}>
-                  <IconButtonGroup
-                    legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
-                      defaultMessage: 'Chart actions',
-                    })}
-                    buttonSize="s"
-                    buttons={rightSide}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <IconButtonGroup
+                legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                  defaultMessage: 'Chart actions',
+                })}
+                buttonSize="s"
+                buttons={rightSide}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

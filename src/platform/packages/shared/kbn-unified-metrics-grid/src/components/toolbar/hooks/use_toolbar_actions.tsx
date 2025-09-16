@@ -8,8 +8,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -99,33 +97,12 @@ export const useToolbarActions = ({
     ]
   );
 
-  const rightSideActions: IconButtonGroupProps['buttons'] = [
-    ...(!showSearchInput
-      ? [
-          {
-            iconType: 'search',
-            label: i18n.translate('metricsExperience.searchButton', {
-              defaultMessage: 'Search',
-            }),
-            onClick: onShowSearch,
-            'data-test-subj': 'metricsExperienceToolbarSearch',
-          },
-        ]
-      : []),
-    {
-      iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
-      label: isFullscreen
-        ? i18n.translate('metricsExperience.fullScreenExitButton', {
-            defaultMessage: 'Exit fullscreen',
-          })
-        : i18n.translate('metricsExperience.fullScreenButton', {
-            defaultMessage: 'Enter fullscreen',
-          }),
-      onClick: onToggleFullscreen,
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-      className: showSearchInput ? 'nextToSearchInput' : undefined,
-    },
-  ];
-
-  return { leftSideActions, rightSideActions, onClearSearch, showSearchInput };
+  return {
+    leftSideActions,
+    onClearSearch,
+    showSearchInput,
+    isFullscreen,
+    onToggleFullscreen,
+    onShowSearch,
+  };
 };

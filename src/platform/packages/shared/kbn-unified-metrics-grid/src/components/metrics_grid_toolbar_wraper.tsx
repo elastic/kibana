@@ -16,7 +16,7 @@ import type { SerializedStyles } from '@emotion/serialize';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useMetricsGridState } from '../hooks';
-import { SearchInput } from './toolbar/search_input/search_input';
+import { RightSideActions } from './toolbar/right_side_actions/search_input';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 
 const getFullScreenStyles = (euiTheme: EuiThemeComputed): CSSObject => {
@@ -80,7 +80,7 @@ export const MetricsGridToolbarWrapper = ({
   fields,
   children,
 }: MetricsGridToolbarWrapperProps) => {
-  const { leftSideActions, rightSideActions, onClearSearch, showSearchInput } = useToolbarActions({
+  const { leftSideActions } = useToolbarActions({
     fields,
     indexPattern,
     renderToggleActions,
@@ -96,14 +96,17 @@ export const MetricsGridToolbarWrapper = ({
         toolbarCss={chartToolbarCss}
         toolbar={{
           leftSide: leftSideActions,
-          rightSide: rightSideActions,
           additionalControls: {
             prependRight: (
-              <SearchInput
-                showSearchInput={showSearchInput}
+              <RightSideActions
+                key="rightSideActions"
                 searchTerm={searchTerm}
                 onSearchTermChange={onSearchTermChange}
-                onClear={onClearSearch}
+                fields={fields}
+                indexPattern={indexPattern}
+                renderToggleActions={renderToggleActions}
+                requestParams={requestParams}
+                setDebouncedSearchTerm={setDebouncedSearchTerm}
                 data-test-subj="metricsExperienceToolbarSearchInput"
               />
             ),

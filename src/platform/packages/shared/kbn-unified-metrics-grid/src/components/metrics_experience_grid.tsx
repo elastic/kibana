@@ -99,18 +99,7 @@ export const MetricsExperienceGrid = ({
   }, [valueFilters]);
 
   if (fields.length === 0) {
-    return (
-      <MetricsGridToolbarWrapper
-        indexPattern={indexPattern}
-        renderToggleActions={renderToggleActions}
-        chartToolbarCss={chartToolbarCss}
-        requestParams={requestParams}
-        setDebouncedSearchTerm={setDebouncedSearchTerm}
-        fields={fields}
-      >
-        <EmptyState isLoading={isLoading} />
-      </MetricsGridToolbarWrapper>
-    );
+    return <EmptyState isLoading={isLoading} />;
   }
 
   return (
