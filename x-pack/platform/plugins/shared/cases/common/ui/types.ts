@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type {
   CREATE_CASES_CAPABILITY,
@@ -343,11 +342,3 @@ export interface CasesCapabilities {
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
 }
-
-export type CaseViewAlertsTableProps = Pick<
-  AlertsTableProps,
-  'id' | 'ruleTypeIds' | 'consumers' | 'query' | 'showAlertStatusWithFlapping' | 'onLoaded'
-> & {
-  services?: AlertsTableProps['services'];
-  caseData: CaseUI;
-};

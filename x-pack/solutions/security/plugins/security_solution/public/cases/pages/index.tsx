@@ -7,12 +7,10 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import type {
-  CaseViewAlertsTableProps,
-  CaseViewRefreshPropInterface,
-} from '@kbn/cases-plugin/common';
+import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { IOCPanelKey } from '../../flyout/ai_for_soc/constants/panel_keys';
 import { DetectionEngineAlertsTable } from '../../detections/components/alerts_table';

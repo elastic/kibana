@@ -35,7 +35,6 @@ import { useKibana } from '../../utils/kibana_react';
 export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
-  caseData,
   tableId,
   refresh,
   openAlertInFlyout,
@@ -93,25 +92,14 @@ export function AlertActions({
     [refresh, telemetryClient, tableId]
   );
 
-  const onRemoveAlertFromCase = useCallback(() => {
-    refresh?.();
-  }, [refresh]);
-
-  const {
-    isPopoverOpen,
-    setIsPopoverOpen,
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
-    handleRemoveAlertsFromCaseClick,
-  } = useCaseActions({
-    onAddToCase,
-    onRemoveAlertFromCase,
-    alerts: [alert],
-    services: {
-      cases,
-    },
-    caseId: caseData?.id,
-  });
+  const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
+    useCaseActions({
+      onAddToCase,
+      alerts: [alert],
+      services: {
+        cases,
+      },
+    });
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -120,23 +108,6 @@ export function AlertActions({
   const toggleActionsPopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
-
-  const removeFromCaseAction = [
-    ...(caseData?.id
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="remove-from-case-action"
-            key="removeFromCase"
-            onClick={handleRemoveAlertsFromCaseClick}
-            size="s"
-          >
-            {i18n.translate('xpack.observability.alerts.actions.removeFromCase', {
-              defaultMessage: 'Remove from case',
-            })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-  ];
 
   const actionsMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
@@ -161,7 +132,6 @@ export function AlertActions({
               defaultMessage: 'Add to new case',
             })}
           </EuiContextMenuItem>,
-          ...removeFromCaseAction,
         ]
       : []),
     useMemo(
@@ -184,13 +154,11 @@ export function AlertActions({
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
           services={services}
-          caseData={caseData}
           {...rest}
         />
       ),
       [
         alert,
-        caseData,
         closeActionsPopover,
         observabilityRuleTypeRegistry,
         openAlertInFlyout,
