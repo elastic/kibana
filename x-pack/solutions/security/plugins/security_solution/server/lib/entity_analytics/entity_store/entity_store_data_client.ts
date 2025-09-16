@@ -124,10 +124,10 @@ import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from './saved_object';
 import {
-  createEntityUpdatesIndex,
-  deleteEntityUpdatesIndex,
-  getEntityUpdatesIndexStatus,
-} from './elasticsearch_assets/updates_entity_index';
+  deleteEntityUpdatesDataStreams,
+  getEntityUpdatesDataStreamStatus,
+  initEntityUpdatesDataStream,
+} from './elasticsearch_assets/updates_entity_data_stream';
 import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
 import {
   createEntityUpdatesIndexComponentTemplate,
@@ -270,7 +270,7 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
-          getEntityUpdatesIndexStatus(type, this.esClient, namespace),
+          getEntityUpdatesDataStreamStatus(type, this.esClient, namespace),
           ...(await getEntityILMPolicyStatuses({
             esClient: this.esClient,
             isServerless: this.isServerless,
@@ -524,8 +524,8 @@ export class EntityStoreDataClient {
       // CRUD Assets
       await createEntityUpdatesIndexComponentTemplate(description, this.esClient);
       this.log(`debug`, entityType, `Created entity updates index component template`);
-      await createEntityUpdatesIndex(entityType, this.esClient, namespace, logger);
-      this.log(`debug`, entityType, `Created entity updates index`);
+      await initEntityUpdatesDataStream(entityType, this.esClient, namespace);
+      this.log(`debug`, entityType, `Initialized entity updates data stream`);
 
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
@@ -785,7 +785,7 @@ export class EntityStoreDataClient {
       this.log('debug', entityType, `Deleted entity store snapshot task`);
 
       // CRUD Assets
-      await deleteEntityUpdatesIndex(entityType, this.esClient, namespace);
+      await deleteEntityUpdatesDataStreams(entityType, this.esClient, namespace);
       this.log('debug', entityType, `Delete entity updates index`);
       await deleteEntityUpdatesIndexComponentTemplate(description, this.esClient);
       this.log('debug', entityType, `Delete entity updates index`);

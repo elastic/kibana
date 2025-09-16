@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ENTITY_UPDATES,
   ENTITY_SCHEMA_VERSION_V1,
@@ -16,31 +16,25 @@ import type {
   EngineComponentStatus,
 } from '../../../../../common/api/entity_analytics/entity_store';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/entity_store';
-import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
-export const createEntityUpdatesIndex = async (
-  entityType: EntityType,
-  esClient: ElasticsearchClient,
-  namespace: string,
-  logger: Logger
-) => {
-  await createOrUpdateIndex({
-    esClient,
-    logger,
-    options: {
-      index: getEntityUpdatesIndexName(entityType, namespace),
-    },
-  });
-};
-
-export const deleteEntityUpdatesIndex = async (
+export const initEntityUpdatesDataStream = async (
   entityType: EntityType,
   esClient: ElasticsearchClient,
   namespace: string
 ) => {
-  await esClient.indices.delete(
+  await esClient.indices.createDataStream({
+    name: getEntityUpdatesDataStreamName(entityType, namespace),
+  });
+};
+
+export const deleteEntityUpdatesDataStreams = async (
+  entityType: EntityType,
+  esClient: ElasticsearchClient,
+  namespace: string
+) => {
+  await esClient.indices.deleteDataStream(
     {
-      index: getEntityUpdatesIndexName(entityType, namespace),
+      name: getEntityUpdatesDataStreamName(entityType, namespace),
     },
     {
       ignore: [404],
@@ -48,24 +42,27 @@ export const deleteEntityUpdatesIndex = async (
   );
 };
 
-export const getEntityUpdatesIndexStatus = async (
+export const getEntityUpdatesDataStreamStatus = async (
   entityType: EntityType,
   esClient: ElasticsearchClient,
   namespace: string
 ): Promise<EngineComponentStatus> => {
-  const index = getEntityUpdatesIndexName(entityType, namespace);
-  const exists = await esClient.indices.exists(
+  const index = getEntityUpdatesDataStreamName(entityType, namespace);
+  const resp = await esClient.indices.getDataStream(
     {
-      index,
+      name: index,
     },
     {
       ignore: [404],
     }
   );
-  return { id: index, installed: exists, resource: EngineComponentResourceEnum.index };
+
+  const exists = resp.data_streams?.length > 0;
+
+  return { id: index, installed: exists, resource: EngineComponentResourceEnum.data_stream };
 };
 
-export const getEntityUpdatesIndexName = (type: EntityType, namespace: string): string => {
+export const getEntityUpdatesDataStreamName = (type: EntityType, namespace: string): string => {
   return entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
     dataset: ENTITY_UPDATES,

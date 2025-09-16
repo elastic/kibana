@@ -19,7 +19,7 @@ import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
 import { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
-import { getEntityUpdatesIndexName } from '../elasticsearch_assets/updates_entity_index';
+import { getEntityUpdatesDataStreamName } from '../elasticsearch_assets/updates_entity_data_stream';
 
 export const buildIndexPatterns = async (
   space: string,
@@ -123,7 +123,8 @@ export const getEntityUpdatesIndexPatterns = (
   const types = onlyForType ? [onlyForType] : Object.values(EntityTypeOpenAPI.enum);
   const patterns = [];
   for (let i = 0; i < types.length; i++) {
-    patterns.push(getEntityUpdatesIndexName(types[i], space));
+    const index = getEntityUpdatesDataStreamName(types[i], space);
+    patterns.push(`${index}*`);
   }
   return patterns;
 };
