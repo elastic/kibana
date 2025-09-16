@@ -19,7 +19,6 @@ import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
-// Add a result class to standardize check results
 class CheckResult {
   constructor(checkName) {
     this.checkName = checkName;
@@ -35,31 +34,27 @@ class CheckResult {
   toString() {
     if (this.succeeded) {
       return `✓ ${this.checkName}: Passed`;
+    } else {
+      return [`✗ ${this.checkName}: Failed`, ...this.errors.map((err) => `  - ${err}`)].join('\n');
     }
-
-    return [`✗ ${this.checkName}: Failed`, ...this.errors.map((err) => `  - ${err}`)].join('\n');
   }
 }
 
-// New code: Define check interfaces
 class PrecommitCheck {
   constructor(name) {
     this.name = name;
   }
 
-  // eslint-disable-next-line no-unused-vars
-  async execute(_log, _files, _options) {
+  async execute() {
     throw new Error('execute() must be implemented by check class');
   }
 
-  // Add wrapper method to standardize error handling
-  async run(log, files, options) {
+  async runSafely(log, files, options) {
     const result = new CheckResult(this.name);
     try {
       await this.execute(log, files, options);
     } catch (error) {
       if (error.errors) {
-        // Handle case where check throws multiple errors
         error.errors.forEach((err) => result.addError(err.message || err.toString()));
       } else {
         result.addError(error.message || error.toString());
@@ -69,7 +64,6 @@ class PrecommitCheck {
   }
 }
 
-// Implement file casing check
 class FileCasingCheck extends PrecommitCheck {
   constructor() {
     super('File Casing');
@@ -80,7 +74,6 @@ class FileCasingCheck extends PrecommitCheck {
   }
 }
 
-// Implement linter check base class
 class LinterCheck extends PrecommitCheck {
   constructor(name, linter) {
     super(name);
@@ -126,10 +119,8 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file, 'utf8');
-        // Try parsing the YAML file
         yamlLoad(content, {
           filename: file,
-          // Strict mode will error on duplicated keys and other potential issues
           strict: true,
         });
       } catch (error) {
@@ -143,7 +134,6 @@ class YamlLintCheck extends PrecommitCheck {
   }
 }
 
-// Define available checks
 const PRECOMMIT_CHECKS = [
   new FileCasingCheck(),
   new LinterCheck('ESLint', Eslint),
@@ -171,12 +161,11 @@ run(
       return;
     }
 
-    // Run all checks concurrently and collect results
     log.info('Running pre-commit checks...');
     const results = await Promise.all(
       PRECOMMIT_CHECKS.map(async (check) => {
         const startTime = Date.now();
-        const result = await check.run(log, files, {
+        const result = await check.runSafely(log, files, {
           fix: flags.fix,
           stage: flags.stage,
         });
@@ -186,7 +175,6 @@ run(
       })
     );
 
-    // Process results
     const failedChecks = results.filter((result) => !result.succeeded);
 
     if (failedChecks.length > 0) {
