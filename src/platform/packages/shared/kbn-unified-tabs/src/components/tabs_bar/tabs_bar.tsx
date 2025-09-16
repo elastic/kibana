@@ -110,7 +110,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     );
 
     const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
-      defaultMessage: 'New tab',
+      defaultMessage: 'New session',
     });
 
     const { tabsSizeConfig, scrollRightButton, scrollLeftButton, tabsContainerCss } =
