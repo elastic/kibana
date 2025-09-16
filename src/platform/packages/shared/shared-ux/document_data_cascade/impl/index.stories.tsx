@@ -115,9 +115,9 @@ export const CascadeGridImplementation: StoryObj<
                   }, 3000);
                 });
               }}
-              rowHeaderTitleSlot={({ row }) => (
+              rowHeaderTitleSlot={({ row, selectedCascadeGroups }) => (
                 <EuiText>
-                  <h2>{row.original[groupByFields[row.depth]]}</h2>
+                  <h2>{row.original[selectedCascadeGroups[row.depth]]}</h2>
                 </EuiText>
               )}
               rowHeaderMetaSlots={({ row }) => {

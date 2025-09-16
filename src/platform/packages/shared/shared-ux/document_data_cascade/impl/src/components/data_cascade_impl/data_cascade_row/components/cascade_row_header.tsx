@@ -169,7 +169,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         <EuiFlexItem css={{ minWidth: 0, maxWidth: '100%' }}>
           <EuiFlexGroup justifyContent="spaceBetween" direction="row">
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
-              <RowTitleSlot row={rowInstance} />
+              <RowTitleSlot row={rowInstance} selectedCascadeGroups={currentGroupByColumns} />
             </EuiFlexItem>
             <EuiFlexItem
               grow={6}
