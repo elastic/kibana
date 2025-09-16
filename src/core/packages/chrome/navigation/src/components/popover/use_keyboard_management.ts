@@ -14,7 +14,12 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { trapFocus } from '../../utils/trap_focus';
 
 /**
- * Hook for keyboard event handling
+ * Custom hook for keyboard event handling in the popover.
+ *
+ * @param isOpen - Whether the popover is open.
+ * @param onClose - Callback to close the popover.
+ * @param triggerRef - Reference to the trigger element.
+ * @param popoverRef - Reference to the popover element.
  */
 export const useKeyboardManagement = (
   isOpen: boolean,
@@ -22,10 +27,13 @@ export const useKeyboardManagement = (
   triggerRef: RefObject<HTMLElement>,
   popoverRef: RefObject<HTMLElement>
 ) => {
-  const elements = getFocusableElements(popoverRef);
-
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      const container = popoverRef?.current;
+      if (!container) return;
+
+      const elements = getFocusableElements(container);
+
       if (!isOpen) return;
 
       switch (e.key) {
@@ -52,12 +60,13 @@ export const useKeyboardManagement = (
           trapFocus(popoverRef)(e);
       }
     },
-    [isOpen, onClose, triggerRef, popoverRef, elements]
+    [isOpen, onClose, triggerRef, popoverRef]
   );
 
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown, true);
+
       return () => document.removeEventListener('keydown', handleKeyDown, true);
     }
   }, [isOpen, handleKeyDown]);

@@ -9,15 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 export const labels = {
   conversations: {
-    title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Conversations' }),
+    title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
   },
   tools: {
     // Landing page
     title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
-    description: i18n.translate('xpack.onechat.tools.toolsDescription', {
-      defaultMessage:
-        'Agents use tools — modular, reusable actions — to search, retrieve, and take meaningful steps on your behalf. Start with built-in capabilities from Elastic, or create your own to fit your workflow.',
-    }),
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
@@ -34,6 +30,12 @@ export const labels = {
       defaultMessage: 'Edit index search tool',
     }),
 
+    editToolContextMenuButtonLabel: i18n.translate(
+      'xpack.onechat.tools.editToolContextMenuButtonLabel',
+      {
+        defaultMessage: 'Edit tool context menu',
+      }
+    ),
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
@@ -227,5 +229,10 @@ export const labels = {
         defaultMessage: 'Optional',
       }),
     },
+  },
+  management: {
+    agentBuilder: i18n.translate('xpack.onechat.management.agentBuilder.title', {
+      defaultMessage: 'Agent Builder',
+    }),
   },
 };

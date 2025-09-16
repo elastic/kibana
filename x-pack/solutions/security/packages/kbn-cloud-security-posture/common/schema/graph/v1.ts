@@ -58,6 +58,11 @@ export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
   type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
   index: schema.maybe(schema.string()),
+  event: schema.maybe(
+    schema.object({
+      id: schema.string(),
+    })
+  ),
   alert: schema.maybe(
     schema.object({
       ruleName: schema.maybe(schema.string()),
