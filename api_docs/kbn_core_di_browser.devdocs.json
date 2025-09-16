@@ -38,7 +38,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/core/packages/di/common-internal/src/utils.ts",
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -80,7 +80,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/core/packages/di/common-internal/src/utils.ts",
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -122,7 +122,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/core/packages/di/common-internal/src/utils.ts",
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false
           }

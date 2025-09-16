@@ -10,15 +10,12 @@
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 
 export interface ApmErrorsContextService {
-  getErrorsIndexPattern(): string;
+  getErrorsIndexPattern(): string | undefined;
 }
 
-export interface ApmErrorsContextServiceDeps {
+interface ApmErrorsContextServiceDeps {
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
-
-// should we have defaults here?
-export const DEFAULT_ALLOWED_APM_ERRORS_BASE_PATTERNS = [];
 
 export const createApmErrorsContextService = async ({
   apmSourcesAccess,
@@ -41,10 +38,8 @@ export const createApmErrorsContextService = async ({
   }
 };
 
-export const getApmErrorsContextService = (error: string) => ({
+export const getApmErrorsContextService = (error?: string) => ({
   getErrorsIndexPattern: () => error,
 });
 
-const defaultApmErrorsContextService = getApmErrorsContextService(
-  DEFAULT_ALLOWED_APM_ERRORS_BASE_PATTERNS.join()
-);
+const defaultApmErrorsContextService = getApmErrorsContextService(undefined);

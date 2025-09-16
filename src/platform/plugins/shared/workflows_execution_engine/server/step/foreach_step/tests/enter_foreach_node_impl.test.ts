@@ -39,7 +39,6 @@ describe('EnterForeachNodeImpl', () => {
       id: 'testStep',
       type: 'enter-foreach',
       exitNodeId: 'exitNode',
-      itemNodeIds: ['foreachItemNode'],
       configuration: {
         foreach: JSON.stringify(['item1', 'item2', 'item3']),
       } as ForEachStep,
@@ -70,10 +69,28 @@ describe('EnterForeachNodeImpl', () => {
       getStepState.mockReturnValue(undefined);
     });
 
-    it('should enter scope', async () => {
+    it('should enter the whole foreach scope', async () => {
       await underTest.run();
 
-      expect(enterScope).toHaveBeenCalledTimes(1);
+      expect(enterScope).toHaveBeenCalledWith();
+    });
+
+    it('should enter the iteration scope', async () => {
+      await underTest.run();
+
+      expect(enterScope).toHaveBeenCalledWith('0');
+    });
+
+    it('should enter scopes in correct order', async () => {
+      await underTest.run();
+      expect(enterScope).toHaveBeenNthCalledWith(1);
+      expect(enterScope).toHaveBeenNthCalledWith(2, '0');
+    });
+
+    it('should enter scope twice', async () => {
+      await underTest.run();
+
+      expect(enterScope).toHaveBeenCalledTimes(2);
     });
 
     it('should start step', async () => {
@@ -137,7 +154,8 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
 
         expect(logDebug).toHaveBeenCalledWith(
-          `Foreach step \"testStep\" will iterate over 3 items.`
+          `Foreach step "testStep" will iterate over 3 items.`,
+          { workflow: { step_id: 'testStep' } }
         );
       });
     });
@@ -168,7 +186,8 @@ describe('EnterForeachNodeImpl', () => {
       it('should log debug message', async () => {
         await underTest.run();
         expect(logDebug).toHaveBeenCalledWith(
-          `Foreach step "testStep" has no items to iterate over. Skipping execution.`
+          `Foreach step "testStep" has no items to iterate over. Skipping execution.`,
+          { workflow: { step_id: 'testStep' } }
         );
       });
     });
@@ -205,6 +224,18 @@ describe('EnterForeachNodeImpl', () => {
         index: 0,
         total: 3,
       });
+    });
+
+    it('should enter iteration scope', async () => {
+      await underTest.run();
+
+      expect(enterScope).toHaveBeenCalledWith('1');
+    });
+
+    it('should enter scope only once', async () => {
+      await underTest.run();
+
+      expect(enterScope).toHaveBeenCalledTimes(1);
     });
 
     it('should not start step', async () => {

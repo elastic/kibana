@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { badRequest } from '@hapi/boom';
 import { _IGNORED } from '../../../../common/es_fields';
 import type { DataStreamType } from '../../../../common/types';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -14,17 +15,21 @@ import { extractNonAggregatableDatasets } from './extract_non_aggregatable_datas
 
 export async function getNonAggregatableDataStreams({
   esClient,
-  types,
+  types = [],
   start,
   end,
   dataStream,
 }: {
   esClient: ElasticsearchClient;
-  types: DataStreamType[];
+  types?: DataStreamType[];
   start: number;
   end: number;
   dataStream?: string;
 }) {
+  if (types.length === 0 && !dataStream) {
+    throw badRequest(`Either types or dataStream must be provided.`);
+  }
+
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   const dataStreamTypes = types.map((type) => `${type}-*-*`).join(',');

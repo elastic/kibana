@@ -48,14 +48,15 @@ describe('useConversationsTable', () => {
       totalItemCount: 0,
     });
 
-    expect(columns).toHaveLength(6);
+    expect(columns).toHaveLength(7);
 
     // column 0 is the checkbox column
     expect(columns[1].name).toBe('Title');
     expect(columns[2].name).toBe('System prompt');
     expect(columns[3].name).toBe('Connector');
-    expect(columns[4].name).toBe('Date updated');
-    expect(columns[5].name).toBe('Actions');
+    expect(columns[4].name).toBe('Sharing');
+    expect(columns[5].name).toBe('Date updated');
+    expect(columns[6].name).toBe('Actions');
   });
 
   it('should return a list of conversations', () => {

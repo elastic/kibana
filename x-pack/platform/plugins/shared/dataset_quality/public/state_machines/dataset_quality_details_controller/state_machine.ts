@@ -21,9 +21,7 @@ import type {
   NonAggregatableDatasets,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { indexNameToDataStreamParts } from '../../../common/utils';
 import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
 import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 import type {
@@ -280,6 +278,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target:
                         '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
                       actions: ['toggleCurrentQualityIssues'],
+                    },
+                    UPDATE_SELECTED_ISSUE_TYPES: {
+                      target: 'doneFetchingQualityIssues',
+                      actions: ['updateSelectedIssueTypes'],
+                    },
+                    UPDATE_SELECTED_FIELDS: {
+                      target: 'doneFetchingQualityIssues',
+                      actions: ['updateSelectedFields'],
                     },
                   },
                 },
@@ -689,6 +695,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             showCurrentQualityIssues: !context.showCurrentQualityIssues,
           };
         }),
+        updateSelectedIssueTypes: assign((_context, event) => {
+          return {
+            selectedIssueTypes: 'selectedIssueTypes' in event ? event.selectedIssueTypes : [],
+          };
+        }),
+        updateSelectedFields: assign((_context, event) => {
+          return {
+            selectedFields: 'selectedFields' in event ? event.selectedFields : [],
+          };
+        }),
         raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
         storeDataStreamSettings: assign((_context, event: DoneInvokeEvent<DataStreamSettings>) => {
           return 'data' in event
@@ -816,7 +832,6 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   initialContext: DatasetQualityDetailsControllerContext;
   plugins: DatasetQualityStartDeps;
   toasts: IToasts;
-  dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
 }
 
@@ -824,7 +839,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   initialContext,
   plugins,
   toasts,
-  dataStreamStatsClient,
   dataStreamDetailsClient,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
@@ -852,11 +866,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
-        const { type } = indexNameToDataStreamParts(context.dataStream);
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamStatsClient.getNonAggregatableDatasets({
-          types: [type],
+        return dataStreamDetailsClient.getNonAggregatableDatasets({
           start,
           end,
           dataStream: context.dataStream,
@@ -996,7 +1008,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         if (
           'dataStreamDetails' in context &&
           context.dataStreamDetails &&
-          context.dataStreamDetails.hasFailureStore
+          context.dataStreamDetails.hasFailureStore !== undefined
         ) {
           return dataStreamDetailsClient.updateFailureStore({
             dataStream: context.dataStream,

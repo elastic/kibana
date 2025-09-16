@@ -11,7 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  cloud: 8836
+  cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -40,13 +40,13 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 10290
   discoverShared: 2322
-  elasticAssistant: 294308
+  elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 18810
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 10370
+  esql: 12323
   esqlDataGrid: 10209
   esUiShared: 100338
   eventAnnotation: 22361
@@ -81,6 +81,7 @@ pageLoadAssetSize:
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 9842
+  inspectComponent: 4900
   inspector: 18000
   interactiveSetup: 42153
   intercepts: 19011
@@ -107,8 +108,8 @@ pageLoadAssetSize:
   navigation: 13598
   newsfeed: 12371
   noDataPage: 1749
-  observability: 160191
-  observabilityAIAssistant: 46941
+  observability: 176467
+  observabilityAIAssistant: 52565
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
@@ -122,7 +123,7 @@ pageLoadAssetSize:
   productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
-  reindexService: 2781
+  reindexService: 3601
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
@@ -133,7 +134,7 @@ pageLoadAssetSize:
   savedObjectsManagement: 22426
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
-  savedSearch: 12662
+  savedSearch: 11000
   screenshotMode: 2351
   screenshotting: 8417
   searchAssistant: 6150
@@ -153,14 +154,14 @@ pageLoadAssetSize:
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
-  serverlessSearch: 28909
+  serverlessSearch: 35000
   sessionView: 47938
   share: 58677
   slo: 36645
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67227
+  stackConnectors: 67939
   streams: 8494
   streamsApp: 12431
   streamsAppWrapper: 5787
@@ -200,4 +201,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 5768
+  workflowsManagement: 6200

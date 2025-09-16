@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { useEuiTheme, EuiText } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { FieldBadge } from './field_badge';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { GrokHighlighter } from './grok_highlighter';

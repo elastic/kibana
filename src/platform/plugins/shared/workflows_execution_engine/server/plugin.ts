@@ -15,13 +15,14 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionStatus } from '@kbn/workflows';
+import { convertToWorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
-import { v4 as generateUuid } from 'uuid';
-import { Client } from '@elastic/elasticsearch';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { v4 as generateUuid } from 'uuid';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -33,43 +34,35 @@ import type {
 
 import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { ConnectorExecutor } from './connector_executor';
+import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
+import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
+import { workflowExecutionLoop } from './workflow_execution_loop';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
-import { workflowExecutionLoop } from './workflow_execution_loop';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private esClient: Client = new Client({
-    node: 'http://localhost:9200', // or your ES URL
-    auth: {
-      username: 'elastic',
-      password: 'changeme',
-    },
-  });
-  private readonly workflowExecutionRepository: WorkflowExecutionRepository;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(this.esClient);
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
     this.logger.debug('workflows-execution-engine: Setup');
-    const esClient = this.esClient;
+
     const logger = this.logger;
     const config = this.config;
 
@@ -79,30 +72,40 @@ export class WorkflowsExecutionEnginePlugin
         description: 'Executes a workflow immediately',
         timeout: '5m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }) => {
-          const workflowExecutionRepository = this.workflowExecutionRepository;
-
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
           return {
             async run() {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
-              const [, pluginsStart] = await core.getStartServices();
+              const [coreStart, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
-              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-                workflowRunId,
-                spaceId,
-                actions,
-                taskManager,
-                esClient,
-                logger,
-                config,
-                workflowExecutionRepository
-              );
-              await workflowRuntime.start();
+              // Get ES client from core services (guaranteed to be available at task execution time)
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+              // Task Manager automatically provides fakeRequest if task was scheduled with user context
+              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+                await createContainer(
+                  workflowRunId,
+                  spaceId,
+                  actions,
+                  taskManager,
+                  esClient,
+                  logger,
+                  config,
+                  workflowExecutionRepository,
+                  fakeRequest, // Provided by Task Manager's first-class API key support
+                  coreStart
+                );
+              await workflowRuntime.start();
+              await workflowExecutionLoop(
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory
+              );
             },
             async cancel() {
               // Cancel function for the task
@@ -117,29 +120,41 @@ export class WorkflowsExecutionEnginePlugin
         description: 'Resumes a paused workflow',
         timeout: '5m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }) => {
-          const workflowExecutionRepository = this.workflowExecutionRepository;
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
           return {
             async run() {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
-              const [, pluginsStart] = await core.getStartServices();
+              const [coreStart, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
 
-              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-                workflowRunId,
-                spaceId,
-                actions,
-                taskManager,
-                esClient,
-                logger,
-                config,
-                workflowExecutionRepository
-              );
+              // Get ES client from core services (guaranteed to be available at task execution time)
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+
+              // Task Manager automatically provides fakeRequest if task was scheduled with user context
+              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+                await createContainer(
+                  workflowRunId,
+                  spaceId,
+                  actions,
+                  taskManager,
+                  esClient,
+                  logger,
+                  config,
+                  workflowExecutionRepository,
+                  fakeRequest, // Provided by Task Manager's first-class API key support
+                  coreStart
+                );
               await workflowRuntime.resume();
 
-              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+              await workflowExecutionLoop(
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory
+              );
             },
             async cancel() {},
           };
@@ -155,16 +170,23 @@ export class WorkflowsExecutionEnginePlugin
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>
+      context: Record<string, any>,
+      request?: any // KibanaRequest for user-scoped execution
     ) => {
       const workflowCreatedAt = new Date();
+
+      // Get ES client and create repository for this execution
+      const esClient = core.elasticsearch.client.asInternalUser as Client;
+      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: generateUuid(),
         spaceId: context.spaceId,
         workflowId: workflow.id,
+        isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
+        yaml: workflow.yaml,
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
@@ -173,31 +195,119 @@ export class WorkflowsExecutionEnginePlugin
         lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
-      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
-      const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
-        taskType: 'workflow:run',
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        } as StartWorkflowExecutionParams,
-        state: {
-          lastRunAt: null,
-          lastRunStatus: null,
-          lastRunError: null,
-        },
-        scope: ['workflows'],
-        enabled: true,
-      };
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
-      await plugins.taskManager.schedule(taskInstance);
+      // AUTO-DETECT: Check if we're already running in a Task Manager context
+      const isRunningInTaskManager =
+        triggeredBy === 'scheduled' ||
+        context.source === 'task-manager' ||
+        request?.isFakeRequest === true;
+
+      if (isRunningInTaskManager) {
+        // We're already in a task - execute directly without scheduling another task
+        this.logger.info(
+          `Executing workflow directly (already in Task Manager context): ${workflow.id}`
+        );
+
+        const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+          await createContainer(
+            workflowExecution.id!,
+            workflowExecution.spaceId!,
+            plugins.actions,
+            plugins.taskManager,
+            esClient,
+            this.logger,
+            this.config,
+            workflowExecutionRepository,
+            request, // Pass the fakeRequest for user context
+            core
+          );
+
+        await workflowRuntime.start();
+        await workflowExecutionLoop(
+          workflowRuntime,
+          workflowExecutionState,
+          workflowLogger,
+          nodesFactory
+        );
+      } else {
+        // Normal manual execution - schedule a task
+        const taskInstance = {
+          id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+          taskType: 'workflow:run',
+          params: {
+            workflowRunId: workflowExecution.id,
+            spaceId: workflowExecution.spaceId,
+          } as StartWorkflowExecutionParams,
+          state: {
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          },
+          scope: ['workflows'],
+          enabled: true,
+        };
+
+        // Use Task Manager's first-class API key support by passing the request
+        // Task Manager will automatically create and manage the API key
+        if (request) {
+          // Debug: Log the user info from the original request
+          this.logger.info(
+            `Scheduling workflow task with user context for workflow ${workflow.id}`
+          );
+          await plugins.taskManager.schedule(taskInstance, { request });
+        } else {
+          this.logger.info(`Scheduling workflow task without user context`);
+          await plugins.taskManager.schedule(taskInstance);
+        }
+      }
       return {
         workflowExecutionId: workflowExecution.id!,
       };
     };
 
+    const cancelWorkflowExecution = async (workflowExecutionId: string, spaceId: string) => {
+      const esClient = core.elasticsearch.client.asInternalUser as Client;
+      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowExecutionId,
+        spaceId
+      );
+
+      if (!workflowExecution) {
+        throw new WorkflowExecutionNotFoundError(workflowExecutionId);
+      }
+
+      if (
+        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
+          workflowExecution.status
+        )
+      ) {
+        // Already in a terminal state or being canceled
+        return;
+      }
+
+      // Request cancellation
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowExecution.id,
+        cancelRequested: true,
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: 'system', // TODO: set user if available
+      });
+
+      if (
+        [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
+          workflowExecution.status
+        )
+      ) {
+        // TODO: handle WAITING states
+        // It should clean up resume tasks, etc
+      }
+    };
+
     return {
       executeWorkflow,
+      cancelWorkflowExecution,
     };
   }
 
@@ -212,7 +322,9 @@ async function createContainer(
   esClient: Client,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
-  workflowExecutionRepository: WorkflowExecutionRepository
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  fakeRequest?: any, // KibanaRequest from task manager
+  coreStart?: any // CoreStart for creating esClientAsUser
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -236,6 +348,7 @@ async function createContainer(
       workflowId: workflowExecution.workflowId,
       workflowName: workflowExecution.workflowDefinition.name,
       executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
     },
     {
       enableConsoleLogging: config.logging.console,
@@ -256,26 +369,41 @@ async function createContainer(
     workflowExecutionState,
   });
 
+  // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
+  let clientToUse = esClient; // fallback
+  if (fakeRequest && coreStart) {
+    clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  }
+
+  // fakeRequest is automatically created by Task Manager from taskInstance.apiKey
+  // Will be undefined if no API key was provided when scheduling the workflow task
+
   const contextManager = new WorkflowContextManager({
-    spaceId: workflowExecution.spaceId,
-    workflow: workflowExecution.workflowDefinition,
-    event: workflowExecution.context.event,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
+    esClient: clientToUse, // Either user-scoped or fallback client
+    fakeRequest, // Will be undefined if no API key provided
+    coreStart, // For accessing Kibana's internal services
   });
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
+
+  const urlValidator = new UrlValidator({
+    allowedHosts: config.http.allowedHosts,
+  });
 
   const nodesFactory = new StepFactory(
     contextManager,
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager
+    workflowTaskManager,
+    urlValidator
   );
 
   return {
     workflowRuntime,
+    workflowExecutionState,
     contextManager,
     connectorExecutor,
     workflowLogger,

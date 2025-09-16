@@ -9,6 +9,7 @@
 
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from './to_navigation_items';
+import { PanelStateManager } from './panel_state_manager';
 import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
@@ -19,19 +20,33 @@ import type {
 const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+// Mock panelStateManager for testing
+const mockPanelStateManager = new PanelStateManager();
+
+// Utility function to simplify toNavigationItems calls in tests
+const createNavigationItems = (
+  tree: NavigationTreeDefinitionUI = navigationTree,
+  activeNodes: ChromeProjectNavigationNode[][] = []
+) => {
+  return toNavigationItems(tree, [], activeNodes, mockPanelStateManager);
+};
+
 beforeEach(() => {
   consoleWarnSpy.mockClear();
+  mockPanelStateManager.clear();
 });
 
 describe('toNavigationItems', () => {
   const {
     logoItem,
     navItems: { footerItems, primaryItems },
-  } = toNavigationItems(navigationTree, [], []);
+  } = createNavigationItems();
 
   it('should return missing logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": undefined,
         "href": "/missing-href-😭",
         "iconType": "broom",
         "id": "kibana",
@@ -88,7 +103,7 @@ describe('toNavigationItems', () => {
 
 describe('isActive', () => {
   it('should return null if no active paths', () => {
-    const { activeItemId } = toNavigationItems(navigationTree, [], []);
+    const { activeItemId } = createNavigationItems();
     expect(activeItemId).toBeUndefined();
   });
 
@@ -96,7 +111,7 @@ describe('isActive', () => {
     const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
     const primaryNode = logoNode.children![0]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(navigationTree, [], [[logoNode, primaryNode]]);
+    const { activeItemId } = createNavigationItems(navigationTree, [[logoNode, primaryNode]]);
     expect(activeItemId).toBe(primaryNode.id);
   });
 
@@ -105,14 +120,10 @@ describe('isActive', () => {
     const primaryNode1 = logoNode.children![0]! as ChromeProjectNavigationNode;
     const primaryNode2 = logoNode.children![1]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(
-      navigationTree,
-      [],
-      [
-        [logoNode, primaryNode1],
-        [logoNode, primaryNode2],
-      ]
-    );
+    const { activeItemId } = createNavigationItems(navigationTree, [
+      [logoNode, primaryNode1],
+      [logoNode, primaryNode2],
+    ]);
     expect(activeItemId).toBe(primaryNode1.id);
   });
 
@@ -121,11 +132,9 @@ describe('isActive', () => {
     const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
     const secondaryNode = primaryNode.children![1]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(
-      navigationTree,
-      [],
-      [[logoNode, primaryNode, secondaryNode]]
-    );
+    const { activeItemId } = createNavigationItems(navigationTree, [
+      [logoNode, primaryNode, secondaryNode],
+    ]);
     expect(activeItemId).toBe(secondaryNode.id);
   });
 
@@ -135,11 +144,9 @@ describe('isActive', () => {
     const secondaryNode = primaryNode.children![0]! as ChromeProjectNavigationNode;
     const beyondNavNode = secondaryNode.children![0]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(
-      navigationTree,
-      [],
-      [[logoNode, primaryNode, secondaryNode, beyondNavNode]]
-    );
+    const { activeItemId } = createNavigationItems(navigationTree, [
+      [logoNode, primaryNode, secondaryNode, beyondNavNode],
+    ]);
     expect(activeItemId).toBe(secondaryNode.id);
   });
 
@@ -149,14 +156,10 @@ describe('isActive', () => {
     const secondaryNode = primaryNode.children![0]! as ChromeProjectNavigationNode;
     const beyondNavNode = secondaryNode.children![0]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(
-      navigationTree,
-      [],
-      [
-        [logoNode, primaryNode, secondaryNode, beyondNavNode],
-        [logoNode, primaryNode],
-      ]
-    );
+    const { activeItemId } = createNavigationItems(navigationTree, [
+      [logoNode, primaryNode, secondaryNode, beyondNavNode],
+      [logoNode, primaryNode],
+    ]);
     expect(activeItemId).toBe(secondaryNode.id);
   });
 
@@ -169,19 +172,15 @@ describe('isActive', () => {
     const managementSecondaryItem =
       managementSecondarySection.children![0]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(
-      navigationTree,
-      [],
+    const { activeItemId } = createNavigationItems(navigationTree, [
       [
-        [
-          footerRootNode,
-          managementAccordion,
-          managementPrimary,
-          managementSecondarySection,
-          managementSecondaryItem,
-        ],
-      ]
-    );
+        footerRootNode,
+        managementAccordion,
+        managementPrimary,
+        managementSecondarySection,
+        managementSecondaryItem,
+      ],
+    ]);
 
     expect(activeItemId).toBe(managementSecondaryItem.id);
   });
@@ -207,9 +206,10 @@ describe('logo node', () => {
   ];
 
   test('should return logo node with correct properties', () => {
-    const { logoItem } = toNavigationItems(treeWithLogo, [], []);
+    const { logoItem } = createNavigationItems(treeWithLogo);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
         "href": "/tzo/s/sec/app/security/get_started",
         "iconType": "launch",
         "id": "securityHome",
@@ -219,7 +219,37 @@ describe('logo node', () => {
   });
 
   test('Logo node can be active', () => {
-    const { activeItemId } = toNavigationItems(treeWithLogo, [], [[homeNode]]);
+    const { activeItemId } = createNavigationItems(treeWithLogo, [[homeNode]]);
     expect(activeItemId).toBe(homeNode.id);
+  });
+});
+
+describe('panel opener href', () => {
+  it('should return panel opener href as first child href', () => {
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems();
+
+    // Find a panel opener from the existing mock tree - 'securityGroup:rules' is a panel opener
+    const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
+    expect(rulesPanel).toBeDefined();
+    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/rules');
+  });
+
+  it('should return panel opener href as last active child href', () => {
+    // Set up a last active item for the securityGroup:rules panel
+    mockPanelStateManager.setPanelLastActive(
+      'securityGroup:rules',
+      'cloud_security_posture-benchmarks'
+    );
+
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems();
+
+    // Find the panel opener and verify it uses the last active item's href
+    const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
+    expect(rulesPanel).toBeDefined();
+    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
   });
 });

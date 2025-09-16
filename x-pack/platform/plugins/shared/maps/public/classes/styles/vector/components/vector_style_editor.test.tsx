@@ -12,7 +12,7 @@ import { VectorStyleEditor } from './vector_style_editor';
 import { getDefaultStaticProperties } from '../vector_style_defaults';
 import type { IVectorLayer } from '../../../layers/vector_layer';
 import type { IVectorSource } from '../../../sources/vector_source';
-import type { CustomIcon } from '../../../../../common/descriptor_types';
+import type { CustomIcon, VectorStyleDescriptor } from '../../../../../common/descriptor_types';
 import type { VECTOR_STYLES } from '../../../../../common/constants';
 import { FIELD_ORIGIN, LAYER_STYLE_TYPE, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
 import type { IField } from '../../../fields/field';
@@ -59,7 +59,7 @@ const vectorStyleDescriptor = {
   type: LAYER_STYLE_TYPE.VECTOR,
   properties: getDefaultStaticProperties(),
   isTimeAware: true,
-};
+} as VectorStyleDescriptor;
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
   {} as unknown as IVectorSource,

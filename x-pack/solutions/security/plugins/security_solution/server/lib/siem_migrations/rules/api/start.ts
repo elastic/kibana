@@ -14,12 +14,12 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { authz } from '../../common/utils/authz';
-import { getRetryFilter } from './util/retry';
-import { withLicense } from '../../common/utils/with_license';
-import { createTracersCallbacks } from './util/tracing';
-import { withExistingMigration } from './util/with_existing_migration_id';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { getRetryFilter } from '../../common/api/util/retry';
+import { withLicense } from '../../common/api/util/with_license';
+import { createTracersCallbacks } from '../../common/api/util/tracing';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,

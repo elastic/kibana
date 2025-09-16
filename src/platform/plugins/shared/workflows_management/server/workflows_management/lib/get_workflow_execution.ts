@@ -13,6 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import { stringifyWorkflowDefinition } from '../../../common/lib/yaml_utils';
 import { searchStepExecutions } from './search_step_executions';
 
 interface GetWorkflowExecutionParams {
@@ -39,28 +40,19 @@ export const getWorkflowExecution = async ({
         bool: {
           must: [
             {
-              match: {
-                _id: workflowExecutionId,
+              ids: {
+                values: [workflowExecutionId],
               },
             },
-            {
-              bool: {
-                should: [
-                  { term: { spaceId } },
-                  // Backward compatibility for objects without spaceId
-                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
+            { term: { spaceId } },
           ],
         },
       },
     });
 
-    const workflowExecution = response.hits.hits.map((hit) => hit._source)[0] ?? null;
+    const hit = response.hits.hits[0] ?? null;
 
-    if (!workflowExecution) {
+    if (!hit || !hit._source) {
       return null;
     }
 
@@ -72,7 +64,7 @@ export const getWorkflowExecution = async ({
       spaceId,
     });
 
-    return transformToWorkflowExecutionDetailDto(workflowExecution, stepExecutions);
+    return transformToWorkflowExecutionDetailDto(hit._id!, hit._source, stepExecutions, logger);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
     throw error;
@@ -80,12 +72,26 @@ export const getWorkflowExecution = async ({
 };
 
 function transformToWorkflowExecutionDetailDto(
+  id: string,
   workflowExecution: EsWorkflowExecution,
-  stepExecutions: EsWorkflowStepExecution[]
+  stepExecutions: EsWorkflowStepExecution[],
+  logger: Logger
 ): WorkflowExecutionDto {
+  let yaml = workflowExecution.yaml;
+  // backward compatibility for workflow executions created before yaml was added to the workflow execution object
+  try {
+    if (!yaml) {
+      yaml = stringifyWorkflowDefinition(workflowExecution.workflowDefinition);
+    }
+  } catch (error) {
+    logger.error(`Failed to stringify workflow definition: ${error}`);
+    yaml = '';
+  }
   return {
     ...workflowExecution,
+    id,
     stepExecutions,
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
+    yaml,
   };
 }

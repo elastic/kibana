@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -47,6 +48,8 @@ import type {
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
   CasesSimilarResponse,
+  CaseSummaryResponse,
+  InferenceConnectorsResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -71,6 +74,9 @@ export interface CasesUiConfigType {
   };
   stack: {
     enabled: boolean;
+  };
+  unsafe?: {
+    enableCaseSummary: boolean;
   };
 }
 
@@ -125,9 +131,9 @@ export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export type CasesConfigurationUI = Pick<
@@ -183,6 +189,9 @@ export interface FilterOptions extends SystemFilterOptions {
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
+
+export type CaseSummary = CaseSummaryResponse;
+export type InferenceConnectors = InferenceConnectorsResponse;
 
 /**
  * If you add a new value here and you want to support it on the URL

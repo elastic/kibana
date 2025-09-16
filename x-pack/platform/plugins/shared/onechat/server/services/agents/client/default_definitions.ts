@@ -12,8 +12,8 @@ export const createDefaultAgentDefinition = (): AgentDefinition => {
   return {
     id: oneChatDefaultAgentId,
     type: AgentType.chat,
-    name: 'Onechat default agent',
-    description: 'The default onechat agent',
+    name: 'Elastic AI Agent',
+    description: 'Elastic AI Agent',
     configuration: {
       tools: [{ tool_ids: [...defaultAgentToolIds] }],
     },

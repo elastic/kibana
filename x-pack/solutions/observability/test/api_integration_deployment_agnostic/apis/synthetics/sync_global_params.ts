@@ -37,6 +37,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe.skip('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');

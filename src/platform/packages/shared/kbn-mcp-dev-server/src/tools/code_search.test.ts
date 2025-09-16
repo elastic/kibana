@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { codeSearchTool, client } from './code_search';
+import { codeSearchTool } from './code_search';
+import { client } from '../utils/elasticsearch';
 
-jest.mock('@elastic/elasticsearch');
+jest.mock('../utils/elasticsearch', () => ({
+  client: {
+    search: jest.fn(),
+  },
+}));
 
 describe('codeSearchTool', () => {
   beforeEach(() => {
@@ -24,10 +29,11 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({ query: 'test query' });
+    await codeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
     expect(mockSearch).toHaveBeenCalledWith({
       index: 'kibana-code-search',
       size: 10,
+      from: 0,
       _source: [
         'filePath',
         'content',
@@ -41,12 +47,19 @@ describe('codeSearchTool', () => {
         'created_at',
         'updated_at',
         'type',
+        'imports',
       ],
       query: {
-        sparse_vector: {
-          field: 'content_embedding',
-          inference_id: '.elser_model_2',
-          query: 'test query',
+        bool: {
+          must: [
+            {
+              sparse_vector: {
+                field: 'content_embedding',
+                inference_id: '.elser_model_2',
+                query: 'test query',
+              },
+            },
+          ],
         },
       },
     });
@@ -60,10 +73,16 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({ query: 'test query', kql: 'language:typescript' });
+    await codeSearchTool.handler({
+      query: 'test query',
+      kql: 'language:typescript',
+      size: 20,
+      page: 2,
+    });
     expect(mockSearch).toHaveBeenCalledWith({
       index: 'kibana-code-search',
-      size: 10,
+      size: 20,
+      from: 20,
       _source: [
         'filePath',
         'content',
@@ -77,6 +96,7 @@ describe('codeSearchTool', () => {
         'created_at',
         'updated_at',
         'type',
+        'imports',
       ],
       query: {
         bool: {

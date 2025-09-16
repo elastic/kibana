@@ -59,6 +59,10 @@
     "@kbn/grok-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
-    "@kbn/sse-utils"
+    "@kbn/safer-lodash-set",
+    "@kbn/sse-utils",
+    "@kbn/global-search-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/otel-semantic-conventions"
   ]
 }

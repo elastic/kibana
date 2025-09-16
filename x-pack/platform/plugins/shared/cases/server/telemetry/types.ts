@@ -158,6 +158,7 @@ export interface AttachmentFramework {
 export interface SolutionTelemetry extends Count, AttachmentFramework {
   assignees: Assignees;
   totalWithAlerts: number;
+  status: Status;
 }
 
 export interface Status {
