@@ -42,6 +42,11 @@ export interface GenerateOpenApiDocumentOptions {
   tags?: string[];
   env?: Env;
   filters?: GenerateOpenApiDocumentOptionsFilters;
+  /**
+   * Optional handler to post-process the generated OpenAPI document before returning.
+   * Receives the OAS document and should return the modified document.
+   */
+  postProcess?: (oas: OpenAPIV3.Document) => OpenAPIV3.Document | Promise<OpenAPIV3.Document>;
 }
 
 export const generateOpenApiDocument = async (
@@ -77,7 +82,7 @@ export const generateOpenApiDocument = async (
     Object.assign(paths, result.paths);
   }
   const tags = buildGlobalTags(paths, opts.tags);
-  return {
+  let oas: OpenAPIV3.Document = {
     openapi: openApiVersion,
     info: {
       title: opts.title,
@@ -108,4 +113,10 @@ export const generateOpenApiDocument = async (
     tags,
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
+
+  if (opts.postProcess) {
+    oas = await opts.postProcess(oas);
+  }
+
+  return oas;
 };
