@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
@@ -42,6 +43,15 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   } = useSchemaFields({
     definition,
     refreshDefinition,
+  });
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: pendingChangesCount > 0,
+    history: context.appParams.history,
+    http: context.core.http,
+    navigateToUrl: context.core.application.navigateToUrl,
+    openConfirm: context.core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   const handleCancelClick = useDiscardConfirm(discardChanges, {
