@@ -60,14 +60,14 @@ describe('IndexUpdateService', () => {
   });
 
   describe('Unsaved changes', () => {
-    it('marks unsaved changes after adding a new row', async () => {
+    it('unsaved changes should be falseafter adding a new empty row', async () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
       service.addEmptyRow();
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
-      expect(afterAdd).toBe(true);
+      expect(afterAdd).toBe(false);
     });
 
     it('marks unsaved changes after updating a doc', async () => {

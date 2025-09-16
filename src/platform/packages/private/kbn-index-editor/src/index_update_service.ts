@@ -457,9 +457,13 @@ export class IndexUpdateService {
       this.bufferState$
         .pipe(
           map((actions) =>
-            actions.some((action) =>
-              (['add-doc', 'delete-doc'] as Array<keyof ActionMap>).includes(action.type)
-            )
+            actions.some((action) => {
+              if (action.type === 'add-doc') {
+                // Only consider rows with at least one value
+                return Object.keys(action.payload.value).length > 0;
+              }
+              return action.type === 'delete-doc';
+            })
           )
         )
         .subscribe(this._hasUnsavedChanges$)
@@ -554,7 +558,7 @@ export class IndexUpdateService {
                 this.destroy();
               }
             } else {
-              const errorDetail = response.items
+              const errorDetail = response?.items
                 .map((item) => Object.values(item)[0])
                 .filter((res) => res.error)
                 .map((res) => `- ${res.error?.type}: ${res.error?.reason}`)
