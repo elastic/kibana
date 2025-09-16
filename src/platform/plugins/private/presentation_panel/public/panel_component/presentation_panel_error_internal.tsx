@@ -60,7 +60,6 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     const observer = new ResizeObserver(() => {
       if (!panelRef?.current) return;
       const { width, height } = panelRef?.current?.getBoundingClientRect();
-      console.log({ width, height });
       setPanelSize({ width, height });
     });
     if (panelRef?.current) observer.observe(panelRef?.current!);
@@ -158,7 +157,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     <div
       ref={panelRef}
       data-test-subj="embeddableError"
-      css={(theme) => [styles.fullWidthAndHeight, styles.outerWrapperStyles]}
+      css={[styles.fullWidthAndHeight, styles.outerWrapperStyles]}
     >
       {isNarrow ? (
         <NarrowError error={error} />

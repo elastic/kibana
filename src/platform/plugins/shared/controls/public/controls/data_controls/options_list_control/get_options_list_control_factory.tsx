@@ -221,7 +221,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       ])
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
-          console.log({ selectedOptions });
           const dataView = dataViews?.[0];
           let newFilter: Filter | undefined;
           if (dataView) {
@@ -233,12 +232,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             });
           }
           dataControlManager.internalApi.setOutputFilter(newFilter);
-
-          blockingError$.next(
-            new Error(
-              'This is a test error. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis neque blandit, efficitur tortor vitae, dictum ex. Aliquam nibh quam, interdum sed iaculis in, dictum sed tortor.'
-            )
-          );
         });
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {
