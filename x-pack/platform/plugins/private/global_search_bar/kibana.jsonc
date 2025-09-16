@@ -19,7 +19,9 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "savedObjectsTagging"
+      "savedObjectsTagging",
+      "observabilityAIAssistant",
+      "elasticAssistant"
     ]
   }
 }

@@ -34,6 +34,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
 import { blurEvent, isMac, sort } from '.';
 import { resultToOption, createInformationOption, createActionOption, createChatOption } from '../lib';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import type { SearchSuggestion } from '../suggestions';
@@ -87,7 +88,7 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, observabilityAIAssistant, elasticAssistant, ...props } = opts;
 
   const isMounted = useMountedState();
   const { euiTheme, colorMode } = useEuiTheme();
@@ -396,6 +397,94 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [buttonRef, searchRef, reportEvent, isOverlayMode, closeOverlay]
   );
 
+  // Function to open AI Assistant programmatically
+  const openAIAssistant = useCallback(
+    (initialQuery?: string) => {
+      try {
+        // Try to determine which space we're in and use the appropriate AI Assistant
+        const currentUrl = window.location.pathname;
+        
+        if (observabilityAIAssistant?.service) {
+          // For Observability space or when Observability AI Assistant is available
+          const messages = initialQuery 
+            ? [{
+                '@timestamp': new Date().toISOString(),
+                message: {
+                  role: MessageRole.User,
+                  content: initialQuery
+                }
+              }] 
+            : [];
+          
+          observabilityAIAssistant.service.conversations.openNewConversation({
+            messages,
+            title: initialQuery ? `Search: ${initialQuery}` : undefined,
+          });
+          
+          reportEvent.navigateToApplication({
+            application: 'observability_ai_assistant',
+            searchValue: searchValue,
+            selectedLabel: initialQuery || 'AI Assistant',
+            selectedRank: 1,
+          });
+          
+          return true;
+        } else if (elasticAssistant && typeof window !== 'undefined') {
+          // For Security space - trigger the assistant overlay
+          // We need to dispatch a custom event or use a global method
+          // Since we can't directly access the showAssistantOverlay from here,
+          // we'll use a keyboard shortcut simulation or URL navigation
+          
+          // Try to trigger the keyboard shortcut for AI Assistant (Ctrl/Cmd + ;)
+          const keyboardEvent = new KeyboardEvent('keydown', {
+            key: ';',
+            code: 'Semicolon',
+            ctrlKey: !isMac,
+            metaKey: isMac,
+            bubbles: true,
+          });
+          
+          document.dispatchEvent(keyboardEvent);
+          
+          reportEvent.navigateToApplication({
+            application: 'elastic_assistant',
+            searchValue: searchValue,
+            selectedLabel: initialQuery || 'AI Assistant',
+            selectedRank: 1,
+          });
+          
+          return true;
+        } else {
+          // Fallback: try to navigate to AI Assistant pages or show a message
+          console.warn('AI Assistant services not available');
+          
+          // Try navigating to known AI Assistant URLs
+          if (currentUrl.includes('/app/observability') || currentUrl.includes('/app/apm') || currentUrl.includes('/app/logs')) {
+            navigateToUrl('/app/observabilityAIAssistant/conversations/new');
+            return true;
+          } else if (currentUrl.includes('/app/security') || currentUrl.includes('/app/siem')) {
+            // For security, we'll try the keyboard shortcut approach
+            const keyboardEvent = new KeyboardEvent('keydown', {
+              key: ';',
+              code: 'Semicolon',
+              ctrlKey: !isMac,
+              metaKey: isMac,
+              bubbles: true,
+            });
+            document.dispatchEvent(keyboardEvent);
+            return true;
+          }
+          
+          return false;
+        }
+      } catch (error) {
+        console.error('Error opening AI Assistant:', error);
+        return false;
+      }
+    },
+    [observabilityAIAssistant, elasticAssistant, searchValue, navigateToUrl, reportEvent]
+  );
+
   const handleOptionClick = useCallback(
     (option: EuiSelectableTemplateSitewideOption, event: React.MouseEvent) => {
       const selectedLabel = option.label ?? null;
@@ -407,26 +496,25 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
       // Handle chat items specially - open AI assistant flyout
       if (type === 'chat' || itemType === 'chat') {
-        // TODO: Implement AI assistant flyout opening
-        // For now, we'll just log the action and close the search
-        console.log('Opening AI assistant with query:', selectedLabel);
+        const success = openAIAssistant(selectedLabel || undefined);
         
-        // Here you would typically:
-        // 1. Open the AI assistant flyout/panel
-        // 2. Pre-populate the input with the selectedLabel
-        // Example: openAIAssistant({ initialQuery: selectedLabel });
-        
-        // Close the search interface
-        (document.activeElement as HTMLElement).blur();
-        if (searchRef) {
-          clearField();
-          searchRef.dispatchEvent(blurEvent);
+        if (success) {
+          // Close the search interface only if AI Assistant opened successfully
+          (document.activeElement as HTMLElement).blur();
+          if (searchRef) {
+            clearField();
+            searchRef.dispatchEvent(blurEvent);
+          }
+          
+          if (isOverlayMode) {
+            setIsOverlayMode(false);
+          }
+          setIsPopoverOpen(false);
+        } else {
+          // If AI Assistant couldn't be opened, show a user-friendly message
+          console.warn('AI Assistant is not available in this space');
+          // Could optionally show a toast notification here
         }
-        
-        if (isOverlayMode) {
-          setIsOverlayMode(false);
-        }
-        setIsPopoverOpen(false);
         return;
       }
 
@@ -486,7 +574,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }
       setIsPopoverOpen(false);
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue, isOverlayMode, options]
+    [reportEvent, navigateToUrl, searchRef, searchValue, isOverlayMode, options, openAIAssistant]
   );
 
   const clearField = () => setSearchValue('');
