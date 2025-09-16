@@ -441,6 +441,7 @@ const AssistantComponent: React.FC<Props> = ({
           >
             <ConversationSidePanel
               currentConversation={currentConversation}
+              currentUser={currentUser}
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
@@ -474,6 +475,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     conversationsLoaded={isFetchedCurrentUserConversations}
                     conversationSharedState={conversationSharedState}
+                    currentUser={currentUser}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
                     isConversationOwner={isConversationOwner}
