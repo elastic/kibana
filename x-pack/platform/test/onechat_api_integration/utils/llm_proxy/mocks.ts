@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ToolMessage } from '.';
+import type { ToolMessage } from './types';
 
 export function toolCallMock(toolName: string, toolArg: Record<string, any>): ToolMessage {
   return {
