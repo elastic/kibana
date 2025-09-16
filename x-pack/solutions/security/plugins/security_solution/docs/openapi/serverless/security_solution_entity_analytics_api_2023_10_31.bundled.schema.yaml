@@ -1801,12 +1801,12 @@ components:
         - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
         - type: object
           properties:
-            '@timestamp':
-              format: date-time
-              type: string
             event:
               type: object
               properties:
+                '@timestamp':
+                  format: date-time
+                  type: string
                 ingested:
                   format: date-time
                   type: string
@@ -2151,6 +2151,24 @@ components:
     UserName:
       type: object
       properties:
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  source:
+                    enum:
+                      - api
+                      - csv
+                      - index_sync
+                    type: string
+                  value:
+                    type: string
+              type: array
         user:
           type: object
           properties:
