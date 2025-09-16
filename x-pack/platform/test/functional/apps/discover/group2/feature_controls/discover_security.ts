@@ -9,7 +9,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 import { decompressFromBase64 } from 'lz-string';
 import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
@@ -53,14 +53,16 @@ export default function (ctx: FtrProviderContext) {
     await timePicker.setDefaultAbsoluteRange();
   }
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/security'
       );
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
 
       // ensure we're logged out so we can login as the appropriate users
       await security.forceLogout();
@@ -72,7 +74,7 @@ export default function (ctx: FtrProviderContext) {
       await security.forceLogout();
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/security'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

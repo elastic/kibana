@@ -22,8 +22,9 @@ import {
   GridSectionHeader,
   GridSectionWrapper,
 } from './grid_section';
-import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
-import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
+import type { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import type { GridLayoutContextType } from './use_grid_layout_context';
+import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import {
   getPanelKeysInOrder,

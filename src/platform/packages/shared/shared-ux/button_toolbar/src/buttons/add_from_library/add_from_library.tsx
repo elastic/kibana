@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ToolbarButton, ToolbarButtonProps } from '../toolbar_button';
+import type { ToolbarButtonProps } from '../toolbar_button';
+import { ToolbarButton } from '../toolbar_button';
 
 export type Props = Omit<ToolbarButtonProps<'standard'>, 'iconType' | 'label' | 'type'>;
 

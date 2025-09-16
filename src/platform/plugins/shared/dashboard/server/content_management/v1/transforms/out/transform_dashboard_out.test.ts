@@ -9,17 +9,17 @@
 
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
+  DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '@kbn/controls-plugin/common';
-import {
+} from '@kbn/controls-constants';
+import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
@@ -57,8 +57,8 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
-        chainingSystem: DEFAULT_CONTROL_CHAINING,
-        labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
+        chainingSystem: DEFAULT_CONTROLS_CHAINING,
+        labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
         ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
         autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [

@@ -18,6 +18,7 @@ import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_r
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
@@ -58,7 +59,9 @@ export function TraceWaterfall({
       showLegend={showLegend}
       serviceName={serviceName}
     >
-      <TraceWaterfallComponent />
+      <TraceWarning>
+        <TraceWaterfallComponent />
+      </TraceWarning>
     </TraceWaterfallContextProvider>
   );
 }
@@ -67,7 +70,6 @@ function TraceWaterfallComponent() {
   const { euiTheme } = useEuiTheme();
   const {
     duration,
-    rootItem,
     margin: { left, right },
     isEmbeddable,
     legends,
@@ -75,10 +77,6 @@ function TraceWaterfallComponent() {
     showLegend,
     serviceName,
   } = useTraceWaterfallContext();
-
-  if (!rootItem) {
-    return null;
-  }
 
   return (
     <EuiFlexGroup direction="column">

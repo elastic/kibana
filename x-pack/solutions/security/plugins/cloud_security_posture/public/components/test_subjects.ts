@@ -54,46 +54,8 @@ export const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenB
 export const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
 export const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
 
-export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
-export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
-  CLOUDFORMATION: 'aws-cloudformation-setup-option',
-  MANUAL: 'aws-manual-setup-option',
-};
-export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
-  CLOUD_SHELL: 'gcpGoogleCloudShellOptionTestId',
-  MANUAL: 'gcpManualOptionTestId',
-};
-export const CIS_GCP_OPTION_TEST_SUBJ = 'cisGcpTestId';
-export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
-
-export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
-export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
-  TENANT_ID: 'cisAzureTenantId',
-  CLIENT_ID: 'cisAzureClientId',
-  CLIENT_SECRET: 'passwordInput-client-secret',
-  CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
-  CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
-  CLIENT_USERNAME: 'cisAzureClientUsername',
-  CLIENT_PASSWORD: 'cisAzureClientPassword',
-};
-export const CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
-  ARM_TEMPLATE: 'cisAzureArmTemplate',
-  MANUAL: 'cisAzureManual',
-};
-export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
-  GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
-  PROJECT_ID: 'project_id_test_id',
-  ORGANIZATION_ID: 'organization_id_test_id',
-  CREDENTIALS_TYPE: 'credentials_type_test_id',
-  CREDENTIALS_FILE: 'credentials_file_test_id',
-  CREDENTIALS_JSON: 'credentials_json_test_id',
-  CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
-};
-
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
 export const COMPLIANCE_SCORE_BAR_UNKNOWN = 'complianceScoreBarUnknown';
 export const COMPLIANCE_SCORE_BAR_FAILED = 'complianceScoreBarFailed';
 export const COMPLIANCE_SCORE_BAR_PASSED = 'complianceScoreBarPassed';
-export const AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ =
-  'launchAwsCloudFormationAccordianInstructions';

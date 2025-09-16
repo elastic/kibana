@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { merge } from 'lodash';
-import { FunctionForm, FunctionFormProps } from './function_form';
+import type { FunctionFormProps } from './function_form';
+import { FunctionForm } from './function_form';
 
 export type TransformProps = { requiresContext: boolean } & FunctionFormProps;
 

@@ -8,11 +8,9 @@ import type {
 
 import type {
   WorkflowsExamplePluginSetup,
-  WorkflowsExamplePluginSetupDeps,
   WorkflowsExamplePluginStart,
   WorkflowsExamplePluginStartDeps,
 } from './types';
-import { defineRoutes } from './routes';
 
 export class WorkflowsExamplePlugin
   implements Plugin<WorkflowsExamplePluginSetup, WorkflowsExamplePluginStart>
@@ -23,12 +21,7 @@ export class WorkflowsExamplePlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(
-    core: CoreSetup<WorkflowsExamplePluginStartDeps, WorkflowsExamplePluginStartDeps>,
-    deps: WorkflowsExamplePluginSetupDeps
-  ) {
-    // Register server side APIs
-    defineRoutes(core);
+  public setup(core: CoreSetup<WorkflowsExamplePluginStartDeps, WorkflowsExamplePluginStartDeps>) {
     return {};
   }
 

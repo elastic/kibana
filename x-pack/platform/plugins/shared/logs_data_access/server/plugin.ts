@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { uiSettings } from '../common/ui_settings';
 import { registerServices } from './services/register_services';
-import { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
+import type { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
 
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;

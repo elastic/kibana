@@ -14,7 +14,7 @@ const fnDocView = {
   id: 'function-doc-view',
   order: 10,
   title: 'Render function',
-  render: jest.fn(),
+  component: jest.fn(),
 };
 const componentDocView = {
   id: 'component-doc-view',
@@ -117,7 +117,7 @@ describe('DocViewerRegistry', () => {
         id: 'additional-doc-view',
         order: 20,
         title: 'Render function',
-        render: jest.fn(),
+        component: jest.fn(),
       });
 
       expect(registry.getAll().length).toBe(2);

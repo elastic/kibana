@@ -10,7 +10,7 @@
 /* eslint-disable max-classes-per-file*/
 
 import fetch from 'node-fetch';
-import { RequestInit } from 'node-fetch';
+import type { RequestInit } from 'node-fetch';
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';

@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 import { ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
-import { RecurrenceSchedule, RRuleFrequency } from '../../../../../../types';
+import type { RecurrenceSchedule } from '../../../../../../types';
+import { RRuleFrequency } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import { ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from './constants';
 import { i18nFreqSummary, i18nNthWeekdayShort } from './translations';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
 
 import { EditorMenu as Component } from './editor_menu.component';
 import { useCanvasApi } from '../../hooks/use_canvas_api';

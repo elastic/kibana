@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import {
   CONFIRMATION_RULE_SAVE_TITLE,
   CONFIRM_RULE_SAVE_CONFIRM_BUTTON_TEXT,
@@ -23,11 +23,14 @@ export interface ConfirmCreateRuleProps {
 
 export const ConfirmCreateRule = (props: ConfirmCreateRuleProps) => {
   const { onCancel, onConfirm } = props;
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
       data-test-subj="confirmCreateRuleModal"
       title={CONFIRMATION_RULE_SAVE_TITLE}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       confirmButtonText={CONFIRM_RULE_SAVE_CONFIRM_BUTTON_TEXT}

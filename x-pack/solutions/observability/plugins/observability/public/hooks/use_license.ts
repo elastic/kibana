@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 
 import { useKibana } from '../utils/kibana_react';
 

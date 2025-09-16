@@ -9,7 +9,8 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import React, { useCallback, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
@@ -38,6 +39,7 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
   json,
 }) => {
   const { services } = useKibana<InspectorKibanaServices>();
+  const useUrl = services.share.url.locators.useUrl;
 
   function getValue(): string {
     if (!requestParams) {
@@ -57,9 +59,15 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
 
   // "Open in Console" button
   const devToolsDataUri = compressToEncodedURIComponent(value);
-  const consoleHref = services.share.url.locators
-    .get('CONSOLE_APP_LOCATOR')
-    ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
+  const consoleHref = useUrl(
+    () => ({
+      id: 'CONSOLE_APP_LOCATOR',
+      params: {
+        loadFrom: `data:text/plain,${devToolsDataUri}`,
+      },
+    }),
+    [devToolsDataUri]
+  );
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const canShowDevTools =
     services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;

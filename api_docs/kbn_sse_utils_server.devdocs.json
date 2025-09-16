@@ -29,7 +29,7 @@
         "signature": [
           "(source$: ",
           "Observable",
-          "<Record<string, unknown> & { type: string; }>, {\n    logger,\n    signal,\n    flushThrottleMs = 100,\n  }: { logger: Pick<",
+          "<Record<string, unknown> & { type: string; }>, {\n    logger,\n    signal,\n    flushThrottleMs = 100,\n    flushMinBytes,\n  }: { logger: Pick<",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          ", \"error\" | \"debug\">; signal: AbortSignal; flushThrottleMs?: number | undefined; }) => ResponseStream"
+          ", \"error\" | \"debug\">; signal: AbortSignal; flushThrottleMs?: number | undefined; flushMinBytes?: number | undefined; }) => ResponseStream"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
         "deprecated": false,
@@ -64,7 +64,7 @@
             "id": "def-common.observableIntoEventSourceStream.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    signal,\n    flushThrottleMs = 100,\n  }",
+            "label": "{\n    logger,\n    signal,\n    flushThrottleMs = 100,\n    flushMinBytes,\n  }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
             "deprecated": false,
@@ -163,6 +163,22 @@
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils-server",
+                "id": "def-common.observableIntoEventSourceStream.$2.flushMinBytes",
+                "type": "number",
+                "tags": [],
+                "label": "flushMinBytes",
+                "description": [
+                  "\nThe Cloud proxy currently buffers 4kb or 8kb of data until flushing.\nThis decreases the responsiveness of the streamed response,\nso we manually insert some data during stream flushes to force the proxy to flush too."
+                ],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -212,7 +228,23 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/sse-utils-server",
+        "id": "def-common.cloudProxyBufferSize",
+        "type": "number",
+        "tags": [],
+        "label": "cloudProxyBufferSize",
+        "description": [],
+        "signature": [
+          "4096"
+        ],
+        "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

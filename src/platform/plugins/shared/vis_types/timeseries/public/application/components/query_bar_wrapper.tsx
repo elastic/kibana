@@ -9,13 +9,14 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
+import type { QueryStringInputProps } from '@kbn/unified-search-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IndexPatternValue } from '../../../common/types';
 
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
-import { TimeseriesVisDependencies } from '../../plugin';
+import type { TimeseriesVisDependencies } from '../../plugin';
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange' | 'isInvalid'> & {
   indexPatterns: IndexPatternValue[];

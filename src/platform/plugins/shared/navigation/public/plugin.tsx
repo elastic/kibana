@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -18,8 +18,8 @@ import {
 } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
-import type { SolutionId, SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -28,8 +28,8 @@ import type {
   AddSolutionNavigationArg,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import { SideNavComponent } from './side_navigation';
+import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+
 import { registerNavigationEventTypes } from './analytics';
 
 export class NavigationPublicPlugin
@@ -45,7 +45,6 @@ export class NavigationPublicPlugin
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
   private coreStart?: CoreStart;
-  private depsStart?: NavigationPublicStartDependencies;
   private isSolutionNavEnabled = false;
   private isCloudTrialUser = false;
 
@@ -71,7 +70,6 @@ export class NavigationPublicPlugin
     depsStart: NavigationPublicStartDependencies
   ): NavigationPublicStart {
     this.coreStart = core;
-    this.depsStart = depsStart;
 
     const { unifiedSearch, cloud, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
@@ -108,7 +106,14 @@ export class NavigationPublicPlugin
 
       if (!this.isSolutionNavEnabled) return;
 
-      chrome.project.setCloudUrls(cloud!);
+      if (cloud) {
+        chrome.project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+        cloud.getPrivilegedUrls().then((privilegedUrls) => {
+          if (Object.keys(privilegedUrls).length === 0) return;
+
+          chrome.project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
+        });
+      }
     };
 
     if (this.getIsUnauthenticated(core.http)) {
@@ -145,34 +150,11 @@ export class NavigationPublicPlugin
     this.stop$.next();
   }
 
-  private getSideNavComponent({
-    dataTestSubj,
-  }: {
-    dataTestSubj?: string;
-  } = {}): SolutionNavigationDefinition['sideNavComponent'] {
-    if (!this.coreStart) throw new Error('coreStart is not available');
-    if (!this.depsStart) throw new Error('depsStart is not available');
-
-    const core = this.coreStart;
-    const { project } = core.chrome as InternalChromeStart;
-    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
-    const navigationTreeUi$ = project.getNavigationTreeUi$();
-
-    return () => (
-      <SideNavComponent
-        navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj }}
-        deps={{ core, activeNodes$: activeNavigationNodes$ }}
-      />
-    );
-  }
-
   private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
     if (!this.coreStart) throw new Error('coreStart is not available');
-    const { dataTestSubj, ...rest } = solutionNavigation;
-    const sideNavComponent = this.getSideNavComponent({ dataTestSubj });
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
-      [solutionNavigation.id]: { ...rest, sideNavComponent },
+      [solutionNavigation.id]: solutionNavigation,
     });
   }
 

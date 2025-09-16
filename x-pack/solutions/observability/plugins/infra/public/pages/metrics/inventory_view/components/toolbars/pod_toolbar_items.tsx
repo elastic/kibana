@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-import { podSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
 export const podGroupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
 
 export const PodToolbarItems = (props: ToolbarProps) => {
-  return (
-    <MetricsAndGroupByToolbarItems
-      {...props}
-      metricTypes={podSnapshotMetricTypes}
-      groupByFields={podGroupByFields}
-    />
-  );
+  return <MetricsAndGroupByToolbarItems {...props} groupByFields={podGroupByFields} />;
 };

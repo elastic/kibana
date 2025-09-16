@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import {
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import type {
   IRouter,
   KibanaRequest,
   RequestHandlerContext,

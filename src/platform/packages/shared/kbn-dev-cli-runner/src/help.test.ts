@@ -8,7 +8,7 @@
  */
 
 import { getCommandLevelHelp, getHelp, getHelpForAllCommands } from './help';
-import { Command } from './run_with_commands';
+import type { Command } from './run/run_with_commands';
 
 const fooCommand: Command<any> = {
   description: `

@@ -6,9 +6,10 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import { Deanonymization } from './anonymization';
-import { Message } from './messages';
-import type { ToolCallsOf, ToolOptions } from './tools';
+import type { Deanonymization } from './anonymization';
+import type { Message } from './messages';
+import type { ToolOptions } from './tools';
+import type { ToolCallOfToolOptions } from './tools_of';
 
 /**
  * List possible values of {@link ChatCompletionEvent} types.
@@ -32,10 +33,6 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       content: string;
       /**
-       * The eventual tool calls performed by the LLM.
-       */
-      toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
-      /**
        * Optional deanonymized input messages metadata
        */
       deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
@@ -43,6 +40,10 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        * Optional deanonymized output metadata
        */
       deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+      /**
+       * Tool calls from the LLM
+       */
+      toolCalls: ToolCallOfToolOptions<TToolOptions>[];
     }
   >;
 /**

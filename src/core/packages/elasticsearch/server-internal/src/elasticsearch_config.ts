@@ -8,10 +8,11 @@
  */
 
 import { readFileSync } from 'fs';
-import { Duration } from 'moment';
+import type { Duration } from 'moment';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
-import { schema, offeringBasedSchema, ByteSizeValue, type TypeOf } from '@kbn/config-schema';
+import type { ByteSizeValue } from '@kbn/config-schema';
+import { schema, offeringBasedSchema, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type {

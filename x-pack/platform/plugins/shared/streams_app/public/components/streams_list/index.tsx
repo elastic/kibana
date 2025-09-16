@@ -58,7 +58,7 @@ export function asTrees(streams: Streams.all.Definition[]) {
         name: stream.name,
         children: [],
         stream,
-        type: Streams.UnwiredStream.Definition.is(stream)
+        type: Streams.ClassicStream.Definition.is(stream)
           ? 'classic'
           : isRootStreamDefinition(stream)
           ? 'root'
@@ -300,7 +300,7 @@ function StreamNode({
                 defaultMessage: 'Management',
               })}
               href={router.link('/{key}/management/{tab}', {
-                path: { key: node.name, tab: 'route' },
+                path: { key: node.name, tab: 'partitioning' },
               })}
             />
           </EuiToolTip>

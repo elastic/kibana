@@ -14,7 +14,7 @@
 
 import React from 'react';
 import { PhaseDescription } from './phase_description';
-import { Phases } from '../../../../../common/types';
+import type { Phases } from '../../../../../common/types';
 import { MinAge, SearchableSnapshot } from './components';
 
 export const FrozenPhase = ({ phases }: { phases: Phases }) => {

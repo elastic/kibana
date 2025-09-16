@@ -34,13 +34,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.10.0/data.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.10.0/data.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -136,11 +136,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.11.1 saved object to the latest version
     describe('7.11.1 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.11.1');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.11.1');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1'
+        );
       });
 
       it('adds rule info to only alert comments for 7.12', async () => {
@@ -187,11 +189,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.13.2', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       describe('owner field', () => {
@@ -281,11 +285,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.16.0', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       describe('resolve', () => {
@@ -353,12 +359,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.0 id migration', () => {
       describe('awesome space', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.16.0_space');
+          await esArchiver.load(
+            'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.16.0_space'
+          );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/cases/migrations/7.16.0_space'
+            'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.16.0_space'
           );
         });
 
@@ -406,13 +414,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.1.0 removing type', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/case_and_collection.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/case_and_collection.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/case_and_collection.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/case_and_collection.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -439,13 +447,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.3.0', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_duration.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_duration.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -498,19 +506,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.5.0', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_duration.json'
         );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_duration.json'
         );
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -547,13 +555,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.7.0', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity_and_status.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_severity_and_status.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity_and_status.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_severity_and_status.json'
         );
         await deleteAllCaseItems(es);
       });

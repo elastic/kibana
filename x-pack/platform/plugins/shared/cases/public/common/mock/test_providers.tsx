@@ -12,7 +12,7 @@ import React, { useMemo, useCallback } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { FilesClient, ScopedFilesClient } from '@kbn/files-plugin/public';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { QueryClient } from '@tanstack/react-query';

@@ -12,8 +12,9 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
-import { monaco } from '@kbn/monaco';
+import type { ESQLVariableType } from '@kbn/esql-types';
+import { type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import type { monaco } from '@kbn/monaco';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import { ESQLControlsFlyout } from './control_flyout';
 

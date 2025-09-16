@@ -6,11 +6,11 @@
  */
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
-import {
-  attachMlInferencePipeline,
+import type {
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
 } from './attach_ml_inference_pipeline';
+import { attachMlInferencePipeline } from './attach_ml_inference_pipeline';
 
 describe('AttachMlInferencePipelineApiLogic', () => {
   const { http } = mockHttpValues;

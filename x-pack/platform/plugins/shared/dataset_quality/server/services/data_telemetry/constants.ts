@@ -7,7 +7,7 @@
 
 import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from '@kbn/telemetry-plugin/server/telemetry_collection/get_data_telemetry/constants';
 
-import { DatasetIndexPattern } from './types';
+import type { DatasetIndexPattern } from './types';
 
 export const LOGS_DATA_TELEMETRY_TASK_TYPE = 'logs-data-telemetry';
 export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task';

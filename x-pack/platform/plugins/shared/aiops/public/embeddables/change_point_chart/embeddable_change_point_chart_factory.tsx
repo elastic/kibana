@@ -146,7 +146,7 @@ export const getChangePointChartEmbeddableFactory = (
                     changePointManager.api.updateUserInput(result);
                     closeFlyout();
                   }}
-                  closeFlyout={closeFlyout}
+                  onCancel={closeFlyout}
                   input={changePointManager.getLatestState()}
                 />
               );

@@ -7,12 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
-
-export { awsRDSSnapshotMetricTypes } from './metrics';
-
-export const awsRDS: InventoryModel = {
-  id: 'awsRDS',
+import { createInventoryModel } from '../shared/create_inventory_model';
+export const awsRDS = createInventoryModel('awsRDS', {
   displayName: i18n.translate('xpack.metricsData.inventoryModels.awsRDS.displayName', {
     defaultMessage: 'RDS Databases',
   }),
@@ -22,7 +18,7 @@ export const awsRDS: InventoryModel = {
       defaultMessage: 'RDS Database',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -34,18 +30,4 @@ export const awsRDS: InventoryModel = {
     id: 'aws.rds.db_instance.arn',
     name: 'aws.rds.db_instance.identifier',
   },
-  requiredMetrics: [
-    'awsRDSCpuTotal',
-    'awsRDSConnections',
-    'awsRDSQueriesExecuted',
-    'awsRDSActiveTransactions',
-    'awsRDSLatency',
-  ],
-  tooltipMetrics: [
-    'cpu',
-    'rdsLatency',
-    'rdsConnections',
-    'rdsQueriesExecuted',
-    'rdsActiveTransactions',
-  ],
-};
+});

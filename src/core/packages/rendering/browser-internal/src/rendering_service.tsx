@@ -23,14 +23,14 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
+import type { LayoutService } from '@kbn/core-chrome-layout';
 import {
-  LayoutService,
-  LayoutFeatureFlag,
-  LAYOUT_FEATURE_FLAG_KEY,
-  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
-} from '@kbn/core-chrome-layout';
+  getSideNavVersion,
+  getLayoutVersion,
+  getLayoutDebugFlag,
+} from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 
@@ -88,11 +88,9 @@ export class RenderingService implements IRenderingService {
     targetDomElement: HTMLDivElement
   ) {
     const { chrome, featureFlags } = renderCoreDeps;
-    const layoutType = featureFlags.getStringValue<LayoutFeatureFlag>(
-      LAYOUT_FEATURE_FLAG_KEY,
-      'legacy-fixed'
-    );
-    const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
+    const layoutType = getLayoutVersion(featureFlags);
+    const debugLayout = getLayoutDebugFlag(featureFlags);
+    const projectSideNavVersion = getSideNavVersion(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
 
@@ -107,8 +105,8 @@ export class RenderingService implements IRenderingService {
 
     const layout: LayoutService =
       layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
-        : new LegacyFixedLayout(renderCoreDeps);
+        ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
+        : new LegacyFixedLayout(renderCoreDeps, { projectSideNavVersion });
 
     const Layout = layout.getComponent();
 

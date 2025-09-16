@@ -11,9 +11,9 @@ import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../co
 import { GetRuleMigrationTranslationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
-import { withExistingMigration } from './util/with_existing_migration_id';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsTranslationStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -44,9 +44,9 @@ export const registerSiemRuleMigrationsTranslationStatsRoute = (
             const migrationId = req.params.migration_id;
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
-              const stats = await ruleMigrationsClient.data.rules.getTranslationStats(migrationId);
+              const stats = await ruleMigrationsClient.data.items.getTranslationStats(migrationId);
 
               if (stats.rules.total === 0) {
                 return res.noContent();

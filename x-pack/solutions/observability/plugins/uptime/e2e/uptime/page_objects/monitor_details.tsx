@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page } from '@elastic/synthetics';
+import type { Page } from '@elastic/synthetics';
 import { byTestId, delay, getQuerystring } from '../../helpers/utils';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { registerAppRoutes } from './api/app';
 import { registerRepositoriesRoutes } from './api/repositories';
 import { registerSnapshotsRoutes } from './api/snapshots';

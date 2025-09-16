@@ -1,5 +1,8 @@
 ---
 navigation_title: "{{xsoar}}"
+applies_to:
+  stack: ga 9.1
+  serverless: ga
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/xsoar-action-type.html
 ---

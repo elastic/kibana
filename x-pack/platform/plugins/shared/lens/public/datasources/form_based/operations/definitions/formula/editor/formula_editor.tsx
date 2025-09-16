@@ -29,14 +29,16 @@ import {
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
-import { ParamEditorProps } from '../..';
+import type { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
-import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
+import type { ErrorWrapper } from '../validation';
+import { runASTValidation, tryToParse } from '../validation';
+import type { LensMathSuggestions } from './math_completion';
 import {
-  LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -50,7 +52,7 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
-import { FormulaIndexPatternColumn } from '../formula';
+import type { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';

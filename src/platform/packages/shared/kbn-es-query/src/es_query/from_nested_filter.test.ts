@@ -10,7 +10,7 @@
 import { fromNestedFilter } from './from_nested_filter';
 import { fields } from '../filters/stubs';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { DataViewBase } from './types';
+import type { DataViewBase } from './types';
 
 describe('fromNestedFilter', function () {
   const indexPattern: DataViewBase = {

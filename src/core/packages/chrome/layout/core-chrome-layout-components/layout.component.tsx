@@ -10,13 +10,13 @@
 import React from 'react';
 import { LayoutApplication } from './application';
 import { LayoutBanner } from './banner';
-import { LayoutNavigation, LayoutNavigationPanel } from './navigation';
+import { LayoutNavigation } from './navigation';
 import { LayoutFooter } from './footer';
 import { LayoutHeader } from './header';
-import { LayoutSidebar, LayoutSidebarPanel } from './sidebar';
+import { LayoutSidebar } from './sidebar';
 
 import { useLayoutStyles } from './layout.styles';
-import { ChromeLayoutSlots, Slot } from './layout.types';
+import type { ChromeLayoutSlots, Slot } from './layout.types';
 import { useLayoutState } from './layout_state_context';
 
 export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
@@ -49,20 +49,9 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <LayoutFooter>{renderSlot(props.footer)}</LayoutFooter>
   ) : null;
 
-  const navigationPanel = layoutState.hasNavigationPanel ? (
-    <LayoutNavigationPanel width={layoutState.navigationPanelWidth}>
-      {renderSlot(props.navigationPanel)}
-    </LayoutNavigationPanel>
-  ) : null;
-
   const sidebar = layoutState.hasSidebar ? (
     <LayoutSidebar>{renderSlot(props.sidebar)}</LayoutSidebar>
   ) : null;
-
-  const sidebarPanel =
-    layoutState.hasSidebar && layoutState.hasSidebarPanel ? (
-      <LayoutSidebarPanel>{renderSlot(props.sidebarPanel)}</LayoutSidebarPanel>
-    ) : null;
 
   const header = layoutState.hasHeader ? (
     <LayoutHeader>{renderSlot(props.header)}</LayoutHeader>
@@ -86,11 +75,9 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
       {banner}
       {header}
       {navigation}
-      {navigationPanel}
       {application}
       {footer}
       {sidebar}
-      {sidebarPanel}
     </div>
   );
 };

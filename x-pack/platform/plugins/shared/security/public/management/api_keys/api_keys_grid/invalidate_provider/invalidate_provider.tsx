@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
@@ -37,6 +37,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
   const [apiKeys, setApiKeys] = useState<ApiKeyToInvalidate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const invalidateApiKeyPrompt: InvalidateApiKeys = (keys, onSuccess = () => undefined) => {
     if (!keys || !keys.length) {
@@ -130,6 +131,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     return (
       <EuiConfirmModal
         role="dialog"
+        aria-labelledby={modalTitleId}
         title={
           isSingle
             ? i18n.translate(
@@ -147,6 +149,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
                 }
               )
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={invalidateApiKey}
         cancelButtonText={i18n.translate(

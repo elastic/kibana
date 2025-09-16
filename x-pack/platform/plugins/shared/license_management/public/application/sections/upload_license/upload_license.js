@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiPageSection,
   EuiPanel,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
@@ -56,12 +57,15 @@ export class UploadLicense extends React.PureComponent {
   };
 
   acknowledgeModal() {
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
     const { needsAcknowledgement, messages: [firstLine, ...messages] = [] } = this.props;
     if (!needsAcknowledgement) {
       return null;
     }
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           <FormattedMessage
             id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"

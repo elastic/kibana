@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
-import {
-  EuiBasicTable,
-  HorizontalAlignment,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-  euiScreenReaderOnly,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT, euiScreenReaderOnly } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';

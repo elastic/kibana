@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
@@ -14,6 +16,7 @@ import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app'
 import type { AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
+import { EmbeddableAnomalyChartsUserInput } from '../embeddables/anomaly_charts/anomaly_charts_setup_flyout';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
@@ -59,26 +62,33 @@ export function createAddAnomalyChartsPanelAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       const [coreStart, pluginStart] = await getStartServices();
-      try {
-        const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-          '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
-        );
-        const initialState = await resolveEmbeddableAnomalyChartsUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          context.embeddable.uuid
-        );
 
-        presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-          serializedState: { rawState: initialState },
-        });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-        return Promise.reject();
-      }
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
+          focusedPanelId: context.embeddable.uuid,
+        },
+        loadContent: async ({ closeFlyout }) => {
+          return (
+            <EmbeddableAnomalyChartsUserInput
+              coreStart={coreStart}
+              pluginStart={pluginStart}
+              onConfirm={(initialState) => {
+                presentationContainerParent.addNewPanel({
+                  panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    rawState: initialState,
+                  },
+                });
+                closeFlyout();
+              }}
+              onCancel={closeFlyout}
+            />
+          );
+        },
+      });
     },
   };
 }

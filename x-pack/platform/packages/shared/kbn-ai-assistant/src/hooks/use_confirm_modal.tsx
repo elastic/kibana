@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { useState } from 'react';
 
 const ConfirmModal = ({
@@ -22,9 +22,13 @@ const ConfirmModal = ({
   confirmButtonText: React.ReactNode;
   setElement: (element: React.ReactNode | undefined) => void;
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={title}
+      titleProps={{ id: modalTitleId }}
       onConfirm={() => {
         onClose(true);
         setElement(undefined);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import type { ListRowRenderer } from 'react-virtualized';
 import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { css } from '@emotion/react';
@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiAutoSizer,
   EuiSkeletonRectangle,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
@@ -52,9 +51,16 @@ export const GridColumn = ({
     })
   );
 
+  // Reset the row measurement cache when the list changes
+  useEffect(() => {
+    if (rowMeasurementCache.current) {
+      rowMeasurementCache.current.clearAll();
+    }
+  }, [list]);
+
   if (isLoading) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="m" columns={3} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
           <EuiFlexItem key={index} grow={3}>
             <EuiSkeletonRectangle height="160px" width="100%" />
@@ -66,7 +72,13 @@ export const GridColumn = ({
 
   if (!list.length) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="emptyState" style={emptyStateStyles}>
+      <EuiFlexGrid
+        gutterSize="m"
+        columns={3}
+        data-test-subj="emptyState"
+        style={emptyStateStyles}
+        alignItems="start"
+      >
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -100,12 +112,13 @@ export const GridColumn = ({
       >
         {({ registerChild }) => (
           <div ref={registerChild} style={style}>
-            <EuiFlexGroup gutterSize="m" responsive={true}>
+            <EuiFlexGrid columns={3} gutterSize="m" alignItems="start">
               {items.map((item) => (
                 <EuiFlexItem
                   key={item.id}
                   // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
                   css={css`
+                    align-self: stretch;
                     & > .euiPopover,
                     & > .euiPopover > .euiCard {
                       height: 100%;
@@ -116,7 +129,7 @@ export const GridColumn = ({
                   <PackageCard {...item} showLabels={showCardLabels} />
                 </EuiFlexItem>
               ))}
-            </EuiFlexGroup>
+            </EuiFlexGrid>
             <EuiSpacer size="m" />
           </div>
         )}
@@ -139,9 +152,7 @@ export const GridColumn = ({
       }}
     >
       {({ height, isScrolling, onChildScroll, scrollTop }) => (
-        // `key` is a hack to re-render the list when the number of items changes, see:
-        // https://stackoverflow.com/questions/52769760/react-virtualized-list-item-does-not-re-render-with-changed-props-until-i-scroll
-        <EuiAutoSizer disableHeight key={list.length}>
+        <EuiAutoSizer disableHeight>
           {({ width }) => (
             <VirtualizedList
               tabIndex={-1}

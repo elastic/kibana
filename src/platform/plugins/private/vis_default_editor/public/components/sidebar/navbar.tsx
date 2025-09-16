@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { OptionTab } from './use_option_tabs';
+import type { OptionTab } from './use_option_tabs';
 
 const defaultEditorNavBarStyles = {
   base: css({ flexGrow: 0 }),

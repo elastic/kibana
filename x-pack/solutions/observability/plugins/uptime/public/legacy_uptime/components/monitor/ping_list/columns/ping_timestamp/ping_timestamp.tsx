@@ -11,11 +11,8 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useInProgressImage } from './use_in_progress_image';
-import {
-  isScreenshotImageBlob,
-  isScreenshotRef,
-  ScreenshotRefImageData,
-} from '../../../../../../../common/runtime_types';
+import type { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
+import { isScreenshotImageBlob, isScreenshotRef } from '../../../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../../../contexts';
 
 import { NoImageDisplay } from './no_image_display';

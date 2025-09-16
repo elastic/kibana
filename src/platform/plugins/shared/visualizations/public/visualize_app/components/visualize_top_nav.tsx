@@ -8,15 +8,16 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { EventEmitter } from 'events';
-import { AppMountParameters, OverlayRef } from '@kbn/core/public';
+import type { EventEmitter } from 'events';
+import type { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

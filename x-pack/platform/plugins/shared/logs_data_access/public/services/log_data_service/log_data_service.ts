@@ -6,9 +6,9 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { LogSourcesService } from '../../../common/types';
-import { RegisterServicesParams } from '../register_services';
-import { LogDataService } from './types';
+import type { LogSourcesService } from '../../../common/types';
+import type { RegisterServicesParams } from '../register_services';
+import type { LogDataService } from './types';
 
 export function createLogDataService(
   params: RegisterServicesParams & { logSourcesService: LogSourcesService }

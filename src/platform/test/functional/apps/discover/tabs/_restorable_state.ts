@@ -8,14 +8,11 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { discover, unifiedFieldList, unifiedTabs } = getPageObjects([
-    'common',
     'discover',
-    'timePicker',
-    'header',
     'unifiedFieldList',
     'unifiedTabs',
   ]);
@@ -24,6 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
+  const esql = getService('esql');
+  const browser = getService('browser');
 
   describe('tabs restorable state', function () {
     describe('sidebar', function () {
@@ -124,6 +123,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('data grid', function () {
+      afterEach(async () => {
+        await browser.clearLocalStorage();
+      });
+
       it('should restore the selected docs', async () => {
         const expectState = async (count: number) => {
           expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(count);
@@ -143,6 +146,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
         await expectState(2);
+      });
+
+      it('should restore density setting', async () => {
+        const expectState = async (density: string) => {
+          await retry.try(async () => {
+            expect(await dataGrid.getCurrentDensityValue()).to.be(density);
+          });
+        };
+
+        await dataGrid.clickGridSettings();
+        await expectState('Compact');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await dataGrid.changeDensityValue('Normal');
+        await expectState('Normal');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Compact');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Normal');
+      });
+
+      it('should restore row height setting', async () => {
+        const expectState = async (rowHeightValue: string) => {
+          await retry.try(async () => {
+            expect(await dataGrid.getCurrentRowHeightValue('row')).to.be(rowHeightValue);
+          });
+        };
+
+        await dataGrid.clickGridSettings();
+        await expectState('Custom');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await dataGrid.changeRowHeightValue('Auto');
+        await expectState('Auto');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Custom');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Auto');
       });
 
       it('should restore in-table search', async () => {
@@ -276,7 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should restore the search bar state in ES|QL mode', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
-        const defaultQuery = 'FROM logstash-* | LIMIT 10';
+        const defaultQuery = 'FROM logstash-*';
 
         const expectState = async (query: string, isDirty: boolean) => {
           await retry.try(async () => {
@@ -294,14 +351,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
         await expectState(defaultQuery, false);
 
         const draftQuery2 = 'from logstash-* | sort @timestamp desc | limit 150';
         await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await expectState(defaultQuery, false);
         await monacoEditor.setCodeEditorValue(draftQuery2);
@@ -310,7 +363,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery0, true);
-        expect(await discover.getHitCount()).to.be('10');
+        expect(await discover.getHitCount()).to.be('1,000');
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery0, false);
@@ -319,12 +372,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         await expectState(defaultQuery, false);
-        expect(await discover.getHitCount()).to.be('10');
+        expect(await discover.getHitCount()).to.be('1,000');
 
         await unifiedTabs.selectTab(2);
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery2, true);
-        expect(await discover.getHitCount()).to.be('10');
+        expect(await discover.getHitCount()).to.be('1,000');
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery2, false);
@@ -334,6 +387,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery0, false);
         expect(await discover.getHitCount()).to.be('50');
+      });
+
+      it('should restore ES|QL editor state', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        const distance = 100;
+        const initialHeight = await esql.getEditorHeight();
+        const updatedHeight = initialHeight + distance;
+
+        const expectState = async (isHistoryPanelOpen: boolean, editorHeight: number) => {
+          await retry.try(async () => {
+            expect(await esql.isHistoryPanelOpen()).to.be(isHistoryPanelOpen);
+          });
+          expect(await esql.getEditorHeight()).to.be(editorHeight);
+        };
+
+        await expectState(false, initialHeight);
+        await esql.toggleHistoryPanel();
+        await expectState(true, initialHeight);
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(false, initialHeight);
+        await esql.resizeEditorBy(distance);
+        await expectState(false, updatedHeight);
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(true, initialHeight);
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(false, updatedHeight);
       });
     });
   });

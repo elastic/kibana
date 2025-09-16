@@ -70,7 +70,7 @@ exports[`<ExportApp /> renders as expected 1`] = `
                     data-s=""
                   >
                     
-                    .css-721pd1-floatTopRight{position:absolute;top:-8px;right:-8px;}
+                    .css-1aoydhg-floatTopRight{position:absolute;top:-8px;right:-8px;z-index:1;}
                   </style>
                   <style
                     data-emotion="css"
@@ -199,7 +199,7 @@ exports[`<ExportApp /> renders as expected 2`] = `
                     data-s=""
                   >
                     
-                    .css-721pd1-floatTopRight{position:absolute;top:-8px;right:-8px;}
+                    .css-1aoydhg-floatTopRight{position:absolute;top:-8px;right:-8px;z-index:1;}
                   </style>
                   <style
                     data-emotion="css"

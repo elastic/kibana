@@ -12,15 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
 import { DEFAULT_LLM_PROMPT } from '../../common/prompt';
 
-import {
+import type {
   LLMModel,
   PlaygroundForm,
   PlaygroundResponse,
   PlaygroundSavedObject,
   SavedPlaygroundForm,
   SavedPlaygroundFormFetchError,
-  SavedPlaygroundFormFields,
 } from '../types';
+import { SavedPlaygroundFormFields } from '../types';
 
 function parseSummarizationModel(
   model: PlaygroundSavedObject['summarizationModel'],
@@ -185,4 +185,42 @@ export function validatePlaygroundName(name: string): string | null {
     });
   }
   return null;
+}
+
+export function validateSavedPlaygroundIndices(
+  savedIndices: string[],
+  queriedIndices: string[]
+): { validIndices: string[]; missingIndices: string[] } {
+  const validIndices: string[] = [];
+  const missingIndices: string[] = [];
+  for (const index of savedIndices) {
+    if (queriedIndices.includes(index)) {
+      validIndices.push(index);
+    } else {
+      missingIndices.push(index);
+    }
+  }
+  return { validIndices, missingIndices };
+}
+
+export function validateSavedPlaygroundModel(
+  summarizationModel: PlaygroundSavedObject['summarizationModel'],
+  models: LLMModel[]
+): string | undefined {
+  if (summarizationModel && summarizationModel.modelId) {
+    const model = models.find(
+      (llm) =>
+        llm.connectorId === summarizationModel.connectorId &&
+        llm.value === summarizationModel.modelId
+    );
+    if (model === undefined) {
+      return summarizationModel.modelId;
+    }
+  } else if (summarizationModel) {
+    const model = models.find((llm) => llm.connectorId === summarizationModel.connectorId);
+    if (model === undefined) {
+      return summarizationModel.connectorId;
+    }
+  }
+  return undefined;
 }

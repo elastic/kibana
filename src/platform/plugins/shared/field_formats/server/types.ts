@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
 
 export interface FieldFormatsSetup {
   /**

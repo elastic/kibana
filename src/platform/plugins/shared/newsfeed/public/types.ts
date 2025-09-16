@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration, Moment } from 'moment';
+import type { Duration, Moment } from 'moment';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 export interface NewsfeedPluginStartDependencies {
   screenshotMode: ScreenshotModePluginStart;

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
@@ -26,12 +26,15 @@ interface Props {
 export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
         defaultMessage: `Delete configuration`,
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={async () => {
         setIsDeleting(true);

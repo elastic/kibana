@@ -6,29 +6,58 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
+import { getDocumentById } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getDocumentById, GetDocumentByIdResult } from '@kbn/onechat-genai-utils';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),
   index: z.string().describe('Name of the index to retrieve the document from'),
 });
 
-export const getDocumentByIdTool = (): BuiltinToolDefinition<
-  typeof getDocumentByIdSchema,
-  GetDocumentByIdResult
-> => {
+export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
   return {
-    id: builtinToolIds.getDocumentById,
-    description: 'Retrieve the full content (source) of a document based on its ID and index name.',
+    id: platformCoreTools.getDocumentById,
+    description:
+      'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
       const result = await getDocumentById({ id, index, esClient: esClient.asCurrentUser });
+
+      if (result.found) {
+        return {
+          results: [
+            {
+              type: ToolResultType.resource,
+              data: {
+                reference: {
+                  id: result.id,
+                  index: result.index,
+                },
+                partial: false,
+                content: result._source,
+              },
+            },
+          ],
+        };
+      }
+
       return {
-        result,
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Document with ID '${result.id}' not found in index '${result.index}'`,
+              metadata: {
+                id: result.id,
+                index: result.index,
+              },
+            },
+          },
+        ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

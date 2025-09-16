@@ -442,6 +442,18 @@ export interface HttpInterceptor {
   ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
+   * Define an interceptor to be executed at the fetch call.
+   * @param next {@link HttpSetup.fetch}
+   * @param fetchOptions {@link HttpFetchOptionsWithPath}
+   * @param controller {@link IHttpInterceptController}
+   */
+  fetch?(
+    next: (fetchOptions: HttpFetchOptionsWithPath) => Promise<HttpResponse>,
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>,
+    controller: IHttpInterceptController
+  ): Promise<HttpResponse>;
+
+  /**
    * Define an interceptor to be executed after a response is received.
    * @param httpResponse {@link HttpResponse}
    * @param controller {@link IHttpInterceptController}

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { ConfigDrivenProcessorFormState, FieldConfiguration } from '../types';
+import type { ConfigDrivenProcessorFormState, FieldConfiguration } from '../types';
 import { ToggleField } from '../../toggle_field';
-import { ExtractBooleanFields } from '../../../types';
+import type { ExtractBooleanFields } from '../../../types';
 
 export const BooleanField = ({
   fieldConfiguration,

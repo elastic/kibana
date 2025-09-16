@@ -10,10 +10,10 @@ import expect from '@kbn/expect';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { LogLevel, SynthtraceClientsManager, createLogger } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getBettertest } from '../../common/bettertest';
 import {
   createAgentPolicy,
@@ -21,7 +21,7 @@ import {
   deleteAgentPolicyAndPackagePolicyByName,
   setupFleet,
 } from './helpers';
-import { ApmApiClient } from '../../common/config';
+import type { ApmApiClient } from '../../common/config';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const { getService } = ftrProviderContext;
@@ -85,7 +85,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     return apmEsClient;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177384
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
       const res = await bettertest<{
@@ -168,7 +167,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
           await scopedSynthtraceEsClient.index(scenario.events);
         });
 
-        it('the events can be seen on the Service Inventory Page', async () => {
+        it('the events can be seen on the Service inventory Page', async () => {
           const apmServices = await getApmServices(
             apmApiClient,
             scenario.start,

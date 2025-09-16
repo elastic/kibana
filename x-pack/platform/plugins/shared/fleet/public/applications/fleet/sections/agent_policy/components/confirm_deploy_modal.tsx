@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -27,8 +27,11 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPoliciesToAdd = [],
   agentPoliciesToRemove = [],
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   return agentPolicies.length === 0 && agentPoliciesToRemove.length === 0 ? (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="xpack.fleet.agentPolicy.noPolicies.confirmModalTitle"
@@ -68,6 +71,8 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
     </EuiConfirmModal>
   ) : (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="xpack.fleet.agentPolicy.confirmModalTitle"

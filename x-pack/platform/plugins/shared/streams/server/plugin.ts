@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import type { StreamsConfig } from '../common/config';
+import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -35,12 +36,13 @@ import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
-import { RouteHandlerScopedClients } from './routes/types';
-import {
+import type { RouteHandlerScopedClients } from './routes/types';
+import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -183,6 +185,7 @@ export class StreamsPlugin
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
           const licensing = pluginsStart.licensing;
+          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
           return {
             scopedClusterClient,
@@ -192,6 +195,7 @@ export class StreamsPlugin
             inferenceClient,
             contentClient,
             queryClient,
+            fieldsMetadataClient,
             licensing,
           };
         },
@@ -201,7 +205,13 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
-    registerFeatureFlags(core, plugins, this.logger);
+    registerFeatureFlags(core, this.logger);
+
+    if (plugins.globalSearch) {
+      plugins.globalSearch.registerResultProvider(
+        createStreamsGlobalSearchResultProvider(core, this.logger)
+      );
+    }
 
     return {};
   }

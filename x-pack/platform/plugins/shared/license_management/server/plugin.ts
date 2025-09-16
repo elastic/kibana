@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
-import { SetupDependencies, StartDependencies } from './types';
+import type { SetupDependencies, StartDependencies } from './types';
 
 export class LicenseManagementServerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>

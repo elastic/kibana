@@ -5,45 +5,94 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  useEuiTheme,
+  useEuiShadow,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
+import { useKibana } from '../../hooks/use_kibana';
+import { SearchConnectorTab } from './search_connector_tab';
+import { getSolutionSpecificLogos } from '../../helpers/get_solution_specific_logos';
+import { getSolutionSpecificLabels } from '../../helpers/get_solution_specific_labels';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
-import type { TabsRt } from '../config';
-import { SearchConnectorTab } from './search_connector_tab';
-import { useKibana } from '../../hooks/use_kibana';
 
 export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp, isAppRegistered },
+      application: { navigateToApp, isAppRegistered, capabilities },
       serverless,
+      spaces,
+      cloud,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
+  const { euiTheme } = useEuiTheme();
+  const headerIconShadow = useEuiShadow('s');
+
+  const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
+
+  // Determine the current solution.
+  let currentSolution: SolutionView | undefined;
+  if (serverless) {
+    const projectType = cloud?.serverless?.projectType;
+    currentSolution = projectType === 'observability' ? 'oblt' : 'es';
+  } else {
+    currentSolution = currentSpaceSolution;
+  }
+
+  const hasConnectorsAllPrivilege =
+    capabilities.actions?.show === true &&
+    capabilities.actions?.execute === true &&
+    capabilities.actions?.delete === true &&
+    capabilities.actions?.save === true;
 
   const {
     query: { tab },
   } = useObservabilityAIAssistantManagementRouterParams('/');
 
   useEffect(() => {
+    const getCurrentSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setCurrentSpaceSolution(space?.solution);
+      }
+    };
+
+    getCurrentSpace();
+  }, [spaces]);
+
+  const { breadcrumbText, title } = getSolutionSpecificLabels({
+    solution: currentSolution,
+    isServerless: !!serverless,
+  });
+
+  const logos = getSolutionSpecificLogos(currentSolution);
+
+  useEffect(() => {
     if (serverless) {
       serverless.setBreadcrumbs([
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
-            {
-              defaultMessage: 'AI Assistant for Observability and Search Settings',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     } else {
@@ -54,20 +103,15 @@ export function SettingsPage() {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
-            {
-              defaultMessage: 'Observability',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     }
-  }, [navigateToApp, serverless, setBreadcrumbs]);
+  }, [breadcrumbText, navigateToApp, serverless, setBreadcrumbs]);
 
   const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element; disabled?: boolean }> = [
     {
@@ -82,7 +126,7 @@ export function SettingsPage() {
       name: i18n.translate(
         'xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBaseLabel',
         {
-          defaultMessage: 'Knowledge base',
+          defaultMessage: 'Knowledge Base',
         }
       ),
       content: <KnowledgeBaseTab />,
@@ -110,18 +154,50 @@ export function SettingsPage() {
 
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiTitle size="l">
-        <h2>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-            {
-              defaultMessage: 'Settings',
-            }
-          )}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} direction="row">
+          {logos.map((logo) => (
+            <EuiFlexItem key={logo} grow={false}>
+              <EuiIcon
+                size="xl"
+                type={logo}
+                style={{
+                  backgroundColor: euiTheme.colors.backgroundBasePlain,
+                  borderRadius: '50%',
+                  padding: 6,
+                }}
+                css={css`
+                  ${headerIconShadow};
+                `}
+              />
+            </EuiFlexItem>
+          ))}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {hasConnectorsAllPrivilege ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="gear"
+              size="m"
+              onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+              data-test-subj="genAiSettingsButton"
+            >
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton',
+                {
+                  defaultMessage: 'GenAI Settings',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiTabs data-test-subj="settingsPageTabs">
         {tabs

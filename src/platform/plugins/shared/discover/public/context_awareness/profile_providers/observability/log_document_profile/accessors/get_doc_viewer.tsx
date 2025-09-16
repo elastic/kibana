@@ -29,6 +29,14 @@ export const createGetDocViewer =
 
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
 
+    const indexes = {
+      apm: {
+        errors: services.apmErrorsContextService.getErrorsIndexPattern(),
+        traces: services.tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: services.logsContextService.getAllLogsIndexPattern(),
+    };
+
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry) => {
@@ -46,11 +54,11 @@ export const createGetDocViewer =
             );
 
             useEffect(() => {
-              context.logOverviewContext$.next(undefined);
-
               if (!logsOverviewApi) {
                 return;
               }
+
+              context.logOverviewContext$.next(undefined);
 
               if (initialAccordionSection.current) {
                 logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);
@@ -86,6 +94,7 @@ export const createGetDocViewer =
                 renderAIAssistant={logsAIAssistantFeature?.render}
                 renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
                 renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+                indexes={indexes}
               />
             );
           },

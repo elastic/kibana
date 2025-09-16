@@ -6,23 +6,21 @@
  */
 
 import React, { useState } from 'react';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   Comparators,
-  Criteria,
   EuiAvatar,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiSpacer,
-  EuiTableSortingType,
   EuiText,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Agent } from '../../../../../common/agents';
+import type { Agent } from '../../../../../common/agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { CreateNewAssistantModal } from '../assistant_create_modal';

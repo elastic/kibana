@@ -8,8 +8,9 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
-import { useChat } from '../../../hooks/use_chat';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../context/send_message_context';
+import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
@@ -23,20 +24,20 @@ const fullHeightStyles = css`
 `;
 
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
-  const [message, setMessage] = useState<string>('');
+  const isSendingMessage = useIsSendingMessage();
+  const [input, setInput] = useState('');
+  const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
-  const { status, sendMessage } = useChat();
-  const disabled = !message.trim() || status === 'loading';
+  const isSubmitDisabled = !input.trim() || isSendingMessage;
 
-  const handleSubmit = useCallback(() => {
-    if (disabled) {
+  const handleSubmit = () => {
+    if (isSubmitDisabled) {
       return;
     }
-
-    sendMessage(message);
+    sendMessage({ message: input });
+    setInput('');
     onSubmit();
-    setMessage('');
-  }, [message, onSubmit, sendMessage, disabled]);
+  };
 
   const contentStyles = css`
     ${fullHeightStyles}
@@ -47,7 +48,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     padding: ${euiTheme.size.base};
     box-shadow: none;
     border: ${euiTheme.border.thin};
-    border-color: ${euiTheme.border.color};
+    border-color: ${euiTheme.colors.borderBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
     &:focus-within {
       border-bottom-color: ${euiTheme.colors.primary};
@@ -67,12 +68,16 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
           defaultMessage: 'Message input form',
         })}
       >
-        <ConversationInputTextArea
-          message={message}
-          setMessage={setMessage}
-          handleSubmit={handleSubmit}
+        <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
+        <ConversationInputActions
+          onSubmit={handleSubmit}
+          isSubmitDisabled={isSubmitDisabled}
+          resetToPendingMessage={() => {
+            if (pendingMessage) {
+              setInput(pendingMessage);
+            }
+          }}
         />
-        <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />
       </EuiFlexGroup>
     </ConversationContent>
   );

@@ -47,7 +47,7 @@ export const createThreatSignal = async ({
   const threatIndicatorPath =
     sharedParams.completeRule.ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH;
   const threatFilter = buildThreatMappingFilter({
-    threatMapping,
+    threatMappings: threatMapping,
     threatList: currentThreatList,
     entryKey: 'value',
     allowedFieldsForTermsQuery,
@@ -87,6 +87,7 @@ export const createThreatSignal = async ({
       reassignThreatPitId,
       threatIndexFields,
       allowedFieldsForTermsQuery,
+      threatMapping,
     });
 
     let result: SearchAfterAndBulkCreateReturnType;

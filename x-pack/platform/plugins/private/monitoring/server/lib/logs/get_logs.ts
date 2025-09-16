@@ -7,15 +7,17 @@
 
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
-import { createTimeFilter, TimerangeFilter } from '../create_query';
-import { detectReason, LogsIndexCheckOpts } from './detect_reason';
+import type { TimerangeFilter } from '../create_query';
+import { createTimeFilter } from '../create_query';
+import type { LogsIndexCheckOpts } from './detect_reason';
+import { detectReason } from './detect_reason';
 import { elasticsearchLogsFilter } from './logs_filter';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getTimezone } from '../get_timezone';
 import { detectReasonFromException } from './detect_reason_from_exception';
-import { LegacyRequest } from '../../types';
-import { LogsResponse } from '../../../common/types/logs';
-import { MonitoringConfig } from '../../config';
+import type { LegacyRequest } from '../../types';
+import type { LogsResponse } from '../../../common/types/logs';
+import type { MonitoringConfig } from '../../config';
 
 interface Log {
   timestamp?: string | number;

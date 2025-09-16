@@ -43,7 +43,40 @@
       "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "sampleDataIngest",
+          "id": "def-public.SampleDataIngestPluginStart.isSampleIndex",
+          "type": "Function",
+          "tags": [],
+          "label": "isSampleIndex",
+          "description": [],
+          "signature": [
+            "(indexName: string) => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "sampleDataIngest",
+              "id": "def-public.SampleDataIngestPluginStart.isSampleIndex.$1",
+              "type": "string",
+              "tags": [],
+              "label": "indexName",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -58,7 +91,55 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.getSampleDataIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getSampleDataIndexName",
+        "description": [],
+        "signature": [
+          "(sampleType: ",
+          {
+            "pluginId": "sampleDataIngest",
+            "scope": "common",
+            "docId": "kibSampleDataIngestPluginApi",
+            "section": "def-common.DatasetSampleType",
+            "text": "DatasetSampleType"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.getSampleDataIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "sampleType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sampleDataIngest",
+                "scope": "common",
+                "docId": "kibSampleDataIngestPluginApi",
+                "section": "def-common.DatasetSampleType",
+                "text": "DatasetSampleType"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "sampleDataIngest",
@@ -92,6 +173,20 @@
             "tags": [],
             "label": "indexName",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.InstallResponse.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -137,16 +232,31 @@
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.StatusResponse.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [
+    "enums": [],
+    "misc": [
       {
         "parentPluginId": "sampleDataIngest",
         "id": "def-common.DatasetSampleType",
-        "type": "Enum",
+        "type": "string",
         "tags": [],
         "label": "DatasetSampleType",
         "description": [],
@@ -154,9 +264,22 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      }
-    ],
-    "misc": [
+      },
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.indexNamePrefix",
+        "type": "string",
+        "tags": [],
+        "label": "indexNamePrefix",
+        "description": [],
+        "signature": [
+          "\"kibana_sample_data_\""
+        ],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "sampleDataIngest",
         "id": "def-common.INSTALL_API_PATH",

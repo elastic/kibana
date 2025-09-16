@@ -9,16 +9,18 @@ import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kb
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
+import { isLeft } from 'fp-ts/Either';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useKibana } from '../../../../../common/lib/kibana';
+import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
 
 export const DASHBOARD_TABLE_QUERY_ID = 'privmonDashboardTableQueryId';
 
 export const useDashboardTableQuery = <TableItemType extends Record<string, string>>(
-  tableQuery: string
+  tableQuery: EsqlQueryOrInvalidFields
 ) => {
   const filterQuery = useEsqlGlobalFilterQuery();
   const { data } = useKibana().services;
@@ -33,13 +35,18 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
     error,
   } = useQuery(
     [tableQuery, filterQuery],
-    async ({ signal }) =>
-      getESQLResults({
-        esqlQuery: tableQuery,
+    async ({ signal }) => {
+      if (isLeft(tableQuery)) {
+        return null;
+      }
+
+      return getESQLResults({
+        esqlQuery: tableQuery.right,
         search: data.search.search,
         signal,
         filter: filterQuery,
-      }),
+      });
+    },
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
@@ -48,18 +55,21 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
 
   const { deleteQuery, setQuery } = useGlobalTime();
 
-  const index = getIndexPatternFromESQLQuery(tableQuery);
-
   const response = result?.response;
 
   const inspect = useMemo(() => {
+    if (isLeft(tableQuery)) {
+      return {
+        dsl: [],
+        response: [],
+      };
+    }
+    const index = getIndexPatternFromESQLQuery(tableQuery.right);
     return {
-      dsl: [
-        JSON.stringify({ index: [index] ?? [''], body: prettifyQuery(tableQuery, false) }, null, 2),
-      ],
+      dsl: [JSON.stringify({ index: [index], body: prettifyQuery(tableQuery.right) }, null, 2)],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
-  }, [tableQuery, response, index]);
+  }, [tableQuery, response]);
 
   useQueryInspector({
     deleteQuery,

@@ -7,23 +7,22 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
 import {
-  ChatCompleteOptions,
   createInferenceRequestError,
   getConnectorFamily,
   getConnectorProvider,
   type ChatCompleteCompositeResponse,
   MessageRole,
-  AnonymizationRule,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { getInferenceAdapter } from './adapters';
+import type { InferenceExecutor } from './utils';
 import {
-  InferenceExecutor,
   chunksIntoMessage,
   getInferenceExecutor,
   handleCancellation,
@@ -34,7 +33,7 @@ import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
-import { RegexWorkerService } from './anonymization/regex_worker_service';
+import type { RegexWorkerService } from './anonymization/regex_worker_service';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -84,7 +83,7 @@ export function createChatCompleteCallbackApi({
       abortSignal,
       stream,
       maxRetries = 3,
-      retryConfiguration = { retryOn: 'all' },
+      retryConfiguration = {},
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {

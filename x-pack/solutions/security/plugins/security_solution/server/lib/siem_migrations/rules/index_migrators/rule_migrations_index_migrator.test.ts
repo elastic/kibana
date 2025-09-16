@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RuleMigrationIndexMigrator } from '.';
 import * as RuleMigrationSpaceIndexMigratorModule from './rule_migrations_per_space_index_migrator';
-import type { Adapters } from '../types';
+import type { RuleMigrationAdapters } from '../types';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -27,7 +27,7 @@ const ruleMigrationIndexAdapters = {
   rules: new IndexPatternAdapter(rulesIndexName, {
     kibanaVersion: '9.0.0',
   }),
-} as unknown as Adapters;
+} as unknown as RuleMigrationAdapters;
 
 const mockLogger = loggerMock.create();
 

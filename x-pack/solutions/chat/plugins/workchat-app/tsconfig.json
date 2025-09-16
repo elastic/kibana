@@ -35,7 +35,6 @@
     "@kbn/actions-plugin",
     "@kbn/wci-browser",
     "@kbn/features-plugin",
-    "@kbn/wc-genai-utils",
     "@kbn/workchat-framework-plugin",
     "@kbn/logging",
   ],

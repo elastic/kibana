@@ -35,6 +35,7 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  checkIntegrationFipsLooseCompatibility,
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
@@ -49,6 +50,7 @@ import {
   useStartServices,
   useUIExtension,
   useAuthz,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -74,6 +76,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
+import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
+
 import {
   AddIntegrationFlyoutConfigureHeader,
   CreatePackagePolicySinglePageLayout,
@@ -84,7 +88,6 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
@@ -173,12 +176,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       : undefined;
   }, [integrationToEnable, packageInfo?.policy_templates]);
 
+  const fipsCompatibleIntegration = useMemo(() => {
+    return checkIntegrationFipsLooseCompatibility(pkgName, packageInfo);
+  }, [packageInfo, pkgName]);
+
   const showSecretsDisabledCallout =
     !fleetStatus.isSecretsStorageEnabled &&
     packageInfo &&
     packageHasAtLeastOneSecret({ packageInfo });
 
-  const hideAgentlessSelector = !!addIntegrationFlyoutProps;
+  const isAddIntegrationFlyout = !!addIntegrationFlyoutProps;
   // Save package policy
   const {
     onSubmit,
@@ -211,7 +218,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
-    hideAgentlessSelector,
+    isAddIntegrationFlyout,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -284,7 +291,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     if (isFleetEnabled && agentPolicyIds.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
+  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentPolicies]);
+
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
+
+  const fipsAgentsCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
+  }, [agentPolicyData?.items]);
 
   useEffect(() => {
     if (
@@ -324,12 +339,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
       setIsFleetExtensionLoaded(isExtensionLoaded);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+
+      if (isValid !== undefined) {
+        setFormState(isValid ? 'VALID' : 'INVALID');
+      }
     },
     [updatePackagePolicy, setFormState]
   );
@@ -458,7 +471,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
+          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               showLimitationsMessage={!isServerless}
               disabled={false}
@@ -518,7 +531,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
-      hideAgentlessSelector,
+      isAddIntegrationFlyout,
       isServerless,
     ]
   );
@@ -592,6 +605,38 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="xl" />
         </>
       ) : null}
+      {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.fipsCalloutTitle"
+                defaultMessage="This integration is not FIPS compatible"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
+              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
+              values={{
+                guideLink: (
+                  <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
+                      defaultMessage="Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut

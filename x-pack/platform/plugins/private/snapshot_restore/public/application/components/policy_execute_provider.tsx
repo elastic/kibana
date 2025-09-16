@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { executePolicy as executePolicyRequest } from '../services/http';
@@ -27,6 +27,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
   const [policyName, setPolicyName] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const executePolicyPrompt: ExecutePolicy = (name, onSuccess = () => undefined) => {
     if (!name || !name.length) {
@@ -82,6 +83,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.executePolicy.confirmModal.executePolicyTitle"
@@ -89,6 +91,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
             values={{ name: policyName }}
           />
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={executePolicy}
         cancelButtonText={

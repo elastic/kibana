@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ToolType } from '@kbn/onechat-common';
+import { editableToolTypes } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
@@ -20,10 +20,7 @@ import type {
   UpdateToolResponse,
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
-import {
-  configurationSchema as esqlConfigSchema,
-  configurationUpdateSchema as esqlConfigUpdateSchema,
-} from '../services/tools/esql/schemas';
+import { publicApiPath } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
@@ -34,7 +31,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // list tools API
   router.versioned
     .get({
-      path: '/api/chat/tools',
+      path: `${publicApiPath}/tools`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -65,7 +62,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // get tool by ID
   router.versioned
     .get({
-      path: '/api/chat/tools/{id}',
+      path: `${publicApiPath}/tools/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -104,7 +101,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // create tool
   router.versioned
     .post({
-      path: '/api/chat/tools',
+      path: `${publicApiPath}/tools`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -125,10 +122,12 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           request: {
             body: schema.object({
               id: schema.string(),
-              type: schema.oneOf([schema.literal(ToolType.esql)]),
+              // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
+              type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
               description: schema.string({ defaultValue: '' }),
               tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-              configuration: esqlConfigSchema,
+              // actual config validation is done in the tool service
+              configuration: schema.recordOf(schema.string(), schema.any()),
             }),
           },
         },
@@ -147,7 +146,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // update tool
   router.versioned
     .put({
-      path: '/api/chat/tools/{toolId}',
+      path: `${publicApiPath}/tools/{toolId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -172,7 +171,8 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
             body: schema.object({
               description: schema.maybe(schema.string()),
               tags: schema.maybe(schema.arrayOf(schema.string())),
-              configuration: schema.maybe(esqlConfigUpdateSchema),
+              // actual config validation is done in the tool service
+              configuration: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             }),
           },
         },
@@ -192,7 +192,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // delete tool
   router.versioned
     .delete({
-      path: '/api/chat/tools/{id}',
+      path: `${publicApiPath}/tools/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -227,11 +227,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         });
       })
     );
-
   // execute a tool
   router.versioned
     .post({
-      path: '/api/chat/tools/_execute',
+      path: `${publicApiPath}/tools/_execute`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -275,7 +274,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
 
         return response.ok({
           body: {
-            result: toolResult.result,
+            results: toolResult.results,
           },
         });
       })

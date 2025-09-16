@@ -6,16 +6,22 @@
  */
 import { z } from '@kbn/zod';
 import { BaseStream } from '../base';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 
 export interface Group {
+  metadata: Record<string, string>;
+  tags: string[];
   members: string[];
 }
 
 export const Group: Validation<unknown, Group> = validation(
   z.unknown(),
   z.object({
+    metadata: z.record(z.string()),
+    tags: z.array(z.string()),
     members: z.array(z.string()),
   })
 );
@@ -51,3 +57,8 @@ export const GroupStream: ModelValidation<BaseStream.Model, GroupStream.Model> =
     UpsertRequest: z.object({}),
   }
 );
+
+// Optimized implementation for Definition check - the fallback is a zod-based check
+GroupStream.Definition.is = (
+  stream: BaseStream.Model['Definition']
+): stream is GroupStream.Definition => 'group' in stream;

@@ -13,7 +13,6 @@ import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { fromSavedSearchAttributes } from '../service/saved_searches_utils';
 import type { SavedSearchAttributes, SavedSearch } from '../types';
-
 import type { KibanaContextStartDependencies } from './kibana_context';
 import { getKibanaContextFn } from './kibana_context';
 
@@ -57,6 +56,19 @@ describe('kibanaContextFn', () => {
               query: [],
             }),
           },
+          tabs: [
+            {
+              id: 'test',
+              label: 'Test',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    query: [],
+                  }),
+                },
+              },
+            },
+          ],
         } as SavedSearchAttributes,
         [],
         undefined,

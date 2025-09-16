@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConsoleAppenderConfig } from './console';
-import { FileAppenderConfig } from './file';
-import { RewriteAppenderConfig } from './rewrite';
-import { RollingFileAppenderConfig } from './rolling_file';
+import type { ConsoleAppenderConfig } from './console';
+import type { FileAppenderConfig } from './file';
+import type { RewriteAppenderConfig } from './rewrite';
+import type { RollingFileAppenderConfig } from './rolling_file';
 
 export type { ConsoleAppenderConfig } from './console';
 export type { FileAppenderConfig } from './file';

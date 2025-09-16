@@ -29,7 +29,7 @@ Banners are a [subscription feature](https://www.elastic.co/subscriptions).
 `xpack.banners.textColor`
 :   The color for the banner text. Defaults to `#8A6A0A`.
 
-`xpack.banners.linkColor`
+`xpack.banners.linkColor` {applies_to}`stack: ga 9.1`
 :   The color for the banner link text. Defaults to `#0B64DD`.
 
 `xpack.banners.backgroundColor`

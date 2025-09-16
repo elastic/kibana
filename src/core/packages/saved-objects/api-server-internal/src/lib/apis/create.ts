@@ -15,12 +15,13 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
-import { CreateRequest, type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
+import type { CreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;
@@ -109,6 +110,12 @@ export const performCreate = async <T>(
       id,
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+        attributes: {
+          ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
+          ...attributes,
+        },
+      }),
     },
   });
 

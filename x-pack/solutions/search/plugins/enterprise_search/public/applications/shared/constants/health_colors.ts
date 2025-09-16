@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
-import { IconColor } from '@elastic/eui';
+import type { IconColor } from '@elastic/eui';
 
 type HealthStatusStrings = 'red' | 'green' | 'yellow' | 'unavailable';
 export const healthColorsMap: Record<HealthStatusStrings, IconColor> = {

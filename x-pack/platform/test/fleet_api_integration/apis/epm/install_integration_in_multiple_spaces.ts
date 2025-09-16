@@ -7,7 +7,7 @@
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';
@@ -78,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 
       await createSpace(testSpaceId);
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await deleteSpace(testSpaceId);
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     it('should install kibana assets', async function () {

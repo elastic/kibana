@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiButtonGroup, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 
 import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../../translations';
 import { Actions } from '../../../../../../../../actions';
-import { LegacyHistoricalResult } from '../../../../../../../../types';
+import type { LegacyHistoricalResult } from '../../../../../../../../types';
 import { IncompatibleCallout } from '../../../../incompatible_callout';
 import { CheckSuccessEmptyPrompt } from '../../../../check_success_empty_prompt';
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';

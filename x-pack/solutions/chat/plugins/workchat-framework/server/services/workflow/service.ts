@@ -12,8 +12,9 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { workflowSoTypeName } from '../../saved_objects';
-import { WorkflowRegistry } from './registry';
-import { ScopedWorkflowService, ScopedWorkflowServiceImpl } from './scoped_service';
+import type { WorkflowRegistry } from './registry';
+import type { ScopedWorkflowService } from './scoped_service';
+import { ScopedWorkflowServiceImpl } from './scoped_service';
 import { WorkflowClientImpl } from './client';
 
 export interface WorkflowService {

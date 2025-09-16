@@ -22,6 +22,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,13 +40,15 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
   const { isEditing } = useValues(ConnectorNameAndDescriptionLogic);
   const { saveNameAndDescription, setIsEditing } = useActions(ConnectorNameAndDescriptionLogic);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   if (!isEditing) return null;
 
   return (
-    <EuiFlyout onClose={() => setIsEditing(false)} size="s">
+    <EuiFlyout onClose={() => setIsEditing(false)} size="s" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={flyoutTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.title',
               {

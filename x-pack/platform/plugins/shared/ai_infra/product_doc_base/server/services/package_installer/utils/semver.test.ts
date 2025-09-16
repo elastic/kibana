@@ -26,4 +26,8 @@ describe('latestVersion', () => {
   it('accepts versions in a {major.minor} format', () => {
     expect(latestVersion(['9.16', '9.3'])).toEqual('9.16');
   });
+  it('returns the highest version from the list, ignoring versions less than the current version if provided', () => {
+    expect(latestVersion(['8.18', '9.1', '9.16', '9.3'], '8.19')).toEqual('8.18');
+    expect(latestVersion(['8.18', '8.19', '9.1', '9.3'], '9.2')).toEqual('9.1');
+  });
 });

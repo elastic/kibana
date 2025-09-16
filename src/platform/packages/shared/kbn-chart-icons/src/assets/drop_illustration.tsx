@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiIconProps, useEuiTheme } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
 export const DropIllustration = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => {

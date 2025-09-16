@@ -100,6 +100,16 @@ jest.mock('../output', () => {
       type: 'remote_elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
     },
+    'test-streams-id': {
+      id: 'test-streams-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'streams output',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+      write_to_logs_streams: true,
+    },
   };
   return {
     outputService: {
@@ -1086,6 +1096,83 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should return a policy with logs permissions when write_to_logs_streams is enabled', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'somelogs.log',
+        },
+      ],
+    } as PackageInfo);
+    mockAgentPolicy({
+      data_output_id: 'test-streams-id',
+      package_policies: [
+        {
+          name: 'test-policy',
+          namespace: 'defaultspace',
+          id: 'package-policy-uuid-test-123',
+          enabled: true,
+          policy_ids: ['agent-policy'],
+          package: {
+            name: 'somelogs',
+            title: 'Some logs',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: 'logfile-somelogs.log',
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'somelogs.log',
+                    type: 'logs',
+                  },
+                },
+              ],
+            },
+          ],
+          revision: 1,
+          created_at: '2020-01-01',
+          created_by: '',
+          updated_at: '2020-01-01',
+          updated_by: '',
+        },
+      ],
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      output_permissions: {
+        'test-streams-id': {
+          _elastic_agent_checks: {
+            cluster: ['monitor'],
+          },
+          'package-policy-uuid-test-123': {
+            indices: [
+              {
+                names: ['logs-somelogs.log-defaultspace'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
   it('should return a policy with advanced settings', async () => {
     mockAgentPolicy({
       advanced_settings: {
@@ -1360,6 +1447,39 @@ ssl.test: 123
     `);
   });
 
+  it('should keep ssl fields for es output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "preset": "balanced",
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+        },
+        "type": "elasticsearch",
+      }
+    `);
+  });
+
   it('should works with proxy', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
@@ -1471,6 +1591,44 @@ ssl.test: 123
           "verification_mode": "none",
         },
         "type": "logstash",
+      }
+    `);
+  });
+
+  it('should not override advanced yaml ssl fields for elasticsearch output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        config_yaml:
+          'ssl:\n  verification_mode: "none"\n  certificate_authorities: ["/tmp/ssl/ca.crt"] ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "preset": "balanced",
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+          "verification_mode": "none",
+        },
+        "type": "elasticsearch",
       }
     `);
   });

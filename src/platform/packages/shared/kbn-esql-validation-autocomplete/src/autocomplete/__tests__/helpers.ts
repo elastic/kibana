@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import {
-  TRIGGER_SUGGESTION_COMMAND,
-  fieldTypes,
-  FieldType,
-  FunctionParameterType,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '@kbn/esql-ast';
+import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
+import { TRIGGER_SUGGESTION_COMMAND, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import {
+import type {
   Location,
   ESQLFieldWithMetadata,
   ISuggestionItem,
@@ -26,7 +20,8 @@ import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -51,15 +46,27 @@ export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
+    userDefined: false as const,
+    // suggestedAs is optional and omitted here
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  {
+    name: 'any#Char$Field',
+    type: 'double',
+    suggestedAs: '`any#Char$Field`',
+    userDefined: false as const,
+  },
+  {
+    name: 'kubernetes.something.something',
+    type: 'double',
+    suggestedAs: undefined,
+    userDefined: false as const,
+  },
 ];
 
 export const lookupIndexFields: TestField[] = [
-  { name: 'booleanField', type: 'boolean' },
-  { name: 'dateField', type: 'date' },
-  { name: 'joinIndexOnlyField', type: 'text' },
+  { name: 'booleanField', type: 'boolean', userDefined: false },
+  { name: 'dateField', type: 'date', userDefined: false },
+  { name: 'joinIndexOnlyField', type: 'text', userDefined: false },
 ];
 
 export const indexes = (
@@ -138,8 +145,9 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
-    license === 'platinum'
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
+    license === 'platinum',
+  activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -168,53 +176,64 @@ export function getFunctionSignaturesByReturnType(
   const locations = Array.isArray(location) ? location : [location];
 
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
-      const hasRestrictedSignature = signatures.some((signature) => signature.license);
-      if (hasRestrictedSignature) {
-        const availableSignatures = signatures.filter((signature) => {
-          if (!signature.license) return true;
-          return hasMinimumLicenseRequired(
-            signature.license.toLocaleLowerCase() as ESQLLicenseType
-          );
-        });
+    .filter(
+      ({ signatures, ignoreAsSuggestion, locationsAvailable, observabilityTier, license }) => {
+        const hasRestrictedSignature = signatures.some((signature) => signature.license);
+        if (hasRestrictedSignature) {
+          const availableSignatures = signatures.filter((signature) => {
+            if (!signature.license) return true;
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
+          });
 
-        if (availableSignatures.length === 0) {
+          if (availableSignatures.length === 0) {
+            return false;
+          }
+        }
+
+        const hasObservabilityAccess = !(
+          observabilityTier &&
+          activeProduct &&
+          activeProduct.type === 'observability' &&
+          activeProduct.tier !== observabilityTier.toLowerCase()
+        );
+
+        if (!hasObservabilityAccess) {
           return false;
         }
-      }
 
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (
-        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-          (loc) => locationsAvailable.includes(loc)
-        )
-      ) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
-      );
-      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
+        if (ignoreAsSuggestion) {
+          return false;
+        }
+        if (
+          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+            (loc) => locationsAvailable.includes(loc)
+          )
+        ) {
+          return false;
+        }
+        const filteredByReturnType = signatures.filter(
+          ({ returnType }) =>
+            expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
         );
+        if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
+          return false;
+        }
+        if (paramsTypes?.length) {
+          return filteredByReturnType.some(
+            ({ params }) =>
+              !params.length ||
+              (paramsTypes.length <= params.length &&
+                paramsTypes.every(
+                  (expectedType, i) =>
+                    expectedType === 'any' ||
+                    params[i].type === 'any' ||
+                    expectedType === params[i].type
+                ))
+          );
+        }
+        return true;
       }
-      return true;
-    })
+    )
     .filter(({ name }) => {
       if (ignored?.length) {
         return !ignored?.includes(name);
@@ -273,7 +292,9 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>
+  }>,
+  customLicenseType = 'platinum',
+  customActiveProduct?: PricingProduct
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
@@ -303,7 +324,10 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
-    getLicense: jest.fn(),
+    getLicense: jest.fn(async () => ({
+      hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
+    })),
+    getActiveProduct: jest.fn(() => customActiveProduct),
   };
 }
 

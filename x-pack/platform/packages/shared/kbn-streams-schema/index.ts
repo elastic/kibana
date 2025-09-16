@@ -9,42 +9,16 @@ export { Streams } from './src/models/streams';
 export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
-export { UnwiredIngest } from './src/models/ingest/unwired';
+export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
 export {
-  type ProcessorDefinition,
-  type ProcessorConfig,
-  type ProcessorDefinitionWithId,
-  type ProcessorType,
-  type ProcessorTypeOf,
-  type KvProcessorDefinition,
-  type KvProcessorConfig,
-  type GeoIpProcessorConfig,
-  type GeoIpProcessorDefinition,
-  type SetProcessorConfig,
-  type SetProcessorDefinition,
-  type RenameProcessorConfig,
-  type RenameProcessorDefinition,
-  type UrlDecodeProcessorConfig,
-  type UrlDecodeProcessorDefinition,
-  type UserAgentProcessorConfig,
-  type UserAgentProcessorDefinition,
-  type DateProcessorConfig,
-  type DateProcessorDefinition,
-  type DissectProcessorConfig,
-  type DissectProcessorDefinition,
-  type GrokProcessorConfig,
-  type GrokProcessorDefinition,
-  type ManualIngestPipelineProcessorConfig as ManualIngestPipelineProcessorConfig,
-  type ManualIngestPipelineProcessorDefinition as ManualIngestPipelineProcessorDefinition,
-  getProcessorConfig,
-  getProcessorType,
-  processorWithIdDefinitionSchema,
-  processorDefinitionSchema,
-} from './src/models/ingest/processors';
-
-export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
+  type RoutingDefinition,
+  routingStatus,
+  type RoutingStatus,
+  isRoutingEnabled,
+  routingDefinitionListSchema,
+} from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';
 
@@ -59,6 +33,8 @@ export {
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+export { getInheritedSettings } from './src/helpers/get_inherited_settings';
+export { buildEsqlQuery } from './src/helpers/query';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -92,8 +68,6 @@ export {
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
 
-export { getConditionFields } from './src/helpers/get_condition_fields';
-
 export {
   type StreamQuery,
   type StreamQueryKql,
@@ -106,7 +80,7 @@ export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lif
 
 export {
   type IngestStreamLifecycle,
-  type UnwiredIngestStreamEffectiveLifecycle,
+  type ClassicIngestStreamEffectiveLifecycle,
   type IlmPolicyPhases,
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,
@@ -125,28 +99,16 @@ export {
 } from './src/models/ingest/lifecycle';
 
 export {
-  type BinaryFilterCondition,
-  type Condition,
-  type FilterCondition,
-  type UnaryFilterCondition,
-  type AlwaysCondition,
-  type UnaryOperator,
-  type NeverCondition,
-  isAlwaysCondition,
-  isAndCondition,
-  isFilterCondition,
-  isNeverCondition,
-  isOrCondition,
-  isUnaryFilterCondition,
-  isBinaryFilterCondition,
-  conditionSchema,
-  isCondition,
-} from './src/conditions';
+  type IngestStreamSettings,
+  type WiredIngestStreamEffectiveSettings,
+} from './src/models/ingest/settings';
 
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
+  SignificantEventsGenerateResponse,
+  GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
 
-export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
+export { emptyAssets } from './src/helpers/empty_assets';

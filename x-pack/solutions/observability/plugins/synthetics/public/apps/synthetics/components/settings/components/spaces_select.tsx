@@ -9,10 +9,11 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
+import type { FieldValues, Path } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface SpaceSelectorProps {
   helpText: string;

@@ -7,46 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-
 export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
+export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
 
-const connectors = [
-  {
-    type: 'console',
-    params: [
-      {
-        name: 'message',
-        type: 'string' as const,
-      },
-    ],
-  },
-  {
-    type: 'slack.sendMessage',
-    params: [
-      {
-        name: 'message',
-        type: 'string' as const,
-      },
-    ],
-    // TODO: fetch from ActionsClient.getAll()
-    availableConnectorIds: ['keep-playground', 'keep-demo'],
-  },
-  {
-    type: 'delay',
-    params: [
-      {
-        name: 'delay',
-        type: 'number' as const,
-      },
-    ],
-  },
-];
+// Export shared utilities that are needed by both server and client
+// NOTE: buildRequestFromConnector removed from here to avoid main bundle bloat
+// Import directly from './elasticsearch_request_builder' if needed
 
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
+// DO NOT IMPORT MODULES HERE. Otherwise it will inflate the initial plugin bundle size.

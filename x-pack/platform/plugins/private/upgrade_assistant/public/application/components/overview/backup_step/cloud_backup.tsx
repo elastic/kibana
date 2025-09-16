@@ -23,7 +23,7 @@ import {
 
 import { CLOUD_SNAPSHOT_REPOSITORY } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
-import { ResponseError } from '../../../../../common/types';
+import type { ResponseError } from '../../../../../common/types';
 import { uiMetricService, UIM_BACKUP_DATA_CLOUD_CLICK } from '../../../lib/ui_metric';
 
 interface Props {

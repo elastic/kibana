@@ -25,35 +25,47 @@ import { mvExpandCommand } from './commands/mv_expand';
 import { rowCommand } from './commands/row';
 import { sortCommand } from './commands/sort';
 import { statsCommand } from './commands/stats';
+import { inlineStatsCommand } from './commands/inlinestats';
 import { sampleCommand } from './commands/sample';
 import { showCommand } from './commands/show';
 import { timeseriesCommand } from './commands/timeseries';
 import { whereCommand } from './commands/where';
 import { fuseCommand } from './commands/fuse';
+import { rerankCommand } from './commands/rerank';
+import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
 
 const esqlCommandRegistry = new CommandRegistry();
 
-esqlCommandRegistry.registerCommand(limitCommand);
-esqlCommandRegistry.registerCommand(dropCommand);
-esqlCommandRegistry.registerCommand(forkCommand);
-esqlCommandRegistry.registerCommand(renameCommand);
-esqlCommandRegistry.registerCommand(changePointCommand);
-esqlCommandRegistry.registerCommand(completionCommand);
-esqlCommandRegistry.registerCommand(dissectCommand);
-esqlCommandRegistry.registerCommand(enrichCommand);
-esqlCommandRegistry.registerCommand(evalCommand);
-esqlCommandRegistry.registerCommand(fromCommand);
-esqlCommandRegistry.registerCommand(grokCommand);
-esqlCommandRegistry.registerCommand(joinCommand);
-esqlCommandRegistry.registerCommand(mvExpandCommand);
-esqlCommandRegistry.registerCommand(keepCommand);
-esqlCommandRegistry.registerCommand(rowCommand);
-esqlCommandRegistry.registerCommand(sortCommand);
-esqlCommandRegistry.registerCommand(statsCommand);
-esqlCommandRegistry.registerCommand(sampleCommand);
-esqlCommandRegistry.registerCommand(showCommand);
-esqlCommandRegistry.registerCommand(timeseriesCommand);
-esqlCommandRegistry.registerCommand(whereCommand);
-esqlCommandRegistry.registerCommand(fuseCommand);
+const baseCommands = [
+  limitCommand,
+  dropCommand,
+  forkCommand,
+  renameCommand,
+  changePointCommand,
+  completionCommand,
+  dissectCommand,
+  enrichCommand,
+  evalCommand,
+  fromCommand,
+  grokCommand,
+  joinCommand,
+  mvExpandCommand,
+  keepCommand,
+  rowCommand,
+  sortCommand,
+  statsCommand,
+  inlineStatsCommand,
+  sampleCommand,
+  showCommand,
+  timeseriesCommand,
+  whereCommand,
+  fuseCommand,
+  rerankCommand,
+];
+
+baseCommands.forEach((command) => {
+  const mergedCommand = mergeCommandWithGeneratedCommandData(command);
+  esqlCommandRegistry.registerCommand(mergedCommand);
+});
 
 export { esqlCommandRegistry };

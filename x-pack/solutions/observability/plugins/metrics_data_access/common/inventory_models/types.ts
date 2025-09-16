@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type {
-  ChartType,
-  LensBaseLayer,
-  LensConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type {
+  AggregationConfigMap,
+  ChartsConfigMap,
+  DataSchemaFormat,
+  FormulasConfigMap,
+  InventoryMetricsConfig,
+} from './shared/metrics/types';
+import type { HOST_METRICS_RECEIVER_OTEL, SYSTEM_INTEGRATION } from '../constants';
 
+export { DataSchemaFormatEnum, type DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -42,32 +47,12 @@ export const InventoryFormatterTypeRT = rt.keyof({
 export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
-export const InventoryMetricRT = rt.keyof({
-  hostSystemOverview: null,
-  hostCpuUsageTotal: null,
-  hostCpuUsage: null,
-  hostK8sOverview: null,
-  hostK8sCpuCap: null,
-  hostK8sDiskCap: null,
-  hostK8sMemoryCap: null,
-  hostK8sPodCap: null,
-  hostLoad: null,
-  hostMemoryUsage: null,
-  hostNetworkTraffic: null,
+export const InventoryTsvbTypeKeysRT = rt.keyof({
   podOverview: null,
   podCpuUsage: null,
   podMemoryUsage: null,
   podLogUsage: null,
   podNetworkTraffic: null,
-  containerOverview: null,
-  containerCpuUsage: null,
-  containerDiskIOOps: null,
-  containerDiskIOBytes: null,
-  containerMemory: null,
-  containerNetworkTraffic: null,
-  containerK8sOverview: null,
-  containerK8sCpuUsage: null,
-  containerK8sMemoryUsage: null,
   nginxHits: null,
   nginxRequestRate: null,
   nginxActiveConnections: null,
@@ -98,7 +83,7 @@ export const InventoryMetricRT = rt.keyof({
   awsSQSOldestMessage: null,
   custom: null,
 });
-export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
+export type InventoryTsvbType = rt.TypeOf<typeof InventoryTsvbTypeKeysRT>;
 
 export const TSVBMetricTypeRT = rt.keyof({
   avg: null,
@@ -205,7 +190,7 @@ export type TSVBSeries = rt.TypeOf<typeof TSVBSeriesRT>;
 
 export const TSVBMetricModelRT = rt.intersection([
   rt.type({
-    id: InventoryMetricRT,
+    id: InventoryTsvbTypeKeysRT,
     requires: rt.array(rt.string),
     index_pattern: rt.union([rt.string, rt.array(rt.string)]),
     interval: rt.string,
@@ -269,29 +254,25 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export interface InventoryMetrics {
-  tsvb?: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation | undefined };
-  defaultSnapshot: SnapshotMetricType;
-  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metrics like awsS3 require multiple days where others like host only need an hour.*/
-  defaultTimeRangeInSeconds: number;
-}
+type BeatsIntegrations = 'aws' | 'docker' | typeof SYSTEM_INTEGRATION | 'kubernetes';
+type OtelReceivers = typeof HOST_METRICS_RECEIVER_OTEL;
+type Integrations =
+  | {
+      beats: BeatsIntegrations;
+      otel: OtelReceivers;
+    }
+  | BeatsIntegrations;
 
-export interface InventoryMetricsWithCharts<
-  TFormula extends Record<string, LensBaseLayer>,
-  TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>
-> extends InventoryMetrics {
-  getFormulas: () => Promise<TFormula>;
-  getCharts: () => Promise<TChart>;
-}
-
-type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
-
-export interface InventoryModel<TMetrics = InventoryMetrics> {
-  id: string;
+export interface InventoryModel<
+  TEntityType extends InventoryItemType,
+  TAggregations extends AggregationConfigMap,
+  TFormulas extends FormulasConfigMap | undefined = undefined,
+  TCharts extends ChartsConfigMap | undefined = undefined
+> {
+  id: TEntityType;
   displayName: string;
   singularDisplayName: string;
-  requiredModule: Modules;
+  requiredIntegration: Integrations;
   fields: {
     id: string;
     name: string;
@@ -305,11 +286,8 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
     apm: boolean;
     uptime: boolean;
   };
-  metrics: TMetrics;
-  requiredMetrics: InventoryMetric[];
-  legacyMetrics?: SnapshotMetricType[];
-  tooltipMetrics: SnapshotMetricType[];
-  nodeFilter?: object[];
+  metrics: InventoryMetricsConfig<TAggregations, TFormulas, TCharts>;
+  nodeFilter?: (args?: { schema?: DataSchemaFormat }) => estypes.QueryDslQueryContainer[];
 }
 
 export type LensConfigWithId = LensConfig & { id: string };

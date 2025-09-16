@@ -12,7 +12,8 @@ import { partition } from 'lodash/fp';
 import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
 import { isAsExpression, isFieldExpression } from '@kbn/esql-ast/src/ast/is';
-import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/utils';
+import * as E from 'fp-ts/Either';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 export const getPrivilegedMonitorUsersJoin = (
   namespace: string
@@ -21,6 +22,10 @@ export const getPrivilegedMonitorUsersJoin = (
   | RENAME event_timestamp AS @timestamp
   | WHERE user.is_privileged == true`;
 
+export type EsqlQueryOrInvalidFields = E.Either<
+  { invalidFields: string[]; error?: undefined } | { error: string; invalidFields?: undefined },
+  string
+>;
 export const getPrivilegeMonitrUsersJoinNoTimestamp = (
   namespace: string
 ) => `| LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
@@ -29,7 +34,10 @@ export const getPrivilegeMonitrUsersJoinNoTimestamp = (
 /**
  * Rewrites que query to remove FORK branches that contain columns not available.
  */
-export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql: string) {
+export function removeInvalidForkBranchesFromESQL(
+  fields: DataViewFieldMap,
+  esql: string
+): EsqlQueryOrInvalidFields {
   const { root } = Parser.parse(esql);
   const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<
     ESQLCommand<'fork'>
@@ -37,7 +45,7 @@ export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql
 
   // The query has no FORK command, so we can return the original ESQL query
   if (forkCommands.length === 0) {
-    return esql;
+    return E.right(esql);
   }
 
   // There is no technical limitation preventing us from having multiple FORK commands in the query,
@@ -67,24 +75,31 @@ export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql
 
   // When all branches are valid we can return the original ESQL query
   if (invalidBranches.length === 0) {
-    return esql;
+    return E.right(esql);
   }
 
   // No valid FORK branches found
   if (validBranches.length === 0) {
-    return undefined; // TODO can we throw an error here? or return an empty query?
+    const invalidFields = new Set<string>();
+    invalidBranches.forEach((branch) => {
+      Walker.findAll(branch, isInvalidColumn).forEach((node) => {
+        invalidFields.add(node.name);
+      });
+    });
+
+    return E.left({ invalidFields: Array.from(invalidFields) });
   }
 
   // When FORK has only one valid branch we need to remove the fork command from query and add the valid branch back to the root
   if (validBranches.length === 1) {
-    return moveForkBranchToToplevel(root, forkCommand, validBranches[0]);
+    return E.right(moveForkBranchToToplevel(root, forkCommand, validBranches[0]));
   }
 
   // Remove the invalid branches
   invalidBranches.forEach((branch) => {
     mutate.generic.commands.args.remove(root, branch);
   });
-  return BasicPrettyPrinter.multiline(root);
+  return E.right(BasicPrettyPrinter.multiline(root));
 }
 
 function moveForkBranchToToplevel(

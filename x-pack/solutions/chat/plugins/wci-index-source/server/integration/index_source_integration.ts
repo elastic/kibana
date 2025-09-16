@@ -13,7 +13,7 @@ import {
   type WorkChatIntegration,
 } from '@kbn/wci-server';
 import { createMcpServer } from './mcp_server';
-import { WCIIndexSourceConfiguration } from '../../common/types';
+import type { WCIIndexSourceConfiguration } from '../../common/types';
 
 export const getIndexSourceIntegrationDefinition = ({
   core,

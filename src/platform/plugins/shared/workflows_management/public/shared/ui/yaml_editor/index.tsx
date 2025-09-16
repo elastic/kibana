@@ -8,9 +8,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import { configureMonacoYamlSchema } from '@kbn/monaco';
-import { MonacoYamlOptions } from 'monaco-yaml';
+import type { MonacoYamlOptions } from 'monaco-yaml';
 
 interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId'> {
   schemas: MonacoYamlOptions['schemas'] | null;
@@ -19,7 +20,13 @@ interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId'> {
 export function YamlEditor(props: YamlEditorProps) {
   useEffect(() => {
     if (props.schemas) {
-      configureMonacoYamlSchema(props.schemas);
+      // Configure Monaco YAML with completions disabled to prevent duplicates
+      // while keeping validation and hover information enabled
+      configureMonacoYamlSchema(props.schemas, {
+        completion: false, // Disable schema-based completions
+        hover: true, // Keep hover information
+        validate: true, // Keep validation
+      });
     }
   }, [props.schemas]);
 

@@ -9,29 +9,35 @@ import React from 'react';
 import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ElasticAgentVersionInfo } from '../../../../common/types';
-import { buildKubectlCommand } from './build_kubectl_command';
+import { buildHelmCommand } from './build_helm_command';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
+import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
+import type { ElasticAgentVersionInfo } from '../../../../common/types';
 
 interface Props {
   encodedApiKey: string;
   onboardingId: string;
   elasticsearchUrl: string;
-  elasticAgentVersionInfo: ElasticAgentVersionInfo;
   isCopyPrimaryAction: boolean;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
 }
 
 export function CommandSnippet({
   encodedApiKey,
   onboardingId,
   elasticsearchUrl,
-  elasticAgentVersionInfo,
   isCopyPrimaryAction,
+  elasticAgentVersionInfo,
 }: Props) {
-  const command = buildKubectlCommand({
+  const metricsEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+  const command = buildHelmCommand({
     encodedApiKey,
     onboardingId,
     elasticsearchUrl,
+    metricsEnabled,
     elasticAgentVersionInfo,
   });
 

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { Streams } from '@kbn/streams-schema';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { GrokCollection } from '@kbn/grok-ui';
-import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { Streams } from '@kbn/streams-schema';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { GrokCollection } from '@kbn/grok-ui';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import type { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
+import type {
   PreviewDocsFilterOption,
   SimulationActorRef,
   SimulationContext,
 } from '../simulation_state_machine';
-import { MappedSchemaField } from '../../../schema_editor/types';
-import { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { MappedSchemaField } from '../../../schema_editor/types';
+import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -40,7 +40,7 @@ export interface StreamEnrichmentContextType {
   dataSourcesRefs: DataSourceActorRef[];
   processorsRefs: ProcessorActorRef[];
   grokCollection: GrokCollection;
-  simulatorRef?: SimulationActorRef;
+  simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
 }
 
@@ -63,7 +63,7 @@ export type StreamEnrichmentEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
-  | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
-  | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] }
+  | { type: 'processors.add'; processor?: StreamlangProcessorDefinition }
+  | { type: 'processors.reorder'; from: number; to: number }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };

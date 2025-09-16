@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
 
 import {
   FormProvider,
@@ -15,18 +16,21 @@ import {
   type FormKibanaDependencies,
   type FormServices,
 } from '@kbn/management-settings-components-form';
-import { SettingsCapabilities, UiSettingMetadata } from '@kbn/management-settings-types';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { SettingsCapabilities, UiSettingMetadata } from '@kbn/management-settings-types';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { Subscription } from 'rxjs';
-import { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-section-registry';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
+import type { Subscription } from 'rxjs';
+import type { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type {
+  RegistryEntry,
+  SectionRegistryStart,
+} from '@kbn/management-settings-section-registry';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 export interface Services {
   getAllowlistedSettings: (
@@ -151,16 +155,17 @@ export const SettingsApplicationKibanaProvider: FC<
   };
 
   const getAllowlistedSettings = (scope: UiSettingsScope, solution: SolutionView | undefined) => {
+    const { filterSettings } = application.capabilities;
     const scopeClient = getScopeClient(scope);
     const rawSettings = Object.fromEntries(
       Object.entries(scopeClient.getAll()).filter(
         ([settingId, settingDef]) =>
           !settingDef.readonly &&
           !client.isCustom(settingId) &&
-          (!solution ||
-            solution === 'classic' ||
-            !settingDef.solution ||
-            settingDef.solution === solution)
+          (!filterSettings.bySolutionView ||
+            !solution ||
+            !settingDef.solutionViews ||
+            settingDef.solutionViews.includes(solution))
       )
     );
     return normalizeSettings(rawSettings);
@@ -173,7 +178,7 @@ export const SettingsApplicationKibanaProvider: FC<
   };
 
   const getCapabilities = () => {
-    const { advancedSettings, globalSettings } = application.capabilities;
+    const { advancedSettings, globalSettings, filterSettings } = application.capabilities;
     return {
       spaceSettings: {
         show: advancedSettings.show as boolean,
@@ -182,6 +187,9 @@ export const SettingsApplicationKibanaProvider: FC<
       globalSettings: {
         show: globalSettings.show as boolean,
         save: globalSettings.save as boolean,
+      },
+      filterSettings: {
+        bySolutionView: filterSettings.bySolutionView as boolean,
       },
     };
   };

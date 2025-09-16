@@ -12,8 +12,8 @@ import {
   getUngroupedReasonMessage,
   getMonitorAlertDocument,
 } from './message_utils';
-import { MissingPingMonitorInfo } from '../../../common/runtime_types/alert_rules/common';
-import { OverviewPing } from '../../../common/runtime_types';
+import type { MissingPingMonitorInfo } from '../../../common/runtime_types/alert_rules/common';
+import type { OverviewPing } from '../../../common/runtime_types';
 
 describe('message_utils', () => {
   const dateFormat = 'YYYY-MM-DD HH:mm:ss';
@@ -168,7 +168,7 @@ describe('message_utils', () => {
           configId: monitorId,
           monitorQueryId: monitorId,
           locationId,
-          ping: {
+          latestPing: {
             observer: {
               geo: {
                 name: locationName,
@@ -185,7 +185,7 @@ describe('message_utils', () => {
           configId: monitorId,
           monitorQueryId: monitorId,
           locationId: secondLocationId,
-          ping: {
+          latestPing: {
             observer: {
               geo: {
                 name: secondLocationName,

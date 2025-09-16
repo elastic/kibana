@@ -20,17 +20,14 @@ import {
   EuiCodeBlock,
   EuiTitle,
 } from '@elastic/eui';
-import { Option, map, getOrElse } from 'fp-ts/Option';
+import type { Option } from 'fp-ts/Option';
+import { map, getOrElse } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import {
-  ActionConnector,
-  ActionConnectorMode,
-  ActionTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;

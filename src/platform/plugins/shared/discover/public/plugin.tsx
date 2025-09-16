@@ -209,6 +209,7 @@ export class DiscoverPlugin
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
+          onAppLeave: params.onAppLeave,
           services,
           customizationContext: defaultCustomizationContext,
         });
@@ -450,6 +451,11 @@ export class DiscoverPlugin
         startServices,
         discoverServices,
       });
+    });
+
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, async () => {
+      const { searchEmbeddableTransforms } = await getEmbeddableServices();
+      return searchEmbeddableTransforms;
     });
   }
 }

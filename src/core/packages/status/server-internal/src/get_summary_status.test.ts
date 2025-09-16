@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { getSummaryStatus } from './get_summary_status';
-import { PluginStatus } from './types';
+import type { PluginStatus } from './types';
 
 describe('getSummaryStatus', () => {
   const availableService: ServiceStatus = {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
-import { AlertingServerSetup, RuleType, RuleTypeParams } from '@kbn/alerting-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
+import type { AlertingServerSetup, RuleType, RuleTypeParams } from '@kbn/alerting-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 

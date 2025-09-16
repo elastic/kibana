@@ -10,7 +10,7 @@
 import React, { useMemo, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
-import type { DocViewerComponent } from '@kbn/unified-doc-viewer/src/services/types';
+import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
 import {
   EuiTitle,
   EuiSpacer,

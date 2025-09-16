@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, IconColor, EuiThemeComputed, EuiSkeletonText } from '@elastic/eui';
+import type { IconColor, EuiThemeComputed } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText } from '@elastic/eui';
 
 type MonitorStatus = 'succeeded' | 'failed' | 'skipped' | 'unknown';
 export const StatusBadge = ({ status }: { status: MonitorStatus }) => {

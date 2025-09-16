@@ -83,17 +83,10 @@ export const Header: React.FC<HeaderProps> = ({
             size="xs"
           >
             <h2>
-              {isSearchModeEnabled ? (
-                <FormattedMessage
-                  id="xpack.searchPlayground.unsaved.pageTitle"
-                  defaultMessage="Unsaved playground"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.searchPlayground.pageTitle"
-                  defaultMessage="Playground"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.searchPlayground.unsaved.pageTitle"
+                defaultMessage="Unsaved playground"
+              />
             </h2>
           </EuiTitle>
 
@@ -125,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
           <Toolbar selectedPageMode={pageMode} />
-          {isSearchModeEnabled && <SaveNewPlaygroundButton disabled={isActionsDisabled} />}
+          <SaveNewPlaygroundButton disabled={isActionsDisabled} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

@@ -2,10 +2,13 @@
 
 exports[`Modal all errors rendering it renders the default all errors modal when isShowing is positive 1`] = `
 <EuiModal
+  aria-labelledby="generated-id"
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
+    <EuiModalHeaderTitle
+      id="generated-id"
+    >
       Your visualization has error(s)
     </EuiModalHeaderTitle>
   </EuiModalHeader>

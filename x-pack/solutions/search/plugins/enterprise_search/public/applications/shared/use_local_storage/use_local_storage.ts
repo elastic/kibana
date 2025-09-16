@@ -33,6 +33,7 @@ export const useLocalStorage = <Value>(key: string, defaultValue: Value): [Value
     let parsedItem;
     try {
       return JSON.parse(storedItem) as Value;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       removeFromStorage();
     }

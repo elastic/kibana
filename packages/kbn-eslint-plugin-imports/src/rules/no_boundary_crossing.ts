@@ -15,7 +15,8 @@ import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import type { ModuleType } from '@kbn/repo-source-classifier';
 
-import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
+import type { Importer } from '../helpers/visit_all_import_statements';
+import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';

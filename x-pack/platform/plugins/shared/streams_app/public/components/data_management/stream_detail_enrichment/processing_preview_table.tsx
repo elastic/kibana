@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiAvatar,
-  EuiButtonIcon,
+import type {
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
-  EuiFlexGroup,
-  EuiToolTip,
 } from '@elastic/eui';
+import { EuiAvatar, EuiButtonIcon, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
-import {
+import type {
   SampleDocumentWithUIAttributes,
   SimulationContext,
 } from './state_management/simulation_state_machine';
 import { PreviewTable } from '../preview_table';
 import { DATA_SOURCES_I18N } from './data_sources_flyout/translations';
-import { EnrichmentDataSourceWithUIAttributes } from './types';
+import type { EnrichmentDataSourceWithUIAttributes } from './types';
 import { useDataSourceSelectorById } from './state_management/data_source_state_machine/use_data_source_selector';
 
 export function ProcessingPreviewTable({
@@ -84,8 +81,16 @@ export function ProcessingPreviewTable({
     [onRowSelected, showRowSourceAvatars, selectedRowIndex, originalSamples]
   );
 
-  return <PreviewTable {...otherProps} leadingControlColumns={leadingControlColumns} />;
+  return (
+    <PreviewTable
+      {...otherProps}
+      leadingControlColumns={leadingControlColumns}
+      selectedRowIndex={selectedRowIndex}
+    />
+  );
 }
+
+export const MemoProcessingPreviewTable = React.memo(ProcessingPreviewTable);
 
 function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
   switch (type) {

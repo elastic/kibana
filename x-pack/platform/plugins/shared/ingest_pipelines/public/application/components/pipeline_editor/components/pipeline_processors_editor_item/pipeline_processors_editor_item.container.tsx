@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { usePipelineProcessorsContext } from '../../context';
 
-import {
-  PipelineProcessorsEditorItem as ViewComponent,
-  Props as ViewComponentProps,
-} from './pipeline_processors_editor_item';
+import type { Props as ViewComponentProps } from './pipeline_processors_editor_item';
+import { PipelineProcessorsEditorItem as ViewComponent } from './pipeline_processors_editor_item';
 
 type Props = Omit<ViewComponentProps, 'editor' | 'processorsDispatch'>;
 

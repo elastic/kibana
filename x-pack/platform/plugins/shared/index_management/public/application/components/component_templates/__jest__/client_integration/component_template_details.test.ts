@@ -8,8 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
-import { ComponentTemplateDetailsTestBed } from './helpers/component_template_details.helpers';
-import { ComponentTemplateDeserialized } from '../../shared_imports';
+import type { ComponentTemplateDetailsTestBed } from './helpers/component_template_details.helpers';
+import type { ComponentTemplateDeserialized } from '../../shared_imports';
 
 const { setup } = pageHelpers.componentTemplateDetails;
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDeleteSynonymRule } from '../../hooks/use_delete_synonym_rule';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -24,6 +24,8 @@ export const DeleteSynonymRuleModal = ({
   synonymsSetId,
 }: DeleteSynonymRuleModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const onSuccess = () => {
     setIsLoading(false);
@@ -46,9 +48,11 @@ export const DeleteSynonymRuleModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.searchSynonyms.deleteSynonymRuleModal.title', {
         defaultMessage: 'Delete synonym rule',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeDeleteModal}
       onConfirm={deleteOperation}
       cancelButtonText={i18n.translate('xpack.searchSynonyms.deleteSynonymRuleModal.cancelButton', {

@@ -6,8 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { CommandRegistry, ICommand, ICommandMethods, ICommandMetadata } from './registry';
-import { ItemKind } from './types';
+import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
+import type { ICommand, ICommandMethods, ICommandMetadata } from './registry';
+import { CommandRegistry } from './registry';
+import type { ItemKind } from './types';
 
 describe('CommandRegistry', () => {
   let registry: CommandRegistry;
@@ -194,6 +196,47 @@ describe('CommandRegistry', () => {
       const allCommands = registry.getAllCommands();
       expect(allCommands.length).toBe(1);
       expect(allCommands[0]).toEqual(command1); // Should be the first registered command
+    });
+  });
+
+  describe('mergeCommandWithGeneratedMetadata', () => {
+    test('should return a valid command object', () => {
+      const baseCommand = createMockCommand('test_command');
+      const mergedCommand = mergeCommandWithGeneratedCommandData(baseCommand);
+
+      expect(mergedCommand).toBeDefined();
+      expect(mergedCommand.name).toBe('test_command');
+      expect(mergedCommand.methods).toBeDefined();
+      expect(mergedCommand.metadata).toBeDefined();
+    });
+
+    test('should preserve original command properties', () => {
+      const baseCommand = createMockCommand(
+        'test_command',
+        {},
+        {
+          description: 'Test description',
+          declaration: 'TEST_COMMAND',
+          examples: ['example'],
+        }
+      );
+
+      const mergedCommand = mergeCommandWithGeneratedCommandData(baseCommand);
+
+      expect(mergedCommand.metadata.description).toBe('Test description');
+      expect(mergedCommand.metadata.declaration).toBe('TEST_COMMAND');
+      expect(mergedCommand.metadata.examples).toEqual(['example']);
+    });
+
+    test('should handle commands that exist in generated data', () => {
+      const baseCommand = createMockCommand('change_point');
+      const mergedCommand = mergeCommandWithGeneratedCommandData(baseCommand);
+
+      expect(mergedCommand.name).toBe('change_point');
+      expect(mergedCommand.methods).toBeDefined();
+      expect(mergedCommand.metadata).toBeDefined();
+      expect(mergedCommand.metadata.license).toBeDefined();
+      expect(mergedCommand.metadata.observabilityTier).toBeDefined();
     });
   });
 });

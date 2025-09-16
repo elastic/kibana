@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
+import { createInventoryModel } from '../shared/create_inventory_model';
 
-export { containerSnapshotMetricTypes } from './metrics';
-
-export const container: InventoryModel<typeof metrics> = {
-  id: 'container',
+export const container = createInventoryModel('container', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.container.displayName', {
     defaultMessage: 'Docker Containers',
   }),
@@ -22,7 +19,7 @@ export const container: InventoryModel<typeof metrics> = {
       defaultMessage: 'Docker Container',
     }
   ),
-  requiredModule: 'docker',
+  requiredIntegration: 'docker',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -35,16 +32,4 @@ export const container: InventoryModel<typeof metrics> = {
     ip: 'container.ip_address',
   },
   metrics,
-  requiredMetrics: [
-    'containerOverview',
-    'containerCpuUsage',
-    'containerMemory',
-    'containerNetworkTraffic',
-    'containerDiskIOBytes',
-    'containerDiskIOOps',
-    'containerK8sOverview',
-    'containerK8sCpuUsage',
-    'containerK8sMemoryUsage',
-  ],
-  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
-};
+});

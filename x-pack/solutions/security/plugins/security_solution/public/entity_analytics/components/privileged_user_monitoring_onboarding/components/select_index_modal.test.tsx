@@ -97,7 +97,7 @@ describe('IndexSelectorModal', () => {
       wrapper: TestProviders,
     });
 
-    expect(screen.queryByLabelText('Select index')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Select index' })).toBeInTheDocument();
   });
 
   it('pre-selects indices when editDataSource is provided', () => {
@@ -126,7 +126,7 @@ describe('IndexSelectorModal', () => {
     );
 
     // Add button should be enabled since index1 is preselected
-    fireEvent.click(screen.getByText('Add privileged users'));
+    fireEvent.click(screen.getByText('Update privileged users'));
 
     waitFor(() => {
       expect(mockUpdatePrivMonMonitoredIndices).toHaveBeenCalledWith('edit-id', 'index1');

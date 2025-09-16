@@ -7,11 +7,11 @@
 
 import { merge, cloneDeep } from 'lodash';
 
-import { SerializedPolicy } from '../../../../../../common/types';
+import type { SerializedPolicy } from '../../../../../../common/types';
 
 import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
 
-import { FormInternal } from '../../types';
+import type { FormInternal } from '../../types';
 
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
 

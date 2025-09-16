@@ -7,219 +7,146 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import { RunStepResult } from '../step/step_base';
+import type { graphlib } from '@dagrejs/dagre';
+import type { StepContext, WorkflowContext } from '@kbn/workflows';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest, CoreStart } from '@kbn/core/server';
+import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
-  workflowRunId: string;
-  workflow: z.infer<typeof WorkflowSchema>;
-  previousExecution?: Record<string, any>;
-  connectorSecrets?: Record<string, any>;
-  stepResults: Record<string, RunStepResult>;
-  event: any;
-  esApiKey: string;
   // New properties for logging
-  logger?: Logger;
-  workflowEventLoggerIndex?: string;
-  esClient?: ElasticsearchClient;
+  workflowExecutionGraph: graphlib.Graph;
+  workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  // New properties for internal actions
+  esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
+  fakeRequest?: KibanaRequest;
+  coreStart?: CoreStart; // For using Kibana's internal HTTP client
 }
 
 export class WorkflowContextManager {
-  private context: Record<string, any>; // Make it strongly typed
-  private esClient: IScopedClusterClient;
-  // private workflowLogger: IWorkflowEventLogger | null = null;
-  // private currentStepId: string | null = null;
-  // // Store original parameters for recreating logger
-  // private originalEsClient: ElasticsearchClient | null = null;
-  // private originalLogger: Logger | null = null;
-  // private originalIndexName: string | null = null;
+  private workflowExecutionGraph: graphlib.Graph;
+  private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  private esClient: ElasticsearchClient;
+  private fakeRequest?: KibanaRequest;
+  private coreStart?: CoreStart;
 
   constructor(init: ContextManagerInit) {
-    this.context = {
-      workflowRunId: init.workflowRunId,
-      workflow: init.workflow,
-      previousExecution: init.previousExecution ?? {},
-      connectorSecrets: init.connectorSecrets ?? {},
-      stepResults: init.stepResults ?? {}, // we might start from previous execution with some results
-      event: init.event,
+    this.workflowExecutionGraph = init.workflowExecutionGraph;
+    this.workflowExecutionRuntime = init.workflowExecutionRuntime;
+    this.esClient = init.esClient;
+    this.fakeRequest = init.fakeRequest;
+    this.coreStart = init.coreStart;
+  }
+
+  public getContext(): StepContext {
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
     };
 
-    this.esClient = this.createEsClient(init.esApiKey);
+    const visited = new Set<string>();
+    const collectPredecessors = (nodeId: string) => {
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
 
-    // Store original parameters for recreating logger
-    // this.originalEsClient = init.esClient || null;
-    // this.originalLogger = init.logger || null;
-    // this.originalIndexName = init.workflowEventLoggerIndex || null;
+      stepContext.steps[nodeId] = {};
+      const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
+      if (stepResult) {
+        stepContext.steps[nodeId] = {
+          ...stepContext.steps[nodeId],
+          ...stepResult,
+        };
+      }
 
-    // Initialize workflow event logger if provided
-    // if (init.logger && init.workflowEventLoggerIndex && init.esClient) {
-    //   this.workflowLogger = new WorkflowEventLogger(
-    //     init.esClient,
-    //     init.logger,
-    //     init.workflowEventLoggerIndex,
-    //     {
-    //       workflowId: init.workflowRunId,
-    //       workflowName: init.workflow.name,
-    //       executionId: init.workflowRunId,
-    //     }
-    //   );
-    // }
+      const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
+      if (stepState) {
+        stepContext.steps[nodeId] = {
+          ...stepContext.steps[nodeId],
+          ...stepState,
+        };
+      }
+
+      const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
+      preds.forEach((predId) => collectPredecessors(predId));
+    };
+
+    const currentNode = this.workflowExecutionRuntime.getCurrentStep();
+    const currentNodeId = currentNode?.id ?? currentNode?.name;
+    const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
+    directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
+
+    return this.enrichStepContextAccordingToStepScope(stepContext);
   }
 
-  private createEsClient(apiKey: string): IScopedClusterClient {
-    return {} as IScopedClusterClient; // Placeholder
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
+    const propertyPathSegments = propertyPath.split('.');
+    let result: any = this.getContext();
+
+    for (const segment of propertyPathSegments) {
+      if (!(segment in result)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
+      }
+
+      result = result[segment];
+    }
+
+    return { pathExists: true, value: result };
   }
 
-  public getEsClient(): IScopedClusterClient {
+  /**
+   * Get the Elasticsearch client for internal actions
+   * This client is already user-scoped if fakeRequest was available during initialization
+   */
+  public getEsClientAsUser(): ElasticsearchClient {
     return this.esClient;
   }
 
-  public getContext(): Record<string, any> {
-    return { ...this.context };
-  }
-
-  public updateContext(updates: Record<string, any>): void {
-    Object.assign(this.context, updates);
-  }
-
-  public appendStepResult(stepId: string, result: RunStepResult): void {
-    this.context.stepResults[stepId] = result;
-  }
-
-  public getContextKey(key: string): any {
-    return this.context[key];
-  }
-
-  public getStepResults(): { [stepId: string]: RunStepResult } {
-    return this.context.stepResults;
-  }
-
-  // ======================
-  // Workflow Event Logging Methods
-  // ======================
-
   /**
-   * Get the workflow-level logger (execution scoped)
+   * Get the fake request from task manager for Kibana API authentication
    */
-  // public get logger(): IWorkflowEventLogger | null {
-  //   return this.workflowLogger;
-  // }
-
-  /**
-   * Set the current step context for logging
-   * Call this when entering a step to get step-specific logging
-   */
-  public setCurrentStep(stepId: string, stepName?: string, stepType?: string): void {
-    // this.currentStepId = stepId;
-    // if (this.workflowLogger) {
-    //   // Create a new step-specific logger
-    //   this.workflowLogger = this.workflowLogger.createStepLogger(stepId, stepName, stepType);
-    // }
+  public getFakeRequest(): KibanaRequest | undefined {
+    return this.fakeRequest;
   }
 
   /**
-   * Clear the current step context (back to execution-level logging)
+   * Get CoreStart for accessing Kibana's internal services
    */
-  public clearCurrentStep(): void {
-    // this.currentStepId = null;
-    // if (
-    //   this.workflowLogger &&
-    //   this.originalEsClient &&
-    //   this.originalLogger &&
-    //   this.originalIndexName
-    // ) {
-    //   // Reset to execution-level logger using original parameters
-    //   this.workflowLogger = new WorkflowEventLogger(
-    //     this.originalEsClient,
-    //     this.originalLogger,
-    //     this.originalIndexName,
-    //     {
-    //       workflowId: this.context.workflowRunId,
-    //       workflowName: this.context.workflow.name,
-    //       executionId: this.context.workflowRunId,
-    //     }
-    //   );
-    // }
+  public getCoreStart(): CoreStart | undefined {
+    return this.coreStart;
   }
 
-  /**
-   * Convenience logging methods that automatically include workflow/execution/step context
-   */
-  // public logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-  //   this.workflowLogger?.logInfo(message, additionalData);
-  // }
+  private buildWorkflowContext(): WorkflowContext {
+    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
 
-  // public logError(
-  //   message: string,
-  //   error?: Error,
-  //   additionalData?: Partial<WorkflowLogEvent>
-  // ): void {
-  //   this.workflowLogger?.logError(message, error, additionalData);
-  // }
-
-  // public logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-  //   this.workflowLogger?.logWarn(message, additionalData);
-  // }
-
-  // public logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-  //   this.workflowLogger?.logDebug(message, additionalData);
-  // }
-
-  // public startTiming(event: WorkflowLogEvent): void {
-  //   this.workflowLogger?.startTiming(event);
-  // }
-
-  // public stopTiming(event: WorkflowLogEvent): void {
-  //   this.workflowLogger?.stopTiming(event);
-  // }
-
-  /**
-   * Log workflow execution start
-   */
-  public logWorkflowStart(): void {
-    // this.logInfo('Workflow execution started', {
-    //   event: { action: 'workflow-start', category: ['workflow'] },
-    //   tags: ['workflow', 'execution', 'start'],
-    // });
+    return {
+      execution: {
+        id: workflowExecution.id,
+        isTestRun: !!workflowExecution.isTestRun,
+        startedAt: new Date(workflowExecution.startedAt),
+      },
+      workflow: {
+        id: workflowExecution.workflowId,
+        name: workflowExecution.workflowDefinition.name,
+        enabled: workflowExecution.workflowDefinition.enabled,
+        spaceId: workflowExecution.spaceId,
+      },
+      consts: workflowExecution.workflowDefinition.consts || {},
+      event: workflowExecution.context?.event,
+      inputs: workflowExecution.context?.inputs,
+    };
   }
 
-  /**
-   * Log workflow execution completion
-   */
-  public logWorkflowComplete(success: boolean = true): void {
-    // this.logInfo(`Workflow execution ${success ? 'completed successfully' : 'failed'}`, {
-    //   event: {
-    //     action: 'workflow-complete',
-    //     category: ['workflow'],
-    //     outcome: success ? 'success' : 'failure',
-    //   },
-    //   tags: ['workflow', 'execution', 'complete'],
-    // });
-  }
+  private enrichStepContextAccordingToStepScope(stepContext: StepContext): StepContext {
+    for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
+      const node = this.workflowExecutionGraph.node(nodeId) as any;
+      const nodeType = node?.type;
+      switch (nodeType) {
+        case 'enter-foreach':
+          stepContext.foreach = this.workflowExecutionRuntime.getStepState(nodeId) as any;
+          break;
+      }
+    }
 
-  /**
-   * Log step execution start
-   */
-  public logStepStart(stepId: string, stepName?: string): void {
-    // this.logInfo(`Step '${stepName || stepId}' started`, {
-    //   event: { action: 'step-start', category: ['workflow', 'step'] },
-    //   tags: ['workflow', 'step', 'start'],
-    // });
-  }
-
-  /**
-   * Log step execution completion
-   */
-  public logStepComplete(stepId: string, stepName?: string, success: boolean = true): void {
-    // this.logInfo(`Step '${stepName || stepId}' ${success ? 'completed' : 'failed'}`, {
-    //   event: {
-    //     action: 'step-complete',
-    //     category: ['workflow', 'step'],
-    //     outcome: success ? 'success' : 'failure',
-    //   },
-    //   tags: ['workflow', 'step', 'complete'],
-    // });
+    return stepContext;
   }
 }

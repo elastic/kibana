@@ -13,7 +13,7 @@ import {
   mockIsNotFoundFromUnsupportedServer,
 } from './internal_bulk_resolve.test.mock';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,

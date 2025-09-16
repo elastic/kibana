@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge } from '@elastic/eui';
-import { StatusTag } from './location_status_tags';
+import type { StatusTag } from './location_status_tags';
 import { STATUS } from '../../../../../../common/constants';
 
 const BadgeItem = styled.div`

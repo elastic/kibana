@@ -5,58 +5,100 @@
  * 2.0.
  */
 
-import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
-import { CreateToolPayload } from '../../../../common/http_api/tools';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { queryKeys } from '../../query_keys';
+import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
+import { useToasts } from '../use_toasts';
 
-export const useOnechatTools = () => {
+export const useToolsService = () => {
   const { toolsService } = useOnechatServices();
 
-  const {
-    data: tools,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
   });
 
-  return { tools: tools ?? [], isLoading, error };
+  return { tools: data ?? [], isLoading, error, isError };
 };
 
-export const useBaseTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const baseTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.builtin), [tools]);
-  return { tools: baseTools, ...rest };
-};
-
-export const useEsqlTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const esqlTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.esql), [tools]);
-  return { tools: esqlTools, ...rest };
-};
-
-export const useCreateTool = ({
-  onSuccess,
-  onError,
-}: {
-  onSuccess?: (tool: ToolDefinitionWithSchema) => void;
-  onError?: (error: Error) => void;
-}) => {
-  const queryClient = useQueryClient();
+export const useToolService = (toolId?: string) => {
   const { toolsService } = useOnechatServices();
 
-  const { mutateAsync, isLoading } = useMutation({
-    mutationFn: (tool: CreateToolPayload) => toolsService.create(tool),
-    onSuccess,
-    onError,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
+  const {
+    data: tool,
+    isLoading,
+    error,
+    isError,
+  } = useQuery({
+    enabled: !!toolId,
+    queryKey: queryKeys.tools.byId(toolId),
+    // toolId! is safe because of the enabled check above
+    queryFn: () => toolsService.get({ toolId: toolId! }),
   });
 
-  return { createTool: mutateAsync, isLoading };
+  return {
+    tool: tool as ToolDefinitionWithSchema | undefined,
+    isLoading,
+    error,
+    isError,
+  };
+};
+
+export interface UseToolProps {
+  toolId?: string;
+  onLoadingError?: (error: Error) => void;
+}
+
+export const useTool = ({ toolId, onLoadingError }: UseToolProps) => {
+  const { addErrorToast } = useToasts();
+  const { tool, isLoading, error, isError } = useToolService(toolId);
+
+  useEffect(() => {
+    if (toolId && isError) {
+      const formattedError = formatOnechatErrorMessage(error);
+      addErrorToast({
+        title: labels.tools.loadToolErrorToast(toolId),
+        text: formattedError,
+      });
+      onLoadingError?.(new Error(formattedError));
+    }
+  }, [isError, error, toolId, addErrorToast, onLoadingError]);
+
+  return {
+    tool,
+    isLoading,
+    error,
+    isError,
+  };
+};
+
+export interface UseToolsWithErrorHandlingProps {
+  onLoadingError?: (error: Error) => void;
+}
+
+export const useTools = ({ onLoadingError }: UseToolsWithErrorHandlingProps = {}) => {
+  const { addErrorToast } = useToasts();
+  const { tools, isLoading, error, isError } = useToolsService();
+
+  useEffect(() => {
+    if (isError) {
+      const formattedError = formatOnechatErrorMessage(error);
+      addErrorToast({
+        title: labels.tools.loadToolsErrorToast,
+        text: formattedError,
+      });
+      onLoadingError?.(new Error(formattedError));
+    }
+  }, [isError, error, addErrorToast, onLoadingError]);
+
+  return {
+    tools,
+    isLoading,
+    error,
+    isError,
+  };
 };

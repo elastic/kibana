@@ -17,14 +17,10 @@ import {
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  DataTableRecord,
-  LogDocumentOverview,
-  fieldConstants,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
+import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
@@ -47,6 +43,7 @@ export function LogsOverviewHeader({
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
   });
+  const rawFieldValue = doc && field ? doc.flattened[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
@@ -102,6 +99,7 @@ export function LogsOverviewHeader({
         value={value}
         formattedValue={formattedValue}
         field={field}
+        rawFieldValue={rawFieldValue}
         anchorPosition="downCenter"
         display="block"
       >

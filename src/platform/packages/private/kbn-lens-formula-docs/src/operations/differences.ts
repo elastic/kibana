@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDocumentationType } from './types';
+import type { OperationDocumentationType } from './types';
 
 export const DIFFERENCES_ID = 'differences';
 export const DIFFERENCES_NAME = i18n.translate('lensFormulaDocs.derivative', {

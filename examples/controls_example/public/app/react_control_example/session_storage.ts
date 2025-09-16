@@ -8,12 +8,12 @@
  */
 
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import type { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
+} from '@kbn/controls-constants';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupSavedState';
@@ -23,7 +23,7 @@ export const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 export const savedStateManager = {
   clear: () => sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY),
-  set: (serializedState: SerializedPanelState<ControlGroupSerializedState>) =>
+  set: (serializedState: SerializedPanelState<ControlsGroupState>) =>
     sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState)),
   get: () => {
     const serializedStateJSON = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
@@ -35,7 +35,7 @@ export const savedStateManager = {
 
 export const unsavedStateManager = {
   clear: () => sessionStorage.removeItem(UNSAVED_STATE_SESSION_STORAGE_KEY),
-  set: (serializedState: SerializedPanelState<ControlGroupSerializedState>) =>
+  set: (serializedState: SerializedPanelState<ControlsGroupState>) =>
     sessionStorage.setItem(UNSAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState)),
   get: () => {
     const serializedStateJSON = sessionStorage.getItem(UNSAVED_STATE_SESSION_STORAGE_KEY);
@@ -92,7 +92,7 @@ const initialSerializedControlGroupState = {
       ignoreTimerange: false,
       ignoreValidations: false,
     },
-  } as ControlGroupSerializedState,
+  } as ControlsGroupState,
   references: [
     {
       name: `controlGroup_${rangeSliderControlId}:rangeSliderDataView`,

@@ -7,13 +7,13 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { css } from '@emotion/css';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiPanel,
   EuiText,
   useEuiTheme,
   EuiTabs,
   EuiTab,
-  EuiTabbedContentTab,
   useEuiFontSize,
   EuiNotificationBadge,
 } from '@elastic/eui';

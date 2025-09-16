@@ -12,7 +12,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import { TrustedAppsForm } from './form';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -20,14 +21,18 @@ import type {
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { INPUT_ERRORS } from '../translations';
+import {
+  INPUT_ERRORS,
+  USING_ADVANCED_MODE,
+  USING_ADVANCED_MODE_DESCRIPTION,
+} from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/components/user_privileges');
-
+jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -83,6 +88,7 @@ describe('Trusted apps form', () => {
       entries: [createEntry(ConditionEntryField.HASH, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
+      meta: { temporaryUuid: '1111' },
     };
     return {
       ...defaults,
@@ -157,11 +163,34 @@ describe('Trusted apps form', () => {
     return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
   };
 
+  const getAdvancedModeToggle = (): HTMLButtonElement => {
+    return renderResult.getByTestId(`advancedModeButton`) as HTMLButtonElement;
+  };
+
+  const getBasicModeToggle = (): HTMLButtonElement => {
+    return renderResult.getByTestId(`basicModeButton`) as HTMLButtonElement;
+  };
+
+  const getAdvancedModeUsageWarningHeader = (dataTestSub: string = formPrefix): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningHeader`);
+  };
+
+  const getAdvancedModeUsageWarningBody = (dataTestSub: string = formPrefix): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningBody`);
+  };
+
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
     latestUpdatedItem = createItem();
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      {
+        indexPatterns: stubIndexPattern,
+      },
+    ]);
 
     formProps = {
       item: latestUpdatedItem,
@@ -274,7 +303,6 @@ describe('Trusted apps form', () => {
         (label) => (label.textContent || '').trim()
       );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
-      expect(formProps.onChange).not.toHaveBeenCalled();
     });
 
     it('should not allow the entry to be removed if its the only one displayed', () => {
@@ -376,7 +404,7 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
         rerender();
       });
 
@@ -393,6 +421,110 @@ describe('Trusted apps form', () => {
 
       it('should show the AND visual connector when multiple entries are present', () => {
         expect(getConditionBuilderAndConnectorBadge().textContent).toEqual('AND');
+      });
+    });
+
+    describe('Advanced Mode', () => {
+      afterEach(() => {
+        cleanup();
+      });
+      it('should update tags to include "form_mode:advanced" and show advanced mode warning', async () => {
+        await userEvent.click(getAdvancedModeToggle());
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          tags: ['policy:all', 'form_mode:advanced'],
+          entries: [],
+        };
+        const expected = createOnChangeArgs({
+          item: createItem(propsItem),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expected);
+
+        // update TA to show toggle change
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
+        rerender();
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE);
+        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(
+          USING_ADVANCED_MODE_DESCRIPTION
+        );
+      });
+
+      it('when updating an existing trusted app, the previous form mode is enabled by default', async () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          name: 'edit advanced mode ta',
+          entries: [
+            { field: 'file.path.text', operator: 'included', type: 'match', value: 'asdf' },
+          ],
+          tags: ['policy:all', 'form_mode:advanced'],
+        };
+
+        formProps = {
+          item: { ...formProps.item, ...propsItem },
+          mode: 'edit',
+          disabled: false,
+          error: undefined,
+          onChange: jest.fn((updates) => {
+            latestUpdatedItem = updates.item;
+          }),
+        };
+
+        latestUpdatedItem = { ...formProps.item, ...propsItem };
+
+        rerenderWithLatestProps();
+
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getBasicModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(
+          false
+        );
+      });
+
+      it('retains previous user input when switching from basic to advanced mode', async () => {
+        setTextFieldValue(getConditionValue(getCondition()), 'some value');
+        const propsItem1: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+        };
+        const expectedAfterBasicValueChange = createOnChangeArgs({
+          item: createItem(propsItem1),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterBasicValueChange);
+
+        await userEvent.click(getAdvancedModeToggle());
+        const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
+          tags: ['policy:all', 'form_mode:advanced'],
+          entries: [],
+        };
+        const expectedAfterSwitchToAdvancedMode = createOnChangeArgs({
+          item: createItem(propsItem2),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToAdvancedMode);
+
+        await userEvent.click(getBasicModeToggle());
+        const propsItem3: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+        };
+        const expectedAfterSwitchToBasicMode = createOnChangeArgs({
+          item: createItem(propsItem3),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
       });
     });
   });

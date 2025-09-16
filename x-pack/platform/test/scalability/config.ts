@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -13,8 +14,8 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { v4 as uuidV4 } from 'uuid';
 import { services } from './services';
 import { ScalabilityTestRunner } from './runner';
-import { FtrProviderContext } from './ftr_provider_context';
-import { ScalabilityJourney } from './types';
+import type { FtrProviderContext } from './ftr_provider_context';
+import type { ScalabilityJourney } from './types';
 
 // These "secret" values are intentionally written in the source.
 const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';

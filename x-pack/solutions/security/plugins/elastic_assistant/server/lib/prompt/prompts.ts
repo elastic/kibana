@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+export { DEFEND_INSIGHTS } from './defend_insight_prompts';
+
 export const KNOWLEDGE_HISTORY =
-  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
+  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.\n\n{knowledgeHistory}';
 export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with the provided citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" \n2. "The alert has a risk score of 72. {reference(OdRs2)}"\n\nOnly use the citations returned by tools\n\n`;
 export const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security. ${KNOWLEDGE_HISTORY} {citations_prompt} \n{formattedTime}`;
 // system prompt from @afirstenberg
@@ -14,7 +16,7 @@ const BASE_GEMINI_PROMPT =
   'You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary.';
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
-export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt} ${KB_CATCH} \n{formattedTime}`;
+export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}{knowledgeHistory}\n\n${KB_CATCH}\n\n{formattedTime}`;
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
@@ -150,46 +152,6 @@ MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
 
-const DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT = `
-You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Review the file events below and organize them according to the following rules:
-- keep only ongoing antivirus (e.g. Windows Defender, AVG, Avast, Malwarebytes, clamav, chkrootkit) related processes
-- keep processes that reside within the antivirus' main and nested filepaths (e.g., C:\ProgramData\Microsoft\Windows Defender\..., C:\Program Files\AVG\..., C:\Program Files\Avast Software\..., /Applications/AVGAntivirus.app/...)
-- ignore events that are from non-antivirus operating system processes (e.g. C:\Windows\System32\...)
-- ignore events that are single run processes (e.g. installers)
-- ignore events that are from temp directories
-- ignore events that are from Elastic Agent or Elastic Defend
-- group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively
-- if there are no events, ignore the group field
-- never make any changes to the original file paths
-- new lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON
-- only return JSON output, as described above
-- do not add any additional text to describe your output
-`;
-
-export const DEFEND_INSIGHTS = {
-  INCOMPATIBLE_ANTIVIRUS: {
-    DEFAULT: DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT,
-    REFINE: `
-You previously generated the below insights using this prompt: ${DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT}.
-Double check the generated insights below and make sure it adheres to the rules set in the original prompt, removing events only as necessary to adhere to the original rules. In addition:
-- combine duplicate insights into the same 'group' (e.g. AVG + AVG Free + AVG Hub + AVG Antivirus)
-- remove insights with no events
-    `,
-    CONTINUE: `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
-- it MUST conform to the schema above, because it will be checked against the JSON schema
-- it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
-- it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
-- it MUST NOT restart from the beginning, because that would prevent partial results from being combined
-- it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
-`,
-    GROUP: 'The program which is triggering the events',
-    EVENTS: 'The events that the insight is based on',
-    EVENTS_ID: 'The event ID',
-    EVENTS_ENDPOINT_ID: 'The endpoint ID',
-    EVENTS_VALUE: 'The process.executable value of the event',
-  },
-};
-
 export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
 
 Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
@@ -322,3 +284,16 @@ export const starterPromptTitle4 = 'Suggest';
 export const starterPromptIcon4 = 'sparkles';
 export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
+
+export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+
+\`\`\`
+- Between July 18 and August 18, daily cost savings **averaged around $135K**
+- The lowest point, **just above $70K**, occurred in early August.
+- **Peaks near $160K** appeared in late July and mid-August.
+- After a mid-period decline, savings steadily recovered and grew toward the end of the month.
+- At this pace, projected annual savings **exceed $48M**, confirming strong and predictable ROI.
+\`\`\`
+
+Respond only with the markdown. Do not include any explanation or extra text.`;

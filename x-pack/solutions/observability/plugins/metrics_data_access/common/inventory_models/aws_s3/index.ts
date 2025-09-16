@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
+import { createInventoryModel } from '../shared/create_inventory_model';
 
-export { awsS3SnapshotMetricTypes } from './metrics';
-
-export const awsS3: InventoryModel = {
-  id: 'awsS3',
+export const awsS3 = createInventoryModel('awsS3', {
   displayName: i18n.translate('xpack.metricsData.inventoryModels.awsS3.displayName', {
     defaultMessage: 'S3 Buckets',
   }),
@@ -22,7 +19,7 @@ export const awsS3: InventoryModel = {
       defaultMessage: 'S3 Bucket',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -34,18 +31,4 @@ export const awsS3: InventoryModel = {
     id: 'aws.s3.bucket.name',
     name: 'aws.s3.bucket.name',
   },
-  requiredMetrics: [
-    'awsS3BucketSize',
-    'awsS3NumberOfObjects',
-    'awsS3TotalRequests',
-    'awsS3DownloadBytes',
-    'awsS3UploadBytes',
-  ],
-  tooltipMetrics: [
-    's3BucketSize',
-    's3NumberOfObjects',
-    's3TotalRequests',
-    's3UploadBytes',
-    's3DownloadBytes',
-  ],
-};
+});

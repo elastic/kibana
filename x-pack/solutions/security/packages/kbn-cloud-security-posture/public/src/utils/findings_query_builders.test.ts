@@ -6,10 +6,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { AggregationBuckets } from './findings_query_builders';
 import {
-  AggregationBuckets,
   getVulnerabilitiesAggregationCount,
   VULNERABILITIES_RESULT_EVALUATION,
+  createGetVulnerabilityFindingsQuery,
 } from './findings_query_builders';
 
 describe('getVulnerabilitiesAggregationCount', () => {
@@ -55,5 +56,104 @@ describe('getVulnerabilitiesAggregationCount', () => {
       [VULNERABILITIES_RESULT_EVALUATION.NONE]: 5,
     };
     expect(vulnerabilitiesAggregrationCount).toEqual(result);
+  });
+});
+
+describe('createGetVulnerabilityFindingsQuery', () => {
+  it('should create query with all parameters defined', () => {
+    const vulnerabilityId = 'CVE-2023-1234';
+    const resourceId = 'resource-123';
+    const packageName = 'package-abc';
+    const packageVersion = '1.2.3';
+    const eventId = 'event-456';
+
+    const result = createGetVulnerabilityFindingsQuery(
+      vulnerabilityId,
+      resourceId,
+      packageName,
+      packageVersion,
+      eventId
+    );
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            terms: {
+              'vulnerability.id': ['CVE-2023-1234'],
+            },
+          },
+          {
+            terms: {
+              'resource.id': ['resource-123'],
+            },
+          },
+          {
+            terms: {
+              'package.name': ['package-abc'],
+            },
+          },
+          {
+            terms: {
+              'package.version': ['1.2.3'],
+            },
+          },
+          {
+            terms: {
+              'event.id': ['event-456'],
+            },
+          },
+        ],
+        must_not: [],
+      },
+    });
+  });
+
+  it('should create query with undefined package.version and resource.id fields', () => {
+    const vulnerabilityId = 'CVE-2023-1234';
+    const packageName = 'package-abc';
+    const eventId = 'event-456';
+
+    const result = createGetVulnerabilityFindingsQuery(
+      vulnerabilityId,
+      undefined,
+      packageName,
+      undefined,
+      eventId
+    );
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            terms: {
+              'vulnerability.id': ['CVE-2023-1234'],
+            },
+          },
+          {
+            terms: {
+              'package.name': ['package-abc'],
+            },
+          },
+          {
+            terms: {
+              'event.id': ['event-456'],
+            },
+          },
+        ],
+        must_not: [
+          {
+            exists: {
+              field: 'resource.id',
+            },
+          },
+          {
+            exists: {
+              field: 'package.version',
+            },
+          },
+        ],
+      },
+    });
   });
 });

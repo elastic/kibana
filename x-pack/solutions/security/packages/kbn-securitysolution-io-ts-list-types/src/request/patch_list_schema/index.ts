@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { version } from '@kbn/securitysolution-io-ts-types';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
 import { _version } from '../../common/underscore_version';
 import { meta } from '../../common/meta';

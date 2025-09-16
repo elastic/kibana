@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { lastValueFrom } from 'rxjs';
-import { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 import {
   runOptimizer,
   OptimizerConfig,
@@ -19,7 +19,8 @@ import {
   reportOptimizerTimings,
 } from '@kbn/optimizer';
 
-import { Task, deleteAll, write, read } from '../lib';
+import type { Task } from '../lib';
+import { deleteAll, write, read } from '../lib';
 
 export const BuildKibanaPlatformPlugins: Task = {
   description: 'Building distributable versions of Kibana platform plugins',

@@ -10,7 +10,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview';
 import errorApmOtelFixture from '../../__fixtures__/error_apm_otel.json';
-import otelExampleFixture from '../../__fixtures__/logs_otel_example.json';
+import otelExampleFixture from '../../__fixtures__/log_otel_example.json';
+import k8sContainerLogFixture from '../../__fixtures__/log_k8s_filebeat.json';
 import { LogsOverview, type LogsOverviewProps } from './logs_overview';
 
 type Args = UnifiedDocViewerStorybookArgs<LogsOverviewProps>;
@@ -21,23 +22,48 @@ const meta = {
 export default meta;
 type Story = StoryObj<Args>;
 
+/**
+ * Just a document with a timestamp.
+ */
 export const Minimal: Story = {
   name: 'Minimal log',
   args: {
     hit: { fields: { '@timestamp': new Date().toISOString() } },
   },
+  tags: ['log'],
 };
 
-export const OtelExample: Story = {
-  name: 'Otel example log',
+/**
+ * A proxy access event from the OpenTelemetry demo. Has `body.text` as the message and no severity.
+ * The `event_name` is `proxy.access`, a custom event defined by that application.
+ */
+export const OtelExampleEvent: Story = {
+  name: 'Custom OpenTelemetry event',
   args: {
     hit: otelExampleFixture,
   },
+  tags: ['otel', 'log', 'event'],
 };
 
+/**
+ * An OpenTelemetry exception event, with APM error attributes added by the elasticapmprocessor.
+ * Has `event_name:exception` and both OpenTelemetry `exception.*` attributes and APM `error.*` attributes.
+ */
 export const ApmErrorOtelExample: Story = {
-  name: 'APM Error (processed Otel)',
+  name: 'OpenTelemetry exception event as APM Error',
   args: {
     hit: errorApmOtelFixture,
   },
+  tags: ['apm', 'otel', 'log', 'error', 'exception', 'event'],
+};
+
+/**
+ * Kubernetes container log captured by Filebeat.
+ */
+export const K8sContainerLog: Story = {
+  name: 'Filebeat Kubernetes container log',
+  args: {
+    hit: k8sContainerLogFixture,
+  },
+  tags: ['k8s', 'log', 'filebeat'],
 };

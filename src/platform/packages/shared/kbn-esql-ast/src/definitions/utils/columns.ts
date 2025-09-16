@@ -7,39 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ICommandContext } from '../../commands_registry/types';
+import type { ICommandContext } from '../../commands_registry/types';
 import type { ESQLColumn, ESQLIdentifier } from '../../types';
 import { fuzzySearch } from './shared';
-
-/**
- * This returns the name with any quotes that were present.
- *
- * E.g. "`bytes`" will be "`bytes`"
- *
- * @param node
- * @returns
- */
-export const getQuotedColumnName = (node: ESQLColumn | ESQLIdentifier) =>
-  node.type === 'identifier' ? node.name : node.quoted ? node.text : node.name;
 
 /**
  * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.
  */
 export function getColumnExists(
   node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: Pick<ICommandContext, 'fields' | 'userDefinedColumns'>
+  { columns }: Pick<ICommandContext, 'columns'>,
+  excludeFields = false
 ) {
   const columnName = node.type === 'identifier' ? node.name : node.parts.join('.');
-  if (fields.has(columnName) || userDefinedColumns.has(columnName)) {
+
+  const set = new Set(
+    !excludeFields
+      ? columns.keys()
+      : Array.from(columns.values())
+          .filter((col) => col.userDefined)
+          .map((col) => col.name)
+  );
+
+  if (set.has(columnName)) {
     return true;
   }
 
   // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-  if (
-    Boolean(
-      fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, userDefinedColumns.keys())
-    )
-  ) {
+  if (Boolean(fuzzySearch(columnName, set.values()))) {
     return true;
   }
 

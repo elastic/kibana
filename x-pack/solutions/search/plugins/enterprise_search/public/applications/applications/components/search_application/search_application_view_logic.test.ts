@@ -10,14 +10,12 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applications/delete_search_application_api_logic';
+import type { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applications/delete_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 import { SearchApplicationsListLogic } from '../search_applications/search_applications_list_logic';
 
-import {
-  SearchApplicationViewLogic,
-  SearchApplicationViewValues,
-} from './search_application_view_logic';
+import type { SearchApplicationViewValues } from './search_application_view_logic';
+import { SearchApplicationViewLogic } from './search_application_view_logic';
 
 const DEFAULT_VALUES: SearchApplicationViewValues = {
   fetchSearchApplicationApiError: undefined,

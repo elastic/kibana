@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useIndicesRedirect } from './use_indices_redirect';
 import { useKibana } from '../../../hooks/use_kibana';
+import { navigateToIndexDetails } from '../../utils';
 import type { UserStartPrivilegesResponse, IndicesStatusResponse } from '../../../../common';
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -26,16 +27,20 @@ jest.mock('../../utils', () => ({
 
 describe('useIndicesRedirect', () => {
   const mockNavigateToApp = jest.fn();
-  const mockNavigateToIndexDetails = jest.fn();
+  const mockIsSampleIndex = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsSampleIndex.mockReset();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
         },
         http: {},
+        sampleDataIngest: {
+          isSampleIndex: mockIsSampleIndex,
+        },
       },
     });
   });
@@ -78,7 +83,7 @@ describe('useIndicesRedirect', () => {
     renderHook(() => useIndicesRedirect(undefined, userPrivileges));
 
     expect(mockNavigateToApp).not.toHaveBeenCalled();
-    expect(mockNavigateToIndexDetails).not.toHaveBeenCalled();
+    expect(navigateToIndexDetails).not.toHaveBeenCalled();
   });
 
   it('should not navigate if indicesStatus has no indices', () => {
@@ -95,7 +100,7 @@ describe('useIndicesRedirect', () => {
     renderHook(() => useIndicesRedirect(indicesStatus, userPrivileges));
 
     expect(mockNavigateToApp).not.toHaveBeenCalled();
-    expect(mockNavigateToIndexDetails).not.toHaveBeenCalled();
+    expect(navigateToIndexDetails).not.toHaveBeenCalled();
   });
 
   it('should not navigate if userPrivileges is undefined', () => {
@@ -106,7 +111,7 @@ describe('useIndicesRedirect', () => {
     renderHook(() => useIndicesRedirect(indicesStatus, undefined));
 
     expect(mockNavigateToApp).not.toHaveBeenCalled();
-    expect(mockNavigateToIndexDetails).not.toHaveBeenCalled();
+    expect(navigateToIndexDetails).not.toHaveBeenCalled();
   });
 
   it('should navigate to "elasticsearchIndexManagement" if lastStatus is undefined and indicesStatus has indices', () => {
@@ -123,5 +128,58 @@ describe('useIndicesRedirect', () => {
     renderHook(() => useIndicesRedirect(indicesStatus, userPrivileges));
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('elasticsearchIndexManagement');
+  });
+
+  it('should navigate to index details if single index is not a sample index', () => {
+    const emptyIndicesStatus = {
+      indexNames: [],
+    } as IndicesStatusResponse;
+
+    const indicesStatus = {
+      indexNames: ['regular_index'],
+    } as IndicesStatusResponse;
+
+    const userPrivileges = {
+      privileges: {
+        canManageIndex: true,
+      },
+    } as UserStartPrivilegesResponse;
+
+    mockIsSampleIndex.mockReturnValue(false);
+
+    const { rerender } = renderHook((props) => useIndicesRedirect(props, userPrivileges), {
+      initialProps: emptyIndicesStatus,
+    });
+
+    rerender(indicesStatus);
+
+    expect(mockIsSampleIndex).toHaveBeenCalledWith('regular_index');
+    expect(navigateToIndexDetails).toHaveBeenCalled();
+  });
+
+  it('should not navigate if single index is a sample index', () => {
+    const emptyIndicesStatus = {
+      indexNames: [],
+    } as IndicesStatusResponse;
+    const indicesStatus = {
+      indexNames: ['sample_index'],
+    } as IndicesStatusResponse;
+    const userPrivileges = {
+      privileges: {
+        canManageIndex: true,
+      },
+    } as UserStartPrivilegesResponse;
+
+    mockIsSampleIndex.mockReturnValue(true);
+
+    const { rerender } = renderHook((props) => useIndicesRedirect(props, userPrivileges), {
+      initialProps: emptyIndicesStatus,
+    });
+
+    rerender(indicesStatus);
+
+    expect(mockIsSampleIndex).toHaveBeenCalledWith('sample_index');
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
+    expect(navigateToIndexDetails).not.toHaveBeenCalled();
   });
 });

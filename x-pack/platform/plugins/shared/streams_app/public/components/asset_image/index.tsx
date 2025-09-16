@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiImage, EuiImageProps, useEuiTheme } from '@elastic/eui';
+import type { EuiImageProps } from '@elastic/eui';
+import { EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
@@ -69,6 +70,13 @@ const imageSets = {
         defaultMessage: 'Processors cannot be added to root streams image for the streams app',
       }
     ),
+  },
+  extractFields: {
+    light: () => import('./extract_fields_light.png'),
+    dark: () => import('./extract_fields_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.extractFieldsImage', {
+      defaultMessage: 'Extract fields image for the streams app',
+    }),
   },
 };
 

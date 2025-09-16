@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as React from 'react';
+import type * as React from 'react';
 import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
 import { i18n } from '@kbn/i18n';
-import { Action, ActionDefinition, ActionMenuItemProps } from './action';
+import type { Action, ActionDefinition, ActionMenuItemProps } from './action';
 import { getNotifications } from '../services';
 
 /**

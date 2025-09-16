@@ -10,10 +10,10 @@
 import execa from 'execa';
 import chalk from 'chalk';
 import { fromEvent, merge, map, toArray, takeUntil } from 'rxjs';
-import { ToolingLog, LogLevel } from '@kbn/tooling-log';
+import type { ToolingLog, LogLevel } from '@kbn/tooling-log';
 
 import { watchStdioForLine } from './watch_stdio_for_line';
-import { Build } from './build';
+import type { Build } from './build';
 
 interface Options {
   level?: Exclude<LogLevel, 'silent' | 'error'>;

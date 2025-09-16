@@ -6,12 +6,12 @@
  */
 
 import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
-import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
+import type { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
 import type { ContentRef } from '@kbn/wci-common';
 import type { ToolResultEvent } from '../../../../../common/chat_events';
 import type { AssistantMessage } from '../../../../../common/conversation_events';
 import { extractTextContent, messageFromLangchain } from '../../utils';
-import { AgentRunEvents } from '../../types';
+import type { AgentRunEvents } from '../../types';
 import { matchGraphName } from '../utils';
 import type { EventConverter } from './types';
 

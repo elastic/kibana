@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,11 +21,12 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { Doc } from '../../types';
+import type { Doc } from '../../types';
 
 interface RetrievalDocsFlyoutProps {
   onClose: () => void;
@@ -43,6 +44,8 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
   retrievalDocs,
 }) => {
   const usageTracker = useUsageTracker();
+  const modalTitleId = useGeneratedHtmlId();
+
   const columns: Array<EuiBasicTableColumn<{ field: string; value: unknown }>> = [
     {
       field: 'field',
@@ -85,10 +88,10 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
   }, [usageTracker]);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={modalTitleId}>
             {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDoc.title', {
               defaultMessage: 'Documents retrieved',
             })}

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
@@ -27,14 +27,9 @@ import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
@@ -45,7 +40,6 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
 export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
     useDocumentDetailsContext();
-  const { isTourShown, activeStep } = useTourContext();
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const oldSecurityDefaultPatterns =
@@ -60,12 +54,6 @@ export const CorrelationsOverview: React.FC = () => {
       tab: LeftPanelInsightsTab,
       subTab: CORRELATIONS_TAB_ID,
     });
-
-  useEffect(() => {
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
-      goToCorrelationsTab();
-    }
-  }, [activeStep, goToCorrelationsTab, isTourShown]);
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,

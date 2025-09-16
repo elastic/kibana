@@ -36,3 +36,9 @@ export const EndpointAgentTamperProtectionLazy = lazy(() =>
     default: EndpointAgentTamperProtection,
   }))
 );
+
+export const EndpointDeviceControlLazy = lazy(() =>
+  import('./endpoint_device_control').then(({ EndpointDeviceControl }) => ({
+    default: EndpointDeviceControl,
+  }))
+);

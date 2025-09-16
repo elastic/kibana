@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EVENT_FILTERS_OPERATORS,
+  ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
@@ -61,6 +61,7 @@ import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import { getAddedFieldsCounts, computeHasDuplicateFields } from '../../../../common/utils';
 
 import {
   ABOUT_EVENT_FILTERS,
@@ -79,6 +80,7 @@ import { ExceptionItemComments } from '../../../../../detection_engine/rule_exce
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
+import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -91,19 +93,6 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   value: os,
   inputDisplay: OS_TITLES[os],
 }));
-
-const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
-  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
-    if (field in allFields) {
-      allFields[field]++;
-    } else {
-      allFields[field] = 1;
-    }
-    return allFields;
-  }, {});
-
-const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
-  Object.values(formFieldsList).some((e) => e > 1);
 
 const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   {
@@ -124,13 +113,6 @@ const cleanupEntries = (
     }
   );
 };
-
-type EventFilterItemEntries = Array<{
-  field: string;
-  value: string;
-  operator: 'included' | 'excluded';
-  type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
-}>;
 
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
@@ -195,7 +177,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         !hasNameError &&
         !hasCommentError &&
         !!exception.entries.length &&
-        (exception.entries as EventFilterItemEntries).some((e) => e.value !== '' || e.value.length)
+        (exception.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
+          (e) => e.value !== '' || e.value.length
+        )
       );
     }, [hasCommentError, hasNameError, exception.entries]);
 
@@ -586,7 +570,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           dataTestSubj: 'alert-exception-builder',
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
-          operatorsList: EVENT_FILTERS_OPERATORS,
+          operatorsList: ENDPOINT_ARTIFACT_OPERATORS,
           osTypes: exception.os_types,
           showValueListModal: ShowValueListModal,
         }),

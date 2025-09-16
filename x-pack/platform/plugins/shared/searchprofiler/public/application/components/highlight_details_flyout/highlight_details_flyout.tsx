@@ -14,11 +14,12 @@ import {
   EuiIconTip,
   EuiText,
   EuiCodeBlock,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { msToPretty } from '../../lib';
 import { HighlightDetailsTable } from './highlight_details_table';
-import { Operation } from '../../types';
+import type { Operation } from '../../types';
 
 export interface Props {
   operation: Omit<Operation, 'children' | 'parent'>;
@@ -41,10 +42,18 @@ const FlyoutEntry = ({
 );
 
 export const HighlightDetailsFlyout = ({ indexName, operation, shardName, onClose }: Props) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout className="prfDevTool__details" onClose={() => onClose()}>
+    <EuiFlyout
+      className="prfDevTool__details"
+      onClose={() => onClose()}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiText size="s">{indexName}</EuiText>
+        <EuiText size="s" id={flyoutTitleId}>
+          {indexName}
+        </EuiText>
         <EuiText>{shardName}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

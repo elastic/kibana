@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+
 /**
  * The `activity` document ingested from SentinelOne via the integration
  *
@@ -162,3 +164,30 @@ export interface SentinelOneKillProcessResponseMeta {
   /** The SentinelOne task ID associated with the completion of the kill-process action */
   taskId: string;
 }
+
+export interface SentinelRunScriptRequestMeta extends SentinelOneIsolationRequestMeta {
+  /**
+   * The Parent Task Is that is executing script in SentinelOne.
+   * Used to check on the status of that action
+   */
+  parentTaskId: string;
+}
+
+export interface SentinelOneRunScriptResponseMeta {
+  /** The SentinelOne task ID associated with the completion of the run script action */
+  taskId: string;
+}
+
+/**
+ * A subset of properties from the SentinelOne Script API response
+ */
+export type SentinelOneScript = Pick<
+  SentinelOneGetRemoteScriptsResponse['data'][number],
+  | 'id'
+  | 'scriptDescription'
+  | 'osTypes'
+  | 'inputInstructions'
+  | 'inputExample'
+  | 'inputRequired'
+  | 'shortFileName'
+>;

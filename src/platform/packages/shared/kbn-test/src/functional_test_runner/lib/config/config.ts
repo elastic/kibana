@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Schema } from 'joi';
+import type { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 
 import { schema } from './schema';
-import { ConfigModule } from './config_loading';
+import type { ConfigModule } from './config_loading';
 
 const $values = Symbol('values');
 

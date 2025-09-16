@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
 
 /*
  * API for checking read privilege on Monitoring Data

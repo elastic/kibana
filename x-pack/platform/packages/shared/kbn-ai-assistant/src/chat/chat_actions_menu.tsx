@@ -42,7 +42,7 @@ export function ChatActionsMenu({
   const handleNavigateToSettingsKnowledgeBase = () => {
     application?.navigateToUrl(
       http!.basePath.prepend(
-        `/app/management/kibana/observabilityAiAssistantManagement?tab=knowledge_base`
+        `/app/management/ai/observabilityAiAssistantManagement?tab=knowledge_base`
       )
     );
   };

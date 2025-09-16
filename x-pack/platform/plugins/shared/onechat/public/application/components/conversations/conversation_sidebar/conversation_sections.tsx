@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { ConversationItem } from './conversation_item';
@@ -24,6 +24,10 @@ const emptyStyles = css`
 `;
 
 export const ConversationSections: React.FC<ConversationSectionsProps> = ({ conversations }) => {
+  const { euiTheme } = useEuiTheme();
+  const sectionTitleStyles = css`
+    margin-inline-start: ${euiTheme.size.s};
+  `;
   const timeSections = useMemo(() => {
     if (!conversations || conversations.length === 0) {
       return [];
@@ -44,7 +48,7 @@ export const ConversationSections: React.FC<ConversationSectionsProps> = ({ conv
       {timeSections.map(({ label, conversations: sectionConversations }) => (
         <EuiFlexItem key={label} grow={false}>
           <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiText size="xs" color="subdued">
+            <EuiText css={sectionTitleStyles} size="xs" color="subdued">
               {label}
             </EuiText>
 

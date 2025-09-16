@@ -8,7 +8,7 @@
  */
 
 import type { SerializableRecord, Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,

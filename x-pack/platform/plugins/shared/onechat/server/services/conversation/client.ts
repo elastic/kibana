@@ -6,18 +6,18 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
-  ConversationWithoutRounds,
 } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
 } from '../../../common/conversations';
-import { ConversationStorage } from './storage';
+import type { ConversationStorage } from './storage';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -29,9 +29,11 @@ import {
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
+  exists(conversationId: string): Promise<boolean>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  delete(conversationId: string): Promise<boolean>;
 }
 
 export const createClient = ({
@@ -65,7 +67,11 @@ class ConversationClientImpl implements ConversationClient {
       query: {
         bool: {
           must: [
-            { term: { user_id: this.user.id } },
+            {
+              term: this.user.username
+                ? { user_name: this.user.username }
+                : { user_id: this.user.id },
+            },
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
         },
@@ -76,13 +82,24 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async get(conversationId: string): Promise<Conversation> {
-    const document = await this.storage.getClient().get({ id: conversationId });
+    const document = await this._get(conversationId);
+    if (!document) {
+      throw createConversationNotFoundError({ conversationId });
+    }
 
     if (!hasAccess({ conversation: document, user: this.user })) {
       throw createConversationNotFoundError({ conversationId });
     }
 
     return fromEs(document);
+  }
+
+  async exists(conversationId: string): Promise<boolean> {
+    const document = await this._get(conversationId);
+    if (!document) {
+      return false;
+    }
+    return hasAccess({ conversation: document, user: this.user });
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
@@ -104,11 +121,15 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
+    const { id: conversationId } = conversationUpdate;
     const now = new Date();
-    const document = await this.storage.getClient().get({ id: conversationUpdate.id });
+    const document = await this._get(conversationUpdate.id);
+    if (!document) {
+      throw createConversationNotFoundError({ conversationId });
+    }
 
     if (!hasAccess({ conversation: document, user: this.user })) {
-      throw createConversationNotFoundError({ conversationId: conversationUpdate.id });
+      throw createConversationNotFoundError({ conversationId });
     }
 
     const storedConversation = fromEs(document);
@@ -126,6 +147,45 @@ class ConversationClientImpl implements ConversationClient {
 
     return this.get(conversationUpdate.id);
   }
+
+  async delete(conversationId: string): Promise<boolean> {
+    const document = await this._get(conversationId);
+    if (!document) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    if (!hasAccess({ conversation: document, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    const { result } = await this.storage.getClient().delete({ id: conversationId });
+    return result === 'deleted';
+  }
+
+  private async _get(conversationId: string): Promise<Document | undefined> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { _id: conversationId } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+    if (response.hits.hits.length === 0) {
+      return undefined;
+    } else {
+      return response.hits.hits[0] as Document;
+    }
+  }
 }
 
 const hasAccess = ({
@@ -135,5 +195,7 @@ const hasAccess = ({
   conversation: Pick<Document, '_source'>;
   user: UserIdAndName;
 }) => {
-  return conversation._source!.user_id === user.id;
+  return (
+    conversation._source!.user_id === user.id || conversation._source!.user_name === user.username
+  );
 };

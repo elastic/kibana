@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export const buildRollingTimeWindow = (
   params: Partial<SLOWithSummaryResponse['timeWindow']> = {}

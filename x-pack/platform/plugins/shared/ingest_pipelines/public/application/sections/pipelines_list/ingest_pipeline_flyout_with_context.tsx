@@ -13,14 +13,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { AuthorizationProvider } from '@kbn/es-ui-shared-plugin/public';
-import {
-  INGEST_PIPELINES_APP_LOCATOR,
-  INGEST_PIPELINES_PAGES,
-  IngestPipelinesParams,
-} from '../../../locator';
+import type { IngestPipelinesParams } from '../../../locator';
+import { INGEST_PIPELINES_APP_LOCATOR, INGEST_PIPELINES_PAGES } from '../../../locator';
 import { API_BASE_PATH } from '../../../../common/constants';
-import { Pipeline } from '../../../../common/types';
-import { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
+import type { Pipeline } from '../../../../common/types';
+import type { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
 
 import { KibanaRenderContextProvider, KibanaContextProvider } from '../../../shared_imports';
 import { PipelineDeleteModal } from './delete_modal';
@@ -35,6 +32,13 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
 }) => {
   const locator = services.share.url.locators.get<IngestPipelinesParams>(
     INGEST_PIPELINES_APP_LOCATOR
+  );
+
+  const createPipeline = useCallback(
+    (name: string) => {
+      locator?.navigate({ page: INGEST_PIPELINES_PAGES.CREATE, pipelineId: name });
+    },
+    [locator]
   );
 
   const editPipeline = useCallback(
@@ -61,9 +65,9 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
       >
         <KibanaContextProvider services={services}>
           <PipelineFlyout
-            embedded
-            pipeline={ingestPipelineName}
+            ingestPipeline={ingestPipelineName}
             onClose={onClose}
+            onCreateClick={createPipeline}
             onEditClick={editPipeline}
             onCloneClick={clonePipeline}
             onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}

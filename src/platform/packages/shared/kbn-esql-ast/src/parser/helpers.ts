@@ -10,23 +10,6 @@
 import type { Token } from 'antlr4';
 import { DEFAULT_CHANNEL } from './constants';
 
-export const isQuotedIdentifier = (text: string): boolean => {
-  const firstChar = text[0];
-  const lastChar = text[text.length - 1];
-
-  return firstChar === '`' && lastChar === '`';
-};
-
-export const parseIdentifier = (text: string): string => {
-  const isQuoted = isQuotedIdentifier(text);
-
-  if (!isQuoted) {
-    return text;
-  }
-
-  return text.slice(1, -1).replace(/``/g, '`');
-};
-
 export const regexUnquotedIdentifierPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
 
 export const formatIdentifier = (text: string): string => {

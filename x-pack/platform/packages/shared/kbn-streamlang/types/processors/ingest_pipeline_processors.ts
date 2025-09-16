@@ -5,60 +5,66 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { RenameFieldsAndRemoveAction } from '../utils';
+import type {
+  GrokProcessor,
+  DissectProcessor,
+  DateProcessor,
+  RenameProcessor,
+  SetProcessor,
+  ManualIngestPipelineProcessor,
+  AppendProcessor,
+} from '.';
 
-export type ElasticsearchProcessorType = keyof IngestProcessorContainer;
+/** Ingest Pipeline processor configurations very closely resemble Streamlang DSL action blocks */
 
-const ensureFullProcessorTypeList = <T extends readonly ElasticsearchProcessorType[]>(
-  types: ElasticsearchProcessorType extends T[number]
-    ? T
-    : `Missing elements from union: "${Exclude<ElasticsearchProcessorType, T[number]>}"`
-) => types as T;
+// Grok
+export type IngestPipelineGrokProcessor = RenameFieldsAndRemoveAction<
+  GrokProcessor,
+  { from: 'field'; where: 'if' }
+>;
 
-export const elasticsearchProcessorTypes = ensureFullProcessorTypeList([
-  'append',
-  'attachment',
-  'bytes',
-  'circle',
-  'community_id',
-  'convert',
-  'csv',
-  'date',
-  'date_index_name',
-  'dissect',
-  'dot_expander',
-  'drop',
-  'enrich',
-  'fail',
-  'fingerprint',
-  'foreach',
-  'ip_location',
-  'geo_grid',
-  'geoip',
-  'grok',
-  'gsub',
-  'html_strip',
-  'inference',
-  'join',
-  'json',
-  'kv',
-  'lowercase',
-  'network_direction',
-  'pipeline',
-  'redact',
-  'registered_domain',
-  'remove',
-  'rename',
-  'reroute',
-  'script',
-  'set',
-  'set_security_user',
-  'sort',
-  'split',
-  'terminate',
-  'trim',
-  'uppercase',
-  'urldecode',
-  'uri_parts',
-  'user_agent',
-] as const);
+// Dissect
+export type IngestPipelineDissectProcessor = RenameFieldsAndRemoveAction<
+  DissectProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
+// Date
+export type IngestPipelineDateProcessor = RenameFieldsAndRemoveAction<
+  DateProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Rename
+export type IngestPipelineRenameProcessor = RenameFieldsAndRemoveAction<
+  RenameProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Set
+export type IngestPipelineSetProcessor = RenameFieldsAndRemoveAction<
+  SetProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Append
+export type IngestPipelineAppendProcessor = RenameFieldsAndRemoveAction<
+  AppendProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Manual Ingest Pipeline (escape hatch)
+export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
+  ManualIngestPipelineProcessor,
+  { where: 'if' }
+>;
+
+export type IngestPipelineProcessor =
+  | IngestPipelineGrokProcessor
+  | IngestPipelineDissectProcessor
+  | IngestPipelineDateProcessor
+  | IngestPipelineRenameProcessor
+  | IngestPipelineSetProcessor
+  | IngestPipelineAppendProcessor
+  | IngestPipelineManualIngestPipelineProcessor;

@@ -17,6 +17,8 @@ You must add a `translations` directory at the root of your plugin. This directo
 ├── translations
 │   ├── en.json
 │   ├── ja-JP.json
+│   ├── de-DE.json
+│   ├── fr-FR.json
 │   └── zh-CN.json
 └── .i18nrc.json
 ```
@@ -44,6 +46,8 @@ To use {{kib}} i18n tooling, create a `.i18nrc.json` file with the following con
   ],
   "translations": [
     "translations/zh-CN.json",
+    "translations/fr-FR.json",
+    "translations/de-DE.json",
     "translations/ja-JP.json"
   ]
 }

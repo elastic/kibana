@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -14,12 +14,12 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import type { Connector } from '@kbn/search-connectors';
 import {
   CRAWLER_SERVICE_TYPE,
   deleteConnectorSecret,
   deleteConnectorById,
   updateConnectorIndexName,
-  Connector,
 } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
@@ -28,7 +28,7 @@ import {
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { AlwaysShowPattern } from '../../../common/types/indices';
+import type { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   AttachMlInferencePipelineResponse,

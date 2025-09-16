@@ -14,7 +14,7 @@ import {
   painlessLanguageAttributes,
 } from './nested_painless';
 import { buildEsqlRules, buildEsqlStartRule, esqlLanguageAttributes } from './nested_esql';
-import { monaco } from '../../../..';
+import type { monaco } from '../../../..';
 import { globals } from '../../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
 

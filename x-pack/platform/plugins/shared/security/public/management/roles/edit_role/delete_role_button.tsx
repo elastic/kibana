@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -50,8 +50,11 @@ export class DeleteRoleButton extends Component<Props, State> {
     if (!this.state.showModal) {
       return null;
     }
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           buildFlavor !== 'serverless' ? (
             <FormattedMessage

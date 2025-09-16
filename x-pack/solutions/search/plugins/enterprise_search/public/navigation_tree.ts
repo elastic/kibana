@@ -84,6 +84,20 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  link: SEARCH_HOMEPAGE,
+                  title,
+                  icon,
+                  renderAs: 'home',
+                  sideNavVersion: 'v2',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
+                    );
+                  },
+                },
+                {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
@@ -94,6 +108,7 @@ export const getNavigationTreeDefinition = ({
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
                     defaultMessage: 'Home',
                   }),
+                  sideNavVersion: 'v1',
                 },
                 {
                   link: 'discover',
@@ -106,13 +121,13 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'onechat:conversations' },
-                    { link: 'onechat:tools' },
-                    { link: 'onechat:agents' },
+                    { link: 'agent_builder:conversations' },
+                    { link: 'agent_builder:tools' },
+                    { link: 'agent_builder:agents' },
                   ],
-                  id: 'chat',
+                  id: 'agent_builder',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
-                    defaultMessage: 'Chat',
+                    defaultMessage: 'Agents',
                   }),
                   renderAs: 'accordion',
                 },
@@ -127,12 +142,12 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'elasticsearchIndexManagement',
+                      iconV2: 'indexManagementApp',
                     },
                     {
                       breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
                     },
-                    { link: 'enterpriseSearchContent:connectors' },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         const someSubItemSelected = searchApps?.some((app) =>
@@ -147,13 +162,8 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
+                      iconV2: 'searchProfilerApp' /* TODO: review icon */,
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),
@@ -240,6 +250,7 @@ export const getNavigationTreeDefinition = ({
                       ),
                     },
                     {
+                      iconV2: 'managementApp',
                       children: [
                         {
                           children: [
@@ -293,11 +304,18 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
-                            { link: 'management:aiAssistantManagementSelection' },
                             { link: 'management:spaces' },
                             { link: 'management:settings' },
                           ],
                           title: 'Kibana',
+                        },
+                        {
+                          children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:agentBuilder' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: 'AI',
                         },
                         {
                           children: [

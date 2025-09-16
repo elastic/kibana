@@ -276,14 +276,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createMockStore(
-    undefined,
-    storeReducer,
-    undefined,
-    undefined,
-    // @ts-expect-error ts upgrade v4.7.4
-    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
-  );
+  const store = createMockStore(undefined, storeReducer, undefined, undefined, [
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const queryClient = new QueryClient({
     defaultOptions: {

@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 
 import { useLastPage } from './use_last_page';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
+import type { CaseUserActionsStats } from '../../containers/types';
 
 const userActivityQueryParams: UserActivityParams = {
   type: 'all',
@@ -17,10 +18,13 @@ const userActivityQueryParams: UserActivityParams = {
   perPage: 10,
 };
 
-const userActionsStats = {
+const userActionsStats: CaseUserActionsStats = {
   total: 5,
+  totalDeletions: 0,
   totalComments: 2,
+  totalCommentDeletions: 0,
   totalOtherActions: 3,
+  totalOtherActionDeletions: 0,
 };
 
 jest.mock('../../common/lib/kibana');
@@ -46,7 +50,14 @@ describe('useLastPage', () => {
   it('returns 1 when actions stats are 0', async () => {
     const { result } = renderHook(() =>
       useLastPage({
-        userActionsStats: { total: 0, totalComments: 0, totalOtherActions: 0 },
+        userActionsStats: {
+          total: 0,
+          totalDeletions: 0,
+          totalComments: 0,
+          totalCommentDeletions: 0,
+          totalOtherActions: 0,
+          totalOtherActionDeletions: 0,
+        },
         userActivityQueryParams,
       })
     );
@@ -59,7 +70,14 @@ describe('useLastPage', () => {
   it('returns correct last page when filter type is all', async () => {
     const { result } = renderHook(() =>
       useLastPage({
-        userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
         userActivityQueryParams,
       })
     );
@@ -72,7 +90,14 @@ describe('useLastPage', () => {
   it('returns correct last page when filter type is user', async () => {
     const { result } = renderHook(() =>
       useLastPage({
-        userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
         userActivityQueryParams: {
           ...userActivityQueryParams,
           type: 'user',
@@ -88,7 +113,14 @@ describe('useLastPage', () => {
   it('returns correct last page when filter type is action', async () => {
     const { result } = renderHook(() =>
       useLastPage({
-        userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
         userActivityQueryParams: {
           ...userActivityQueryParams,
           type: 'action',

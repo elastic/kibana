@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
+import type { Writable } from '@kbn/utility-types';
 import { SOURCE_TYPES, SCALING_TYPES } from '../constants';
-import { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
+import type { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 
 function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
@@ -33,7 +34,8 @@ export function migrateUseTopHitsToScalingType({
 
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
-      const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
+      const sourceDescriptor =
+        layerDescriptor.sourceDescriptor as Writable<ESSearchSourceDescriptor>;
       sourceDescriptor.scalingType = _.get(layerDescriptor, 'sourceDescriptor.useTopHits', false)
         ? SCALING_TYPES.TOP_HITS
         : SCALING_TYPES.LIMIT;

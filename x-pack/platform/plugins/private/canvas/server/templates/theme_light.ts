@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CanvasTemplate } from '../../types';
+import type { CanvasTemplate } from '../../types';
 
 export const light: CanvasTemplate = {
   id: 'workpad-template-890b80e5-a3eb-431d-b8ed-37587ffd32c3',

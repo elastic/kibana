@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RendererFactory } from '../types';
+import type { RendererFactory } from '../types';
 
 export const renderFunctions: RendererFactory[];
 export const renderFunctionNames: string[];

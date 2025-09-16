@@ -4,18 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useKibana } from '../hooks/use_kibana';
+import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
+import { generateRandomIndexName } from '../utils/indices';
+import { SampleDataActionButton } from './sample_data_action_button';
 
 export const ConnectToElasticsearchSidePanel = () => {
-  const { application } = useKibana().services;
+  const { application, sampleDataIngest } = useKibana().services;
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
+
+  const indexName = useMemo(() => generateRandomIndexName(), []);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -46,32 +53,29 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         />
-        {/* TODO:   Enable The “Sample Data” section when the one-click sample data ingestion feature is complete. */}
-        {/* <EuiCard
-          display="plain"
-          hasBorder
-          textAlign="left"
-          titleSize="xs"
-          title={
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
-              defaultMessage="Add sample data"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
-              defaultMessage="Add data sets with sample visualizations, dashboards, and more."
-            />
-          }
-          footer={
-            <EuiButtonEmpty href="#" iconType="importAction" data-test-subj="sampleDatasetButton">
-              {i18n.translate('xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton', {
-                defaultMessage: 'Add sample data',
-              })}
-            </EuiButtonEmpty>
-          }
-        /> */}
+
+        {sampleDataIngest && userPrivileges?.privileges?.canManageIndex === true && (
+          <EuiCard
+            display="plain"
+            hasBorder
+            textAlign="left"
+            titleSize="xs"
+            data-test-subj="sampleDataSection"
+            title={
+              <FormattedMessage
+                id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
+                defaultMessage="Add sample data"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
+                defaultMessage="Add data sets with sample visualizations, dashboards, and more."
+              />
+            }
+            footer={<SampleDataActionButton />}
+          />
+        )}
 
         {/* TODO: Enable CE block once we can discern the billing type.
         <EuiCard

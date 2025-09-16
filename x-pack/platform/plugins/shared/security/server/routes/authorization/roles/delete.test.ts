@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 
 import { defineDeleteRolesRoutes } from './delete';
 import { API_VERSIONS } from '../../../../common/constants';

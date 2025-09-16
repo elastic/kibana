@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { ApiKey } from '@kbn/security-plugin-types-common';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -22,6 +22,7 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
   const { id, name } = agentKey;
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteAgentKey = async () => {
     try {
@@ -49,6 +50,8 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.apm.settings.agentKeys.deleteConfirmModal.title', {
         defaultMessage: 'Delete APM agent key "{name}"?',
         values: { name },

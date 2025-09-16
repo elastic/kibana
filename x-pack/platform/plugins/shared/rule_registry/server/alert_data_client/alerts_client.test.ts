@@ -11,12 +11,16 @@ import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugi
 import type { ConstructorOptions } from './alerts_client';
 import { AlertsClient } from './alerts_client';
 import { fromKueryExpression } from '@kbn/es-query';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 describe('AlertsClient', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();
   const ruleDataService = ruleDataServiceMock.create();
   const requestHandlerContext = coreMock.createRequestHandlerContext();
-  const esClientMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
+  const esClientScopedMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
+  const esClientMock = requestHandlerContext.elasticsearch.client.asInternalUser;
+  const getRuleListMock = jest.fn();
+  const getAlertIndicesAliasMock = jest.fn();
 
   let alertsClient: AlertsClient;
 
@@ -46,10 +50,11 @@ describe('AlertsClient', () => {
       logger: loggingSystemMock.create().get(),
       authorization: alertingAuthMock,
       esClient: esClientMock,
+      esClientScoped: esClientScopedMock,
       ruleDataService,
       getRuleType: jest.fn(),
-      getRuleList: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      getRuleList: getRuleListMock,
+      getAlertIndicesAlias: getAlertIndicesAliasMock,
     };
 
     alertsClient = new AlertsClient(alertsClientParams);
@@ -242,6 +247,258 @@ describe('AlertsClient', () => {
           "track_total_hits": undefined,
         }
       `);
+    });
+  });
+
+  describe('getAlertFields', () => {
+    beforeEach(async () => {
+      jest.spyOn({ getRuleList: getRuleListMock }, 'getRuleList').mockReturnValue(new Map([]));
+      jest
+        .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
+        .mockResolvedValue(new Map([]));
+
+      jest
+        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
+        .mockImplementation((ruleTypeIds: string[]) => {
+          return [];
+        });
+
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest.fn().mockResolvedValue({
+        fields: [],
+        indices: [],
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should fetch all rule types when ruleTypeIds is empty array', async () => {
+      await alertsClient.getAlertFields([]);
+
+      expect(getRuleListMock).toHaveBeenCalled();
+    });
+
+    test('should fetch alert indices separately for siem and other rule types', async () => {
+      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+        // @ts-expect-error: mocking only necessary methods
+        new Map([
+          ['.es-query', {}],
+          ['logs.alert.document.count', {}],
+          ['siem.esqlRule', {}],
+        ])
+      );
+
+      await alertsClient.getAlertFields([
+        '.es-query',
+        'logs.alert.document.count',
+        'siem.esqlRule',
+      ]);
+
+      expect(getRuleListMock).not.toHaveBeenCalled();
+
+      expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
+      expect(getAlertIndicesAliasMock).nthCalledWith(1, ['siem.esqlRule']);
+      expect(getAlertIndicesAliasMock).nthCalledWith(2, ['.es-query', 'logs.alert.document.count']);
+    });
+
+    test('should fetch alert fields correctly', async () => {
+      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+        // @ts-expect-error: mocking only necessary methods
+        new Map([
+          ['.es-query', {}],
+          ['logs.alert.document.count', {}],
+          ['siem.esqlRule', {}],
+        ])
+      );
+
+      jest
+        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
+        .mockImplementation((ruleTypeIds: string[]) => {
+          if (ruleTypeIds.includes('siem.esqlRule')) {
+            return ['.alerts-security.alerts-default'];
+          } else {
+            return ['.alerts-stack.alerts-default', '.alerts-observability.logs.alerts-default'];
+          }
+        });
+
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValueOnce({
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'event.category', type: 'string' },
+            { name: 'signal.status', type: 'keyword' },
+          ],
+          indices: ['.alerts-security.alerts-default'],
+        })
+        .mockResolvedValueOnce({
+          fields: [
+            { name: 'message', type: 'string' },
+            { name: 'log.level', type: 'string' },
+          ],
+          indices: ['.alerts-stack.alerts-default', '.alerts-observability.logs.alerts-default'],
+        });
+
+      const response = await alertsClient.getAlertFields([
+        '.es-query',
+        'logs.alert.document.count',
+        'siem.esqlRule',
+      ]);
+
+      expect(getRuleListMock).not.toHaveBeenCalled();
+
+      expect(response.fields).toEqual([
+        {
+          name: 'message',
+          type: 'string',
+        },
+        {
+          name: 'log.level',
+          type: 'string',
+        },
+        {
+          name: '@timestamp',
+          type: 'date',
+        },
+        {
+          name: 'event.category',
+          type: 'string',
+        },
+        { name: 'signal.status', type: 'keyword' },
+      ]);
+    });
+
+    test('returns only SIEM fields when no other rule types are authorized', async () => {
+      // Mock authorization to return only SIEM rule types
+      jest
+        .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
+        .mockResolvedValueOnce(new Map([['siem.esqlRule', { authorizedConsumers: {} }]]));
+
+      jest
+        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
+        .mockImplementation((ruleTypeIds: string[]) => {
+          if (ruleTypeIds.includes('siem.esqlRule')) {
+            return ['.alerts-security.alerts-default'];
+          } else {
+            return [];
+          }
+        });
+
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValueOnce({
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'event.category', type: 'string' },
+            { name: 'signal.status', type: 'keyword' },
+          ],
+          indices: ['.alerts-security.alerts-default'],
+        })
+        .mockResolvedValueOnce({
+          fields: [],
+          indices: [],
+        });
+
+      const response = await alertsClient.getAlertFields(['siem.esqlRule']);
+
+      expect(getRuleListMock).not.toHaveBeenCalled();
+
+      // should not fetch other fields as there are no other indices
+      expect(IndexPatternsFetcher.prototype.getFieldsForWildcard).toHaveBeenCalledTimes(1);
+
+      expect(IndexPatternsFetcher.prototype.getFieldsForWildcard).toHaveBeenCalledWith({
+        fieldCapsOptions: {
+          allow_no_indices: true,
+        },
+        includeEmptyFields: false,
+        indexFilter: {
+          range: {
+            '@timestamp': {
+              gte: 'now-90d',
+            },
+          },
+        },
+        pattern: ['.alerts-security.alerts-default'],
+        metaFields: ['_id', '_index'],
+      });
+
+      expect(response.fields).toHaveLength(3);
+      expect(response.fields).toEqual([
+        { name: '@timestamp', type: 'date' },
+        { name: 'event.category', type: 'string' },
+        { name: 'signal.status', type: 'keyword' },
+      ]);
+    });
+
+    test('merges fields and removes duplicates', async () => {
+      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+        // @ts-expect-error: mocking only necessary methods
+        new Map([
+          ['.es-query', {}],
+          ['logs.alert.document.count', {}],
+          ['siem.esqlRule', {}],
+        ])
+      );
+
+      jest
+        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
+        .mockImplementation((ruleTypeIds: string[]) => {
+          if (ruleTypeIds.includes('siem.esqlRule')) {
+            return ['.alerts-security.alerts-default'];
+          } else {
+            return ['.alerts-stack.alerts-default'];
+          }
+        });
+
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValueOnce({
+          fields: [
+            { name: 'user.name', type: 'string' },
+            { name: 'source.ip', type: 'ip' },
+          ],
+          indices: ['.alerts-security.alerts-default'],
+        })
+        .mockResolvedValueOnce({
+          fields: [
+            { name: 'source.ip', type: 'ip' },
+            { name: 'destination.port', type: 'number' },
+          ],
+          indices: ['.alerts-stack.alerts-default'],
+        });
+
+      const response = await alertsClient.getAlertFields(['siem.esqlRule', '.es-query']);
+
+      expect(response.fields).toHaveLength(3);
+      expect(response.fields).toEqual([
+        { name: 'source.ip', type: 'ip' },
+        { name: 'destination.port', type: 'number' },
+        { name: 'user.name', type: 'string' },
+      ]);
+    });
+
+    test('returns empty fields when no rule types are authorized', async () => {
+      jest
+        .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
+        .mockResolvedValueOnce(new Map());
+      const response = await alertsClient.getAlertFields(['siem.esqlRule']);
+      expect(response.fields).toHaveLength(0);
+    });
+
+    test('returns empty fields when no indices are found', async () => {
+      jest.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+        // @ts-expect-error: mocking only necessary methods
+        new Map([['siem.esqlRule', {}]])
+      );
+
+      jest
+        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
+        .mockImplementation(() => []);
+
+      const response = await alertsClient.getAlertFields(['siem.esqlRule']);
+
+      expect(response.fields).toHaveLength(0);
     });
   });
 });

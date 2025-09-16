@@ -16,7 +16,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
@@ -55,55 +55,42 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
     } catch (error) {
       setIsValidWorkflow(false);
     }
-    setWorkflow(workflow);
+    setWorkflowYaml(workflow);
   };
 
   // Use React hooks to manage state.
-  const [stringWorkflow, setWorkflow] = useState<string>(
-    yaml.dump({
-      id: 'example-workflow-1',
-      name: 'Example Workflow 1',
-      status: 'active',
-      triggers: [
-        {
-          id: 'detection-rule',
-          type: 'detection-rule',
-          enabled: true,
-          config: {},
-        },
-      ],
-      steps: [
-        {
-          id: 'step-with-console-log-1',
-          type: 'console.log',
-          with: {
-            message: 'Step 1 executed "{{event.ruleName}}"',
-          },
-        },
-        {
-          id: 'step-with-slow-console',
-          type: 'console.sleep',
-          with: {
-            sleepTime: 1000,
-            message: 'Step 2 executed "{{event.additionalData.userName}}"',
-          },
-        },
-        {
-          id: 'step-with-slack-connector',
-          needs: ['step1', 'step2'],
-          type: 'slack-connector',
-          'connector-id': 'slack_keep',
-          with: {
-            message:
-              'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
-          },
-        },
-      ],
-    })
+  const [workflowYaml, setWorkflowYaml] = useState<string>(
+    `
+workflow:
+  name: New workflow
+  enabled: false
+  triggers:
+    - type: manual
+  steps:
+    - name: step-with-console-log-1
+      type: console
+      connector-id: console
+      with:
+        message: Step 1 executed for rule"{{event.ruleName}}"
+    
+    - name: slack-connector-step
+      type: slack
+      connector-id: keep-playground
+      with:
+        message: |
+          Hello from Kibana!
+          The user name from event is {{event.additionalData.userName}} and email is {{event.additionalData.user}}
+
+    - name: step-with-5-seconds-delay
+      type: delay
+      connector-id: delay
+      with:
+        delay: 5000
+    `
   );
 
   // Update workflow inputs with current user email
-  const getWorkflowInputs = useCallback(() => {
+  const getWorkflowInputs = React.useCallback(() => {
     const userEmail = currentUser?.email || 'workflow-user@gmail.com';
     const userName = currentUser?.username || 'workflow-user';
     return yaml.dump({
@@ -116,6 +103,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       },
     });
   }, [currentUser]);
+
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
   const [isValidWorkflow, setIsValidWorkflow] = useState<boolean>(true);
 
@@ -129,9 +117,9 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
     http
-      .post('/api/workflows/run', {
+      .post('/api/workflows/test', {
         body: JSON.stringify({
-          workflow: yaml.load(stringWorkflow),
+          workflowYaml,
           inputs: yaml.load(workflowInputs),
         }),
       })
@@ -223,7 +211,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                       >
                         <CodeEditor
                           languageId="yaml"
-                          value={stringWorkflow}
+                          value={workflowYaml}
                           height={500}
                           editorDidMount={() => {}}
                           onChange={validateAndSetWorkflow}
@@ -251,7 +239,10 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                     />
                   </EuiButton>
                   {workflowExecutionId && (
-                    <WorkflowExecution workflowExecutionId={workflowExecutionId} />
+                    <WorkflowExecution
+                      workflowExecutionId={workflowExecutionId}
+                      workflowYaml={workflowYaml}
+                    />
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>

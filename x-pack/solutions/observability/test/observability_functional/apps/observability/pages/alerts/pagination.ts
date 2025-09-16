@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ROWS_NEEDED_FOR_PAGINATION = 10;
 const DEFAULT_ROWS_PER_PAGE = 50;
@@ -22,15 +22,23 @@ export default ({ getService }: FtrProviderContext) => {
     const observability = getService('observability');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
 
       await observability.alerts.common.navigateToTimeWithData();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
     });
 
     // This will fail after removing workflow filter i.e. show all not only "open"  https://github.com/elastic/kibana/issues/119946

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { registerRetryRoute } from './register_retry_route';
 import { registerRemoveRoute } from './register_remove_route';
 import { registerAddPolicyRoute } from './register_add_policy_route';

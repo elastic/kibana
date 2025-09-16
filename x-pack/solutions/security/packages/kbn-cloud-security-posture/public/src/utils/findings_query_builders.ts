@@ -47,6 +47,12 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
       },
     },
   },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 2,
+    },
+  },
 });
 
 export const getMisconfigurationAggregationCount = (
@@ -182,6 +188,12 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
       },
     },
   },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 2,
+    },
+  },
 });
 
 export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPreview = false) => ({
@@ -255,12 +267,19 @@ export const createGetVulnerabilityFindingsQuery = (
   eventId?: string | string[]
 ) => {
   const filters: Array<{ terms: Record<string, string[]> }> = [];
+  const mustNotFilters: estypes.QueryDslQueryContainer[] = [];
 
   const addTermFilter = (field: string, value?: string | string[]) => {
     if (value !== undefined) {
       filters.push({
         terms: {
           [field]: Array.isArray(value) ? value : [value],
+        },
+      });
+    } else {
+      mustNotFilters.push({
+        exists: {
+          field,
         },
       });
     }
@@ -275,6 +294,7 @@ export const createGetVulnerabilityFindingsQuery = (
   return {
     bool: {
       filter: filters,
+      must_not: mustNotFilters,
     },
   };
 };

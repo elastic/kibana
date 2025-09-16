@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
+import { createInventoryModel } from '../shared/create_inventory_model';
 
-export { awsEC2SnapshotMetricTypes } from './metrics';
-
-export const awsEC2: InventoryModel = {
-  id: 'awsEC2',
+export const awsEC2 = createInventoryModel('awsEC2', {
   displayName: i18n.translate('xpack.metricsData.inventoryModels.awsEC2.displayName', {
     defaultMessage: 'EC2 Instances',
   }),
@@ -22,7 +19,7 @@ export const awsEC2: InventoryModel = {
       defaultMessage: 'EC2 Instance',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -35,7 +32,5 @@ export const awsEC2: InventoryModel = {
     name: 'cloud.instance.name',
     ip: 'aws.ec2.instance.public.ip',
   },
-  requiredMetrics: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
-  tooltipMetrics: ['cpu', 'rx', 'tx'],
-  nodeFilter: [{ term: { 'event.dataset': 'aws.ec2' } }],
-};
+  nodeFilter: () => [{ term: { 'event.dataset': 'aws.ec2' } }],
+});

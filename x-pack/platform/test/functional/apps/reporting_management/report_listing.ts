@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { REPORT_TABLE_ID } from '@kbn/reporting-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'reporting', 'settings', 'console']);
@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Listing of Reports', function () {
     const kbnArchive =
-      'x-pack/test/functional/fixtures/kbn_archiver/reporting/view_in_console_index_pattern.json';
+      'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/view_in_console_index_pattern.json';
 
     before(async () => {
       await security.testUser.setRoles([
@@ -40,13 +40,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       // to reset the data after deletion testing
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 200000 });
     });
 
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/reporting/archived_reports'
+      );
     });
 
     it('Confirm single report deletion works', async () => {

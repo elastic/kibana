@@ -25,9 +25,8 @@
  * @packageDocumentation
  */
 
+import 'reflect-metadata/lite';
 import './index.scss';
-
-import 'reflect-metadata';
 
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
@@ -35,7 +34,7 @@ export type { I18nStart } from '@kbn/core-i18n-browser';
 export type {
   FatalErrorsSetup,
   FatalErrorsStart,
-  FatalErrorInfo,
+  FatalError,
 } from '@kbn/core-fatal-errors-browser';
 export type {
   EvaluationContext,

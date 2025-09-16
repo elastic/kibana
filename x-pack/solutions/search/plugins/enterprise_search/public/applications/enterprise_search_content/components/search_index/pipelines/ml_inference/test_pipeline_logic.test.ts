@@ -9,13 +9,15 @@ import { mockMlInferenceValues } from './__mocks__/ml_inference_logic.mock';
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { nerModel } from '../../../../__mocks__/ml_models.mock';
 
-import { HttpError, Status } from '../../../../../../../common/types/api';
-import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
+import type { HttpError } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
+import type { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { SimulateExistingMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
 import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
-import { TestPipelineLogic, TestPipelineValues } from './test_pipeline_logic';
+import type { TestPipelineValues } from './test_pipeline_logic';
+import { TestPipelineLogic } from './test_pipeline_logic';
 import { AddInferencePipelineSteps } from './types';
 
 const DEFAULT_VALUES: TestPipelineValues = {

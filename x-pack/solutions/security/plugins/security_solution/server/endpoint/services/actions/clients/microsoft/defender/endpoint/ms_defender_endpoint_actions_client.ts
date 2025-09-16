@@ -10,17 +10,15 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
-import type {
-  MicrosoftDefenderEndpointGetActionsParams,
-  MicrosoftDefenderEndpointGetActionsResponse,
-  MicrosoftDefenderEndpointRunScriptParams,
-  MicrosoftDefenderGetLibraryFilesResponse,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
   type MicrosoftDefenderEndpointIsolateHostParams,
   type MicrosoftDefenderEndpointMachine,
   type MicrosoftDefenderEndpointMachineAction,
+  type MicrosoftDefenderEndpointGetActionsParams,
+  type MicrosoftDefenderEndpointGetActionsResponse,
+  type MicrosoftDefenderEndpointRunScriptParams,
+  type MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
@@ -35,6 +33,7 @@ import type {
 } from '../../../../../../../../common/api/endpoint';
 import type {
   ActionDetails,
+  ResponseActionScriptsApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
@@ -51,12 +50,10 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../../../../../common/endpoint/service/response_actions/constants';
 import type { NormalizedExternalConnectorClient } from '../../../lib/normalized_external_connector_client';
-import type {
-  ResponseActionsClientPendingAction,
-  ResponseActionsClientValidateRequestResponse,
-  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
-} from '../../../lib/base_response_actions_client';
 import {
+  type ResponseActionsClientPendingAction,
+  type ResponseActionsClientValidateRequestResponse,
+  type ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientImpl,
   type ResponseActionsClientOptions,
 } from '../../../lib/base_response_actions_client';
@@ -67,7 +64,6 @@ import {
 } from '../../../errors';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
@@ -379,7 +375,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   protected async validateRequest(
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO: support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -406,6 +403,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'isolate',
     };
 
@@ -457,6 +455,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'unisolate',
     };
 
@@ -683,6 +682,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       for (const machineAction of machineActions.value) {
         const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
 
+        const commandErrors: string = machineAction.commands?.[0]?.errors?.join('\n') ?? '';
+
         if (!isPending) {
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
 
@@ -705,7 +706,11 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                   ? actionRequest.agent.id[0]
                   : actionRequest.agent.id,
                 data: { command: actionRequest.EndpointActions.data.command },
-                error: isError ? { message } : undefined,
+                error: isError
+                  ? {
+                      message: commandErrors || message,
+                    }
+                  : undefined,
                 ...additionalData,
               })
             );
@@ -767,7 +772,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return { isPending, isError, message };
   }
 
-  async getCustomScripts(): Promise<CustomScriptsResponse> {
+  async getCustomScripts(): Promise<ResponseActionScriptsApiResponse> {
     try {
       const customScriptsResponse = (await this.sendAction(
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
@@ -776,7 +781,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       const scripts = customScriptsResponse.data?.value || [];
 
-      // Transform MS Defender scripts to CustomScriptsResponse format
+      // Transform MS Defender scripts to ResponseActionScriptsApiResponse format
       const data = scripts.map((script) => ({
         // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
         id: script.fileName || '',
@@ -784,7 +789,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         description: script.description || '',
       }));
 
-      return { data } as CustomScriptsResponse;
+      return { data } as ResponseActionScriptsApiResponse;
     } catch (err) {
       const error = new ResponseActionsClientError(
         `Failed to fetch Microsoft Defender for Endpoint scripts, failed with: ${err.message}`,

@@ -14,11 +14,11 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -30,10 +30,8 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { PreviewPanel } from './preview_panel';
-import {
-  StatefulStreamsAppRouter,
-  useStreamsAppRouter,
-} from '../../../hooks/use_streams_app_router';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -202,7 +200,7 @@ const createForkSuccessNofitier =
               href={router.link('/{key}/management/{tab}', {
                 path: {
                   key: streamName,
-                  tab: 'route',
+                  tab: 'partitioning',
                 },
               })}
             >

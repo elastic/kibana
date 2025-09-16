@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const svlSharedConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-serverless/shared/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/serverless/shared/config.base')
   );
 
   return {

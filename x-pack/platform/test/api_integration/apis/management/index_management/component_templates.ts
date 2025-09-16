@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { componentTemplatesApi } from './lib/component_templates.api';
 import { componentTemplateHelpers } from './lib/component_template.helpers';
 

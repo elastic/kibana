@@ -24,23 +24,22 @@ import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import {
-  GetObservabilityAlertsTableProp,
-  ObservabilityAlertsTableContext,
-  observabilityFeatureId,
-} from '../..';
+import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
+import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
+import { useKibana } from '../../utils/kibana_react';
 
-export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
+export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
+  caseData,
   tableId,
   refresh,
   openAlertInFlyout,
   parentAlert,
   services,
   ...rest
-}) => {
+}: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>) {
   const {
     http: {
       basePath: { prepend },
@@ -48,6 +47,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     cases,
   } = services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+  const { telemetryClient } = useKibana().services;
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
@@ -80,14 +80,38 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
-    useCaseActions({
-      refresh,
-      alerts: [alert],
-      services: {
-        cases,
-      },
-    });
+  const onAddToCase = useCallback(
+    ({ isNewCase }: { isNewCase: boolean }) => {
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+
+      refresh?.();
+    },
+    [telemetryClient, tableId, observabilityAlert.fields, refresh]
+  );
+
+  const onRemoveAlertFromCase = useCallback(() => {
+    refresh?.();
+  }, [refresh]);
+
+  const {
+    isPopoverOpen,
+    setIsPopoverOpen,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    handleRemoveAlertsFromCaseClick,
+  } = useCaseActions({
+    onAddToCase,
+    onRemoveAlertFromCase,
+    alerts: [alert],
+    services: {
+      cases,
+    },
+    caseId: caseData?.id,
+  });
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -96,6 +120,23 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   const toggleActionsPopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
+
+  const removeFromCaseAction = [
+    ...(caseData?.id
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="remove-from-case-action"
+            key="removeFromCase"
+            onClick={handleRemoveAlertsFromCaseClick}
+            size="s"
+          >
+            {i18n.translate('xpack.observability.alerts.actions.removeFromCase', {
+              defaultMessage: 'Remove from case',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
 
   const actionsMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
@@ -120,6 +161,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
               defaultMessage: 'Add to new case',
             })}
           </EuiContextMenuItem>,
+          ...removeFromCaseAction,
         ]
       : []),
     useMemo(
@@ -142,11 +184,13 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
           services={services}
+          caseData={caseData}
           {...rest}
         />
       ),
       [
         alert,
+        caseData,
         closeActionsPopover,
         observabilityRuleTypeRegistry,
         openAlertInFlyout,
@@ -246,7 +290,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       </EuiFlexItem>
     </>
   );
-};
+}
 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export

@@ -8,12 +8,16 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
-import { ShortUrlRecord } from '..';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { ShortUrlRecord } from '..';
 import { UrlServiceError } from '../..';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../../common/url_service/locators/legacy_short_url_locator';
-import { ShortUrlData } from '../../../../common/url_service/short_urls/types';
-import { ShortUrlStorage } from '../types';
+import type { ShortUrlData } from '../../../../common/url_service/short_urls/types';
+import type { ShortUrlStorage } from '../types';
 import { escapeSearchReservedChars } from '../util';
 
 export type ShortUrlSavedObject = SavedObject<ShortUrlSavedObjectAttributes>;

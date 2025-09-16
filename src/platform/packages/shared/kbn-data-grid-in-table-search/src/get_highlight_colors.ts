@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 const AMSTERDAM_HIGHLIGHT_COLOR = '#e5ffc0';
 const AMSTERDAM_ACTIVE_HIGHLIGHT_COLOR = '#ffc30e';

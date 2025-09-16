@@ -8,12 +8,12 @@
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { EntityTypeRT } from '../shared/entity_type';
-import { SchemaTypesRT } from '../shared/schema_type';
+import { DataSchemaFormatRT } from '../shared/data_schema_format';
 
 export const GetInfraEntityCountRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
-    schema: SchemaTypesRT,
+    schema: DataSchemaFormatRT,
   }),
   rt.type({
     from: isoToEpochRt,

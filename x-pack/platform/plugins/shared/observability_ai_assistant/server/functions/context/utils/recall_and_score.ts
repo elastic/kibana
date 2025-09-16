@@ -6,13 +6,17 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { Connector } from '@kbn/actions-plugin/server';
 import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../../common';
+import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ObservabilityAIAssistantClient } from '../../../service/client';
 import type { FunctionCallChatFunction } from '../../../service/types';
-import { RecallRanking, recallRankingEventType } from '../../../analytics/recall_ranking';
-import { RecalledEntry } from '../../../service/knowledge_base_service';
+import type { RecallRanking } from '../../../analytics/recall_ranking';
+import { recallRankingEventType } from '../../../analytics/recall_ranking';
+import type { RecalledEntry } from '../../../service/knowledge_base_service';
 import { queryRewrite } from './query_rewrite';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'esScore'>;
@@ -21,6 +25,8 @@ export async function recallAndScore({
   recall,
   chat,
   analytics,
+  scopes,
+  connector,
   screenDescription,
   messages,
   logger,
@@ -29,6 +35,8 @@ export async function recallAndScore({
   recall: ObservabilityAIAssistantClient['recall'];
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
+  scopes: AssistantScope[];
+  connector?: Connector;
   screenDescription: string;
   messages: Message[];
   logger: Logger;
@@ -80,9 +88,12 @@ export async function recallAndScore({
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = llmScores.find((score) => score.id === suggestion.id);
+        const inferenceConnector = getInferenceConnectorInfo(connector);
         return {
           esScore: suggestion.esScore ?? -1,
           llmScore: llmScore ? llmScore.llmScore : -1,
+          scopes,
+          connector: inferenceConnector,
         };
       }),
     });

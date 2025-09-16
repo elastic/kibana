@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import { DataStream } from '@kbn/index-management-plugin/common';
-import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { DataStream } from '@kbn/index-management-plugin/common';
+import type { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { apiService } from '../../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 

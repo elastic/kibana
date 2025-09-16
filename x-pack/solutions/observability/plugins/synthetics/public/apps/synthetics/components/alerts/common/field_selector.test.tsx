@@ -6,7 +6,7 @@
  */
 
 import { onFieldChange } from './field_selector';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('onFieldChange', () => {

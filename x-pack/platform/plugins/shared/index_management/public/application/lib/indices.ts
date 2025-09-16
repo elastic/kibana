@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index } from '../../../common';
+import type { Index } from '../../../common';
 
 export const isHiddenIndex = (index: Index): boolean => {
   return index.hidden === true;

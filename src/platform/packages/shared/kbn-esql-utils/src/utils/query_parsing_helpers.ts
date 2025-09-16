@@ -10,9 +10,11 @@ import {
   parse,
   Walker,
   walk,
-  BasicPrettyPrinter,
+  Parser,
   isFunctionExpression,
   isColumn,
+  WrappingPrettyPrinter,
+  isStringLiteral,
 } from '@kbn/esql-ast';
 
 import type {
@@ -25,7 +27,7 @@ import type {
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -36,6 +38,44 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.name).join(',');
+}
+
+export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
+  if (!esql) return undefined;
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
+
+  const clustersSet = new Set<string>();
+
+  // Handle sources with explicit prefix (e.g., FROM cluster1:index1)
+  args
+    .filter((arg) => arg.prefix)
+    .forEach((arg) => {
+      if (arg.prefix?.value) {
+        clustersSet.add(arg.prefix.value);
+      }
+    });
+
+  // Handle sources without prefix that might contain cluster:index patterns
+  // This includes quoted sources like "cluster1:index1,cluster2:index2"
+  args
+    .filter((arg) => !arg.prefix)
+    .forEach((arg) => {
+      // Split by comma to handle cases like "cluster1:index1,cluster2:index2"
+      const indices = arg.name.split(',');
+      indices.forEach((index) => {
+        const trimmedIndex = index.trim();
+        const colonIndex = trimmedIndex.indexOf(':');
+        // Only add if there's a valid cluster:index pattern
+        if (colonIndex > 0 && colonIndex < trimmedIndex.length - 1) {
+          const clusterName = trimmedIndex.substring(0, colonIndex);
+          clustersSet.add(clusterName);
+        }
+      });
+    });
+
+  return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
 // For ES|QL we consider stats and keep transformational command
@@ -131,6 +171,26 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   return columnName;
 };
 
+export const getKqlSearchQueries = (esql: string) => {
+  const { ast } = parse(esql);
+  const functions: ESQLFunction[] = [];
+
+  walk(ast, {
+    visitFunction: (node) => functions.push(node),
+  });
+
+  const searchFunctions = functions.filter(({ name }) => name === 'kql');
+
+  return searchFunctions
+    .map((func) => {
+      if (func.args.length > 0 && isStringLiteral(func.args[0])) {
+        return func.args[0].valueUnquoted.trim();
+      }
+      return '';
+    })
+    .filter((query) => query !== '');
+};
+
 export const isQueryWrappedByPipes = (query: string): boolean => {
   const { ast } = parse(query);
   const numberOfCommands = ast.length;
@@ -138,9 +198,9 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
-export const prettifyQuery = (query: string, isWrapped: boolean): string => {
-  const { root } = parse(query);
-  return BasicPrettyPrinter.print(root, { multiline: !isWrapped });
+export const prettifyQuery = (src: string): string => {
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
@@ -228,6 +288,55 @@ const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
   return lastChar === '?' || secondLastChar === '?';
 };
 
+/**
+ * Finds the column closest to the given cursor position within an array of columns.
+ *
+ * @param columns An array of ES|QL columns.
+ * @param cursorPosition The current cursor position.
+ * @returns The column object closest to the cursor, or null if the columns array is empty.
+ */
+export function findClosestColumn(
+  columns: ESQLColumn[],
+  cursorPosition?: monaco.Position
+): ESQLColumn | undefined {
+  if (columns.length === 0) {
+    return undefined;
+  }
+
+  if (!cursorPosition) {
+    return columns[0]; // If no cursor position is provided, return the first column
+  }
+
+  const cursorCol = cursorPosition.column;
+  let closestColumn;
+  let minDistance = Infinity;
+
+  for (const column of columns) {
+    const columnMin = column.location.min;
+    const columnMax = column.location.max;
+
+    // If the cursor is within the column's range, it's the closest
+    if (cursorCol >= columnMin && cursorCol <= columnMax) {
+      return column;
+    }
+
+    // Calculate distance from the cursor to the nearest edge of the column
+    let distance: number;
+    if (cursorCol < columnMin) {
+      distance = columnMin - cursorCol; // Cursor is to the left of the column
+    } else {
+      distance = cursorCol - columnMax; // Cursor is to the right of the column
+    }
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColumn = column;
+    }
+  }
+
+  return closestColumn;
+}
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
 
@@ -244,7 +353,7 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
     visitColumn: (node) => columns.push(node),
   });
 
-  const column = Walker.match(lastCommand, { type: 'column' });
+  const column = findClosestColumn(columns, cursorPosition);
 
   if (column && column.name && column.name !== '*') {
     return `${column.name}`;
