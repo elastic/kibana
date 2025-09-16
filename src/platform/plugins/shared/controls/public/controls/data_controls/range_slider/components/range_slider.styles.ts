@@ -30,6 +30,10 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         width: 100%;
       }
 
+      /**
+       * Workarounds for removing the border from EuiDualRange
+       * Border is rendered with a combination of outline, border on ::after, and box-shadows
+       */
       .euiFormControlLayout {
         border: none;
         border-radius: 0;
@@ -46,6 +50,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .euiFormControlLayout__childrenWrapper {
+        /* Additional border removal workarounds */
         box-shadow: none;
 
         &:hover {
