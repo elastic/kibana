@@ -63,7 +63,9 @@ export function ActionBlock({
               border: 1px solid ${euiTheme.colors.borderStrongPrimary};
               box-sizing: border-box;
             `
-          : undefined
+          : css`
+              border: ${euiTheme.border.thin};
+            `
       }
     >
       {isUnderEdit ? (

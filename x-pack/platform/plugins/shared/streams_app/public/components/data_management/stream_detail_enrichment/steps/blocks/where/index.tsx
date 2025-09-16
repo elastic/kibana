@@ -99,7 +99,9 @@ export const WhereBlock = ({
                 border: 1px solid ${euiTheme.colors.borderStrongPrimary};
                 box-sizing: border-box;
               `
-            : undefined
+            : css`
+                border: ${euiTheme.border.thin};
+              `
         }
       >
         {/* The step under edit isn't part of the same root level hierarchy,

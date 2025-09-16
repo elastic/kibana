@@ -188,16 +188,20 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
             {canDelete && (
               <>
                 <EuiHorizontalRule margin="m" />
-                <EuiButton
-                  data-test-subj="streamsAppProcessorConfigurationButton"
-                  color="danger"
-                  onClick={handleDelete}
-                >
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
-                    { defaultMessage: 'Delete processor' }
-                  )}
-                </EuiButton>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="streamsAppProcessorConfigurationButton"
+                      color="danger"
+                      onClick={handleDelete}
+                    >
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
+                        { defaultMessage: 'Delete processor' }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </>
             )}
             {processorMetrics && !isEmpty(processorMetrics.errors) && (

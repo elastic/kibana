@@ -21,7 +21,11 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { convertStepsForUI, type StreamlangProcessorDefinition } from '@kbn/streamlang';
+import {
+  ALWAYS_CONDITION,
+  convertStepsForUI,
+  type StreamlangProcessorDefinition,
+} from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import type {
@@ -153,8 +157,7 @@ export const streamEnrichmentMachine = setup({
         if (!condition) {
           condition = {
             where: {
-              field: '',
-              eq: '',
+              ...ALWAYS_CONDITION,
               steps: [],
             },
           };
