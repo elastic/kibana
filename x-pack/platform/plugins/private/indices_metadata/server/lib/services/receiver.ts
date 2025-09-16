@@ -52,7 +52,7 @@ export class MetadataReceiver {
     return this.esClient.indices
       .get(request)
       .then((indices) =>
-        Object.entries(indices).map(([index, value]) => {
+        Object.entries(indices ?? {}).map(([index, value]) => {
           return {
             index_name: index,
             default_pipeline: value.settings?.index?.default_pipeline,
@@ -63,7 +63,7 @@ export class MetadataReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices', { error });
         throw error;
       });
   }
@@ -79,8 +79,9 @@ export class MetadataReceiver {
 
     return this.esClient.indices
       .getDataStream(request)
-      .then((response) =>
-        response.data_streams.map((ds) => {
+      .then((response) => {
+        const streams = response.data_streams ?? [];
+        return streams.map((ds) => {
           return {
             datastream_name: ds.name,
             indices:
@@ -91,10 +92,10 @@ export class MetadataReceiver {
                 } as Index;
               }) ?? [],
           } as DataStream;
-        })
-      )
+        });
+      })
       .catch((error) => {
-        this.logger.error('Error fetching datastreams', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching datastreams', { error });
         throw error;
       });
   }
@@ -120,9 +121,17 @@ export class MetadataReceiver {
         filter_path: [
           'indices.*.total.search.query_total',
           'indices.*.total.search.query_time_in_millis',
+
           'indices.*.total.docs.count',
           'indices.*.total.docs.deleted',
           'indices.*.total.store.size_in_bytes',
+
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.docs.deleted',
+          'indices.*.primaries.store.size_in_bytes',
+
+          'indices.*.total.indexing.index_failed',
+          'indices.*.total.indexing.index_failed_due_to_version_conflict',
         ],
       };
 
@@ -136,10 +145,18 @@ export class MetadataReceiver {
             docs_count: stats.total?.docs?.count,
             docs_deleted: stats.total?.docs?.deleted,
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+
+            index_failed: stats.total?.indexing?.index_failed,
+            index_failed_due_to_version_conflict: (stats.total?.indexing as any)
+              ?.index_failed_due_to_version_conflict,
+
+            docs_count_primaries: stats.primaries?.docs?.count,
+            docs_deleted_primaries: stats.primaries?.docs?.deleted,
+            docs_total_size_in_bytes_primaries: stats.primaries?.store?.size_in_bytes,
           } as IndexStats;
         }
       } catch (error) {
-        this.logger.error('Error fetching indices stats', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching indices stats', { error });
         throw error;
       }
     }
@@ -193,7 +210,7 @@ export class MetadataReceiver {
           yield entry;
         }
       } catch (error) {
-        this.logger.error('Error fetching ilm stats', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching ilm stats', { error });
         throw error;
       }
     }
@@ -221,8 +238,9 @@ export class MetadataReceiver {
 
     return this.esClient.indices
       .getIndexTemplate(request)
-      .then((response) =>
-        response.index_templates.map((props) => {
+      .then((response) => {
+        const templates = response.index_templates ?? [];
+        return templates.map((props) => {
           const datastream = props.index_template?.data_stream !== undefined;
           return {
             template_name: props.name,
@@ -237,10 +255,10 @@ export class MetadataReceiver {
             source_includes: props.index_template.template?.mappings?._source?.includes ?? [],
             source_excludes: props.index_template.template?.mappings?._source?.excludes ?? [],
           } as IndexTemplateInfo;
-        })
-      )
+        });
+      })
       .catch((error) => {
-        this.logger.warn('Error fetching index templates', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching index templates', { error });
         throw error;
       });
   }
@@ -295,9 +313,7 @@ export class MetadataReceiver {
           } as IlmPolicy;
         }
       } catch (error) {
-        this.logger.error('Error fetching ilm policies', {
-          error_message: error.message,
-        } as LogMeta);
+        this.logger.error('Error fetching ilm policies', { error });
         throw error;
       }
     }

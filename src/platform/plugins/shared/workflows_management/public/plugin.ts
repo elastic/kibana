@@ -9,24 +9,42 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { getWorkflowsConnectorType } from './connectors/workflows';
+// Lazy import to avoid bundling connector dependencies in main plugin
 import type {
-  AppPluginStartDependencies,
   WorkflowsPluginSetup,
   WorkflowsPluginSetupDependencies,
   WorkflowsPluginStart,
+  WorkflowsPluginStartDependencies,
 } from './types';
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
+export class WorkflowsPlugin
+  implements
+    Plugin<
+      WorkflowsPluginSetup,
+      WorkflowsPluginStart,
+      WorkflowsPluginSetupDependencies,
+      WorkflowsPluginStartDependencies
+    >
+{
+  private readonly storage = new Storage(localStorage);
+
   public setup(core: CoreSetup, plugins: WorkflowsPluginSetupDependencies): WorkflowsPluginSetup {
-    // Register workflows connector UI component
-    plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
+    // Register workflows connector UI component lazily to reduce main bundle size
+    const registerConnectorType = async () => {
+      const { getWorkflowsConnectorType } = await import('./connectors/workflows');
+      plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
+    };
+
+    // Register the connector type immediately but load it lazily
+    registerConnectorType();
 
     // Check if workflows UI is enabled
     const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
 
     if (isWorkflowsUiEnabled) {
+      const storage = this.storage;
       // Register an application into the side navigation menu
       // TODO: add icon
       core.application.register({
@@ -40,7 +58,14 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           // Get start services as specified in kibana.json
           const [coreStart, depsStart] = await core.getStartServices();
           // Render the application
-          return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+          return renderApp(
+            coreStart,
+            depsStart as WorkflowsPluginStartDependencies,
+            {
+              storage,
+            },
+            params
+          );
         },
       });
     }

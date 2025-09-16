@@ -32,6 +32,7 @@ import { AddConnectorModal } from '../add_connector_modal';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
+  fullWidth?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   onConnectorSelectionChange: (connector: AIConnector) => void;
@@ -50,6 +51,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
   ({
     isDisabled = false,
     isOpen = false,
+    fullWidth = false,
     displayFancy,
     selectedConnectorId,
     onConnectorSelectionChange,
@@ -209,6 +211,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             compressed={true}
             data-test-subj="connector-selector"
             disabled={localIsDisabled}
+            fullWidth={fullWidth}
             hasDividers={true}
             isOpen={modalForceOpen}
             onChange={onChange}

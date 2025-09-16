@@ -87,14 +87,14 @@ type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
   threatList: ThreatListItem[];
-  threatMapping: ThreatMapping;
+  threatMappings: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
 }
 
 export interface FilterThreatMappingOptions {
   threatListItem: ThreatListItem;
-  threatMapping: ThreatMapping;
+  threatMappingEntries: ThreatMappingEntries;
   entryKey: EntryKey;
 }
 
@@ -104,15 +104,16 @@ export interface CreateInnerAndClausesOptions {
   entryKey: EntryKey;
 }
 
-export interface CreateAndOrClausesOptions {
+export interface CreateNamedAndClauseOptions {
   threatListItem: ThreatListItem;
-  threatMapping: ThreatMapping;
+  threatMappingEntries: ThreatMappingEntries;
   entryKey: EntryKey;
+  threatMappingIndex: number;
 }
 
 export interface BuildEntriesMappingFilterOptions {
   threatList: ThreatListItem[];
-  threatMapping: ThreatMapping;
+  threatMappings: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
 }
@@ -168,11 +169,9 @@ export interface ThreatEnrichment {
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
-interface BaseThreatNamedQuery {
-  field: string;
-  value: string;
+export interface BaseThreatNamedQuery {
+  threatMappingIndex: number;
   queryType: string;
-  negate?: boolean;
 }
 
 export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {

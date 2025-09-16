@@ -61,29 +61,29 @@ describe('TS Validation', () => {
       });
 
       test('errors on trailing comma', () => {
-        tsExpectErrors(`TS assignment = 1`, ['Unknown index [assignment]']);
+        tsExpectErrors(`TS assignment = 1`, ['Unknown index "assignment"']);
       });
 
       test('errors on invalid syntax', () => {
-        tsExpectErrors('TS `index`', ['Unknown index [`index`]']);
-        tsExpectErrors(`TS assignment = 1`, ['Unknown index [assignment]']);
+        tsExpectErrors('TS `index`', ['Unknown index "`index`"']);
+        tsExpectErrors(`TS assignment = 1`, ['Unknown index "assignment"']);
       });
 
       test('errors on unknown index', () => {
-        tsExpectErrors(`TS index, missingIndex`, ['Unknown index [missingIndex]']);
-        tsExpectErrors(`TS average()`, ['Unknown index [average]']);
-        tsExpectErrors(`TS custom_function()`, ['Unknown index [custom_function]']);
-        tsExpectErrors(`TS indexes*`, ['Unknown index [indexes*]']);
-        tsExpectErrors('TS numberField', ['Unknown index [numberField]']);
-        tsExpectErrors('TS policy', ['Unknown index [policy]']);
+        tsExpectErrors(`TS index, missingIndex`, ['Unknown index "missingIndex"']);
+        tsExpectErrors(`TS average()`, ['Unknown index "average"']);
+        tsExpectErrors(`TS custom_function()`, ['Unknown index "custom_function"']);
+        tsExpectErrors(`TS indexes*`, ['Unknown index "indexes*"']);
+        tsExpectErrors('TS numberField', ['Unknown index "numberField"']);
+        tsExpectErrors('TS policy', ['Unknown index "policy"']);
 
-        tsExpectErrors('TS index, missingIndex', ['Unknown index [missingIndex]']);
-        tsExpectErrors('TS missingIndex, index', ['Unknown index [missingIndex]']);
-        tsExpectErrors('TS *missingIndex, missingIndex2, index', ['Unknown index [missingIndex2]']);
-        tsExpectErrors('TS missingIndex*', ['Unknown index [missingIndex*]']);
+        tsExpectErrors('TS index, missingIndex', ['Unknown index "missingIndex"']);
+        tsExpectErrors('TS missingIndex, index', ['Unknown index "missingIndex"']);
+        tsExpectErrors('TS *missingIndex, missingIndex2, index', ['Unknown index "missingIndex2"']);
+        tsExpectErrors('TS missingIndex*', ['Unknown index "missingIndex*"']);
         tsExpectErrors('TS *missingIndex, missing*Index2', [
-          'Unknown index [*missingIndex]',
-          'Unknown index [missing*Index2]',
+          'Unknown index "*missingIndex"',
+          'Unknown index "missing*Index2"',
         ]);
       });
     });
@@ -97,7 +97,7 @@ describe('TS Validation', () => {
       describe('validates fields', () => {
         test('validates fields', () => {
           tsExpectErrors(`TS index METADATA _id, _source2`, [
-            `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+            `Metadata field "_source2" is not available. Available metadata fields are: [${METADATA_FIELDS.join(
               ', '
             )}]`,
           ]);

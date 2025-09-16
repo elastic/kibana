@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/extract-plugin-translations",
+  "owner": "@elastic/kibana-core",
+  "devOnly": true
+}

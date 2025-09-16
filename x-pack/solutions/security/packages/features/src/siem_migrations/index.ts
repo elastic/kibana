@@ -7,9 +7,9 @@
 
 import { getSiemMigrationsBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
+import { siemMigrationsProductFeaturesConfig } from './product_feature_config';
 
 export const getSiemMigrationsFeature = (): ProductFeatureParams => ({
   baseKibanaFeature: getSiemMigrationsBaseKibanaFeature(),
-  baseKibanaSubFeatureIds: [],
-  subFeaturesMap: new Map(),
+  productFeatureConfig: siemMigrationsProductFeaturesConfig,
 });

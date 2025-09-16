@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/types';
-import type { FilterOptions } from '../../../types';
-import { AuthorFilter, StatusFilter } from '../../../types';
+import { StatusFilterBase } from '../../../../common/types';
+import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/rules/types';
+import type { RulesFilterOptions, RulesStatusFilter } from '../../../types';
+import { AuthorFilter, RulesSpecificStatusFilter } from '../../../types';
 
 const AUTHOR_FILTERS: Record<AuthorFilter, RuleMigrationFilters> = {
   [AuthorFilter.ELASTIC]: { prebuilt: true },
   [AuthorFilter.CUSTOM]: { prebuilt: false },
 };
 
-const STATUS_FILTERS: Record<StatusFilter, RuleMigrationFilters> = {
-  [StatusFilter.FAILED]: { failed: true },
-  [StatusFilter.INSTALLED]: { installed: true },
-  [StatusFilter.TRANSLATED]: { installed: false, fullyTranslated: true },
-  [StatusFilter.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
-  [StatusFilter.UNTRANSLATABLE]: { untranslatable: true },
+const STATUS_FILTERS: Record<RulesStatusFilter, RuleMigrationFilters> = {
+  [StatusFilterBase.FAILED]: { failed: true },
+  [StatusFilterBase.INSTALLED]: { installed: true },
+  [StatusFilterBase.TRANSLATED]: { installed: false, fullyTranslated: true },
+  [StatusFilterBase.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
+  [StatusFilterBase.UNTRANSLATABLE]: { untranslatable: true },
+  [RulesSpecificStatusFilter.INDEX_PATTERN_MISSING]: { missingIndex: true },
 };
 
-export const convertFilterOptions = (filterOptions?: FilterOptions) => {
+export const convertFilterOptions = (filterOptions?: RulesFilterOptions) => {
   const filters: RuleMigrationFilters = {};
   if (filterOptions?.author) {
     Object.assign(filters, AUTHOR_FILTERS[filterOptions.author]);

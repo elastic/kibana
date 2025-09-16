@@ -181,7 +181,7 @@ const DraggablePatternInput = ({
                 <EuiIcon type="grab" />
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 0 }}>
               <Expression
                 draftGrokExpression={draftGrokExpression}
                 grokCollection={grokCollection}

@@ -19,14 +19,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import {
-  type RuleMigrationResourceBase,
-  type RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { DataInputStep } from './steps/constants';
@@ -69,7 +67,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     }, []);
 
     const onMissingResourcesFetched = useCallback(
-      (missingResources: RuleMigrationResourceBase[]) => {
+      (missingResources: SiemMigrationResourceBase[]) => {
         const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
           (acc, { type, name }) => {
             if (type === 'macro') {

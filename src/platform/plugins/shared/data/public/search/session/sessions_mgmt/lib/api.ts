@@ -38,7 +38,7 @@ export class SearchSessionsMgmtAPI {
     private deps: SearchSessionManagementDeps
   ) {}
 
-  public async fetchTableData(): Promise<FetchReturn> {
+  public async fetchTableData({ appId }: { appId?: string } = {}): Promise<FetchReturn> {
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -80,7 +80,10 @@ export class SearchSessionsMgmtAPI {
       const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         return {
-          savedObjects: result.saved_objects as SearchSessionSavedObject[],
+          savedObjects: result.saved_objects.filter((object) => {
+            if (!appId) return true;
+            return object.attributes.appId === appId;
+          }) as SearchSessionSavedObject[],
           statuses: result.statuses,
         };
       }

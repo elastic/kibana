@@ -423,6 +423,11 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
           totalWithAlerts: 10,
         },
         obs: {
@@ -436,6 +441,11 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
           totalWithAlerts: 5,
         },
         sec: {
@@ -449,6 +459,11 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
           totalWithAlerts: 20,
         },
       });
@@ -532,6 +547,11 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
@@ -610,6 +630,11 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
@@ -666,6 +691,11 @@ describe('getCasesTelemetryData', () => {
                         "to": "now",
                       },
                     ],
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
                   },
                 },
                 "totalAssignees": Object {

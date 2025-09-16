@@ -6,14 +6,17 @@
  */
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
+import {
+  API_VERSIONS,
+  PRIVMON_PRIVILEGE_CHECK_API,
+} from '@kbn/security-solution-plugin/common/constants';
 
 export const privilegeMonitoringRouteHelpersFactoryNoAuth = (
   supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
     await supertestWithoutAuth
-      .get('/api/entity_analytics/monitoring/privileges/privileges')
+      .get(PRIVMON_PRIVILEGE_CHECK_API)
       .auth(username, password)
       .set('elastic-api-version', API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

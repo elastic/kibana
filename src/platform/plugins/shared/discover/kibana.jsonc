@@ -49,7 +49,9 @@
       "fieldsMetadata",
       "logsDataAccess",
       "embeddableEnhanced",
-      "apmSourcesAccess"
+      "apmSourcesAccess",
+      "fileUpload",
+      "metricsExperience"
     ],
     "requiredBundles": [
       "kibanaUtils",

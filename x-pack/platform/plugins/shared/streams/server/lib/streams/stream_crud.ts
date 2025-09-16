@@ -8,11 +8,15 @@
 import type {
   ClusterComponentTemplate,
   IndicesDataStream,
+  IndicesGetDataStreamSettingsDataStreamSettings,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
@@ -46,6 +50,30 @@ export function getDataStreamLifecycle(
   };
 }
 
+export function getDataStreamSettings(dataStream?: IndicesGetDataStreamSettingsDataStreamSettings) {
+  const settings: IngestStreamSettings = {};
+
+  if (dataStream?.effective_settings.index?.number_of_replicas) {
+    settings['index.number_of_replicas'] = {
+      value: Number(dataStream.effective_settings.index.number_of_replicas),
+    };
+  }
+
+  if (dataStream?.effective_settings.index?.number_of_shards) {
+    settings['index.number_of_shards'] = {
+      value: Number(dataStream.effective_settings.index.number_of_shards),
+    };
+  }
+
+  if (dataStream?.effective_settings.index?.refresh_interval) {
+    settings['index.refresh_interval'] = {
+      value: dataStream.effective_settings.index.refresh_interval,
+    };
+  }
+
+  return settings;
+}
+
 interface ReadUnmanagedAssetsParams extends BaseParams {
   dataStream: IndicesDataStream;
 }
@@ -68,7 +96,7 @@ export async function getUnmanagedElasticsearchAssets({
     name: templateName,
   });
   if (template.index_templates.length) {
-    template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+    template.index_templates[0].index_template.composed_of?.forEach((componentTemplateName) => {
       componentTemplates.push(componentTemplateName);
     });
   }
@@ -142,7 +170,7 @@ async function fetchComponentTemplates(
     .map((componentTemplate) => ({
       ...componentTemplate,
       used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .filter((template) => template.index_template.composed_of?.includes(componentTemplate.name))
         .map((template) => template.name),
     }));
 }

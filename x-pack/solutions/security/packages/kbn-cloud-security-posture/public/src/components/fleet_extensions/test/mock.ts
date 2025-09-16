@@ -26,34 +26,7 @@ export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AZURE, TEMPLATE_NAME, AZURE_PROVIDER, vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
 
-export const getMockPackageInfoVulnMgmtAWS = () => {
-  return {
-    policy_templates: [
-      {
-        title: '',
-        description: '',
-        name: 'vuln_mgmt',
-        inputs: [
-          {
-            type: 'cloudbeat/vuln_mgmt_aws',
-            title: '',
-            description: '',
-            vars: [
-              {
-                type: 'text',
-                name: 'cloud_formation_template',
-                default: 's3_url',
-                show_user: false,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  } as PackageInfo;
-};
-
-export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
+export const getMockPackageInfoAWS = (packageVersion = '1.5.0') => {
   return {
     version: packageVersion,
     name: TEMPLATE_NAME,
@@ -82,7 +55,7 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
+export const getMockPackageInfoGCP = (packageVersion = '1.5.2') => {
   return {
     version: packageVersion,
     name: TEMPLATE_NAME,
@@ -172,7 +145,7 @@ const getPolicyMock = (
     name: 'cloud_security_posture-policy',
     package: {
       name: 'cloud_security_posture',
-      title: 'Security Posture Management (CSPM/KSPM)',
+      title: 'Security Posture Management',
       version: '1.1.1',
     },
     vars: {

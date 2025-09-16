@@ -27,6 +27,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
+  private readonly toasts = this.ctx.getService('toasts');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -43,7 +44,7 @@ export class DiscoverPageObject extends FtrService {
   public async saveSearch(
     searchName: string,
     saveAsNew?: boolean,
-    options: { tags: string[] } = { tags: [] }
+    { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
@@ -56,12 +57,24 @@ export class DiscoverPageObject extends FtrService {
       }
     );
 
-    if (options.tags.length) {
+    if (tags.length) {
       await this.testSubjects.click('savedObjectTagSelector');
-      for (const tagName of options.tags) {
+      for (const tagName of tags) {
         await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
       }
       await this.testSubjects.click('savedObjectTitle');
+    }
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
     }
 
     if (saveAsNew !== undefined) {
@@ -140,8 +153,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getSavedSearchTitle() {
-    const breadcrumb = await this.find.byCssSelector('[data-test-subj="breadcrumb last"]');
-    return await breadcrumb.getVisibleText();
+    if (await this.testSubjects.exists('breadcrumb last')) {
+      const breadcrumb = await this.testSubjects.find('breadcrumb last');
+      return await breadcrumb.getVisibleText();
+    }
   }
 
   public async loadSavedSearch(searchName: string) {
@@ -235,6 +250,10 @@ export class DiscoverPageObject extends FtrService {
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
 
+    await this.retry.waitFor('the dropdown to close', async () => {
+      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
+    });
+
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
         'unifiedHistogramBreakdownSelectorButton'
@@ -248,6 +267,42 @@ export class DiscoverPageObject extends FtrService {
 
   public async clearBreakdownField() {
     await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
+  }
+
+  public async isLensEditFlyoutOpen() {
+    return await this.testSubjects.exists('lnsChartSwitchPopover');
+  }
+
+  public async openLensEditFlyout() {
+    await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
+    await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await this.retry.waitFor('flyout', async () => {
+      return await this.isLensEditFlyoutOpen();
+    });
+  }
+
+  public async changeVisShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    await this.testSubjects.click('lnsChartSwitchPopover');
+    await this.testSubjects.setValue('lnsChartSwitchSearch', seriesType, {
+      clearWithKeyboard: true,
+    });
+    await this.testSubjects.click(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('lnsChartSwitchPopover')).to.be(seriesType);
+    });
+
+    await this.toasts.dismissAll();
+    await this.testSubjects.scrollIntoView('applyFlyoutButton');
+    await this.testSubjects.click('applyFlyoutButton');
+  }
+
+  public async getCurrentVisTitle() {
+    await this.toasts.dismissAll();
+    await this.openLensEditFlyout();
+    const seriesType = await this.testSubjects.getVisibleText('lnsChartSwitchPopover');
+    await this.testSubjects.click('cancelFlyoutButton');
+    return seriesType;
   }
 
   public async chooseLensSuggestion(suggestionType: string) {

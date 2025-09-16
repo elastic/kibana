@@ -23,7 +23,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { DiscoveryDataset } from '../../common/types';
 
 import type { PackageClient } from '../services';
-import { appContextService } from '../services';
+import { appContextService, dataStreamService } from '../services';
 import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
@@ -293,30 +293,14 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const whereClause =
-      datasetsOfInstalledContentPackages.length > 0
-        ? `| WHERE data_stream.dataset NOT IN (${datasetsOfInstalledContentPackages
-            .map((dataset) => `"${dataset}"`)
-            .join(',')})`
-        : '';
-    const query = `FROM logs-*,metrics-*,traces-* 
-      | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - ${this.intervalToEsql(this.taskInterval)} 
-      | STATS COUNT(*) BY data_stream.dataset ${whereClause}`;
-    const response = await esClient.esql.query({ query });
-    this.logger.info(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
-
-    const datasetsWithData: string[] = response.values.map((value: any[]) => value[1]);
+    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
+    const datasetsWithData: string[] = allFleetDataStreams
+      .map((dataStream: any) => dataStream.name.split('-')[1])
+      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
     this.logger.info(
       `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
     );
     return datasetsWithData;
-  }
-
-  private intervalToEsql(interval: string): string {
-    const value = parseInt(interval, 10);
-    const unit = interval.includes('h') ? 'hours' : interval.includes('m') ? 'minutes' : 'seconds';
-    return `${value} ${unit}`;
   }
 
   private async getContentPackagesDiscoveryMap(prerelease: boolean): Promise<DiscoveryMap> {

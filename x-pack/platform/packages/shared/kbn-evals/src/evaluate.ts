@@ -26,6 +26,9 @@ import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
+import { EvaluationAnalysisService } from './utils/analysis';
+import { EvaluationScoreRepository } from './utils/score_repository';
+import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -41,6 +44,7 @@ export const evaluate = base.extend<
     connector: AvailableConnectorWithId;
     evaluationConnector: AvailableConnectorWithId;
     repetitions: number;
+    evaluationAnalysisService: EvaluationAnalysisService;
   }
 >({
   fetch: [
@@ -93,7 +97,7 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   phoenixClient: [
-    async ({ log, connector, repetitions }, use) => {
+    async ({ log, connector, repetitions, esClient }, use) => {
       const config = getPhoenixConfig();
 
       const inferenceConnector: InferenceConnector = {
@@ -135,10 +139,12 @@ export const evaluate = base.extend<
 
       await reportModelScore({
         phoenixClient,
+        esClient,
         log,
         model,
         experiments: await phoenixClient.getRanExperiments(),
         repetitions,
+        runId: process.env.TEST_RUN_ID,
       });
     },
     {
@@ -165,6 +171,12 @@ export const evaluate = base.extend<
             log,
           });
         },
+        groundednessAnalysis: () => {
+          return createGroundednessAnalysisEvaluator({
+            inferenceClient: evaluatorInferenceClient,
+            log,
+          });
+        },
       };
       await use(evaluators);
     },
@@ -177,6 +189,14 @@ export const evaluate = base.extend<
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
+    },
+    { scope: 'worker' },
+  ],
+  evaluationAnalysisService: [
+    async ({ esClient, log }, use) => {
+      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      const helper = new EvaluationAnalysisService(scoreRepository, log);
+      await use(helper);
     },
     { scope: 'worker' },
   ],

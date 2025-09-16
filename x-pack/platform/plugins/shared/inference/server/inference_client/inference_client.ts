@@ -53,8 +53,7 @@ export function createInferenceClient({
     }),
     output: createOutputApi(chatComplete),
     getConnectorById: async (connectorId: string) => {
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-      return await getConnectorById({ connectorId, actionsClient });
+      return await getConnectorById({ connectorId, actions, request });
     },
     bindTo: (options: BoundOptions) => {
       return bindClient(client, options);

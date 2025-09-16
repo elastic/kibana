@@ -32,7 +32,10 @@ const getColumn = (columns: Array<EuiBasicTableColumn<UISession>>, field: string
 const setup = ({
   kibanaVersion = '7.14.0',
   tz = 'UTC',
-}: { kibanaVersion?: string; tz?: string } = {}) => {
+}: {
+  kibanaVersion?: string;
+  tz?: string;
+} = {}) => {
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
   const mockConfig = {
@@ -109,91 +112,6 @@ describe('getColumns', () => {
 
       // Then
       expect(screen.getByText(expectedValue)).toBeVisible();
-    });
-  });
-
-  describe('given the name column', () => {
-    describe('when the session is from an older version', () => {
-      const kibanaVersion = '7.14.0';
-      const sessionVersion = '7.13.0';
-
-      describe.each([SearchSessionStatus.IN_PROGRESS, SearchSessionStatus.COMPLETE])(
-        'when status is %s',
-        (status) => {
-          it('should render a warning', () => {
-            // Given
-            const mockSession = getUiSessionMock({
-              version: sessionVersion,
-              status,
-            });
-
-            const columns = setup({ kibanaVersion });
-            const nameColumn = getColumn(columns, 'name');
-
-            // When
-            render(nameColumn.render!(mockSession.name, mockSession));
-
-            // Then
-            expect(screen.getByTestId('versionIncompatibleWarningTestSubj')).toBeVisible();
-          });
-        }
-      );
-
-      describe.each([
-        SearchSessionStatus.CANCELLED,
-        SearchSessionStatus.ERROR,
-        SearchSessionStatus.EXPIRED,
-      ])('when status is %s', (status) => {
-        it('should NOT render a warning', () => {
-          // Given
-          const mockSession = getUiSessionMock({
-            version: sessionVersion,
-            status,
-          });
-
-          const columns = setup({ kibanaVersion });
-          const nameColumn = getColumn(columns, 'name');
-
-          // When
-          render(nameColumn.render!(mockSession.name, mockSession));
-
-          // Then
-          expect(
-            screen.queryByTestId('versionIncompatibleWarningTestSubj')
-          ).not.toBeInTheDocument();
-        });
-      });
-    });
-
-    describe('when the session is from the same version', () => {
-      const version = '7.15.0';
-
-      describe.each([
-        SearchSessionStatus.IN_PROGRESS,
-        SearchSessionStatus.COMPLETE,
-        SearchSessionStatus.CANCELLED,
-        SearchSessionStatus.ERROR,
-        SearchSessionStatus.EXPIRED,
-      ])('when status is %s', (status) => {
-        it('should NOT render a warning', () => {
-          // Given
-          const mockSession = getUiSessionMock({
-            version,
-            status,
-          });
-
-          const columns = setup({ kibanaVersion: version });
-          const nameColumn = getColumn(columns, 'name');
-
-          // When
-          render(nameColumn.render!(mockSession.name, mockSession));
-
-          // Then
-          expect(
-            screen.queryByTestId('versionIncompatibleWarningTestSubj')
-          ).not.toBeInTheDocument();
-        });
-      });
     });
   });
 

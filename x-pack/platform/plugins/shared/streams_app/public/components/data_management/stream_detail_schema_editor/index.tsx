@@ -5,30 +5,36 @@
  * 2.0.
  */
 import React from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 
 interface SchemaEditorProps {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
+
+const wiredDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES;
+const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const { loading } = useStreamDetail();
 
-  const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
-    useSchemaFields({
-      definition,
-      refreshDefinition,
-    });
+  const { fields, isLoadingFields, refreshFields, unmapField, updateField } = useSchemaFields({
+    definition,
+    refreshDefinition,
+  });
 
   return (
     <SchemaEditor
       fields={fields}
-      isLoading={loading || isLoadingUnmappedFields}
+      isLoading={loading || isLoadingFields}
+      defaultColumns={
+        Streams.WiredStream.GetResponse.is(definition) ? wiredDefaultColumns : classicDefaultColumns
+      }
       stream={definition.stream}
       onFieldUnmap={unmapField}
       onFieldUpdate={updateField}

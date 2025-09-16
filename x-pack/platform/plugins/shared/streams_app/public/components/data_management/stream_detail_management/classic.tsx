@@ -17,15 +17,27 @@ import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
+import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 const classicStreamManagementSubTabs = [
-  'enrich',
+  'processing',
   'advanced',
-  'lifecycle',
+  'dataQuality',
+  'retention',
   'significantEvents',
+  'schemaEditor',
+  'schema',
+  'references',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
+
+const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = {
+  schemaEditor: { newTab: 'schema' },
+  lifecycle: { newTab: 'retention' },
+  enrich: { newTab: 'processing' },
+};
 
 function isValidManagementSubTab(value: string): value is ClassicStreamManagementSubTab {
   return classicStreamManagementSubTabs.includes(value as ClassicStreamManagementSubTab);
@@ -42,7 +54,7 @@ export function ClassicStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const { enrich, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { processing, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -91,7 +103,7 @@ export function ClassicStreamDetailManagement({
   const tabs: ManagementTabs = {};
 
   if (definition.data_stream_exists) {
-    tabs.lifecycle = {
+    tabs.retention = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
@@ -104,14 +116,31 @@ export function ClassicStreamDetailManagement({
         >
           <span>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Data retention',
+              defaultMessage: 'Retention',
             })}
           </span>
         </EuiToolTip>
       ),
     };
-    tabs.enrich = enrich;
+    tabs.processing = processing;
   }
+
+  tabs.dataQuality = {
+    content: <StreamDetailDataQuality definition={definition} />,
+    label: (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+          defaultMessage: 'View details about this classic stream’s data quality',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+            defaultMessage: 'Data quality',
+          })}
+        </span>
+      </EuiToolTip>
+    ),
+  };
 
   if (definition.privileges.manage) {
     tabs.advanced = {
@@ -136,14 +165,34 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
+    tabs.schema = {
+      content: (
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+        defaultMessage: 'Schema',
+      }),
+    };
   }
 
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;
   }
 
+  const redirectConfig = tabRedirects[tab];
+  if (redirectConfig) {
+    return (
+      <RedirectTo
+        path="/{key}/management/{tab}"
+        params={{ path: { key, tab: redirectConfig.newTab } }}
+      />
+    );
+  }
+
   if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'processing' } }} />
+    );
   }
 
   return <Wrapper tabs={tabs} streamId={key} tab={tab} />;

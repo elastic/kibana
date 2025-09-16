@@ -12,6 +12,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -97,6 +98,14 @@ export interface UpdateLifecycleAction {
   };
 }
 
+export interface UpdateDataStreamMappingsAction {
+  type: 'update_data_stream_mappings';
+  request: {
+    name: string;
+    mappings: StreamsMappingProperties;
+  };
+}
+
 export interface DeleteDatastreamAction {
   type: 'delete_datastream';
   request: {
@@ -123,6 +132,18 @@ export interface DeleteQueriesAction {
   };
 }
 
+export interface UpdateIngestSettingsAction {
+  type: 'update_ingest_settings';
+  request: {
+    name: string;
+    settings: {
+      'index.number_of_replicas'?: number | null;
+      'index.number_of_shards'?: number | null;
+      'index.refresh_interval': string | -1 | null;
+    };
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -139,7 +160,9 @@ export type ElasticsearchAction =
   | UpdateDefaultIngestPipelineAction
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
-  | DeleteQueriesAction;
+  | UpdateDataStreamMappingsAction
+  | DeleteQueriesAction
+  | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -157,5 +180,7 @@ export interface ActionsByType {
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
+  update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  update_ingest_settings: UpdateIngestSettingsAction[];
 }

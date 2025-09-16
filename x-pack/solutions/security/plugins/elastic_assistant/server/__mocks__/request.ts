@@ -21,6 +21,7 @@ import type {
   PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
 import {
+  ELASTIC_USERS_SUGGEST_URL,
   ATTACK_DISCOVERY,
   ATTACK_DISCOVERY_BY_CONNECTOR_ID,
   ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
@@ -159,6 +160,12 @@ export const getCurrentUserPromptsRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  });
+
+export const getSuggestUsersRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: ELASTIC_USERS_SUGGEST_URL,
   });
 
 export const getCurrentUserSecurityAIPromptsRequest = () =>

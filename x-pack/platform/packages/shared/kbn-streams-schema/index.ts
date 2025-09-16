@@ -12,7 +12,13 @@ export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
-export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
+export {
+  type RoutingDefinition,
+  routingStatus,
+  type RoutingStatus,
+  isRoutingEnabled,
+  routingDefinitionListSchema,
+} from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';
 
@@ -27,6 +33,7 @@ export {
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export { buildEsqlQuery } from './src/helpers/query';
 
 export * from './src/ingest_pipeline_processors';
@@ -91,6 +98,11 @@ export {
   isDisabledLifecycle,
 } from './src/models/ingest/lifecycle';
 
+export {
+  type IngestStreamSettings,
+  type WiredIngestStreamEffectiveSettings,
+} from './src/models/ingest/settings';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
@@ -98,3 +110,5 @@ export type {
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
+
+export { emptyAssets } from './src/helpers/empty_assets';
