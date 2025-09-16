@@ -111,6 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
+      await expectDisabledAllTime(false);
       const queryWithoutTimeField = 'FROM kibana_sample_data_flights';
       await esql.setEsqlEditorQuery(queryWithoutTimeField);
       await testSubjects.click('querySubmitButton');
@@ -121,15 +122,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
+      await expectDisabledAllTime(true);
       const queryWithDefaultTimeField = 'FROM logstash-*';
       await esql.setEsqlEditorQuery(queryWithDefaultTimeField);
       await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
       await expectDisabledAllTime(false);
       await expectFlightsTimeRange();
       expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
       await discover.waitUntilTabIsLoaded();
+      await expectDisabledAllTime(false);
       await timePicker.setCommonlyUsedTime('Last_90 days');
       await discover.waitUntilTabIsLoaded();
+      await expectDisabledAllTime(false);
       await expectCustomTimeRange();
       expect(await discover.hasNoResults()).to.be(true);
 

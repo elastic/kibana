@@ -35,14 +35,14 @@ export async function getESQLAdHocDataview(
   dataViewsService: DataViewsPublicPluginStart,
   options?: {
     allowNoIndex?: boolean;
-    createNewInstanceEvenIfCachedAvailable?: boolean;
+    createNewInstanceEvenIfCachedOneAvailable?: boolean;
   }
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId = await sha256(`esql-${indexPattern}`);
 
-  if (options?.createNewInstanceEvenIfCachedAvailable) {
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
