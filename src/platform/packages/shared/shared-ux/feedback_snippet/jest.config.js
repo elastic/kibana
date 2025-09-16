@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../../../../..',
+  rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/shared-ux/feedback_snippet'],
 };
