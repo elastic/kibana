@@ -24,6 +24,7 @@ export const configSchema = schema.object({
     schema.literal('custom'),
   ]),
   customContentType: schema.maybe(schema.string()),
+  paramFields: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
 });
 export type HttpRequestConfig = TypeOf<typeof configSchema>;
 

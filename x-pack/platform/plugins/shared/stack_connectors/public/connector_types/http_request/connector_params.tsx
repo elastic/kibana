@@ -6,69 +6,131 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/code-editor';
+import { EuiFormRow, EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { HttpRequestActionParams } from '.';
+
+/*
+const sampleForm = [
+  {
+    "name": "summary",
+    "label": "Summary",
+    "type": "text",
+    "required": true,
+    "placeholder": "Enter a short summary"
+  },
+  {
+    "name": "description",
+    "label": "Description",
+    "type": "textarea",
+    "required": false,
+    "placeholder": "Enter detailed description"
+  },
+  {
+    "name": "priority",
+    "label": "Priority",
+    "type": "select",
+    "required": true,
+    "options": [
+      { "value": "high", "text": "High" },
+      { "value": "medium", "text": "Medium" },
+      { "value": "low", "text": "Low" }
+    ]
+  },
+  {
+    "name": "assignee",
+    "label": "Assignee",
+    "type": "text",
+    "required": false,
+    "placeholder": "Assign to user"
+  }
+];
+*/
+
+interface FieldDefinition {
+  name: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  options?: { value: string; text: string }[];
+}
+
+interface FormDefinition {
+  fields: FieldDefinition[];
+}
+
+interface JsonFormGeneratorProps {
+  form: FormDefinition;
+  values: Record<string, any>;
+  onChange: (field: string, value: any) => void;
+}
+
+function getCompoent(
+  field: FieldDefinition,
+  value: string | number | undefined,
+  onChange: JsonFormGeneratorProps['onChange']
+) {
+  switch (field.type) {
+    case 'textarea':
+      return (
+        <EuiTextArea
+          fullWidth={true}
+          value={value}
+          placeholder={field.placeholder}
+          onChange={(e) => onChange(field.name, e.target.value)}
+        />
+      );
+    case 'select':
+      return (
+        <EuiSelect
+          fullWidth={true}
+          options={field.options || []}
+          value={value}
+          onChange={(e) => onChange(field.name, e.target.value)}
+        />
+      );
+    case 'text':
+    default:
+      return (
+        <EuiFieldText
+          fullWidth={true}
+          value={value}
+          placeholder={field.placeholder}
+          onChange={(e) => onChange(field.name, e.target.value)}
+        />
+      );
+  }
+}
+
+export const jsonFormGenerator: React.FC<JsonFormGeneratorProps> = ({ form, values, onChange }) => {
+  return (
+    <>
+      {form.fields.map((field) => {
+        const value = values[field.name] ?? '';
+
+        return (
+          <EuiFormRow fullWidth label={field.label}>
+            {getCompoent(field, value, onChange)}
+          </EuiFormRow>
+        );
+      })}
+    </>
+  );
+};
 
 const HttpRequestParamsFields: React.FunctionComponent<
   ActionParamsProps<HttpRequestActionParams>
 > = ({ actionParams, editAction, index, messageVariables, errors, actionConnector }) => {
   const { body } = actionParams;
-  const contentType = (actionConnector as any).config;
 
-  return contentType === 'json' ? (
-    <JsonEditorWithMessageVariables
-      messageVariables={messageVariables}
-      paramsProperty={'body'}
-      inputTargetValue={body}
-      label={i18n.translate('xpack.stackConnectors.components.httpRequest.bodyFieldLabel', {
-        defaultMessage: 'Body',
-      })}
-      ariaLabel={i18n.translate(
-        'xpack.stackConnectors.components.httpRequest.bodyCodeEditorAriaLabel',
-        {
-          defaultMessage: 'Code editor',
-        }
-      )}
-      errors={errors.body as string[]}
-      onDocumentsChange={(json: string) => {
-        editAction('body', json, index);
-      }}
-      onBlur={() => {
-        if (!body) {
-          editAction('body', '', index);
-        }
-      }}
-      dataTestSubj="actionJsonEditor"
-    />
-  ) : (
-    <CodeEditor
-      languageId={'xml'}
-      options={{
-        renderValidationDecorations: 'off',
-        lineNumbers: 'on',
-        fontSize: 14,
-        minimap: {
-          enabled: false,
-        },
-        scrollBeyondLastLine: false,
-        folding: true,
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-        automaticLayout: true,
-      }}
-      value={body || ''}
-      width="100%"
-      height="200px"
-      data-test-subj={`${contentType}Editor`}
-      onChange={(val: string) => {
-        editAction('body', val, index);
-      }}
-    />
-  );
+  return jsonFormGenerator({
+    form: {
+      fields: actionConnector.config.paramFields,
+    },
+    values: body ? JSON.parse(body) : {},
+    onChange: (name, val) => editAction(name, val, 0),
+  });
 };
 
 // eslint-disable-next-line import/no-default-export

@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  Field,
+  SelectField,
+  JsonEditorField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 
 const HTTP_VERBS = ['get', 'put', 'post', 'delete', 'patch'];
@@ -35,7 +39,13 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   readOnly,
 }) => {
   const [{ config }] = useFormData({
-    watch: ['config.contentType'],
+    watch: [
+      'config.method',
+      'config.url',
+      'config.contentType',
+      'config.paramFields',
+      'config.customContentType',
+    ],
   });
 
   return (
@@ -133,6 +143,33 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             />
           </EuiFlexItem>
         )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            path="config.paramFields"
+            component={JsonEditorField}
+            config={{
+              label: i18n.translate(
+                'xpack.stackConnectors.components.httpRequest.paramFieldsJSONEditorFieldLabel',
+                {
+                  defaultMessage: 'Parameter Fields',
+                }
+              ),
+            }}
+            componentProps={{
+              euiCodeEditorProps: {
+                fullWidth: true,
+                height: '200px',
+                options: {
+                  fontSize: '12px',
+                  renderValidationDecorations: 'off',
+                },
+              },
+            }}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
