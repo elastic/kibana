@@ -39,9 +39,8 @@ const upsertRequest = ({
   stream: {
     description: 'Test stream',
     ingest: {
-      processing: {
-        steps: [],
-      },
+      processing: { steps: [] },
+      settings: {},
       wired: { fields, routing },
       lifecycle: { inherit: {} },
     },
@@ -290,9 +289,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'ok',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -307,9 +305,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'a'.repeat(twoMB),
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -465,9 +462,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: '',
                     ingest: {
-                      processing: {
-                        steps: [],
-                      },
+                      processing: { steps: [] },
+                      settings: {},
                       wired: {
                         fields,
                         routing: [],
@@ -558,9 +554,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: {
                       fields: {},
                       routing: [
@@ -584,9 +579,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -628,9 +622,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: {
                       fields: {},
                       routing: [],
