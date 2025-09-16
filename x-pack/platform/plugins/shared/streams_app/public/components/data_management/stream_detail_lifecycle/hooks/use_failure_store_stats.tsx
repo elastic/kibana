@@ -33,7 +33,7 @@ export const useFailureStoreStats = ({
       }
 
       const fsStats = await http.get<FailureStoreStatsResponse>(
-        `/api/streams/${getFailureStoreIndexName(definition)}/failure_store/stats`
+        `/internal/streams/${getFailureStoreIndexName(definition)}/failure_store/stats`
       );
 
       if (!fsStats || !fsStats.creationDate) {

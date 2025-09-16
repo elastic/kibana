@@ -23,7 +23,7 @@ export function useUpdateFailureStore() {
       name: string,
       options: { failureStoreEnabled: boolean; customRetentionPeriod?: string }
     ) => {
-      const data = await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_failure_store', {
+      const data = await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/_failure_store', {
         params: {
           path: { name },
           body: {

@@ -16,7 +16,7 @@ export interface UpdateFailureStoreResponse {
 }
 
 export const getFailureStoreStatsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/failure_store/stats',
+  endpoint: 'GET /internal/streams/{name}/failure_store/stats',
   options: {
     access: 'internal',
     summary: 'Get failure store stats',
@@ -49,7 +49,7 @@ export const getFailureStoreStatsRoute = createServerRoute({
 });
 
 export const updateFailureStoreRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/_failure_store',
+  endpoint: 'PUT /internal/streams/{name}/_failure_store',
   options: {
     access: 'internal',
     summary: 'Update failure store configuration',
