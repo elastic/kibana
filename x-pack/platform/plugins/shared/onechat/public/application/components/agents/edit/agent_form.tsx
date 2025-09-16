@@ -34,6 +34,8 @@ import { filterToolsBySelection, type AgentDefinition } from '@kbn/onechat-commo
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { defer } from 'lodash';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
