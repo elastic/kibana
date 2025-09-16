@@ -37,7 +37,7 @@ const learnMoreLink = (
 const restartSuppressionMessageComponent = (
   <FormattedMessage
     id="xpack.securitySolution.alert.closeInfoModal.restartSuppressionMessage"
-    defaultMessage="Some alerts being closed are currently subject to suppression. Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. {link}."
+    defaultMessage="Some of the alerts being closed were created while a suppression window was active. If suppression remains active, any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. {link}."
     values={{
       link: learnMoreLink,
     }}
@@ -47,7 +47,7 @@ const restartSuppressionMessageComponent = (
 const continueSuppressionMessageComponent = (
   <FormattedMessage
     id="xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage"
-    defaultMessage="Some alerts being closed are currently subject to suppression. Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. {link}."
+    defaultMessage="Some of the alerts being closed were created while a suppression window was active. If suppression remains active, duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. {link}."
     values={{
       link: learnMoreLink,
     }}
