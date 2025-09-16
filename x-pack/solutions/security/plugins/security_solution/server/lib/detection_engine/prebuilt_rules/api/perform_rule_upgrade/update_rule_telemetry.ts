@@ -9,7 +9,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayDiffConflict,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { DETECTION_RULE_UPDATE_EVENT } from '../../../../telemetry/event_based/events';
+import { DETECTION_RULE_UPGRADE_EVENT } from '../../../../telemetry/event_based/events';
 
 interface BasicDiffInfo {
   conflict: ThreeWayDiffConflict;
@@ -20,14 +20,14 @@ type BasicRuleFieldsDiff = Record<string, BasicDiffInfo>;
 
 type UpdateRuleFinalResult = 'SUCCESS' | 'SKIP' | 'ERROR';
 
-export interface RuleUpdateContext {
+export interface RuleUpgradeContext {
   ruleId: string;
   ruleName: string;
   hasBaseVersion: boolean;
   fieldsDiff: BasicRuleFieldsDiff;
 }
 
-export interface RuleUpdateTelemetry {
+export interface RuleUpgradeTelemetry {
   ruleId: string;
   ruleName: string;
   hasBaseVersion: boolean;
@@ -44,6 +44,76 @@ export interface RuleUpdateTelemetry {
   finalResult: UpdateRuleFinalResult;
 }
 
+interface BasicRuleResponse {
+  rule_id: string;
+}
+
+interface BasicInstallationError {
+  item: {
+    rule_id: string;
+  };
+}
+
+interface BasicSkippedRule {
+  rule_id: string;
+}
+
+export function sendRuleUpdateTelemetryEvents(
+  analytics: AnalyticsServiceStart,
+  RuleUpdateContextsMap: Map<string, RuleUpgradeContext>,
+  updatedRules: BasicRuleResponse[],
+  installationErrors: BasicInstallationError[],
+  skippedRules: BasicSkippedRule[]
+) {
+  try {
+    for (const ruleResponse of updatedRules) {
+      const ruleUpdateContext = RuleUpdateContextsMap.get(ruleResponse.rule_id);
+      if (ruleUpdateContext) {
+        const event: RuleUpgradeTelemetry = createRuleUpdateTelemetryEvent({
+          fieldsDiff: ruleUpdateContext.fieldsDiff,
+          ruleId: ruleUpdateContext.ruleId,
+          ruleName: ruleUpdateContext.ruleName,
+          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
+          finalResult: 'SUCCESS',
+        });
+        analytics.reportEvent(DETECTION_RULE_UPGRADE_EVENT.eventType, event);
+      }
+    }
+
+    for (const erroredRule of installationErrors) {
+      const ruleUpdateContext = RuleUpdateContextsMap.get(erroredRule.item.rule_id);
+      if (ruleUpdateContext) {
+        const event: RuleUpgradeTelemetry = createRuleUpdateTelemetryEvent({
+          fieldsDiff: ruleUpdateContext.fieldsDiff,
+          ruleId: ruleUpdateContext.ruleId,
+          ruleName: ruleUpdateContext.ruleName,
+          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
+          finalResult: 'ERROR',
+        });
+        analytics.reportEvent(DETECTION_RULE_UPGRADE_EVENT.eventType, event);
+      }
+    }
+
+    for (const skippedRule of skippedRules) {
+      const ruleUpdateContext = RuleUpdateContextsMap.get(skippedRule.rule_id);
+      if (ruleUpdateContext) {
+        const event: RuleUpgradeTelemetry = createRuleUpdateTelemetryEvent({
+          fieldsDiff: ruleUpdateContext.fieldsDiff,
+          ruleId: ruleUpdateContext.ruleId,
+          ruleName: ruleUpdateContext.ruleName,
+          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
+          finalResult: 'SKIP',
+        });
+        analytics.reportEvent(DETECTION_RULE_UPGRADE_EVENT.eventType, event);
+      }
+    }
+  } catch (e) {
+    // we don't want telemetry errors to impact the main flow
+    // eslint-disable-next-line no-console
+    console.error('Failed to send detection rule update telemetry', e);
+  }
+}
+
 interface CreateRuleUpdateTelemetryEventParams {
   fieldsDiff: BasicRuleFieldsDiff;
   ruleId: string;
@@ -58,7 +128,7 @@ function createRuleUpdateTelemetryEvent({
   ruleName,
   hasBaseVersion,
   finalResult,
-}: CreateRuleUpdateTelemetryEventParams): RuleUpdateTelemetry {
+}: CreateRuleUpdateTelemetryEventParams): RuleUpgradeTelemetry {
   const updatedFieldsTotal: string[] = [];
   const updatedFieldsWithNonSolvableConflicts: string[] = [];
   const updatedFieldsWithSolvableConflicts: string[] = [];
@@ -111,74 +181,4 @@ function createRuleUpdateTelemetryEvent({
     updatedFieldsWithNoConflicts,
     finalResult,
   };
-}
-
-interface BasicRuleResponse {
-  rule_id: string;
-}
-
-interface BasicInstallationError {
-  item: {
-    rule_id: string;
-  };
-}
-
-interface BasicSkippedRule {
-  rule_id: string;
-}
-
-export function sendRuleUpdateTelemetryEvents(
-  analytics: AnalyticsServiceStart,
-  RuleUpdateContextsMap: Map<string, RuleUpdateContext>,
-  updatedRules: BasicRuleResponse[],
-  installationErrors: BasicInstallationError[],
-  skippedRules: BasicSkippedRule[]
-) {
-  try {
-    for (const ruleResponse of updatedRules) {
-      const ruleUpdateContext = RuleUpdateContextsMap.get(ruleResponse.rule_id);
-      if (ruleUpdateContext) {
-        const event: RuleUpdateTelemetry = createRuleUpdateTelemetryEvent({
-          fieldsDiff: ruleUpdateContext.fieldsDiff,
-          ruleId: ruleUpdateContext.ruleId,
-          ruleName: ruleUpdateContext.ruleName,
-          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
-          finalResult: 'SUCCESS',
-        });
-        analytics.reportEvent(DETECTION_RULE_UPDATE_EVENT.eventType, event);
-      }
-    }
-
-    for (const erroredRule of installationErrors) {
-      const ruleUpdateContext = RuleUpdateContextsMap.get(erroredRule.item.rule_id);
-      if (ruleUpdateContext) {
-        const event: RuleUpdateTelemetry = createRuleUpdateTelemetryEvent({
-          fieldsDiff: ruleUpdateContext.fieldsDiff,
-          ruleId: ruleUpdateContext.ruleId,
-          ruleName: ruleUpdateContext.ruleName,
-          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
-          finalResult: 'ERROR',
-        });
-        analytics.reportEvent(DETECTION_RULE_UPDATE_EVENT.eventType, event);
-      }
-    }
-
-    for (const skippedRule of skippedRules) {
-      const ruleUpdateContext = RuleUpdateContextsMap.get(skippedRule.rule_id);
-      if (ruleUpdateContext) {
-        const event: RuleUpdateTelemetry = createRuleUpdateTelemetryEvent({
-          fieldsDiff: ruleUpdateContext.fieldsDiff,
-          ruleId: ruleUpdateContext.ruleId,
-          ruleName: ruleUpdateContext.ruleName,
-          hasBaseVersion: ruleUpdateContext.hasBaseVersion,
-          finalResult: 'SKIP',
-        });
-        analytics.reportEvent(DETECTION_RULE_UPDATE_EVENT.eventType, event);
-      }
-    }
-  } catch (e) {
-    // we don't want telemetry errors to impact the main flow
-    // eslint-disable-next-line no-console
-    console.error('Failed to send detection rule update telemetry', e);
-  }
 }

@@ -26,11 +26,11 @@ import type {
 } from '../diagnostic/health_diagnostic_service.types';
 
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
-import type { RuleUpdateTelemetry } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import type { RuleUpgradeTelemetry } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
 
-// Telemetry event that is sent for each rule that is updated during a prebuilt rule upgrade
-export const DETECTION_RULE_UPDATE_EVENT: EventTypeOpts<RuleUpdateTelemetry> = {
-  eventType: 'detection_rule_update',
+// Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
+export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
+  eventType: 'detection_rule_upgrade',
   schema: {
     ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
     ruleName: { type: 'keyword', _meta: { description: 'Rule name' } },
@@ -1302,7 +1302,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 };
 
 export const events = [
-  DETECTION_RULE_UPDATE_EVENT,
+  DETECTION_RULE_UPGRADE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,

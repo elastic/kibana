@@ -8,6 +8,7 @@
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
+  FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   RuleUpgradeSpecifier,
@@ -38,11 +39,10 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
-import type { RuleUpdateContext } from './update_rule_telemetry';
+import type { RuleUpgradeContext } from './update_rule_telemetry';
 import { sendRuleUpdateTelemetryEvents } from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
@@ -82,7 +82,7 @@ export const performRuleUpgradeHandler = async (
     const updatedRules: RuleResponse[] = [];
     const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
-    const ruleUpdateContextsMap = new Map<string, RuleUpdateContext>();
+    const ruleUpgradeContextsMap = new Map<string, RuleUpgradeContext>();
 
     const ruleUpgradeQueue: Array<{
       rule_id: RuleSignatureId;
@@ -169,10 +169,8 @@ export const performRuleUpgradeHandler = async (
               ? request.body.rules.find((x) => x.rule_id === targetRule.rule_id)
               : undefined;
 
-          const { conflict, ruleDiff } = getRuleUpgradeConflictState(
-            ruleVersions,
-            ruleUpgradeSpecifier
-          );
+          const { ruleDiff } = calculateRuleDiff(ruleVersions);
+          const conflict = getRuleUpgradeConflictState(ruleDiff, ruleUpgradeSpecifier);
 
           if (conflict !== ThreeWayDiffConflict.NONE) {
             skippedRules.push({
@@ -181,7 +179,7 @@ export const performRuleUpgradeHandler = async (
               conflict,
             });
 
-            ruleUpdateContextsMap.set(targetRule.rule_id, {
+            ruleUpgradeContextsMap.set(targetRule.rule_id, {
               ruleId: targetRule.rule_id,
               ruleName: currentVersion.name,
               hasBaseVersion: !!baseVersion,
@@ -199,7 +197,7 @@ export const performRuleUpgradeHandler = async (
         });
       });
 
-      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpdateContexts } =
+      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpgradeContexts } =
         createModifiedPrebuiltRuleAssets({
           upgradeableRules,
           requestBody: request.body,
@@ -207,8 +205,8 @@ export const performRuleUpgradeHandler = async (
         });
       ruleErrors.push(...processingErrors);
 
-      ruleUpdateContexts.forEach((ruleUpdateContext) => {
-        ruleUpdateContextsMap.set(ruleUpdateContext.ruleId, ruleUpdateContext);
+      ruleUpgradeContexts.forEach((ruleUpgradeContext) => {
+        ruleUpgradeContextsMap.set(ruleUpgradeContext.ruleId, ruleUpgradeContext);
       });
 
       if (isDryRun) {
@@ -242,7 +240,7 @@ export const performRuleUpgradeHandler = async (
 
       sendRuleUpdateTelemetryEvents(
         analytics,
-        ruleUpdateContextsMap,
+        ruleUpgradeContextsMap,
         updatedRules,
         ruleErrors,
         skippedRules
@@ -274,26 +272,20 @@ export const performRuleUpgradeHandler = async (
 };
 
 function getRuleUpgradeConflictState(
-  ruleVersions: RuleVersions,
+  ruleDiff: FullThreeWayRuleDiff,
   ruleUpgradeSpecifier?: RuleUpgradeSpecifier
-): { conflict: ThreeWayDiffConflict; ruleDiff: ReturnType<typeof calculateRuleDiff>['ruleDiff'] } {
-  const { ruleDiff } = calculateRuleDiff(ruleVersions);
-
+): ThreeWayDiffConflict {
   if (ruleDiff.num_fields_with_conflicts === 0) {
-    return { conflict: ThreeWayDiffConflict.NONE, ruleDiff };
+    return ThreeWayDiffConflict.NONE;
   }
 
   if (!ruleUpgradeSpecifier) {
-    return {
-      conflict:
-        ruleDiff.num_fields_with_non_solvable_conflicts > 0
-          ? ThreeWayDiffConflict.NON_SOLVABLE
-          : ThreeWayDiffConflict.SOLVABLE,
-      ruleDiff,
-    };
+    return ruleDiff.num_fields_with_non_solvable_conflicts > 0
+      ? ThreeWayDiffConflict.NON_SOLVABLE
+      : ThreeWayDiffConflict.SOLVABLE;
   }
 
-  let conflict = ThreeWayDiffConflict.NONE;
+  let result = ThreeWayDiffConflict.NONE;
 
   // filter out resolved fields
   for (const [fieldName, fieldThreeWayDiff] of Object.entries<ThreeWayDiff<unknown>>(
@@ -304,11 +296,11 @@ function getRuleUpgradeConflictState(
         ?.pick_version === 'RESOLVED';
 
     if (fieldThreeWayDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE && !hasResolvedValue) {
-      return { conflict: ThreeWayDiffConflict.NON_SOLVABLE, ruleDiff };
+      return ThreeWayDiffConflict.NON_SOLVABLE;
     } else if (fieldThreeWayDiff.conflict === ThreeWayDiffConflict.SOLVABLE && !hasResolvedValue) {
-      conflict = ThreeWayDiffConflict.SOLVABLE;
+      result = ThreeWayDiffConflict.SOLVABLE;
     }
   }
 
-  return { conflict, ruleDiff };
+  return result;
 }

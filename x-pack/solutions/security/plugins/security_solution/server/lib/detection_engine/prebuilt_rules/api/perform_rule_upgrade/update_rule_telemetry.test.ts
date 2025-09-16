@@ -10,16 +10,16 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { DETECTION_RULE_UPDATE_EVENT } from '../../../../telemetry/event_based/events';
-import type { RuleUpdateContext } from './update_rule_telemetry';
+import { DETECTION_RULE_UPGRADE_EVENT } from '../../../../telemetry/event_based/events';
+import type { RuleUpgradeContext } from './update_rule_telemetry';
 import { sendRuleUpdateTelemetryEvents } from './update_rule_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceStart =>
   ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart);
 
 const createMockRuleUpdateContext = (
-  overrides: Partial<RuleUpdateContext> = {}
-): RuleUpdateContext => ({
+  overrides: Partial<RuleUpgradeContext> = {}
+): RuleUpgradeContext => ({
   ruleId: 'r1',
   ruleName: 'Rule r1',
   hasBaseVersion: true,
@@ -59,7 +59,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
     const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
 
-    expect(eventType).toBe(DETECTION_RULE_UPDATE_EVENT.eventType);
+    expect(eventType).toBe(DETECTION_RULE_UPGRADE_EVENT.eventType);
 
     expect(payload.ruleId).toBe('r1');
     expect(payload.ruleName).toBe('Rule r1');
