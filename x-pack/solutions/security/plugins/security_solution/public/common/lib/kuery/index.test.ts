@@ -333,7 +333,7 @@ describe('convertToBuildEsQuery', () => {
       const dataViewWithIdMapped = createStubDataView({
         spec: {
           id: 'test-id',
-          title:'some-title',
+          title: 'some-title',
           fields: {
             _id: {
               name: '_id',
