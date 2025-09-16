@@ -26,3 +26,4 @@ export const ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES = ['read', 'view_i
 
 // The index pattern for the entity store has to support '.entities.v1.latest.noop' index
 export const ENTITY_STORE_INDEX_PATTERN = '.entities.v1.latest.*';
+export const ENTITY_STORE_UPDATES_INDEX_PATTERN = '.entities.v1.updates.*';

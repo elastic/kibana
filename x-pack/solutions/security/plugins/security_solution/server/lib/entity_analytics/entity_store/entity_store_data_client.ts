@@ -33,6 +33,7 @@ import {
   ENTITY_STORE_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
+  ENTITY_STORE_UPDATES_INDEX_PATTERN,
 } from '../../../../common/entity_analytics/entity_store/constants';
 import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
 import {
@@ -972,6 +973,7 @@ export class EntityStoreDataClient {
 
     // The entity store has to create the following indices
     indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_UPDATES_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
 
     return checkAndFormatPrivileges({
