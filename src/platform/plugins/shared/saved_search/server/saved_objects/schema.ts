@@ -138,11 +138,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.exten
   ),
 });
 
-export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
-  controlGroupJson: schema.maybe(schema.string()),
-});
-
-const DISCOVER_SESSION_TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+const DISCOVER_SESSION_TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
   title: undefined,
   description: undefined,
 });
@@ -154,10 +150,7 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
   attributes: DISCOVER_SESSION_TAB_ATTRIBUTES,
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
-
-export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
 
@@ -173,6 +166,24 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.exten
   kibanaSavedObjectMeta: schema.maybe(kibanaSavedObjectMeta),
   rowHeight: schema.maybe(rowHeight),
   sort: schema.maybe(sort),
-  controlGroupJson: schema.maybe(schema.string()),
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
 });
+
+const CONTROL_GROUP_JSON_SCHEMA = {
+  controlGroupJson: schema.maybe(schema.string()),
+};
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES.extends(CONTROL_GROUP_JSON_SCHEMA);
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
+  ...CONTROL_GROUP_JSON_SCHEMA,
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
