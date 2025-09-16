@@ -62,7 +62,7 @@ const FullScreenWrapper = ({
   );
 };
 
-export interface MetricsGridToolbarWrapperProps
+export interface MetricsGridWrapperProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   indexPattern: string;
   chartToolbarCss?: SerializedStyles;
@@ -71,7 +71,7 @@ export interface MetricsGridToolbarWrapperProps
   children?: React.ReactNode;
 }
 
-export const MetricsGridToolbarWrapper = ({
+export const MetricsGridWrapper = ({
   indexPattern,
   renderToggleActions,
   chartToolbarCss,
@@ -79,7 +79,7 @@ export const MetricsGridToolbarWrapper = ({
   setDebouncedSearchTerm,
   fields,
   children,
-}: MetricsGridToolbarWrapperProps) => {
+}: MetricsGridWrapperProps) => {
   const { leftSideActions } = useToolbarActions({
     fields,
     indexPattern,
