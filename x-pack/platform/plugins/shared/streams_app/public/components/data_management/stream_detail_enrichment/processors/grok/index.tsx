@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { GrokPatternsEditor } from './grok_patterns_editor';
-import { ProcessorFieldSelector } from '../processor_field_selector';
+import { EnhancedFieldSelector } from '../enhanced_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
@@ -16,7 +16,11 @@ import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 export const GrokProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector fieldKey={'from'} />
+      <EnhancedFieldSelector
+        fieldKey="from"
+        processorType="grok"
+        helpText="Field to search for grok matches in simulation data"
+      />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
       <FieldsAccordion>
