@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface HelpMenuProps {
   docLink: string;

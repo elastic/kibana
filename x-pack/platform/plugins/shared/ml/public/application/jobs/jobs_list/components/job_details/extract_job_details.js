@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
-import { detectorToString } from '../../../../util/string_utils';
-import { formatValues, filterObjects } from './format_values';
-import { i18n } from '@kbn/i18n';
+
 import { EuiLink } from '@elastic/eui';
+
+import { detectorToString } from '@kbn/ml-common-utils/string_utils/detector_to_string';
+import { i18n } from '@kbn/i18n';
+
 import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';
+
+import { formatValues, filterObjects } from './format_values';
 
 export function extractJobDetails(job, basePath, refreshJobList) {
   if (Object.keys(job).length === 0) {

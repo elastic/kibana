@@ -15,7 +15,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-node-checks/ml_jobs_awaiting_node_warning';
+import { MlNodeAvailableWarningShared } from '@kbn/ml-node-checks/node_available_warning';
 import { useKibana } from '../../lib/kibana';
 import { filterJobs } from './helpers';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';

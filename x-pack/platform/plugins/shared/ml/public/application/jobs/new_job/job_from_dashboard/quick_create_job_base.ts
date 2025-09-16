@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqWith, isEqual } from 'lodash';
+import { firstValueFrom } from 'rxjs';
+
+import type { estypes } from '@elastic/elasticsearch';
+
+import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { firstValueFrom } from 'rxjs';
-import type { estypes } from '@elastic/elasticsearch';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import { getTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_title';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { MlApi } from '../../../services/ml_api_service';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
-import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
-import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
+import { getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils/get_filters_for_dsl_query';
+
 import { createQueries } from '../utils/new_job_utils';
-import { createDatafeedId } from '../../../../../common/util/job_utils';
 
 interface CreationState {
   success: boolean;

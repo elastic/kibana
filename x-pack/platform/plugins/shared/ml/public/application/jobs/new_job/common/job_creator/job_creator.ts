@@ -8,47 +8,45 @@
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
+import type { Aggregation, Field, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
-  type Aggregation,
-  type Field,
-  type MlUrlConfig,
   ML_JOB_AGGREGATION,
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
-import { createDatafeedId } from '../../../../../../common/util/job_utils';
-import type { MlApi } from '../../../../services/ml_api_service';
-import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
+import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import type {
-  Job,
-  Datafeed,
   Detector,
+  Job,
   JobId,
-  DatafeedId,
   BucketSpan,
-  CustomSettings,
-} from '../../../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed, DatafeedId } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
+import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '@kbn/ml-common-constants/new_job';
+import type { MlCalendar } from '@kbn/ml-common-types/calendars';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
+import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
+import { getFirstKeyInObject } from '@kbn/ml-common-utils/object_utils';
+
+import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { JobRunner, type ProgressSubscriber } from '../job_runner';
-import type { CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
-import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '../../../../../../common/constants/new_job';
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
-import type { MlCalendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
-import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
-import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 export class JobCreator {
@@ -692,8 +690,8 @@ export class JobCreator {
   }
 
   private _setCustomSetting(
-    setting: keyof CustomSettings,
-    value: CustomSettings[keyof CustomSettings] | null
+    setting: keyof estypes.MlCustomSettings,
+    value: estypes.MlCustomSettings[keyof estypes.MlCustomSettings] | null
   ) {
     if (value === null) {
       // if null is passed in, delete the custom setting
@@ -722,8 +720,8 @@ export class JobCreator {
   }
 
   private _getCustomSetting(
-    setting: keyof CustomSettings
-  ): CustomSettings[keyof CustomSettings] | null {
+    setting: keyof estypes.MlCustomSettings
+  ): estypes.MlCustomSettings[keyof estypes.MlCustomSettings] | null {
     if (
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined

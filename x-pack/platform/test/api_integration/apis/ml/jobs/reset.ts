@@ -7,10 +7,12 @@
 
 import expect from '@kbn/expect';
 
-import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
+import { ANNOTATION_TYPE } from '@kbn/ml-common-types/annotations';
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';
+
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
 export default ({ getService }: FtrProviderContext) => {

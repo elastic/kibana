@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import { fromPromise } from 'xstate5';
 
 export interface MlFeatureFlags {
@@ -21,20 +21,19 @@ export type MlCapabilities =
       reason: 'disabled' | 'insufficientLicense';
     };
 
-export type MlApiDependency =
-  | Pick<NonNullable<MlPluginStart['mlApi']>, 'checkMlCapabilities'>
-  | undefined;
+export type GetMlApiDependency = NonNullable<MlPluginStart['getMlApi']> | undefined;
 
-export const loadMlCapabilitiesActor = ({ mlApi }: { mlApi: MlApiDependency }) =>
+export const loadMlCapabilitiesActor = ({ getMlApi }: { getMlApi: GetMlApiDependency }) =>
   fromPromise<MlCapabilities, { featureFlags: MlFeatureFlags }>(
     async ({ input: { featureFlags } }) => {
-      if (!mlApi || !featureFlags.isPatternsEnabled) {
+      if (!getMlApi || !featureFlags.isPatternsEnabled) {
         return {
           status: 'unavailable' as const,
           reason: 'disabled',
         };
       }
 
+      const mlApi = await getMlApi();
       const mlCapabilities = await mlApi?.checkMlCapabilities();
 
       if (!mlCapabilities.isPlatinumOrTrialLicense) {

@@ -8,13 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
+
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 import type { CustomUrlListProps } from './list';
 import { CustomUrlList } from './list';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../contexts/kibana');
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 
 jest.mock('../../../services/toast_notification_service', () => ({
   useToastNotificationService: () => {

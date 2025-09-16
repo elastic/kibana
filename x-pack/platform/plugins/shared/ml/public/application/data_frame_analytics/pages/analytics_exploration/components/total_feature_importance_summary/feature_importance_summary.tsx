@@ -27,7 +27,7 @@ import {
   type FeatureImportanceClassName,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { ExpandableSection } from '../expandable_section';
 

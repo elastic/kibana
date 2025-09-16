@@ -7,11 +7,13 @@
 
 import { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { useTrainedModelsApiService } from '@kbn/ml-hooks/trained_models/use_trained_models_api_service';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import type { MemoryUsageInfo } from '@kbn/ml-common-types/trained_models';
+
 import { useRefresh } from '../routing/use_refresh';
-import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import type { MlSavedObjectType } from '../../../common/types/saved_objects';
-import type { MemoryUsageInfo } from '../../../common/types/trained_models';
 
 export const useMemoryUsage = (node?: string, type?: MlSavedObjectType) => {
   const [loading, setLoading] = useState<boolean>(false);

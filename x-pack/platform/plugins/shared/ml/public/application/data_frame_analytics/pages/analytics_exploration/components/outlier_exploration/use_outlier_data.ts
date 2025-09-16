@@ -25,6 +25,8 @@ import {
   useRenderCellValue,
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
@@ -33,7 +35,6 @@ import {
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 
 import { getIndexData, getIndexFields } from '../../../../common';
 

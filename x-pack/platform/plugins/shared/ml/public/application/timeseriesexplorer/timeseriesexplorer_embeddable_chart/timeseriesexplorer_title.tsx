@@ -17,9 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type MlEntityFieldOperation, ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils/entity_field_operations';
 
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MlEntity, SingleMetricViewerEmbeddableApi } from '../../../embeddables/types';
 import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
 import { SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../../ui_actions/triggers';

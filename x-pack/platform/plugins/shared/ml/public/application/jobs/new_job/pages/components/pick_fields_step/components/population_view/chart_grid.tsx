@@ -10,10 +10,10 @@ import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import type { AggFieldPair, SplitField } from '@kbn/ml-anomaly-utils';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 import type { ChartSettings } from '../../../charts/common/settings';
 import type { LineChartData } from '../../../../../common/chart_loader';
 import type { ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { DetectorTitle } from '../detector_title';
 import { ByFieldSelector } from '../by_field';

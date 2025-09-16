@@ -7,9 +7,9 @@
 
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ML_APP_ROUTE, ML_MANAGEMENT_APP_ROUTE, PLUGIN_ID } from '../../../../common/constants/app';
+import { ML_APP_ROUTE, ML_MANAGEMENT_APP_ROUTE, PLUGIN_ID } from '@kbn/ml-common-constants/app';
 
-import { useMlKibana } from './kibana_context';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export type NavigateToPath = ReturnType<typeof useNavigateToPath>;
 

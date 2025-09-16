@@ -13,7 +13,7 @@ import React, { useCallback } from 'react';
 import type { LogsOverviewFeatureFlags } from '../../types';
 import type { LogsSourceConfiguration } from '../../utils/logs_source';
 import { resolveLogsSourceActor } from '../../utils/logs_source';
-import type { MlApiDependency } from '../../utils/ml_capabilities';
+import type { GetMlApiDependency } from '../../utils/ml_capabilities';
 import { loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
 import type { LogCategoriesDependencies, LogCategoriesProps } from '../log_categories';
 import { LogCategories } from '../log_categories';
@@ -35,7 +35,7 @@ export type LogsOverviewProps = Pick<LogsOverviewContentProps, 'height' | 'timeR
 export type LogsOverviewDependencies = LogsOverviewContentDependencies & {
   logsDataAccess: LogsDataAccessPluginStart;
   dataViews: DataViewsContract;
-  mlApi: MlApiDependency;
+  getMlApi: GetMlApiDependency;
 };
 
 export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
@@ -56,7 +56,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
               dataViewsService: dependencies.dataViews,
             }),
             loadMlCapabilities: loadMlCapabilitiesActor({
-              mlApi: dependencies.mlApi,
+              getMlApi: dependencies.getMlApi,
             }),
           },
         })}

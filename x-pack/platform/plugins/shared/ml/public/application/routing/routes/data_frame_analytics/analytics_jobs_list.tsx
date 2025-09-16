@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { MlRoute } from '../../router';
-import { PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';

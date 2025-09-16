@@ -6,14 +6,13 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { type ConfigSchema } from '../common/constants/app';
+import { type ConfigSchema } from '@kbn/ml-common-constants/app';
 import { configSchema } from './config_schema';
-export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
-  DatafeedStats as MlDatafeedStats,
-  Job as MlJob,
-  MlSummaryJob,
-  SummaryJobState as MlSummaryJobState,
+  MlPluginSetup as MlServerPluginSetup,
+  MlPluginStart as MlServerPluginStart,
+} from './plugin';
+export type {
   AlertingService as MlAlertingService,
   AnomalyDetectors as MlAnomalyDetectors,
   JobService as MlJobService,
