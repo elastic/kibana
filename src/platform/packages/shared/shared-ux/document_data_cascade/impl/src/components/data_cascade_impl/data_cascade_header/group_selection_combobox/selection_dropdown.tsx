@@ -25,27 +25,25 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDataCascadeState, useDataCascadeActions } from '../../../store_provider';
+import { useDataCascadeState, useDataCascadeActions } from '../../../../store_provider';
 
 const MAX_SELECTABLE_COLUMNS = 3;
 
 export interface SelectionDropdownProps {
-  onSelectionChange?: (groupByColumn: string[]) => void;
+  availableColumns: string[];
+  currentSelectedColumns: string[];
+  onSelectionChange: (groupByColumn: string[]) => void;
 }
 
-export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps) {
+export function SelectionDropdown({
+  onSelectionChange,
+  availableColumns,
+  currentSelectedColumns,
+}: SelectionDropdownProps) {
   const [isPopoverOpen, setPopover] = useState(false);
   const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
   const { groupByColumns, currentGroupByColumns } = useDataCascadeState();
   const actions = useDataCascadeActions();
-
-  const persistGroupByColumnSelection = useCallback(
-    (groupByColumn: string[]) => {
-      actions.setActiveCascadeGroups(groupByColumn);
-      onSelectionChange?.(groupByColumn);
-    },
-    [actions, onSelectionChange]
-  );
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -56,7 +54,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   };
 
   const onGroupByColumnSelection = (groupByColumn: string) => {
-    persistGroupByColumnSelection([...currentGroupByColumns, groupByColumn]);
+    onSelectionChange([...currentGroupByColumns, groupByColumn]);
     closePopover();
   };
 
@@ -69,10 +67,10 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
       if (source && destination) {
         const items = euiDragDropReorder(currentGroupByColumns, source.index, destination.index);
 
-        persistGroupByColumnSelection(items);
+        onSelectionChange(items);
       }
     },
-    [currentGroupByColumns, persistGroupByColumnSelection]
+    [currentGroupByColumns, onSelectionChange]
   );
 
   const button = (

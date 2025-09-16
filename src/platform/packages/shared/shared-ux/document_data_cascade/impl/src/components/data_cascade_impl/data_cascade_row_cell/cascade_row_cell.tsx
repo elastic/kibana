@@ -107,6 +107,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
           <div css={styles.cellInner}>
             {React.createElement(children, {
               data: leafData,
+              cellId: leafCacheKey,
               key: leafCacheKey,
             })}
           </div>
