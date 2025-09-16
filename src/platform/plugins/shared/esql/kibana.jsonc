@@ -20,11 +20,14 @@
       "uiActions",
       "contentManagement",
       "inference",
-      "actions"
+      "actions",
+      "share",
+      "fileUpload",
+      "fieldFormats"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ]
   }
 }

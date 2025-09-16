@@ -25,10 +25,8 @@ export { inlineSuggest } from './src/inline_suggestions/inline_suggest';
  * Some utility functions that can be useful to build more feature
  * for the ES|QL language
  */
-export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
-
 export {
-  getFieldsByTypeHelper,
+  getColumnsByTypeHelper as getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
 } from './src/shared/resources_helpers';

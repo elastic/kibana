@@ -17,12 +17,13 @@ import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/funct
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { monaco } from '../../monaco_imports';
+import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
-import { buildEsqlTheme } from './lib/theme';
-import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
+import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { getHoverItem } from './lib/hover/hover';
 import { monacoPositionToOffset } from './lib/shared/utils';
+import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -35,7 +36,9 @@ const globalLLMTriggerState = {
   isTriggered: false,
 };
 
-export const ESQLLang = {
+export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
+
+export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const language = monarch.create({

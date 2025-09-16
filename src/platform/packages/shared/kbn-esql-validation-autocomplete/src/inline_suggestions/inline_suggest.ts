@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { EsqlQuery } from '@kbn/esql-ast';
 import {
   getRecommendedQueriesTemplates,
   getCategorizationField,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type { ESQLCallbacks } from '../shared/types';
-import { getFieldsByTypeHelper } from '../shared/resources_helpers';
+import { getColumnsByTypeHelper } from '../shared/resources_helpers';
 
 export interface InlineSuggestionItem {
   /**
@@ -185,11 +186,15 @@ async function getFieldInfo(
   fromCommand: string,
   callbacks?: ESQLCallbacks
 ): Promise<{ timeField: string; categorizationField: string | undefined }> {
-  const { getFieldsByType } = getFieldsByTypeHelper(fromCommand, callbacks);
+  const { getColumnsByType } = getColumnsByTypeHelper(
+    EsqlQuery.fromSrc(fromCommand).ast,
+    fromCommand,
+    callbacks
+  );
 
   const [dateFields, textFields] = await Promise.all([
-    getFieldsByType(['date'], []),
-    getFieldsByType(['text'], []),
+    getColumnsByType(['date'], []),
+    getColumnsByType(['text'], []),
   ]);
 
   const timeField =
