@@ -125,7 +125,7 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    if (spaces?.solutionViewTourManager) {
+    if (spaces) {
       const { project } = core.chrome as InternalChromeStart;
 
       const tourManager = new SolutionNavigationTourManager({

@@ -70,7 +70,7 @@ export interface SpacesApi {
   /**
    * Manages the state of the solution view tour.
    */
-  solutionViewTourManager?: TourManager;
+  solutionViewTourManager: TourManager;
 }
 
 /**
