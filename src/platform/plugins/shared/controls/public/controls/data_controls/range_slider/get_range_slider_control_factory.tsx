@@ -39,7 +39,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
     type: RANGE_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-      const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
@@ -60,6 +59,10 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         state,
         dataControlManager.internalApi.onSelectionChange
       );
+
+      // If there are no initial selections, the min/max values will be displayed initially in the control.
+      // Therefore, make sure they're set to be initially in a loading state
+      const loadingMinMax$ = new BehaviorSubject<boolean>(!selections.hasInitialSelections);
 
       function serializeState() {
         return {
@@ -111,7 +114,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         dataControlManager.api.dataLoading$,
       ])
         .pipe(
-          debounceTime(100),
+          debounceTime(0),
           map((values) => values.some((value) => value))
         )
         .subscribe((isLoading) => {
@@ -215,6 +218,13 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             )
             .subscribe(() => resolve());
         });
+      } else {
+        // Wait for initial min/max to load to avoid a flash of -Infinity, Infinity values
+        await new Promise<void>((resolve) =>
+          combineLatest([loadingMinMax$, dataLoading$])
+            .pipe(first(([minMaxLoading, dataLoading]) => !minMaxLoading && !dataLoading))
+            .subscribe(() => resolve())
+        );
       }
 
       return {

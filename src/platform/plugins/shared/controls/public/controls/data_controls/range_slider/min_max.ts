@@ -57,10 +57,9 @@ export function minMax$({
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };
+      } finally {
+        setIsLoading(false);
       }
-    }),
-    tap(() => {
-      setIsLoading(false);
     })
   );
 }
