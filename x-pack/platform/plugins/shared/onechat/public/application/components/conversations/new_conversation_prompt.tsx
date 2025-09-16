@@ -118,7 +118,7 @@ const cards = [
     description: (
       <FormattedMessage
         id="xpack.onechat.welcome.quickNavigation.agentCreation.description"
-        defaultMessage="Start fresh with a custom agent tuned to your data and workflows."
+        defaultMessage="Build a custom agent tuned to your data and workflows."
       />
     ),
     iconType: 'plus',
@@ -130,13 +130,13 @@ const cards = [
     title: (
       <FormattedMessage
         id="xpack.onechat.welcome.quickNavigation.agentManagement.title"
-        defaultMessage="Manage all agents"
+        defaultMessage="Manage agents"
       />
     ),
     description: (
       <FormattedMessage
         id="xpack.onechat.welcome.quickNavigation.agentManagement.description"
-        defaultMessage="View, edit, and organize the agents you've already built."
+        defaultMessage="View, edit, and organize your existing agents."
       />
     ),
     iconType: 'controls',
@@ -148,13 +148,13 @@ const cards = [
     title: (
       <FormattedMessage
         id="xpack.onechat.welcome.quickNavigation.toolManagement.title"
-        defaultMessage="Manage all tools"
+        defaultMessage="Manage tools"
       />
     ),
     description: (
       <FormattedMessage
         id="xpack.onechat.welcome.quickNavigation.toolManagement.description"
-        defaultMessage="Set up or adjust the tools your agents can use."
+        defaultMessage="Add, remove, or edit the tools your agents can use."
       />
     ),
     iconType: 'wrench',
