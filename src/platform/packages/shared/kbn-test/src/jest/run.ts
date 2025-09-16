@@ -18,8 +18,9 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
-import { resolve, relative, sep as osSep } from 'path';
-import { existsSync } from 'fs';
+import { resolve, relative, sep as osSep, join } from 'path';
+import Fs from 'fs';
+import Path from 'path';
 import { run } from 'jest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -28,13 +29,15 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { map } from 'lodash';
 import getopts from 'getopts';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
+import { readInitialOptions } from 'jest-config';
+import type { Config } from '@jest/types';
 import jestFlags from './jest_flags.json';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
-export function runJest(configName = 'jest.config.js') {
+export async function runJest(configName = 'jest.config.js') {
   const unknownFlag: string[] = [];
   const argv = getopts(process.argv.slice(2), {
     ...jestFlags,
@@ -76,7 +79,15 @@ export function runJest(configName = 'jest.config.js') {
 
   let testFiles: string[];
 
+  if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = 'test';
+  }
+
   const cwd: string = process.env.INIT_CWD || process.cwd();
+
+  // We'll resolve a config path (either provided or discovered),
+  // then read/augment the initial options and pass them to Jest as inline JSON.
+  let resolvedConfigPath: string | undefined;
 
   if (!argv.config) {
     testFiles = argv._.map((p) => resolve(cwd, p.toString()));
@@ -99,13 +110,13 @@ export function runJest(configName = 'jest.config.js') {
     let wd = testFilesProvided ? commonTestFiles : cwd;
     while (true) {
       const dev = resolve(wd, devConfigName);
-      if (existsSync(dev)) {
+      if (Fs.existsSync(dev)) {
         configPath = dev;
         break;
       }
 
       const actual = resolve(wd, configName);
-      if (existsSync(actual)) {
+      if (Fs.existsSync(actual)) {
         configPath = actual;
         break;
       }
@@ -137,31 +148,79 @@ export function runJest(configName = 'jest.config.js') {
     }
 
     log.verbose(`no config provided, found ${configPath}`);
+    resolvedConfigPath = configPath;
     process.argv.push('--config', configPath);
 
     if (!testFilesProvided) {
       log.verbose(`no test files provided, setting to current directory`);
       process.argv.push(relative(wd, cwd));
     }
+  }
+  let initialOptions: Config.InitialOptions | undefined;
 
-    log.info('yarn jest', process.argv.slice(2).join(' '));
-
-    if (SCOUT_REPORTER_ENABLED) {
-      // Expose Jest config file path via environment variables
-      process.env.JEST_CONFIG_PATH = configPath;
+  // If a config path was provided via argv, use that; otherwise we already set resolvedConfigPath above
+  if (argv.config) {
+    try {
+      initialOptions = JSON.parse(argv.config);
+    } catch (err) {
+      resolvedConfigPath = argv.config;
     }
   }
 
-  if (process.env.NODE_ENV == null) {
-    process.env.NODE_ENV = 'test';
+  if (!initialOptions && !resolvedConfigPath) {
+    throw new Error(
+      `--config is not set or invalid, and no config path was found for any listed files`
+    );
   }
 
-  if (SCOUT_REPORTER_ENABLED && argv.config) {
+  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
     // Expose Jest config file path via environment variables
-    process.env.JEST_CONFIG_PATH = argv.config;
+    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
   }
 
-  run().then(() => {
+  if (!initialOptions) {
+    const configFileExists = await Fs.promises
+      .stat(resolvedConfigPath!)
+      .then((stat) => stat.isFile())
+      .catch(() => false);
+
+    if (!configFileExists) {
+      throw new Error(`Config at ${resolvedConfigPath} does not exist`);
+    }
+
+    // readInitialOptions returns an object that includes the resolved Jest config at `config`
+    // along with some metadata (e.g. configPath). We only want to pass the actual Jest
+    // config object to --config, augmented with our overrides.
+    initialOptions = (await readInitialOptions(resolvedConfigPath)).config;
+  }
+  const baseConfig = initialOptions;
+
+  const cacheDirectory = join(REPO_ROOT, 'data', 'jest-cache');
+
+  const inlineConfig = {
+    ...baseConfig,
+    id: 'kbn-test-jest',
+    cacheDirectory,
+  };
+
+  const originalArgv = process.argv.concat();
+
+  const tmpConfigPath = Path.join(cacheDirectory, `${process.pid}.jest.config.json`);
+
+  await Fs.promises.mkdir(cacheDirectory, { recursive: true });
+
+  await Fs.promises.writeFile(tmpConfigPath, JSON.stringify(inlineConfig, null, 2), 'utf8');
+
+  const argvWithoutConfig = withoutFlags(process.argv, 'config');
+
+  // Provide the inline JSON config as the last --config argument so it takes precedence
+  const jestArgv = argvWithoutConfig
+    .slice(0, 2)
+    .concat([`--config`, JSON.stringify(inlineConfig), ...argvWithoutConfig.slice(2)]);
+
+  log.info('yarn jest', originalArgv.slice(2).join(' '));
+
+  return run(jestArgv.slice(2)).then(() => {
     // Success means that tests finished, doesn't mean they passed.
     reportTime(runStartTime, 'total', {
       success: true,
@@ -191,4 +250,27 @@ export function commonBasePath(paths: string[] = [], sep = osSep) {
   }
 
   return first.slice(0, i).join(sep);
+}
+
+/**
+ * Remove occurrences of a CLI flag (and its following value if present) from argv array.
+ * Supports both --flag value and --flag=value forms.
+ */
+function withoutFlags(argv: string[], flag: string): string[] {
+  const out: string[] = [];
+  const long = `--${flag}`;
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === long) {
+      // skip this and the next value if it exists
+      i += 1;
+      continue;
+    }
+    if (a.startsWith(`${long}=`)) {
+      // skip --flag=value
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
 }
