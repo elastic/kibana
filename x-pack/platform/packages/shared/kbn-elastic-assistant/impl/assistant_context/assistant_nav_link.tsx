@@ -96,7 +96,8 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }
           css={{
             position: 'relative',
             zIndex: 1,
-            color: '#2b394f',
+            // color: '#2b394f',
+            color: euiTheme.colors.textInverse,
             backgroundColor: 'transparent !important',
             overflow: 'hidden',
             transition: 'color 0.3s ease',

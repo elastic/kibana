@@ -156,9 +156,10 @@ export function NavControl({
     <>
       <EuiToolTip
         delay="long"
+        // title="Kehyboard shortcut"
         content={i18n.translate(
           'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
-          { defaultMessage: 'Keyboard shortcut Ctrl ;' }
+          { defaultMessage: 'Ctrl + ;' }
         )}
       >
         <div
@@ -166,7 +167,7 @@ export function NavControl({
             position: 'relative',
             display: 'inline-block',
             overflow: 'hidden',
-            marginTop: '4px',
+            // marginTop: '4px',
             borderRadius: '4px', // Match EUI button border radius
             '&:hover > div:first-of-type': {
               transform: iconOnly
@@ -205,25 +206,21 @@ export function NavControl({
             display={iconOnly ? 'empty' : undefined}
             iconType={() => <AssistantIcon multicolor={false} />}
             isLoading={chatService.loading}
-            css={
-              iconOnly
-                ? undefined
-                : {
-                    position: 'relative',
-                    zIndex: 1,
-                    color: '#2b394f',
-                    backgroundColor: 'transparent !important',
-                    overflow: 'hidden',
-                    transition: 'color 0.3s ease',
-                    '&:hover': {
-                      backgroundColor: 'transparent !important',
-                      color: '#2b394f',
-                    },
-                    '&::before': {
-                      backgroundColor: 'transparent !important',
-                    },
-                  }
-            }
+            css={{
+              position: 'relative',
+              zIndex: 1,
+              color: '#2b394f',
+              backgroundColor: 'transparent !important',
+              overflow: 'hidden',
+              transition: 'color 0.3s ease',
+              '&:hover': {
+                backgroundColor: 'transparent !important',
+                color: '#2b394f',
+              },
+              '&::before': {
+                backgroundColor: 'transparent !important',
+              },
+            }}
           >
             {!iconOnly &&
               i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
