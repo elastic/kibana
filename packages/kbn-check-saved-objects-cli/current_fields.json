@@ -760,6 +760,7 @@
     "vars"
   ],
   "ingest_manager_settings": [
+    "action_secret_storage_requirements_met",
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
