@@ -155,7 +155,12 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DocumentsColumn indexPattern={item.stream.name} histogramQueryFetch={histogramMap[item.stream.name]} timeState={timeState} numDataPoints={numDataPoints} />
+              <DocumentsColumn
+                indexPattern={item.stream.name}
+                histogramQueryFetch={histogramMap[item.stream.name]}
+                timeState={timeState}
+                numDataPoints={numDataPoints}
+              />
             ) : null,
         },
         {

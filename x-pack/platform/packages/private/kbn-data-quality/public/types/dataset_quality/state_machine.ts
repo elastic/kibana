@@ -6,7 +6,7 @@
  */
 
 import type { DoneInvokeEvent } from 'xstate';
-import type { QualityIndicators } from '@kbn/data-quality/common';
+import type { QualityIndicators } from '../../../common';
 import type {
   DataStreamDocsStat,
   DatasetUserPrivileges,
