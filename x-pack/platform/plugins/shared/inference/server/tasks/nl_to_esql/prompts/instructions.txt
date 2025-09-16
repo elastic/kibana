@@ -8,16 +8,6 @@
     in the provided ES|QL documentation is valid, and do not try to guess parameters or syntax based
     on other query languages.
 
-    ## Use a safety limit
-
-    1. **LIMIT is Mandatory:** All multi-row queries **must** end with a `LIMIT`. The only exception is for single-row aggregations (e.g., `STATS` without a `GROUP BY`).
-
-    2. **Applying Limits:**
-        * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the `LIMIT`.
-        * **Default:** If no number is given, default to `LIMIT 100` for both raw events and `GROUP BY` results. Notify the user when you apply this default (e.g., "I've added a `LIMIT 100` for safety.").
-
-    3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety `LIMIT 250` and state that this limit was added to protect the system.
-
     ## Respect the mappings or field definitions
 
     If the user, or a tool, provides in the discussion the mappings or a list of fields present in the index, you should **ONLY** use
