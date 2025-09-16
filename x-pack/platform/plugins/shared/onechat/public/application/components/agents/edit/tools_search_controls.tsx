@@ -59,6 +59,7 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
             view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
           })),
           searchThreshold: 1,
+          autoSortOptions: false,
         },
       ],
       onChange: ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
