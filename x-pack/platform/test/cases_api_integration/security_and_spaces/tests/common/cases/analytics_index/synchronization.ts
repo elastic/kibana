@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await runAttachmentsSynchronizationTask(supertest);
 
-      await retry.try(async () => {
+      await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
           index: '.internal.cases-attachments.space1-securitysolution',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
