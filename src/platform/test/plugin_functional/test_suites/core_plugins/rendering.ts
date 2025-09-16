@@ -387,6 +387,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
+        'xpack.observability.managedOtlpServiceUrl (string?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
