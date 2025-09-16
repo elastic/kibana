@@ -311,6 +311,12 @@ export class CaseCommentModel {
       }
     );
 
+    const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
+      {
+        caseId: this.caseInfo.id,
+      }
+    );
+
     attachments.forEach((attachment) => {
       if (isCommentRequestTypeAlert(attachment)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
@@ -348,6 +354,11 @@ export class CaseCommentModel {
 
       if (isCommentRequestTypeEvent(attachment)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+
+        // do not allow adding events already present in the case
+        if (eventsAttachedToCase.intersection(new Set(ids)).size) {
+          return;
+        }
 
         dedupedAttachments.push({
           ...attachment,

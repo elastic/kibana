@@ -54,6 +54,9 @@ export const createCaseCommentSavedObjectType = ({
       alertId: {
         type: 'keyword',
       },
+      eventId: {
+        type: 'keyword',
+      },
       /*
       index: {
         type: 'keyword',
