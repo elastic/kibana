@@ -142,14 +142,9 @@ export function DashboardRenderer({
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
-          if (dashboardInternalApi) {
-            if (dashboardInternalApi.dashboardContainerRef$.value !== e) {
-              dashboardInternalApi.setDashboardContainerRef(e);
-            }
-            return;
+          if (dashboardInternalApi && dashboardInternalApi.dashboardContainerRef$.value !== e) {
+            dashboardInternalApi.setDashboardContainerRef(e);
           }
-
-          // only store ref locally if dashboardInternalApi is not yet available
           dashboardContainerRef.current = e;
         }}
       >
