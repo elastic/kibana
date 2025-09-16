@@ -63,7 +63,7 @@ export function getDashboardApi({
     return getReferencesForPanelId(id, references$.value ?? []);
   };
 
-  // console.log({ initialState });
+  console.log({ initialState });
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
@@ -103,7 +103,11 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
+    const {
+      panels,
+      controlGroupInput,
+      references: panelReferences,
+    } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.api.getSettings(),

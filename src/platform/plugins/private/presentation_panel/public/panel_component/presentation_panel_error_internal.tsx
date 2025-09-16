@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 
 import {
@@ -39,16 +39,12 @@ import type { DefaultPresentationPanelApi } from './types';
 export interface PresentationPanelErrorProps {
   error: ErrorLike;
   api?: DefaultPresentationPanelApi;
-  panelRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-export const PresentationPanelErrorInternal = ({
-  api,
-  error,
-  panelRef,
-}: PresentationPanelErrorProps) => {
+export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanelErrorProps) => {
   const errorTextStyle = useErrorTextStyle();
   const { euiTheme } = useEuiTheme();
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
@@ -64,6 +60,7 @@ export const PresentationPanelErrorInternal = ({
     const observer = new ResizeObserver(() => {
       if (!panelRef?.current) return;
       const { width, height } = panelRef?.current?.getBoundingClientRect();
+      console.log({ width, height });
       setPanelSize({ width, height });
     });
     if (panelRef?.current) observer.observe(panelRef?.current!);
@@ -157,41 +154,44 @@ export const PresentationPanelErrorInternal = ({
     };
   }, [panelSize, euiTheme.breakpoint.s]);
 
-  return isNarrow ? (
-    <NarrowError error={error} />
-  ) : (
+  return (
     <div
+      ref={panelRef}
       data-test-subj="embeddableError"
-      css={(theme) => [styles.fullWidth, styles.wrapperStyles(theme)]}
+      css={(theme) => [styles.fullWidthAndHeight, styles.outerWrapperStyles]}
     >
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="m"
-            alignItems="center"
-            justifyContent="center"
-            direction={isLandscape ? 'row' : 'column'}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="xl" type="error" color="danger" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {searchErrorDisplay?.body ?? (
-                <Markdown css={errorTextStyle} data-test-subj="errorMessageMarkdown" readOnly>
-                  {error.message?.length
-                    ? error.message
-                    : i18n.translate('presentationPanel.emptyErrorMessage', {
-                        defaultMessage: 'Error',
-                      })}
-                </Markdown>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={styles.actionStyles}>
-          {actions}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isNarrow ? (
+        <NarrowError error={error} />
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="l" css={styles.innerWrapperStyles}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              justifyContent="center"
+              direction={isLandscape ? 'row' : 'column'}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="xl" type="error" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {searchErrorDisplay?.body ?? (
+                  <Markdown css={errorTextStyle} data-test-subj="errorMessageMarkdown" readOnly>
+                    {error.message?.length
+                      ? error.message
+                      : i18n.translate('presentationPanel.emptyErrorMessage', {
+                          defaultMessage: 'Error',
+                        })}
+                  </Markdown>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.actionStyles}>
+            {actions}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </div>
   );
 };
@@ -206,7 +206,7 @@ const NarrowError = ({ error }: { error: ErrorLike }) => {
       iconSize="m"
       iconType="error"
       onClick={() => setPopoverOpen((open) => !open)}
-      css={[styles.fullWidth, styles.fullHeight]}
+      css={[styles.fullWidthAndHeight]}
       size="s"
     >
       <FormattedMessage
@@ -221,7 +221,7 @@ const NarrowError = ({ error }: { error: ErrorLike }) => {
       button={popoverButton}
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverOpen(false)}
-      css={[styles.fullWidth, styles.fullHeight]}
+      css={[styles.fullWidthAndHeight]}
       panelProps={{
         css: styles.popoverErrorStyles,
       }}
@@ -238,10 +238,8 @@ const NarrowError = ({ error }: { error: ErrorLike }) => {
 };
 
 const styles = {
-  fullWidth: css({
+  fullWidthAndHeight: css({
     width: '100%',
-  }),
-  fullHeight: css({
     height: '100%',
   }),
   actionStyles: css({
@@ -250,12 +248,9 @@ const styles = {
       width: 'fit-content',
     },
   }),
-  wrapperStyles: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
-      overflow: 'auto',
-      margin: 'auto',
-    }),
+  outerWrapperStyles: css({ overflow: 'auto', display: 'flex' }),
+  innerWrapperStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({ padding: euiTheme.size.m, margin: 'auto' }),
   popoverErrorStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxWidth: `calc(${euiTheme.size.xxxl} * 10)`,

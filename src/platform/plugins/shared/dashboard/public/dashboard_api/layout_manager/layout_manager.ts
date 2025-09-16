@@ -80,7 +80,7 @@ export function initializeLayoutManager(
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
-  // console.log({ initialChildState });
+  console.log({ initialLayout });
 
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
@@ -270,7 +270,6 @@ export function initializeLayoutManager(
     usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
 
     if (serializedState) currentChildState[uuid] = serializedState;
-
     layout$.next(await placeNewPanel(uuid, panelPackage, gridData, options?.beside));
 
     if (options?.displaySuccessMessage) {
@@ -449,7 +448,7 @@ export function initializeLayoutManager(
           ...children$.value,
           [api.uuid]: api,
         });
-        // currentChildState[api.uuid] = api.serializeState();
+        currentChildState[api.uuid] = api.serializeState();
       },
 
       /** Panels */

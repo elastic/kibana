@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
+
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { PresentationPanel, PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
+
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
@@ -119,11 +121,10 @@ export const EmbeddableRenderer = <
           if (apiIsPresentationContainer(parentApi)) {
             errorApi.parentApi = parentApi;
           }
-          onApiAvailable?.(errorApi);
           return React.forwardRef<Api>((_, ref) => {
             // expose the dummy error api into the imperative handle
             useImperativeHandle(ref, () => errorApi, []);
-            return null;
+            return <PresentationPanelError error={e} api={errorApi} />;
           });
         }
       })();

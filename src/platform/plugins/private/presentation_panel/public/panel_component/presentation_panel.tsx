@@ -93,10 +93,7 @@ export const PresentationPanel = <
     return (
       <div ref={panelRef}>
         {PanelError ? (
-          <PanelError
-            error={new Error(value?.loadErrorReason ?? errorLoadingPanel)}
-            panelRef={panelRef}
-          />
+          <PanelError error={new Error(value?.loadErrorReason ?? errorLoadingPanel)} />
         ) : (
           value?.loadErrorReason ?? errorLoadingPanel
         )}

@@ -233,6 +233,12 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             });
           }
           dataControlManager.internalApi.setOutputFilter(newFilter);
+
+          blockingError$.next(
+            new Error(
+              'This is a test error. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis neque blandit, efficitur tortor vitae, dictum ex. Aliquam nibh quam, interdum sed iaculis in, dictum sed tortor.'
+            )
+          );
         });
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {

@@ -120,19 +120,25 @@ export function initializeUnsavedChangesManager({
           'timeRange',
           'refreshInterval',
         ]);
+        console.log({ hasChildrenUnsavedChanges, hasLayoutChanges });
 
         // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
         dashboardBackupState.viewMode = viewMode;
         // Backup latest state from children that have unsaved changes
         if (hasChildrenUnsavedChanges || hasLayoutChanges) {
-          const { panels, references } = layoutManager.internalApi.serializeLayout();
+          const { panels, controlGroupInput, references } =
+            layoutManager.internalApi.serializeLayout();
+          console.log({ panels, controlGroupInput });
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
           dashboardBackupState.references = references ?? [];
-          if (hasChildrenUnsavedChanges) dashboardBackupState.panels = panels;
+          if (hasChildrenUnsavedChanges) {
+            dashboardBackupState.panels = panels;
+            dashboardBackupState.controlGroupInput = controlGroupInput;
+          }
         }
-
+        console.log('SET STATE', { dashboardBackupState });
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
     });

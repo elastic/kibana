@@ -52,7 +52,7 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlsGroupState;
+  controlGroupInput?: DashboardAttributes['controlGroupInput'];
 }
 
 export type DashboardLocatorParams = Partial<

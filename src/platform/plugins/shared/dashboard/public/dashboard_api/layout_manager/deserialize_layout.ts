@@ -9,7 +9,7 @@
 
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import { type DashboardState, isDashboardSection, getReferencesForControls } from '../../../common';
+import { type DashboardState, isDashboardSection } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
@@ -24,8 +24,8 @@ export function deserializeLayout(
     panels: {},
     sections: {},
     controls: Object.values((initialControls ?? { controls: {} }).controls).reduce(
-      (prev, control) => {
-        return { ...prev, [control.id ?? v4()]: control };
+      (prev, control, index) => {
+        return { ...prev, [control.id ?? v4()]: { ...control, order: index } };
       },
       {}
     ),

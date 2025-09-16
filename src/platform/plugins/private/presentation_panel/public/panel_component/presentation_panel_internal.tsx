@@ -47,7 +47,6 @@ export const PresentationPanelInternal = <
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = useMemo(() => {
@@ -121,7 +120,6 @@ export const PresentationPanelInternal = <
       setDragHandle={setDragHandle}
     >
       <EuiPanel
-        panelRef={panelRef}
         role="figure"
         paddingSize="none"
         className={classNames('embPanel', {
@@ -147,9 +145,7 @@ export const PresentationPanelInternal = <
             panelDescription={panelDescription ?? defaultPanelDescription}
           />
         )}
-        {blockingError && api && (
-          <PresentationPanelErrorInternal api={api} error={blockingError} panelRef={panelRef} />
-        )}
+        {blockingError && api && <PresentationPanelErrorInternal api={api} error={blockingError} />}
         {!initialLoadComplete && <PanelLoader />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
