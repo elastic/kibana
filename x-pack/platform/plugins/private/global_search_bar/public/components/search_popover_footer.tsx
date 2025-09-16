@@ -11,11 +11,11 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elast
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-interface PopoverFooterProps {
+interface SearchPopoverFooterProps {
   isMac: boolean;
 }
 
-export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
+export const SearchPopoverFooter: FC<SearchPopoverFooterProps> = ({ isMac }) => {
   const { euiTheme } = useEuiTheme();
   
   const footerStyles = css`

@@ -9,10 +9,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CustomListItem } from './custom_list_item';
+import { SearchListItem } from './search_list_item';
+import { SearchListTitle } from './search_list_title';
 
-// Custom Search List Component
-export interface CustomSearchListProps {
+// Search List Component  
+export interface SearchListProps {
   options: EuiSelectableTemplateSitewideOption[];
   searchValue: string;
   onOptionClick: (option: EuiSelectableTemplateSitewideOption, event: React.MouseEvent) => void;
@@ -20,16 +21,18 @@ export interface CustomSearchListProps {
   emptyMessage?: React.ReactNode;
   errorMessage?: React.ReactNode;
   customComponents?: React.ReactNode[];
+  showSuggestedTitle?: boolean;
 }
 
-export const CustomSearchList: React.FC<CustomSearchListProps> = ({
+export const SearchList: React.FC<SearchListProps> = ({
   options,
   searchValue,
   onOptionClick,
   isLoading = false,
   emptyMessage,
   errorMessage,
-  customComponents = []
+  customComponents = [],
+  showSuggestedTitle = false
 }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -139,6 +142,11 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
       `}
       data-test-subj="custom-search-list"
     >
+      {/* Show Suggested title if enabled and we have content */}
+      {showSuggestedTitle && (customComponents.length > 0 || options.length > 0) && (
+        <SearchListTitle title="Suggested" />
+      )}
+      
       {/* Custom components first */}
       {customComponents.map((component, index) => (
         <div key={`custom-${index}`} css={css`margin-bottom: 4px;`}>
@@ -149,7 +157,7 @@ export const CustomSearchList: React.FC<CustomSearchListProps> = ({
       {/* Search options */}
       {options.map((option, index) => (
         <div key={option.key || index} >
-          <CustomListItem
+          <SearchListItem
             option={option}
             searchValue={searchValue}
             isSelected={index === selectedIndex}

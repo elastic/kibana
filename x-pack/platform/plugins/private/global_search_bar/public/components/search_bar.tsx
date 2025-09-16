@@ -37,14 +37,14 @@ import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import type { SearchSuggestion } from '../suggestions';
 import { getSuggestions } from '../suggestions';
-import { PopoverFooter } from './popover_footer';
-import { PopoverPlaceholder } from './popover_placeholder';
+import { SearchPopoverFooter } from './search_popover_footer';
+import { SearchPopoverPlaceholder } from './search_popover_placeholder';
 import type { SearchBarProps } from './types';
 import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_animation';
 import { getOverlayBackdropStyles } from './overlay_styles';
 import { VersionSelectorPanel, type DesignVersion } from './version_selector_panel';
-import { CustomSearchList } from './custom_search_list';
-import { addCustomComponent, createDemoCustomComponent } from './custom_components_utils';
+import { SearchList } from './search_list';
+import { addCustomComponent, createDemoCustomComponent } from './search_list_utils';
 
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
@@ -67,9 +67,9 @@ const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
     </>
   );
 
-  return (
-    <PopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
-  );
+    return (
+      <SearchPopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
+    );
 };
 
 const EmptyMessage = () => (
@@ -541,17 +541,18 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }
       
       if (!options.length && !customComponents.length) {
-        return <PopoverPlaceholder basePath={props.basePathUrl} />;
+        return <SearchPopoverPlaceholder basePath={props.basePathUrl} />;
       }
 
       return (
-        <CustomSearchList
+        <SearchList
           options={options}
           searchValue={searchValue}
           onOptionClick={handleOptionClick}
           isLoading={isLoading}
           customComponents={customComponents}
-          emptyMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
+          emptyMessage={<SearchPopoverPlaceholder basePath={props.basePathUrl} />}
+          showSuggestedTitle={true}
         />
       );
     })();
@@ -564,7 +565,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         `}
       >
         {listContent}
-        <PopoverFooter isMac={isMac} />
+        <SearchPopoverFooter isMac={isMac} />
       </div>
     );
 

@@ -11,7 +11,7 @@ import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 // Custom List Item Component
-export interface CustomListItemProps {
+export interface SearchListItemProps {
   option: EuiSelectableTemplateSitewideOption;
   searchValue: string;
   isSelected?: boolean;
@@ -20,7 +20,7 @@ export interface CustomListItemProps {
   customRender?: (option: EuiSelectableTemplateSitewideOption, searchValue: string) => React.ReactElement;
 }
 
-export const CustomListItem: React.FC<CustomListItemProps> = ({
+export const SearchListItem: React.FC<SearchListItemProps> = ({
   option,
   searchValue,
   isSelected = false,
