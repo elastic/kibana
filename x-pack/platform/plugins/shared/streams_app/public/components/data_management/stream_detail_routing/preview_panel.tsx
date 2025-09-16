@@ -16,11 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { isCondition } from '@kbn/streamlang';
+import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { PreviewTable } from '../preview_table';
 import {
   selectPreviewDocuments,
   useStreamRoutingEvents,
@@ -28,7 +28,9 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
-import { processCondition } from './utils';
+import { processCondition, toDataTableRecordWithIndex } from './utils';
+import type { DataTableRecordWithIndex } from '../shared';
+import { MemoPreviewTable, PreviewFlyout } from '../shared';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -104,6 +106,9 @@ const SamplePreviewPanel = () => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
+  const streamName = useStreamSamplesSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
 
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = useStreamSamplesSelector((snapshot) =>
@@ -118,9 +123,63 @@ const SamplePreviewPanel = () => {
     ? Number.NaN
     : parseFloat(approximateMatchingPercentage!);
 
-  const [sorting, setSorting] = useState();
+  const [sorting, setSorting] = useState<{
+    fieldName?: string;
+    direction: 'asc' | 'desc';
+  }>();
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
+  // Add row expansion state
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | undefined>(undefined);
+
+  // Add flyout state and document conversion
+  const [currentDoc, setExpandedDoc] = useState<DataTableRecordWithIndex | undefined>(undefined);
+
+  const docViewsRegistry = useDocViewerSetup();
+
+  // Convert SampleDocument[] to DataTableRecordWithIndex[] for flyout compatibility
+  const hits = useMemo(() => {
+    return toDataTableRecordWithIndex(documents);
+  }, [documents]);
+
+  const onRowSelected = useCallback(
+    (rowIndex: number) => {
+      if (selectedRowIndex === rowIndex) {
+        // If the same row is clicked, collapse it
+        setSelectedRowIndex(undefined);
+        setExpandedDoc(undefined);
+      } else {
+        // Expand the clicked row
+        setSelectedRowIndex(rowIndex);
+        setExpandedDoc(hits[rowIndex]);
+      }
+    },
+    [selectedRowIndex, hits]
+  );
+
+  // Enhanced setExpandedDoc that also resets selectedRowIndex when flyout is closed
+  const handleSetExpandedDoc = useCallback((doc?: DataTableRecordWithIndex) => {
+    setExpandedDoc(doc);
+    if (!doc) {
+      // If no document is provided (flyout is being closed), reset the selected row
+      setSelectedRowIndex(undefined);
+    }
+  }, []);
+
+  // Update currentDoc when hits change
+  useEffect(() => {
+    if (currentDoc) {
+      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
+      const hit = hits.find((h) => h.index === currentDoc.index);
+      if (hit && hit !== currentDoc) {
+        setExpandedDoc(hit);
+      } else if (!hit && currentDoc) {
+        // if the current doc is not found in the hits, reset it
+        handleSetExpandedDoc(undefined);
+      }
+    }
+  }, [currentDoc, hits, handleSetExpandedDoc]);
 
   let content: React.ReactNode | null = null;
 
@@ -175,13 +234,22 @@ const SamplePreviewPanel = () => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <PreviewTable
+        <MemoPreviewTable
           documents={documents}
           sorting={sorting}
           setSorting={setSorting}
           toolbarVisibility={true}
           displayColumns={visibleColumns}
           setVisibleColumns={setVisibleColumns}
+          selectedRowIndex={selectedRowIndex}
+          onRowSelected={onRowSelected}
+        />
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={handleSetExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
         />
       </EuiFlexItem>
     );

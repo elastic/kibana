@@ -17,12 +17,11 @@ import {
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
+import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { getPercentageFormatter } from '../../../util/formatters';
-import { useKibana } from '../../../hooks/use_kibana';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getSourceField,
@@ -42,15 +41,14 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { isProcessorUnderEdit } from './state_management/processor_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import { docViewJson } from './doc_viewer_json';
-import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
-import type { DataTableRecordWithIndex } from './preview_flyout';
-import { PreviewFlyout } from './preview_flyout';
-import { MemoProcessingPreviewTable } from './processing_preview_table';
+import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
+import type { DataTableRecordWithIndex } from '../shared';
+import { PreviewFlyout, MemoPreviewTable } from '../shared';
+import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -174,6 +172,7 @@ const PreviewDocumentsGroupBy = () => {
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
+  const streamName = useSimulatorSelector((state) => state.context.streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -205,18 +204,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return getSourceField(currentProcessorRef.getSnapshot().context.processor);
   });
 
-  const { dependencies } = useKibana();
-  const { unifiedDocViewer } = dependencies.start;
-
-  const docViewsRegistry = useMemo(() => {
-    const docViewers = unifiedDocViewer.registry.getAll();
-    const myRegistry = new DocViewsRegistry([
-      docViewers.find((docView) => docView.id === 'doc_view_table')!,
-      docViewDiff,
-      docViewJson,
-    ]);
-    return myRegistry;
-  }, [unifiedDocViewer.registry]);
+  const docViewsRegistry = useDocViewerSetup(true);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -366,15 +354,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   const hits = useMemo(() => {
-    return previewDocuments.map((doc, index) =>
-      // make sure the ID is unique when remapping a new batch of preview documents so the document flyout will refresh properly
-      ({
-        raw: doc,
-        flattened: doc,
-        index,
-        id: `${index}-${Date.now()}`,
-      })
-    );
+    return toDataTableRecordWithIndex(previewDocuments);
   }, [previewDocuments]);
 
   const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
@@ -426,7 +406,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   return (
     <>
-      <MemoProcessingPreviewTable
+      <MemoPreviewTable
         documents={previewDocuments}
         originalSamples={originalSamples}
         showRowSourceAvatars={shouldShowRowSourceAvatars}
@@ -447,6 +427,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           hits={hits}
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
         />
       </DocViewerContext.Provider>
     </>
