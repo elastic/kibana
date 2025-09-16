@@ -22,6 +22,13 @@ export const getLogsDefaultPipelineProcessors = (isServerless?: boolean) => [
             ignore_missing_pipeline: true,
           },
         },
+        // necessary because the polyfill below requires subobjects for now
+        {
+          dot_expander: {
+            field: '*',
+            ignore_failure: true,
+          },
+        },
         {
           // This is a placeholder for the ECS migration - since it's not yet exposed on serverless, we need to handle it via painless script.
           script: {
