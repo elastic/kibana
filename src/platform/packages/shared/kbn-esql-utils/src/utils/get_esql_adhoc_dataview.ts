@@ -45,7 +45,7 @@ export async function getESQLAdHocDataview(
     allowNoIndex,
   });
 
-  // create a shallow copy of the data view to be able to override the timeFieldName
+  // Creating a shallow copy of the data view to be able to override the timeFieldName
   // without mutating the cached data view inside the data view service
   const shallowDataViewCopy = Object.assign(
     Object.create(Object.getPrototypeOf(dataView)),
