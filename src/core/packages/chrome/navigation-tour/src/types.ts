@@ -10,8 +10,10 @@
 import type { ElementTarget } from '@elastic/eui';
 import type { ReactNode } from 'react';
 
+export type TourStepId = 'sidenav-home' | 'sidenav-manage-data';
+
 export interface TourStep {
-  id: string;
+  id: TourStepId;
   title: ReactNode;
   content: ReactNode;
   target: ElementTarget;

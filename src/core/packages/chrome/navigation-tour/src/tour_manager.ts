@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject, first, firstValueFrom, map } from 'rxjs';
-import type { TourState } from './types';
+import type { TourState, TourStepId } from './types';
 import { tourSteps } from './tour_config';
 
 const initialState: TourState = {
@@ -25,9 +25,11 @@ export class TourManager {
     return this._state$.value;
   }
 
-  startTour(): void {
+  startTour(enabledSteps: TourStepId[]): void {
     this._state$.next({
       ...this.state,
+      steps: tourSteps.filter((step) => enabledSteps.includes(step.id)),
+      currentStepIndex: 0,
       status: 'active',
     });
   }

@@ -40,11 +40,13 @@ export class SolutionNavigationTourManager {
     // when completes, maybe start the navigation tour (if applicable)
     if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
     if (this.deps.isCloudTrialUser) return;
-    if (!hasAccessToDataManagement(this.deps.capabilities)) return;
     const hasCompletedTour = await checkTourCompletion(this.deps.userProfiles);
     if (hasCompletedTour) return;
 
-    this.deps.navigationTourManager.startTour();
+    const canShowDataManagement = hasAccessToDataManagement(this.deps.capabilities);
+    this.deps.navigationTourManager.startTour(
+      canShowDataManagement ? ['sidenav-home', 'sidenav-manage-data'] : ['sidenav-home']
+    );
     await this.deps.navigationTourManager.waitForTourEnd();
 
     await preserveTourCompletion(this.deps.userProfiles);
