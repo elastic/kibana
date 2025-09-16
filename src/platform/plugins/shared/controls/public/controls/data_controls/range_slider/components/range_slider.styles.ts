@@ -33,18 +33,36 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       .euiFormControlLayout {
         border: none;
         border-radius: 0;
+        box-shadow: none;
+
+        &::after {
+          display: none;
+        }
+
+        &:hover {
+          z-index: 0 !important;
+          outline: none !important;
+        }
       }
 
-      /** Don't deform the control when rendering the loading spinner. 
+      .euiFormControlLayout__childrenWrapper {
+        box-shadow: none;
+
+        &:hover {
+          outline: none !important;
+        }
+
+        /** Don't deform the control when rendering the loading spinner. 
         * Instead, render the spinner on top of the control with a light background,
         * ensuring that it covers up the up/down arrow buttons rendered at all times by some browsers.
         * Add 16px of right padding to get it out of the way of the drag handle.
-        * */
-      .euiFormControlLayout__childrenWrapper .euiFormControlLayoutIcons:last-child {
-        position: absolute;
-        right: 0;
-        padding-right: 16px;
-        background: ${euiTheme.colors.backgroundBaseSubdued};
+        */
+        & .euiFormControlLayoutIcons:last-child {
+          position: absolute;
+          right: 0;
+          padding-right: 16px;
+          background: ${euiTheme.colors.backgroundBaseSubdued};
+        }
       }
     `,
     invalid: css`
