@@ -191,3 +191,5 @@ export const buildGraphFromViewModels = (
 
   return { nodes, edges };
 };
+
+export const showStackedShape = (count?: number) => !!count && count > 1;
