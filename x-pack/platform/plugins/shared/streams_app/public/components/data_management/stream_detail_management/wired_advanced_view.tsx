@@ -13,8 +13,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { IndexConfiguration } from './advanced_view/index_configuration';
 import { DeleteStreamPanel } from './advanced_view/delete_stream';
 import { ImportExportPanel } from './advanced_view/import_export';
-import { useKibana } from '../../../hooks/use_kibana';
-import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 
 export function WiredAdvancedView({
   definition,
@@ -24,16 +23,12 @@ export function WiredAdvancedView({
   refreshDefinition: () => void;
 }) {
   const {
-    core: { featureFlags },
-  } = useKibana();
-  const renderContentPackItems = featureFlags.getBooleanValue(
-    FeatureFlagStreamsContentPackUIEnabled,
-    false
-  );
+    features: { contentPacks },
+  } = useStreamsPrivileges();
 
   return (
     <>
-      {renderContentPackItems && (
+      {contentPacks?.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />

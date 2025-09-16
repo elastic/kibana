@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { Row } from './row';
 import { ImportContentPackFlyout } from '../../content/import_flyout';
 import { ExportContentPackFlyout } from '../../content/export_flyout';
-import { Streams } from '@kbn/streams-schema';
 
 export function ImportExportPanel({
   definition,
@@ -78,9 +78,7 @@ export function ImportExportPanel({
         <ExportContentPackFlyout
           onClose={() => setIsExportFlyoutOpen(false)}
           definition={definition}
-          onExport={() => {
-            setIsExportFlyoutOpen(false);
-          }}
+          onExport={() => setIsExportFlyoutOpen(false)}
         />
       )}
 

@@ -25,6 +25,8 @@ import {
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 import { asTree } from '../../lib/content/stream/tree';
+import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
+import { RequestHandlerContext } from '@kbn/core/server';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -51,7 +53,9 @@ const exportContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, response, getScopedClients }) {
+  async handler({ params, request, response, context, getScopedClients }) {
+    await checkEnabled(context);
+
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
@@ -149,7 +153,9 @@ const importContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, getScopedClients }) {
+  async handler({ params, request, context, getScopedClients }) {
+    await checkEnabled(context);
+
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
@@ -218,13 +224,23 @@ const previewContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ request, params, getScopedClients }): Promise<ContentPack> {
+  async handler({ request, params, context, getScopedClients }): Promise<ContentPack> {
+    await checkEnabled(context);
+
     const { streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
     return await parseArchive(params.body.content);
   },
 });
+
+async function checkEnabled(context: RequestHandlerContext) {
+  const core = await context.core;
+  const enabled = await core.uiSettings.client.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS);
+  if (!enabled) {
+    throw new StatusError('Content packs are not enabled', 400);
+  }
+}
 
 export const contentRoutes = {
   ...exportContentRoute,

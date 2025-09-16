@@ -7,14 +7,13 @@
 
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiFlexGroup,
   EuiPageHeader,
   useEuiTheme,
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
@@ -24,9 +23,6 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
-import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
-import { ExportContentPackFlyout } from '../content/export_flyout';
-import { ImportContentPackFlyout } from '../content/import_flyout';
 import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
@@ -47,12 +43,7 @@ export function Wrapper({
   tab: string;
 }) {
   const router = useStreamsAppRouter();
-  const { definition, refresh: refreshDefinition } = useStreamDetail();
-  const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
-  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
-  const {
-    core: { featureFlags },
-  } = useKibana();
+  const { definition } = useStreamDetail();
   const {
     features: { groupStreams },
   } = useStreamsPrivileges();
