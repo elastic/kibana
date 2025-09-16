@@ -156,50 +156,71 @@ interface NestedObject {
   [key: string]: NestedSchemaNode;
 }
 
-export function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
-  const result: { [key: string]: string } = {};
+interface InspectSchemaNodeResult {
+  childToInspect?: NestedObject;
+  nodeType?: string;
+}
+
+function isObjectRecord(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+function inspectArraySchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
+  const item = node.items;
+
+  if (!isObjectRecord(item)) {
+    return { nodeType: 'array' };
+  }
+
+  if ('type' in item && (item as NestedSchemaNode).type) {
+    const t = String((item as NestedSchemaNode).type);
+    if (t === 'array') return { nodeType: 'array' }; // array-of-arrays -> keep "array"
+    return { nodeType: t }; // array of primitives
+  }
+
+  if (
+    (item as NestedSchemaNode).properties &&
+    isObjectRecord((item as NestedSchemaNode).properties)
+  ) {
+    return { childToInspect: (item as NestedSchemaNode).properties as NestedObject }; // array of objects
+  }
+
+  return { nodeType: 'array' };
+}
+
+function inspectSchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
+  if (!node.type) {
+    const objectNode = node.properties ?? (node as unknown as NestedObject);
+    return { childToInspect: objectNode };
+  }
+
+  if (node.type === 'array') {
+    return inspectArraySchemaNode(node);
+  }
+
+  return { nodeType: String(node.type) };
+}
+
+export function flattenSchema(inputObj: NestedObject): Record<string, string> {
+  const result: Record<string, string> = {};
   const queue: Array<{ obj: NestedObject; prefix: string }> = [{ obj: inputObj, prefix: '' }];
+
   while (queue.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { obj, prefix } = queue.shift()!;
-    for (const key in obj) {
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        const newKey = `${prefix}${key}`;
 
-        if ('type' in obj[key]) {
-          const node = obj[key];
-          if (node.type === 'array') {
-            const item = node.items;
-            if (item && typeof item === 'object') {
-              if ('type' in item && item.type) {
-                // array of primitive types
-                result[newKey] = String(item.type);
-              } else if (item.properties) {
-                // array of objects
-                queue.push({ obj: item.properties, prefix: `${newKey}.` });
-              } else {
-                // unknown array item type, leave it unaffected
-                result[newKey] = 'array';
-              }
-            } else {
-              // items is not defined or not an object, leave it unaffected
-              result[newKey] = 'array';
-            }
-          } else {
-            // @ts-ignore
-            result[newKey] = obj[key].type;
-          }
-        } else if (obj[key].properties) {
-          const nestedObj = obj[key].properties;
-          const nestedPrefix = `${newKey}.`;
-          // @ts-ignore
-          queue.push({ obj: nestedObj, prefix: nestedPrefix });
-        } else if (obj[key]) {
-          const nestedObj = obj[key];
-          const nestedPrefix = `${newKey}.`;
-          // @ts-ignore
-          queue.push({ obj: nestedObj, prefix: nestedPrefix });
-        }
+    for (const [key, node] of Object.entries(obj)) {
+      // eslint-disable-next-line no-continue
+      if (!isObjectRecord(node)) continue;
+
+      const newKey = `${prefix}${key}`;
+      const { childToInspect, nodeType } = inspectSchemaNode(node);
+
+      if (childToInspect) {
+        queue.push({ obj: childToInspect, prefix: `${newKey}.` });
+      }
+      if (nodeType) {
+        result[newKey] = nodeType;
       }
     }
   }
