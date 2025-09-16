@@ -345,4 +345,47 @@ describe('searchAlerts', () => {
 
     expect(result.alerts).toEqual([]);
   });
+
+  it('handles shard failure error', async () => {
+    const obs$ = of<IKibanaSearchResponse>({
+      ...searchResponse,
+      rawResponse: {
+        ...searchResponse.rawResponse,
+        hits: {
+          ...searchResponse.rawResponse.hits,
+          hits: [],
+          max_score: null,
+          total: 0,
+        },
+        _shards: {
+          total: 2,
+          successful: 1,
+          skipped: 0,
+          failed: 1,
+          failures: [
+            {
+              shard: 0,
+              index: '.internal.alerts-dataset.quality.alerts-default-000001',
+              reason: {
+                type: 'query_shard_exception',
+                reason: 'No mapping found for [kibana.alert.title] in order to sort on',
+                index: '.internal.alerts-dataset.quality.alerts-default-000001',
+              },
+            },
+          ],
+        },
+      },
+    });
+    mockDataPlugin.search.search.mockReturnValue(obs$);
+    const result = await searchAlerts(params);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        ...expectedResponse,
+        alerts: [],
+        total: 0,
+        error: new Error('No mapping found for [kibana.alert.title] in order to sort on'),
+      })
+    );
+  });
 });

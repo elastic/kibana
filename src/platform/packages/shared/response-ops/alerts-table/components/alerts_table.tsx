@@ -347,8 +347,6 @@ const AlertsTableContent = typedForwardRef(
       error: alertsError,
     } = alertsData ?? {};
 
-    console.log('AlertsTable', { alertsData });
-
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
         onLoaded({ alerts, columns, totalAlertsCount: alertsCount });

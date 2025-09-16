@@ -83,7 +83,6 @@ const euiColumnFactory = (
   const browserFieldsProps = getBrowserFieldProps(columnId, browserFields);
 
   const sortingData = registeredKbnTypes.find((t) => t.name === browserFieldsProps?.type);
-  console.log('euiColumnFactory', { columnId, browserFieldsProps, sortingData });
   return {
     ...column,
     isSortable: (sortingData?.sortable && browserFieldsProps?.aggregatable) ?? false,
@@ -128,7 +127,7 @@ const populateColumns = (
   defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn[] => {
   return columns.map((column: EuiDataGridColumn) => {
-    return isPopulatedColumn(column) && column.isSortable !== undefined
+    return isPopulatedColumn(column)
       ? column
       : euiColumnFactory(column.id, browserFields, defaultColumns);
   });

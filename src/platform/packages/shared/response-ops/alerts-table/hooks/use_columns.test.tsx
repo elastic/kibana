@@ -352,6 +352,32 @@ describe('useColumns', () => {
 
       await waitFor(() => expect(result.current.columns).toMatchObject(resultColumns));
     });
+
+    test('should update columns with isSortable', async () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns([
+        ...defaultColumns,
+        { id: 'test', displayAsText: 'test' },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useColumns({
+            http: mockHttp,
+            defaultColumns,
+            ruleTypeIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() =>
+        expect(result.current.columns).toMatchObject([
+          ...resultColumns,
+          { id: 'test', isSortable: false },
+        ])
+      );
+    });
   });
 
   describe('onToggleColumns', () => {

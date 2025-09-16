@@ -129,23 +129,14 @@ export const searchAlerts = ({
       )
       .pipe(
         filter((response) => {
-          console.log('searchAlerts before filter response', { response });
           return !response.isRunning;
         }),
         map((response) => {
-          console.log('searchAlerts after filter response', { response });
           const { rawResponse } = response;
           const total = parseTotalHits(rawResponse);
           const alerts = parseAlerts(rawResponse);
           const { oldAlertsData, ecsAlertsData } = transformToLegacyFormat(alerts);
           const alertsError = parseFailure(rawResponse);
-          console.log('searchAlerts result', {
-            alerts,
-            total,
-            oldAlertsData,
-            ecsAlertsData,
-            alertsError,
-          });
 
           return {
             alerts,
