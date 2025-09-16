@@ -33,7 +33,7 @@ export const UserName = z.object({
           z.object({
             field: z.string().optional(),
             value: z.string().optional(),
-            source: z.string().optional(),
+            source: z.enum(['api', 'csv', 'index_sync']).optional(),
           })
         )
         .optional(),
@@ -81,8 +81,8 @@ export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
     event: z
       .object({
         ingested: z.string().datetime().optional(),
+        '@timestamp': z.string().datetime().optional(),
       })
       .optional(),
-    '@timestamp': z.string().datetime().optional(),
   })
 );

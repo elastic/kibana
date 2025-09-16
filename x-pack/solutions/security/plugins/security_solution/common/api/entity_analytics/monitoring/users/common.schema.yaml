@@ -15,7 +15,7 @@ components:
             name:
               type: string
               description: The name of the user.
-          entity_analytics_monitoring:
+        entity_analytics_monitoring:
           type: object
           properties:
             labels:
@@ -34,7 +34,7 @@ components:
                       - csv
                       - index_sync
 
-  MonitoredUserUpdateDoc:
+    MonitoredUserUpdateDoc:
       type: object
       properties:
         id:
@@ -91,6 +91,6 @@ components:
               ingested:
                 type: string
                 format: date-time
-          "@timestamp":
-            type: string
-            format: date-time
+              "@timestamp":
+                type: string
+                format: date-time
