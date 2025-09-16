@@ -25,6 +25,8 @@ import type {
 } from './types';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 
+import { registerLocators } from './locator/register_locators';
+
 export class OnechatPlugin
   implements
     Plugin<
@@ -61,6 +63,7 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
+      registerLocators(deps.share);
     }
 
     try {
