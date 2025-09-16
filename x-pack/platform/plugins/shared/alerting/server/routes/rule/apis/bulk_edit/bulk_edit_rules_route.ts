@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID, type IRouter } from '@kbn/core/server';
+import { type IRouter } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { RulesClient } from '../../../../rules_client';
 import type { RegistryRuleType } from '../../../../rule_type_registry';
-import { findRulesSo } from '../../../../data/rule';
-import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import type { ILicenseState } from '../../../../lib';
-import { RuleTypeDisabledError, convertRuleIdsToKueryNode } from '../../../../lib';
+import { RuleTypeDisabledError } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
@@ -52,10 +49,6 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const alertingContext = await context.alerting;
-          const unsecuredSavedObjectsClient = (await context.core).savedObjects.getClient({
-            excludedExtensions: [SECURITY_EXTENSION_ID],
-            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-          });
 
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
@@ -68,7 +61,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
             await validateInternalRuleTypes({
               req: bulkEditData,
               ruleTypes,
-              unsecuredSavedObjectsClient,
+              rulesClient,
             });
 
             validateRequiredGroupInDefaultActionsInOperations(
@@ -135,48 +128,20 @@ const validateRequiredGroupInDefaultActionsInOperations = (
 const validateInternalRuleTypes = async ({
   req,
   ruleTypes,
-  unsecuredSavedObjectsClient,
+  rulesClient,
 }: {
   req: BulkEditRulesRequestBodyV1;
   ruleTypes: Map<string, RegistryRuleType>;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  rulesClient: RulesClient;
 }) => {
   const { filter, operations, ids } = req;
-
-  if (ids && filter) {
-    throw Boom.badRequest(
-      "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
-    );
-  }
 
   if (operations.every((op) => op.field === 'apiKey')) {
     return;
   }
 
-  const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-
-  const { aggregations } = await findRulesSo<{
-    ruleTypeIds: {
-      buckets: Array<{
-        key: string;
-        doc_count: number;
-      }>;
-    };
-  }>({
-    savedObjectsClient: unsecuredSavedObjectsClient,
-    savedObjectsFindOptions: {
-      filter: qNodeFilter,
-      page: 1,
-      perPage: 0,
-      aggs: {
-        ruleTypeIds: {
-          terms: { field: 'alert.attributes.alertTypeId', size: ruleTypes.size },
-        },
-      },
-    },
-  });
-
-  const ruleTypeIds = new Set(aggregations?.ruleTypeIds.buckets?.map((bucket) => bucket.key) ?? []);
+  const ruleTypesByQuery = await rulesClient.getRuleTypesByQuery({ filter, ids });
+  const ruleTypeIds = new Set(ruleTypesByQuery.ruleTypes);
 
   for (const [_, ruleType] of ruleTypes) {
     if (ruleTypeIds.has(ruleType.id) && ruleType.internallyManaged) {

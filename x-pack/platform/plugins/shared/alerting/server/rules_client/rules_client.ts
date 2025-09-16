@@ -96,6 +96,8 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
+import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -249,4 +251,7 @@ export class RulesClient {
 
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);
+
+  public getRuleTypesByQuery = (params: GetRuleTypesByQueryParams) =>
+    getRuleTypesByQuery(this.context, params);
 }

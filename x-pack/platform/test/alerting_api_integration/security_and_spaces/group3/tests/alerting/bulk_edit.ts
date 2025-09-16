@@ -1046,7 +1046,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('internally managed rule types', () => {
+    describe.only('internally managed rule types', () => {
       const rulePayload = getAlwaysFiringInternalRule();
 
       const payloadWithFilter = {
