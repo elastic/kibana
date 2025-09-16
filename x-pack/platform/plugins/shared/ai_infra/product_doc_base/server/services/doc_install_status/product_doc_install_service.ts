@@ -7,7 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
+import type { ProductName } from '@kbn/product-doc-common';
+import { DocumentationProduct } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';

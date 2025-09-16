@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { SupportedEntityTypesRT } from '../http_api/shared/entity_type';
 import { DataSchemaFormatRT } from '../http_api/shared';
@@ -21,6 +21,7 @@ export const getHasDataResponseRT = rt.partial({
 export const getTimeRangeMetadataQueryParamsRT = rt.intersection([
   rt.partial({
     kuery: rt.string,
+    filters: jsonRt.pipe(rt.UnknownRecord),
   }),
   rt.type({
     dataSource: SupportedEntityTypesRT,

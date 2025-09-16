@@ -12,10 +12,10 @@ import {
   syntheticsMonitorSavedObjectType,
   legacySyntheticsMonitorTypeSingle,
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
-import { SupertestWithRoleScopeType } from '../../services';
+import type { SupertestWithRoleScopeType } from '../../services';
 
 const runTests = (
   { getService }: DeploymentAgnosticFtrProviderContext,

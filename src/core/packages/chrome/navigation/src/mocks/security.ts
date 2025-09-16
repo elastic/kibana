@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import type { MenuItem } from '../../types';
 
 export const LOGO = {
   href: '/security',
@@ -112,7 +112,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'investigations-section',
-        label: null,
         items: [
           {
             id: 'investigations-timelines',
@@ -147,7 +146,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'explore-section',
-        label: null,
         items: [
           {
             id: 'hosts',
@@ -261,7 +259,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'ml-section-1',
-        label: null,
         items: [
           {
             id: 'overview',
@@ -421,13 +418,13 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'access-org-members',
             label: 'Org members',
             href: '/settings/access/org-members',
-            external: true,
+            isExternal: true,
           },
           {
             id: 'access-billing',
             label: 'Billing and subscriptions',
             href: '/settings/access/billing',
-            external: true,
+            isExternal: true,
           },
           {
             id: 'access-api-keys',

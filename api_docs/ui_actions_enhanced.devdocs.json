@@ -1055,7 +1055,13 @@
             "signature": [
               "BehaviorSubject",
               "<",
-              "ILicense",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.ILicense",
+                "text": "ILicense"
+              },
               " | undefined>"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",

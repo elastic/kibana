@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 
 import { ES_SEARCH_PLAYGROUND_ID } from '@kbn/deeplinks-search';
 

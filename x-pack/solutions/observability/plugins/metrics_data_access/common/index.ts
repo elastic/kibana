@@ -24,7 +24,7 @@ export {
   ItemTypeRT,
   SnapshotMetricTypeRT,
   SnapshotMetricTypeKeys,
-  DataSchemaFormat,
+  DataSchemaFormatEnum,
 } from './inventory_models/types';
 
 export type {
@@ -36,21 +36,26 @@ export type {
   SnapshotMetricType,
   TSVBMetricModelCreator,
   TSVBMetricModel,
+  DataSchemaFormat,
 } from './inventory_models/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export {
   METRICS_EXPLORER_API_MAX_METRICS,
-  CONTAINER_ID_FIELD,
-  KUBERNETES_POD_UID_FIELD,
-  HOST_NAME_FIELD,
-  DATASTREAM_DATASET,
+  TIMESTAMP,
+  HOST_NAME,
+  CONTAINER_ID,
+  KUBERNETES_POD_UID,
+  HOST_OS_NAME,
+  CLOUD_PROVIDER,
+  SERVICE_NAME,
   EVENT_MODULE,
-  HOST_METRICS_RECEIVER_OTEL,
   METRICSET_MODULE,
   METRICSET_NAME,
+  DATASTREAM_DATASET,
+  OS_NAME,
   SYSTEM_INTEGRATION,
-  TIMESTAMP_FIELD,
+  HOST_METRICS_RECEIVER_OTEL,
 } from './constants';
 
 export {

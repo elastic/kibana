@@ -10,7 +10,7 @@ import { EuiInMemoryTable, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { defaultSort } from '../../../../constants';
-import { IndexSummaryTableItem, SortConfig } from '../../../../types';
+import type { IndexSummaryTableItem, SortConfig } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { MIN_PAGE_SIZE } from '../constants';
 import { getShowPagination } from './utils/get_show_pagination';

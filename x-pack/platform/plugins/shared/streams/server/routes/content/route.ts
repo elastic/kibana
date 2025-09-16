@@ -7,14 +7,12 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import {
-  ContentPack,
-  ContentPackStream,
-  contentPackIncludedObjectsSchema,
-} from '@kbn/content-packs-schema';
-import { FieldDefinition, Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
+import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { QueryLink } from '../../../common/assets';
+import type { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -117,8 +115,8 @@ function asContentPackEntry({
     name: stream.name,
     request: {
       stream: { ...omit(stream, ['name']) },
+      ...emptyAssets,
       queries: queryLinks.map(({ query }) => query),
-      dashboards: [],
     },
   };
 }

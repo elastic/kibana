@@ -11,11 +11,13 @@ import React, { createContext, useMemo } from 'react';
 import { isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { EuiListGroup, EuiPanel, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { PanelIncompatibleError, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
-  SerializedTitles,
   initializeTitleManager,
   useBatchedPublishingSubjects,
   titleComparators,
@@ -32,7 +34,7 @@ import {
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
-import { LinksApi, LinksParentApi, ResolvedLink } from '../types';
+import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 

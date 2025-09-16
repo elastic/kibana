@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
-import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { type EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -28,9 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
-        await retry.tryForTime(10000, async () => {
-          testSubjects.existOrFail('dashboardLandingPage');
-        });
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await searchSessions.markTourDone();
       });
 
@@ -91,6 +89,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           return s.length === 0;
         });
+      });
+
+      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
+        await PageObjects.common.navigateToApp('management');
+        const searchSessionsAnchor = await testSubjects.find('search_sessions');
+        const anchorText = await searchSessionsAnchor.getVisibleText();
+        expect(anchorText).to.be('Search Sessions');
       });
     });
   });

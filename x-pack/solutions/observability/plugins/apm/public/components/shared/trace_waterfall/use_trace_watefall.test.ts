@@ -14,6 +14,8 @@ import {
   getClockSkew,
   getLegends,
   createColorLookupMap,
+  getRootItemOrFallback,
+  TraceDataState,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -82,12 +84,13 @@ describe('getFlattenedTraceWaterfall', () => {
   ]);
 
   it('returns a flattened waterfall with correct depth, offset, skew, and color', () => {
-    const result = getTraceWaterfall(
-      root,
+    const result = getTraceWaterfall({
+      rootItem: root,
       parentChildMap,
-      serviceColorsMap,
-      WaterfallLegendType.ServiceName
-    );
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
 
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
 
@@ -123,7 +126,13 @@ describe('getFlattenedTraceWaterfall', () => {
   });
 
   it('returns only the root if there are no children', () => {
-    const result = getTraceWaterfall(root, {}, serviceColorsMap, WaterfallLegendType.ServiceName);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
     expect(result[0].depth).toBe(0);
@@ -135,13 +144,30 @@ describe('getFlattenedTraceWaterfall', () => {
       '1': [child2, child1], // child2 timestamp is after child1
       '2': [grandchild],
     };
-    const result = getTraceWaterfall(
-      root,
-      unorderedMap,
-      serviceColorsMap,
-      WaterfallLegendType.ServiceName
-    );
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: unorderedMap,
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
+  });
+
+  it('reparents orphan spans', () => {
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [grandchild],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('1');
+    expect(result[0].depth).toBe(0);
+    expect(result[1].id).toBe('4');
+    expect(result[1].depth).toBe(1);
   });
 });
 
@@ -185,7 +211,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        spanType: 'db',
+        type: 'db',
         errorCount: 0,
       },
       {
@@ -195,7 +221,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        spanType: 'http',
+        type: 'http',
         errorCount: 0,
       },
       {
@@ -205,7 +231,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        spanType: 'cache',
+        type: 'cache',
         errorCount: 0,
       },
     ];
@@ -215,10 +241,10 @@ describe('getLegends', () => {
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
       { type: WaterfallLegendType.ServiceName, value: 'svcC', color: 'color2' },
-      { type: WaterfallLegendType.SpanType, value: '', color: 'color3' },
-      { type: WaterfallLegendType.SpanType, value: 'db', color: 'color4' },
-      { type: WaterfallLegendType.SpanType, value: 'http', color: 'color5' },
-      { type: WaterfallLegendType.SpanType, value: 'cache', color: 'color6' },
+      { type: WaterfallLegendType.Type, value: '', color: 'color3' }, // needed in the legends component to display the service name when colorBy is Type
+      { type: WaterfallLegendType.Type, value: 'db', color: 'color4' },
+      { type: WaterfallLegendType.Type, value: 'http', color: 'color5' },
+      { type: WaterfallLegendType.Type, value: 'cache', color: 'color6' },
     ]);
   });
 
@@ -258,7 +284,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcB',
-        spanType: 'http',
+        type: 'http',
         errorCount: 0,
       },
       {
@@ -268,7 +294,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcB',
-        spanType: 'http',
+        type: 'http',
         errorCount: 0,
       },
     ];
@@ -278,8 +304,8 @@ describe('getLegends', () => {
     expect(result).toEqual([
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
-      { type: WaterfallLegendType.SpanType, value: '', color: 'color2' }, // needed in the legends component to display the service name when colorBy is SpanType
-      { type: WaterfallLegendType.SpanType, value: 'http', color: 'color3' },
+      { type: WaterfallLegendType.Type, value: '', color: 'color2' }, // needed in the legends component to display the service name when colorBy is Type
+      { type: WaterfallLegendType.Type, value: 'http', color: 'color3' },
     ]);
   });
 
@@ -301,7 +327,7 @@ describe('getLegends', () => {
 
     const result = getLegends(traceItems);
 
-    expect(Object.keys(result)).toHaveLength(16); // 15+1 for legends component to display the service name when colorBy is SpanType
+    expect(Object.keys(result)).toHaveLength(16); // 15+1 for legends component to display the service name when colorBy is Type
 
     expect(result[0].color).toBe('color0');
     expect(result[10].color).toBe('color10');
@@ -318,14 +344,14 @@ describe('createColorLookupMap', () => {
     const legends = [
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'red' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'blue' },
-      { type: WaterfallLegendType.SpanType, value: 'db', color: 'green' },
+      { type: WaterfallLegendType.Type, value: 'db', color: 'green' },
     ];
 
     const result = createColorLookupMap(legends);
 
     expect(result.get('serviceName:svcA')).toBe('red');
     expect(result.get('serviceName:svcB')).toBe('blue');
-    expect(result.get('spanType:db')).toBe('green');
+    expect(result.get('type:db')).toBe('green');
   });
 });
 
@@ -438,6 +464,46 @@ describe('getTraceMap', () => {
   });
 });
 
+describe('getRootItemOrFallback', () => {
+  it('should return a FULL state and a rootItem for a complete trace', () => {
+    const traceData = [root, child1, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Full);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return an EMPTY state for an empty trace', () => {
+    const result = getRootItemOrFallback({}, []);
+
+    expect(result.rootItem).toBeUndefined();
+    expect(result.traceState).toBe(TraceDataState.Empty);
+    expect(result.orphans).toBeUndefined();
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with no root span', () => {
+    const traceData = [child1, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with orphan child spans', () => {
+    const traceData = [root, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([grandchild]);
+  });
+});
+
 describe('getTraceWaterfallDuration', () => {
   afterAll(() => {
     jest.clearAllMocks();
@@ -456,6 +522,7 @@ describe('getTraceWaterfallDuration', () => {
         skew: 0,
         color: 'red',
         errorCount: 0,
+        isOrphan: false,
       },
       {
         id: '2',
@@ -469,6 +536,7 @@ describe('getTraceWaterfallDuration', () => {
         skew: 10,
         color: 'blue',
         errorCount: 0,
+        isOrphan: false,
       },
       {
         id: '3',
@@ -482,6 +550,7 @@ describe('getTraceWaterfallDuration', () => {
         skew: 5,
         color: 'green',
         errorCount: 0,
+        isOrphan: false,
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);

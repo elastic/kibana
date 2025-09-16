@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssetType } from '../../../../types';
+import type { AssetType } from '../../../../types';
 
 export const AIRPLANE: AssetType = {
   '@created': '2018-10-13T16:44:44.648Z',

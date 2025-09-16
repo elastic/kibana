@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../use_kibana';
-import { Mappings } from '../../types';
+import type { Mappings } from '../../types';
 import { QueryKeys } from '../../constants';
 
 const POLLING_INTERVAL = 15 * 1000;

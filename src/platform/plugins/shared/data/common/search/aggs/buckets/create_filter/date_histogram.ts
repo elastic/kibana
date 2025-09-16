@@ -9,7 +9,7 @@
 
 import moment from 'moment-timezone';
 import { buildRangeFilter } from '@kbn/es-query';
-import { IBucketDateHistogramAggConfig } from '../date_histogram';
+import type { IBucketDateHistogramAggConfig } from '../date_histogram';
 
 export const createFilterDateHistogram = (
   agg: IBucketDateHistogramAggConfig,

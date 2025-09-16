@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasourceLayers } from '../types';
+import type { DatasourceLayers } from '../types';
 
 type VisState = { layers: Array<{ layerId: string }> } | { layerId: string };
 

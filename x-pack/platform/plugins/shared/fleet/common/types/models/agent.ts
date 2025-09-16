@@ -42,7 +42,8 @@ export type AgentActionType =
   | 'REQUEST_DIAGNOSTICS'
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION'
-  | 'MIGRATE';
+  | 'MIGRATE'
+  | 'PRIVILEGE_LEVEL_CHANGE';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'

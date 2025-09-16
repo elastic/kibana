@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -22,10 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the indices tab
-      await pageObjects.indexManagement.changeTabs('indicesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('indices');
     });
 
     it('renders the indices tab', async () => {
@@ -41,10 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('manage index', function () {
       beforeEach(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the indices tab
-        await pageObjects.indexManagement.changeTabs('indicesTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('indices');
         await pageObjects.indexManagement.manageIndex(testIndexName);
         await pageObjects.indexManagement.manageIndexContextMenuExists();
       });

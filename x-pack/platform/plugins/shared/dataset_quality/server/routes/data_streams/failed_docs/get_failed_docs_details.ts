@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { FailedDocsDetails } from '../../../../common/api_types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { FailedDocsDetails } from '../../../../common/api_types';
 import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { TIMESTAMP } from '../../../../common/es_fields';
 import { createDatasetQualityESClient } from '../../../utils';

@@ -128,8 +128,5 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2022-02-09T17:44:03.359Z',
-    version: 'WzI5MTI5OSwzXQ==',
   } as LensAttributes;
 };

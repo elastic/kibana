@@ -6,7 +6,11 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
+import type {
+  AuthenticatedUser,
+  Role,
+  RoleRemoteClusterPrivilege,
+} from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';

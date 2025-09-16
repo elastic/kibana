@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContentPackManifest } from '@kbn/content-packs-schema';
+import type { ContentPackManifest } from '@kbn/content-packs-schema';
 import React from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 

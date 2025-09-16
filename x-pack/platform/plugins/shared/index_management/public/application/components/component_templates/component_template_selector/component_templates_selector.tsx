@@ -11,12 +11,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLink, EuiText } from '@el
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ComponentTemplateListItem } from '../../../../../common';
+import type { ComponentTemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
+import type { ComponentTemplateDetailsProps } from '../component_template_details';
 import {
   ComponentTemplateDetailsFlyoutContent,
   defaultFlyoutProps,
-  ComponentTemplateDetailsProps,
 } from '../component_template_details';
 import { CreateButtonPopOver } from './components';
 import { ComponentTemplates } from './component_templates';

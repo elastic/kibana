@@ -6,7 +6,8 @@
  */
 
 import { persistTokenCloudData } from './persist_token'; // Adjust the import based on the actual file path
-import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 

@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { FormatFactory } from '../../../types';
+import type { FormatFactory } from '../../../types';
 import { computeSummaryRowForColumn } from './summary';
 import type { DatatableExpressionFunction } from '../../defs/datatable/types';
 import { transposeTable } from './transpose_helpers';

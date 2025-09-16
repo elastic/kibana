@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
+import type React from 'react';
+import type {
   UseFormReturn,
   ControllerRenderProps,
   ControllerFieldState,
@@ -14,7 +14,7 @@ import {
   UseControllerProps,
   FieldValues,
 } from 'react-hook-form';
-import {
+import type {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
@@ -22,7 +22,7 @@ import {
   ResponseCheckJSON,
   RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
-import { AlertConfigKey } from './constants';
+import type { AlertConfigKey } from './constants';
 
 export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
 

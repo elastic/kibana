@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   PluginStats,
@@ -16,8 +16,8 @@ import {
   REPOSITORY_PLUGINS_MAP,
   MODULE_REPOSITORY_TYPES,
 } from '../../../common';
-import { Repository, RepositoryType } from '../../../common/types';
-import { RouteDependencies } from '../../types';
+import type { Repository, RepositoryType } from '../../../common/types';
+import type { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 import { nameParameterSchema, repositorySchema } from './validate_schemas';
 

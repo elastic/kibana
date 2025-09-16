@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { MatchedItem } from '../types';
+import type { HttpStart } from '@kbn/core/public';
+import type { MatchedItem } from '../types';
 
 export * from './has_data';
 

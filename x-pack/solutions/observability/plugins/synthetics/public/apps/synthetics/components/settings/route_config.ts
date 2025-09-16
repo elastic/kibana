@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-import { RouteProps } from '../../routes';
+import type { useHistory } from 'react-router-dom';
+import type { RouteProps } from '../../routes';
 import { SETTINGS_ROUTE, SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 import { SettingsPage } from './settings_page';
 import { getSettingsPageHeader } from './page_header';

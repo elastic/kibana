@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import { describeDataset, getLogPatterns, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import { Logger } from '@kbn/core/server';
-import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { Logger } from '@kbn/core/server';
+import { type InferenceClient } from '@kbn/inference-common';
+import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
-import pLimit from 'p-limit';
-import { v4 } from 'uuid';
-import { kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
+import { analyzeDataset } from './helpers/analyze_dataset';
+import { assignShortIds } from './helpers/assign_short_ids';
+import { getLogPatterns } from './helpers/get_log_patterns';
+import { verifyQueries } from './helpers/verify_queries';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
 const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
-export interface GeneratedSignificantEventQuery {
-  title: string;
-  kql: string;
-}
-
 interface Params {
-  name: string;
+  definition: Streams.all.Definition;
   connectorId: string;
   currentDate?: Date;
   shortLookback?: moment.Duration;
@@ -43,7 +39,7 @@ export async function generateSignificantEventDefinitions(
   dependencies: Dependencies
 ): Promise<GeneratedSignificantEventQuery[]> {
   const {
-    name,
+    definition,
     connectorId,
     currentDate = new Date(),
     shortLookback = DEFAULT_SHORT_LOOKBACK,
@@ -57,52 +53,17 @@ export async function generateSignificantEventDefinitions(
   const start = mstart.valueOf();
   const end = mend.valueOf();
 
-  const analysis = await describeDataset({
-    esClient: esClient.client,
-    start,
-    end,
-    index: name,
-  });
-
-  const short = sortAndTruncateAnalyzedFields(analysis);
-
-  const textFields = analysis.fields
-    .filter((field) => field.types.includes('text'))
-    .map((field) => field.name);
-
-  const categorizationField = textFields.includes('message')
-    ? 'message'
-    : textFields.includes('body.text')
-    ? 'body.text'
-    : undefined;
-
   const lookbackStart = mend.clone().subtract(longLookback).valueOf();
 
-  const logPatterns = categorizationField
-    ? await getLogPatterns({
-        start: lookbackStart,
-        end,
-        esClient,
-        fields: [categorizationField],
-        index: name,
-        includeChanges: true,
-        metadata: [],
-      }).then((results) => {
-        return results.map((result) => {
-          const { sample, count, regex } = result;
-          return { count, sample, regex };
-        });
-      })
-    : undefined;
+  const { categorizationField, short } = await analyzeDataset(
+    { start, end, definition },
+    { esClient }
+  );
 
-  if (logPatterns?.length) {
-    logger.debug(() => {
-      return `Found ${logPatterns?.length} log patterns:
-      
-      ${logPatterns.map((pattern) => `- ${pattern.sample} (${pattern.count})`).join('\n')}
-      `;
-    });
-  }
+  const logPatterns = await getLogPatterns(
+    { categorizationField, lookbackStart, end, definition },
+    { esClient, logger }
+  );
 
   const chunks = [
     INSTRUCTION,
@@ -163,62 +124,12 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     } as const,
   });
 
-  const queries = output.queries;
+  const verifiedQueries = await verifyQueries(
+    { queries: output.queries, definition, start, end },
+    { esClient, logger }
+  );
 
-  if (!queries.length) {
-    return [];
-  }
-
-  const limiter = pLimit(10);
-
-  const [queriesWithCounts, totalCount] = await Promise.all([
-    Promise.all(
-      queries.map((query) =>
-        limiter(async () => {
-          return esClient
-            .search('verify_query', {
-              track_total_hits: true,
-              index: name,
-              size: 0,
-              timeout: '5s',
-              query: {
-                bool: {
-                  filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
-                },
-              },
-            })
-            .then((response) => ({ ...query, count: response.hits.total.value }));
-        })
-      )
-    ),
-    esClient
-      .search('verify_query', {
-        track_total_hits: true,
-        index: name,
-        size: 0,
-        timeout: '5s',
-      })
-      .then((response) => response.hits.total.value),
-  ]);
-
-  if (queries.length) {
-    logger.debug(() => {
-      return `Ran queries:
-      
-      ${queriesWithCounts.map((query) => `- ${query.kql}: ${query.count}`).join('\n')}`;
-    });
-  }
-
-  const idLookupTable = new ShortIdTable();
-
-  const queriesWithShortIds = queriesWithCounts.map((query) => {
-    const id = v4();
-    return {
-      id,
-      shortId: idLookupTable.take(id),
-      ...query,
-    };
-  });
+  const { queriesWithShortIds, queriesByShortId } = assignShortIds(verifiedQueries);
 
   const { output: selectedQueries } = await inferenceClient.output({
     id: 'verify_kql_queries',
@@ -230,19 +141,14 @@ I've executed those queries and obtained document counts for each.
 Now I need you to analyze these results and prioritize the most operationally relevant queries.
 
 ## Analysis Context
-- Total documents in time period: ${totalCount}
+- Total documents in time period: ${verifiedQueries.totalCount}
 - Lookback period: ${longLookback.asDays()} days
 - Goal: Identify queries that provide the best signal-to-noise ratio for operational monitoring
 
 ## Queries
 ${JSON.stringify(
   queriesWithShortIds.map(({ shortId, kql, title, count }) => {
-    return {
-      id: shortId,
-      kql,
-      title,
-      count,
-    };
+    return { id: shortId, kql, title, count };
   })
 )}`,
     ].join('\n\n'),
@@ -266,23 +172,17 @@ ${JSON.stringify(
     } as const,
   });
 
-  const queriesByShortId = new Map(
-    queriesWithShortIds.map(({ shortId, ...query }) => [shortId, query])
-  );
-
   const selected = selectedQueries.queries.flatMap(({ id }) => {
     const query = queriesByShortId.get(id);
     if (!query) {
       return [];
     }
+
     return { title: query.title, kql: query.kql, count: query.count };
   });
 
   logger.debug(() => {
-    return `Selected queries:
-    
-    ${selected.map((query) => `- ${query.kql}`).join('\n')}
-    `;
+    return `Selected queries: ${selected.map((query) => `- ${query.kql}`).join('\n')}`;
   });
 
   return selected;

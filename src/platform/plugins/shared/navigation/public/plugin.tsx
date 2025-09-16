@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -18,7 +19,7 @@ import {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionId } from '@kbn/core-chrome-browser';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -27,7 +28,7 @@ import type {
   AddSolutionNavigationArg,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 import { registerNavigationEventTypes } from './analytics';
 
@@ -105,7 +106,14 @@ export class NavigationPublicPlugin
 
       if (!this.isSolutionNavEnabled) return;
 
-      chrome.project.setCloudUrls(cloud!);
+      if (cloud) {
+        chrome.project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+        cloud.getPrivilegedUrls().then((privilegedUrls) => {
+          if (Object.keys(privilegedUrls).length === 0) return;
+
+          chrome.project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
+        });
+      }
     };
 
     if (this.getIsUnauthenticated(core.http)) {

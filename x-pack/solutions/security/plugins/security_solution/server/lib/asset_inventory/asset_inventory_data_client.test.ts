@@ -13,6 +13,12 @@ import {
 import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
 import { AssetInventoryDataClient } from './asset_inventory_data_client';
+import type { CoreStart } from '@kbn/core/server';
+import type {
+  SecuritySolutionPluginStartDependencies,
+  SecuritySolutionPluginStart,
+} from '../../plugin_contract';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 const mockSecSolutionContext = {
   getEntityStoreDataClient: jest.fn(),
@@ -40,15 +46,35 @@ const mockEntityStorePrivileges = {
   },
 };
 
+const mockCoreServicesTuple: [
+  CoreStart,
+  SecuritySolutionPluginStartDependencies,
+  SecuritySolutionPluginStart
+] = [
+  {} as CoreStart,
+  {} as SecuritySolutionPluginStartDependencies,
+  {} as SecuritySolutionPluginStart,
+];
+
 describe('AssetInventoryDataClient', () => {
   const loggerMock = loggingSystemMock.createLogger();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const uiSettingsClientMock = uiSettingsServiceMock.createClient();
 
+  const mockUsageCollection = {
+    makeUsageCollector: jest.fn().mockImplementation((config) => config),
+    registerCollector: jest.fn(),
+  } as unknown as UsageCollectionSetup & {
+    makeUsageCollector: jest.Mock;
+    registerCollector: jest.Mock;
+  };
+
   const client: AssetInventoryDataClient = new AssetInventoryDataClient({
     logger: loggerMock,
     clusterClient: clusterClientMock,
     uiSettingsClient: uiSettingsClientMock,
+    usageCollection: mockUsageCollection,
+    coreStartPromise: Promise.resolve(mockCoreServicesTuple),
   });
 
   describe('status function', () => {

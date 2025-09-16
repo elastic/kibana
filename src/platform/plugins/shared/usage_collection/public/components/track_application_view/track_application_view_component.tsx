@@ -9,8 +9,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IApplicationUsageTracker } from '../../plugin';
-import { TrackApplicationViewProps } from './types';
+import type { IApplicationUsageTracker } from '../../plugin';
+import type { TrackApplicationViewProps } from './types';
 
 interface Props extends TrackApplicationViewProps {
   applicationUsageTracker?: IApplicationUsageTracker;

@@ -8,8 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { ValidationBadValueError, ValidationSettingNotFoundError } from '../../ui_settings_errors';
 import type {
   InternalUiSettingsRequestHandlerContext,

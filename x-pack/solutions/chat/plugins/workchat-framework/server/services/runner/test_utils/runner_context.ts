@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { WorkflowRunnerInternalContext, InternalScopedRunner } from '../workflows/types';
-import { createModelProviderMock, ModelProviderMock } from './models';
-import { createToolProviderMock, ToolProviderMock } from './tools';
+import type { ModelProviderMock } from './models';
+import { createModelProviderMock } from './models';
+import type { ToolProviderMock } from './tools';
+import { createToolProviderMock } from './tools';
 import { createExecutionState } from './execution_state';
-import { createMockRegistry, MockRegistry } from './registries';
+import type { MockRegistry } from './registries';
+import { createMockRegistry } from './registries';
 
 export type ScopedClusterClientMock = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient

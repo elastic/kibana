@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ApiKey } from '@kbn/security-plugin-types-common';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 
 import { KibanaLogic } from '../../kibana';
 

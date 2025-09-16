@@ -9,8 +9,8 @@ import React from 'react';
 
 import { ActionColumn } from './action_column';
 import { EditingColumn } from './editing_column';
-import { InlineEditableTableColumn } from './types';
-import { Column, ItemWithAnID } from '../../types';
+import type { InlineEditableTableColumn } from './types';
+import type { Column, ItemWithAnID } from '../../types';
 
 interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;

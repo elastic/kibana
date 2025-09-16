@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { OperatorFunction, Observable } from 'rxjs';
-import {
+import type { OperatorFunction } from 'rxjs';
+import { Observable } from 'rxjs';
+import type {
   ChatCompletionChunkEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCountEvent,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   isChatCompletionTokenCountEvent,
   isChatCompletionChunkEvent,
 } from '@kbn/inference-common';

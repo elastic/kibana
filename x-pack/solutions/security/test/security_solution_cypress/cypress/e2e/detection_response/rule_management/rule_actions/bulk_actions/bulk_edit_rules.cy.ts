@@ -50,7 +50,7 @@ import {
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
   submitBulkEditForm,
-  clickAddIndexPatternsMenuItem,
+  clickBulkAddIndexPatternsMenuItem,
   checkMachineLearningRulesCannotBeModified,
   checkEsqlRulesCannotBeModified,
   openBulkEditAddTagsForm,
@@ -104,6 +104,7 @@ import {
 
 import {
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
@@ -129,6 +130,10 @@ describe(
   'Detection rules, bulk edit',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       // Make sure persisted rules table state is cleared
@@ -348,7 +353,7 @@ describe(
           const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
           selectAllRules();
-          clickAddIndexPatternsMenuItem();
+          clickBulkAddIndexPatternsMenuItem();
 
           // confirm editing all rules, that are not Machine Learning
           checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
@@ -369,7 +374,7 @@ describe(
 
       it('Index pattern action applied to all rules, including machine learning: user cancels action', () => {
         selectAllRules();
-        clickAddIndexPatternsMenuItem();
+        clickBulkAddIndexPatternsMenuItem();
 
         // confirm editing all rules, that are not Machine Learning
         checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
@@ -772,7 +777,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
       { tags: ['@ess'] },
       () => {
         selectAllRules();
-        clickAddIndexPatternsMenuItem();
+        clickBulkAddIndexPatternsMenuItem();
 
         // confirm editing all rules, that are not Machine Learning
         checkEsqlRulesCannotBeModified(1);

@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MigrationPanelTitle } from './migration_panel_title';
 import { useUpdateMigration } from '../../logic/use_update_migration';
-import { useDeleteMigration } from '../../logic/use_delete_migration';
+import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
@@ -21,7 +21,7 @@ jest.mock('../../logic/use_update_migration');
 const useUpdateMigrationMock = useUpdateMigration as jest.Mock;
 const mockUpdateMigration = jest.fn();
 
-jest.mock('../../logic/use_delete_migration');
+jest.mock('../../../common/hooks/use_delete_migrations');
 const useDeleteMigrationMock = useDeleteMigration as jest.Mock;
 const mockDeleteMigration = jest.fn();
 
@@ -29,7 +29,7 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   id: 'test-migration-id',
   name: 'Test Migration',
   status: SiemMigrationTaskStatus.READY,
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };

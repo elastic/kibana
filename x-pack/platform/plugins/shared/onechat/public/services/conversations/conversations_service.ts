@@ -6,12 +6,13 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
 import type { ListConversationsResponse } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
 } from '../../../common/conversations';
+import { publicApiPath } from '../../../common/constants';
 
 export class ConversationsService {
   private readonly http: HttpSetup;
@@ -21,15 +22,18 @@ export class ConversationsService {
   }
 
   async list({ agentId }: ConversationListOptions): Promise<ConversationWithoutRounds[]> {
-    const response = await this.http.get<ListConversationsResponse>('/api/chat/conversations', {
-      query: {
-        agent_id: agentId,
-      },
-    });
+    const response = await this.http.get<ListConversationsResponse>(
+      `${publicApiPath}/conversations`,
+      {
+        query: {
+          agent_id: agentId,
+        },
+      }
+    );
     return response.results;
   }
 
   async get({ conversationId }: ConversationGetOptions) {
-    return await this.http.get<Conversation>(`/api/chat/conversations/${conversationId}`);
+    return await this.http.get<Conversation>(`${publicApiPath}/conversations/${conversationId}`);
   }
 }

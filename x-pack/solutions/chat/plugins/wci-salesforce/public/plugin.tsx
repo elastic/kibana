@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { type CoreSetup, type Plugin } from '@kbn/core/public';
 import type {
   WCISalesforcePluginSetup,
   WCISalesforcePluginStart,

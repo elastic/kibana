@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import {
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type {
   SignificantEventsPreviewResponse,
   StreamQueryKql,
   Streams,
-  getIndexPatternsForStream,
 } from '@kbn/streams-schema';
-import { InferSearchResponseOf } from '@kbn/es-types';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
+import type { InferSearchResponseOf } from '@kbn/es-types';
 import { notFound } from '@hapi/boom';
 import type { ChangePointType } from '@kbn/es-types/src';
 

@@ -7,9 +7,9 @@
 import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { getConditionType } from '../../../../../../common/rules/status_rule';
-import { StatusRuleParamsProps } from '../status_rule_ui';
+import type { StatusRuleParamsProps } from '../status_rule_ui';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
@@ -60,15 +60,12 @@ const OPTIONS: Option[] = [
   },
 ];
 
-// Set this to true to test the feature
-export const SHOW_RECOVERY_STRATEGY_SWITCH = false;
-
 export const DEFAULT_CONDITION = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
   downThreshold: 3,
   locationsThreshold: 1,
-  ...(SHOW_RECOVERY_STRATEGY_SWITCH ? { recoveryStrategy: 'firstUp' as const } : {}),
+  recoveryStrategy: 'firstUp' as const,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { useTimeWindow, isLocationBased } = getConditionType(condition);

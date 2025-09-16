@@ -2863,6 +2863,41 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.indexPatternToCcs",
+        "type": "Function",
+        "tags": [],
+        "label": "indexPatternToCcs",
+        "description": [
+          "\nAppends cross-cluster search equivalents for each specified index pattern.\nUse this when you want to query both local and cross-cluster indices automatically."
+        ],
+        "signature": [
+          "(index: string | string[]) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/indices/index_pattern_to_ccs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.indexPatternToCcs.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/indices/index_pattern_to_ccs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.isCCSRemoteIndexName",
         "type": "Function",
         "tags": [],

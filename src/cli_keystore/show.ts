@@ -9,7 +9,7 @@
 
 import { writeFileSync, existsSync } from 'fs';
 
-import { Keystore } from '../cli/keystore';
+import type { Keystore } from '../cli/keystore';
 import { Logger } from '../cli/logger';
 
 interface ShowOptions {

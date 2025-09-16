@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { ApplicationUsageTelemetryReport } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
@@ -186,4 +186,5 @@ export const applicationUsageSchema = {
   uptime: commonSchema,
   synthetics: commonSchema,
   ux: commonSchema,
+  metricsExperience: commonSchema,
 };

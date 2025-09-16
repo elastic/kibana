@@ -67,10 +67,11 @@ export const indexTemplates: {
     template: {
       settings: {
         default_pipeline: 'logs@default-pipeline',
-        data_stream_options: {
-          failure_store: {
-            enabled: false,
-          },
+      },
+      // @ts-expect-error
+      data_stream_options: {
+        failure_store: {
+          enabled: false,
         },
       },
     },
@@ -92,10 +93,16 @@ export const indexTemplates: {
       settings: {
         default_pipeline: 'synth.fs@pipeline',
       },
+      // @ts-expect-error
+      data_stream_options: {
+        failure_store: {
+          enabled: true,
+        },
+      },
     },
-    priority: 500,
+    priority: 501,
     index_patterns: ['logs-synth.2*', 'logs-synth.3*'],
-    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings', 'synth.fs@custom'],
+    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings'],
     allow_auto_create: true,
     data_stream: {
       hidden: false,

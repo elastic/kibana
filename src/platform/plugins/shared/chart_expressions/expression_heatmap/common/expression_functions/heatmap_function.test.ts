@@ -10,13 +10,13 @@
 import { heatmapFunction } from './heatmap_function';
 import type { HeatmapArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import {
   EXPRESSION_HEATMAP_GRID_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
   EXPRESSION_HEATMAP_NAME,
 } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#heatmap', () => {
   const fn = functionWrapper(heatmapFunction());

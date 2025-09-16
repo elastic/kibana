@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: xPackAPITestsConfig.get('servers'),
     services: xPackAPITestsConfig.get('services'),
     junit: {
-      reportName: 'X-Pack OneChat API Integration Tests',
+      reportName: 'X-Pack Agent Builder API Integration Tests',
     },
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {

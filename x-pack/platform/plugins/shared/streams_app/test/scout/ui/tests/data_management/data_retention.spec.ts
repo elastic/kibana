@@ -23,8 +23,7 @@ test.describe(
       // Create a test stream with routing rules first
       await apiServices.streams.forkStream('logs', 'logs.nginx', {
         field: 'service.name',
-        value: 'nginx',
-        operator: 'eq',
+        eq: 'nginx',
       });
 
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
@@ -40,15 +39,16 @@ test.describe(
     }) => {
       // Update to a specific retention policy first
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
-      await page.getByRole('button', { name: 'Set specific retention days' }).click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('streamsAppDslModalDaysField').fill('7');
 
-      await dialog.getByRole('button', { name: 'Save' }).click();
-      await expect(
-        page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
-      ).toBeVisible();
-      await pageObjects.streams.closeToast();
+      // Toggle off the inherit switch to enable other options
+      await page.getByTestId('inheritDataRetentionSwitch').click();
+      await expect(page.getByTestId('inheritDataRetentionSwitch')).not.toBeChecked();
+
+      await page.getByRole('button', { name: 'Custom period' }).click();
+      await page.getByTestId('streamsAppDslModalDaysField').fill('7');
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
+      await pageObjects.streams.closeToasts();
     });
 
     test('should reset a stream data retention policy successfully', async ({
@@ -57,27 +57,26 @@ test.describe(
     }) => {
       // Set a specific retention policy first
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
-      await page.getByRole('button', { name: 'Set specific retention days' }).click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('streamsAppDslModalDaysField').fill('7');
 
-      await dialog.getByRole('button', { name: 'Save' }).click();
-      await expect(
-        page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
-      ).toBeVisible();
-      await pageObjects.streams.closeToast();
+      // Toggle off the inherit switch to enable other options
+      await page.getByTestId('inheritDataRetentionSwitch').click();
+      await expect(page.getByTestId('inheritDataRetentionSwitch')).not.toBeChecked();
+      await page.getByRole('button', { name: 'Custom period' }).click();
+      await page.getByTestId('streamsAppDslModalDaysField').fill('7');
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
+      await pageObjects.streams.closeToasts();
 
       // Reset the retention policy
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
-      await page.getByRole('button', { name: 'Reset to default', exact: true }).click();
-      await page
-        .getByRole('dialog')
-        .getByRole('button', { name: 'Set to default', exact: true })
-        .click();
-      await expect(
-        page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('∞')
-      ).toBeVisible();
-      await pageObjects.streams.closeToast();
+
+      // Toggle the inherit switch back on
+      await page.getByTestId('inheritDataRetentionSwitch').click();
+      await expect(page.getByTestId('inheritDataRetentionSwitch')).toBeChecked();
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      await expect(page.getByTestId('retention-metric').getByText('∞')).toBeVisible();
+      await pageObjects.streams.closeToasts();
     });
   }
 );

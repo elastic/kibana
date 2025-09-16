@@ -13,28 +13,27 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
-  ESQLUserDefinedColumn,
-  ESQLFieldWithMetadata,
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ICommandCallbacks,
   ISuggestionItem,
-  getLocationFromCommandOrOptionName,
   Location,
+  ESQLColumnData,
 } from '../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLCommand } from '../types';
-import {
+import type {
   FieldType,
-  FunctionDefinitionTypes,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
@@ -50,8 +49,7 @@ export const suggest = (
     arg1: ESQLCommand,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -80,8 +78,7 @@ export const expectSuggestions = async (
     arg1: ESQLCommand,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -91,6 +88,11 @@ export const expectSuggestions = async (
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
+    if (containsSnippet(suggestion.text) && !suggestion.asSnippet) {
+      throw new Error(
+        `Suggestion with snippet placeholder must be marked as a snippet. -> ${suggestion.text}`
+      );
+    }
     suggestions.push(suggestion.text);
   });
   expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
@@ -100,12 +102,10 @@ export function getFieldNamesByType(
   _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
   excludeUserDefined: boolean = false
 ) {
-  const fieldsMap = mockContext.fields;
-  const userDefinedColumnsMap = mockContext.userDefinedColumns;
-  const fields = Array.from(fieldsMap.values());
-  const userDefinedColumns = Array.from(userDefinedColumnsMap.values()).flat();
+  const columnMap = mockContext.columns;
+  const columns = Array.from(columnMap.values());
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  const finalArray = excludeUserDefined ? fields : [...fields, ...userDefinedColumns];
+  const finalArray = excludeUserDefined ? columns.filter((col) => !col.userDefined) : columns;
   return finalArray
     .filter(
       ({ type }) =>
@@ -154,7 +154,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
     license === 'platinum',
   activeProduct = { type: 'observability', tier: 'complete' }
 ) {
@@ -188,9 +188,7 @@ export function getFunctionSignaturesByReturnType(
         if (hasRestrictedSignature) {
           const availableSignatures = signatures.filter((signature) => {
             if (!signature.license) return true;
-            return hasMinimumLicenseRequired(
-              signature.license.toLocaleLowerCase() as ESQLLicenseType
-            );
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
           });
 
           if (availableSignatures.length === 0) {
@@ -271,3 +269,10 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   }
   return [];
 }
+
+export const containsSnippet = (text: string): boolean => {
+  // Matches most common monaco snippets
+  // $0, $1, etc. and ${1:placeholder}, ${2:another}
+  const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
+  return snippetRegex.test(text);
+};

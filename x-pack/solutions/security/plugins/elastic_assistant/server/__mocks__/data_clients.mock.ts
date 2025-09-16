@@ -9,11 +9,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
-import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
+import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import type { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import type { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
@@ -43,6 +43,7 @@ const createConversationsDataClientMock = () => {
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
     deleteAllConversations: jest.fn(),
+    conversationExists: jest.fn(),
     getConversation: jest.fn(),
     updateConversation: jest.fn(),
     getReader: jest.fn(),
@@ -60,22 +61,17 @@ export const conversationsDataClientMock: {
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => {
   const mockDataClient = {
     bulkUpdateAttackDiscoveryAlerts: jest.fn(),
-    createAttackDiscovery: jest.fn(),
     getAdHocAlertsIndexPattern: jest.fn(),
     getScheduledAndAdHocIndexPattern: jest.fn(),
     createAttackDiscoveryAlerts: jest.fn(),
-    findAllAttackDiscoveries: jest.fn(),
     getAlertConnectorNames: jest.fn(),
-    getAttackDiscovery: jest.fn(),
     findAttackDiscoveryAlerts: jest.fn(),
     findDocuments: jest.fn(),
-    findAttackDiscoveryByConnectorId: jest.fn(),
     getAttackDiscoveryGenerations: jest.fn(),
     getAttackDiscoveryGenerationById: jest.fn(),
     getReader: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
     refreshEventLogIndex: jest.fn(),
-    updateAttackDiscovery: jest.fn(),
     // Properties from AIAssistantDataClient
     spaceId: 'default',
     indexTemplateAndPattern: {
@@ -144,11 +140,13 @@ const createKnowledgeBaseDataClientMock = () => {
     isInferenceEndpointExists: jest.fn(),
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
+    isDefendInsightsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),
     isSetupInProgress: jest.fn().mockReturnValue(false)(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
     getLoadedSecurityLabsDocsCount: jest.fn(),
+    getLoadedDefendInsightsDocsCount: jest.fn(),
     getProductDocumentationStatus: jest.fn(),
   };
 

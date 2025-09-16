@@ -4,18 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  MachineImplementationsFrom,
-  assign,
-  and,
-  enqueueActions,
-  setup,
-  ActorRefFrom,
-} from 'xstate5';
+import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
+import { assign, and, enqueueActions, setup, sendTo } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
-import {
+import type { Streams } from '@kbn/streams-schema';
+import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import type {
   StreamRoutingContext,
   StreamRoutingEvent,
   StreamRoutingInput,
@@ -29,7 +24,7 @@ import {
   createDeleteStreamActor,
 } from './stream_actors';
 import { routingConverter } from '../../utils';
-import { RoutingDefinitionWithUIAttributes } from '../../types';
+import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import { selectCurrentRule } from './selectors';
 import {
   createRoutingSamplesMachineImplementations,
@@ -57,7 +52,8 @@ export const streamRoutingMachine = setup({
     addNewRoutingRule: assign(({ context }) => {
       const newRule = routingConverter.toUIDefinition({
         destination: `${context.definition.stream.name}.child`,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
+        status: 'enabled',
         isNew: true,
       });
 
@@ -136,6 +132,14 @@ export const streamRoutingMachine = setup({
           reenter: true,
         },
       },
+      invoke: {
+        id: 'routingSamplesMachine',
+        src: 'routingSamplesMachine',
+        input: ({ context }) => ({
+          definition: context.definition,
+          documentMatchFilter: 'matched',
+        }),
+      },
       states: {
         idle: {
           id: 'idle',
@@ -159,16 +163,18 @@ export const streamRoutingMachine = setup({
         creatingNewRule: {
           id: 'creatingNewRule',
           entry: [{ type: 'addNewRoutingRule' }],
-          exit: [{ type: 'resetRoutingChanges' }],
-          initial: 'changing',
-          invoke: {
-            id: 'routingSamplesMachine',
-            src: 'routingSamplesMachine',
-            input: ({ context }) => ({
-              definition: context.definition,
-              condition: selectCurrentRule(context).if,
+          exit: [
+            { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: undefined,
             }),
-          },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
+          ],
+          initial: 'changing',
           states: {
             changing: {
               on: {
@@ -181,10 +187,10 @@ export const streamRoutingMachine = setup({
                     enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
 
                     // Trigger samples collection only on condition change
-                    if (event.routingRule.if) {
+                    if (event.routingRule.where) {
                       enqueue.sendTo('routingSamplesMachine', {
                         type: 'routingSamples.updateCondition',
-                        condition: event.routingRule.if,
+                        condition: event.routingRule.where,
                       });
                     }
                   }),
@@ -198,6 +204,14 @@ export const streamRoutingMachine = setup({
                   guard: 'canForkStream',
                   target: 'forking',
                 },
+                'routingSamples.setDocumentMatchFilter': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: event.filter,
+                    });
+                  }),
+                },
               },
             },
             forking: {
@@ -209,8 +223,9 @@ export const streamRoutingMachine = setup({
 
                   return {
                     definition: context.definition,
-                    if: currentRoutingRule.if,
+                    where: currentRoutingRule.where,
                     destination: currentRoutingRule.destination,
+                    status: currentRoutingRule.status,
                   };
                 },
                 onDone: {

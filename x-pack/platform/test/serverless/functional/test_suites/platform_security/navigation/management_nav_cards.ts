@@ -6,10 +6,10 @@
  */
 
 // Note: this suite is currently only called from the feature flags test config:
-// x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+// x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

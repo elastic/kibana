@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import {
   SAVED_OBJECT_TEST_CASES,
   CONFLICT_TEST_CASES,
@@ -14,7 +14,7 @@ import {
 } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestDefinition, TestSuite } from '../lib/types';
+import type { ExpectResponseBody, TestDefinition, TestSuite } from '../lib/types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

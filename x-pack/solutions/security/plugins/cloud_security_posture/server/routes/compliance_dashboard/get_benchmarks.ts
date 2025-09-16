@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BenchmarkData } from '../../../common/types_old';
-import {
-  failedFindingsAggQuery,
-  BenchmarkVersionQueryResult,
-  getPostureStatsFromAggs,
-} from './get_grouped_findings_evaluation';
+import type { BenchmarkVersionQueryResult } from './get_grouped_findings_evaluation';
+import { failedFindingsAggQuery, getPostureStatsFromAggs } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
-import { KeyDocCount } from './compliance_dashboard';
+import type { KeyDocCount } from './compliance_dashboard';
 import { getIdentifierRuntimeMapping } from '../../../common/runtime_mappings/get_identifier_runtime_mapping';
 
 export interface BenchmarkBucket extends KeyDocCount {

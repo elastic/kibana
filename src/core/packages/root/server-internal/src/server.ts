@@ -12,9 +12,11 @@ import { firstValueFrom } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import type { Env, RawConfigurationProvider } from '@kbn/config';
+import { ConfigService } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { LoggingService } from '@kbn/core-logging-server-internal';
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
@@ -36,6 +38,7 @@ import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
+import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -52,13 +55,13 @@ import type {
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
+import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
+import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
-import { CoreInjectionService } from '@kbn/core-di-internal';
-import { http as httpModule } from '@kbn/core-di-server-internal';
+import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -101,6 +104,7 @@ export class Server {
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
+  private readonly dataStreams: DataStreamsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -155,6 +159,7 @@ export class Server {
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
+    this.dataStreams = new DataStreamsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -301,6 +306,8 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
+    const dataStreamsSetup = this.dataStreams.setup();
+
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
@@ -400,10 +407,8 @@ export class Server {
       security: securitySetup,
       userProfile: userProfileSetup,
       injection: injectionSetup,
+      dataStreams: dataStreamsSetup,
     };
-
-    const container = injectionSetup.getContainer();
-    container.loadSync(httpModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
@@ -440,6 +445,10 @@ export class Server {
     this.uptimePerStep.elasticsearch = {
       waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
     };
+
+    const dataStreamsStart = await this.dataStreams.start({
+      elasticsearch: elasticsearchStart,
+    });
 
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
@@ -506,6 +515,7 @@ export class Server {
       userProfile: userProfileStart,
       pricing: pricingStart,
       injection: injectionStart,
+      dataStreams: dataStreamsStart,
     };
 
     this.coreApp.start(this.coreStart);

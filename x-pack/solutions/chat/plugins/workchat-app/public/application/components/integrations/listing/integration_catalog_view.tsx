@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiCard,
   EuiFlexItem,
@@ -13,7 +14,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  IconType,
   useEuiTheme,
   useIsWithinBreakpoints,
   EuiFlexGrid,

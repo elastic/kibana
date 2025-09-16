@@ -32,7 +32,7 @@ import { WatchHistoryItem } from '../../../../models/watch_history_item';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 import { ExecuteDetails } from '../../../../models/execute_details';
 
-import { ActionType } from '../../../../../../common/types/action_types';
+import type { ActionType } from '../../../../../../common/types/action_types';
 import { ACTION_TYPES, ACTION_MODES } from '../../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
 

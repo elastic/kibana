@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
+import type { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
 export type { Integration } from '@kbn/wci-common';
 
 export interface IntegrationCreateRequest {

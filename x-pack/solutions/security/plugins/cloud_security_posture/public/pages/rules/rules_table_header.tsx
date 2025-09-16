@@ -23,11 +23,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import {
-  RuleStateAttributesWithoutStates,
-  useChangeCspRuleState,
-} from './use_change_csp_rule_state';
-import { CspBenchmarkRulesWithStates } from './rules_container';
+import type { RuleStateAttributesWithoutStates } from './use_change_csp_rule_state';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
+import type { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 import { RULES_TABLE_HEADER_TEST_SUBJ } from './test_subjects';
 

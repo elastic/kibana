@@ -8,7 +8,8 @@
  */
 
 import classNames from 'classnames';
-import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import type { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { euiFocusRing, euiFontSize, type CommonProps, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

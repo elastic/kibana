@@ -7,8 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { useQueryRulesSetsTableData } from './use_query_rules_sets_table_data';
-import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_PAGE_VALUE, Paginate } from '../../common/pagination';
+import type { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
+import type { Paginate } from '../../common/pagination';
+import { DEFAULT_PAGE_VALUE } from '../../common/pagination';
 
 const generateMockRulesetData = (
   totalCount: number

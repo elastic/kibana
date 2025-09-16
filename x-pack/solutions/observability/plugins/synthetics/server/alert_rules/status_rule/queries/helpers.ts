@@ -6,15 +6,16 @@
  */
 
 import moment from 'moment';
-import { SavedObjectsFindResult } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
-import { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
-import {
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
+import type {
   AlertStatusConfigs,
   AlertPendingStatusConfigs,
   MissingPingMonitorInfo,
 } from '../../../../common/runtime_types/alert_rules/common';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export interface ConfigStats {
   up: number;

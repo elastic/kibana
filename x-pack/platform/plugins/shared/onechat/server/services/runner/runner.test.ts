@@ -12,16 +12,18 @@ import type {
   RunToolParams,
   RunAgentParams,
 } from '@kbn/onechat-server';
-import {
-  createScopedRunnerDepsMock,
-  createMockedTool,
-  createMockedAgent,
+import type {
   CreateScopedRunnerDepsMock,
   MockedTool,
   MockedAgent,
   AgentClientMock,
-  createMockedAgentClient,
   ToolRegistryMock,
+} from '../../test_utils';
+import {
+  createScopedRunnerDepsMock,
+  createMockedTool,
+  createMockedAgent,
+  createMockedAgentClient,
   createToolRegistryMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
@@ -75,7 +77,6 @@ describe('Onechat runner', () => {
       expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -100,7 +101,6 @@ describe('Onechat runner', () => {
       expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -154,7 +154,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });
@@ -183,7 +182,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });

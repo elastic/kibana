@@ -9,8 +9,8 @@ import React, { useMemo, useState } from 'react';
 import type { Index } from '@kbn/index-management-shared-types';
 
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
-import { Mappings } from '../../types';
-import { IndexDocuments } from '../../hooks/api/use_document_search';
+import type { Mappings } from '../../types';
+import type { IndexDocuments } from '../../hooks/api/use_document_search';
 
 import { AISearchQuickStat } from './ai_search_stat';
 import { AliasesStat } from './aliases_quick_stat';

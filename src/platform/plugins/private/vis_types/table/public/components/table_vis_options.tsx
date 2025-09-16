@@ -13,14 +13,14 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import {
   SwitchOption,
   SelectOption,
   NumberInputOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { TableVisParams } from '../../common';
+import type { TableVisParams } from '../../common';
 import { totalAggregations } from './utils';
 
 const { tabifyGetColumns } = search;

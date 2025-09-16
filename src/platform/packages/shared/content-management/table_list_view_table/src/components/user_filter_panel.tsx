@@ -11,7 +11,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
+import type { UserProfile } from '@kbn/user-profile-components';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
 import { useUserProfiles, NoCreatorTip } from '@kbn/content-management-user-profiles';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceLocationErrors } from '../runtime_types';
+import type { ServiceLocationErrors } from '../runtime_types';
 
 export interface TestNowResponse {
   errors?: ServiceLocationErrors;

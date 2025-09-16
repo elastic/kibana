@@ -6,7 +6,7 @@
  */
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 
 interface PolicyProps {
@@ -42,7 +42,11 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
     spaceIds: ['default'],
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+    package: {
+      name: 'synthetics',
+      title: 'Elastic Synthetics',
+      version: INSTALLED_VERSION,
+    },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
@@ -405,6 +409,7 @@ export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
 
   policy.inputs.forEach((input) => {
+    input.id = '';
     input.streams = sortBy(input.streams, 'data_stream.dataset');
     input.streams.forEach((stream) => {
       stream.id = '';

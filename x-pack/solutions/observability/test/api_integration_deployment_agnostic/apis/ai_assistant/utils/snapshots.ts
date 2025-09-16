@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/common_paths';
 

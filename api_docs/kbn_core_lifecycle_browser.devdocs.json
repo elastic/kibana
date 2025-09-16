@@ -135,6 +135,22 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreSetup.injection",
+            "type": "Object",
+            "tags": [],
+            "label": "injection",
+            "description": [
+              "{@link CoreDiServiceSetup}"
+            ],
+            "signature": [
+              "CoreDiServiceSetup"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-public.CoreSetup.notifications",
             "type": "Object",
             "tags": [],
@@ -435,6 +451,22 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreStart.injection",
+            "type": "Object",
+            "tags": [],
+            "label": "injection",
+            "description": [
+              "{@link CoreDiServiceStart}"
+            ],
+            "signature": [
+              "CoreDiServiceStart"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-public.CoreStart.savedObjects",
             "type": "Object",
             "tags": [
@@ -466,10 +498,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
               }
             ]
           },

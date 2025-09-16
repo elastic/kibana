@@ -23,6 +23,8 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 
+const IS_CI = process.env.CI?.match(/(1|true)/i);
+
 /** @type {import('../../lib/command').Command} */
 export const command = {
   name: 'bootstrap',
@@ -47,6 +49,7 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -57,7 +60,9 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
-    const vscodeConfig = args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE;
+    const vscodeConfig =
+      !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
+    const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
@@ -102,7 +107,16 @@ export const command = {
 
     await time('pre-build webpack bundles for packages', async () => {
       log.info('pre-build webpack bundles for packages');
-      await run('yarn', ['kbn', 'build-shared']);
+      await run(
+        'yarn',
+        ['kbn', 'build-shared']
+          .concat(quiet ? ['--quiet'] : [])
+          .concat(forceInstall ? ['--no-cache'] : [])
+          .concat(allowRoot ? ['--allow-root'] : []),
+        {
+          pipe: true,
+        }
+      );
       log.success('shared webpack bundles built');
     });
 

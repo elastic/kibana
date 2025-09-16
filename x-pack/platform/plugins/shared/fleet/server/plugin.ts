@@ -150,6 +150,7 @@ import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task'
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
+import { registerSetupTasks } from './tasks/setup';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -635,7 +636,8 @@ export class FleetPlugin
       this.initializerContext.logger.get('fleet_authz_router')
     );
 
-    registerRoutes(fleetAuthzRouter, config);
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    registerRoutes(fleetAuthzRouter, config, isServerless);
 
     this.telemetryEventsSender.setup(deps.telemetry);
     // Register tasks
@@ -643,6 +645,7 @@ export class FleetPlugin
     registerDeployAgentPoliciesTask(deps.taskManager);
     registerBumpAgentPoliciesTask(deps.taskManager);
     registerPackagesBulkOperationTask(deps.taskManager);
+    registerSetupTasks(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({

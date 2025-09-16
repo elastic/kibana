@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { SignificantEventsTable } from './significant_events_table';
 
 const stories: Meta<{}> = {
@@ -43,7 +43,9 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     lifecycle: {
       inherit: {},
     },
-    processing: [],
+    processing: {
+      steps: [],
+    },
   },
 };
 

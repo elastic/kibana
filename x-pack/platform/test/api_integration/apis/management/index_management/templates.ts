@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { templatesApi } from './lib/templates.api';
 import { templatesHelpers } from './lib/templates.helpers';
 import { getRandomString } from './lib/random';

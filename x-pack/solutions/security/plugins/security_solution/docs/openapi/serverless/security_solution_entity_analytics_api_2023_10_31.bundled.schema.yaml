@@ -219,7 +219,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -355,7 +355,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Internal Server Error
       summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
@@ -487,7 +520,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  aknowledged:
+                  acknowledged:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
@@ -513,7 +546,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MonitoredUserDoc'
+              $ref: '#/components/schemas/MonitoredUserUpdateDoc'
         required: true
       responses:
         '200':
@@ -1394,6 +1427,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
@@ -1563,8 +1597,7 @@ components:
           description: >-
             The number of risk input documents that contributed to the Category
             1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: >-
             The contribution of Category 1 to the overall risk score
@@ -1572,8 +1605,7 @@ components:
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number
@@ -1765,11 +1797,22 @@ components:
     Metadata:
       $ref: '#/components/schemas/TransformStatsMetadata'
     MonitoredUserDoc:
+      allOf:
+        - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
+        - type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            event:
+              type: object
+              properties:
+                ingested:
+                  format: date-time
+                  type: string
+    MonitoredUserUpdateDoc:
       type: object
       properties:
-        '@timestamp':
-          format: date-time
-          type: string
         entity_analytics_monitoring:
           type: object
           properties:
@@ -1784,18 +1827,12 @@ components:
                   value:
                     type: string
               type: array
-        event:
-          type: object
-          properties:
-            ingested:
-              format: date-time
-              type: string
         id:
           type: string
         labels:
           type: object
           properties:
-            source_indices:
+            source_ids:
               items:
                 type: string
               type: array
@@ -1821,12 +1858,20 @@ components:
     MonitoringEngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+          properties:
+            message:
+              description: >-
+                Error message typically only present if the engine is in error
+                state
+              type: string
         status:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
-        - type
         - status
     PrivilegeMonitoringEngineStatus:
+      description: The status of the Privilege Monitoring Engine
       enum:
         - started
         - error

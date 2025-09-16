@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Response as SupertestResponse } from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Response as SupertestResponse } from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     'lowPriorityTask',
     'normalLongRunningPriorityTask',
     'sampleOneTimeTaskThrowingError',
+    'sampleRecurringTaskDisablesItself',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleRecurringTaskThatDeletesItself',
@@ -51,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
+        'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
@@ -70,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.index',
         'actions:.inference',
         'actions:.jira',
+        'actions:.jira-service-management',
         'actions:.microsoft_defender_endpoint',
         'actions:.observability-ai-assistant',
         'actions:.opsgenie',
@@ -167,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:packages-bulk-operations',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
+        'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',
         'fleet:sync-integrations-task',
         'fleet:unenroll-inactive-agents-task',
@@ -181,11 +185,13 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-saved-queries',
         'report:execute',
         'report:execute-scheduled',
+        'reporting_telemetry',
         'risk_engine:risk_scoring',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
+        'security:health-diagnostic',
         'security:indices-metadata-telemetry',
         'security:ingest-pipelines-stats-telemetry',
         'security:telemetry-configuration',

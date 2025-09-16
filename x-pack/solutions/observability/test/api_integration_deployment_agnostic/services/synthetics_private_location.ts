@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export const INSTALLED_VERSION = '1.4.2';
 
@@ -19,6 +19,8 @@ export class PrivateLocationTestService {
   private readonly retry: RetryService;
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     this.supertestWithAuth = getService('supertest');
     this.retry = getService('retry');
   }

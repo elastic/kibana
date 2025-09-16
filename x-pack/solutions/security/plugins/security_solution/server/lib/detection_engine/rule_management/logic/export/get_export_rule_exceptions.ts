@@ -14,7 +14,7 @@ import type {
   ExportExceptionListAndItemsReturn,
 } from '@kbn/lists-plugin/server';
 
-const NON_EXPORTABLE_LIST_IDS = [ENDPOINT_LIST_ID];
+const NON_EXPORTABLE_LIST_IDS = [ENDPOINT_LIST_ID] as string[];
 export const EXCEPTIONS_EXPORT_CHUNK_SIZE = 50;
 
 export const getRuleExceptionsForExport = async (

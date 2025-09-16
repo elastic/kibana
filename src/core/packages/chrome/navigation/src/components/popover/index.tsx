@@ -9,15 +9,8 @@
 
 import { EuiPopover, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, {
-  useRef,
-  useMemo,
-  useCallback,
-  cloneElement,
-  ReactNode,
-  ReactElement,
-  useEffect,
-} from 'react';
+import type { ReactNode, ReactElement } from 'react';
+import React, { useRef, useMemo, useCallback, cloneElement, useEffect } from 'react';
 
 import { focusFirstElement } from '../../utils/focus_first_element';
 import { blurPopover } from './blur_popover';
@@ -153,6 +146,7 @@ export const SideNavPopover = ({
         offset={POPOVER_OFFSET}
         ownFocus={false}
         panelPaddingSize="none"
+        repositionOnScroll
       >
         <div
           ref={popoverRef}

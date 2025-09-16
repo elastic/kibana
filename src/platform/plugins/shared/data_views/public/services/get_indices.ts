@@ -8,10 +8,12 @@
  */
 
 import { sortBy } from 'lodash';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Tag, INDEX_PATTERN_TYPE } from '../types';
-import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
+import type { Tag } from '../types';
+import { INDEX_PATTERN_TYPE } from '../types';
+import type { MatchedItem, ResolveIndexResponse } from '../types';
+import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });
 const dataStreamLabel = i18n.translate('dataViews.dataStreamLabel', {

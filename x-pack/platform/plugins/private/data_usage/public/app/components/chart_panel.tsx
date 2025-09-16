@@ -19,7 +19,8 @@ import {
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
-import { type MetricTypes, type MetricSeries } from '../../../common/rest_types';
+import type { MetricTypes } from '../../../common/rest_types';
+import type { MetricSeries } from '../../../server/routes/internal/usage_metrics';
 import { formatBytes } from '../../utils/format_bytes';
 
 // TODO: Remove this when we have a title for each metric type

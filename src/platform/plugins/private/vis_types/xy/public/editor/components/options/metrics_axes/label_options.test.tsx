@@ -10,7 +10,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { LabelOptions, LabelOptionsProps } from './label_options';
+import type { LabelOptionsProps } from './label_options';
+import { LabelOptions } from './label_options';
 import { TruncateLabelsOption } from '../../common';
 import { valueAxis } from './mocks';
 

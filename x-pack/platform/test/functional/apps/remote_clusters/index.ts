@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // refer to the below docs for CCR, Remote Clusters
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-getting-started.html#ccr-getting-started-prerequisites

@@ -1288,12 +1288,20 @@
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts"
+          },
+          {
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/types.ts"
+          },
+          {
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",

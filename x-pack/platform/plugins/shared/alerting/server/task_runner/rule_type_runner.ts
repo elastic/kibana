@@ -354,18 +354,7 @@ export class RuleTypeRunner<
     await withAlertingSpan('alerting:index-alerts-as-data', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
         if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
-          const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
-
-          // Set the event log MW ids again, this time including the ids that matched alerts with
-          // scoped query
-          if (
-            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-          ) {
-            context.alertingEventLogger.setMaintenanceWindowIds(
-              updateAlertsMaintenanceWindowResult.maintenanceWindowIds
-            );
-          }
+          await alertsClient.persistAlerts();
         } else {
           context.logger.debug(
             `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
@@ -373,6 +362,28 @@ export class RuleTypeRunner<
         }
       })
     );
+
+    await withAlertingSpan('alerting:updating-maintenance-windows', async () => {
+      if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
+        const updateAlertsMaintenanceWindowResult =
+          await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+        // Set the event log MW ids again, this time including the ids that matched alerts with
+        // scoped query
+        if (
+          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
+          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
+        ) {
+          context.alertingEventLogger.setMaintenanceWindowIds(
+            updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+          );
+        }
+      } else {
+        context.logger.debug(
+          `skipping updating alerts with maintenance windows for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
+        );
+      }
+    });
 
     alertsClient.logAlerts({
       ruleRunMetricsStore: context.ruleRunMetricsStore,

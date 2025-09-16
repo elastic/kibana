@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { FieldDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { AssignArgs } from 'xstate5';
-import { StreamEnrichmentContextType } from './types';
+import type { AssignArgs } from 'xstate5';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang/types/processors';
+import type { StreamEnrichmentContextType } from './types';
+import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
-  SampleDocumentWithUIAttributes,
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import {
+import type {
   EnrichmentUrlState,
   KqlSamplesDataSource,
   RandomSamplesDataSource,
@@ -116,14 +118,16 @@ export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
     .map((proc) => proc.context.processor);
 }
 
-export function getUpsertWiredFields(
-  context: StreamEnrichmentContextType
-): FieldDefinition | undefined {
-  if (!Streams.WiredStream.GetResponse.is(context.definition)) {
+export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
+  if (!context.simulatorRef) {
     return undefined;
   }
 
-  const originalFieldDefinition = { ...context.definition.stream.ingest.wired.fields };
+  const originalFieldDefinition = {
+    ...(Streams.WiredStream.GetResponse.is(context.definition)
+      ? context.definition.stream.ingest.wired.fields
+      : context.definition.stream.ingest.classic.field_overrides),
+  };
 
   const { detectedSchemaFields } = context.simulatorRef.getSnapshot().context;
 
@@ -133,9 +137,7 @@ export function getUpsertWiredFields(
     delete originalFieldDefinition[field.name];
   });
 
-  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields).filter(
-    (field) => !originalFieldDefinition[field.name]
-  );
+  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields);
 
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
@@ -145,18 +147,18 @@ export function getUpsertWiredFields(
 export const spawnProcessor = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
-  processor: ProcessorDefinition,
+  processor: StreamlangProcessorDefinition,
   assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;
-  const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
+  const convertedProcessor = processorConverter.toUIDefinition(processor);
 
   return spawn('processorMachine', {
-    id: processorWithUIAttributes.id,
+    id: convertedProcessor.customIdentifier,
     input: {
       parentRef: self,
-      processor: processorWithUIAttributes,
+      processor: convertedProcessor,
       isNew: options?.isNew ?? false,
     },
   });

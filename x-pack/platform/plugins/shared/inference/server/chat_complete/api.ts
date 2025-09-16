@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ChatCompleteOptions, type ChatCompleteAPI } from '@kbn/inference-common';
+import type { ChatCompleteOptions } from '@kbn/inference-common';
+import { type ChatCompleteAPI } from '@kbn/inference-common';
 import { createChatCompleteCallbackApi } from './callback_api';
-import { CreateChatCompleteApiOptions } from './types';
+import type { CreateChatCompleteApiOptions } from './types';
 
 export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
 export function createChatCompleteApi({

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Anonymization, NamedEntityRecognitionRule } from '@kbn/inference-common';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { Anonymization, NamedEntityRecognitionRule } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
-import { AnonymizationState } from './types';
+import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
 // structured data can end up being a token per character.
@@ -97,7 +97,7 @@ export async function executeNerRule({
               const response = await esClient.ml.inferTrainedModel({
                 model_id: rule.modelId,
                 docs,
-                timeout: '30s',
+                timeout: `${rule.timeoutSeconds ?? 30}s`,
               });
 
               span?.setAttribute('output.value', JSON.stringify(response.inference_results));
@@ -106,7 +106,8 @@ export async function executeNerRule({
             }
           )
         ).catch((error) => {
-          throw new Error(`Inference failed for NER model '${rule.modelId}'`, {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          throw new Error(`Inference failed for NER model '${rule.modelId}': ${errorMessage}`, {
             cause: error,
           });
         });

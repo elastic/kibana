@@ -8,11 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import * as ast from '../../../types';
+import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
-import { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,
   assignCompletionItem,
@@ -62,11 +62,7 @@ function getPosition(
   }
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
-  const expressionType = getExpressionType(
-    expressionRoot,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const expressionType = getExpressionType(expressionRoot, context?.columns);
 
   if (isExpressionComplete(expressionType, query)) {
     return CompletionPosition.AFTER_PROMPT;
@@ -161,8 +157,7 @@ export async function autocomplete(
           callbacks?.getByType,
           {
             functions: true,
-            fields: true,
-            userDefinedColumns: context?.userDefinedColumns,
+            columns: true,
           },
           {},
           callbacks?.hasMinimumLicenseRequired,

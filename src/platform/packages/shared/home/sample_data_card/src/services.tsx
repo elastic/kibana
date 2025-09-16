@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, MouseEventHandler, useContext } from 'react';
-import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { FC, PropsWithChildren, MouseEventHandler } from 'react';
+import React, { useContext } from 'react';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 
 import { SAMPLE_DATA_API } from './constants';
 

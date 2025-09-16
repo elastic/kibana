@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -18,7 +18,7 @@ import type {
   StreamsAppStartDependencies,
   StreamsApplicationProps,
 } from './types';
-import { StreamsAppServices } from './services/types';
+import type { StreamsAppServices } from './services/types';
 import {
   createDiscoverFlyoutStreamFieldLink,
   createDiscoverFlyoutStreamProcessingLink,
@@ -52,7 +52,7 @@ export class StreamsAppPlugin
 
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
-    pluginsStart.streams.status$.subscribe((status) => {
+    pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
       pluginsStart.discoverShared.features.registry.register({
         id: 'streams',

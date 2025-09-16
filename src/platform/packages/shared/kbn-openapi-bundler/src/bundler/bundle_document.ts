@@ -12,10 +12,10 @@ import { RefResolver } from './ref_resolver/ref_resolver';
 import { processDocument } from './process_document/process_document';
 import { X_INLINE } from './known_custom_props';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
-import { ResolvedDocument } from './ref_resolver/resolved_document';
+import type { ResolvedDocument } from './ref_resolver/resolved_document';
 import { BundleRefProcessor } from './process_document/document_processors/bundle_refs';
 import { RemoveUnusedComponentsProcessor } from './process_document/document_processors/remove_unused_components';
-import { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
+import type { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {

@@ -8,7 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import { Section } from '../../components/section/section';
-import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
+import type { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 import { DrilldownsWithoutEmbeddableExample } from '../drilldowns_without_embeddable_example';
 import { DrilldownsWithoutEmbeddableSingleButtonExample } from '../drilldowns_without_embeddable_single_button_example/drilldowns_without_embeddable_single_button_example';
 import { DrilldownsWithEmbeddableExample } from '../drilldowns_with_embeddable_example';

@@ -6,8 +6,8 @@
  */
 
 import { isNotFoundError } from '@kbn/es-errors';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamLifecycle,
   MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
@@ -34,7 +34,11 @@ import {
   validateDescendantFields,
   validateSystemFields,
 } from '../../helpers/validate_fields';
-import { validateRootStreamChanges } from '../../helpers/validate_stream';
+import {
+  validateNoManualIngestPipelineUsage,
+  validateRootStreamChanges,
+  validateBracketsInFieldNames,
+} from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
 import { generateIngestPipeline } from '../../ingest_pipelines/generate_ingest_pipeline';
@@ -142,13 +146,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [
                 {
                   destination: this._definition.name,
-                  if: { never: {} },
+                  where: { never: {} },
+                  status: 'disabled',
                 },
               ],
             },
@@ -171,7 +176,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: { steps: [] },
                 wired: {
                   fields: {},
                   routing: [],
@@ -206,7 +211,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                     ...currentParentRouting,
                     {
                       destination: this._definition.name,
-                      if: { never: {} },
+                      where: { never: {} },
+                      status: 'disabled',
                     },
                   ],
                 },
@@ -296,6 +302,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     const existsInStartingState = startingState.has(this._definition.name);
+
+    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
+      // recursively go through all steps to make sure it's not using manual_ingest_pipeline
+      validateNoManualIngestPipelineUsage(this._definition.ingest.processing.steps);
+    }
 
     if (!existsInStartingState) {
       // Check for conflicts
@@ -410,6 +421,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     validateSystemFields(this._definition);
+    validateBracketsInFieldNames(this._definition);
 
     if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
       return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };

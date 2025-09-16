@@ -12,7 +12,8 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { agentTypeName } from '../../saved_objects/agents';
-import { AgentClientImpl, AgentClient } from './agent_client';
+import type { AgentClient } from './agent_client';
+import { AgentClientImpl } from './agent_client';
 
 interface ConversationServiceOptions {
   logger: Logger;

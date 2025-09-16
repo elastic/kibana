@@ -9,7 +9,7 @@ import { chunk } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { MAX_INDICES_PER_REQUEST } from '../../../../common/constants';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { fetchIndices } from '../../../lib/fetch_indices';
 import { addBasePath } from '..';
 

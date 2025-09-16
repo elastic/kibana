@@ -16,7 +16,7 @@ import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-s
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { mkdirp } from '../build/lib';
 import type { MigrationSnapshot, MigrationInfoRecord, MigrationSnapshotMeta } from './types';

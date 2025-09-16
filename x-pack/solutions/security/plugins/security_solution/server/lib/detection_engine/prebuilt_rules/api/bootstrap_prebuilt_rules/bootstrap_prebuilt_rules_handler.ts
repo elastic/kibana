@@ -94,10 +94,15 @@ export const bootstrapPrebuiltRulesHandler = async (
       rules: ruleResults,
     };
 
+    logger.debug(
+      `bootstrapPrebuiltRulesHandler: Total packages installed: ${packageResults.length}`
+    );
+
     return response.ok({
       body: responseBody,
     });
   } catch (err) {
+    logger.error(`bootstrapPrebuiltRulesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

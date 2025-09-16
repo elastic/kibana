@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RoleApiCredentials, apiTest, expect } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
+import { apiTest, expect } from '@kbn/scout';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(

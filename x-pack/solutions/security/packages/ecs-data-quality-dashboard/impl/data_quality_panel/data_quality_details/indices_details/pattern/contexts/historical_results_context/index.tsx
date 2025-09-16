@@ -6,7 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { HistoricalResultsValue } from './types';
+import type { HistoricalResultsValue } from './types';
 
 export const HistoricalResultsContext = createContext<HistoricalResultsValue | null>(null);
 

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 
 import { services as functionalServices } from '../../functional/services';
-import { pageObjects } from '../../functional/page_objects';
+import type { pageObjects } from '../../functional/page_objects';
 
 import { KibanaEBTServerProvider, KibanaEBTUIProvider } from './kibana_ebt';
 

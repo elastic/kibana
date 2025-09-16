@@ -18,7 +18,7 @@ import getopts from 'getopts';
 import del from 'del';
 
 import { buildSnapshot, log } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 
 const pipelineAsync = promisify(pipeline);
 

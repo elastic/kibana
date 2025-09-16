@@ -23,6 +23,7 @@ import type {
   SiemMigrationsClientDependencies,
   SiemMigrationsCreateClientParams,
 } from '../common/types';
+import type { KibanaRequest } from '@kbn/core/server';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');
@@ -71,14 +72,10 @@ describe('SiemRuleMigrationsService', () => {
 
   describe('when createClient is called', () => {
     let createClientParams: SiemMigrationsCreateClientParams;
-
+    let request: KibanaRequest;
     beforeEach(() => {
-      createClientParams = {
-        spaceId: 'default',
-        currentUser,
-        request: httpServerMock.createKibanaRequest(),
-        dependencies,
-      };
+      request = httpServerMock.createKibanaRequest();
+      createClientParams = { spaceId: 'default', currentUser, request, dependencies };
     });
 
     describe('without setup', () => {
@@ -108,6 +105,7 @@ describe('SiemRuleMigrationsService', () => {
         ruleMigrationsService.createClient(createClientParams);
         expect(mockTaskCreateClient).toHaveBeenCalledWith({
           currentUser: createClientParams.currentUser,
+          request,
           dataClient: mockDataCreateClient(),
           dependencies,
         });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/inference-common';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
-import { AnonymizationWorkerConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from '../../config';
 
 const regexEmailRule: AnonymizationRule = {
   type: 'RegExp',
@@ -23,8 +23,8 @@ const backTrackingRule: AnonymizationRule = {
   pattern: '(a+)+$',
 };
 const taskPayload = {
-  records: [{ email: 'jorge21@gmail.com' }],
-  rule: regexEmailRule,
+  records: [{ content: 'Contact me at jorge21@gmail.com for details' }],
+  rules: [regexEmailRule],
 };
 function createTestConfig(
   overrides: Partial<AnonymizationWorkerConfig> = {}
@@ -41,27 +41,44 @@ function createTestConfig(
 
 describe('RegexWorkerService', () => {
   let logger: MockedLogger;
+  let regexWorker: RegexWorkerService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     logger = loggerMock.create();
   });
 
-  it('anonymizes through the worker', async () => {
-    const regexWorker = new RegexWorkerService(createTestConfig(), logger);
+  afterEach(async () => {
+    // Force immediate termination of worker pools
+    const piscinaWorker = (regexWorker as any).worker;
+    piscinaWorker?.destroy({ force: true });
+  });
+
+  it('detects regex matches through the worker', async () => {
+    regexWorker = new RegexWorkerService(createTestConfig(), logger);
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
     expect(worker).toBeDefined();
     expect(worker.completed).toBe(1);
-    expect(result.records[0].email).not.toContain('jorge21@gmail.com');
-    expect(result.anonymizations.length).toBe(1);
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({
+      recordIndex: 0,
+      recordKey: 'content',
+      start: expect.any(Number),
+      end: expect.any(Number),
+      matchValue: 'jorge21@gmail.com',
+      class_name: 'EMAIL',
+      ruleIndex: 0,
+    });
 
     // worker completed 2 tasks
     await regexWorker.run(taskPayload);
     expect(worker.completed).toBe(2);
   });
   it('times out task if greater than taskTimeout time', async () => {
-    const regexWorker = new RegexWorkerService(
+    regexWorker = new RegexWorkerService(
       createTestConfig({ taskTimeout: { asMilliseconds: () => 1 } } as any),
       logger
     );
@@ -69,16 +86,26 @@ describe('RegexWorkerService', () => {
     await expect(
       regexWorker.run({
         records: [{ content: longA }],
-        rule: backTrackingRule,
+        rules: [backTrackingRule],
       })
     ).rejects.toThrow('Regex anonymization task timed out');
   });
   it('runs task synchronously when worker is disabled', async () => {
-    const regexWorker = new RegexWorkerService(createTestConfig({ enabled: false }), logger);
+    regexWorker = new RegexWorkerService(createTestConfig({ enabled: false }), logger);
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
     expect(worker).toBeUndefined();
-    expect(result.records[0].email).not.toContain('jorge21@gmail.com');
-    expect(result.anonymizations.length).toBe(1);
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({
+      recordIndex: 0,
+      recordKey: 'content',
+      start: expect.any(Number),
+      end: expect.any(Number),
+      matchValue: 'jorge21@gmail.com',
+      class_name: 'EMAIL',
+      ruleIndex: 0,
+    });
   });
 });

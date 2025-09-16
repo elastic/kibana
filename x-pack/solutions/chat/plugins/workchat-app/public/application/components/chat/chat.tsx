@@ -9,7 +9,7 @@ import React, { useCallback, useRef, useEffect } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
-import { ConversationEventChanges } from '../../../../common/chat_events';
+import type { ConversationEventChanges } from '../../../../common/chat_events';
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { List, ListArray } from '.';
+import type { List, ListArray } from '.';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 export const getListMock = (): List => ({

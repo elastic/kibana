@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { useController, useWatch } from 'react-hook-form';
-import { EuiButtonEmpty, EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-import { DateFormState, ProcessorFormState } from '../../types';
+import type { DateFormState, ProcessorFormState } from '../../types';
 
 export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) => {
   const { field, fieldState } = useController<ProcessorFormState, 'formats'>({
@@ -24,7 +25,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
     },
   });
 
-  const fieldName = useWatch<DateFormState, 'field'>({ name: 'field' });
+  const fieldName = useWatch<DateFormState, 'from'>({ name: 'from' });
 
   const handleChange = (options: EuiComboBoxOptionOption[]) => {
     field.onChange(options.map((option) => option.label));

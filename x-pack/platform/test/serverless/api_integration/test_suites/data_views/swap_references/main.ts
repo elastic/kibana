@@ -14,7 +14,7 @@ import {
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');

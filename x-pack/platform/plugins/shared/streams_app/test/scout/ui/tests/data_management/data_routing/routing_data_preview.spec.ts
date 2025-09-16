@@ -17,7 +17,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await apiServices.streams.enable();
     // Generate logs data only
     await logsSynthtraceEsClient.clean();
-    await generateLogsData(logsSynthtraceEsClient);
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -47,7 +47,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -70,7 +70,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -88,7 +88,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
@@ -107,8 +107,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       JSON.stringify(
         {
           field: 'severity_text',
-          operator: 'eq',
-          value: 'info',
+          eq: 'info',
         },
         null,
         2
@@ -119,7 +118,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -133,13 +132,11 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
           and: [
             {
               field: 'severity_text',
-              operator: 'eq',
-              value: 'warn',
+              eq: 'warn',
             },
             {
               field: 'body.text',
-              operator: 'contains',
-              value: 'log',
+              contains: 'log',
             },
           ],
         },
@@ -152,15 +149,10 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
-      });
-      await pageObjects.streams.expectCellValue({
-        columnName: 'body.text',
-        rowIndex,
-        value: 'Test log message',
       });
     }
   });
@@ -178,5 +170,189 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
 
     // Should show no matching documents
     await expect(page.getByText('No documents to preview')).toBeVisible();
+  });
+
+  test('should show document filter controls when there is data by default', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.expectPreviewPanelVisible();
+
+    await expect(page.getByTestId('routingPreviewFilterControls')).toBeVisible();
+  });
+
+  test('should select matched filter by default when condition is set', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.filter-controls-test');
+
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      operator: 'equals',
+      value: 'info',
+    });
+
+    await pageObjects.streams.expectPreviewPanelVisible();
+
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeVisible();
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeVisible();
+
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('%');
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
+  });
+
+  test('should switch between matched and unmatched documents', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.filter-switch-test');
+
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      operator: 'equals',
+      value: 'info',
+    });
+
+    await pageObjects.streams.expectPreviewPanelVisible();
+    const initialRows = await pageObjects.streams.getPreviewTableRows();
+
+    // Verify all initial rows match the condition
+    for (let rowIndex = 0; rowIndex < initialRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'severity_text',
+        rowIndex,
+        value: 'info',
+      });
+    }
+
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('50%');
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('50%');
+
+    await page.getByTestId('routingPreviewUnmatchedFilterButton').click();
+
+    await pageObjects.streams.expectPreviewPanelVisible();
+
+    // Verify unmatched filter is now selected
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    // Verify unmatched documents are shown (should not contain 'info')
+    const unmatchedRows = await pageObjects.streams.getPreviewTableRows();
+    for (let rowIndex = 0; rowIndex < unmatchedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'severity_text',
+        rowIndex,
+        value: 'info',
+        invertCondition: true,
+      });
+    }
+  });
+
+  test('should maintain filter state when condition changes', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.filter-state-test');
+
+    // Set initial condition
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      operator: 'equals',
+      value: 'info',
+    });
+
+    // Switch to unmatched filter
+    await page.getByTestId('routingPreviewUnmatchedFilterButton').click();
+
+    // Verify unmatched filter is selected
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    // Change condition
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      operator: 'equals',
+      value: 'warn',
+    });
+
+    // Wait for preview to update
+    await pageObjects.streams.expectPreviewPanelVisible();
+
+    // Verify filter state is maintained (still showing unmatched)
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  test('should handle filter controls with complex conditions', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.complex-filter-test');
+
+    // Enable syntax editor and set complex condition
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+    await pageObjects.streams.fillConditionEditorWithSyntax(
+      JSON.stringify(
+        {
+          and: [
+            {
+              field: 'severity_text',
+              eq: 'info',
+            },
+            {
+              field: 'body.text',
+              contains: 'will never match',
+            },
+          ],
+        },
+        null,
+        2
+      )
+    );
+
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('0%');
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('100%');
+  });
+
+  test('should disable filter controls when no condition is set', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.no-condition-test');
+
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
+  });
+
+  test('should show filter tooltip', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    const tooltipIcon = page.getByTestId('routingPreviewFilterControlsTooltip');
+    await expect(tooltipIcon).toBeVisible();
+  });
+
+  test('should handle error states', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.error-test');
+
+    // Set a condition that might cause issues without field
+    await pageObjects.streams.fillConditionEditor({
+      operator: 'equals',
+      value: 'info',
+    });
+
+    // Verify filter controls are present
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
   });
 });

@@ -76,7 +76,9 @@ const DetectionResponseComponent = () => {
           <FiltersGlobal>
             <SiemSearchBar
               id={InputsModelId.global}
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
+              }
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">

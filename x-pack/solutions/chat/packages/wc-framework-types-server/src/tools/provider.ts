@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { Tool } from './tool';
+import type { Tool } from './tool';
 
 /**
  * Represents a tool provider exposed to a workflow to let it call tools.

@@ -10,7 +10,7 @@ import { registerAlertsFunction } from './alerts';
 import { registerQueryFunction } from './query';
 import { registerLensFunction } from './lens';
 import { registerVisualizeESQLFunction } from './visualize_esql';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { registerChangesFunction } from './changes';
 import { registerDocumentationFunction } from './documentation';
 

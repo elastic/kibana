@@ -32,7 +32,7 @@ import {
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
-import { ComplianceDashboardDataV2 } from '../../../common/types_old';
+import type { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';

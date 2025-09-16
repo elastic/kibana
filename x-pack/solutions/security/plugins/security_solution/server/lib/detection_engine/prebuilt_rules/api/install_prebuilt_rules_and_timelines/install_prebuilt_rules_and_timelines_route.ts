@@ -53,6 +53,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (
           );
           return response.ok({ body: validated ?? {} });
         } catch (err) {
+          logger.error(`installPrebuiltRulesAndTimelinesRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,
