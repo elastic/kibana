@@ -22,11 +22,9 @@
       "inference",
       "kibanaUtils",
       "lens",
-<<<<<<< HEAD
       "spaces",
       "stackConnectors",
-      "triggersActionsUi"
-=======
+      "triggersActionsUi",
       "management",
       "share"
     ],
@@ -35,7 +33,6 @@
     ],
     "optionalPlugins": [
       "cloud"
->>>>>>> upstream/main
     ],
     "extraPublicDirs": []
   }
