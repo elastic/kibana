@@ -704,3 +704,64 @@ export function getValidSignaturesAndTypesToSuggestNext(
     currentArg,
   };
 }
+
+export function getLookupIndexCreateSuggestion(
+  innerText: string,
+  indexName?: string
+): ISuggestionItem {
+  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
+  const rangeToReplace =
+    indexName && start !== -1
+      ? {
+          start,
+          end: start + indexName.length,
+        }
+      : undefined;
+  return {
+    label: indexName
+      ? i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
+
+          {
+            defaultMessage: 'Create lookup index "{indexName}"',
+
+            values: { indexName },
+          }
+        )
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
+          defaultMessage: 'Create lookup index',
+        }),
+
+    text: indexName,
+
+    kind: 'Issue',
+
+    filterText: indexName,
+
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+      {
+        defaultMessage: 'Click to create',
+      }
+    ),
+
+    sortText: '1A',
+
+    command: {
+      id: `esql.lookup_index.create`,
+
+      title: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+
+      arguments: [{ indexName }],
+    },
+
+    rangeToReplace,
+  } as ISuggestionItem;
+}
