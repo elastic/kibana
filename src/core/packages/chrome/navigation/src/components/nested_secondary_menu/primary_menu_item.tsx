@@ -68,6 +68,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
         isCurrent={isCurrent}
         onClick={handleClick}
         {...props}
+        as={hasSubmenu ? 'button' : 'a'}
       >
         {children}
         {hasSubmenu && <EuiIcon color="text" css={arrowStyle} type="arrowRight" size="m" />}
