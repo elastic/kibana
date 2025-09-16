@@ -71,6 +71,7 @@ export function createUpsertStreamActor({
 
     telemetryClient.trackProcessingSaved({
       processors_count: input.processors.length,
+      stream_type: Streams.WiredStream.GetResponse.is(input.definition) ? 'wired' : 'classic',
     });
 
     return response;

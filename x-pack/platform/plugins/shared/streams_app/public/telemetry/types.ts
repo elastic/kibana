@@ -37,6 +37,7 @@ interface StreamsAIGrokSuggestionAcceptedProps {
 
 interface StreamsProcessingSavedProps {
   processors_count: number;
+  stream_type: 'wired' | 'classic';
 }
 
 interface StreamsRetentionChangedProps {

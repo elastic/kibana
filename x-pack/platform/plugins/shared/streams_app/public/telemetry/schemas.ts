@@ -156,6 +156,12 @@ const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
       description: 'The number of processors configured on the stream',
     },
   },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
 };
 
 const streamsRetentionChangedSchema: RootSchema<StreamsRetentionChangedProps> = {
