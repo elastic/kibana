@@ -87,13 +87,14 @@ export function scrollToIntegration(selector: string) {
   cy.getBySel(INTEGRATION_LIST);
 
   return cy.window().then(async (win) => {
-    const container = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+    const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+    const integrationSelector = `[data-test-subj="${selector}"]`;
 
     let found = false;
     let i = 0;
     while (!found && i < 20) {
-      if (container) {
-        container.scrollTop = i++ * 250;
+      if (scrollContainer) {
+        scrollContainer.scrollTop = i++ * 250;
       } else {
         win.scroll(0, i++ * 250);
       }
@@ -101,8 +102,8 @@ export function scrollToIntegration(selector: string) {
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       if (
-        (container && container.querySelector(`[data-test-subj="${selector}"]`)) ||
-        (!container && win.document.querySelector(`[data-test-subj="${selector}"]`))
+        (scrollContainer && scrollContainer.querySelector(integrationSelector)) ||
+        (!scrollContainer && win.document.querySelector(integrationSelector))
       ) {
         found = true;
       }
