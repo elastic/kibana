@@ -52,6 +52,8 @@ export * as synth from './src/synth';
 export { qry, cmd, exp } from './src/synth';
 export * from './src/composer';
 
+export { esql, e } from './src/composer/esql';
+
 export {
   LeafPrinter,
   BasicPrettyPrinter,
