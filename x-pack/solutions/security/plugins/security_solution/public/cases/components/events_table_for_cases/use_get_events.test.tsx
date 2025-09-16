@@ -10,14 +10,7 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { useGetEvents } from './use_get_events';
 
-import { searchEvents } from './api';
-import { useToasts } from '../common/lib/kibana';
-import { TestProviders } from '../common/mock';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-
-jest.mock('./api');
-
-jest.mock('../common/lib/kibana');
 
 const mockDataView = {
   getIndexPattern: jest.fn(() => 'test-index'),

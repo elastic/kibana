@@ -13,8 +13,8 @@ import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
-import * as i18n from './translations';
-import { KibanaServices, useToasts } from '../../common/lib/kibana';
+import * as i18n from '../translations';
+import { KibanaServices, useToasts } from '../../../common/lib/kibana';
 
 const searchEvents = async (
   signal: AbortSignal | undefined,

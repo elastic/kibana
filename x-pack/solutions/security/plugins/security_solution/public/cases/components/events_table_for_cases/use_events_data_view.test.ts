@@ -14,7 +14,7 @@ const render = () =>
     wrapper: TestProviders,
   });
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 const mockCreate = jest.fn();
 const mockAddError = jest.fn();
@@ -24,8 +24,8 @@ const mockDataView = new DataView({
   fieldFormats: {} as FieldFormatsStart,
 });
 
-import * as kibanaLib from '../../common/lib/kibana';
-import { TestProviders } from '../../common/mock';
+import * as kibanaLib from '../../../common/lib/kibana';
+import { TestProviders } from '../../../common/mock';
 import { useCaseEventsDataView } from './use_events_data_view';
 
 describe('useEventsDataView', () => {
