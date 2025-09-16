@@ -15440,6 +15440,8 @@ paths:
                         download_source_id:
                           nullable: true
                           type: string
+                        fips_agents:
+                          type: number
                         fleet_server_host_id:
                           nullable: true
                           type: string
@@ -15835,6 +15837,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -16350,6 +16354,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -16745,6 +16751,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -17056,6 +17064,8 @@ paths:
                         download_source_id:
                           nullable: true
                           type: string
+                        fips_agents:
+                          type: number
                         fleet_server_host_id:
                           nullable: true
                           type: string
@@ -17451,6 +17461,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -17741,6 +17753,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -18136,6 +18150,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -18651,6 +18667,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -19046,6 +19064,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -19421,6 +19441,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -19816,6 +19838,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -33876,6 +33900,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -34229,6 +34255,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -34397,6 +34425,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -34740,6 +34770,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -35213,6 +35245,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -35719,6 +35753,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -36074,6 +36110,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -36241,6 +36279,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -36583,6 +36623,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -36809,6 +36851,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -37370,6 +37414,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
@@ -37694,6 +37740,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
