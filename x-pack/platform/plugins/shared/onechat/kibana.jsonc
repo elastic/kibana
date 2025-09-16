@@ -13,13 +13,18 @@
       "onechat"
     ],
     "requiredPlugins": [
+      "actions",
       "data",
       "dataViews",
+      "discover",
       "esql",
       "features",
       "inference",
       "kibanaUtils",
       "lens",
+      "spaces",
+      "stackConnectors",
+      "triggersActionsUi",
       "management",
       "share"
     ],

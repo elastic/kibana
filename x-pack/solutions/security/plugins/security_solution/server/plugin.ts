@@ -95,6 +95,10 @@ import {
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
+import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_and_acknowledged_alerts';
+import { alertCountsInternalTool } from './assistant/tools/alert_counts';
+import { productDocumentationInternalTool } from './assistant/tools/product_docs';
+import { createSiemAgentCreator } from './assistant/siem_agent_creator';
 
 import type {
   ISecuritySolutionPlugin,
@@ -141,8 +145,11 @@ import {
 } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
+import { knowledgeBaseRetrievalInternalTool } from './assistant/tools/knowledge_base/knowledge_base_retrieval_internal_tool';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { knowledgeBaseWriteInternalTool } from './assistant/tools/knowledge_base/knowledge_base_write_internal_tool';
+import { securityLabsKnowledgeInternalTool } from './assistant/tools/security_labs/security_labs_knowledge_internal_tool';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -242,6 +249,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    // Register onechat tools
+    plugins.onechat.tools.register(openAndAcknowledgedAlertsInternalTool());
+    plugins.onechat.tools.register(alertCountsInternalTool());
+    plugins.onechat.tools.register(productDocumentationInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(knowledgeBaseRetrievalInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(knowledgeBaseWriteInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
@@ -583,7 +598,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
       isFeatureEnabled: config.experimentalFeatures.defendInsights,
-      endpointContext: this.endpointContext.service,
+      endpointContext: this.endpointAppContextService,
     });
 
     if (plugins.taskManager) {
@@ -648,6 +663,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
+
+    // Create SIEM agent with open-and-acknowledged-alerts-internal-tool
+    const siemAgentCreator = createSiemAgentCreator({
+      onechatPlugin: plugins.onechat,
+      core,
+      logger: this.logger,
+      actionsPlugin: plugins.actions,
+      assistantPlugin: plugins.elasticAssistant,
+    });
+    siemAgentCreator.createSiemAgent();
 
     const manifestManager = new ManifestManager({
       savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),

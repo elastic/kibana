@@ -95,6 +95,14 @@ export interface ChatConverseParams {
    * Request bound to this call.
    */
   request: KibanaRequest;
+  /**
+   * Optional space ID for space-specific conversations.
+   */
+  spaceId?: string;
+  /**
+   * Optional tool parameters to pass to the agent.
+   */
+  toolParameters?: any;
 }
 
 export const createChatService = (options: ChatServiceOptions): ChatService => {
@@ -133,6 +141,8 @@ class ChatServiceImpl implements ChatService {
     abortSignal,
     nextInput,
     autoCreateConversationWithId = false,
+    spaceId,
+    toolParameters,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { inference } = this;
     const isNewConversation = !conversationId;
@@ -192,13 +202,18 @@ class ChatServiceImpl implements ChatService {
             nextInput,
             abortSignal,
             agentService: this.agentService,
+            toolParameters,
             defaultConnectorId: selectedConnectorId,
           });
 
           const title$ = shouldCreateNewConversation$.pipe(
             switchMap((shouldCreate) =>
               shouldCreate
-                ? generateTitle$({ chatModel, conversation$, nextInput })
+                ? generateTitle$({
+                    chatModel: chatModel.chatModel,
+                    conversation$,
+                    nextInput,
+                  })
                 : conversation$.pipe(
                     switchMap((conversation) => {
                       return of(conversation.title);
@@ -218,12 +233,15 @@ class ChatServiceImpl implements ChatService {
                     conversationId,
                     title$,
                     roundCompletedEvents$,
+                    spaceId,
+                    connectorId: chatModel.connectorId,
                   })
                 : updateConversation$({
                     conversationClient,
                     conversation$,
                     title$,
                     roundCompletedEvents$,
+                    connectorId,
                   })
             )
           );

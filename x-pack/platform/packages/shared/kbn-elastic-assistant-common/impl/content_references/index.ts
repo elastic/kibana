@@ -13,6 +13,7 @@ export {
   securityAlertsPageReference,
   productDocumentationReference,
   esqlQueryReference,
+  hrefReference,
 } from './references';
 export {
   contentReferenceString,

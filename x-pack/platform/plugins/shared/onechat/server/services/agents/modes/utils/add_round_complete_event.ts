@@ -26,6 +26,8 @@ import {
   isToolProgressEvent,
   isReasoningEvent,
 } from '@kbn/onechat-common';
+import { pruneContentReferences } from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { getCurrentTraceId } from '../../../../tracing';
 
 type SourceEvents = ChatAgentEvent;
@@ -38,8 +40,10 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 
 export const addRoundCompleteEvent = ({
   userInput,
+  contentReferencesStore,
 }: {
   userInput: RoundInput;
+  contentReferencesStore: ContentReferencesStore;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -48,7 +52,7 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const round = createRoundFromEvents({ events, input: userInput });
+          const round = createRoundFromEvents({ events, input: userInput, contentReferencesStore });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
@@ -67,9 +71,11 @@ export const addRoundCompleteEvent = ({
 const createRoundFromEvents = ({
   events,
   input,
+  contentReferencesStore,
 }: {
   events: SourceEvents[];
   input: RoundInput;
+  contentReferencesStore: ContentReferencesStore;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
   const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
@@ -108,12 +114,23 @@ const createRoundFromEvents = ({
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
+  // Get the final message content and prune content references
+  const finalMessageContent = messages[messages.length - 1]?.message_content || '';
+  const { prunedContentReferencesStore } = pruneContentReferences(
+    finalMessageContent,
+    contentReferencesStore
+  );
+
   const round: ConversationRound = {
     id: uuidv4(),
     input,
     steps: stepEvents.map(eventToStep),
     trace_id: getCurrentTraceId(),
-    response: { message: messages[messages.length - 1].message_content },
+    timestamp: new Date().toISOString(),
+    response: { message: finalMessageContent },
+    metadata: {
+      contentReferences: prunedContentReferencesStore as any,
+    },
   };
 
   return round;

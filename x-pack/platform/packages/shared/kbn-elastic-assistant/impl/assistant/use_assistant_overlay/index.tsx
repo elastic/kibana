@@ -105,11 +105,8 @@ export const useAssistantOverlay = (
   const _replacements = useMemo(() => replacements, [replacements]);
 
   // the assistant context is used to show/hide the assistant overlay:
-  const {
-    registerPromptContext,
-    showAssistantOverlay: assistantContextShowOverlay,
-    unRegisterPromptContext,
-  } = useAssistantContext();
+  const { registerPromptContext, showOneChatOverlay, unRegisterPromptContext } =
+    useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   // silent:boolean doesn't show the toast notification if the conversation is not found
@@ -124,7 +121,7 @@ export const useAssistantOverlay = (
               )
             : undefined;
 
-        assistantContextShowOverlay({
+        showOneChatOverlay({
           showOverlay,
           promptContextId,
           // conversation with id exists in the data stream, title if it's a new conversation
@@ -136,7 +133,7 @@ export const useAssistantOverlay = (
         });
       }
     },
-    [assistantContextShowOverlay, conversationTitle, isAssistantEnabled, promptContextId, refetch]
+    [showOneChatOverlay, conversationTitle, isAssistantEnabled, promptContextId, refetch]
   );
 
   useEffect(() => {

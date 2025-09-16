@@ -19,6 +19,9 @@ export { AssistantProvider, useAssistantContext } from './impl/assistant_context
 /** modal overlay for Elastic Assistant conversations */
 export { AssistantOverlay } from './impl/assistant/assistant_overlay';
 
+/** modal overlay for One Chat conversations */
+export { OneChatOverlay } from './impl/assistant/one_chat_overlay';
+
 // In addition to the `AssistantOverlay`, or as an alternative, you may use the `Assistant` component
 // to display the assistant without the modal overlay:
 

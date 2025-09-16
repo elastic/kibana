@@ -28,7 +28,7 @@ export interface RunnerFactoryDeps {
 
 export type CreateScopedRunnerExtraParams = Pick<
   CreateScopedRunnerDeps,
-  'request' | 'defaultConnectorId'
+  'request' | 'defaultConnectorId' | 'contentReferencesStore'
 >;
 
 export interface RunnerFactory {

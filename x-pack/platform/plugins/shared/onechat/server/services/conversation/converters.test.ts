@@ -37,6 +37,8 @@ describe('conversation model converters', () => {
           ],
           created_at: creationDate,
           updated_at: updateDate,
+          space_id: 'space_id',
+          connector_id: 'connector_id',
         },
       };
     };
@@ -56,7 +58,8 @@ describe('conversation model converters', () => {
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
-
+        space_id: 'space_id',
+        connector_id: 'connector_id',
         rounds: [
           {
             id: 'round-1',
@@ -125,6 +128,8 @@ describe('conversation model converters', () => {
         title: 'conv_title',
         created_at: creationDate,
         updated_at: updateDate,
+        space_id: 'space_id',
+        connector_id: 'connector_id',
         rounds: [
           {
             id: 'round-1',
@@ -163,6 +168,8 @@ describe('conversation model converters', () => {
         ],
         created_at: creationDate,
         updated_at: updateDate,
+        space_id: 'space_id',
+        connector_id: 'connector_id',
       });
     });
 

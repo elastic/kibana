@@ -55,13 +55,15 @@ export const createClient = async ({
   logger: Logger;
 }): Promise<AgentClient> => {
   const authUser = security.authc.getCurrentUser(request);
-  if (!authUser) {
+  /* if (!authUser) {
     throw new Error('No user bound to the provided request');
-  }
+  } */
 
-  const esClient = elasticsearch.client.asScoped(request).asInternalUser;
+  const esClient = !authUser
+    ? elasticsearch.client.asInternalUser
+    : elasticsearch.client.asScoped(request).asInternalUser;
   const storage = createStorage({ logger, esClient });
-  const user = { id: authUser.profile_uid!, username: authUser.username };
+  const user = !authUser ? undefined : { id: authUser.profile_uid!, username: authUser.username };
 
   return new AgentClientImpl({ storage, user, request, toolsService });
 };
@@ -70,7 +72,7 @@ class AgentClientImpl implements AgentClient {
   private readonly request: KibanaRequest;
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
-  private readonly user: UserIdAndName;
+  private readonly user?: UserIdAndName;
 
   constructor({
     storage,
@@ -80,7 +82,7 @@ class AgentClientImpl implements AgentClient {
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
-    user: UserIdAndName;
+    user?: UserIdAndName;
     request: KibanaRequest;
   }) {
     this.storage = storage;

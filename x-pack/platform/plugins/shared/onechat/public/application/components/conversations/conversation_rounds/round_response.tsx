@@ -13,7 +13,10 @@ import type {
   ConversationRoundStep,
 } from '@kbn/onechat-common';
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../../services/types';
 import { useTimer } from '../../../hooks/use_timer';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
 
@@ -31,7 +34,17 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   isLoading,
 }) => {
   const timer = useTimer({ isLoading });
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the commentActionsMounter
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const commentActionsMounter = conversationSettings?.commentActionsMounter;
   const showThinking = timer.showTimer || steps.length > 0;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -47,8 +60,19 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} steps={steps} />
+        <ChatMessageText
+          content={message}
+          steps={steps}
+          contentReferences={rawRound.metadata?.contentReferences}
+        />
       </EuiFlexItem>
+
+      {/* Render comment actions if available */}
+      {commentActionsMounter && (
+        <EuiFlexItem grow={false}>
+          {React.createElement(commentActionsMounter, { message: { content: message } })}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

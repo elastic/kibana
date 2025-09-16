@@ -19,17 +19,23 @@ import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/cha
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
-import { useAgentId } from '../hooks/use_conversation';
+import useObservable from 'react-use/lib/useObservable';
+import { useAgentId, useConnectorId } from '../hooks/use_conversation';
 import { useConversationActions } from '../hooks/use_conversation_actions';
 import { useConversationId } from '../hooks/use_conversation_id';
 import { useOnechatServices } from '../hooks/use_onechat_service';
 import { useReportConverseError } from '../hooks/use_report_error';
 import { mutationKeys } from '../mutation_keys';
+import type { ConversationSettings } from '../../services/types';
 interface UseSendMessageMutationProps {
   connectorId?: string;
+  toolParameters?: Record<string, any>;
 }
 
-const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
+const useSendMessageMutation = ({
+  connectorId,
+  toolParameters,
+}: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
   const conversationActions = useConversationActions();
@@ -53,6 +59,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
         conversationId,
         agentId,
         connectorId,
+        toolParameters,
       });
 
       events$.subscribe({
@@ -97,7 +104,10 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
             setIsResponseLoading(false);
           } else if (isConversationCreatedEvent(event)) {
             const { conversation_id: id, title } = event.data;
-            conversationActions.onConversationCreated({ conversationId: id, title });
+            conversationActions.onConversationCreated({
+              conversationId: id,
+              title,
+            });
           }
         },
         complete: () => {
@@ -196,6 +206,16 @@ interface SendMessageState {
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+  const { conversationSettingsService } = useOnechatServices();
+
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const connectorId = useConnectorId();
+  const toolParameters = conversationSettings?.toolParameters;
+
   const {
     sendMessage,
     isResponseLoading,
@@ -205,7 +225,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     retry,
     canCancel,
     cancel,
-  } = useSendMessageMutation();
+  } = useSendMessageMutation({ connectorId, toolParameters });
 
   return (
     <SendMessageContext.Provider
