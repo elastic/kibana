@@ -51,26 +51,19 @@ const PillarDetails: React.FC<PillarDetailsProps> = ({ pillarProps, pillarData }
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <div
+        <EuiProgress
+          value={completed}
+          max={total}
+          size="m"
+          color={pillarProps.color}
           css={{
             transform: 'rotate(-90deg)',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'absolute',
+            top: '70px',
+            left: '-42px',
+            width: '120px',
           }}
-        >
-          <EuiProgress
-            value={completed}
-            max={total}
-            size="m"
-            color={pillarProps.color}
-            css={{
-              position: 'absolute',
-              width: '120px',
-            }}
-          />
-        </div>
+        />
       </EuiFlexItem>
 
       <EuiFlexItem grow={9}>
