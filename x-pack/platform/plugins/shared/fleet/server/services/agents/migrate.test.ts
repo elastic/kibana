@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { AgentPolicy, Agent } from '../../types';
 
@@ -47,12 +48,14 @@ const mockedPolicy: AgentPolicy = {
 };
 
 describe('Agent migration', () => {
-  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let esClientMock: jest.Mocked<ElasticsearchClient>;
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     // Reset mocks before each test
     jest.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
+    soClientMock = savedObjectsClientMock.create();
 
     // Mock the createAgentAction response
     mockedCreateAgentAction.mockResolvedValue({
@@ -76,6 +79,7 @@ describe('Agent migration', () => {
 
       const result = await migrateSingleAgent(
         esClientMock,
+        soClientMock,
         agentId,
         mockedPolicy,
         mockedAgent,
@@ -84,7 +88,7 @@ describe('Agent migration', () => {
 
       // Verify createAgentAction was called with correct params
       expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
-      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
         agents: [agentId],
         created_at: expect.any(String),
         type: 'MIGRATE',
@@ -108,11 +112,19 @@ describe('Agent migration', () => {
         uri: 'https://test-fleet-server.example.com',
       };
 
-      await migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options);
+      await migrateSingleAgent(
+        esClientMock,
+        soClientMock,
+        agentId,
+        mockedPolicy,
+        mockedAgent,
+        options
+      );
 
       // Verify createAgentAction was called with correct params and undefined additionalSettings
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
+        soClientMock,
         expect.objectContaining({
           data: {
             enrollment_token: options.enrollment_token,
@@ -132,7 +144,7 @@ describe('Agent migration', () => {
       };
       mockedPolicy.is_protected = true;
       await expect(
-        migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options)
+        migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
       ).rejects.toThrowError('Agent is protected and cannot be migrated');
     });
   });
@@ -149,6 +161,7 @@ describe('Agent migration', () => {
 
       const result = await bulkMigrateAgents(
         esClientMock,
+        soClientMock,
         [mockedAgent, mockedAgent],
         [mockedPolicy, mockedPolicy],
         options
@@ -156,7 +169,7 @@ describe('Agent migration', () => {
 
       // Verify createAgentAction was called with correct params
       expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
-      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
         agents: [mockedAgent.id, mockedAgent.id],
         created_at: expect.any(String),
         type: 'MIGRATE',
@@ -179,6 +192,7 @@ describe('Agent migration', () => {
 
       await bulkMigrateAgents(
         esClientMock,
+        soClientMock,
         [mockedAgent, mockedAgent],
         [mockedPolicy, mockedPolicy],
         options
@@ -187,6 +201,7 @@ describe('Agent migration', () => {
       // Verify createAgentAction was called with correct params and undefined additionalSettings
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
+        soClientMock,
         expect.objectContaining({
           data: {
             enrollment_token: options.enrollment_token,
@@ -206,6 +221,7 @@ describe('Agent migration', () => {
       await expect(
         bulkMigrateAgents(
           esClientMock,
+          soClientMock,
           [mockedAgent, mockedAgent],
           [mockedPolicy, mockedPolicy],
           options

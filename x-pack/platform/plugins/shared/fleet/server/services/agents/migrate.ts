@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -14,6 +14,7 @@ import { createAgentAction } from './actions';
 
 export async function migrateSingleAgent(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentId: string,
   agentPolicy: AgentPolicy | undefined,
   agent: Agent,
@@ -23,7 +24,7 @@ export async function migrateSingleAgent(
   if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
   }
-  const response = await createAgentAction(esClient, {
+  const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'MIGRATE',
@@ -39,6 +40,7 @@ export async function migrateSingleAgent(
 
 export async function bulkMigrateAgents(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agents: Agent[],
   agentPolicies: Array<AgentPolicy | undefined>,
   options: any
@@ -61,7 +63,7 @@ export async function bulkMigrateAgents(
     );
   }
 
-  const response = await createAgentAction(esClient, {
+  const response = await createAgentAction(esClient, soClient, {
     agents: agents.map((agent) => agent.id),
     created_at: new Date().toISOString(),
     type: 'MIGRATE',

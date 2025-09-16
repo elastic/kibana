@@ -35,6 +35,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
 
   const body = await AgentService.migrateSingleAgent(
     esClient,
+    soClient,
     request.params.agentId,
     agentPolicy,
     agent,
@@ -62,7 +63,7 @@ export const bulkMigrateAgentsHandler: FleetRequestHandler<
   // then get all the policies for the agents
   const agentPolicies = await AgentService.getAgentPolicyForAgents(soClient, agents);
 
-  const body = await AgentService.bulkMigrateAgents(esClient, agents, agentPolicies, {
+  const body = await AgentService.bulkMigrateAgents(esClient, soClient, agents, agentPolicies, {
     ...options,
   });
   return response.ok({ body });

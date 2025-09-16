@@ -13,6 +13,8 @@ import type {
   AgentStatuses,
 } from '../../constants';
 
+import type { PolicySecretReference, SOSecret } from './secret';
+
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
@@ -76,6 +78,11 @@ export interface NewAgentAction {
   total?: number;
   is_automatic?: boolean;
   policyId?: string;
+  secrets?: {
+    user_info?: {
+      password?: SOSecret;
+    };
+  };
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -452,6 +459,7 @@ export interface FleetServerAgentAction {
 
   /**
    * The opaque payload.
+   * Secret properties contain a secret reference instead of a value.
    */
   data?: {
     [k: string]: unknown;
@@ -474,6 +482,11 @@ export interface FleetServerAgentAction {
 
   // the id of the policy associated with the action
   policyId?: string;
+
+  /**
+   * List of secret references associated with the action.
+   */
+  secret_references?: PolicySecretReference[];
 
   [k: string]: unknown;
 }
