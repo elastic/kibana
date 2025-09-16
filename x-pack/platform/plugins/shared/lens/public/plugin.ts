@@ -392,6 +392,13 @@ export class LensPlugin {
         return createLensEmbeddableFactory(deps);
       });
 
+      embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, async () => {
+        const { getLensPublicTransforms } = await import('./react_embeddable/transforms');
+        const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils/config_builder');
+        const builder = new LensConfigBuilder();
+        return getLensPublicTransforms(builder);
+      });
+
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensAttributes>({
         onAdd: async (container, savedObject) => {
