@@ -12,12 +12,12 @@ import { ChatMessageText } from './chat_message_text';
 interface StreamingTextProps {
   content: string;
   steps: ConversationRoundStep[];
-  charDelay?: number;
+  tokenDelay?: number; // ms between tokens. Defaults to 17ms to ensure 60fps.
 }
 
-export const StreamingText = ({ content, steps, charDelay = 10 }: StreamingTextProps) => {
+export const StreamingText = ({ content, steps, tokenDelay = 17 }: StreamingTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
-  const characterQueueRef = useRef<string[]>([]);
+  const tokenQueueRef = useRef<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousContentRef = useRef('');
 
@@ -26,23 +26,25 @@ export const StreamingText = ({ content, steps, charDelay = 10 }: StreamingTextP
     const newContent = content.slice(previousContent.length);
 
     if (newContent.length > 0) {
-      characterQueueRef.current.push(...newContent);
+      // Split the new content into tokens, preserving spaces
+      const tokens = newContent.split(/(\s+)/).filter((token) => token.length > 0);
+      tokenQueueRef.current.push(...tokens);
       previousContentRef.current = content;
     }
 
-    if (!intervalRef.current && characterQueueRef.current.length > 0) {
+    if (!intervalRef.current && tokenQueueRef.current.length > 0) {
       intervalRef.current = setInterval(() => {
-        if (characterQueueRef.current.length === 0) {
+        if (tokenQueueRef.current.length === 0) {
           clearInterval(intervalRef.current!);
           intervalRef.current = null;
           return;
         }
 
-        const nextChar = characterQueueRef.current.shift();
-        if (nextChar) {
-          setDisplayedText((prev) => prev + nextChar);
+        const nextToken = tokenQueueRef.current.shift();
+        if (nextToken) {
+          setDisplayedText((prev) => prev + nextToken);
         }
-      }, charDelay);
+      }, tokenDelay);
     }
 
     return () => {
@@ -51,7 +53,7 @@ export const StreamingText = ({ content, steps, charDelay = 10 }: StreamingTextP
         intervalRef.current = null;
       }
     };
-  }, [content, charDelay]);
+  }, [content, tokenDelay]);
 
   return <ChatMessageText content={displayedText} steps={steps} />;
 };
