@@ -9519,9 +9519,6 @@
             "tags": [],
             "label": "code",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
