@@ -226,8 +226,8 @@ components:
     
     # These entities represent the API of Entity Store
     # where entity is a root field, as it's in the final
-    # index for entities. Note that this is different form the 
-    # mapping from logs where `entity` will be nested under
+    # index for entities. Note that this is different from the 
+    # source logs mapping where `entity` will be nested under
     # `host`, `user` and `service`
     Entity:
       oneOf:
