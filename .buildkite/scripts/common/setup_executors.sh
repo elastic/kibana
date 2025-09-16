@@ -9,7 +9,9 @@ echo '--- Executor Setup'
 # we should clear previously cached EPR images,
 # (as the package registry image is quite big to keep 2 versions of)
 DEFAULT_FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/kibana-ci/package-registry-distribution:lite'
-if [ -n "${FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE:-}" && "${FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE}" != "${DEFAULT_FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE}" ]; then
+if [[ -n "${FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE:-}" \
+      && "${FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE}" != "${DEFAULT_FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE}" \
+]]; then
   echo 'Clearing previously cached EPR images'
   EPR_IMAGES=$(docker images -q "${DEFAULT_FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE}")
   if [ -n "${EPR_IMAGES}" ]; then
