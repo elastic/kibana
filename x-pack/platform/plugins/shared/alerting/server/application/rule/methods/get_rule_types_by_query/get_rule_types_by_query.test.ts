@@ -25,9 +25,8 @@ import { backfillClientMock } from '../../../../backfill_client/backfill_client.
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-describe('getRuleIdsWithGaps', () => {
+describe('getRuleTypesByQuery', () => {
   let rulesClient: RulesClient;
   let eventLogClient: ReturnType<typeof eventLogClientMock.create>;
   let rulesClientParams: jest.Mocked<ConstructorOptions>;
@@ -45,16 +44,24 @@ describe('getRuleIdsWithGaps', () => {
   const logger = loggingSystemMock.create().get();
   const eventLogger = eventLoggerMock.create();
 
-  const params = {
-    start: '2024-01-01T00:00:00.000Z',
-    end: '2024-01-02T00:00:00.000Z',
-    statuses: ['unfilled', 'partially_filled'],
-  };
-
   const filter = { type: 'mock_filter' };
 
   beforeEach(() => {
     eventLogClient = eventLogClientMock.create();
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 1,
+      page: 1,
+      aggregations: {
+        ruleTypeIds: {
+          buckets: [{ key: 'rule-type-1' }],
+        },
+      },
+    });
+
+    ruleTypeRegistry.getAllTypes.mockReturnValue(['rule-type-1', 'rule-type-2']);
 
     rulesClientParams = {
       taskManager,
@@ -108,144 +115,111 @@ describe('getRuleIdsWithGaps', () => {
     jest.resetAllMocks();
   });
 
-  describe('authorization', () => {
-    it('should get authorization filter with correct parameters', async () => {
-      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
-        aggregations: {
-          unique_rule_ids: {
-            buckets: [],
-          },
-        },
-      });
+  it('should return the correct rule types', async () => {
+    const result = await rulesClient.getRuleTypesByQuery({ ids: ['rule-1', 'rule-2'] });
 
-      await rulesClient.getRuleIdsWithGaps(params);
-
-      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalled();
-    });
-
-    it('should throw and log audit event when authorization fails', async () => {
-      const authError = new Error('Authorization failed');
-      authorization.getFindAuthorizationFilter.mockRejectedValue(authError);
-
-      await expect(rulesClient.getRuleIdsWithGaps(params)).rejects.toThrow('Authorization failed');
-
-      expect(rulesClientParams.auditLogger!.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'rule_get_rules_with_gaps',
-            outcome: 'failure',
-          }),
-          error: {
-            code: 'Error',
-            message: 'Authorization failed',
-          },
-        })
-      );
-    });
+    expect(result).toEqual({ ruleTypes: ['rule-type-1'] });
   });
 
-  describe('event log aggregation', () => {
-    it('should aggregate events with correct parameters', async () => {
-      const mockAggregations = {
-        unique_rule_ids: {
-          buckets: [{ key: 'rule-1' }, { key: 'rule-2' }],
-        },
-        latest_gap_timestamp: {
-          value: 1704067200000,
-        },
-      };
-
-      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
-        aggregations: mockAggregations,
-      });
-
-      const result = await rulesClient.getRuleIdsWithGaps(params);
-
-      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
-        RULE_SAVED_OBJECT_TYPE,
-        filter,
-        expect.objectContaining({
-          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
-          aggs: {
-            latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
-          },
-        })
-      );
-
-      expect(result).toEqual({
-        total: 2,
-        ruleIds: ['rule-1', 'rule-2'],
-        latestGapTimestamp: 1704067200000,
-      });
-    });
-
-    it('should handle empty aggregation results', async () => {
-      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
-        aggregations: {
-          unique_rule_ids: {
-            buckets: [],
-          },
-          latest_gap_timestamp: {
-            value: null,
-          },
-        },
-      });
-
-      const result = await rulesClient.getRuleIdsWithGaps(params);
-
-      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
-        RULE_SAVED_OBJECT_TYPE,
-        filter,
-        expect.objectContaining({
-          filter: expect.stringContaining(
-            'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true'
-          ),
-          aggs: {
-            latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
-          },
-        })
-      );
-
-      expect(result).toEqual({
-        total: 0,
-        ruleIds: [],
-        latestGapTimestamp: null,
-      });
-    });
-
-    it('should handle missing status filters', async () => {
-      const paramsWithoutStatuses = {
-        start: params.start,
-        end: params.end,
-      };
-
-      await rulesClient.getRuleIdsWithGaps(paramsWithoutStatuses);
-
-      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
-        RULE_SAVED_OBJECT_TYPE,
-        filter,
-        expect.objectContaining({
-          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
-          aggs: {
-            latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
-          },
-        })
-      );
-    });
+  it('throws 400 if the ids and filter are set', async () => {
+    await expect(
+      rulesClient.getRuleTypesByQuery({ ids: ['rule-1', 'rule-2'], filter: 'a-filter' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to find rule types by query: Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"`
+    );
   });
 
-  describe('error handling', () => {
-    it('should handle and wrap errors from event log client', async () => {
-      const error = new Error('Event log client error');
-      eventLogClient.aggregateEventsWithAuthFilter.mockRejectedValue(error);
+  it('converts the ids as KQL filter correctly', async () => {
+    await rulesClient.getRuleTypesByQuery({ ids: ['rule-1', 'rule-2'] });
 
-      await expect(rulesClient.getRuleIdsWithGaps(params)).rejects.toThrow(
-        'Failed to find rules with gaps'
-      );
-      expect(rulesClientParams.logger!.error).toHaveBeenCalled();
-    });
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "aggs": Object {
+          "ruleTypeIds": Object {
+            "terms": Object {
+              "field": "alert.attributes.alertTypeId",
+              "size": 2,
+            },
+          },
+        },
+        "filter": Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert.id",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert:rule-1",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert.id",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert:rule-2",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        },
+        "page": 1,
+        "perPage": 0,
+        "type": "alert",
+      }
+    `);
+  });
+
+  it('converts the filter as KQL filter correctly', async () => {
+    await rulesClient.getRuleTypesByQuery({ filter: 'a-filter' });
+
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "aggs": Object {
+          "ruleTypeIds": Object {
+            "terms": Object {
+              "field": "alert.attributes.alertTypeId",
+              "size": 2,
+            },
+          },
+        },
+        "filter": Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": null,
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "a-filter",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        },
+        "page": 1,
+        "perPage": 0,
+        "type": "alert",
+      }
+    `);
   });
 });

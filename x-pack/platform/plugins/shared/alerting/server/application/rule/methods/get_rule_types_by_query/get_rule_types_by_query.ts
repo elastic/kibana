@@ -58,7 +58,7 @@ export async function getRuleTypesByQuery(
 
     return { ruleTypes: Array.from(ruleTypeIds) };
   } catch (err) {
-    const errorMessage = `Failed to find rule types`;
+    const errorMessage = `Failed to find rule types by query`;
     context.logger.error(`${errorMessage} - ${err}`);
     throw Boom.boomify(err, { message: errorMessage });
   }
