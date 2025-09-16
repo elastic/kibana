@@ -12,38 +12,35 @@
     | [processing-command2]
     ```
 
-    <commands>
+    <source-commands>
+        Source commands select a data source.
 
-      <source-commands>
-          Source commands select a data source.
+        - FROM: Selects one or multiple indices, data streams or aliases to use as source.
+        - ROW: Produces a row with one or more columns with values that you specify.
+        - SHOW: returns information about the deployment.
+    </source-commands>
 
-          - FROM: Selects one or multiple indices, data streams or aliases to use as source.
-          - ROW: Produces a row with one or more columns with values that you specify.
-          - SHOW: returns information about the deployment.
-      </source-commands>
+    <processing-commands>
+        ES|QL processing commands change an input table by adding, removing, or changing rows and columns.
 
-      <processing-commands>
-          ES|QL processing commands change an input table by adding, removing, or changing rows and columns.
+        - DISSECT: extracts structured data out of a string, using a dissect pattern
+        - DROP: drops one or more columns
+        - ENRICH: adds data from existing indices as new columns
+        - EVAL: adds a new column with calculated values, using various type of functions
+        - GROK: extracts structured data out of a string, using a grok pattern
+        - KEEP: keeps one or more columns, drop the ones that are not kept
+        - LIMIT: returns the first n number of rows. The maximum value for this is 10000
+        - MV_EXPAND: expands multi-value columns into a single row per value
+        - RENAME: renames a column
+        - STATS ... BY: groups rows according to a common value and calculates one or more aggregated values over the grouped rows, using aggregation and grouping functions.
+        - SORT: sorts the row in a table by a column. Expressions are not supported.
+        - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
+        - [preview] RERANK: uses an inference model to compute a new relevance score for an initial set of documents
+        - [preview] SAMPLE: samples a fraction of the table rows
+        - [preview] COMPLETION: send prompts and context to an LLM
+        - [preview] CHANGE_POINT: detects spikes, dips, and change points in a metric.
+    </processing-commands>
 
-          - DISSECT: extracts structured data out of a string, using a dissect pattern
-          - DROP: drops one or more columns
-          - ENRICH: adds data from existing indices as new columns
-          - EVAL: adds a new column with calculated values, using various type of functions
-          - GROK: extracts structured data out of a string, using a grok pattern
-          - KEEP: keeps one or more columns, drop the ones that are not kept
-          - LIMIT: returns the first n number of rows. The maximum value for this is 10000
-          - MV_EXPAND: expands multi-value columns into a single row per value
-          - RENAME: renames a column
-          - STATS ... BY: groups rows according to a common value and calculates one or more aggregated values over the grouped rows, using aggregation and grouping functions.
-          - SORT: sorts the row in a table by a column. Expressions are not supported.
-          - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
-          - [preview] RERANK: uses an inference model to compute a new relevance score for an initial set of documents
-          - [preview] SAMPLE: samples a fraction of the table rows
-          - [preview] COMPLETION: send prompts and context to an LLM
-          - [preview] CHANGE_POINT: detects spikes, dips, and change points in a metric.
-      </processing-commands>
-
-    </commands>
 
     <grouping-functions>
         BUCKET: Create groups of values out of a datetime or numeric input
@@ -236,6 +233,12 @@
         ```esql
         ROW name = """Indiana "Indy" Jones"""
         ```
+
+        ### Comments
+
+        ES|QL uses C++ style comments:
+        - double slash // for single line comments
+        - /* and */ for block comments
 
         ### timespan literals
 
