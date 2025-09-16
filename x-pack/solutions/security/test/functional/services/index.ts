@@ -6,7 +6,7 @@
  */
 
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
-import { SecuritySolutionApiProvider } from './security_solution_api.gen';
+import { SecuritySolutionApiProvider } from '../../api_integration/services/security_solution_api.gen';
 
 export const services = {
   ...platformServices,
