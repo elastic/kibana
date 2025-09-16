@@ -89,9 +89,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -127,9 +128,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -157,9 +159,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeTest = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeTest.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -188,6 +191,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -217,9 +224,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeDelete.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeDelete.length).to.eql(1);
+      });
 
       await testSubjects.click('deleteConnector');
       await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -230,9 +238,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      await retry.try(async () => {
+        const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsAfterDelete.length).to.eql(0);
+      });
     });
 
     it('should bulk delete connectors', async () => {
@@ -246,10 +255,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeDelete.length).to.eql(1);
-
+      await retry.try(async () => {
+        const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeDelete.length).to.eql(1);
+      });
       await find.clickByCssSelector('.euiTableRowCellCheckbox .euiCheckbox__input');
 
       await testSubjects.click('bulkDelete');
@@ -261,17 +270,19 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      await retry.try(async () => {
+        const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsAfterDelete.length).to.eql(0);
+      });
     });
 
     it('should not be able to delete a preconfigured connector', async () => {
       const preconfiguredConnectorName = 'Serverlog';
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
-
-      const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResults.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResults.length).to.eql(1);
+      });
 
       expect(await testSubjects.exists('deleteConnector')).to.be(false);
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
@@ -284,9 +295,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const preconfiguredConnectorName = 'test-preconfigured-email';
 
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
