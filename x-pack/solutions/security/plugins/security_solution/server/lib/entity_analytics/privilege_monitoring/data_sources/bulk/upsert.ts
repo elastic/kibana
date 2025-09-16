@@ -6,7 +6,7 @@
  */
 
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
-import type { PrivMonBulkUser, PrivMonOktaIntegrationsUser } from '../../types';
+import type { PrivMonBulkUser, PrivMonOktaIntegrationsUser, PrivMonUserSource } from '../../types';
 import { UPDATE_SCRIPT_SOURCE } from '../sync/integrations/update_detection/queries';
 
 export const INDEX_SCRIPT = `
@@ -107,7 +107,7 @@ export const bulkUpsertOperationsFactoryShared =
   (dataClient: PrivilegeMonitoringDataClient) =>
   <T extends PrivMonBulkUser>(
     users: T[],
-    sourceLabel: string,
+    sourceLabel: PrivMonUserSource,
     updateScriptSource: string,
     opts: {
       buildUpdateParams: ParamsBuilder<T>;
@@ -118,7 +118,6 @@ export const bulkUpsertOperationsFactoryShared =
     const { buildUpdateParams, buildCreateDoc, shouldCreate = () => true } = opts;
     const ops: object[] = [];
     dataClient.log('info', `Building bulk operations for ${users.length} users`);
-
     for (const user of users) {
       if (user.existingUserId) {
         ops.push(

@@ -32,7 +32,6 @@ interface PrivTopHitFields {
 export interface PrivTopHit {
   _index?: string;
   _id?: string;
-  _score?: number | null; // remove
   _source?: PrivTopHitSource;
   fields?: PrivTopHitFields; // from script field
 }
@@ -68,14 +67,14 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
     let afterKey: AfterKey | undefined;
     let fetchMore = true;
-    const pageSize = 2; // TODO: make bigger, smaller for testing atm.
+    const pageSize = 100; // number of agg buckets per page
     const users: PrivMonOktaIntegrationsUser[] = [];
 
     try {
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
-          index: source.indexPattern,
-          ...buildPrivilegedSearchBody(script, 'now-10y', afterKey, pageSize), // TODO: change time range: testing atm.
+          index: source.indexPattern, // Time range relies on sync markers: https://github.com/elastic/security-team/issues/13985
+          ...buildPrivilegedSearchBody(script, 'now-10y', afterKey, pageSize),
         });
 
         const aggregations = response.aggregations;

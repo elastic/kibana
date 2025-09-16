@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { Processor } from '../../saved_objects';
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
-import type { MonitoringEntitySourceType } from '../../types';
+import type { PrivMonUserSource } from '../../types';
 
 export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
@@ -20,7 +20,7 @@ export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClie
     process,
   }: {
     soClient: SavedObjectsClientContract;
-    sourceType: MonitoringEntitySourceType;
+    sourceType: PrivMonUserSource;
     process: Processor;
   }): Promise<void> => {
     const monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({

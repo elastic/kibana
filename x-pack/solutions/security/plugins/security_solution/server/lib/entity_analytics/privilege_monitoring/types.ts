@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type PrivMonUserSource = 'csv' | 'api' | 'index_sync';
+export type PrivMonUserSource = 'csv' | 'api' | 'index_sync' | 'entity_analytics_integration';
 
 export interface PrivMonBulkUser {
   username: string;
@@ -20,5 +20,3 @@ export interface PrivMonOktaIntegrationsUser extends PrivMonBulkUser {
   lastSeen: string;
   isPrivileged: boolean;
 }
-
-export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';

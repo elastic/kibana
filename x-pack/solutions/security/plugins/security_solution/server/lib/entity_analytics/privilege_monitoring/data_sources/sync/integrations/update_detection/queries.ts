@@ -12,7 +12,11 @@ import type { AfterKey } from './privileged_status_match';
 import type { PrivMonOktaIntegrationsUser } from '../../../../types';
 import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
 
-// First step -- see which are privileged via matchers
+/**
+ * Build painless script for matcher
+ * @param matcher - matcher object containing fields and values to match against
+ * @returns
+ */
 export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
   if (!matcher || matcher.fields.length === 0 || matcher.values.length === 0) {
     throw new Error('Invalid matcher: fields and values must be defined and non-empty');
@@ -36,12 +40,15 @@ export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
     `,
   };
 };
-// First step -- see which are privileged via matchers
+
+/**
+ * Building privileged search body for matchers
+ */
 export const buildPrivilegedSearchBody = (
   script: estypes.Script,
   timeGte: string = 'now-10y',
   afterKey?: AfterKey,
-  pageSize: number = 20
+  pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => ({
   size: 0,
   query: {
@@ -68,11 +75,10 @@ export const buildPrivilegedSearchBody = (
   },
 });
 
-// Script to update privileged status and sources array based on new status from source
-// If new status is false, remove source from sources array, and if sources array is empty, set is_privileged to false
-// If new status is true, add source to sources array if not already present, and set is_privileged to true
-
-// Note: this script does not update last_seen or roles, those should be handled separately if needed: will need to update
+/** Script to update privileged status and sources array based on new status from source
+ * If new status is false, remove source from sources array, and if sources array is empty, set is_privileged to false
+ * If new status is true, add source to sources array if not already present, and set is_privileged to true
+ */
 export const UPDATE_SCRIPT_SOURCE = `
 if (params.new_privileged_status == false) {
   if (ctx._source.user.is_privileged == true) {
