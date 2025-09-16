@@ -50,12 +50,15 @@ export const createPrivilegedUsersCrudService = ({
           // Handle API labels if provided
           const apiLabels = user.entity_analytics_monitoring?.labels || [];
           const existingLabels = existingUserDoc?.entity_analytics_monitoring?.labels || [];
-          
+
           // Merge API labels with existing labels, avoiding duplicates
           const mergedLabels = [...existingLabels];
           for (const apiLabel of apiLabels) {
             const existingLabelIndex = mergedLabels.findIndex(
-              (label) => label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
+              (label) =>
+                label.field === apiLabel.field &&
+                label.value === apiLabel.value &&
+                label.source === 'api'
             );
             if (existingLabelIndex >= 0) {
               // Update existing API label
@@ -104,10 +107,11 @@ export const createPrivilegedUsersCrudService = ({
     }
 
     // Prepare API labels with source 'api'
-    const apiLabels = user.entity_analytics_monitoring?.labels?.map(label => ({
-      ...label,
-      source: 'api'
-    })) || [];
+    const apiLabels =
+      user.entity_analytics_monitoring?.labels?.map((label) => ({
+        ...label,
+        source: 'api',
+      })) || [];
 
     // Create new user
     const doc = merge(user, {
@@ -155,12 +159,13 @@ export const createPrivilegedUsersCrudService = ({
 
     const existingLabels = existingUser?.entity_analytics_monitoring?.labels || [];
     const apiLabels = user.entity_analytics_monitoring?.labels || [];
-    
+
     // Merge API labels with existing labels, avoiding duplicates
     const mergedLabels = [...existingLabels];
     for (const apiLabel of apiLabels) {
       const existingLabelIndex = mergedLabels.findIndex(
-        (label) => label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
+        (label) =>
+          label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
       );
       if (existingLabelIndex >= 0) {
         // Update existing API label
@@ -206,14 +211,14 @@ export const createPrivilegedUsersCrudService = ({
     }
 
     const sources = existingUser?.labels?.sources || [];
-    const hasNonApiSources = sources.some(source => source !== 'api');
-    
+    const hasNonApiSources = sources.some((source) => source !== 'api');
+
     if (hasNonApiSources) {
       // User has non-API sources, only remove API labels and API source
       const existingLabels = existingUser?.entity_analytics_monitoring?.labels || [];
-      const nonApiLabels = existingLabels.filter(label => label.source !== 'api');
-      const nonApiSources = sources.filter(source => source !== 'api');
-      
+      const nonApiLabels = existingLabels.filter((label) => label.source !== 'api');
+      const nonApiSources = sources.filter((source) => source !== 'api');
+
       await esClient.update({
         index,
         id,
