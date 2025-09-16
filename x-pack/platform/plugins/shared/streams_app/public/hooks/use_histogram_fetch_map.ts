@@ -26,7 +26,7 @@ function useHistogramFetch(
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+            query: `FROM ${indexPattern},${indexPattern}::failures | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
             start,
             end,
           },

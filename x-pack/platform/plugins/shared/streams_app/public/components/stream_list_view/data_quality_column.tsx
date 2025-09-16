@@ -95,15 +95,13 @@ export function DataQualityColumn({
     ? Number(failedDocsQueryFetch.value.values?.[0]?.[0])
     : 0;
 
-  const totalDocs = docCount + degradedDocCount + failedDocCount;
-
   const degradedPercentage = calculatePercentage({
-    totalDocs,
+    totalDocs: docCount,
     count: degradedDocCount,
   });
 
   const failedPercentage = calculatePercentage({
-    totalDocs,
+    totalDocs: docCount,
     count: failedDocCount,
   });
 
