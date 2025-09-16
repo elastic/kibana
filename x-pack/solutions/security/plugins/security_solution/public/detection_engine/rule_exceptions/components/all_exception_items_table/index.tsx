@@ -522,7 +522,7 @@ const ExceptionsViewerComponent = ({
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
-                canAddException={isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly}
+                isReadOnly={isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly}
                 isEndpoint={isEndpointSpecified}
                 isSearching={viewerState === 'searching'}
                 onSearch={handleSearch}
