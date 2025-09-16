@@ -9,73 +9,38 @@
 import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
-  describe('new-column suggestions', () => {
-    describe('across commands', () => {
-      test('increments suggestion (EVAL)', async () => {
-        const { suggest } = await setup();
+  describe('new-column suggestion incrementing', () => {
+    test.each([
+      'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | EVAL /',
+      'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | STATS /',
+      // even though DROP removes the columns, they still count for the purposes of naming new columns
+      'FROM a | EVAL col0 = 1, col1 = 1 | DROP col0, col1 | EVAL /',
+      // even though STATS removes the columns, they still count for the purposes of naming new columns
+      'FROM a | EVAL col0 = 1, col1 = 1 | STATS COUNT() | STATS /',
+    ])('across commands', async (query) => {
+      const { suggest } = await setup();
 
-        const suggestions = (
-          await suggest(
-            'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | EVAL /'
-          )
-        ).map((s) => s.text);
+      const suggestions = (await suggest(query)).map((s) => s.text);
 
-        expect(suggestions).toContain('col2 = ');
-        expect(suggestions).not.toContain('col1 = ');
-        expect(suggestions).not.toContain('col0 = ');
-      });
-
-      test('resets suggestion in commands that reset the fields list (STATS)', async () => {
-        const { suggest } = await setup();
-
-        const suggestions = (
-          await suggest(
-            'FROM a | EVAL col0 = 1 | ENRICH policy ON keywordField WITH col1 = integerField | STATS /'
-          )
-        ).map((s) => s.text);
-
-        expect(suggestions).toContain('col0 = ');
-        expect(suggestions).not.toContain('col1 = ');
-        expect(suggestions).not.toContain('col2 = ');
-      });
+      expect(suggestions).toContain('col2 = ');
+      expect(suggestions).not.toContain('col1 = ');
+      expect(suggestions).not.toContain('col0 = ');
     });
 
-    describe('within single command', () => {
-      test('STATS', async () => {
-        const { suggest } = await setup();
+    test.each([
+      'FROM a | STATS col0 = AVG(integerField), col1 = 3, /',
+      'FROM a | EVAL col0 = FLOOR(integerField), col1 = 3, /',
+      'ROW col0 = FLOOR(32), col1 = 3, /',
+    ])('within single command', async (query) => {
+      const { suggest } = await setup();
 
-        const suggestions = (
-          await suggest('FROM a | STATS col0 = AVG(integerField), col1 = 3, /')
-        ).map((s) => s.text);
+      const suggestions = (await suggest(query)).map((s) => s.text);
 
-        expect(suggestions).toContain('col2 = ');
-        expect(suggestions).not.toContain('col1 = ');
-        expect(suggestions).not.toContain('col0 = ');
-      });
-
-      test('EVAL', async () => {
-        const { suggest } = await setup();
-
-        const suggestions = (
-          await suggest('FROM a | EVAL col0 = FLOOR(integerField), col1 = 3, /')
-        ).map((s) => s.text);
-
-        expect(suggestions).toContain('col2 = ');
-        expect(suggestions).not.toContain('col1 = ');
-        expect(suggestions).not.toContain('col0 = ');
-      });
-
-      test('ROW', async () => {
-        const { suggest } = await setup();
-
-        const suggestions = (await suggest('ROW col0 = FLOOR(32), col1 = 3, /')).map((s) => s.text);
-
-        expect(suggestions).toContain('col2 = ');
-        expect(suggestions).not.toContain('col1 = ');
-        expect(suggestions).not.toContain('col0 = ');
-      });
-
-      test.todo('RERANK');
+      expect(suggestions).toContain('col2 = ');
+      expect(suggestions).not.toContain('col1 = ');
+      expect(suggestions).not.toContain('col0 = ');
     });
+
+    test.todo('RERANK');
   });
 });
