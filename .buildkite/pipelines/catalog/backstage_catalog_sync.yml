@@ -12,12 +12,11 @@ steps:
     key: generate_components
     commands:
       - set -euo pipefail
-      # Clone catalog-info to temp dir, clean old entries, ensure dir exists
-      - git clone https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/catalog-info.git ../catalog-info
+      - git clone https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/catalog-info.git ../catalog-info # clone catalog-info outside of kibana folder
       - rm -rf ../catalog-info/locations/kibana # clean old entries
       - mkdir -p ../catalog-info/locations/kibana # ensure dir exists
       - ts-node .buildkite/pipelines/catalog/generate_kibana_catalog_components.ts # generate new entries in ../catalog-info/locations/kibana
-      - ts-node .buildkite/pipelines/catalog/compare-and-commit-catalog-changes.ts # compare, commit, and create/update PR
+      - ts-node .buildkite/pipelines/catalog/compare-and-commit-catalog-changes.ts # compare, commit, and create/update PR in catalog-info repo
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
