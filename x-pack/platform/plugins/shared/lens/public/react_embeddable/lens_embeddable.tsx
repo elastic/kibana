@@ -19,7 +19,7 @@ import type {
 } from './types';
 
 import { loadEmbeddableData } from './data_loader';
-import { isTextBasedLanguage, deserializeState } from './helper';
+import { isTextBasedLanguage, deserializeState, transformInitialState } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import {
@@ -56,7 +56,8 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({ finalizeApi, parentApi, uuid, ...rest }) => {
+      const initialState = transformInitialState(rest.initialState);
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(

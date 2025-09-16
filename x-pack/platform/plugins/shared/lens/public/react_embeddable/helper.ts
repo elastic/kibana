@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -19,6 +19,7 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
   LensEmbeddableStartServices,
   LensRuntimeState,
@@ -32,6 +33,7 @@ import type { FormBasedPersistedState } from '../datasources/form_based/types';
 import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
+import { getLensPublicTransforms } from './transforms';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -161,5 +163,21 @@ export function getStructuredDatasourceStates(
     textBased: ((datasourceStates as DatasourceStates)?.textBased?.state ??
       datasourceStates?.textBased ??
       undefined) as TextBasedPersistedState,
+  };
+}
+
+export function transformInitialState(
+  initialState: SerializedPanelState<LensSerializedState>
+): SerializedPanelState<LensSerializedState> {
+  const builder = new LensConfigBuilder();
+  const transforms = getLensPublicTransforms(builder);
+  const transformedState = transforms.transformOut({
+    ...initialState.rawState,
+    // Why are there 2 references?
+    references: initialState.rawState.references ?? initialState?.references ?? [],
+  });
+  return {
+    ...initialState,
+    rawState: transformedState,
   };
 }
