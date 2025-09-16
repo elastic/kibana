@@ -165,7 +165,10 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       dataView = await getEsqlDataView(
         initialQuery,
         persistedTabDataView ?? currentDataView$.getValue(),
-        services
+        services,
+        {
+          createNewInstanceEvenIfCachedAvailable: true,
+        }
       );
     } else {
       // Load the requested data view if one exists, or a fallback otherwise

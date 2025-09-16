@@ -33,14 +33,17 @@ async function sha256(str: string) {
 export async function getESQLAdHocDataview(
   query: string,
   dataViewsService: DataViewsPublicPluginStart,
-  allowNoIndex?: boolean,
-  ignoreCachedInstance?: boolean
+  options?: {
+    allowNoIndex?: boolean;
+    createNewInstanceEvenIfCachedAvailable?: boolean;
+  }
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId = await sha256(`esql-${indexPattern}`);
 
-  if (ignoreCachedInstance) {
+  if (options?.createNewInstanceEvenIfCachedAvailable) {
+    // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
 
@@ -48,7 +51,7 @@ export async function getESQLAdHocDataview(
     title: indexPattern,
     type: ESQL_TYPE,
     id: dataViewId,
-    allowNoIndex,
+    allowNoIndex: options?.allowNoIndex,
   });
 
   dataView.timeFieldName = timeField;

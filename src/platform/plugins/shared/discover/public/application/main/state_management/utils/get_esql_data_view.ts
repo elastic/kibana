@@ -19,7 +19,10 @@ import type { DiscoverServices } from '../../../../build_services';
 export async function getEsqlDataView(
   query: AggregateQuery,
   currentDataView: DataView | undefined,
-  services: DiscoverServices
+  services: DiscoverServices,
+  options?: {
+    createNewInstanceEvenIfCachedAvailable?: boolean;
+  }
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   const newTimeField = getTimeFieldFromESQLQuery(query.esql);
@@ -30,7 +33,9 @@ export async function getEsqlDataView(
     (newTimeField !== currentDataView?.timeFieldName &&
       indexPatternFromQuery === currentDataView?.getIndexPattern())
   ) {
-    return await getESQLAdHocDataview(query.esql, services.dataViews, undefined, true);
+    return await getESQLAdHocDataview(query.esql, services.dataViews, {
+      createNewInstanceEvenIfCachedAvailable: options?.createNewInstanceEvenIfCachedAvailable,
+    });
   }
   return currentDataView;
 }
