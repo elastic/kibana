@@ -18,3 +18,5 @@ export const NULL_LABEL = i18n.translate('fieldFormats.string.missingLabel', {
 });
 
 export const NAN_LABEL = 'NaN';
+
+export const MISSING_TOKEN = '__missing__';

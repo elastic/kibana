@@ -15,7 +15,8 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
-import { NAN_LABEL, NULL_LABEL } from '../constants/replacement_labels';
+import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '../constants/replacement_labels';
+import { asPrettyString } from '../utils';
 
 const numeralInst = numeral();
 
@@ -37,7 +38,7 @@ export abstract class NumeralFormat extends FieldFormat {
 
   protected getConvertedValue(val: unknown): string {
     const originalVal = val;
-    if (val == null) return NULL_LABEL;
+    if (val == null || val === MISSING_TOKEN) return NULL_LABEL;
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val === 'object') return JSON.stringify(val);
@@ -75,8 +76,11 @@ export abstract class NumeralFormat extends FieldFormat {
   }
 
   htmlConvert: HtmlContextTypeConvert = (val) => {
-    if (val === null || val === '__missing__') {
+    if (val == null || val === MISSING_TOKEN) {
       return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
+    }
+    if (typeof val === 'object' && !Array.isArray(val)) {
+      return asPrettyString(val);
     }
     return this.getConvertedValue(val);
   };

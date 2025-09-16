@@ -14,7 +14,7 @@ import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils'
 import { FieldFormat } from '../field_format';
 import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-import { EMPTY_LABEL, NULL_LABEL } from '../constants/replacement_labels';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '../constants/replacement_labels';
 
 const TRANSFORM_OPTIONS = [
   {
@@ -112,7 +112,7 @@ export class StringFormat extends FieldFormat {
     if (val === '') {
       return EMPTY_LABEL;
     }
-    if (val == null || val === '__missing__') {
+    if (val == null || val === MISSING_TOKEN) {
       return NULL_LABEL;
     }
     switch (this.param('transform')) {
@@ -137,10 +137,9 @@ export class StringFormat extends FieldFormat {
     if (val === '') {
       return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
     }
-    if (val === null || val === '__missing__') {
+    if (val == null || val === MISSING_TOKEN) {
       return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
     }
-
     return hit?.highlight?.[field?.name!]
       ? getHighlightHtml(escape(val), hit.highlight[field!.name])
       : escape(this.textConvert(val));
