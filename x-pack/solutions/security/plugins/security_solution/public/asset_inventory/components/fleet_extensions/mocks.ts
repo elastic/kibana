@@ -287,7 +287,7 @@ export const getPackageInfoMock = () => {
     name: 'cloud_asset_inventory',
     description: 'Discover and Create Cloud Assets Inventory',
     owner: {
-      github: 'elastic/cloud-security-posture',
+      github: 'elastic/contextual-security',
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
     title: 'Cloud Asset Discovery',
@@ -367,7 +367,7 @@ export const getAwsPackageInfoMock = () => {
             is_default: true,
             organization: 'security',
             division: 'engineering',
-            team: 'cloud-security-posture',
+            team: 'contextual-security',
           },
         },
       },
