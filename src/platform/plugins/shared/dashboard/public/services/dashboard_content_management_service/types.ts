@@ -12,7 +12,7 @@ import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/commo
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
+import type { DashboardAttributes, DashboardAPIGetOut } from '../../../server/content_management';
 import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import type {
   FindDashboardsByIdResponse,
@@ -38,7 +38,7 @@ export interface LoadDashboardFromSavedObjectProps {
   id?: string;
 }
 
-type DashboardResolveMeta = DashboardGetOut['meta'];
+type DashboardResolveMeta = DashboardAPIGetOut['meta'];
 
 export type DashboardSearchSource = Omit<SerializedSearchSourceFields, 'query'> & {
   query?: Query;

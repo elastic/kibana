@@ -27,15 +27,13 @@ import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardItem,
-  DashboardCreateOut,
   DashboardCreateOptions,
-  DashboardGetOut,
-  DashboardSearchOut,
   DashboardUpdateOptions,
-  DashboardUpdateOut,
   DashboardSearchOptions,
+  DashboardItem,
+  DashboardGetOut,
 } from './latest';
+import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -292,11 +290,11 @@ export class DashboardStorage {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
+
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-
-    const validationError = transforms.create.out.result.validate({ item });
+    const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
