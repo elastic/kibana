@@ -47,8 +47,8 @@ paths:
           description: Entity not found
         '403':
           description: Operation on a restricted field
-        '400':
-          description: Operation on a non-existent field or on an uninitialized Engine
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
         '200':
           description: Entity updated or created
           content:
