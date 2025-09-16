@@ -114,7 +114,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             badgeOptions: {
               icon: 'beaker',
               tooltip: i18n.translate('xpack.serverlessSearch.nav.workflowsBadgeTooltip', {
-                defaultMessage: 'Technical preview',
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
             },
           },

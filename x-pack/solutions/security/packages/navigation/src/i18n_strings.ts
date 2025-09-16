@@ -33,7 +33,8 @@ export const i18nStrings = {
   },
   workflows: {
     badgeTooltip: i18n.translate('securitySolutionPackages.navLinks.workflows.badgeTooltip', {
-      defaultMessage: 'Technical preview',
+      defaultMessage:
+        'This functionality is experimental and not supported. It may change or be removed at any time.',
     }),
   },
   launchpad: {

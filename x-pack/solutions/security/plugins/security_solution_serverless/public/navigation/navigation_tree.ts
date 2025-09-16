@@ -65,12 +65,7 @@ export const createNavigationTree = async (
                 badgeTypeV2: 'techPreview' as const,
                 badgeOptions: {
                   icon: 'beaker',
-                  tooltip: i18n.translate(
-                    'xpack.securitySolutionServerless.nav.workflowsBadgeTooltip',
-                    {
-                      defaultMessage: 'Technical preview',
-                    }
-                  ),
+                  tooltip: i18nStrings.workflows.badgeTooltip,
                 },
               },
               {

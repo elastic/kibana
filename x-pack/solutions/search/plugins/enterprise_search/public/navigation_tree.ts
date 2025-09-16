@@ -125,7 +125,8 @@ export const getNavigationTreeDefinition = ({
                     tooltip: i18n.translate(
                       'xpack.enterpriseSearch.searchNav.workflowsBadgeTooltip',
                       {
-                        defaultMessage: 'Technical preview',
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
                       }
                     ),
                   },

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
@@ -60,7 +60,8 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             badgeOptions: {
               icon: 'beaker',
               tooltip: i18n.translate('xpack.observability.nav.workflowsBadgeTooltip', {
-                defaultMessage: 'Technical preview',
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
             },
           },

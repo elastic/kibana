@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
   return {
@@ -41,7 +41,8 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             badgeOptions: {
               icon: 'beaker',
               tooltip: i18n.translate('xpack.serverlessObservability.nav.workflowsBadgeTooltip', {
-                defaultMessage: 'Technical preview',
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
             },
           },
