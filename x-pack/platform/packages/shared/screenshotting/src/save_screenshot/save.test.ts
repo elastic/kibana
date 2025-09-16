@@ -38,7 +38,7 @@ describe('saveScreenshot', () => {
   });
 
   it('calls create and upload and returns upload result', async () => {
-    const uploadResult = { ok: true, size: 1234 };
+    const uploadResult = { ok: true, size: 1234, fileId: 'file-1' };
     const filesClient = {
       ...createFilesClientMock(),
       create: jest.fn().mockResolvedValue({
@@ -62,7 +62,7 @@ describe('saveScreenshot', () => {
       body: blob,
       contentType: 'image/png',
     });
-    expect(result).toBe(uploadResult);
+    expect(result).toStrictEqual(uploadResult);
     expect(filesClient.bulkDelete).not.toHaveBeenCalled();
   });
 
