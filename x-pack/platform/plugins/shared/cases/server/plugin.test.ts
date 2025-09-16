@@ -217,6 +217,11 @@ describe('Cases Plugin', () => {
               ],
               "maxSize": 1,
             },
+            "incrementalId": Object {
+              "enabled": true,
+              "taskIntervalMinutes": 10,
+              "taskStartDelayMinutes": 10,
+            },
             "markdownPlugins": Object {
               "lens": true,
             },
