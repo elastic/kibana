@@ -83,7 +83,6 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
     throw error;
   }
 }
-
 export async function createAndInstallTemplates(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,

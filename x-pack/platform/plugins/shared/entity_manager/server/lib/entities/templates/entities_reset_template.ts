@@ -19,7 +19,6 @@ import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
-  ENTITY_RESET_ILM_POLICY,
 } from '../../../../common/constants_entities';
 
 export const generateEntitiesResetIndexTemplateConfig = (
@@ -50,13 +49,6 @@ export const generateEntitiesResetIndexTemplateConfig = (
   template: {
     aliases: {
       [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_RESET })]: {},
-    },
-    settings: {
-      index: {
-        lifecycle: {
-          name: ENTITY_RESET_ILM_POLICY,
-        },
-      },
     },
   },
 });

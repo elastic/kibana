@@ -38,10 +38,6 @@ export const ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1 =
 export const ENTITY_LATEST_PREFIX_V1 =
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}` as const;
 
-// Reset constants
-export const ENTITY_RESET_ILM_POLICY =
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_ilm_policy` as const;
-
 // Transform constants
 export const ENTITY_DEFAULT_LATEST_FREQUENCY = '1m';
 export const ENTITY_DEFAULT_LATEST_SYNC_DELAY = '60s';

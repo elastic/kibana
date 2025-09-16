@@ -232,6 +232,16 @@ export async function runTask({
     );
 
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
+    logger.info(msg(`removing old entries from ${resetIndex}`));
+    const cleanResetResponse = await esClient.deleteByQuery({
+      index: resetIndex,
+      query: {
+        match_all: {},
+      },
+      refresh: true,
+    });
+    logger.info(msg(`removed ${cleanResetResponse.deleted} old entries from ${resetIndex}`));
+
     logger.info(msg(`reindexing entities to ${resetIndex}`));
     const resetReindexResponse = await esClient.reindex({
       source: {

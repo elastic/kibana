@@ -7,17 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ENTITY_HISTORY_ILM_POLICY,
-  ENTITY_RESET_ILM_POLICY,
-} from '../../../common/constants_entities';
-import { generateEntitiesResetILMPolicy } from './ilm_policies/reset_ilm_policy';
+import { ENTITY_HISTORY_ILM_POLICY } from '../../../common/constants_entities';
 import { generateEntitiesHistoryILMPolicy } from './ilm_policies/history_ilm_policy';
 import { retryTransientEsErrors } from './helpers/retry';
 
 export async function createAndInstallILMPolicies(esClient: ElasticsearchClient): Promise<void> {
-  const resetPolicy: IlmPutLifecycleRequest = generateEntitiesResetILMPolicy();
-  await esClient.ilm.putLifecycle(resetPolicy);
   const historyPolicy: IlmPutLifecycleRequest = generateEntitiesHistoryILMPolicy();
   await esClient.ilm.putLifecycle(historyPolicy);
 }
@@ -26,9 +20,6 @@ export async function getILMPoliciesStatus(
   esClient: ElasticsearchClient
 ): Promise<Array<{ type: 'ilm_policy'; id: string }>> {
   const policies: Array<{ type: 'ilm_policy'; id: string }> = [];
-
-  await esClient.ilm.getLifecycle({ name: ENTITY_RESET_ILM_POLICY });
-  policies.push({ type: 'ilm_policy', id: ENTITY_RESET_ILM_POLICY });
 
   await esClient.ilm.getLifecycle({ name: ENTITY_HISTORY_ILM_POLICY });
   policies.push({ type: 'ilm_policy', id: ENTITY_HISTORY_ILM_POLICY });
@@ -48,6 +39,5 @@ export async function deleteILMPolicy(esClient: ElasticsearchClient, name: strin
 }
 
 export async function deleteILMPolicies(esClient: ElasticsearchClient, logger: Logger) {
-  await deleteILMPolicy(esClient, ENTITY_RESET_ILM_POLICY, logger);
   await deleteILMPolicy(esClient, ENTITY_HISTORY_ILM_POLICY, logger);
 }
