@@ -53695,9 +53695,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -55395,9 +55428,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -56893,9 +56959,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -58443,9 +58542,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -60314,9 +60446,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             wired:
@@ -61927,9 +62092,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             classic:
