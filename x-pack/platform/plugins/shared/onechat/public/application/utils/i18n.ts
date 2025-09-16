@@ -14,10 +14,6 @@ export const labels = {
   tools: {
     // Landing page
     title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
-    description: i18n.translate('xpack.onechat.tools.toolsDescription', {
-      defaultMessage:
-        'Agents use tools — modular, reusable actions — to search, retrieve, and take meaningful steps on your behalf. Start with built-in capabilities from Elastic, or create your own to fit your workflow.',
-    }),
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),

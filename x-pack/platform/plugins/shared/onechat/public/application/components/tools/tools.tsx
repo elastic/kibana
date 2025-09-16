@@ -5,24 +5,57 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiText, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useToolsActions } from '../../context/tools_provider';
+import { useNavigation } from '../../hooks/use_navigation';
+import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
+  const { createOnechatUrl } = useNavigation();
 
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
         pageTitle={labels.tools.title}
-        description={labels.tools.description}
+        description={
+          <FormattedMessage
+            id="xpack.onechat.tools.toolsDescription"
+            defaultMessage="Tools are modular, reusable Elasticsearch operations. {agentsLink} use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
+            values={{
+              agentsLink: (
+                <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
+                  {i18n.translate('xpack.onechat.tools.agentsLinkText', {
+                    defaultMessage: 'Agents',
+                  })}
+                </EuiLink>
+              ),
+              learnMoreLink: (
+                <EuiLink
+                  href="#"
+                  target="_blank"
+                  external
+                  aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
+                    defaultMessage: 'Learn more about tools in the documentation',
+                  })}
+                >
+                  {i18n.translate('xpack.onechat.tools.toolsDocumentation', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
           border-block-end: none;
