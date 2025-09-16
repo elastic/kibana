@@ -22,7 +22,7 @@ import {
   type ESQLAstItem,
 } from '@kbn/esql-ast';
 import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
-import { isESQLFunction } from '@kbn/esql-ast/src/types';
+import { type ESQLColumn, isESQLFunction } from '@kbn/esql-ast/src/types';
 
 type NodeType = 'group' | 'leaf';
 
@@ -160,9 +160,6 @@ export const constructCascadeQuery = ({
     if (grouping && Object.keys(grouping).length) {
       statsCommandToOperateOn = statsCommands[i] as StatsCommand;
       break;
-    } else {
-      // remove stats command since we won't be operating on it
-      mutate.generic.commands.remove(ESQLQuery.ast, statsCommands[i]);
     }
   }
 
@@ -360,7 +357,7 @@ function handleStatsByCategorizeLeafOperation(
         }
 
         return Builder.expression.func.call('match', [
-          Builder.identifier({ name: arg.text }),
+          Builder.identifier({ name: (arg as ESQLColumn).text }),
           Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
           Builder.expression.map({
             entries: [

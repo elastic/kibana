@@ -16,9 +16,6 @@ export const relativePosition = css({ position: 'relative' });
 
 export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   container: css({ flex: '1 1 auto' }),
-  cascadeHeaderWrapper: css({
-    padding: euiTheme.size.s,
-  }),
   cascadeTreeGridHeader: css({
     position: 'sticky',
     willChange: 'transform',
