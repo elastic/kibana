@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { IngestStreamSettings, Streams } from '@kbn/streams-schema';
+import type { IngestStreamSettings } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
