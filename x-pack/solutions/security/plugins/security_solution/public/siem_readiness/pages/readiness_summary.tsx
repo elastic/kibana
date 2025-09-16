@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -13,80 +13,41 @@ import {
   EuiTitle,
   htmlIdGenerator,
   useEuiTheme,
+  EuiHealth,
+  EuiBasicTable,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { READINESS_TASKS, useReadinessTasks } from '@kbn/siem-readiness';
-import { usePillarProps } from '../hooks/use_pillar_props';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
 
-const PillarsPieChart = () => {
+interface PillarData {
+  pillar: string;
+  pillarName: string;
+  pillarColor: string;
+  completed: number;
+  total: number;
+}
+
+interface ChartDataItem {
+  pillar: string;
+  count: number;
+  color: string;
+}
+
+const PillarsPieChart: React.FC = () => {
+  const { readinessTasksStats } = useReadinessTasksStats();
   const { euiTheme } = useEuiTheme();
   const { charts } = useKibana<CoreStart>().services;
-  const { pillars } = usePillarProps();
-  const { getLatestTasks } = useReadinessTasks();
   const htmlId = htmlIdGenerator();
   const chartId = htmlId();
 
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
-
-  const latestTasksData = getLatestTasks.data || [];
-  const completedTaskIds = new Set(
-    latestTasksData.filter((task) => task.status === 'completed').map((task) => task.task_id)
-  );
-
-  // Count completed tasks per pillar
-  const pillarCounts = {
-    visibility: 0,
-    detection: 0,
-    response: 0,
-  };
-
-  let incompleteCount = 0;
-
-  READINESS_TASKS.forEach((task) => {
-    if (completedTaskIds.has(task.id)) {
-      pillarCounts[task.pillar]++;
-    } else {
-      incompleteCount++;
-    }
-  });
-
-  const chartData = useMemo(() => {
-    // Create chart data with colors from the pillars hook
-    const data = [
-      {
-        pillar: 'Visibility',
-        count: pillarCounts.visibility,
-        color: pillars.visibility.color,
-      },
-      {
-        pillar: 'Detection',
-        count: pillarCounts.detection,
-        color: pillars.detection.color,
-      },
-      {
-        pillar: 'Response',
-        count: pillarCounts.response,
-        color: pillars.response.color,
-      },
-      {
-        pillar: 'Incomplete',
-        count: incompleteCount,
-        color: euiTheme.colors.severity.unknown, // Gray color for incomplete tasks
-      },
-    ].filter((item) => item.count > 0); // Only show sections with data
-
-    return data;
-  }, [
-    getLatestTasks.data,
-    pillars,
-    euiTheme.colors.severity.unknown,
-    incompleteCount,
-    pillarCounts,
-  ]);
 
   const themeOverrides: PartialTheme = {
     partition: {
@@ -103,15 +64,15 @@ const PillarsPieChart = () => {
         <Settings baseTheme={chartBaseTheme} theme={themeOverrides} ariaLabelledBy={chartId} />
         <Partition
           id="pillarDonut"
-          data={chartData}
+          data={readinessTasksStats.chartData}
           layout={PartitionLayout.sunburst}
           valueAccessor={(d) => d.count}
           layers={[
             {
-              groupByRollup: (d: (typeof chartData)[0]) => d.pillar,
+              groupByRollup: (d: ChartDataItem) => d.pillar,
               shape: {
                 fillColor: (groupName) => {
-                  return chartData.find((d) => d.pillar === groupName)?.color;
+                  return readinessTasksStats.chartData.find((d) => d.pillar === groupName)?.color;
                 },
               },
             },
@@ -132,7 +93,7 @@ const PillarsPieChart = () => {
         }}
       >
         <EuiTitle className="eui-textCenter" size="m" style={{ fontWeight: 700 }}>
-          <h1>{`${READINESS_TASKS.length - incompleteCount}/${READINESS_TASKS.length}`}</h1>
+          <h1>{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
         </EuiTitle>
         <EuiTitle className="eui-textCenter" size="xxs">
           <h3>
@@ -146,21 +107,93 @@ const PillarsPieChart = () => {
   );
 };
 
-const PillarsMiniSummaryTable = () => {
-  // here
+const PillarsMiniSummaryTable: React.FC = () => {
+  const { readinessTasksStats } = useReadinessTasksStats();
+
+  const columns = [
+    {
+      field: 'pillarName',
+      name: 'Readiness Section',
+      render: (pillarName: string, record: PillarData) => (
+        <EuiHealth color={record.pillarColor}>{pillarName}</EuiHealth>
+      ),
+    },
+    {
+      field: 'score',
+      name: 'Task Score',
+      render: (_: unknown, record: PillarData) => `${record.completed}/${record.total}`,
+    },
+  ];
+
+  return (
+    <EuiBasicTable
+      tableCaption="Pillar Task Completion Summary"
+      items={readinessTasksStats.pillarsData}
+      columns={columns}
+      compressed
+      css={{
+        '& *': {
+          borderBlock: 'none !important',
+        },
+      }}
+    />
+  );
+};
+
+const AboutSiemReadiness = () => {
+  return (
+    <div>
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.securitySolution.siemReadiness.aboutSiemReadinessTitle"
+            defaultMessage="About SIEM Readiness"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.siemReadiness.aboutSiemReadinessDescription1"
+            defaultMessage="SIEM Readiness shows how prepared your organization is to defend against threats, built on three pillars: {visibility} (data coverage), {detection} (threat rules), and {response} (ability to act)."
+            values={{
+              visibility: <strong>{'Visibility'}</strong>,
+              detection: <strong>{'Detection'}</strong>,
+              response: <strong>{'Response'}</strong>,
+            }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.siemReadiness.aboutSiemReadinessDescription2"
+            defaultMessage="This page highlights gaps and turns them into clear tasks. Completing these tasks improves your readiness score and strengthens your security posture. Use the task list to focus on what matters—like enabling logs, deploying endpoint protection, or activating detection rules. Learn more in our {docsLink}."
+            values={{
+              docsLink: (
+                <EuiLink href="https://www.elastic.co/guide/index.html" target="_blank" external>
+                  {'docs'}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
+    </div>
+  );
 };
 
 export const ReadinessSummary = () => {
   return (
-    <EuiPanel hasBorder={true}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
+    <EuiPanel hasBorder={true} style={{ padding: '20px 40px' }}>
+      <EuiFlexGroup style={{ gap: 40 }}>
+        <EuiFlexItem grow={false}>
           <PillarsPieChart />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={3} style={{ alignSelf: 'center' }}>
           <PillarsMiniSummaryTable />
         </EuiFlexItem>
-        <EuiFlexItem>{'Summary'}</EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <AboutSiemReadiness />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

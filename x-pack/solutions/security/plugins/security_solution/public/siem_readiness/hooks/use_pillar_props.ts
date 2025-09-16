@@ -17,16 +17,22 @@ export const usePillarProps = () => {
       value: 'visibility',
       displayName: 'Visibility',
       color: euiTheme.colors.vis.euiColorVisBehindText2,
+      description:
+        'Your visibility score is how well your systems are monitored through logs, agents, and cloud telemetry.',
     },
     detection: {
       value: 'detection',
       displayName: 'Detection',
       color: euiTheme.colors.vis.euiColorVisBehindText4,
+      description:
+        'Detections measure how well your system identifies threats through tuned, active detection rules.',
     },
     response: {
       value: 'response',
       displayName: 'Response',
       color: euiTheme.colors.vis.euiColorVisBehindText0,
+      description:
+        'Response shows how quickly and effectively your team investigates and acts on detected threats.',
     },
   };
 

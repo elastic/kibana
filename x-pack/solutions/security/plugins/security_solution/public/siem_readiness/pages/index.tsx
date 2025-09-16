@@ -6,21 +6,26 @@
  */
 
 import React from 'react';
-import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { ReadinessPillarCards } from './readiness_pillar_cards';
 import { ReadinessTasksTable } from './readiness_tasks_table';
 import { ReadinessSummary } from './readiness_summary';
 
 const SiemReadinessDashboard = () => {
   return (
-    <>
+    <div style={{ maxWidth: '1600px' }}>
       <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
       <EuiPageSection>
         <ReadinessSummary />
       </EuiPageSection>
       <EuiPageSection>
+        <ReadinessPillarCards />
+      </EuiPageSection>
+      <EuiSpacer />
+      <EuiPageSection>
         <ReadinessTasksTable />
       </EuiPageSection>
-    </>
+    </div>
   );
 };
 
