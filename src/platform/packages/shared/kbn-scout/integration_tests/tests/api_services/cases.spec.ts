@@ -13,6 +13,7 @@ import { createCasePayload } from '../../fixtures/constants';
 apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   let caseId: string;
   let caseOwner = '';
+
   apiTest.beforeEach(async ({ apiServices, config }) => {
     caseOwner =
       config.serverless && config.projectType === 'security' ? 'securitySolution' : 'cases';
@@ -52,5 +53,51 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     expect(updatedResponse.status).toBe(200);
     expect(updatedResponse.data.length).toBe(1);
     expect(updatedResponse.data[0].severity).toBe('medium');
+  });
+
+  apiTest('should delete multiple cases', async ({ apiServices }) => {
+    const createdResponse1 = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+    });
+    const createdResponse2 = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+    });
+    expect(createdResponse1.status).toBe(200);
+    expect(createdResponse2.status).toBe(200);
+
+    await apiServices.cases.cleanup.deleteAllCases();
+
+    const fetchedResponse1 = await apiServices.cases.get(createdResponse1.data.id);
+    const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
+    expect(fetchedResponse1.status).toBe(404);
+    expect(fetchedResponse2.status).toBe(404);
+  });
+
+  apiTest('should delete cases by tags', async ({ apiServices }) => {
+    const createdResponse1 = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+      tags: ['tag1'],
+    });
+    const createdResponse2 = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+      tags: ['tag2'],
+    });
+    expect(createdResponse1.status).toBe(200);
+    expect(createdResponse2.status).toBe(200);
+
+    await apiServices.cases.cleanup.deleteCasesByTags(['tag1']);
+
+    const fetchedResponse1 = await apiServices.cases.get(createdResponse1.data.id);
+    const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
+
+    // this case should have been deleted because it had "tag1"
+    expect(fetchedResponse1.status).toBe(404);
+
+    // this case should have been deleted because it had "tag2"
+    expect(fetchedResponse2.status).toBe(200);
   });
 });

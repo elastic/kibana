@@ -60,6 +60,14 @@ export interface CasesApiService {
   connectors: {
     get: (spaceId?: string) => Promise<any>;
   };
+  comments: {
+    create: (
+      caseId: string,
+      params: { comment: string; type: string },
+      spaceId?: string
+    ) => Promise<any>;
+    get: (caseId: string, commentId: string, spaceId?: string) => Promise<any>;
+  };
   cleanup: {
     deleteAllCases: (spaceId?: string) => Promise<void>;
     deleteCasesByTags: (tags: string[], spaceId?: string) => Promise<void>;
@@ -72,6 +80,43 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
   };
 
   return {
+    comments: {
+      create: async (
+        caseId: string,
+        params: { comment: string; type: string },
+        spaceId?: string
+      ) => {
+        return await measurePerformanceAsync(
+          log,
+          `casesApi.comments.create [${caseId}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `${buildSpacePath(spaceId)}/api/cases/${caseId}/comments`,
+              retries: 3,
+              body: {
+                comment: params.comment,
+                type: params.type,
+              },
+            });
+          }
+        );
+      },
+      get: async (caseId: string, commentId: string, spaceId?: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `casesApi.comments.get [${caseId}, ${commentId}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'GET',
+              path: `${buildSpacePath(spaceId)}/api/cases/${caseId}/comments/${commentId}`,
+              retries: 3,
+              ignoreErrors: [404],
+            });
+          }
+        );
+      },
+    },
     create: async (params: CreateCaseParams, spaceId?: string) => {
       return await measurePerformanceAsync(
         log,
@@ -208,7 +253,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
             method: 'GET',
             path: `${buildSpacePath(spaceId)}/api/cases/_find`,
             retries: 3,
-            query: { perPage: 10000 },
+            query: { perPage: 100 },
           });
 
           const casesData = cases.data as any;
@@ -238,7 +283,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
               retries: 3,
               query: {
                 tags: tags.join(','),
-                perPage: 10000,
+                perPage: 100,
               },
             });
 
