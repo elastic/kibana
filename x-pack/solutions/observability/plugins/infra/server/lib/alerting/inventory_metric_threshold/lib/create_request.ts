@@ -21,7 +21,7 @@ import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
 const ADDITIONAL_CONTEXT_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
-const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+export const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
   '^' +
