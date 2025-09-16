@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type {
   CREATE_CASES_CAPABILITY,
