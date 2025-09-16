@@ -215,27 +215,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // Add helpful suggestions for new users
         if (searchValue.length === 0) {
           filteredSuggestions = [
-            { 
-              key: 'getting-started', 
-              label: 'Getting started', 
-              description: 'Learn the basics of Kibana',
-              icon: 'help',
-              suggestedSearch: 'getting started'
-            },
-            { 
-              key: 'create-dashboard', 
-              label: 'Create dashboard', 
-              description: 'Build your first dashboard',
-              icon: 'dashboardApp',
-              suggestedSearch: 'create dashboard'
-            },
-            { 
-              key: 'sample-data', 
-              label: 'Sample data', 
-              description: 'Explore with sample datasets',
-              icon: 'database',
-              suggestedSearch: 'sample data'
-            },
             ...suggestions.slice(0, 2)
           ];
         }
@@ -244,8 +223,33 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         filteredSuggestions = suggestions;
       }
 
-      // Create some example information items for demonstration
+      // Create information items for new users and documentation
       const exampleInfoItems = searchValue.length === 0 ? [
+        // Helpful suggestions for new users as documentation items
+        ...(designVersion === 'new-user' ? [
+          createInformationOption({
+            id: 'getting-started',
+            title: 'Getting started',
+            description: 'Learn the basics of Kibana',
+            url: '#', // This could be a real getting started URL
+            icon: 'help'
+          }),
+          createInformationOption({
+            id: 'create-dashboard',
+            title: 'Create dashboard',
+            description: 'Build your first dashboard',
+            url: '#', // This could be a real tutorial URL
+            icon: 'dashboardApp'
+          }),
+          createInformationOption({
+            id: 'sample-data',
+            title: 'Sample data',
+            description: 'Explore with sample datasets',
+            url: '#', // This could be a real sample data URL
+            icon: 'database'
+          })
+        ] : []),
+        // Documentation links for all users
         createInformationOption({
           id: 'kibana-docs',
           title: 'Kibana Documentation',

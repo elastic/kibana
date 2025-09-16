@@ -66,6 +66,77 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
 
   const rightSideContent = getRightSideContent();
 
+  // Debug: Log item details (remove this after debugging)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('SearchListItem:', { 
+      label, 
+      type, 
+      itemType: (option as any).itemType,
+      rightSideContent 
+    });
+  }
+
+  // Get icon wrapper styling based on item type
+  const getIconWrapperStyles = () => {
+    // Check for information/documentation type first
+    const isInformationType = type === 'information' || (option as any).itemType === 'information';
+    const isNavigationType = type === 'application' || type === 'dashboard' || type === 'visualization' || 
+        type === 'search' || type === 'index-pattern' || type === 'lens' || 
+        type === 'map' || type === 'canvas-workpad' || type === 'integration' ||
+        (option as any).itemType === 'navigate';
+
+    if (isInformationType) {
+      return {
+        className: 'search-item-icon-wrapper--information',
+        baseStyles: css`
+          width: 32px;
+          height: 32px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
+        `
+      };
+    }
+    
+    if (isNavigationType) {
+      return {
+        className: 'search-item-icon-wrapper--navigation',
+        baseStyles: css`
+          width: 32px;
+          height: 32px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        `
+      };
+    }
+
+    // Default wrapper for other types (suggestions, etc.)
+    return {
+      className: 'search-item-icon-wrapper--default',
+      baseStyles: css`
+        flex-shrink: 0;
+      `
+    };
+  };
+
+  const iconWrapperStyles = getIconWrapperStyles();
+
+  // Get icon color based on item type
+  const getIconColor = () => {
+    const isInformationType = type === 'information' || (option as any).itemType === 'information';
+    
+    if (isInformationType) {
+      return 'subdued'; // textSubdued color for documentation items
+    }
+    return 'primary'; // primary color for navigation items
+  };
+
   const handleClick = (event: React.MouseEvent) => {
     onClick(option, event);
   };
@@ -124,15 +195,18 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
       `}
       data-test-subj={`nav-search-option-${option.key}`}
     >
-      {/* Icon */}
+      {/* Icon with wrapper */}
       {icon && (
-        <EuiIcon
-          type={icon.type}
-          size="m"
-          css={css`
-            flex-shrink: 0;
-          `}
-        />
+        <div
+          className={iconWrapperStyles.className}
+          css={iconWrapperStyles.baseStyles}
+        >
+          <EuiIcon
+            type={icon.type}
+            size="m"
+            color={getIconColor()}
+          />
+        </div>
       )}
       
       {/* Content container with title and meta in one line */}
