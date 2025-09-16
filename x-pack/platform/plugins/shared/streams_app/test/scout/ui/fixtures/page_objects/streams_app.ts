@@ -414,14 +414,29 @@ export class StreamsApp {
     await typeSelector.selectOption(type);
   }
 
-  async saveFieldMappingChanges() {
-    await this.page.getByTestId('streamsAppSchemaEditorFieldSaveButton').click();
+  async stageFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
   }
 
   async unmapField() {
     await this.openFieldActionsMenu();
     await this.clickFieldAction('Unmap field');
-    await this.getModal().getByRole('button', { name: 'Unmap field' }).click();
+  }
+
+  async discardStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorDiscardChangesButton').click();
+  }
+
+  async reviewStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorReviewStagedChangesButton').click();
+  }
+
+  async closeSchemaReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalCancelButton').click();
+  }
+
+  async submitSchemaChanges() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
   /**

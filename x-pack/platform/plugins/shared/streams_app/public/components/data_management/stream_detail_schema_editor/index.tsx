@@ -103,7 +103,11 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty color="text" onClick={handleCancelClick}>
+                    <EuiButtonEmpty
+                      color="text"
+                      onClick={handleCancelClick}
+                      data-test-subj="streamsAppSchemaEditorDiscardChangesButton"
+                    >
                       <FormattedMessage
                         id="xpack.streams.schemaEditor.cancelButtonLabel"
                         defaultMessage="Cancel"
@@ -111,7 +115,11 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={openConfirmationModal}>
+                    <EuiButton
+                      fill
+                      onClick={openConfirmationModal}
+                      data-test-subj="streamsAppSchemaEditorReviewStagedChangesButton"
+                    >
                       <FormattedMessage
                         id="xpack.streams.schemaEditor.submitChangesButtonLabel"
                         defaultMessage="Submit changes"

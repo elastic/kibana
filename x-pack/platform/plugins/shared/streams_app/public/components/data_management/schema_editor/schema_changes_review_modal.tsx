@@ -203,7 +203,10 @@ export function SchemaChangesReviewModal({
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          data-test-subj="streamsAppSchemaChangesReviewModalCancelButton"
+        >
           <FormattedMessage
             id="xpack.streams.schemaEditor.confirmChangesModal.cancelButton"
             defaultMessage="Cancel"
@@ -215,6 +218,7 @@ export function SchemaChangesReviewModal({
           onClick={handleSubmit}
           isLoading={loading}
           disabled={isSimulating || hasSimulationErrors}
+          data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
           {confirmChangesTitle}
         </EuiButton>
