@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { mapPercentageToQuality, calculatePercentage } from '@kbn/data-quality/common';
-import { DatasetQualityIndicator } from '@kbn/data-quality/public';
+import { i18n } from '@kbn/i18n';
+import type { QualityIndicators } from '@kbn/data-quality/common';
+import { QualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -110,8 +113,19 @@ export function DataQualityColumn({
     ? mapPercentageToQuality([degradedPercentage, failedPercentage])
     : mapPercentageToQuality([degradedPercentage]);
 
-  const isLoading =
-    docsQueryFetch.loading || failedDocsQueryFetch?.loading || degradedDocsQueryFetch.loading;
+  const qualityTexts: Record<QualityIndicators, string> = {
+    poor: i18n.translate('xpack.streams.dataQualityBadge.poor', { defaultMessage: 'Poor' }),
+    degraded: i18n.translate('xpack.streams.dataQualityBadge.degraded', {
+      defaultMessage: 'Degraded',
+    }),
+    good: i18n.translate('xpack.streams.dataQualityBadge.good', { defaultMessage: 'Good' }),
+  };
 
-  return <DatasetQualityIndicator quality={quality} isLoading={isLoading} />;
+  return docsQueryFetch.loading ||
+    failedDocsQueryFetch?.loading ||
+    degradedDocsQueryFetch.loading ? (
+    <EuiLoadingSpinner />
+  ) : (
+    <QualityIndicator quality={quality} description={qualityTexts[quality]} />
+  );
 }

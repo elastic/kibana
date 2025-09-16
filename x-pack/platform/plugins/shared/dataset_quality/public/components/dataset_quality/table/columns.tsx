@@ -25,20 +25,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
-import { DatasetQualityIndicator, QualityIndicator } from '@kbn/data-quality/public';
-import {
-  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
-  POOR_QUALITY_MINIMUM_PERCENTAGE,
-} from '@kbn/data-quality/common';
 import {
   BYTE_NUMBER_FORMAT,
   DEGRADED_DOCS_QUERY,
+  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   FAILURE_STORE_SELECTOR,
+  POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import type { TimeRangeConfig } from '../../../../common/types';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { IntegrationIcon, PrivilegesWarningIconWrapper } from '../../common';
+import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 import { QualityStatPercentageLink } from './quality_stat_percentage_link';
 
