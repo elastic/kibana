@@ -11,6 +11,12 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 import { useGetEvents } from './use_get_events';
 
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { searchEvents } from './search_events';
+import { TestProviders } from '../../../common/mock';
+import { useToasts } from '../../../common/lib/kibana';
+
+jest.mock('./search_events');
+jest.mock('../../../common/lib/kibana');
 
 const mockDataView = {
   getIndexPattern: jest.fn(() => 'test-index'),
@@ -28,9 +34,9 @@ describe('useGetEvents', () => {
     const { result } = renderHook(
       () =>
         useGetEvents(mockDataView, {
-          caseId: 'case-1',
           columns: ['col1', 'col2'],
           eventIds: ['id1', 'id2'],
+          sort: [],
         }),
       { wrapper: TestProviders }
     );
@@ -38,9 +44,9 @@ describe('useGetEvents', () => {
     await waitFor(() => result.current.isSuccess);
 
     expect(searchEvents).toHaveBeenCalledWith(expect.anything(), mockDataView, {
-      caseId: 'case-1',
       columns: ['col1', 'col2'],
       eventIds: ['id1', 'id2'],
+      sort: [],
     });
     expect(result.current.data).toEqual({ isPartial: false, foo: 'bar' });
   });
@@ -51,9 +57,9 @@ describe('useGetEvents', () => {
     renderHook(
       () =>
         useGetEvents(mockDataView, {
-          caseId: 'case-1',
           columns: [],
           eventIds: [],
+          sort: [],
         }),
       { wrapper: TestProviders }
     );
@@ -65,11 +71,11 @@ describe('useGetEvents', () => {
     jest.mocked(searchEvents).mockRejectedValue(new AbortError());
 
     const { rerender } = renderHook(
-      (caseId: string) =>
+      (eventIds: string[] = []) =>
         useGetEvents(mockDataView, {
-          caseId,
           columns: [],
-          eventIds: [],
+          eventIds,
+          sort: [],
         }),
       { wrapper: TestProviders }
     );
@@ -79,7 +85,7 @@ describe('useGetEvents', () => {
 
     // NOTE: just to test if the call count is 1
     jest.mocked(searchEvents).mockRejectedValue(new Error());
-    rerender('case-2');
+    rerender(['mock-event-id']);
     await waitFor(() => expect(useToasts().addError).toHaveBeenCalled());
     expect(jest.mocked(useToasts().addError)).toHaveBeenCalledTimes(1);
   });
