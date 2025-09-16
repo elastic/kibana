@@ -81,12 +81,11 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
         return <UnknownMigration />;
       }
 
-      if (migrationStats.status === SiemMigrationTaskStatus.RUNNING) {
-        return <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />;
-      }
-
       return (
         <>
+          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+            <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+          )}
           {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
             <>
               <DashboardMigrationsUploadMissingPanel
