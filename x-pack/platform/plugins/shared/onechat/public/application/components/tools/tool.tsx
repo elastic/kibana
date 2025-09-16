@@ -290,6 +290,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     http,
     navigateToUrl,
     openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   return (
@@ -368,7 +369,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             {mode !== ToolFormMode.View && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
+                <EuiButtonEmpty
+                  aria-label={labels.tools.cancelButtonLabel}
+                  size="s"
+                  iconType="cross"
+                  color="text"
+                  onClick={handleCancel}
+                >
                   {labels.tools.cancelButtonLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>

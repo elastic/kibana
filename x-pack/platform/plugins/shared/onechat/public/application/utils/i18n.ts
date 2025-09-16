@@ -232,6 +232,9 @@ export const labels = {
       optionalLabel: i18n.translate('xpack.onechat.agents.form.settings.optionalLabel', {
         defaultMessage: 'Optional',
       }),
+      cancelButtonLabel: i18n.translate('xpack.onechat.agents.form.settings.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
     },
   },
   management: {
