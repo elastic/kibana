@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
 
@@ -26,6 +27,14 @@ export const useConvertIndexToLookup = ({
 }: UseConvertIndexToLookupArgs) => {
   const [isConverting, setIsConverting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const onSuccessRef = useRef(onSuccess);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onCloseRef.current = onClose;
+  }, [onSuccess, onClose]);
 
   const pollIntervalIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -49,15 +58,30 @@ export const useConvertIndexToLookup = ({
 
     if (data?.reindexOp?.status === ReindexStatus.inProgress) {
       pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
+    } else if (
+      data?.reindexOp?.status === ReindexStatus.failed ||
+      data?.reindexOp?.status === ReindexStatus.cancelled
+    ) {
+      setErrorMessage(
+        data?.reindexOp?.errorMessage ??
+          i18n.translate(
+            'xpack.idxMgmt.convertToLookupIndexAction.reindexFailedOrCancelledErrorMessage',
+            {
+              defaultMessage: 'Reindex did not complete successfully.',
+            }
+          )
+      );
+      setIsConverting(false);
+      return;
     } else {
       setIsConverting(false);
-      onClose();
+      onCloseRef.current();
 
       if (data?.reindexOp?.newIndexName) {
-        onSuccess(data.reindexOp.newIndexName);
+        onSuccessRef.current(data.reindexOp.newIndexName);
       }
     }
-  }, [clearPollInterval, sourceIndexName, onClose, onSuccess]);
+  }, [clearPollInterval, sourceIndexName]);
 
   const convert = async (lookupIndexName: string) => {
     setIsConverting(true);
@@ -78,7 +102,7 @@ export const useConvertIndexToLookup = ({
     return () => {
       clearPollInterval();
     };
-  }, [clearPollInterval]);
+  }, [clearPollInterval, sourceIndexName]);
 
   return { isConverting, errorMessage, convert };
 };
