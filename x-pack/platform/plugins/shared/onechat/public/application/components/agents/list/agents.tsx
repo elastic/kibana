@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AgentsList } from './agents_list';
@@ -50,10 +50,7 @@ export const OnechatAgents = () => {
               defaultMessage="Define agents with custom instructions and assign them {toolsLink} to answer questions about your data and take actions on your behalf. {learnMoreLink}"
               values={{
                 toolsLink: (
-                  <EuiLink
-                    onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
-                    style={{ cursor: 'pointer' }}
-                  >
+                  <EuiLink onClick={() => navigateToOnechatUrl(appPaths.tools.list)}>
                     {i18n.translate('xpack.onechat.agents.toolsLinkText', {
                       defaultMessage: 'tools',
                     })}
@@ -62,6 +59,7 @@ export const OnechatAgents = () => {
                 learnMoreLink: (
                   <EuiLink
                     href="#"
+                    external
                     aria-label={i18n.translate(
                       'xpack.onechat.agents.agentsDocumentationAriaLabel',
                       {
@@ -71,8 +69,7 @@ export const OnechatAgents = () => {
                   >
                     {i18n.translate('xpack.onechat.agents.agentsDocumentation', {
                       defaultMessage: 'Learn more',
-                    })}{' '}
-                    <EuiIcon type="popout" />
+                    })}
                   </EuiLink>
                 ),
               }}

@@ -48,20 +48,14 @@ export const NewConversationPrompt: React.FC<{}> = () => {
         defaultMessage="Work interactively with your AI {agentsLink} using the chat interface. Your selected agent answers questions by searching your data with its assigned {toolsLink}."
         values={{
           agentsLink: (
-            <EuiLink
-              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-              style={{ cursor: 'pointer' }}
-            >
+            <EuiLink onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
               {i18n.translate('xpack.onechat.newConversationPrompt.agentsLinkText', {
                 defaultMessage: 'agents',
               })}
             </EuiLink>
           ),
           toolsLink: (
-            <EuiLink
-              onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
-              style={{ cursor: 'pointer' }}
-            >
+            <EuiLink onClick={() => navigateToOnechatUrl(appPaths.tools.list)}>
               {i18n.translate('xpack.onechat.newConversationPrompt.toolsLinkText', {
                 defaultMessage: 'tools',
               })}

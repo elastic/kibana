@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText, EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiText, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -33,10 +33,7 @@ export const OnechatTools = () => {
             defaultMessage="Tools are modular, reusable Elasticsearch operations. {agentsLink} use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
             values={{
               agentsLink: (
-                <EuiLink
-                  onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-                  style={{ cursor: 'pointer' }}
-                >
+                <EuiLink onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
                   {i18n.translate('xpack.onechat.tools.agentsLinkText', {
                     defaultMessage: 'Agents',
                   })}
@@ -45,14 +42,14 @@ export const OnechatTools = () => {
               learnMoreLink: (
                 <EuiLink
                   href="#"
+                  external
                   aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
                     defaultMessage: 'Learn more about tools in the documentation',
                   })}
                 >
                   {i18n.translate('xpack.onechat.tools.toolsDocumentation', {
                     defaultMessage: 'Learn more',
-                  })}{' '}
-                  <EuiIcon type="popout" />
+                  })}
                 </EuiLink>
               ),
             }}

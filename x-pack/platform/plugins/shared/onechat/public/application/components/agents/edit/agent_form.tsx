@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiNotificationBadge,
@@ -410,6 +409,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 learnMoreLink: (
                   <EuiLink
                     href="#"
+                    external
                     aria-label={i18n.translate(
                       'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
                       {
@@ -422,8 +422,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                       {
                         defaultMessage: 'Learn more',
                       }
-                    )}{' '}
-                    <EuiIcon type="popout" />
+                    )}
                   </EuiLink>
                 ),
               }}

@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -324,6 +323,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                   learnMoreLink: (
                     <EuiLink
                       href="#"
+                      external
                       aria-label={i18n.translate(
                         'xpack.onechat.tools.createToolDocumentationAriaLabel',
                         {
@@ -333,8 +333,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                     >
                       {i18n.translate('xpack.onechat.tools.createToolDocumentation', {
                         defaultMessage: 'Learn more',
-                      })}{' '}
-                      <EuiIcon type="popout" />
+                      })}
                     </EuiLink>
                   ),
                 }}

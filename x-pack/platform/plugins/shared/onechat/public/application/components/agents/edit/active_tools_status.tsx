@@ -97,10 +97,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   defaultMessage="{toolsLink} enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options."
                   values={{
                     toolsLink: (
-                      <EuiLink
-                        onClick={() => navigateToOnechatUrl(appPaths.tools.list)}
-                        style={{ cursor: 'pointer' }}
-                      >
+                      <EuiLink onClick={() => navigateToOnechatUrl(appPaths.tools.list)}>
                         {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
                           defaultMessage: 'Tools',
                         })}
