@@ -110,6 +110,7 @@ export function generateEsqlTask({
         system: generateEsqlPrompt({
           esqlPrompts: docBase.getPrompts(),
           additionalSystemInstructions,
+          hasTools: !functionLimitReached && Object.keys(tools ?? {}).length > 0,
         }),
         messages: [
           ...messages,

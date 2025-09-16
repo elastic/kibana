@@ -18,6 +18,12 @@
 
     3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety `LIMIT 250` and state that this limit was added to protect the system.
 
+    ## Respect the mappings or field definitions
+
+    If the user, or a tool, provides in the discussion the mappings or a list of fields present in the index, you should **ONLY** use
+    the provided fields to create your query. Do not assume other fields may exist. Only use the set of fields
+    which were provided by the user.
+
     ## Don't use tech preview features unless specified otherwise
 
     Using tech preview commands, functions or other features should be avoided unless specifically asked by the user.
@@ -44,5 +50,8 @@
     If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
     the user. DO NOT invent capabilities not described in the documentation just to provide
     a positive answer to the user.
+
+    When converting queries from one language to ES|QL, make sure that the functions are available
+    and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
 
 </instructions>

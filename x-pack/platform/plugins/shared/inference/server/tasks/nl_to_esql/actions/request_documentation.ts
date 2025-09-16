@@ -44,7 +44,7 @@ export const requestDocumentation = ({
     maxRetries,
     retryConfiguration,
     metadata,
-    system: requestDocumentationSystemPrompt({ esqlPrompts, toolOptions }),
+    system: requestDocumentationSystemPrompt({ esqlPrompts }),
     previousMessages: messages,
     input: `Now, based on the previous conversation, request documentation
         from the ES|QL handbook to help you get the right information
