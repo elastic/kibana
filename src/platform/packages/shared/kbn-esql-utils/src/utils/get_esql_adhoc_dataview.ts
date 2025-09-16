@@ -40,7 +40,7 @@ export async function getESQLAdHocDataview(
   const dataView = await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
-    id: await sha256(`esql-${indexPattern}`),
+    id: await sha256(`esql-${indexPattern}-${timeField ?? 'no-timefield'}`),
     allowNoIndex,
   });
 
