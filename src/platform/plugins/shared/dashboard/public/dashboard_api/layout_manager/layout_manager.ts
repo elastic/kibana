@@ -59,7 +59,8 @@ import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
-import { childrenReady$, getActivePanelCount, isSectionCollapsed } from './active_panels';
+import { getActivePanelCount, isSectionCollapsed } from './active_panels';
+import { childrenReady$ } from './children_ready';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
