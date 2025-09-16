@@ -10,7 +10,6 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   ENTITY_HISTORY,
   ENTITY_LATEST,
-  ENTITY_RESET,
 } from '@kbn/entities-schema';
 
 // Base constants

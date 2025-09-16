@@ -157,6 +157,9 @@ export function removeIlmInServerless(
 ): ClusterPutComponentTemplateRequest {
   if (isServerless) {
     component.template.lifecycle = undefined;
+    if (component.template.settings?.index !== undefined) {
+      component.template.settings.index.lifecycle = undefined;
+    }
   }
   return component;
 }
