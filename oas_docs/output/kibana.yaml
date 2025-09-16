@@ -14195,6 +14195,16 @@ paths:
         content:
           application/json:
             examples:
+              MDE:
+                description: Microsoft Defender Endpoint runscript
+                summary: Run a script against a Microsoft Defender Endpoint agent
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    args: '-param1 value1 -param2 value2'
+                    scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
                 summary: Run a script against a SentinelOne agent
@@ -18880,6 +18890,8 @@ paths:
                         download_source_id:
                           nullable: true
                           type: string
+                        fips_agents:
+                          type: number
                         fleet_server_host_id:
                           nullable: true
                           type: string
@@ -19279,6 +19291,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -19806,6 +19820,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -20205,6 +20221,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -20528,6 +20546,8 @@ paths:
                         download_source_id:
                           nullable: true
                           type: string
+                        fips_agents:
+                          type: number
                         fleet_server_host_id:
                           nullable: true
                           type: string
@@ -20927,6 +20947,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -21229,6 +21251,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -21628,6 +21652,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -22155,6 +22181,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -22554,6 +22582,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -22948,6 +22978,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -23347,6 +23379,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -38184,6 +38218,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -38552,6 +38588,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -38725,6 +38763,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -39072,6 +39112,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -39560,6 +39602,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -40095,6 +40139,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -40466,6 +40512,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -40638,6 +40686,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -40984,6 +41034,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -41222,6 +41274,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -41801,6 +41855,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
@@ -42134,6 +42190,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
@@ -83369,6 +83427,28 @@ components:
       description: A KQL string.
       example: 'united.endpoint.host.os.name : ''Windows'''
       type: string
+    Security_Endpoint_Management_API_MDERunScriptParameters:
+      description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
+      example:
+        agent_type: microsoft_defender_endpoint
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          args: '-param1 value1 -param2 value2'
+          scriptName: my-script.ps1
+      properties:
+        args:
+          description: Optional command line arguments for the script.
+          minLength: 1
+          type: string
+        scriptName:
+          description: The name of the script to execute from the cloud storage.
+          minLength: 1
+          type: string
+      required:
+        - scriptName
+      title: Microsoft Defender Endpoint Run Script Parameters
+      type: object
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
         data:
@@ -83756,6 +83836,7 @@ components:
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_SentinelOneRunScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDERunScriptParameters'
           required:
             - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:

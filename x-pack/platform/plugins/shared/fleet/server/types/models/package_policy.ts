@@ -100,6 +100,7 @@ export const PackagePolicyPackageSchema = schema.object({
   }),
   experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeaturesSchema),
   requires_root: schema.maybe(schema.boolean()),
+  fips_compatible: schema.maybe(schema.boolean()),
 });
 
 export const PackagePolicyBaseSchema = {
