@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
@@ -22,7 +22,7 @@ import { convertToFieldDefinitionConfig } from '../utils';
 interface SamplePreviewTableProps {
   stream: Streams.ingest.all.Definition;
   nextField: SchemaField;
-  onValidate?: (isValid: boolean) => void;
+  onValidate?: ({ isValid, isIgnored }: { isValid: boolean; isIgnored: boolean }) => void;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
@@ -68,7 +68,10 @@ const SamplePreviewTableContent = ({
 
   useEffect(() => {
     if (onValidate) {
-      onValidate(value?.status === 'failure' || error ? false : true);
+      onValidate({
+        isValid: value?.status === 'failure' || error ? false : true,
+        isIgnored: value?.ignoredFields ? true : false,
+      });
     }
   }, [value, error, onValidate]);
 
@@ -111,31 +114,16 @@ const SamplePreviewTableContent = ({
 
   if (value && value.status === 'success' && value.documentsWithRuntimeFieldsApplied) {
     return (
-      <>
-        {value.ignoredFields && (
-          <>
-            <EuiCallOut
-              color="warning"
-              title={i18n.translate('xpack.streams.samplePreviewTable.ignoredFieldsCallOutTitle', {
-                defaultMessage: 'There were ignored fields in the simulation:',
-              })}
-            >
-              {value.ignoredFields.join(', ')}
-            </EuiCallOut>
-            <EuiSpacer size="l" />
-          </>
-        )}
-        <div
-          css={css`
-            height: 500px;
-          `}
-        >
-          <PreviewTable
-            documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
-            displayColumns={columns}
-          />
-        </div>
-      </>
+      <div
+        css={css`
+          height: 500px;
+        `}
+      >
+        <PreviewTable
+          documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
+          displayColumns={columns}
+        />
+      </div>
     );
   }
 

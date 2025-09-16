@@ -14,12 +14,14 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiButton,
+  EuiCallOut,
 } from '@elastic/eui';
 import React, { useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useToggle from 'react-use/lib/useToggle';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
 import type { SchemaField } from '../types';
@@ -45,6 +47,7 @@ export const SchemaEditorFlyout = ({
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
   const [isValidSimulation, setValidSimulation] = useState(true);
+  const [isIgnoredField, setIsIgnoredField] = useState(false);
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
@@ -62,6 +65,11 @@ export const SchemaEditorFlyout = ({
     if (onClose) onClose();
   }, [nextField, onClose, onSave]);
 
+  const onValidate = ({ isValid, isIgnored }: { isValid: boolean; isIgnored: boolean }) => {
+    setIsIgnoredField(isIgnored);
+    setValidSimulation(isValid);
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -69,6 +77,21 @@ export const SchemaEditorFlyout = ({
           <h2>{field.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
+
+      {isIgnoredField && (
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.streams.samplePreviewTable.ignoredFieldsCallOutTitle', {
+            defaultMessage: 'Ignored field',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.streams.samplePreviewTable.ignoredFieldsCallOutMessage"
+            defaultMessage="This field was ignored in some ingested documents due to type mismatch or mapping errors."
+          />
+        </EuiCallOut>
+      )}
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
@@ -87,11 +110,7 @@ export const SchemaEditorFlyout = ({
           />
           {withFieldSimulation && (
             <EuiFlexItem grow={false}>
-              <SamplePreviewTable
-                stream={stream}
-                nextField={nextField}
-                onValidate={setValidSimulation}
-              />
+              <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
