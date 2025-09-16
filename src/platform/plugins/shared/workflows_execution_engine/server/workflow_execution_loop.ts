@@ -129,9 +129,14 @@ async function catchError(
   nodesFactory: NodesFactory,
   workflowGraph: WorkflowGraph
 ) {
-  const nodeStack = workflowGraph.getNodeStack(workflowRuntime.getCurrentNode().id);
-
   try {
+    const currentNode = workflowRuntime.getCurrentNode();
+
+    if (!currentNode) {
+      return;
+    }
+
+    const nodeStack = workflowGraph.getNodeStack(currentNode.id);
     while (
       workflowRuntime.getWorkflowExecution().error &&
       workflowRuntime.getWorkflowExecution().stack.length > 0
