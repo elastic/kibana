@@ -432,7 +432,6 @@ export interface DocLinks {
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
     elasticServerlessSearchManagedLlmUsageCost: string;
-
   }>;
   readonly alerting: Readonly<{
     authorization: string;
