@@ -69,6 +69,8 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
       sampling: 1,
     };
 
+    const usedDataView = this.layerConfig.dataView ?? chartDataView;
+
     return {
       [layerId]: {
         ...this.column.getData(
@@ -77,18 +79,14 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
             columnOrder: [],
             columns: {},
           },
-          this.layerConfig.dataView ?? chartDataView
+          usedDataView
         ),
       },
       ...(this.layerConfig.options?.showTrendLine
         ? {
             [`${layerId}_trendline`]: {
               linkToLayers: [layerId],
-              ...this.column.getData(
-                `${accessorId}_trendline`,
-                baseLayer,
-                this.layerConfig.dataView ?? chartDataView
-              ),
+              ...this.column.getData(`${accessorId}_trendline`, baseLayer, usedDataView),
             },
           }
         : {}),

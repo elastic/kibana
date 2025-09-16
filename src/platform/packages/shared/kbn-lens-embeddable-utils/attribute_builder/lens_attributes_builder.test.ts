@@ -34,7 +34,7 @@ const mockDataView = {
 } as unknown as jest.Mocked<DataView>;
 
 const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
-  customLabel: false,
+  customLabel: true,
   dataType: 'number',
   isBucketed: false,
   label: formula,
@@ -114,7 +114,6 @@ describe('lens_attributes_builder', () => {
           columns: {
             metric_formula_accessor: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
       });
 
@@ -152,7 +151,6 @@ describe('lens_attributes_builder', () => {
           columns: {
             metric_formula_accessor: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
         layer_trendline: {
           columnOrder: ['x_date_histogram', 'metric_formula_accessor_trendline'],
@@ -160,7 +158,6 @@ describe('lens_attributes_builder', () => {
             metric_formula_accessor_trendline: getDataLayer(AVERAGE_CPU_USER_FORMULA),
             x_date_histogram: getHistogramLayer('auto', true),
           },
-          indexPatternId: 'mock-id',
           linkToLayers: ['layer'],
           sampling: 1,
         },
@@ -208,7 +205,6 @@ describe('lens_attributes_builder', () => {
             x_date_histogram: getHistogramLayer('auto'),
             formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
       });
 
@@ -261,7 +257,6 @@ describe('lens_attributes_builder', () => {
             x_date_histogram: getHistogramLayer('auto'),
             formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
         layer_1_reference: {
           columnOrder: ['formula_accessor_1_0_reference_column'],
@@ -326,7 +321,6 @@ describe('lens_attributes_builder', () => {
             formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
             formula_accessor_0_1: getDataLayer(AVERAGE_CPU_SYSTEM_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
       });
 
