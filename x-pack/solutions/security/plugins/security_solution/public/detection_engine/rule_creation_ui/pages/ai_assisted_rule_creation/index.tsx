@@ -23,6 +23,8 @@ import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from '
 import { css } from '@emotion/react';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { ChatActions } from '@kbn/elastic-assistant/impl/assistant/chat_actions';
+import { ConnectorSelector } from '@kbn/security-solution-connectors';
+
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -87,7 +89,7 @@ import { extractValidationMessages } from '../../../rule_creation/logic/extract_
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
-
+import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { PromptTextArea } from './prompt_textarea';
 import { useAiRuleCreation } from './hooks/use_ai_rule_creation';
 import { CreateRulePage } from './rule_create_form';
@@ -104,7 +106,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { addSuccess } = useAppToasts();
+  const { addSuccess, addError } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const { application, triggersActionsUi } = useKibana().services;
   const isLoading = userInfoLoading || listsConfigLoading;
@@ -112,18 +114,32 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const collapseFn = useRef<() => void | undefined>();
 
   const [promptValue, setPromptValue] = useState('');
+  const { aiConnectors, isLoading: isAiConnectorsLoading } = useAIConnectors();
+
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!isAiConnectorsLoading && selectedConnectorId === undefined) {
+      setSelectedConnectorId(aiConnectors[0]?.id);
+    }
+  }, [aiConnectors, isAiConnectorsLoading, selectedConnectorId]);
 
   const {
     executeAiAssistedRuleCreation,
     rule,
     isLoading: isAiRuleCreationInProgress,
   } = useAiRuleCreation();
-
+  const isValid = promptValue.length > 0 && selectedConnectorId != null;
   const handlePromptSubmit = useCallback(() => {
-    if (promptValue.length > 0) {
-      executeAiAssistedRuleCreation(promptValue);
+    if (isValid) {
+      executeAiAssistedRuleCreation({
+        message: promptValue,
+        connectorId: selectedConnectorId,
+      }).catch((err) => {
+        addError(err, { title: 'Failure to suggest rule with AI assistant' });
+      });
     }
-  }, [executeAiAssistedRuleCreation, promptValue]);
+  }, [executeAiAssistedRuleCreation, promptValue, selectedConnectorId, isValid, addError]);
 
   const onSendMessage = useCallback(() => {
     handlePromptSubmit();
@@ -160,7 +176,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
         grow={false}
       >
         <ChatActions
-          isDisabled={isLoading}
+          isDisabled={isLoading && isValid}
           isLoading={isAiRuleCreationInProgress}
           onSendMessage={onSendMessage}
           promptValue={promptValue}
@@ -185,6 +201,21 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                         <h3>{'Describe the rule you want to create'}</h3>
                       </EuiText>
                       <EuiSpacer size="m" />
+                      <EuiFlexItem grow={false}>
+                        <ConnectorSelector
+                          isLoading={isAiConnectorsLoading}
+                          connectors={aiConnectors.map((c) => ({
+                            name: c.name,
+                            id: c.id,
+                            description: c?.config?.apiProvider,
+                          }))}
+                          selectedId={selectedConnectorId}
+                          onChange={setSelectedConnectorId}
+                          mode={'combobox'}
+                        />
+                      </EuiFlexItem>
+                      <EuiSpacer size="m" />
+
                       <EuiPanel hasBorder>{promptComponent}</EuiPanel>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>

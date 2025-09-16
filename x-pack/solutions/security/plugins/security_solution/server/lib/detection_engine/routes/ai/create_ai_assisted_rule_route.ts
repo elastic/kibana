@@ -13,6 +13,8 @@ import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_AI_ASSISTED_CREATE_RULE_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
+
+import { getRuleCreationAgent } from '../../ai_assisted_rule_creation/agent';
 import type { StartPlugins } from '../../../../plugin';
 import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 import type { AIAssistedCreateRuleResponse } from '../../../../../common/api/detection_engine/ai_assisted/index.gen';
@@ -73,11 +75,16 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             },
           });
 
-          const rest = await model.invoke(userQuery);
+          const ruleCreationAgent = getRuleCreationAgent({ model, logger });
+          const result = await ruleCreationAgent.invoke({ userQuery });
+
+          if (result.error) {
+            throw new Error(result.error);
+          }
 
           return response.ok({
             body: {
-              rule: { ...getRulesSchemaMock(), index: ['ai_index', rest.content], references: [] },
+              rule: result.rule,
             },
           });
         } catch (err) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 
 import type {
@@ -21,12 +20,14 @@ const INTERNAL_AI_ASSISTED_RULE_CREATE_API_PATH = '/internal/detection_engine/ai
 
 const createAiAssistedRuleAPI = async ({
   message,
+  connectorId,
   signal,
 }: {
   message: string;
+  connectorId: string;
   signal?: AbortSignal;
 }) => {
-  const body: AIAssistedCreateRuleRequestBody = { user_query: message };
+  const body: AIAssistedCreateRuleRequestBody = { user_query: message, connector_id: connectorId };
 
   return KibanaServices.get().http.fetch<AIAssistedCreateRuleResponse>(
     INTERNAL_AI_ASSISTED_RULE_CREATE_API_PATH,
@@ -42,8 +43,11 @@ const createAiAssistedRuleAPI = async ({
 export const useAiRuleCreation = () => {
   const { data, mutateAsync, isLoading } = useMutation(
     [AI_ASSISTED_RULE_CREATION],
-    async (message: string) => {
-      const result: AIAssistedCreateRuleResponse = await createAiAssistedRuleAPI({ message });
+    async ({ message, connectorId }: { message: string; connectorId: string }) => {
+      const result: AIAssistedCreateRuleResponse = await createAiAssistedRuleAPI({
+        message,
+        connectorId,
+      });
 
       return result;
     }
