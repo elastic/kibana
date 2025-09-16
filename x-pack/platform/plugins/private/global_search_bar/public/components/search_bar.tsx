@@ -33,7 +33,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
 import { blurEvent, isMac, sort } from '.';
-import { resultToOption, suggestionToOption, createInformationOption } from '../lib';
+import { resultToOption, createInformationOption, createActionOption, createChatOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import type { SearchSuggestion } from '../suggestions';
@@ -199,7 +199,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     ) => {
       // Filter and modify options based on design version
       let filteredOptions = _options;
-      let filteredSuggestions = suggestions;
 
       if (designVersion === 'new-user') {
         // For new users, prioritize applications and basic features
@@ -211,45 +210,28 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         
         // Limit to top 5 results for new users to avoid overwhelming
         filteredOptions = filteredOptions.slice(0, 5);
-        
-        // Add helpful suggestions for new users
-        if (searchValue.length === 0) {
-          filteredSuggestions = [
-            ...suggestions.slice(0, 2)
-          ];
-        }
-      } else {
-        // For regular users, show all results
-        filteredSuggestions = suggestions;
       }
 
-      // Create information items for new users and documentation
-      const exampleInfoItems = searchValue.length === 0 ? [
-        // Helpful suggestions for new users as documentation items
-        ...(designVersion === 'new-user' ? [
-          createInformationOption({
-            id: 'getting-started',
-            title: 'Getting started',
-            description: 'Learn the basics of Kibana',
-            url: '#', // This could be a real getting started URL
-            icon: 'help'
-          }),
-          createInformationOption({
-            id: 'create-dashboard',
-            title: 'Create dashboard',
-            description: 'Build your first dashboard',
-            url: '#', // This could be a real tutorial URL
-            icon: 'dashboardApp'
-          }),
-          createInformationOption({
-            id: 'sample-data',
-            title: 'Sample data',
-            description: 'Explore with sample datasets',
-            url: '#', // This could be a real sample data URL
-            icon: 'database'
-          })
-        ] : []),
-        // Documentation links for all users
+      // Create custom items based on design version and search state
+      const customItems = searchValue.length === 0 ? [
+        // Action items - always shown
+        createActionOption({
+          id: 'add-data',
+          title: 'Add data',
+          description: 'Import or connect your data sources',
+          url: '/app/integrations',
+          icon: 'plusInCircle'
+        }),
+        
+        // Chat items - always shown
+        createChatOption({
+          id: 'ask-ai-agent',
+          title: 'Ask AI Agent to help',
+          description: 'Get assistance with your questions',
+          icon: 'discuss'
+        }),
+        
+        // Documentation items for all users
         createInformationOption({
           id: 'kibana-docs',
           title: 'Kibana Documentation',
@@ -267,8 +249,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       ] : [];
 
       setOptions([
-        ...filteredSuggestions.map(suggestionToOption),
-        ...exampleInfoItems,
+        ...customItems,
         ...filteredOptions.map((option) =>
           resultToOption(
             option,
@@ -422,6 +403,32 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
       // @ts-ignore - ts error is "union type is too complex to express"
       const { url, type, suggestion } = option;
+      const itemType = (option as any).itemType;
+
+      // Handle chat items specially - open AI assistant flyout
+      if (type === 'chat' || itemType === 'chat') {
+        // TODO: Implement AI assistant flyout opening
+        // For now, we'll just log the action and close the search
+        console.log('Opening AI assistant with query:', selectedLabel);
+        
+        // Here you would typically:
+        // 1. Open the AI assistant flyout/panel
+        // 2. Pre-populate the input with the selectedLabel
+        // Example: openAIAssistant({ initialQuery: selectedLabel });
+        
+        // Close the search interface
+        (document.activeElement as HTMLElement).blur();
+        if (searchRef) {
+          clearField();
+          searchRef.dispatchEvent(blurEvent);
+        }
+        
+        if (isOverlayMode) {
+          setIsOverlayMode(false);
+        }
+        setIsPopoverOpen(false);
+        return;
+      }
 
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)

@@ -41,6 +41,22 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
       };
     }
     
+    // Check if this is an action type
+    if (type === 'action' || (option as any).itemType === 'action') {
+      return {
+        label: 'Action',
+        icon: null
+      };
+    }
+    
+    // Check if this is a chat type
+    if (type === 'chat' || (option as any).itemType === 'chat') {
+      return {
+        label: 'Chat',
+        icon: null
+      };
+    }
+    
     // For existing navigation types (applications, dashboards, etc.), show "Navigate"
     if (type === 'application' || type === 'dashboard' || type === 'visualization' || 
         type === 'search' || type === 'index-pattern' || type === 'lens' || 
@@ -52,12 +68,7 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
       };
     }
 
-    // For suggestions, keep the original meta
-    if (type === '__suggestion__') {
-      return null; // Use original meta
-    }
-
-    // Default fallback - use original meta or show Navigate
+    // Default fallback - show Navigate
     return {
       label: 'Navigate',
       icon: null
@@ -78,13 +89,15 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
 
   // Get icon wrapper styling based on item type
   const getIconWrapperStyles = () => {
-    // Check for information/documentation type first
     const isInformationType = type === 'information' || (option as any).itemType === 'information';
+    const isActionType = type === 'action' || (option as any).itemType === 'action';
+    const isChatType = type === 'chat' || (option as any).itemType === 'chat';
     const isNavigationType = type === 'application' || type === 'dashboard' || type === 'visualization' || 
         type === 'search' || type === 'index-pattern' || type === 'lens' || 
         type === 'map' || type === 'canvas-workpad' || type === 'integration' ||
         (option as any).itemType === 'navigate';
 
+    // Information/Documentation type - with background
     if (isInformationType) {
       return {
         className: 'search-item-icon-wrapper--information',
@@ -101,6 +114,41 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
       };
     }
     
+    // Action type - with background
+    if (isActionType) {
+      return {
+        className: 'search-item-icon-wrapper--action',
+        baseStyles: css`
+          width: 32px;
+          height: 32px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
+        `
+      };
+    }
+    
+    // Chat type - with background
+    if (isChatType) {
+      return {
+        className: 'search-item-icon-wrapper--chat',
+        baseStyles: css`
+          width: 32px;
+          height: 32px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
+        `
+      };
+    }
+    
+    // Navigation type - no background
     if (isNavigationType) {
       return {
         className: 'search-item-icon-wrapper--navigation',
@@ -116,10 +164,16 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
       };
     }
 
-    // Default wrapper for other types (suggestions, etc.)
+    // Default wrapper - no background
     return {
       className: 'search-item-icon-wrapper--default',
       baseStyles: css`
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
       `
     };
@@ -130,9 +184,17 @@ export const SearchListItem: React.FC<SearchListItemProps> = ({
   // Get icon color based on item type
   const getIconColor = () => {
     const isInformationType = type === 'information' || (option as any).itemType === 'information';
+    const isActionType = type === 'action' || (option as any).itemType === 'action';
+    const isChatType = type === 'chat' || (option as any).itemType === 'chat';
     
     if (isInformationType) {
       return 'subdued'; // textSubdued color for documentation items
+    }
+    if (isActionType) {
+      return 'subdued'; // textSubdued color for action items
+    }
+    if (isChatType) {
+      return 'subdued'; // textSubdued color for chat items
     }
     return 'primary'; // primary color for navigation items
   };
