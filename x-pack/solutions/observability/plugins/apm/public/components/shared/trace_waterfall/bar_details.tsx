@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -44,7 +43,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
-      defaultMessage: '{count, plural, one {View related error} other {View # related errors}}',
+      defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {
         count: item.errorCount,
       },
