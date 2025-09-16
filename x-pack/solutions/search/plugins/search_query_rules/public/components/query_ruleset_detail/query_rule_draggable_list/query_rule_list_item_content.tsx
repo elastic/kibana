@@ -204,15 +204,37 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                   id="queryRuleActionsPopover"
                   button={
                     <EuiButtonIcon
-                      aria-label={i18n.translate(
-                        'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label',
-                        {
-                          defaultMessage: 'Click to reach actions menu for rule {ruleId}',
-                          values: {
-                            ruleId: queryRule.rule_id,
-                          },
-                        }
-                      )}
+                      aria-label={
+                        isDraggable
+                          ? i18n.translate(
+                              'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.draggable',
+                              {
+                                defaultMessage: 'Click to reach actions menu for rule {ruleId}',
+                                values: {
+                                  ruleId: queryRule.rule_id,
+                                },
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.searchResult',
+                              {
+                                defaultMessage:
+                                  'Click to reach actions menu for {actionType} rule with ID: {ruleId}. ' +
+                                  'The rule has {documentCount, plural, one {document} other {documents}} ' +
+                                  'and {criteriaCount} {criteriaCount, plural, one {criterion} other {criteria}}. ' +
+                                  'Visible criteria: {visibleCriteria}',
+                                values: {
+                                  actionType: queryRule.type === 'exclude' ? 'exclude' : 'pinned',
+                                  ruleId: queryRule.rule_id,
+                                  documentCount: queryRule.actions.docs?.length ?? 0,
+                                  criteriaCount: Array.isArray(queryRule.criteria)
+                                    ? queryRule.criteria.length
+                                    : 1,
+                                  visibleCriteria: getVisibleCriteriaDescription(queryRule),
+                                },
+                              }
+                            )
+                      }
                       data-test-subj="searchQueryRulesQueryRulesetDetailButton"
                       iconType="boxesHorizontal"
                       color="text"
