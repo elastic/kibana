@@ -529,10 +529,10 @@ export class IndexActionsContextMenu extends Component {
 
           notificationService.showSuccessToast(
             i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastTitle', {
-              defaultMessage: 'Lookup index created',
+              defaultMessage: 'Index successfully converted to lookup mode',
             }),
             i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastMessage', {
-              defaultMessage: 'The {lookupIndexName} has been created.',
+              defaultMessage: 'The {lookupIndexName} lookup index has been created.',
               values: { lookupIndexName },
             })
           );
