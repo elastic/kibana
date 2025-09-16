@@ -31,6 +31,14 @@ export class EsqlDocumentBase {
     return this.prompts;
   }
 
+  /** @deprecated use individual prompts instead */
+  getSystemMessage(): string {
+    return `${this.prompts.syntax}
+
+    ${this.prompts.examples}
+    `;
+  }
+
   getDocumentation(
     rawKeywords: string[],
     {
