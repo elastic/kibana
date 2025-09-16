@@ -104,54 +104,6 @@ if(params.containsKey('new_roles')&& params.new_roles != null) {
   }
 `;
 
-export const buildBulkUpsertBody = async (
-  // merge with the index sync code, they are very similar
-  users: PrivMonOktaIntegrationsUser[],
-  sourceLabel: string,
-  dataClient: PrivilegeMonitoringDataClient
-) => {
-  const body: object[] = [];
-  dataClient.log('info', `Building bulk operations for integrations sync:  ${users.length} users`);
-  // check if existing and do create or update accordingly
-  for (const user of users) {
-    if (user.existingUserId) {
-      // update existing user
-      dataClient.log(
-        'debug',
-        `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
-      );
-      body.push(
-        { update: { _index: dataClient.index, _id: user.username } },
-        {
-          script: {
-            source: UPDATE_SCRIPT_SOURCE,
-            params: {
-              new_privileged_status: user.isPrivileged,
-              sourceLabel,
-              new_roles: user.roles ?? [],
-            },
-          },
-        }
-      );
-    } else if (user.isPrivileged) {
-      dataClient.log('info', `Creating new user with integrations sync: ${user.username}`);
-      body.push(
-        { index: { _index: dataClient.index } },
-        {
-          user: { id: user.id, name: user.username, is_privileged: user.isPrivileged },
-          roles: user.roles ?? [],
-          labels: {
-            sources: [sourceLabel],
-          },
-          last_seen: user.lastSeen,
-        }
-      );
-    }
-  }
-  dataClient.log('debug', `Built ${body.length / 2} bulk operations for integrations users`);
-  return body;
-};
-
 export const applyPrivilegedUpdates = async ({
   dataClient,
   users,
