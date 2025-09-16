@@ -272,7 +272,7 @@ export class IndexActionsContextMenu extends Component {
                 <EuiText size="xs">
                   <FormattedMessage
                     id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
-                    defaultMessage="Index too large to be converted."
+                    defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
                   />
                 </EuiText>
               )}
