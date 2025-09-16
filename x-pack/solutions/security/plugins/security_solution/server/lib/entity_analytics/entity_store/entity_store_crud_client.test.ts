@@ -8,9 +8,15 @@
 import { EntityStoreCrudClient } from './entity_store_crud_client';
 import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
+import {
+  BadCRUDRequestError,
+  DocumentNotFoundError,
+  EngineNotRunningError,
+  CapabilityNotEnabledError,
+} from './errors';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
 import * as uuid from 'uuid';
+import { EntityStoreCapability } from '@kbn/entities-schema';
 
 describe('EntityStoreCrudClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -31,7 +37,7 @@ describe('EntityStoreCrudClient', () => {
       jest.useRealTimers();
     });
 
-    it('when Entity Store completely disabled throw error', async () => {
+    it('when Entity Store disabled throw error', async () => {
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
 
       await expect(async () =>
@@ -45,7 +51,27 @@ describe('EntityStoreCrudClient', () => {
       expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
     });
 
+    it('when Entity Store enabled but CRUD API not in place throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () =>
+        client.upsertEntity('host', {
+          entity: {
+            id: 'host-id',
+          },
+        })
+      ).rejects.toThrow(new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API));
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'host',
+        EntityStoreCapability.CRUD_API
+      );
+    });
+
     it('when not allowed attributes are updated, throw error', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       const doc: Entity = {
         user: {
@@ -71,6 +97,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when entity not found throw', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
 
@@ -92,6 +119,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when valid update entity', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
@@ -118,6 +146,10 @@ describe('EntityStoreCrudClient', () => {
       await client.upsertEntity('host', doc);
 
       expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'host',
+        EntityStoreCapability.CRUD_API
+      );
       expect(esClientMock.updateByQuery).toBeCalledWith({
         index: '.entities.v1.latest.security_host_default',
         query: {
@@ -161,6 +193,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when valid update entity for generic type', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
@@ -188,6 +221,10 @@ describe('EntityStoreCrudClient', () => {
       await client.upsertEntity('generic', doc, true);
 
       expect(dataClientMock.isEngineRunning).toBeCalledWith('generic');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'generic',
+        EntityStoreCapability.CRUD_API
+      );
       expect(esClientMock.updateByQuery).toBeCalledWith({
         index: '.entities.v1.latest.security_generic_default',
         query: {
@@ -230,6 +267,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when valid update entity using force', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
@@ -260,6 +298,10 @@ describe('EntityStoreCrudClient', () => {
       await client.upsertEntity('host', doc, true);
 
       expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'host',
+        EntityStoreCapability.CRUD_API
+      );
       expect(esClientMock.updateByQuery).toBeCalledWith({
         index: '.entities.v1.latest.security_host_default',
         query: {

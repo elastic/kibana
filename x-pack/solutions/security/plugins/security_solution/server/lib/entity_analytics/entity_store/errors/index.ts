@@ -7,4 +7,5 @@
 
 export { BadCRUDRequestError } from './bad_crud_request_error';
 export { EngineNotRunningError } from './engine_not_running_error';
+export { CapabilityNotEnabledError } from './capability_not_enabled_error';
 export { DocumentNotFoundError } from './document_not_found_error';

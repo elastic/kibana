@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
+import { EntityStoreCapability } from '@kbn/entities-schema';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
@@ -15,7 +16,12 @@ import type {
   EntityField,
 } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
-import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
+import {
+  BadCRUDRequestError,
+  DocumentNotFoundError,
+  EngineNotRunningError,
+  CapabilityNotEnabledError,
+} from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
 import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_entity_data_stream';
@@ -60,6 +66,7 @@ export class EntityStoreCrudClient {
 
   public async upsertEntity(type: APIEntityType, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
+    await this.assertCRUDApiIsEnabled(type);
 
     const normalizedDocToECS = normalizeToECS(doc);
     const flatProps = getFlattenedObject(normalizedDocToECS);
@@ -105,6 +112,17 @@ export class EntityStoreCrudClient {
 
     if (!engineRunning) {
       throw new EngineNotRunningError(type);
+    }
+  }
+
+  private async assertCRUDApiIsEnabled(type: APIEntityType) {
+    const enabled = await this.dataClient.isCapabilityEnabled(
+      EntityType[type],
+      EntityStoreCapability.CRUD_API
+    );
+
+    if (!enabled) {
+      throw new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API);
     }
   }
 }

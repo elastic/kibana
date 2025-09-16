@@ -16,6 +16,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from '../../errors';
+import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
 
 export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -49,8 +50,12 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
 
           return response.ok();
         } catch (error) {
-          if (error instanceof EngineNotRunningError) {
-            return response.badRequest({ body: error as EngineNotRunningError });
+          if (
+            error instanceof EngineNotRunningError ||
+            error instanceof CapabilityNotEnabledError
+          ) {
+            // Service Unavailable 503
+            return response.customError({ statusCode: 503, body: error as EngineNotRunningError });
           }
 
           if (error instanceof BadCRUDRequestError) {
