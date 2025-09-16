@@ -607,10 +607,7 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [
-    "guideId",
-    "isActive"
-  ],
+  "guided-onboarding-guide-state": [],
   "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
@@ -919,9 +916,7 @@
   "privilege-monitoring-status": [
     "status"
   ],
-  "privmon-api-key": [
-    "apiKey"
-  ],
+  "privmon-api-key": [],
   "product-doc-install-status": [
     "index_name",
     "inference_id",
