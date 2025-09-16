@@ -39,10 +39,9 @@ export interface MigrationProgressPanelProps<T extends MigrationTaskStats> {
   migrationType: MigrationType;
 }
 
-export function MigrationProgressPanel<T extends MigrationTaskStats>({
-  migrationStats,
-  migrationType,
-}: MigrationProgressPanelProps<T>) {
+export const MigrationProgressPanel = React.memo(function MigrationProgressPanel<
+  T extends MigrationTaskStats
+>({ migrationStats, migrationType }: MigrationProgressPanelProps<T>) {
   const { euiTheme } = useEuiTheme();
   const { mutate: stopMigration, isLoading: isStopping } = useStopSiemMigration(migrationType);
 
@@ -117,4 +116,4 @@ export function MigrationProgressPanel<T extends MigrationTaskStats>({
       )}
     </EuiPanel>
   );
-}
+});

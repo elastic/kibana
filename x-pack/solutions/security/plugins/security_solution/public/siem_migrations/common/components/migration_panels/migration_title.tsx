@@ -100,7 +100,9 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle<
     closeDeleteModal();
   }, [deleteMigration, closeDeleteModal]);
 
-  const stopPropagation = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
+  const stopPropagation = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation(); // prevent click events from bubbling up and toggle the collapsible panel
+  }, []);
 
   return (
     <EuiFlexGroup
