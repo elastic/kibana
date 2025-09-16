@@ -34,16 +34,16 @@ import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
   THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT,
-  THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
+  THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_INTEGRATION_BUTTON,
 } from './test_subjects';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import type { PostureTypes } from '../../common/types_old';
-import { useAdd3PIntegrationRoute } from '../common/api/use_wiz_integration_route';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import vulnerabilityVendorDarkSVG from '../assets/illustrations/vulnerability_vendor_dark.svg';
 import vulnerabilityVendorBrightSVG from '../assets/illustrations/vulnerability_vendor_bright.svg';
+import { useAddIntegrationPath } from '../common/api/use_add_integrations_route';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -78,7 +78,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
 }) => {
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
-  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
+  const addIntegrationRouteLink = useAddIntegrationPath('vulnerability_workflow');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
   const isDarkMode = useKibanaIsDarkMode();
 
@@ -187,15 +187,15 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
                   <EuiButton
                     color="primary"
                     fill
-                    href={wizAddIntegrationLink}
-                    isDisabled={!wizAddIntegrationLink}
+                    href={addIntegrationRouteLink}
+                    isDisabled={!addIntegrationRouteLink}
                     data-test-subj={
-                      THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
+                      THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_INTEGRATION_BUTTON
                     }
                   >
                     <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addWizIntegrationButtonTitle"
-                      defaultMessage="Add Wiz Integration"
+                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addIntegrationButtonTitle"
+                      defaultMessage="Add Integration"
                     />
                   </EuiButton>
                 </EuiFlexItem>

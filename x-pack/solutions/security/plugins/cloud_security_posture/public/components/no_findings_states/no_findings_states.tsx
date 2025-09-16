@@ -28,7 +28,6 @@ import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { EmptyStatesIllustrationContainer } from '../empty_states_illustration_container';
-import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
@@ -36,7 +35,7 @@ import {
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
   THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT,
-  THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
+  THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_INTEGRATION_BUTTON,
 } from '../test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
@@ -46,6 +45,7 @@ import misconfigurationsVendorDarkSVG from '../../assets/illustrations/misconfig
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { useAddIntegrationPath } from '../../common/api/use_add_integrations_route';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
@@ -185,9 +185,9 @@ const EmptySecurityFindingsPrompt = () => {
   const { euiTheme } = useEuiTheme();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
-  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
   const isDarkMode = useKibanaIsDarkMode();
+  const addIntegrationRouteLink = useAddIntegrationPath('misconfiguration_workflow');
 
   return (
     <EuiFlexGroup>
@@ -313,15 +313,15 @@ const EmptySecurityFindingsPrompt = () => {
                   <EuiButton
                     color="primary"
                     fill
-                    href={wizAddIntegrationLink}
-                    isDisabled={!wizAddIntegrationLink}
+                    href={addIntegrationRouteLink}
+                    isDisabled={!addIntegrationRouteLink}
                     data-test-subj={
-                      THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
+                      THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_INTEGRATION_BUTTON
                     }
                   >
                     <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
-                      defaultMessage="Add Wiz Integration"
+                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addIntegrationButtonTitle"
+                      defaultMessage="Add Integration"
                     />
                   </EuiButton>
                 </EuiFlexItem>
