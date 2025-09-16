@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should display the stats bar and the analytics table with one trained model'
         );
-        // +1 for new fleet setup where an inference model gets deployed for the new system index
-        await ml.trainedModels.assertStats(3);
+        await ml.trainedModels.assertStats(2);
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });

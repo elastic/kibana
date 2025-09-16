@@ -8,111 +8,92 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
-import { MetricChart } from './metric_chart';
+import { Chart } from './chart';
+import { Subject } from 'rxjs';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 
-jest.mock('./metric_chart', () => ({
-  MetricChart: jest.fn(() => <div data-test-subj="metric-chart" />),
+jest.mock('./chart', () => ({
+  Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
 
 describe('MetricsGrid', () => {
-  const timeRange: MetricsGridProps['timeRange'] = { from: 'now-1h', to: 'now' };
+  const requestParams: MetricsGridProps['requestParams'] = {
+    filters: [],
+    getTimeRange: () => ({ from: 'now-1h', to: 'now' }),
+    query: {
+      esql: 'FROM metrics-*',
+    },
+    relativeTimeRange: { from: 'now-1h', to: 'now' },
+    updateTimeRange: () => {},
+  };
+
+  const services = {} as UnifiedHistogramServices;
+
   const fields: MetricsGridProps['fields'] = [
     {
       name: 'system.cpu.utilization',
       dimensions: [{ name: 'host.name', type: 'keyword' }],
       index: 'metrics-*',
-      type: 'number',
+      type: 'long',
     },
     {
       name: 'system.memory.utilization',
       dimensions: [{ name: 'host.name', type: 'keyword' }],
       index: 'metrics-*',
-      type: 'number',
+      type: 'long',
     },
   ];
-
-  it('renders loading state when loading is true', () => {
-    render(
-      <MetricsGrid
-        loading={true}
-        fields={[]}
-        dimensions={[]}
-        pivotOn="metric"
-        columns={3}
-        timeRange={timeRange}
-      />
-    );
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('renders "No results found" when fields are empty', () => {
-    const { getByText } = render(
-      <MetricsGrid
-        loading={false}
-        fields={[]}
-        dimensions={[]}
-        pivotOn="metric"
-        columns={3}
-        timeRange={timeRange}
-      />
-    );
-
-    expect(getByText('No results found')).toBeInTheDocument();
-  });
 
   it('renders MetricChart for each metric field when pivotOn is metric', () => {
     const { getAllByTestId } = render(
       <MetricsGrid
-        loading={false}
-        fields={fields}
-        dimensions={['host.name']}
+        columns={3}
+        dimensions={[]}
         pivotOn="metric"
-        columns={2}
-        timeRange={timeRange}
+        discoverFetch$={new Subject()}
+        fields={fields}
+        requestParams={requestParams}
+        services={services}
+        filters={[]}
       />
     );
 
-    const charts = getAllByTestId('metric-chart');
+    const charts = getAllByTestId('chart');
     expect(charts).toHaveLength(fields.length);
   });
 
   it('passes the correct size prop', () => {
     const { rerender } = render(
       <MetricsGrid
-        loading={false}
-        fields={fields}
+        columns={3}
         dimensions={['host.name']}
         pivotOn="metric"
-        columns={3}
-        timeRange={timeRange}
+        discoverFetch$={new Subject()}
+        fields={fields}
+        requestParams={requestParams}
+        services={services}
         filters={[]}
       />
     );
 
-    expect(MetricChart).toHaveBeenCalledWith(
-      expect.objectContaining({ size: 'm' }),
-      expect.anything()
-    );
+    expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 'm' }), expect.anything());
 
     rerender(
       <MetricsGrid
-        loading={false}
-        fields={fields}
+        columns={4}
         dimensions={['host.name']}
         pivotOn="metric"
-        columns={4}
-        timeRange={timeRange}
+        discoverFetch$={new Subject()}
+        fields={fields}
+        requestParams={requestParams}
+        services={services}
         filters={[]}
       />
     );
 
-    expect(MetricChart).toHaveBeenCalledWith(
-      expect.objectContaining({ size: 's' }),
-      expect.anything()
-    );
+    expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
   });
 });

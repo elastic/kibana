@@ -19,7 +19,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { type Streams, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 
-import { IlmLink } from '../../data_management/stream_detail_lifecycle/ilm_link';
+import { IlmLink } from '../../data_management/stream_detail_lifecycle/general_data/ilm_link';
 import {
   formatBytes,
   formatIngestionRate,
