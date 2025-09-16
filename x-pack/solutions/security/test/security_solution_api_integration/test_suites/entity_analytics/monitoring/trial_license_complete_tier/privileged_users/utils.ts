@@ -177,6 +177,24 @@ export const PrivMonUtils = (
       },
     });
 
+  const updateOktaUserRole = async (id: string, isPrivileged: boolean) => {
+    await es.updateByQuery({
+      index: 'logs-entityanalytics_okta.user-default',
+      refresh: true,
+      conflicts: 'proceed',
+      query: { ids: { values: [id] } },
+      script: {
+        lang: 'painless',
+        source: `
+      if (ctx._source.user == null) ctx._source.user = new HashMap();
+      ctx._source.user.is_privileged = params.new_privileged_status;
+      ctx._source.user.roles = new ArrayList();      
+    `,
+        params: { new_privileged_status: isPrivileged },
+      },
+    });
+  };
+
   return {
     initPrivMonEngine,
     initPrivMonEngineWithoutAuth,
@@ -188,5 +206,6 @@ export const PrivMonUtils = (
     assertIsPrivileged,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
+    updateOktaUserRole,
   };
 };

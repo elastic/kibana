@@ -326,6 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
+        await api.deleteMonitoringEngine({ query: { data: true } });
       });
 
       it('should not create duplicate monitoring data sources', async () => {
@@ -452,17 +453,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('integrations sync', () => {
-      const nameSpace = 'default';
-      const integrationsName = `entity_analytics.monitoring.sources.okta-${nameSpace}`;
-      const oktaIntegrationsIndexPattern = `logs-entityanalytics_okta.user-${nameSpace}`;
-      const entitySourceIntegration = createIntegrationEntitySource({
-        name: integrationsName,
-        indexPattern: oktaIntegrationsIndexPattern,
-      });
-
+    describe('integrations sync', async () => {
       before(async () => {
-        // await es.indices.createDataStream({ name: 'logs-entityanalytics_okta.user-default' });
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
           { useCreate: true }
@@ -476,9 +468,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        // eslint-disable-next-line no-console
-        console.log(`HELPER CALL ONE`);
-        await helper(es);
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
         await kibanaServer.uiSettings.update({
@@ -489,13 +478,31 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         // delete the okta index
         await api.deleteMonitoringEngine({ query: { data: true } });
-        await disablePrivmonSetting(kibanaServer); // does this cleanup internal index as well?
+        await disablePrivmonSetting(kibanaServer);
       });
 
       it('update detection should sync integrations', async () => {
-        // eslint-disable-next-line no-console
-        console.log(`HELPER CALL TWO`);
-        await helper(es);
+        // schedule a sync
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
+        const res = await api.listPrivMonUsers({ query: {} });
+        // each user should be privileged and have correct source
+        res.body.forEach((r: any) => {
+          expect(r.user.is_privileged).toBe(true);
+          expect(r.user.name).toBeDefined();
+          expect(r.labels.sources).toContain('entity_analytics_integration');
+        });
+        // update okta user to non-privileged, to test sync updates
+        await privMonUtils.updateOktaUserRole('AZlHQD20hY07UD0HNBs-', false);
+        // schedule another sync
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
+        const res2 = await api.listPrivMonUsers({ query: {} });
+        // find the updated user
+        const updatedUser = res2.body.find((u: any) => u.user.name === 'Mable.Mann');
+        // check user is now non-privileged and does not have integration source
+        expect(updatedUser.user.is_privileged).toBe(false);
+        expect(updatedUser.labels.sources).toHaveLength(0);
       });
 
       it.skip('deletion detection should delete users on full sync', async () => {
@@ -504,6 +511,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('default entity sources', () => {
+      beforeEach(async () => {});
+      afterEach(async () => {
+        await api.deleteMonitoringEngine({ query: { data: true } });
+        await disablePrivmonSetting(kibanaServer);
+      });
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
@@ -520,35 +532,4 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
   });
-};
-
-export const helper = async (es: any) => {
-  const dsName = 'logs-entityanalytics_okta.user-default';
-  const backingPattern = `.ds-${dsName}-*`;
-
-  // 1) Make newly indexed docs visible to search
-  await es.indices.refresh({ index: backingPattern, expand_wildcards: 'all' });
-
-  // 2) Resolve to the concrete backing index (handy for logging/debug)
-  const resolved = await es.indices.resolveIndex({
-    name: backingPattern,
-    expand_wildcards: 'all',
-  });
-  const backing = resolved.indices?.[0]?.name ?? resolved.data_streams?.[0]?.name ?? backingPattern;
-  // eslint-disable-next-line no-console
-  console.log('Resolved backing:', backing);
-  // 3) Count the docs in the backing index (should be >0)
-  await es.indices.refresh({ index: backing });
-  const { count } = await es.count({ index: backing });
-  expect(count).toBeGreaterThan(0);
-
-  // (Optional) peek at a doc for sanity
-  const hit = await es.search({
-    index: backing,
-    size: 1,
-    query: { match_all: {} },
-    track_total_hits: true,
-  });
-  // eslint-disable-next-line no-console
-  console.log('Sample doc _id:', hit.hits.hits[0]?._id);
 };
