@@ -686,9 +686,7 @@ describe('createPrivilegedUsersCrudService', () => {
             name: 'existing-user',
           },
           entity_analytics_monitoring: {
-            labels: [
-              { field: 'department', value: 'engineering', source: 'api' },
-            ],
+            labels: [{ field: 'department', value: 'engineering', source: 'api' }],
           },
         };
 
@@ -702,9 +700,7 @@ describe('createPrivilegedUsersCrudService', () => {
             sources: ['csv'],
           },
           entity_analytics_monitoring: {
-            labels: [
-              { field: 'location', value: 'NYC', source: 'csv' },
-            ],
+            labels: [{ field: 'location', value: 'NYC', source: 'csv' }],
           },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         };
@@ -846,19 +842,21 @@ describe('createPrivilegedUsersCrudService', () => {
           },
         };
 
-        mockEsClient.asCurrentUser.get.mockResolvedValueOnce({
-          _id: 'test-user-id',
-          _index: TEST_INDEX,
-          _source: existingUser,
-          found: true,
-          _version: 1,
-        }).mockResolvedValueOnce({
-          _id: 'test-user-id',
-          _index: TEST_INDEX,
-          _source: updatedUser,
-          found: true,
-          _version: 2,
-        });
+        mockEsClient.asCurrentUser.get
+          .mockResolvedValueOnce({
+            _id: 'test-user-id',
+            _index: TEST_INDEX,
+            _source: existingUser,
+            found: true,
+            _version: 1,
+          })
+          .mockResolvedValueOnce({
+            _id: 'test-user-id',
+            _index: TEST_INDEX,
+            _source: updatedUser,
+            found: true,
+            _version: 2,
+          });
 
         const result = await crudService.update('test-user-id', updateRequest);
 
@@ -932,9 +930,7 @@ describe('createPrivilegedUsersCrudService', () => {
               sources: ['csv'],
             },
             entity_analytics_monitoring: {
-              labels: [
-                { field: 'location', value: 'NYC', source: 'csv' },
-              ],
+              labels: [{ field: 'location', value: 'NYC', source: 'csv' }],
             },
           },
         });
@@ -952,9 +948,7 @@ describe('createPrivilegedUsersCrudService', () => {
             sources: ['api'],
           },
           entity_analytics_monitoring: {
-            labels: [
-              { field: 'department', value: 'engineering', source: 'api' },
-            ],
+            labels: [{ field: 'department', value: 'engineering', source: 'api' }],
           },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         };
