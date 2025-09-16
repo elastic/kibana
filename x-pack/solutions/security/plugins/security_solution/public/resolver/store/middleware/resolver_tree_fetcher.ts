@@ -61,7 +61,7 @@ export function ResolverTreeFetcher(
       try {
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
           _id: databaseParameters.databaseDocumentID,
-          indices: databaseParameters.indices,
+          index: databaseParameters.entityIndex,
           signal: lastRequestAbortController.signal,
         });
 
