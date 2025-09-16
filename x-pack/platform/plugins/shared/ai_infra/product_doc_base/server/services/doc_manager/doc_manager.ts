@@ -149,9 +149,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    await Promise.allSettled(
-      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate }))
-    );
+    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
     return {
       inferenceIds: idsToUpdate,
     };
