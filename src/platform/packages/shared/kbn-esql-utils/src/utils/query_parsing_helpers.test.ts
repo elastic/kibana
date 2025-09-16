@@ -26,6 +26,7 @@ import {
   getArgsFromRenameFunction,
   getCategorizeField,
   findClosestColumn,
+  getKqlSearchQueries,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -200,6 +201,46 @@ describe('esql query helpers', () => {
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
+    });
+  });
+
+  describe('getKqlSearchQueries', () => {
+    it('should return an empty array for a regular ES|QL query', () => {
+      expect(getKqlSearchQueries('from a | where field == "value"')).toStrictEqual([]);
+    });
+
+    it('should return an empty array if there are no search functions', () => {
+      expect(getKqlSearchQueries('from a | eval b = 1')).toStrictEqual([]);
+    });
+
+    it("should return a KQL query when it's embedded in ES|QL query", () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """)')).toStrictEqual([
+        'field : "value"',
+      ]);
+    });
+
+    it('should correctly parse KQL full text embedded query', () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
+        'full text',
+      ]);
+    });
+
+    it('should correctly parse long queries', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories" """)'
+        )
+      ).toStrictEqual([
+        '(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories"',
+      ]);
+    });
+
+    it('should correctly parse mixed queries, omitting ES|QL valid syntax', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND KQL("""field2:value2""")'
+        )
+      ).toStrictEqual(['field1: "value1"', 'field2:value2']);
     });
   });
 
