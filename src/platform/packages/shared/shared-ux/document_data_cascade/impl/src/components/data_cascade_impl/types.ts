@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEvent } from 'react';
+import type React from 'react';
 import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
 import type { Row, CellContext } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
@@ -64,7 +64,7 @@ export interface CascadeRowActionProps {
   hideOver?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
-      onClick: (e: MouseEvent<HTMLButtonElement>) => void;
+      onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
     } & (
         | {
             label?: React.ReactNode;
@@ -101,7 +101,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
   /**
    * @description The row header title slot for the cascade row.
    */
-  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
+  rowHeaderTitleSlot: React.FC<{ row: Row<G>; selectedCascadeGroups: string[] }>;
   /**
    * @description The row header meta slots for the cascade row.
    */
