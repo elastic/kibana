@@ -26,6 +26,8 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useHistogramFetchMap } from '../../hooks/use_histogram_fetch_map';
+import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
@@ -48,6 +50,7 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
+  const { timeState } = useTimefilter();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -78,6 +81,14 @@ export function StreamsTreeTable({
       setSortDirection(sort.direction);
     }
   };
+
+  const numDataPoints = 25;
+
+  const histogramMap = useHistogramFetchMap(
+    streams.map((s) => s.stream.name),
+    timeState,
+    numDataPoints
+  );
 
   const sorting = {
     sort: {
@@ -144,7 +155,7 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DocumentsColumn indexPattern={item.stream.name} numDataPoints={25} />
+              <DocumentsColumn indexPattern={item.stream.name} histogramQueryFetch={histogramMap[item.stream.name]} timeState={timeState} numDataPoints={numDataPoints} />
             ) : null,
         },
         {
@@ -157,6 +168,7 @@ export function StreamsTreeTable({
             item.data_stream ? (
               <DataQualityColumn
                 indexPattern={item.stream.name}
+                histogramQueryFetch={histogramMap[item.stream.name]}
                 considerFailedQuality={
                   item.can_read_failure_store && item.data_stream?.failure_store?.enabled
                 }

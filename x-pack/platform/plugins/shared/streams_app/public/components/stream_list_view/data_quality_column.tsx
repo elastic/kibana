@@ -6,42 +6,41 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { mapPercentageToQuality, calculatePercentage } from '@kbn/data-quality/common';
-import { i18n } from '@kbn/i18n';
-import type { QualityIndicators } from '@kbn/data-quality/common';
-import { QualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function DataQualityColumn({
   indexPattern,
+  histogramQueryFetch,
   considerFailedQuality,
 }: {
   indexPattern: string;
+  histogramQueryFetch: AbortableAsyncState<UnparsedEsqlResponse>;
   considerFailedQuality?: boolean;
 }) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
-  const docsQueryFetch = useStreamsAppFetch(
-    async ({ signal, timeState: { start, end } }) => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*)`,
-            start,
-            end,
-          },
-        },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, indexPattern],
-    {
-      withTimeRange: true,
-      disableToastOnError: true,
-    }
+  const allTimeseries = React.useMemo(
+    () =>
+      esqlResultToTimeseries({
+        result: histogramQueryFetch,
+        metricNames: ['doc_count'],
+      }),
+    [histogramQueryFetch]
+  );
+
+  const docCount = React.useMemo(
+    () =>
+      allTimeseries.reduce(
+        (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
+        0
+      ),
+    [allTimeseries]
   );
 
   const failedDocsQueryFetch = useStreamsAppFetch(
@@ -89,7 +88,6 @@ export function DataQualityColumn({
     }
   );
 
-  const docCount = docsQueryFetch?.value ? Number(docsQueryFetch.value?.values?.[0]?.[0]) : 0;
   const degradedDocCount = degradedDocsQueryFetch?.value
     ? Number(degradedDocsQueryFetch.value?.values?.[0]?.[0])
     : 0;
@@ -113,19 +111,8 @@ export function DataQualityColumn({
     ? mapPercentageToQuality([degradedPercentage, failedPercentage])
     : mapPercentageToQuality([degradedPercentage]);
 
-  const qualityTexts: Record<QualityIndicators, string> = {
-    poor: i18n.translate('xpack.streams.dataQualityBadge.poor', { defaultMessage: 'Poor' }),
-    degraded: i18n.translate('xpack.streams.dataQualityBadge.degraded', {
-      defaultMessage: 'Degraded',
-    }),
-    good: i18n.translate('xpack.streams.dataQualityBadge.good', { defaultMessage: 'Good' }),
-  };
+  const isLoading =
+    histogramQueryFetch.loading || failedDocsQueryFetch?.loading || degradedDocsQueryFetch.loading;
 
-  return docsQueryFetch.loading ||
-    failedDocsQueryFetch?.loading ||
-    degradedDocsQueryFetch.loading ? (
-    <EuiLoadingSpinner />
-  ) : (
-    <QualityIndicator quality={quality} description={qualityTexts[quality]} />
-  );
+  return <DatasetQualityIndicator quality={quality} isLoading={isLoading} />;
 }

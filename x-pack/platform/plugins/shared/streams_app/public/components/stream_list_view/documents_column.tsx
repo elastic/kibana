@@ -24,50 +24,28 @@ import {
   Tooltip,
   TooltipStickTo,
 } from '@elastic/charts';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
 
 export function DocumentsColumn({
   indexPattern,
+  histogramQueryFetch,
+  timeState,
   numDataPoints,
 }: {
   indexPattern: string;
+  histogramQueryFetch: AbortableAsyncState<UnparsedEsqlResponse>;
+  timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
-
-  const { timeState } = useTimefilter();
-
-  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
-
-  const histogramQueryFetch = useStreamsAppFetch(
-    async ({ signal, timeState: { start, end } }) => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
-            start,
-            end,
-          },
-        },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, indexPattern, minInterval],
-    {
-      withTimeRange: true,
-      disableToastOnError: true,
-    }
-  );
 
   const allTimeseries = React.useMemo(
     () =>
@@ -90,6 +68,7 @@ export function DocumentsColumn({
   const hasData = docCount > 0;
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
+  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
   const noDocCountData = histogramQueryFetch.error ? '' : '-';
 
