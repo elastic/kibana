@@ -14,6 +14,8 @@ import type {
   HttpStep,
   IfStep,
   WaitStep,
+  ElasticsearchStep,
+  KibanaStep,
   WorkflowYaml,
 } from '../../../spec/schema';
 import type {
@@ -26,6 +28,8 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
+  ElasticsearchGraphNode,
+  KibanaGraphNode,
 } from '../../../types/execution';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
@@ -273,6 +277,155 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
+  describe('elasticsearch step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testElasticsearchStep',
+          type: 'elasticsearch.search.query',
+          with: {
+            index: 'logs-*',
+            query: {
+              match: {
+                message: 'error',
+              },
+            },
+            size: 10,
+          },
+        } as ElasticsearchStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for elasticsearch step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testElasticsearchStep']);
+    });
+
+    it('should configure the elasticsearch step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testElasticsearchStep');
+      expect(node).toEqual({
+        id: 'testElasticsearchStep',
+        type: 'elasticsearch.search.query',
+        configuration: {
+          name: 'testElasticsearchStep',
+          type: 'elasticsearch.search.query',
+          with: {
+            index: 'logs-*',
+            query: {
+              match: {
+                message: 'error',
+              },
+            },
+            size: 10,
+          },
+        },
+      } as ElasticsearchGraphNode);
+    });
+
+    it('should handle elasticsearch step with raw API format', () => {
+      const rawApiWorkflow = {
+        steps: [
+          {
+            name: 'testElasticsearchRawStep',
+            type: 'elasticsearch.search',
+            with: {
+              request: {
+                method: 'GET',
+                path: '/logs-*/_search',
+                body: {
+                  query: {
+                    match: {
+                      message: 'error',
+                    },
+                  },
+                  size: 5,
+                },
+              },
+            },
+          } as ElasticsearchStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
+      const node = executionGraph.node(
+        'testElasticsearchRawStep'
+      ) as unknown as ElasticsearchGraphNode;
+      expect(node.type).toBe('elasticsearch.search');
+      expect(node.configuration.with.request.path).toBe('/logs-*/_search');
+    });
+  });
+
+  describe('kibana step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testKibanaStep',
+          type: 'kibana.cases.create',
+          with: {
+            title: 'Test Case',
+            description: 'A test case created by workflow',
+            tags: ['automation'],
+            severity: 'medium',
+          },
+        } as KibanaStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for kibana step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testKibanaStep']);
+    });
+
+    it('should configure the kibana step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testKibanaStep');
+      expect(node).toEqual({
+        id: 'testKibanaStep',
+        type: 'kibana.cases.create',
+        configuration: {
+          name: 'testKibanaStep',
+          type: 'kibana.cases.create',
+          with: {
+            title: 'Test Case',
+            description: 'A test case created by workflow',
+            tags: ['automation'],
+            severity: 'medium',
+          },
+        },
+      } as KibanaGraphNode);
+    });
+
+    it('should handle kibana step with raw API format', () => {
+      const rawApiWorkflow = {
+        steps: [
+          {
+            name: 'testKibanaRawStep',
+            type: 'kibana.cases.get',
+            with: {
+              request: {
+                method: 'GET',
+                path: '/api/cases/test-case-id',
+                headers: {
+                  'kbn-xsrf': 'true',
+                },
+              },
+            },
+          } as KibanaStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
+      const node = executionGraph.node('testKibanaRawStep') as unknown as KibanaGraphNode;
+      expect(node.type).toBe('kibana.cases.get');
+      expect(node.configuration.with.request.path).toBe('/api/cases/test-case-id');
+    });
+  });
+
   describe('if condition', () => {
     describe('if step', () => {
       const workflowDefinition = {
@@ -369,7 +522,7 @@ describe('convertToWorkflowGraph', () => {
         const enterThenBranchNode = executionGraph.node('enterThen(testIfStep)');
         expect(enterThenBranchNode).toEqual({
           id: 'enterThen(testIfStep)',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'true',
         } as EnterConditionBranchNode);
       });
@@ -379,7 +532,7 @@ describe('convertToWorkflowGraph', () => {
         const exitThenBranchNode = executionGraph.node('exitThen(testIfStep)');
         expect(exitThenBranchNode).toEqual({
           id: 'exitThen(testIfStep)',
-          type: 'exit-condition-branch',
+          type: 'exit-then-branch',
           startNodeId: 'enterThen(testIfStep)',
         } as ExitConditionBranchNode);
       });
@@ -389,7 +542,7 @@ describe('convertToWorkflowGraph', () => {
         const enterElseBranchNode = executionGraph.node('enterElse(testIfStep)');
         expect(enterElseBranchNode).toEqual({
           id: 'enterElse(testIfStep)',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
           condition: undefined,
         } as EnterConditionBranchNode);
       });
@@ -399,7 +552,7 @@ describe('convertToWorkflowGraph', () => {
         const exitElseBranchNode = executionGraph.node('exitElse(testIfStep)');
         expect(exitElseBranchNode).toEqual({
           id: 'exitElse(testIfStep)',
-          type: 'exit-condition-branch',
+          type: 'exit-else-branch',
           startNodeId: 'enterElse(testIfStep)',
         } as ExitConditionBranchNode);
       });
@@ -537,7 +690,7 @@ describe('convertToWorkflowGraph', () => {
         const enterThenBranchNode = executionGraph.node('enterThen(if_firstThenTestConnectorStep)');
         expect(enterThenBranchNode).toEqual({
           id: 'enterThen(if_firstThenTestConnectorStep)',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'false',
         } as EnterConditionBranchNode);
       });
@@ -555,7 +708,7 @@ describe('convertToWorkflowGraph', () => {
         const exitThenBranchNode = executionGraph.node('exitThen(if_firstThenTestConnectorStep)');
         expect(exitThenBranchNode).toEqual({
           id: 'exitThen(if_firstThenTestConnectorStep)',
-          type: 'exit-condition-branch',
+          type: 'exit-then-branch',
           startNodeId: 'enterThen(if_firstThenTestConnectorStep)',
         } as ExitConditionBranchNode);
       });
@@ -681,6 +834,20 @@ describe('convertToWorkflowGraph', () => {
             } as ForEachStep,
           ],
         } as Partial<WorkflowYaml>;
+
+        it('should have correct edges', () => {
+          const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
+          const edges = executionGraph.edges();
+          expect(edges).toEqual(
+            expect.arrayContaining([
+              { v: 'outerForeachStep', w: 'innerForeachStep' },
+              { v: 'innerForeachStep', w: 'nestedConnectorStep' },
+              { v: 'nestedConnectorStep', w: 'exitForeach(innerForeachStep)' },
+              { v: 'exitForeach(innerForeachStep)', w: 'exitForeach(outerForeachStep)' },
+            ])
+          );
+          expect(edges).toHaveLength(4);
+        });
 
         it('should handle nested foreach steps correctly', () => {
           const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
@@ -886,6 +1053,31 @@ describe('convertToWorkflowGraph', () => {
         'exitThen(if_testForeachConnectorStep)',
         'exitCondition(if_testForeachConnectorStep)',
       ]);
+    });
+
+    it('should have correct edges', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual(
+        expect.arrayContaining([
+          { v: 'if_testForeachConnectorStep', w: 'enterThen(if_testForeachConnectorStep)' },
+          { v: 'enterThen(if_testForeachConnectorStep)', w: 'foreach_testForeachConnectorStep' },
+          { v: 'foreach_testForeachConnectorStep', w: 'testForeachConnectorStep' },
+          {
+            v: 'testForeachConnectorStep',
+            w: 'exitForeach(foreach_testForeachConnectorStep)',
+          },
+          {
+            v: 'exitForeach(foreach_testForeachConnectorStep)',
+            w: 'exitThen(if_testForeachConnectorStep)',
+          },
+          {
+            v: 'exitThen(if_testForeachConnectorStep)',
+            w: 'exitCondition(if_testForeachConnectorStep)',
+          },
+        ])
+      );
+      expect(edges).toHaveLength(6);
     });
   });
 

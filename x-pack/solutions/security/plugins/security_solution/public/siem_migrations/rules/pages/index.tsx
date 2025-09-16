@@ -7,13 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import {
-  EuiSkeletonLoading,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -23,7 +17,7 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
-import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_rules_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import { HeaderButtons, UnknownMigration } from '../../common/components';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
@@ -36,6 +30,7 @@ import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 import { EmptyMigrationRulesPage } from './empty';
 import * as i18n from './translations';
+import { PageTitle } from '../../common/components/page_title';
 
 export type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -136,15 +131,9 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage
-          title={
-            <EuiTitle data-test-subj="siemMigrationsPageTitle" size="l">
-              <h1>{i18n.PAGE_TITLE}</h1>
-            </EuiTitle>
-          }
-          border
-        >
+        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
           <HeaderButtons
+            migrationType="rule"
             migrationsStats={ruleMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
