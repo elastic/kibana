@@ -36,7 +36,7 @@ export const useConvertIndexToLookup = ({
     onCloseRef.current = onClose;
   }, [onSuccess, onClose]);
 
-  const pollIntervalIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollIntervalIdRef = useRef<number | null>(null);
 
   const clearPollInterval = useCallback(() => {
     if (pollIntervalIdRef.current) {
@@ -57,7 +57,7 @@ export const useConvertIndexToLookup = ({
     }
 
     if (data?.reindexOp?.status === ReindexStatus.inProgress) {
-      pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
+      pollIntervalIdRef.current = window.setTimeout(updateStatus, POLL_INTERVAL);
     } else if (
       data?.reindexOp?.status === ReindexStatus.failed ||
       data?.reindexOp?.status === ReindexStatus.cancelled
