@@ -1010,12 +1010,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Entity'
           description: Entity updated or created
-        '400':
-          description: Operation on a non-existent field or on an uninitialized Engine
         '403':
           description: Operation on a restricted field
         '404':
           description: Entity not found
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
       summary: Upsert an entity in Entity Store
       tags:
         - Security Entity Analytics API
