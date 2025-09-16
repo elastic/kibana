@@ -70,6 +70,9 @@ export function ChatMessageText({
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
+      contentReference: (props: any) => (
+        <ContentReferenceComponentFactory contentReferenceNode={props} />
+      ),
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -118,9 +121,6 @@ export function ChatMessageText({
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
-      contentReference: (props: any) => (
-        <ContentReferenceComponentFactory contentReferenceNode={props} />
-      ),
     };
 
     return {
@@ -128,8 +128,8 @@ export function ChatMessageText({
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationPlugin,
-        ...(contentReferences ? [contentReferenceParser({ contentReferences })] : []),
         ...parsingPlugins,
+        ...(contentReferences ? [contentReferenceParser({ contentReferences })] : []),
       ],
       processingPluginList: processingPlugins,
     };

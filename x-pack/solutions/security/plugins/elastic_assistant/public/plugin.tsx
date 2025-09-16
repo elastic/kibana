@@ -30,6 +30,7 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { KnowledgeBaseEntryReference } from './src/components/get_comments/content_reference/components/knowledge_base_entry_reference';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -56,6 +57,10 @@ export class ElasticAssistantPublicPlugin
     dependencies.onechat.contentReferenceRegistry.register(
       'SecurityAlertsPage',
       SecurityAlertsPageReference
+    );
+    dependencies.onechat.contentReferenceRegistry.register(
+      'KnowledgeBaseEntry',
+      KnowledgeBaseEntryReference
     );
 
     const startServices = (): StartServices => {

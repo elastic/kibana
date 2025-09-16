@@ -8,7 +8,6 @@
 import type {
   EsqlContentReference,
   HrefContentReference,
-  KnowledgeBaseEntryContentReference,
   ProductDocumentationContentReference,
 } from '@kbn/elastic-assistant-common';
 import React from 'react';
@@ -16,7 +15,6 @@ import type {
   ContentReferenceNode,
   ResolvedContentReferenceNode,
 } from '../content_reference_parser';
-import { KnowledgeBaseEntryReference } from './knowledge_base_entry_reference';
 import { ContentReferenceButton } from './content_reference_button';
 import { ProductDocumentationReference } from './product_documentation_reference';
 import { EsqlQueryReference } from './esql_query_reference';
@@ -59,15 +57,6 @@ export const ContentReferenceComponentFactory: React.FC<Props> = ({
 
   // Fallback to built-in components
   switch (type) {
-    case 'KnowledgeBaseEntry': {
-      return (
-        <KnowledgeBaseEntryReference
-          contentReferenceNode={
-            contentReferenceNode as ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>
-          }
-        />
-      );
-    }
     case 'ProductDocumentation':
       return (
         <ProductDocumentationReference

@@ -669,6 +669,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       onechatPlugin: plugins.onechat,
       core,
       logger: this.logger,
+      actionsPlugin: plugins.actions,
+      assistantPlugin: plugins.elasticAssistant,
     });
     siemAgentCreator.createSiemAgent();
 
