@@ -93,7 +93,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'enableAgentStatusAlerting',
           'enableAgentPrivilegeLevelChange',
         ])}`,
-        `--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
