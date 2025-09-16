@@ -64,7 +64,7 @@ export const OnechatTools = () => {
           <EuiButton
             key="new-esql-tool-button"
             fill
-            iconType="plusInCircleFilled"
+            iconType="plus"
             onClick={() => createTool(ToolType.esql)}
           >
             <EuiText size="s">{labels.tools.newToolButton}</EuiText>

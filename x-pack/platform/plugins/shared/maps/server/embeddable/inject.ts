@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
-import type { MapEmbeddablePersistableState } from './types';
-import type { MapAttributes } from '../content_management';
-import { extractReferences, injectReferences } from '../migrations/references';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
+import type { MapAttributes } from '../../common/content_management';
+import { extractReferences, injectReferences } from '../../common/migrations/references';
 
-export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (state, references) => {
-  const typedState = state as MapEmbeddablePersistableState;
-
+export function inject(
+  state: EmbeddableStateWithType & { attributes?: MapAttributes },
+  references: Reference[]
+) {
   // by-reference embeddable
-  if (!('attributes' in typedState) || typedState.attributes === undefined) {
-    return typedState;
+  if (!state.attributes) {
+    return state;
   }
 
   // by-value embeddable
   try {
-    // run embeddable state through extract logic to ensure any state with hard coded ids is replace with refNames
+    // run state through extract logic to ensure any state with hard coded ids is replace with refNames
     // refName generation will produce consistent values allowing inject logic to then replace refNames with current ids.
-    const { attributes: attributesWithNoHardCodedIds } = extractReferences({
-      attributes: typedState.attributes as MapAttributes,
-    });
-
+    const attributesWithNoHardCodedIds = extractReferences({
+      attributes: state.attributes,
+    }).attributes;
     const { attributes: attributesWithInjectedIds } = injectReferences({
       attributes: attributesWithNoHardCodedIds,
       references,
     });
     return {
-      ...typedState,
+      ...state,
       attributes: attributesWithInjectedIds,
     };
   } catch (error) {
@@ -39,6 +39,6 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (stat
     // Instead of throwing, swallow error and let dashboard display
     // Errors will surface in map panel. Any layer that failed injection will surface the error in the legend
     // Users can then manually edit map to resolve any problems.
-    return typedState;
+    return state;
   }
-};
+}

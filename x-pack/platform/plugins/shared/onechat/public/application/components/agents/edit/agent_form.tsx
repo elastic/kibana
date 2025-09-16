@@ -36,6 +36,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { css } from '@emotion/react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { defer } from 'lodash';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -74,9 +76,21 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  // Resolve state updates before navigation to avoid triggering unsaved changes prompt
+  const deferNavigateToOnechatUrl = useCallback(
+    (...args: Parameters<typeof navigateToOnechatUrl>) => {
+      defer(() => navigateToOnechatUrl(...args));
+    },
+    [navigateToOnechatUrl]
+  );
+  const { services } = useKibana();
   const {
-    services: { notifications },
-  } = useKibana();
+    notifications,
+    http,
+    overlays: { openConfirm },
+    application: { navigateToUrl },
+    appParams: { history },
+  } = services;
   const agentFormId = useGeneratedHtmlId({
     prefix: 'agentForm',
   });
@@ -128,14 +142,21 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     resolver: zodResolver(agentFormSchema),
   });
   const { control, handleSubmit, reset, formState, watch } = formMethods;
-  const { errors, isDirty } = formState;
+  const { errors, isDirty, isSubmitSuccessful } = formState;
   const hasErrors = Object.keys(errors).length > 0;
+
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (agentState && !isLoading) {
       reset(agentState);
     }
   }, [agentState, isLoading, reset]);
+
+  const handleCancel = useCallback(() => {
+    setIsCancelling(true);
+    defer(() => navigateToOnechatUrl(appPaths.agents.list));
+  }, [navigateToOnechatUrl]);
 
   const handleSave = useCallback(
     async (
@@ -152,10 +173,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        navigateToOnechatUrl(appPaths.agents.list);
+        deferNavigateToOnechatUrl(appPaths.agents.list);
       }
     },
-    [submit, navigateToOnechatUrl]
+    [submit, deferNavigateToOnechatUrl]
   );
 
   const handleSaveAndChat = useCallback(
@@ -164,9 +185,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
     },
-    [navigateToOnechatUrl, handleSave]
+    [deferNavigateToOnechatUrl, handleSave]
   );
 
   const isFormDisabled = isLoading || isSubmitting;
@@ -176,6 +197,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const [isAdditionalActionsMenuOpen, setAdditionalActionsMenuOpen] = useState(false);
 
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty && !isSubmitSuccessful && !isCancelling,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+  });
 
   const agentTools = watch('configuration.tools');
   const activeToolsCount = useMemo(() => {
@@ -524,12 +553,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="cross"
-              color="text"
-              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-            >
+            <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
               {i18n.translate('xpack.onechat.agents.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}

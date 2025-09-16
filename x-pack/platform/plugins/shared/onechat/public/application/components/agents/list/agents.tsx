@@ -24,7 +24,7 @@ export const OnechatAgents = () => {
   const { createOnechatUrl, navigateToOnechatUrl } = useNavigation();
   const headerButtons = [
     <EuiButton
-      iconType={'plusInCircleFilled'}
+      iconType="plus"
       color="primary"
       fill
       iconSide="left"
