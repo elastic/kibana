@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ReactDOM from 'react-dom';
 
 import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { DefaultControlApi } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi, DefaultControlApi } from '@kbn/controls-plugin/public';
 import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import type { ControlApi } from '@kbn/controls-plugin/public/controls/default_control_manager';
+import type { BehaviorSubject } from 'rxjs';
 import { executeAddLensPanelAction } from '../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../dashboard_api/types';
 import {
@@ -53,6 +55,25 @@ function cleanup() {
 }
 
 const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
+  const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
+  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
+
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      const nextHasTimeSliderControl = Object.values(children).some((controlApi) => {
+        return apiHasType(controlApi) && controlApi.type === TIME_SLIDER_CONTROL;
+      });
+      setHasTimeSliderControl(nextHasTimeSliderControl);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
+
   const onSave = () => {
     dashboardApi.scrollToTop();
   };
@@ -60,7 +81,6 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
     cleanup();
     anchorElement.focus();
   }, [anchorElement]);
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
 
   const panels = [
     {
@@ -208,6 +228,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           name: getAddTimeSliderControlButtonTitle(),
           icon: 'empty',
           'data-test-subj': 'controls-create-timeslider-button',
+          disabled: !controlGroupApi || hasTimeSliderControl,
           onClick: async () => {
             controlGroupApi?.addNewPanel({
               panelType: TIME_SLIDER_CONTROL,
