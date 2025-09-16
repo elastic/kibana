@@ -139,9 +139,7 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
     delete originalFieldDefinition[field.name];
   });
 
-  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields).filter(
-    (field) => !originalFieldDefinition[field.name]
-  );
+  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields);
 
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
