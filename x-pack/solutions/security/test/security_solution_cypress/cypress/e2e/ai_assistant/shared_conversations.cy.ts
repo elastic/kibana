@@ -91,7 +91,10 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     ],
   };
   before(() => {
+    // Login as secondary user to ensure their profile is created/seeded in the system
     loginSecondaryUser(isServerless, secondaryUser);
+    // Visit a page to ensure the user profile is properly initialized
+    visitGetStartedPage();
     cy.clearCookies();
   });
   beforeEach(() => {
