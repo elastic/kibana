@@ -14,6 +14,7 @@ import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
@@ -71,7 +72,7 @@ export function createUpsertStreamActor({
 
     telemetryClient.trackProcessingSaved({
       processors_count: input.processors.length,
-      stream_type: Streams.WiredStream.GetResponse.is(input.definition) ? 'wired' : 'classic',
+      stream_type: getStreamTypeFromDefinition(input.definition.stream),
     });
 
     return response;

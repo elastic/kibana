@@ -17,6 +17,7 @@ import type {
   StreamsSchemaFieldUpdatedProps,
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
+  WiredStreamsStatusChangedProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
@@ -29,6 +30,7 @@ import {
   STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
+  STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -58,6 +60,10 @@ export class StreamsTelemetryClient {
 
   public trackAIGrokSuggestionAccepted(params: StreamsAIGrokSuggestionAcceptedProps) {
     this.analytics.reportEvent(STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
+  }
+
+  public trackWiredStreamsStatusChanged(params: WiredStreamsStatusChangedProps) {
+    this.analytics.reportEvent(STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE, params);
   }
 
   public trackProcessingSaved(params: StreamsProcessingSavedProps) {

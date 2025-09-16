@@ -8,12 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
 import { IlmSummary } from './ilm_summary';
@@ -80,7 +81,7 @@ export const StreamDetailGeneralData = ({
 
       telemetryClient.trackRetentionChanged(
         lifecycle,
-        Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic'
+        getStreamTypeFromDefinition(definition.stream)
       );
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {

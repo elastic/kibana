@@ -17,6 +17,7 @@ import type {
   StreamsSchemaFieldUpdatedProps,
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
+  WiredStreamsStatusChangedProps,
 } from './types';
 
 const streamsAssetCountSchema: RootSchema<StreamsAssetCountProps> = {
@@ -149,6 +150,15 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
   },
 };
 
+const wiredStreamsStatusChangedSchema: RootSchema<WiredStreamsStatusChangedProps> = {
+  is_enabled: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether wired streams was enabled or disabled',
+    },
+  },
+};
+
 const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
   processors_count: {
     type: 'long',
@@ -266,4 +276,5 @@ export {
   streamsSchemaFieldUpdatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   streamsSignificantEventsCreatedSchema,
+  wiredStreamsStatusChangedSchema,
 };

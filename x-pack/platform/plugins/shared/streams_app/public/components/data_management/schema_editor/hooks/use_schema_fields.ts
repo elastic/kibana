@@ -12,6 +12,7 @@ import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { SchemaField } from '../types';
@@ -204,7 +205,7 @@ export const useSchemaFields = ({
           field_name: field.name,
           field_type: nextFieldDefinitionConfig.type,
           field_status: 'mapped',
-          stream_type: Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic',
+          stream_type: getStreamTypeFromDefinition(definition.stream),
         });
 
         refreshFields();
@@ -279,7 +280,7 @@ export const useSchemaFields = ({
         telemetryClient.trackSchemaFieldUpdated({
           field_name: fieldName,
           field_status: 'unmapped',
-          stream_type: Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic',
+          stream_type: getStreamTypeFromDefinition(definition.stream),
         });
 
         refreshFields();

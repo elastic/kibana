@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+type StreamType = 'wired' | 'classic' | 'unknown';
+
 interface StreamsAssetCountProps {
   name: string;
   dashboards: number;
@@ -35,15 +37,19 @@ interface StreamsAIGrokSuggestionAcceptedProps {
   detected_fields: number;
 }
 
+interface WiredStreamsStatusChangedProps {
+  is_enabled: boolean;
+}
+
 interface StreamsProcessingSavedProps {
   processors_count: number;
-  stream_type: 'wired' | 'classic';
+  stream_type: StreamType;
 }
 
 interface StreamsRetentionChangedProps {
   lifecycle_type: 'dsl' | 'ilm' | 'inherit';
   lifecycle_value?: string;
-  stream_type: 'wired' | 'classic';
+  stream_type: StreamType;
 }
 
 interface StreamsChildStreamCreatedProps {
@@ -54,17 +60,17 @@ interface StreamsSchemaFieldUpdatedProps {
   field_name: string;
   field_status: 'mapped' | 'unmapped';
   field_type?: string;
-  stream_type: 'wired' | 'classic';
+  stream_type: StreamType;
 }
 
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
-  stream_type: 'wired' | 'classic';
+  stream_type: StreamType;
 }
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
-  stream_type: 'wired' | 'classic';
+  stream_type: StreamType;
 }
 
 export {
@@ -78,4 +84,5 @@ export {
   type StreamsSchemaFieldUpdatedProps,
   type StreamsSignificantEventsSuggestionsGeneratedEventProps,
   type StreamsSignificantEventsCreatedProps,
+  type WiredStreamsStatusChangedProps,
 };

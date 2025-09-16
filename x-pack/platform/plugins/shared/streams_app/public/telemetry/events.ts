@@ -16,6 +16,7 @@ import {
   STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
+  STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -28,6 +29,7 @@ import {
   streamsSchemaFieldUpdatedSchema,
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
+  wiredStreamsStatusChangedSchema,
 } from './schemas';
 
 const streamsAssetCountEventType = {
@@ -80,6 +82,11 @@ const streamsSignificantEventsCreatedEventType = {
   schema: streamsSignificantEventsCreatedSchema,
 };
 
+const wiredStreamsStatusChangedEventType = {
+  eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
+  schema: wiredStreamsStatusChangedSchema,
+};
+
 export {
   streamsAssetCountEventType,
   streamsAssetClickEventType,
@@ -91,4 +98,5 @@ export {
   streamsSchemaFieldUpdatedEventType,
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
+  wiredStreamsStatusChangedEventType,
 };

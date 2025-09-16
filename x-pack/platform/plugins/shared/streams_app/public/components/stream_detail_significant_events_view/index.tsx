@@ -8,7 +8,7 @@ import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -24,6 +24,7 @@ import { SignificantEventsTable } from './significant_events_table';
 import type { TimelineEvent } from './timeline';
 import { Timeline } from './timeline';
 import { formatChangePoint } from './utils/change_point';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -89,7 +90,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       definition={definition.stream}
       query={queryToEdit}
       onSave={async (data: SaveData) => {
-        const streamType = Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic';
+        const streamType = getStreamTypeFromDefinition(definition.stream);
 
         switch (data.type) {
           case 'single':

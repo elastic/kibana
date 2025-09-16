@@ -17,6 +17,7 @@ import {
   streamsSchemaFieldUpdatedEventType,
   streamsSignificantEventsCreatedEventType,
   streamsSignificantEventsSuggestionsGeneratedEventType,
+  wiredStreamsStatusChangedEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -37,6 +38,7 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsSchemaFieldUpdatedEventType);
     this.analytics.registerEventType(streamsSignificantEventsSuggestionsGeneratedEventType);
     this.analytics.registerEventType(streamsSignificantEventsCreatedEventType);
+    this.analytics.registerEventType(wiredStreamsStatusChangedEventType);
   }
 
   public getClient() {
