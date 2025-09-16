@@ -162,6 +162,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             title: i18n.translate('xpack.serverlessSearch.nav.relevance', {
               defaultMessage: 'Relevance',
             }),
+            sideNavVersion: 'v1',
             spaceBefore: 'm',
             children: [
               {
@@ -187,7 +188,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   }
                 ),
                 link: 'searchInferenceEndpoints',
-                sideNavVersion: 'v1', // Moved to stack management -> ML in v2
               },
             ],
           },
@@ -306,6 +306,19 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {
                   defaultMessage: 'Ingest',
+                }),
+              },
+              {
+                children: [{ link: 'management:dataViews' }, { link: 'management:data_usage' }],
+                title: i18n.translate('xpack.serverlessSearch.nav.ingest.dataViews.title', {
+                  defaultMessage: 'Data views and usage',
+                }),
+              },
+              {
+                children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                id: 'search_relevance',
+                title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
+                  defaultMessage: 'Relevance',
                 }),
               },
             ],

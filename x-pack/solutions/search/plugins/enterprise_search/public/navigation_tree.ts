@@ -225,9 +225,10 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'searchSynonyms:synonyms' },
                     { link: 'searchQueryRules' },
-                    { link: 'searchInferenceEndpoints:inferenceEndpoints', sideNavVersion: 'v1' },
+                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                   ],
                   id: 'relevance',
+                  sideNavVersion: 'v1',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
                   }),
@@ -359,6 +360,16 @@ export const getNavigationTreeDefinition = ({
                         'xpack.enterpriseSearch.searchNav.ingest.pipelines.title',
                         {
                           defaultMessage: 'Ingest',
+                        }
+                      ),
+                    },
+                    {
+                      children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                      id: 'search_relevance',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.ingest.relevance.title',
+                        {
+                          defaultMessage: 'Relevance',
                         }
                       ),
                     },
