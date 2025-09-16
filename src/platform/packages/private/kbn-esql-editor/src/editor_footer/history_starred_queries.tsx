@@ -25,8 +25,6 @@ import {
   EuiNotificationBadge,
   EuiFieldSearch,
   EuiText,
-  EuiIconTip,
-  EuiLink,
   EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -61,27 +59,24 @@ export function QueryHistoryAction({
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiLink
-            onClick={toggleHistory}
-            external={false}
-            data-test-subj="ESQLEditor-hide-queries-link"
+          <EuiToolTip
+            position="top"
+            content={
+              isHistoryOpen
+                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                    defaultMessage: 'Hide recent queries',
+                  })
+                : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                    defaultMessage: 'Show recent queries',
+                  })
+            }
           >
-            <EuiIconTip
-              type="clockCounter"
-              color="primary"
-              size="m"
-              content={
-                isHistoryOpen
-                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                      defaultMessage: 'Hide recent queries',
-                    })
-                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                      defaultMessage: 'Show recent queries',
-                    })
-              }
-              position="top"
+            <EuiButtonIcon
+              onClick={toggleHistory}
+              iconType="clockCounter"
+              data-test-subj="ESQLEditor-hide-queries-link"
             />
-          </EuiLink>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
