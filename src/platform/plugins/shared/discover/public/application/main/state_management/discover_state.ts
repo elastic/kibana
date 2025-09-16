@@ -361,7 +361,7 @@ export function getDiscoverStateContainer({
     const appState = appStateContainer.get();
     const { query } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, filterQuery);
+    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
 
     appStateContainer.update({
       query: { esql: queryString },
@@ -509,6 +509,17 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
+  const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
+    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const scopedEbtManager = scopedEbtManager$.getValue();
+    const { fieldsMetadata } = services;
+
+    scopedEbtManager.trackSubmittingQuery({
+      query,
+      fieldsMetadata,
+    });
+  };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -516,6 +527,8 @@ export function getDiscoverStateContainer({
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
+    trackQueryFields(payload.query);
+
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });

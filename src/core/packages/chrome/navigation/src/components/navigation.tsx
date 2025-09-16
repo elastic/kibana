@@ -31,6 +31,10 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
+   * Content to display inside the side panel footer.
+   */
+  sidePanelFooter?: React.ReactNode;
+  /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
   isCollapsed: boolean;
@@ -58,6 +62,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
+  sidePanelFooter,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -175,7 +180,7 @@ export const Navigation = ({
                   data-test-subj="sideNavMoreMenuItem"
                   isActive={overflowMenuItems.some((item) => item.id === sidePanelContent?.id)}
                   isCollapsed={isCollapsed}
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   hasContent
                   href=""
                   id="more-menu"
@@ -200,7 +205,7 @@ export const Navigation = ({
                         { defaultMessage: 'More' }
                       )}
                     >
-                      <NestedSecondaryMenu.Section hasGap label={null}>
+                      <NestedSecondaryMenu.Section hasGap>
                         {overflowMenuItems.map((item) => {
                           const hasSubItems = getHasSubmenu(item);
 
@@ -263,7 +268,7 @@ export const Navigation = ({
                       defaultMessage: 'More',
                     })}
                   >
-                    <SecondaryMenu.Section hasGap label={null}>
+                    <SecondaryMenu.Section hasGap>
                       {overflowMenuItems.map((item) => (
                         <SideNav.PrimaryMenuItem
                           key={item.id}
@@ -341,7 +346,7 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
-        <SideNav.Panel>
+        <SideNav.Panel footer={sidePanelFooter}>
           <SecondaryMenu
             badgeType={sidePanelContent.badgeType}
             isPanel

@@ -63,10 +63,18 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/management-settings-ids",
+    "@kbn/management-settings-components-field-row",
     "@kbn/visualization-utils",
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
     "@kbn/scout",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/share-plugin",
+    "@kbn/unsaved-changes-prompt",
   ]
 }
