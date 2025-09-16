@@ -23,6 +23,7 @@ export class SolutionNavigationTourManager {
       spacesSolutionViewTourManager: SpacesSolutionViewTourManager;
       userProfiles: UserProfileServiceStart;
       capabilities: ApplicationStart['capabilities'];
+      isCloudTrialUser: boolean;
     }
   ) {}
 
@@ -34,6 +35,7 @@ export class SolutionNavigationTourManager {
     }
 
     // when completes, maybe start the navigation tour (if applicable)
+    if (this.deps.isCloudTrialUser) return;
     if (!hasAccessToDataManagement(this.deps.capabilities)) return;
     const hasCompletedTour = await checkTourCompletion(this.deps.userProfiles);
     if (hasCompletedTour) return;
@@ -65,7 +67,6 @@ async function preserveTourCompletion(userProfiles: UserProfileServiceStart): Pr
 }
 
 async function checkTourCompletion(userProfiles: UserProfileServiceStart): Promise<boolean> {
-  return false;
   try {
     const localValue = localStorage.getItem(SOLUTION_NAVIGATION_TOUR_KEY) === 'true';
     if (localValue) return true;

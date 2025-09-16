@@ -133,6 +133,7 @@ export class NavigationPublicPlugin
         spacesSolutionViewTourManager: spaces.solutionViewTourManager,
         userProfiles: core.userProfile,
         capabilities: core.application.capabilities,
+        isCloudTrialUser: this.isCloudTrialUser,
       });
       void tourManager.startTour();
     }
