@@ -80,7 +80,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.nearLimit.description"
-            defaultMessage="You're currently monitoring {currentCount} out of {maxAllowed} maximum privileged users ({utilizationPercentage}% of limit). Consider removing users that are no longer privileged to prevent performance degradation."
+            defaultMessage="You're currently monitoring {currentCount} out of {maxAllowed} allowed privileged users ({utilizationPercentage}% of limit). Consider removing some users to prevent performance degradation."
             values={{
               currentCount: <strong>{currentCount.toLocaleString()}</strong>,
               maxAllowed: <strong>{maxAllowed.toLocaleString()}</strong>,
