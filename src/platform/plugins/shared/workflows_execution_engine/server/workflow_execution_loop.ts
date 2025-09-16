@@ -164,7 +164,9 @@ async function catchError(
         }
       }
 
-      workflowRuntime.exitScope();
+      if (workflowRuntime.getWorkflowExecution().error) {
+        workflowRuntime.exitScope();
+      }
     }
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
