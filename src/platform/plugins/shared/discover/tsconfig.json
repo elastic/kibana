@@ -112,8 +112,10 @@
     "@kbn/restorable-state",
     "@kbn/esql-editor",
     "@kbn/core-application-browser",
+    "@kbn/file-upload-plugin",
+    "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
-    "@kbn/unified-metrics-grid"
+    "@kbn/unified-metrics-grid",
   ],
   "exclude": ["target/**/*"]
 }

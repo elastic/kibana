@@ -347,9 +347,8 @@ export class StreamsClient {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {},
                 routing: [],
@@ -546,9 +545,8 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         classic: {},
       },
     };
@@ -624,6 +622,7 @@ export class StreamsClient {
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
+        settings: {},
         classic: {},
       },
     }));
@@ -681,22 +680,20 @@ export class StreamsClient {
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
     const definition = await this.getStream(name);
 
+    if (Streams.ClassicStream.Definition.is(definition)) {
+      // attempting to delete a classic stream that was not previously stored
+      // results in a noop so we make sure to make it available in the state first
+      await this.ensureStream(name);
+    }
+
     if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    await State.attemptChanges(
-      [
-        {
-          type: 'delete',
-          name,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
-      }
-    );
+    await State.attemptChanges([{ type: 'delete', name }], {
+      ...this.dependencies,
+      streamsClient: this,
+    });
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -744,7 +741,7 @@ export class StreamsClient {
   }
 
   private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
-    const { dashboards, queries } = request;
+    const { dashboards, queries, rules } = request;
 
     // sync dashboards as before
     await this.dependencies.assetClient.syncAssetList(
@@ -754,6 +751,16 @@ export class StreamsClient {
         [ASSET_TYPE]: 'dashboard' as const,
       })),
       'dashboard'
+    );
+
+    // sync rules
+    await this.dependencies.assetClient.syncAssetList(
+      name,
+      rules.map((rule) => ({
+        [ASSET_ID]: rule,
+        [ASSET_TYPE]: 'rule' as const,
+      })),
+      'rule'
     );
 
     // sync rules with asset links

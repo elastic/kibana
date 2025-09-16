@@ -6,12 +6,10 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
   - src/platform/test/functional/firefox/config.base.ts
-  - x-pack/test/functional/config.base.js
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
   - x-pack/platform/test/functional_with_es_ssl/config.base.ts
-  - x-pack/test/api_integration/config.ts
   - x-pack/platform/test/api_integration/config.ts
   - x-pack/platform/test/fleet_api_integration/config.base.ts
   - x-pack/platform/test/functional_basic/apps/ml/config.base.ts
@@ -333,6 +331,7 @@ enabled:
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/platform/test/upgrade_assistant_integration/config.ts
+  - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
@@ -399,7 +398,7 @@ enabled:
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
-  - x-pack/platform/test/onechat_api_integration/config.ts
+  - x-pack/platform/test/onechat_api_integration/configs/config.stateful.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts

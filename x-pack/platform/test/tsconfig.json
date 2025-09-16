@@ -156,7 +156,6 @@
     "@kbn/datemath",
     "@kbn/global-search-plugin",
     "@kbn/global-search-test-plugin",
-    "@kbn/reindex-service-plugin",
     "@kbn/data-usage-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/response-ops-rule-params",
@@ -168,5 +167,7 @@
     "@kbn/licensing-types",
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
+    "@kbn/reindex-service-plugin",
+    "@kbn/onechat-plugin",
   ]
 }

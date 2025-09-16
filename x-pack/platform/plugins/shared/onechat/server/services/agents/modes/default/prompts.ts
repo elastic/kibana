@@ -6,14 +6,15 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools, ToolResultType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 
 const tools = {
-  indexExplorer: sanitizeToolId(builtinToolIds.indexExplorer),
-  listIndices: sanitizeToolId(builtinToolIds.listIndices),
-  search: sanitizeToolId(builtinToolIds.search),
+  indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
+  listIndices: sanitizeToolId(platformCoreTools.listIndices),
+  search: sanitizeToolId(platformCoreTools.search),
 };
 
 export const getActPrompt = ({
@@ -81,7 +82,7 @@ export const getActPrompt = ({
           - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
           - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
           - Never expose internal tool selection reasoning unless the user asks.
-        
+
         OPERATING PROTOCOL
         Step 1 — Analyze & plan
           - Examine the user's query and conversation history.
@@ -102,6 +103,14 @@ export const getActPrompt = ({
               2) Ask the user to enable/authorize a needed tool.
           - Do NOT provide ungrounded general knowledge answers.
 
+        TOOL USAGE PROTOCOL
+
+        1.  **Exclusive Tool Call Output:** When you decide to call a tool, your entire response **must** be the tool call. Do not include any text, greetings, or explanations before or after this block.
+
+        2.  **Mandatory Internal Reasoning:** All reasoning, thinking, or justification for making a tool call **must** be placed inside the \`_reasoning\` parameter of that tool call. Do not provide reasoning as plain text outside the tool call.
+
+        This protocol is critical for the automated parsing of your responses.
+
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
         - [ ] All claims are grounded in tool output or user-provided content.
@@ -114,16 +123,51 @@ export const getActPrompt = ({
         OUTPUT STYLE
         - Clear, direct, and scoped. No extraneous commentary.
         - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
-        - Do not mention internal reasoning or tool names unless user explicitly asks.
+        - For final answers, do not mention internal reasoning or tool names unless user explicitly asks.
 
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 
+        ${renderVisualizationPrompt()}
+
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
-        - Current date: ${formatDate()}`,
+        - Current date: ${formatDate()}
+`,
     ],
     ...messages,
   ];
 };
+
+function renderVisualizationPrompt() {
+  const { tabularData } = ToolResultType;
+  const { tagName, attributes } = visualizationElement;
+
+  return `#### Rendering Visualizations with the <${tagName}> Element
+      When a tool call returns a result of type "${tabularData}", you may render a visualization in the UI by emitting a custom XML element:
+
+      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
+
+      **Rules**
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
+      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
+      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.
+
+      **Example Usage:**
+
+      Tool response includes:
+      {
+        "tool_result_id": "LiDo",
+        "type": "${tabularData}",
+        "data": {
+          "source": "esql",
+          "query": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)",
+          "result": { "columns": [...], "values": [...] }
+        }
+      }
+
+      To visualize this response your reply should be:
+      <${tagName} ${attributes.toolResultId}="LiDo" />`;
+}

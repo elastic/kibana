@@ -23,7 +23,7 @@ export const PlaygroundHeaderDocs: React.FC = () => (
     size="s"
   >
     {i18n.translate('xpack.searchPlayground.pageTitle.header.docLink', {
-      defaultMessage: 'RAG Playground Docs',
+      defaultMessage: 'Playground Docs',
     })}
   </EuiButtonEmpty>
 );
