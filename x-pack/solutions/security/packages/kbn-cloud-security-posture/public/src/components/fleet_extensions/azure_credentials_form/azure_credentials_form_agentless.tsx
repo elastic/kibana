@@ -69,13 +69,13 @@ export const AzureCredentialsFormAgentless = ({
   const {
     azureOverviewPath,
     azurePolicyType,
-    azureCloudConnectors,
+    isAzureCloudConnectorEnabled,
     azureCloudConnectorRemoteRoleTemplate,
   } = useCloudSetup();
 
-  const azureCredentialsType = getAgentlessCredentialsType(input, azureCloudConnectors);
+  const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
 
-  const agentlessOptions = azureCloudConnectors
+  const agentlessOptions = isAzureCloudConnectorEnabled
     ? getAzureCloudConnectorsCredentialsFormOptions()
     : getAzureAgentlessCredentialFormOptions();
 
@@ -86,7 +86,7 @@ export const AzureCredentialsFormAgentless = ({
     <>
       <AzureSetupInfoContent documentationLink={azureOverviewPath} />
       <EuiSpacer size="l" />
-      {azureCloudConnectors && (
+      {isAzureCloudConnectorEnabled && (
         <>
           <AzureCredentialTypeSelector
             options={getCloudConnectorCredentialOptions(agentlessOptions)}
@@ -99,7 +99,7 @@ export const AzureCredentialsFormAgentless = ({
                   getCloudCredentialVarsConfig({
                     setupTechnology,
                     optionId,
-                    showCloudConnectors: azureCloudConnectors,
+                    showCloudConnectors: isAzureCloudConnectorEnabled,
                     provider: AZURE_PROVIDER,
                   })
                 ),
@@ -110,7 +110,7 @@ export const AzureCredentialsFormAgentless = ({
         </>
       )}
       <AzureSelectedCredentialsGuide azureCredentialType={azureCredentialsType} />
-      {azureCredentialsType === 'cloud_connectors' && azureCloudConnectors && (
+      {azureCredentialsType === 'cloud_connectors' && isAzureCloudConnectorEnabled && (
         <>
           <EuiButton
             data-test-subj={AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ}

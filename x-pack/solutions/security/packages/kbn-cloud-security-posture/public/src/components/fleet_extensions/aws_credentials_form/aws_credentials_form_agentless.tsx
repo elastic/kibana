@@ -31,7 +31,7 @@ import {
   getAgentlessCredentialsType,
   getAwsAgentlessFormOptions,
   getAwsCloudConnectorsCredentialsFormOptions,
-  getAwsCloudConnectorsFormAgentlessOptions,
+  getAwsCredentialsCloudConnectorsFormAgentlessOptions,
   getAwsCredentialsFormAgentlessOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
@@ -78,12 +78,12 @@ export const AwsCredentialsFormAgentless = ({
     showCloudTemplates,
     shortName,
     awsCloudConnectorRemoteRoleTemplate,
-    awsCloudConnectors,
+    isAwsCloudConnectorEnabled,
   } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
-  const awsCredentialsType = getAgentlessCredentialsType(input, awsCloudConnectors);
+  const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
@@ -128,19 +128,20 @@ export const AwsCredentialsFormAgentless = ({
   const isCloudFormationSupported =
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
-  const agentlessOptions = awsCloudConnectors
+  const agentlessCredentialFormGroups = isAwsCloudConnectorEnabled
     ? getAwsCloudConnectorsCredentialsFormOptions(awsInputFieldMapping)
     : getAwsAgentlessFormOptions(awsInputFieldMapping);
 
-  const group = agentlessOptions[awsCredentialsType as keyof typeof agentlessOptions];
+  const group =
+    agentlessCredentialFormGroups[awsCredentialsType as keyof typeof agentlessCredentialFormGroups];
   const fields = getInputVarsFields(input, group.fields);
 
   const selectorOptions = () => {
     if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
       return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
     }
-    if (awsCloudConnectors) {
-      return getAwsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
+    if (isAwsCloudConnectorEnabled) {
+      return getAwsCredentialsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
     }
 
     return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
@@ -149,7 +150,7 @@ export const AwsCredentialsFormAgentless = ({
   const disabled =
     isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
-    awsCloudConnectors;
+    isAwsCloudConnectorEnabled;
 
   const showCloudFormationAccordion = isCloudFormationSupported && showCloudTemplates;
 
@@ -164,7 +165,7 @@ export const AwsCredentialsFormAgentless = ({
     <>
       <AWSSetupInfoContent
         info={
-          awsCloudConnectors ? (
+          isAwsCloudConnectorEnabled ? (
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContentAgentlessCloudConnector"
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
@@ -218,7 +219,7 @@ export const AwsCredentialsFormAgentless = ({
               getCloudCredentialVarsConfig({
                 setupTechnology,
                 optionId,
-                showCloudConnectors: awsCloudConnectors,
+                showCloudConnectors: isAwsCloudConnectorEnabled,
                 provider: AWS_PROVIDER,
               })
             ),

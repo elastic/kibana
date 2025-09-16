@@ -265,7 +265,7 @@ const buildCloudSetupState = ({
 
   const {
     remoteRoleTemplate: awsCloudConnectorRemoteRoleTemplate,
-    showCloudConnectors: awsCloudConnectors,
+    showCloudConnectors: isAwsCloudConnectorEnabled,
   } = getProviderCloudConnectorState({
     provider: AWS_PROVIDER,
     config,
@@ -277,7 +277,7 @@ const buildCloudSetupState = ({
 
   const {
     remoteRoleTemplate: gcpCloudConnectorRemoteRoleTemplate,
-    showCloudConnectors: gcpCloudConnectors,
+    showCloudConnectors: isGcpCloudConnectorEnabled,
   } = getProviderCloudConnectorState({
     provider: GCP_PROVIDER,
     config,
@@ -289,7 +289,7 @@ const buildCloudSetupState = ({
 
   const {
     remoteRoleTemplate: azureCloudConnectorRemoteRoleTemplate,
-    showCloudConnectors: azureCloudConnectors,
+    showCloudConnectors: isAzureCloudConnectorEnabled,
   } = getProviderCloudConnectorState({
     provider: AZURE_PROVIDER,
     config,
@@ -310,10 +310,10 @@ const buildCloudSetupState = ({
     awsOrganizationEnabled: getProviderDetails(AWS_PROVIDER).organizationEnabled,
     awsOverviewPath: getProviderDetails(AWS_PROVIDER).overviewPath,
     awsCloudConnectorRemoteRoleTemplate,
-    awsCloudConnectors,
+    isAwsCloudConnectorEnabled,
     azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
     azureCloudConnectorRemoteRoleTemplate,
-    azureCloudConnectors,
+    isAzureCloudConnectorEnabled,
     azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
     azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
     azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
@@ -321,7 +321,7 @@ const buildCloudSetupState = ({
     gcpEnabled: getProviderDetails(GCP_PROVIDER).enabled,
     gcpOrganizationEnabled: getProviderDetails(GCP_PROVIDER).organizationEnabled,
     gcpCloudConnectorRemoteRoleTemplate,
-    gcpCloudConnectors,
+    isGcpCloudConnectorEnabled,
     gcpOverviewPath: getProviderDetails(GCP_PROVIDER).overviewPath,
     gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,
     shortName: config.shortName,
@@ -344,10 +344,10 @@ interface CloudSetupContextValue {
   awsOrganizationEnabled: boolean;
   awsOverviewPath: string;
   awsCloudConnectorRemoteRoleTemplate?: string;
-  awsCloudConnectors: boolean;
+  isAwsCloudConnectorEnabled: boolean;
   azureEnabled: boolean;
   azureCloudConnectorRemoteRoleTemplate?: string;
-  azureCloudConnectors: boolean;
+  isAzureCloudConnectorEnabled: boolean;
   azureManualFieldsEnabled?: boolean;
   azureOrganizationEnabled: boolean;
   azureOverviewPath: string;
@@ -355,7 +355,7 @@ interface CloudSetupContextValue {
   gcpEnabled: boolean;
   gcpOrganizationEnabled: boolean;
   gcpCloudConnectorRemoteRoleTemplate?: string;
-  gcpCloudConnectors: boolean;
+  isGcpCloudConnectorEnabled: boolean;
   gcpOverviewPath: string;
   gcpPolicyType: string;
   shortName?: string;

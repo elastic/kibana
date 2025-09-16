@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import {
-  getAwsCloudConnectorsFormAgentlessOptions,
+  getAwsCredentialsCloudConnectorsFormAgentlessOptions,
   getAwsCredentialsFormAgentlessOptions,
   getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
@@ -109,7 +109,7 @@ describe('AwsCredentialTypeSelector', () => {
     });
   });
   it('shows the cloud connectors option when type is cloud_connectors', () => {
-    const cloudConnectorAwsOptions = getAwsCloudConnectorsFormAgentlessOptions();
+    const cloudConnectorAwsOptions = getAwsCredentialsCloudConnectorsFormAgentlessOptions();
     render(
       <AwsCredentialTypeSelector
         type={'cloud_connectors'}

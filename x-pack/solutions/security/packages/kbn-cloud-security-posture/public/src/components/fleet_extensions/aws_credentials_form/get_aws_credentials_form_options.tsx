@@ -163,7 +163,7 @@ export const getAwsCredentialsFormAgentlessOptions = (
     getAwsAgentlessFormOptions,
     awsInputFieldMapping
   );
-export const getAwsCloudConnectorsFormAgentlessOptions = (
+export const getAwsCredentialsCloudConnectorsFormAgentlessOptions = (
   awsInputFieldMapping?: AwsInputFieldMapping
 ): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(
