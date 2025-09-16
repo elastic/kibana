@@ -51,6 +51,7 @@ import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AwsAgentlessFormProps {
   input: NewPackagePolicyInput;
@@ -223,9 +224,13 @@ export const AwsCredentialsFormAgentless = ({
         options={selectorOptions()}
         disabled={!!disabled}
         onChange={(optionId) => {
+          const newPackagePolicy = {
+            ...newPolicy,
+            supports_cloud_connector: optionId === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+          };
           updatePolicy({
             updatedPolicy: updatePolicyWithInputs(
-              newPolicy,
+              newPackagePolicy,
               awsPolicyType,
               getCloudCredentialVarsConfig({
                 setupTechnology,
@@ -238,60 +243,78 @@ export const AwsCredentialsFormAgentless = ({
         }}
       />
       <EuiSpacer size="m" />
-      {!showCloudTemplates && isCloudFormationSupported && (
+      {awsCredentialsType !== AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
         <>
-          <EuiCallOut color="warning">
-            <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.supportedMessage"
-              defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
-            />
-          </EuiCallOut>
-          <EuiSpacer size="m" />
+          {!showCloudTemplates && isCloudFormationSupported && (
+            <>
+              <EuiCallOut color="warning">
+                <FormattedMessage
+                  id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.supportedMessage"
+                  defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
+                />
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          {showCloudFormationAccordion && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                id="cloudFormationAccordianInstructions"
+                data-test-subj={AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ}
+                buttonContent={accordianTitleLink}
+                paddingSize="l"
+              >
+                <CloudFormationCloudCredentialsGuide
+                  isOrganization={isOrganization}
+                  credentialType={awsCredentialsType as 'cloud_connectors' | 'direct_access_keys'}
+                />
+              </EuiAccordion>
+              <EuiSpacer size="l" />
+              <EuiButton
+                data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
+                target="_blank"
+                iconSide="left"
+                iconType="launch"
+                href={templateUrl}
+              >
+                <FormattedMessage
+                  id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.launchButton"
+                  defaultMessage="Launch CloudFormation"
+                />
+              </EuiButton>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <AwsInputVarFields
+            fields={fields}
+            packageInfo={packageInfo}
+            onChange={(key, value) => {
+              const updatedPolicy = updatePolicyWithInputs(newPolicy, awsPolicyType, {
+                [key]: { value },
+              });
+              updatePolicy({
+                updatedPolicy,
+              });
+            }}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
         </>
       )}
-      {showCloudFormationAccordion && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="cloudFormationAccordianInstructions"
-            data-test-subj={AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ}
-            buttonContent={accordianTitleLink}
-            paddingSize="l"
-          >
-            <CloudFormationCloudCredentialsGuide
-              isOrganization={isOrganization}
-              credentialType={awsCredentialsType as 'cloud_connectors' | 'direct_access_keys'}
-            />
-          </EuiAccordion>
-          <EuiSpacer size="l" />
-          <EuiButton
-            data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
-            target="_blank"
-            iconSide="left"
-            iconType="launch"
-            href={templateUrl}
-          >
-            <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.launchButton"
-              defaultMessage="Launch CloudFormation"
-            />
-          </EuiButton>
-          <EuiSpacer size="m" />
-        </>
+
+      {awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
+        <CloudConnectorSetup
+          templateName={templateName}
+          input={input}
+          newPolicy={newPolicy}
+          packageInfo={packageInfo}
+          updatePolicy={updatePolicy}
+          isEditPage={isEditPage}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          cloud={cloud}
+          cloudProvider={AWS_PROVIDER}
+        />
       )}
-      <AwsInputVarFields
-        fields={fields}
-        packageInfo={packageInfo}
-        onChange={(key, value) => {
-          const updatedPolicy = updatePolicyWithInputs(newPolicy, awsPolicyType, {
-            [key]: { value },
-          });
-          updatePolicy({
-            updatedPolicy,
-          });
-        }}
-        hasInvalidRequiredVars={hasInvalidRequiredVars}
-      />
       <ReadDocumentation url={awsOverviewPath} />
     </>
   );
