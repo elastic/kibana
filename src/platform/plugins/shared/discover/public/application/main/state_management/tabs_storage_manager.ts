@@ -15,12 +15,10 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
-import { createTabItem } from './redux/utils';
+import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
 
@@ -31,7 +29,6 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -170,7 +167,6 @@ export const createTabsStorageManager = ({
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
       globalState: tabState.globalState,
-      controlGroupState: tabState.controlGroupState,
     };
   };
 
@@ -202,16 +198,20 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
-    const controlGroupState = getDefinedStateOnly(
-      tabStateInStorage.controlGroupState || defaultTabState.controlGroupState
-    );
+    const controlGroupState = internalState?.controlGroupJson
+      ? parseControlGroupJson(internalState.controlGroupJson)
+      : undefined;
+    const esqlVariables = controlGroupState
+      ? extractEsqlVariables(controlGroupState)
+      : defaultTabState.esqlVariables;
+
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
       initialAppState: appState,
       globalState: globalState || {},
-      controlGroupState,
+      esqlVariables,
     };
   };
 

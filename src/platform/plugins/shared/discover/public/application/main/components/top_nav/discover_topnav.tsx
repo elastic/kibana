@@ -63,7 +63,7 @@ export const DiscoverTopNav = ({
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
-  const esqlVariables = useInternalStateSelector((state) => state.esqlVariables);
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const timeRange = useCurrentTabSelector((tab) => tab.dataRequestParams.timeRangeAbsolute);
 

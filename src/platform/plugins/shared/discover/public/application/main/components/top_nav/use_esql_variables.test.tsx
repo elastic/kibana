@@ -157,7 +157,9 @@ describe('useESQLVariables', () => {
             );
           }
           if (action.type === 'internalState/setEsqlVariables') {
-            expect(action.payload).toEqual(mockNewVariables);
+            expect((action.payload as { esqlVariables: unknown }).esqlVariables).toEqual(
+              mockNewVariables
+            );
           }
         });
       });
@@ -179,22 +181,20 @@ describe('useESQLVariables', () => {
 
       // Mock the getInput$ observable
       jest.spyOn(mockControlGroupAPI.inputSubject, 'asObservable').mockReturnValue(
-        new Observable((subscriber) => {
+        new Observable(() => {
           return () => mockUnsubscribeInput();
         })
       );
 
-      // Mock the savedSearchState with getHasReset$ observable
+      // Mock the savedSearchState with getInitial$ observable
       const stateContainer = getStateContainer();
-      const mockGetHasReset = jest.fn().mockReturnValue(
-        new Observable((subscriber) => {
+      const mockGetInitial$ = new BehaviorSubject(null) as unknown as BehaviorSubject<SavedSearch>;
+      jest.spyOn(mockGetInitial$, 'pipe').mockReturnValue(
+        new Observable(() => {
           return () => mockUnsubscribeReset();
         })
       );
-
-      jest
-        .spyOn(stateContainer.savedSearchState, 'getHasReset$')
-        .mockImplementation(mockGetHasReset);
+      jest.spyOn(stateContainer.savedSearchState, 'getInitial$').mockReturnValue(mockGetInitial$);
 
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
@@ -210,19 +210,16 @@ describe('useESQLVariables', () => {
       expect(mockUnsubscribeReset).toHaveBeenCalledTimes(1);
     });
 
-    it('should reset control panels from saved search state when getHasReset$ emits true', async () => {
+    it('should reset control panels from saved search state when getInitial$ emits', async () => {
       const mockInitialSavedSearch = {
         controlGroupJson: JSON.stringify(mockControlState),
         // other saved search properties
       };
+      const mockGetInitial$ = new BehaviorSubject(mockInitialSavedSearch as SavedSearch);
 
       const stateContainer = getStateContainer();
-      const hasReset$ = new BehaviorSubject(false);
 
-      jest
-        .spyOn(stateContainer.savedSearchState, 'getInitial$')
-        .mockReturnValue(new BehaviorSubject(mockInitialSavedSearch as SavedSearch));
-      jest.spyOn(stateContainer.savedSearchState, 'getHasReset$').mockReturnValue(hasReset$);
+      jest.spyOn(stateContainer.savedSearchState, 'getInitial$').mockReturnValue(mockGetInitial$);
 
       // Create a mock control group API with a mock updateInput method
       const mockUpdateInput = jest.fn();
@@ -238,8 +235,11 @@ describe('useESQLVariables', () => {
         controlGroupApi: mockControlGroupApiWithUpdate as unknown as ControlGroupRendererApi,
       });
 
+      expect(mockUpdateInput).not.toHaveBeenCalled();
+
+      // Simulate getInitial$ emitting a new saved search
       act(() => {
-        hasReset$.next(true);
+        mockGetInitial$.next(mockInitialSavedSearch as SavedSearch);
       });
 
       await waitFor(() => {
@@ -248,9 +248,6 @@ describe('useESQLVariables', () => {
           initialChildControlState: mockControlState,
         });
       });
-
-      // Assert that the hasReset$ observable was reset to false
-      expect(hasReset$.getValue()).toBe(false);
     });
   });
 
@@ -332,7 +329,10 @@ describe('useESQLVariables', () => {
           (call) => (call[0] as { type: string }).type === 'internalState/setEsqlVariables'
         );
         expect(setEsqlVariablesCall).toBeTruthy();
-        expect((setEsqlVariablesCall![0] as unknown as { payload: unknown }).payload).toEqual([
+        expect(
+          (setEsqlVariablesCall![0] as unknown as { payload: { esqlVariables: unknown } }).payload
+            .esqlVariables
+        ).toEqual([
           {
             key: 'numericVar',
             type: 'values',
@@ -369,7 +369,10 @@ describe('useESQLVariables', () => {
           (call) => (call[0] as { type: string }).type === 'internalState/setEsqlVariables'
         );
         expect(setEsqlVariablesCall).toBeTruthy();
-        expect((setEsqlVariablesCall![0] as unknown as { payload: unknown }).payload).toEqual([
+        expect(
+          (setEsqlVariablesCall![0] as unknown as { payload: { esqlVariables: unknown } }).payload
+            .esqlVariables
+        ).toEqual([
           {
             key: 'textVar',
             type: 'values',

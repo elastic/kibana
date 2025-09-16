@@ -63,6 +63,7 @@ describe('tab mapping utils', () => {
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
+          "esqlVariables": undefined,
           "globalState": Object {
             "refreshInterval": Object {
               "pause": true,
@@ -131,6 +132,7 @@ describe('tab mapping utils', () => {
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
+          "esqlVariables": undefined,
           "globalState": Object {
             "refreshInterval": Object {
               "pause": false,

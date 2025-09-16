@@ -8,67 +8,20 @@
  */
 import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
+  extractEsqlVariables,
   internalStateActions,
+  parseControlGroupJson,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
-
-/**
- * @param panels - The control panels state, which may be null.
- * @description Extracts ESQL variables from the control panels state.
- * Each ESQL control panel is expected to have a `variableName`, `variableType`, and `selectedOptions`.
- * Returns an array of `ESQLControlVariable` objects.
- * If `panels` is null or empty, it returns an empty array.
- * @returns An array of ESQLControlVariable objects.
- */
-const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
-): ESQLControlVariable[] => {
-  if (!panels || Object.keys(panels).length === 0) {
-    return [];
-  }
-  const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
-    if (panel.type === ESQL_CONTROL) {
-      acc.push({
-        key: panel.variableName,
-        type: panel.variableType,
-        // If the selected option is not a number, keep it as a string
-        value: isNaN(Number(panel.selectedOptions?.[0]))
-          ? panel.selectedOptions?.[0]
-          : Number(panel.selectedOptions?.[0]),
-      });
-    }
-    return acc;
-  }, []);
-
-  return variables;
-};
-
-/**
- * Parses a JSON string into a ControlPanelsState object.
- * If the JSON is invalid or null, it returns an empty object.
- *
- * @param jsonString - The JSON string to parse.
- * @returns A ControlPanelsState object or an empty object if parsing fails.
- */
-
-const parseControlGroupJson = (
-  jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
-  try {
-    return jsonString ? JSON.parse(jsonString) : {};
-  } catch (e) {
-    return {};
-  }
-};
 
 /**
  * Custom hook to manage ESQL variables in the control group for Discover.
@@ -104,8 +57,8 @@ export const useESQLVariables = ({
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
+  const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
-  const initialSavedSearch = useObservable(stateContainer.savedSearchState.getInitial$());
 
   const savedSearchState = useSavedSearch();
 
@@ -117,15 +70,11 @@ export const useESQLVariables = ({
 
     // Handling the reset unsaved changes badge
     const savedSearchResetSubsciption = stateContainer.savedSearchState
-      .getHasReset$()
-      .subscribe((hasReset) => {
-        if (hasReset) {
-          const savedControlGroupState = parseControlGroupJson(
-            initialSavedSearch?.controlGroupJson
-          );
-          controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
-          stateContainer.savedSearchState.getHasReset$().next(false);
-        }
+      .getInitial$()
+      .pipe(skip(1)) // Skip the initial emission since it's a BehaviorSubject
+      .subscribe((initialSavedSearch) => {
+        const savedControlGroupState = parseControlGroupJson(initialSavedSearch?.controlGroupJson);
+        controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
       });
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
@@ -144,7 +93,7 @@ export const useESQLVariables = ({
         const newVariables = extractEsqlVariables(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
           // Update the ESQL variables in the internal state
-          dispatch(internalStateActions.setEsqlVariables(newVariables));
+          dispatch(setEsqlVariables({ esqlVariables: newVariables }));
           stateContainer.dataState.fetch();
         }
       }
@@ -155,13 +104,14 @@ export const useESQLVariables = ({
       savedSearchResetSubsciption.unsubscribe();
     };
   }, [
-    initialSavedSearch?.controlGroupJson,
     controlGroupApi,
-    setControlGroupState,
     currentEsqlVariables,
     dispatch,
     isEsqlMode,
-    stateContainer,
+    setControlGroupState,
+    setEsqlVariables,
+    stateContainer.dataState,
+    stateContainer.savedSearchState,
   ]);
 
   const onSaveControl = useCallback(
