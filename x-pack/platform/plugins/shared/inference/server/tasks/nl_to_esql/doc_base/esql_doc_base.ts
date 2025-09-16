@@ -6,17 +6,15 @@
  */
 
 import { once } from 'lodash';
-import { loadData, type EsqlDocData, type EsqlDocEntry } from './load_data';
+import { loadData, type EsqlDocData, type EsqlDocEntry, type EsqlPrompts } from './load_data';
 import { tryResolveAlias } from './aliases';
 import { getSuggestions } from './suggestions';
 import type { GetDocsOptions } from './types';
 
 const loadDataOnce = once(loadData);
 
-const overviewEntries = ['SYNTAX', 'OVERVIEW', 'OPERATORS'];
-
 export class EsqlDocumentBase {
-  private systemMessage: string;
+  private prompts: EsqlPrompts;
   private docRecords: Record<string, EsqlDocEntry>;
 
   static async load(): Promise<EsqlDocumentBase> {
@@ -25,12 +23,12 @@ export class EsqlDocumentBase {
   }
 
   constructor(rawData: EsqlDocData) {
-    this.systemMessage = rawData.systemMessage;
+    this.prompts = rawData.prompts;
     this.docRecords = rawData.docs;
   }
 
-  getSystemMessage() {
-    return this.systemMessage;
+  getPrompts(): EsqlPrompts {
+    return this.prompts;
   }
 
   getDocumentation(
@@ -38,7 +36,6 @@ export class EsqlDocumentBase {
     {
       generateMissingKeywordDoc = true,
       addSuggestions = true,
-      addOverview = true,
       resolveAliases = true,
     }: GetDocsOptions = {}
   ) {
@@ -52,10 +49,6 @@ export class EsqlDocumentBase {
 
     if (addSuggestions) {
       keywords.push(...getSuggestions(keywords));
-    }
-
-    if (addOverview) {
-      keywords.push(...overviewEntries);
     }
 
     return [...new Set(keywords)].reduce<Record<string, string>>((results, keyword) => {
