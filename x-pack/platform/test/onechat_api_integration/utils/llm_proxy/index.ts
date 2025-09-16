@@ -5,36 +5,26 @@
  * 2.0.
  */
 
+import pTimeout from 'p-timeout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { isString, pull, isFunction } from 'lodash';
 import pRetry from 'p-retry';
-import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { createInterceptors } from './interceptors';
-import { LlmSimulator, sseEvent } from './llm_simulator';
-
-type Request = http.IncomingMessage;
-export type Response = http.ServerResponse<http.IncomingMessage>;
-
-type LLMMessage = string[] | ToolMessage | string | undefined;
+import { LlmSimulator } from './llm_simulator';
+import type { HttpRequest, HttpResponse, LLMMessage, ToolMessage } from './types';
 
 type RequestHandler = (
-  request: Request,
-  response: Response,
+  request: HttpRequest,
+  response: HttpResponse,
   requestBody: ChatCompletionStreamParams
 ) => LLMMessage;
 
 interface RequestInterceptor {
   name: string;
   when: (body: ChatCompletionStreamParams) => boolean;
-}
-
-export interface ToolMessage {
-  role: 'assistant';
-  content?: string;
-  tool_calls?: ChatCompletionChunkToolCall[];
 }
 
 export class LlmProxy {
@@ -83,9 +73,8 @@ export class LlmProxy {
           return;
         }
 
-        const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
+        const errorMessage = `No interceptors found to handle request`;
         this.log.warning(errorMessage);
-
         this.log.warning(
           `Available interceptors: ${JSON.stringify(
             this.requestInterceptors.map(({ name, when }) => ({
@@ -97,16 +86,11 @@ export class LlmProxy {
           )}`
         );
 
-        response.writeHead(500, {
-          'Elastic-Interceptor': 'Interceptor not found',
+        const simulator = new LlmSimulator(requestBody, response, this.log, 'No interceptor found');
+        await simulator.writeErrorChunk(404, {
+          errorMessage,
+          availableInterceptors: this.requestInterceptors.map(({ name }) => name),
         });
-        response.write(
-          sseEvent({
-            errorMessage,
-            availableInterceptors: this.requestInterceptors.map(({ name }) => name),
-          })
-        );
-        response.end();
       })
       .on('error', (error) => {
         this.log.error(`LLM proxy encountered an error: ${error}`);
@@ -140,18 +124,14 @@ export class LlmProxy {
           return;
         }
 
-        const unsettledInterceptors = this.requestInterceptors.map((i) => i.name);
+        const interceptorNames = this.requestInterceptors.map(({ name }) => name);
         this.log.debug(
-          `Waiting for the following interceptors to be called: ${JSON.stringify(
-            unsettledInterceptors
-          )}`
+          `Waiting for the following interceptors to be called: ${JSON.stringify(interceptorNames)}`
         );
-        if (this.requestInterceptors.length > 0) {
-          throw new Error(
-            `Interceptors were not called: ${unsettledInterceptors.map((name) => `\n - ${name}`)}
-`
-          );
-        }
+
+        throw new Error(
+          `Interceptors were not called: ${interceptorNames.map((name) => `\n - ${name}`)}\n`
+        );
       },
       { retries: 5, maxTimeout: 1000 }
     ).catch((error) => {
@@ -172,23 +152,33 @@ export class LlmProxy {
     waitForIntercept: () => Promise<LlmSimulator>;
     completeAfterIntercept: () => Promise<LlmSimulator>;
   } {
-    const waitForInterceptPromise = Promise.race([
+    const getMockedLlmMessage = (body: ChatCompletionStreamParams): LLMMessage | undefined => {
+      if (isFunction(responseMock)) {
+        return responseMock(body);
+      }
+
+      return responseMock;
+    };
+
+    const waitForInterceptPromise = pTimeout(
       new Promise<LlmSimulator>((outerResolve) => {
         this.requestInterceptors.push({
           name,
           when,
           handle: (request, response, requestBody) => {
             const simulator = new LlmSimulator(requestBody, response, this.log, name);
+            const llmMessage = getMockedLlmMessage(requestBody);
             outerResolve(simulator);
 
-            return isFunction(responseMock) ? responseMock(simulator.requestBody) : responseMock;
+            return llmMessage;
           },
         });
       }),
-      new Promise<LlmSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 30000ms`)), 30000);
-      }),
-    ]);
+      {
+        milliseconds: 30000,
+        message: `Interceptor "${name}" timed out after 30000ms`,
+      }
+    );
 
     return {
       waitForIntercept: () => waitForInterceptPromise,
@@ -196,10 +186,7 @@ export class LlmProxy {
         const simulator = await waitForInterceptPromise;
 
         function getParsedChunks(): Array<string | ToolMessage> {
-          const llmMessage = isFunction(responseMock)
-            ? responseMock(simulator.requestBody)
-            : responseMock;
-
+          const llmMessage = getMockedLlmMessage(simulator.requestBody);
           if (!llmMessage) {
             return [];
           }
@@ -217,7 +204,7 @@ export class LlmProxy {
 
         const parsedChunks = getParsedChunks();
         for (const chunk of parsedChunks) {
-          await simulator.next(chunk);
+          await simulator.writeChunk(chunk);
         }
 
         await simulator.complete();
@@ -241,8 +228,12 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
       data += chunk.toString();
     });
 
-    request.on('close', () => {
-      resolve(JSON.parse(data));
+    request.on('end', () => {
+      try {
+        resolve(JSON.parse(data));
+      } catch (error) {
+        reject(`Failed to parse request body: ${error}`);
+      }
     });
 
     request.on('error', (error) => {

@@ -7,7 +7,8 @@
 
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { last } from 'lodash';
-import type { LlmProxy, ToolMessage } from '.';
+import type { LlmProxy } from '.';
+import type { ToolMessage } from './types';
 
 type LLMMessage = string[] | ToolMessage | string | undefined;
 type LLMResponseFnOrString = LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage);

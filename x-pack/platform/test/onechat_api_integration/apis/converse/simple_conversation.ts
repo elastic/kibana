@@ -23,7 +23,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
   const log = getService('log');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe('POST /api/agent_builder/converse', function () {
+  describe('POST /api/agent_builder/converse: simple conversation', function () {
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -37,7 +37,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       await deleteActionConnector(getService, { actionId: connectorId });
     });
 
-    describe('simple conversation', () => {
+    describe('when the payload is valid', () => {
       const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
       const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
       let body: ChatResponse;

@@ -6,17 +6,10 @@
  */
 
 import { once } from 'lodash';
-import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createOpenAiChunk } from './create_openai_chunk';
-import type { Response } from '.';
-
-export interface ToolMessage {
-  role: 'assistant';
-  content?: string;
-  tool_calls?: ChatCompletionChunkToolCall[];
-}
+import type { HttpResponse, ToolMessage } from './types';
 
 /**
  * Formats a chunk for Server-Sent Events (SSE)
@@ -28,10 +21,28 @@ export function sseEvent(chunk: unknown) {
 export class LlmSimulator {
   constructor(
     public readonly requestBody: ChatCompletionStreamParams,
-    private readonly response: Response,
+    private readonly response: HttpResponse,
     private readonly log: ToolingLog,
     private readonly name: string
   ) {}
+
+  async writeChunk(msg: string | ToolMessage): Promise<void> {
+    this.status(200);
+    const chunk = createOpenAiChunk(msg);
+    return this.write(sseEvent(chunk));
+  }
+
+  async complete(): Promise<void> {
+    this.log.debug(`Completed intercept for "${this.name}"`);
+    await this.write('data: [DONE]\n\n');
+    await this.end();
+  }
+
+  async writeErrorChunk(code: number, error: Record<string, unknown>): Promise<void> {
+    this.status(code);
+    await this.write(sseEvent(error));
+    await this.end();
+  }
 
   status = once((code: number) => {
     this.response.writeHead(code, {
@@ -41,32 +52,6 @@ export class LlmSimulator {
       Connection: 'keep-alive',
     });
   });
-
-  async next(msg: string | ToolMessage): Promise<void> {
-    this.status(200);
-    const chunk = createOpenAiChunk(msg);
-    return this.write(sseEvent(chunk));
-  }
-
-  async rawWrite(chunk: string): Promise<void> {
-    this.status(200);
-    return this.write(chunk);
-  }
-
-  async rawEnd(): Promise<void> {
-    return this.end();
-  }
-
-  async complete(): Promise<void> {
-    this.log.debug(`Completed intercept for "${this.name}"`);
-    await this.write('data: [DONE]\n\n');
-    await this.end();
-  }
-
-  async error(error: unknown): Promise<void> {
-    await this.write(`data: ${JSON.stringify({ error })}\n\n`);
-    await this.end();
-  }
 
   private write(chunk: string): Promise<void> {
     return new Promise<void>((resolve) => this.response.write(chunk, () => resolve()));

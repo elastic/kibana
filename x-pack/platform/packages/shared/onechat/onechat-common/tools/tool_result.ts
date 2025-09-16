@@ -43,7 +43,7 @@ export interface TabularDataResult {
 
 export interface QueryResult {
   type: ToolResultType.query;
-  data: { dsl?: SearchRequest; esql?: string };
+  data: { dsl: SearchRequest } | { esql: string };
 }
 
 export interface OtherResult {

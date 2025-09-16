@@ -7,7 +7,7 @@
 
 import { v4 } from 'uuid';
 import type OpenAI from 'openai';
-import type { ToolMessage } from '.';
+import type { ToolMessage } from './types';
 
 export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
   const message = typeof msg === 'string' ? { role: 'user' as const, content: msg } : msg;
