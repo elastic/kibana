@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { debounce } from 'lodash';
 import type { EuiRangeTick, EuiDualRangeProps } from '@elastic/eui';
-import { EuiDualRange, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiDualRange, EuiLoadingSpinner, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { RangeSliderValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
@@ -186,6 +186,10 @@ export const RangeSliderControl: FC<Props> = ({
       id: `${uuid}-upperBound`,
     });
   }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
+
+  if (isLoading && displayedMin === -Infinity && displayedMax === Infinity) {
+    return <EuiLoadingSpinner style={{ margin: 'auto' }} />;
+  }
 
   return (
     <span

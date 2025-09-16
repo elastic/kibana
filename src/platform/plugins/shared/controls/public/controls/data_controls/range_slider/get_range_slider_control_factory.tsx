@@ -40,7 +40,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
       const editorStateManager = initializeEditorStateManager(state);
 
@@ -61,7 +60,10 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       );
 
       // If there are no initial selections, the min/max values will be displayed initially in the control.
-      // Therefore, make sure they're set to be initially in a loading state
+      // Therefore, make sure the control is initially in a loading state
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(
+        !selections.hasInitialSelections
+      );
       const loadingMinMax$ = new BehaviorSubject<boolean>(!selections.hasInitialSelections);
 
       function serializeState() {
@@ -114,7 +116,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         dataControlManager.api.dataLoading$,
       ])
         .pipe(
-          debounceTime(0),
+          debounceTime(100),
           map((values) => values.some((value) => value))
         )
         .subscribe((isLoading) => {
@@ -204,28 +206,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       }).subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
-
-      if (selections.hasInitialSelections) {
-        await new Promise<void>((resolve) => {
-          combineLatest([
-            dataControlManager.api.blockingError$,
-            dataControlManager.api.filtersLoading$,
-          ])
-            .pipe(
-              first(
-                ([blockingError, filtersLoading]) => !filtersLoading || blockingError !== undefined
-              )
-            )
-            .subscribe(() => resolve());
-        });
-      } else {
-        // Wait for initial min/max to load to avoid a flash of -Infinity, Infinity values
-        await new Promise<void>((resolve) =>
-          combineLatest([loadingMinMax$, dataLoading$])
-            .pipe(first(([minMaxLoading, dataLoading]) => !minMaxLoading && !dataLoading))
-            .subscribe(() => resolve())
-        );
-      }
 
       return {
         api,
