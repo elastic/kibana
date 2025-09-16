@@ -167,6 +167,9 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
         persistedTabDataView ?? currentDataView$.getValue(),
         services,
         {
+          // make sure that data view service cache is not used when creating the ES|QL data view,
+          // overwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
+          // https://github.com/elastic/kibana/issues/234719
           createNewInstanceEvenIfCachedAvailable: true,
         }
       );
