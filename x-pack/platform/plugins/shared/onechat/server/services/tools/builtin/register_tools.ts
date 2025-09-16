@@ -10,15 +10,11 @@ import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/serv
 import type { BuiltinToolRegistry } from './builtin_registry';
 import {
   executeEsqlTool,
-  executeWorkflowTool,
   generateEsqlTool,
   getDocumentByIdTool,
   getIndexMappingsTool,
-  getWorkflowDetailsTool,
-  getWorkflowResultTool,
   indexExplorerTool,
   listIndicesTool,
-  listWorkflowsTool,
   searchTool,
 } from './definitions';
 
@@ -39,14 +35,9 @@ export const registerBuiltinTools = ({
     indexExplorerTool(),
   ];
 
-  // Only register workflow tools if workflows management plugin is available
-  if (workflowsManagement) {
-    tools.push(
-      listWorkflowsTool(workflowsManagement),
-      getWorkflowDetailsTool(workflowsManagement),
-      executeWorkflowTool(workflowsManagement),
-      getWorkflowResultTool(workflowsManagement)
-    );
+  // Let workflows management plugin register its own tools
+  if (workflowsManagement?.tools) {
+    workflowsManagement.tools.registerWithOnechat(registry);
   }
 
   tools.forEach((tool) => {

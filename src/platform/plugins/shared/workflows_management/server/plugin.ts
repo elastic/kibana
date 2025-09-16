@@ -43,6 +43,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { registerFeatures } from './features';
+import { createWorkflowTools } from './onechat_tools';
 import { registerUISettings } from './ui_settings';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
@@ -179,8 +180,17 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     // Register server side APIs
     defineRoutes(router, this.api, this.logger, this.spaces!);
 
+    // Create workflow tools for onechat integration
+    const workflowTools = createWorkflowTools(this.api);
+
     return {
       management: this.api,
+      tools: {
+        registerWithOnechat: (registry: { register: (tool: any) => void }) => {
+          workflowTools.forEach((tool) => registry.register(tool));
+        },
+        getToolDefinitions: () => workflowTools,
+      },
     };
   }
 

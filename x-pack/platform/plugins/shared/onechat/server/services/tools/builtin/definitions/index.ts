@@ -12,9 +12,3 @@ export { getIndexMappingsTool } from './get_index_mapping';
 export { indexExplorerTool } from './index_explorer';
 export { listIndicesTool } from './list_indices';
 export { searchTool } from './search';
-export {
-  executeWorkflowTool,
-  getWorkflowDetailsTool,
-  getWorkflowResultTool,
-  listWorkflowsTool,
-} from './workflows';

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { z } from '@kbn/zod';
+import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 const listWorkflowsSchema = z.object({
   query: z
@@ -42,24 +44,31 @@ const getWorkflowResultSchema = z.object({
 });
 
 export const listWorkflowsTool = (
-  workflowsManagement: WorkflowsPluginSetup
+  managementApi: WorkflowsManagementApi
 ): BuiltinToolDefinition<typeof listWorkflowsSchema> => {
   return {
     id: 'list_workflows',
-    description: `List available workflows that can be executed.
+    description: `List available workflows that can be executed (always fetches fresh data).
 
-This tool helps you discover workflows that are available for execution. You can filter by name, description, or enabled status.
+This tool helps you discover workflows that are available for execution. Each call fetches the latest workflow list from the system.
+
+IMPORTANT: This tool always returns fresh data. If you need to see recently added workflows, call this tool again.
 
 Use this tool when:
 - A user asks "what workflows are available?"
 - You need to find a specific workflow by name
 - You want to show all enabled workflows
 - You need to get workflow IDs for execution
+- You need to refresh the workflow list after adding new workflows
+- A user mentions they added new workflows and wants to see them
 
 Examples:
 - "show me all workflows"
+- "refresh the workflow list"
+- "get the latest workflows"
 - "find workflows related to security"
 - "list enabled workflows"
+- "I just added a new workflow, show me all workflows"
 `,
     schema: listWorkflowsSchema,
     handler: async ({ query, enabled = true }, { request, logger }) => {
@@ -77,10 +86,7 @@ Examples:
         // Get space ID from request
         const spaceId = 'default'; // TODO: Extract from request context when spaces are supported
 
-        const workflowsResult = await workflowsManagement.management.getWorkflows(
-          searchParams,
-          spaceId
-        );
+        const workflowsResult = await managementApi.getWorkflows(searchParams, spaceId);
 
         const workflows = workflowsResult.results.map((workflow: any) => ({
           id: workflow.id,
@@ -91,10 +97,13 @@ Examples:
           updatedAt: workflow.updatedAt,
         }));
 
+        const currentTime = new Date().toISOString();
         const message =
           workflows.length > 0
-            ? `Found ${workflows.length} workflow${workflows.length === 1 ? '' : 's'}`
-            : 'No workflows found matching your criteria';
+            ? `Found ${workflows.length} workflow${
+                workflows.length === 1 ? '' : 's'
+              } (refreshed at ${currentTime})`
+            : `No workflows found matching your criteria (checked at ${currentTime})`;
 
         return {
           results: [
@@ -104,6 +113,8 @@ Examples:
                 workflows,
                 total: workflowsResult._pagination.total,
                 message,
+                refreshedAt: currentTime,
+                cacheBuster: Date.now(),
               },
             },
           ],
@@ -129,7 +140,7 @@ Examples:
 };
 
 export const executeWorkflowTool = (
-  workflowsManagement: WorkflowsPluginSetup
+  managementApi: WorkflowsManagementApi
 ): BuiltinToolDefinition<typeof executeWorkflowSchema> => {
   return {
     id: 'execute_workflow',
@@ -170,10 +181,10 @@ The tool returns an execution ID that can be used with get_workflow_result to ch
         // First, try to get the workflow to validate it exists and is enabled
         let workflow;
         try {
-          workflow = await workflowsManagement.management.getWorkflow(workflowId, spaceId);
+          workflow = await managementApi.getWorkflow(workflowId, spaceId);
         } catch (error) {
           // If getting by ID fails, try to search by name
-          const searchResult = await workflowsManagement.management.getWorkflows(
+          const searchResult = await managementApi.getWorkflows(
             { limit: 1, page: 1, query: workflowId, enabled: [true] },
             spaceId
           );
@@ -239,10 +250,7 @@ The tool returns an execution ID that can be used with get_workflow_result to ch
         if ('yaml' in workflow) {
           fullWorkflow = workflow;
         } else {
-          const detailedWorkflow = await workflowsManagement.management.getWorkflow(
-            workflow.id,
-            spaceId
-          );
+          const detailedWorkflow = await managementApi.getWorkflow(workflow.id, spaceId);
           if (!detailedWorkflow) {
             return {
               results: [
@@ -273,7 +281,7 @@ The tool returns an execution ID that can be used with get_workflow_result to ch
         }
 
         // Execute the workflow
-        const executionId = await workflowsManagement.management.runWorkflow(
+        const executionId = await managementApi.runWorkflow(
           {
             id: fullWorkflow.id,
             name: fullWorkflow.name,
@@ -291,10 +299,7 @@ The tool returns an execution ID that can be used with get_workflow_result to ch
 
         // Check if the workflow has completed
         try {
-          const execution = await workflowsManagement.management.getWorkflowExecution(
-            executionId,
-            spaceId
-          );
+          const execution = await managementApi.getWorkflowExecution(executionId, spaceId);
 
           if (execution && execution.status === 'completed') {
             return {
@@ -367,7 +372,7 @@ The tool returns an execution ID that can be used with get_workflow_result to ch
 };
 
 export const getWorkflowDetailsTool = (
-  workflowsManagement: WorkflowsPluginSetup
+  managementApi: WorkflowsManagementApi
 ): BuiltinToolDefinition<typeof getWorkflowDetailsSchema> => {
   return {
     id: 'get_workflow_details',
@@ -411,10 +416,10 @@ Examples:
         // First, try to get the workflow by ID
         let workflow;
         try {
-          workflow = await workflowsManagement.management.getWorkflow(workflowId, spaceId);
+          workflow = await managementApi.getWorkflow(workflowId, spaceId);
         } catch (error) {
           // If getting by ID fails, try to search by name
-          const searchResult = await workflowsManagement.management.getWorkflows(
+          const searchResult = await managementApi.getWorkflows(
             { limit: 1, page: 1, query: workflowId, enabled: undefined }, // Search both enabled and disabled
             spaceId
           );
@@ -433,10 +438,7 @@ Examples:
           }
 
           // Get the full workflow details
-          workflow = await workflowsManagement.management.getWorkflow(
-            searchResult.results[0].id,
-            spaceId
-          );
+          workflow = await managementApi.getWorkflow(searchResult.results[0].id, spaceId);
         }
 
         if (!workflow) {
@@ -534,7 +536,7 @@ Examples:
 };
 
 export const getWorkflowResultTool = (
-  workflowsManagement: WorkflowsPluginSetup
+  managementApi: WorkflowsManagementApi
 ): BuiltinToolDefinition<typeof getWorkflowResultSchema> => {
   return {
     id: 'get_workflow_result',
@@ -575,10 +577,7 @@ Examples:
         const spaceId = 'default'; // TODO: Extract from request context when spaces are supported
 
         // Get the workflow execution
-        const execution = await workflowsManagement.management.getWorkflowExecution(
-          executionId,
-          spaceId
-        );
+        const execution = await managementApi.getWorkflowExecution(executionId, spaceId);
 
         if (!execution) {
           return {
