@@ -6,7 +6,7 @@
  */
 
 import type { FC, ChangeEvent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 
 import {
   EuiButtonIcon,
@@ -139,6 +139,41 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     [euiTheme.size.xl, euiTheme.size.xxxxl]
   );
 
+  const hasTimeField = useCallback(
+    async (dataViewId: string | undefined): Promise<boolean> => {
+      if (!dataViewId) return false;
+      try {
+        const dataView = await dataViews.get(dataViewId);
+        return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
+      } catch {
+        return true;
+      }
+    },
+    [dataViews]
+  );
+
+  const getDiscoverTimeFieldStatus = useCallback(
+    async (kibanaUrl: MlKibanaUrlConfig): Promise<boolean | undefined> => {
+      if (!kibanaUrl.url_value.includes('discover')) {
+        return undefined;
+      }
+      const urlState = parseUrlState(kibanaUrl.url_value);
+      const dataViewId = urlState._a?.index;
+      return dataViewId ? await hasTimeField(dataViewId) : true;
+    },
+    [hasTimeField]
+  );
+
+  const getDFATimeFieldStatus = useCallback(async (): Promise<boolean | undefined> => {
+    const dataViewId = findDFADataViewId(
+      job as DataFrameAnalyticsConfig,
+      dataViewListItems,
+      isPartialDFAJob
+    );
+
+    return dataViewId ? await hasTimeField(dataViewId) : true;
+  }, [dataViewListItems, hasTimeField, isPartialDFAJob, job]);
+
   useEffect(() => {
     if (customUrls.length === 0) return;
 
@@ -147,49 +182,16 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
         customUrls.map(async (customUrl) => {
           const kibanaUrl = customUrl as MlKibanaUrlConfig;
 
-          const hasTimeField = async (dataViewId: string | undefined): Promise<boolean> => {
-            if (!dataViewId) return false;
-            try {
-              const dataView = await dataViews.get(dataViewId);
-              return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
-            } catch {
-              return true;
-            }
-          };
-
-          const getDFATimeFieldStatus = async (): Promise<boolean | undefined> => {
-            if (!isDataFrameAnalyticsConfigs(job) && !isPartialDFAJob) {
-              return undefined; // Not a DFA job
-            }
-
-            const dataViewId = findDFADataViewId(
-              job as DataFrameAnalyticsConfig,
-              dataViewListItems,
-              isPartialDFAJob
-            );
-
-            return dataViewId ? await hasTimeField(dataViewId) : false;
-          };
-
-          const getDiscoverTimeFieldStatus = async (): Promise<boolean | undefined> => {
-            if (!kibanaUrl.url_value.includes('discover')) {
-              return undefined; // Not a Discover URL
-            }
-
-            const urlState = parseUrlState(kibanaUrl.url_value);
-            const dataViewId = urlState._a?.index;
-
-            return dataViewId ? await hasTimeField(dataViewId) : true;
-          };
-
-          const dfaHasTimeField = await getDFATimeFieldStatus();
-          const discoverHasTimeField = await getDiscoverTimeFieldStatus();
+          let dfaHasTimeField: boolean | undefined;
+          if (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) {
+            dfaHasTimeField = await getDFATimeFieldStatus();
+          }
+          const discoverHasTimeField = await getDiscoverTimeFieldStatus(kibanaUrl);
 
           // Anomaly Detection Jobs logic
           if (dfaHasTimeField === undefined) {
-            if (kibanaUrl.url_value.includes('dashboards')) return true;
             if (kibanaUrl.url_value.includes('discover')) return discoverHasTimeField === true;
-            return true; // Show for other/unknown URLs
+            return true; // Show for dashboards/other/unknown URLs
           }
 
           // Data Frame Analytics Jobs logic
@@ -210,7 +212,15 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     };
 
     checkTimeRangeVisibility();
-  }, [customUrls, job, dataViewListItems, isPartialDFAJob, dataViews]);
+  }, [
+    customUrls,
+    job,
+    dataViewListItems,
+    isPartialDFAJob,
+    dataViews,
+    getDFATimeFieldStatus,
+    getDiscoverTimeFieldStatus,
+  ]);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     if (index < customUrls.length) {
