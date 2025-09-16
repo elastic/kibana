@@ -48,6 +48,7 @@ export const NavigationFeedbackSnippet = ({ solutionId }: NavigationFeedbackSnip
       feedbackSnippetId={feedbackSnippetId}
       promptViewMessage={promptViewMessage}
       surveyUrl={feedbackSurveyUrl}
+      showFeedbackButtonTopDivider={true}
     />
   );
 };

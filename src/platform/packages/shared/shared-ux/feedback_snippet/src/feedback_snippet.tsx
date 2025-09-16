@@ -31,6 +31,10 @@ interface FeedbackSnippetProps {
    * Survey URL where the FeedbackButton will redirect to.
    */
   surveyUrl: string;
+  /**
+   * Show a divider on top of the feedback button
+   */
+  showFeedbackButtonTopDivider?: boolean;
 }
 
 export type FeedbackView = 'prompt' | 'positive' | 'negative';
@@ -44,6 +48,7 @@ export const FeedbackSnippet = ({
   feedbackSnippetId,
   promptViewMessage,
   surveyUrl,
+  showFeedbackButtonTopDivider = false,
 }: FeedbackSnippetProps) => {
   const [feedbackView, setFeedbackView] = useState<FeedbackView>('prompt');
   const [showPanel, setShowPanel] = useState(() => {
@@ -106,6 +111,7 @@ export const FeedbackSnippet = ({
       feedbackButtonMessage={feedbackButtonMessage}
       feedbackSnippetId={feedbackSnippetId}
       handleOpenSurvey={handleOpenSurvey}
+      showTopDivider={showFeedbackButtonTopDivider}
     />
   );
 };

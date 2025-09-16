@@ -17,6 +17,7 @@ interface FeedbackButtonProps {
   feedbackButtonMessage: React.ReactNode;
   feedbackSnippetId: string;
   handleOpenSurvey: () => void;
+  showTopDivider?: boolean;
 }
 
 const feedbackButtonAriaLabel = i18n.translate(
@@ -35,24 +36,33 @@ export const FeedbackButton = ({
   feedbackButtonMessage,
   feedbackSnippetId,
   handleOpenSurvey,
+  showTopDivider,
 }: FeedbackButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiButtonEmpty
-      data-test-subj="feedbackSnippetButton"
-      onClick={handleOpenSurvey}
+    <div
       css={css`
-        margin: ${euiTheme.size.m};
-        padding: ${euiTheme.size.s};
+        ${showTopDivider && `border-top: 1px ${euiTheme.colors.borderBaseSubdued} solid;`}
+        padding: ${euiTheme.size.m};
       `}
-      color="text"
-      iconType="popout"
-      iconSide="right"
-      id={`${feedbackSnippetId}ButtonSurveyLink`}
-      aria-label={feedbackButtonAriaLabel}
     >
-      {feedbackButtonMessage}
-    </EuiButtonEmpty>
+      <EuiButtonEmpty
+        data-test-subj="feedbackSnippetButton"
+        onClick={handleOpenSurvey}
+        css={css`
+          width: 100%;
+          padding: ${euiTheme.size.s};
+        `}
+        color="text"
+        iconType="popout"
+        iconSide="right"
+        size="s"
+        id={`${feedbackSnippetId}ButtonSurveyLink`}
+        aria-label={feedbackButtonAriaLabel}
+      >
+        {feedbackButtonMessage}
+      </EuiButtonEmpty>
+    </div>
   );
 };
