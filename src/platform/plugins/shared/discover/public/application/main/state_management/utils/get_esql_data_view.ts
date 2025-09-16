@@ -30,7 +30,7 @@ export async function getEsqlDataView(
     (newTimeField !== currentDataView?.timeFieldName &&
       indexPatternFromQuery === currentDataView?.getIndexPattern())
   ) {
-    return await getESQLAdHocDataview(query.esql, services.dataViews);
+    return await getESQLAdHocDataview(query.esql, services.dataViews, undefined, true);
   }
   return currentDataView;
 }
