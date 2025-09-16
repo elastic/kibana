@@ -155,7 +155,11 @@ export const createTabsStorageManager = ({
     const nextState: TabsUrlState = {
       tabId: selectedTabId,
     };
-    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState);
+    const previousState = getTabsStateFromURL();
+    // If the previous tab was a "new" (unsaved) tab, we replace the URL state instead of pushing a new history entry.
+    // This prevents cluttering the browser history with intermediate "new tab" states that are not meaningful to the user.
+    const shouldReplace = previousState?.tabId === NEW_TAB_ID;
+    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState, { replace: shouldReplace });
   };
 
   const toTabStateInStorage = (

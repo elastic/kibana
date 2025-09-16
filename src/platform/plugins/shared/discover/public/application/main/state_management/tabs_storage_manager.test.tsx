@@ -152,7 +152,11 @@ describe('TabsStorageManager', () => {
 
     await tabsStorageManager.persistLocally(props, mockGetAppState, mockGetInternalState);
 
-    expect(urlStateStorage.set).toHaveBeenCalledWith(TABS_STATE_URL_KEY, { tabId: 'tab1' });
+    expect(urlStateStorage.set).toHaveBeenCalledWith(
+      TABS_STATE_URL_KEY,
+      { tabId: 'tab1' },
+      { replace: false }
+    );
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,

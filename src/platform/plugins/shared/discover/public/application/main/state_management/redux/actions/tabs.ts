@@ -117,6 +117,21 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       };
 
       if (!existingTab) {
+        tab.initialAppState =
+          'initialAppState' in item
+            ? cloneDeep(item.initialAppState as TabState['initialAppState'])
+            : tab.initialAppState;
+
+        tab.globalState =
+          'globalState' in item
+            ? cloneDeep(item.globalState as TabState['globalState'])
+            : tab.globalState;
+
+        tab.dataRequestParams =
+          'dataRequestParams' in item
+            ? (item.dataRequestParams as TabState['dataRequestParams'])
+            : tab.dataRequestParams;
+
         if (item.duplicatedFromId) {
           // the new tab was created by duplicating an existing tab
           const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
@@ -293,6 +308,8 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
   (dispatch, getState) => {
     const currentState = getState();
 
+    // Restoring the 'new' tab ID is a no-op because it represents a placeholder for creating new tabs,
+    // not an actual tab that can be restored.
     if (restoreTabId === currentState.tabs.unsafeCurrentId || restoreTabId === NEW_TAB_ID) {
       return;
     }
