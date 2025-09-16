@@ -143,7 +143,7 @@ describe('MetricsExperienceGrid', () => {
     await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
   });
 
-  it('renders the no data state with the header when Fields API returns no data', () => {
+  it('renders the no data state covering the entire container when Fields API returns no data', () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'success',
@@ -153,8 +153,8 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('toggleActions')).toBeInTheDocument();
-    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).not.toBeInTheDocument();
     expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
   });
 
@@ -324,5 +324,14 @@ describe('MetricsExperienceGrid', () => {
     });
 
     expect(getByText('10 metrics')).toBeInTheDocument();
+  });
+
+  it('renders the technical preview badge', () => {
+    const { getByText, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(getByTestId('metricsExperienceTechnicalPreviewBadge')).toBeInTheDocument();
+    expect(getByText('Technical preview')).toBeInTheDocument();
   });
 });
