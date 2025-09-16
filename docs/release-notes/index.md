@@ -372,6 +372,20 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console [#224708]({{kib-pull}}224708).
 * Fixes an issue preventing solution navigation submenu items from being displayed when the navigation is collapsed [#227705]({{kib-pull}}227705).
 
+
+## 9.0.7 [kibana-9.0.7-release-notes]
+
+### Fixes [kibana-9.0.7-fixes]
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana security**:
+* Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names [#234083]({{kib-pull}}234083).
+
+**Search solution**:
+* Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML [#234079]({{kib-pull}}234079).
+
 ## 9.0.6 [kibana-9.0.6-release-notes]
 
 :::{important}
