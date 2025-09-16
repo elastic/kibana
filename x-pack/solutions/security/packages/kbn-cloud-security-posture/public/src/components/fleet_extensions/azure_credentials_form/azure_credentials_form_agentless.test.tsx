@@ -9,19 +9,16 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form_agentless';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   getPackageInfoMock,
   getMockPolicyAWS,
   getDefaultCloudSetupConfig,
+  createCloudServerlessMock,
   CLOUDBEAT_AZURE,
 } from '../test/mock';
-import { CloudSetupProvider } from '../cloud_setup_context';
 import { AZURE_CREDENTIALS_TYPE, AZURE_PROVIDER, GCP_PROVIDER } from '../constants';
-import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import {
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
@@ -29,33 +26,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import userEvent from '@testing-library/user-event';
 import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
-
-const getMockCloudServerless = (
-  isServerlessEnabled: boolean,
-  provider: string,
-  cloudHost?: string
-) => {
-  const mock = cloudMock.createSetup();
-
-  if (isServerlessEnabled) {
-    mock.isServerlessEnabled = true;
-    mock.isCloudEnabled = false;
-    mock.cloudHost = cloudHost || provider;
-    mock.serverless.projectId = 'test-project-id';
-    mock.cloudId = undefined;
-  } else {
-    mock.isServerlessEnabled = false;
-    mock.isCloudEnabled = true;
-    mock.serverless.projectId = undefined;
-    mock.cloudId =
-      'my-deployment:ZXhhbXBsZS5jbG91ZC5lbGFzdGljLmNvJGRlZmF1bHQkY2liYW5hLWNvbXBvbmVudC1pZCRvdGhlcg==';
-    mock.deploymentUrl = 'https://cloud.elastic.co/deployments/abc12345?region=us-west-2';
-  }
-
-  mock.cloudHost = cloudHost || provider;
-
-  return mock;
-};
+import { CloudSetupTestWrapper } from '../test/fixtures/CloudSetupTestWrapper';
 
 const uiSettingsClient = coreMock.createStart().uiSettings;
 
@@ -85,30 +56,25 @@ const AzureCredentialsFormAgentlessWrapper = ({
   }) => {
     setNewPackagePolicy(updatedPolicy);
   };
-  const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
   const input = newPackagePolicy.inputs.find((i) => i.type === CLOUDBEAT_AZURE)!;
 
   return (
-    <I18nProvider>
-      <FleetAppWrapper>
-        <CloudSetupProvider
-          config={getDefaultCloudSetupConfig()}
-          cloud={cloud}
-          uiSettings={uiSettingsClient}
-          packageInfo={packageInfo}
-          packagePolicy={newPackagePolicy}
-        >
-          <AzureCredentialsFormAgentless
-            updatePolicy={updatePolicy}
-            setupTechnology={setupTechnology}
-            hasInvalidRequiredVars={false}
-            packageInfo={packageInfo}
-            input={input}
-            newPolicy={newPackagePolicy}
-          />
-        </CloudSetupProvider>
-      </FleetAppWrapper>
-    </I18nProvider>
+    <CloudSetupTestWrapper
+      config={getDefaultCloudSetupConfig()}
+      cloud={cloud}
+      uiSettings={uiSettingsClient}
+      packageInfo={packageInfo}
+      newPolicy={newPackagePolicy}
+    >
+      <AzureCredentialsFormAgentless
+        updatePolicy={updatePolicy}
+        setupTechnology={setupTechnology}
+        hasInvalidRequiredVars={hasInvalidRequiredVars}
+        packageInfo={packageInfo}
+        input={input}
+        newPolicy={newPackagePolicy}
+      />
+    </CloudSetupTestWrapper>
   );
 };
 
@@ -119,7 +85,7 @@ describe('AzureCredentialsFormAgentless', () => {
 
   describe('on Serverless', () => {
     describe(' with cloud connectors ', () => {
-      const serverlessMock = getMockCloudServerless(true, AZURE_PROVIDER, AZURE_PROVIDER);
+      const serverlessMock = createCloudServerlessMock(true, AZURE_PROVIDER, AZURE_PROVIDER);
 
       beforeEach(() => {
         // this will return true for all settings checks for  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING
@@ -202,7 +168,7 @@ describe('AzureCredentialsFormAgentless', () => {
       });
 
       it('shows cloud connectors when the cloudHost provider is different than azure', () => {
-        const serverlessMockWithDifferentHost = getMockCloudServerless(
+        const serverlessMockWithDifferentHost = createCloudServerlessMock(
           true,
           AZURE_PROVIDER,
           GCP_PROVIDER
@@ -226,7 +192,7 @@ describe('AzureCredentialsFormAgentless', () => {
 
   describe('on Cloud', () => {
     describe(' with cloud connectors ', () => {
-      const cloudMocker = getMockCloudServerless(true, AZURE_PROVIDER, AZURE_PROVIDER);
+      const cloudMocker = createCloudServerlessMock(true, AZURE_PROVIDER, AZURE_PROVIDER);
       beforeEach(() => {
         // this will return true for all settings checks for  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
@@ -305,7 +271,7 @@ describe('AzureCredentialsFormAgentless', () => {
       });
 
       it('shows cloud connectors when the cloudHost provider is different than azure', () => {
-        const cloudMockerWithDifferentHost = getMockCloudServerless(
+        const cloudMockerWithDifferentHost = createCloudServerlessMock(
           true,
           AZURE_PROVIDER,
           GCP_PROVIDER

@@ -7,6 +7,7 @@
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
@@ -53,6 +54,33 @@ const defaultConfig: CloudSetupConfig = {
       manualFieldsEnabled: true,
     },
   },
+};
+
+export const createCloudServerlessMock = (
+  isServerlessEnabled: boolean,
+  provider: CloudProviders,
+  cloudHost?: CloudProviders
+) => {
+  const mock = cloudMock.createSetup();
+
+  if (isServerlessEnabled) {
+    mock.isServerlessEnabled = true;
+    mock.isCloudEnabled = false;
+    mock.cloudHost = cloudHost || provider;
+    mock.serverless.projectId = 'test-project-id';
+    mock.cloudId = undefined;
+  } else {
+    mock.isServerlessEnabled = false;
+    mock.isCloudEnabled = true;
+    mock.serverless.projectId = undefined;
+    mock.cloudId =
+      'my-deployment:ZXhhbXBsZS5jbG91ZC5lbGFzdGljLmNvJGRlZmF1bHQkY2liYW5hLWNvbXBvbmVudC1pZCRvdGhlcg==';
+    mock.deploymentUrl = 'https://cloud.elastic.co/deployments/abc12345?region=us-west-2';
+  }
+
+  mock.cloudHost = cloudHost || provider;
+
+  return mock;
 };
 
 export const getDefaultCloudSetupConfig = (overrides?: CloudSetupConfig) => {
