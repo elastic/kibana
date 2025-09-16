@@ -20,7 +20,8 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { NavigationTour, NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
+import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
+import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
 import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
