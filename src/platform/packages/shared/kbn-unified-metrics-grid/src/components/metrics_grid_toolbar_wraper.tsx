@@ -16,7 +16,7 @@ import type { SerializedStyles } from '@emotion/serialize';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useMetricsGridState } from '../hooks';
-import { RightSideActions } from './toolbar/right_side_actions/search_input';
+import { RightSideActions } from './toolbar/right_side_actions/right_side_actions';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 
 const getFullScreenStyles = (euiTheme: EuiThemeComputed): CSSObject => {
