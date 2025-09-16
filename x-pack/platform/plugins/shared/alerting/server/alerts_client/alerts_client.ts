@@ -17,6 +17,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_START,
+  ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -117,7 +118,6 @@ export class AlertsClient<
     getById: (id: string) => (Alert & AlertData) | undefined;
   };
 
-  private trackedExecutions: Set<string>;
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
   private rule: AlertRule;
@@ -167,7 +167,6 @@ export class AlertsClient<
         );
       },
     };
-    this.trackedExecutions = new Set([]);
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
@@ -179,67 +178,41 @@ export class AlertsClient<
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
 
-    const { runTimestamp, trackedExecutions } = opts;
+    const { runTimestamp } = opts;
 
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    this.trackedExecutions = new Set(trackedExecutions ?? []);
-
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
-      const getTrackedAlertsByExecutionUuids = async (executionUuids: string[]) => {
+      const getTrackedAlerts = async () => {
         const result = await this.search({
-          size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
-          seq_no_primary_term: true,
+          size: opts.flappingSettings.lookBackWindow,
           query: {
             bool: {
               must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
-              filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
+              must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
             },
           },
-        });
-        return result.hits;
-      };
-
-      const getTrackedAlertsByAlertUuids = async () => {
-        const { activeAlertsFromState = {}, recoveredAlertsFromState = {} } = opts;
-        const uuidsToFetch: string[] = [];
-        Object.values(activeAlertsFromState).forEach((activeAlert) =>
-          uuidsToFetch.push(activeAlert.meta?.uuid!)
-        );
-        Object.values(recoveredAlertsFromState).forEach((recoveredAlert) =>
-          uuidsToFetch.push(recoveredAlert.meta?.uuid!)
-        );
-
-        if (uuidsToFetch.length <= 0) {
-          return [];
-        }
-
-        const result = await this.search({
-          size: uuidsToFetch.length,
-          seq_no_primary_term: true,
-          sort: { [ALERT_START]: 'desc' },
-          query: {
-            bool: {
-              filter: [
-                { term: { [ALERT_RULE_UUID]: this.options.rule.id } },
-                { terms: { [ALERT_UUID]: uuidsToFetch } },
-              ],
+          collapse: {
+            field: ALERT_RULE_EXECUTION_UUID,
+            inner_hits: {
+              name: 'alerts',
+              seq_no_primary_term: true,
+              size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
             },
           },
+          sort: [{ [ALERT_START]: { order: 'desc' } }],
         });
-        return result.hits;
+        return result.hits.map((hit) => hit.inner_hits?.alerts.hits.hits || []).flat();
       };
 
       try {
-        const results = trackedExecutions
-          ? await getTrackedAlertsByExecutionUuids(Array.from(this.trackedExecutions))
-          : await getTrackedAlertsByAlertUuids();
+        const results = await getTrackedAlerts();
 
-        for (const hit of results.flat()) {
+        for (const hit of results) {
           const alertHit = hit._source as Alert & AlertData;
           const alertUuid = get(alertHit, ALERT_UUID);
 
@@ -252,14 +225,6 @@ export class AlertsClient<
           this.trackedAlerts.indices[alertUuid] = hit._index;
           this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
           this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
-
-          // only when the alerts are fetched by alert uuids
-          if (!trackedExecutions) {
-            const executionUuid = get(alertHit, ALERT_RULE_EXECUTION_UUID);
-            if (executionUuid) {
-              this.trackedExecutions.add(executionUuid);
-            }
-          }
         }
       } catch (err) {
         this.options.logger.error(
@@ -916,10 +881,6 @@ export class AlertsClient<
 
   public isUsingDataStreams(): boolean {
     return this._isUsingDataStreams;
-  }
-
-  public getTrackedExecutions() {
-    return this.trackedExecutions;
   }
 
   private throwIfHasClusterBlockException(response: BulkResponse) {
