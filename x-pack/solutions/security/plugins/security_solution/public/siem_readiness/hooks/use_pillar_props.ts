@@ -7,6 +7,19 @@
 
 import { useEuiTheme } from '@elastic/eui';
 
+interface UsePillarProps {
+  pillars: PillarProps;
+}
+
+export interface PillarProps {
+  [key: string]: {
+    value: string;
+    displayName: string;
+    color: string;
+    description: string;
+  };
+}
+
 export const usePillarProps = () => {
   const { euiTheme } = useEuiTheme();
 
