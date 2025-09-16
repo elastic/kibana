@@ -32,7 +32,6 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab } from './tabs';
@@ -72,10 +71,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
      * New tab initialization with the restored data if available
      */
 
-    const tabsEnabled = services.core.featureFlags.getBooleanValue(
-      TABS_ENABLED_FEATURE_FLAG_KEY,
-      false
-    );
+    const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
 
     let tabInitialGlobalState: TabStateGlobalState | undefined;
     let tabInitialAppState: DiscoverAppState | undefined;
