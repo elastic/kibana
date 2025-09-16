@@ -65,33 +65,84 @@ export const ReadinessTasksTable: React.FC = () => {
     () => ({
       'enable-endpoint-visibility': {
         action: () => handleLogTask({ task_id: 'enable-endpoint-visibility', status: 'completed' }),
-        actionButtonLabel: 'Complete Demo Task',
+        actionButtonLabel: 'Complete Task',
       },
       'ingest-cloud-audit-logs': {
-        action: () =>
-          handleLogTask({
-            task_id: 'ingest-cloud-audit-logs',
-            status: 'completed',
-            meta: { test: 'demo' }, // purposefully invalid meta to demonstrate validation
-          }),
-        actionButtonLabel: 'try to log invalid task',
+        action: () => handleLogTask({ task_id: 'ingest-cloud-audit-logs', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
       },
-      'ingest-asset-inventory': {},
-      'enable-kubernetes-container-logs': {},
-      'ingest-all-cloud-logs-inventory': {},
-      'enable-mitre-aligned-detection-rules': {},
-      'view-detection-coverage-mitre': {},
-      'add-threat-intel-feeds': {},
-      'customize-create-rules': {},
-      'use-attack-discovery': {},
-      'maintain-rule-coverage': {},
-      'enable-cspm-on-all-clouds': {},
-      'investigate-alert-using-timeline': {},
-      'use-ai-assistant-for-alert-root-cause': {},
-      'add-external-connectors': {},
-      'automate-response-rules-case-creation': {},
-      'create-manage-case-workflows': {},
-      'complete-automated-cases': {},
+      'ingest-asset-inventory': {
+        action: () => handleLogTask({ task_id: 'ingest-asset-inventory', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'enable-kubernetes-container-logs': {
+        action: () =>
+          handleLogTask({ task_id: 'enable-kubernetes-container-logs', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'ingest-all-cloud-logs-inventory': {
+        action: () =>
+          handleLogTask({ task_id: 'ingest-all-cloud-logs-inventory', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'enable-mitre-aligned-detection-rules': {
+        action: () =>
+          handleLogTask({ task_id: 'enable-mitre-aligned-detection-rules', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'view-detection-coverage-mitre': {
+        action: () =>
+          handleLogTask({ task_id: 'view-detection-coverage-mitre', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'add-threat-intel-feeds': {
+        action: () => handleLogTask({ task_id: 'add-threat-intel-feeds', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'customize-create-rules': {
+        action: () => handleLogTask({ task_id: 'customize-create-rules', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'use-attack-discovery': {
+        action: () => handleLogTask({ task_id: 'use-attack-discovery', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'maintain-rule-coverage': {
+        action: () => handleLogTask({ task_id: 'maintain-rule-coverage', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'enable-cspm-on-all-clouds': {
+        action: () => handleLogTask({ task_id: 'enable-cspm-on-all-clouds', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'investigate-alert-using-timeline': {
+        action: () =>
+          handleLogTask({ task_id: 'investigate-alert-using-timeline', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'use-ai-assistant-for-alert-root-cause': {
+        action: () =>
+          handleLogTask({ task_id: 'use-ai-assistant-for-alert-root-cause', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'add-external-connectors': {
+        action: () => handleLogTask({ task_id: 'add-external-connectors', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'automate-response-rules-case-creation': {
+        action: () =>
+          handleLogTask({ task_id: 'automate-response-rules-case-creation', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'create-manage-case-workflows': {
+        action: () =>
+          handleLogTask({ task_id: 'create-manage-case-workflows', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
+      'complete-automated-cases': {
+        action: () => handleLogTask({ task_id: 'complete-automated-cases', status: 'completed' }),
+        actionButtonLabel: 'Complete Task',
+      },
     }),
     [handleLogTask]
   );
@@ -156,7 +207,12 @@ export const ReadinessTasksTable: React.FC = () => {
               </EuiText>
               {taskContent.actionButtonLabel && taskContent.action && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                  <EuiButton size="s" fill onClick={() => taskContent.action?.()}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={() => taskContent.action?.()}
+                    disabled={taskData?.status === 'completed'}
+                  >
                     {taskContent.actionButtonLabel}
                   </EuiButton>
                 </div>

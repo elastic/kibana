@@ -42,6 +42,8 @@ export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksS
       latestTasksData.filter((task) => task.status === 'completed').map((task) => task.task_id)
     );
 
+    console.log(latestTasksData);
+
     // Count total and completed tasks per pillar
     const pillarStats = {
       visibility: { completed: 0, total: 0 },
@@ -103,7 +105,7 @@ export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksS
       totalCompleted,
       totalTasks,
     };
-  }, [pillars, getLatestTasks.data, euiTheme.colors.severity.unknown]);
+  }, [pillars, getLatestTasks, euiTheme.colors.severity.unknown]);
 
   return {
     readinessTasksStats,
