@@ -84783,6 +84783,7 @@ components:
         - status
         - fieldHistoryLength
     Security_Entity_Analytics_API_EngineMetadata:
+      additionalProperties: false
       type: object
       properties:
         Type:
@@ -84838,20 +84839,24 @@ components:
         - has_all_required
         - privileges
     Security_Entity_Analytics_API_EntityField:
+      additionalProperties: false
       type: object
       properties:
         attributes:
+          additionalProperties: false
           type: object
           properties:
             privileged:
               type: boolean
         behavior:
+          additionalProperties: false
           type: object
         EngineMetadata:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
         id:
           type: string
         lifecycle:
+          additionalProperties: false
           type: object
           properties:
             first_seen:
@@ -84950,12 +84955,14 @@ components:
         - generic
       type: string
     Security_Entity_Analytics_API_GenericEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -84967,12 +84974,14 @@ components:
       required:
         - entity
     Security_Entity_Analytics_API_HostEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -84982,12 +84991,14 @@ components:
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         host:
+          additionalProperties: false
           type: object
           properties:
             architecture:
@@ -85220,12 +85231,14 @@ components:
         - description
         - category
     Security_Entity_Analytics_API_ServiceEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -85235,12 +85248,14 @@ components:
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         service:
+          additionalProperties: false
           type: object
           properties:
             entity:
@@ -85327,12 +85342,14 @@ components:
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UserEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -85342,12 +85359,14 @@ components:
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         user:
+          additionalProperties: false
           type: object
           properties:
             domain:
@@ -85374,6 +85393,7 @@ components:
               type: string
             risk:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
+              additionalProperties: false
             roles:
               items:
                 type: string
