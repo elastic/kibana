@@ -106,7 +106,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
                     >
                       <FormattedMessage
                         id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToAgentBuilder"
-                        defaultMessage="Chat"
+                        defaultMessage="Agents"
                       />
                     </EuiContextMenuItem>,
                   ]
