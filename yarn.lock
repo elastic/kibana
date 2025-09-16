@@ -2198,15 +2198,15 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
-  integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
+"@elastic/eslint-plugin-eui@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.4.0.tgz#b793170bec1dbf7c15f7a7e7c5a64f4a8e622f23"
+  integrity sha512-M+eV/dBtTlr8bazzkyyZKOU1N4dL483GtNNFYA1mrMpxVqroassB9rawmBHav0IATUhNVGzTevbv1nG9U4Zm5w==
 
-"@elastic/eui-theme-borealis@3.3.2":
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.2.tgz#b3b6a9bf0df3cbfc4c4e07f24c5a2f8eec2abd94"
-  integrity sha512-0NbT2MtoaM2ltzyc1ms/lIc163p/XgG/6ePMsEWuHTWkScZe5V1sN7cnjzKncwpIIDJ0CfdOkeJQKcL/gj7bBA==
+"@elastic/eui-theme-borealis@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.4.0.tgz#12804076016708c2d458ca9bb972965763ad5e37"
+  integrity sha512-xOFaVYdj/i5Hyjca8Qqb2KjWxwiWU5KkI4QzRAMjPwNPKzgkKlrCmJyDtMCnhsUWuFGBjaPnHvHTgLmTHLmARg==
 
 "@elastic/eui-theme-common@4.0.0":
   version "4.0.0"
@@ -2217,10 +2217,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@106.5.0":
-  version "106.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.5.0.tgz#a37d0839545c41a023aa366e37ac1287cf262586"
-  integrity sha512-RIEETOUwx475vmF8NPao6em0yU2RlyGNflrMtmGQ04Ka3vZzs/AUIpdGcLJclOCyDj94gq4dltlXPuXkc1aMYw==
+"@elastic/eui@106.6.0":
+  version "106.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.6.0.tgz#95612842ce1bece58e4fd8f74ca36e565a007191"
+  integrity sha512-4dQkpMl+pG5li+1DnCmb6Mc5ymLj/W63va25KfafFNS2Yp8/pLA0bdMveW9cFsUbVmBStUMo1RU/KNrceBmGoQ==
   dependencies:
     "@elastic/eui-theme-common" "4.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -7844,6 +7844,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-feedback-snippet@link:src/platform/packages/shared/shared-ux/feedback_snippet":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-context@link:src/platform/packages/shared/shared-ux/file/context":
   version "0.0.0"
   uid ""
@@ -8823,20 +8827,20 @@
   resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.19.0.tgz#aca7cb277a28ddcbeb9bb457ad4d6b7e82bad77c"
   integrity sha512-p4MU3VxFSxj1T5yGm3OeJAS034nAiISGUF9Av3r9tClRCElcIdj159hADBYCE4VpiH6q+6KJ3cbvXF8v1200+g==
 
-"@launchdarkly/js-server-sdk-common@2.16.1":
-  version "2.16.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.16.1.tgz#70e1dac65b03551bdb2ef1edcec47ca77d6fa0f1"
-  integrity sha512-+040T/Wuvbhh1TJc2XdTjOpPtNOx6SLWpACJ920g188IG59RdOjwFrnuj000noygkmhc7vkgkjfTteSLtMiBrQ==
+"@launchdarkly/js-server-sdk-common@2.16.2":
+  version "2.16.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.16.2.tgz#c889d58428ac8a9ba2267136d8e7e3f3699ccd06"
+  integrity sha512-xjJP1YHdSABgn4whBccaIFK5Mr0e3WVdu47NJoSzbkVEDrr2LaOaya+92vYkuByulObvuGAkhI+ceJhz3G0l2g==
   dependencies:
     "@launchdarkly/js-sdk-common" "2.19.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.10.1":
-  version "9.10.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.1.tgz#387e3099f1d8701a84fd86df5f330d93161e93b3"
-  integrity sha512-A+d7AqKo0a0N2yk1/hEzpuO8tLpriB72GcJK9RpK918jHzLQin/Nab7pbIqojjodgweo4r5XHlOGe0WNpl4w2w==
+"@launchdarkly/node-server-sdk@^9.10.2":
+  version "9.10.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.2.tgz#e6bd0a83590d971621d502222b5be77525c6ddc9"
+  integrity sha512-I/pAQfnupbmpKdH/4m88PWVhaElj1hyY7V+s2yAO4ZmPOybrsbObJZOkIrspdqK97V8aY0wjQpoivHyIUACWkg==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.16.1"
+    "@launchdarkly/js-server-sdk-common" "2.16.2"
     https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
@@ -12397,6 +12401,11 @@
     "@types/keyv" "*"
     "@types/node" "*"
     "@types/responselike" "*"
+
+"@types/canvas-confetti@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@types/canvas-confetti/-/canvas-confetti-1.9.0.tgz#d1077752e046413c9881fbb2ba34a70ebe3c1773"
+  integrity sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==
 
 "@types/chance@^1.0.0":
   version "1.0.1"
@@ -16017,6 +16026,11 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001718:
   version "1.0.30001720"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001720.tgz#c138cb6026d362be9d8d7b0e4bcd0183a850edfd"
   integrity sha512-Ec/2yV2nNPwb4DnTANEV99ZWwm3ZWfdlfkQbWSDDt+PsXEVYwlhPH8tdMaPunYTKKmz7AnHi2oNEi1GcmKCD8g==
+
+canvas-confetti@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/canvas-confetti/-/canvas-confetti-1.9.3.tgz#ef4c857420ad8045ab4abe8547261c8cdf229845"
+  integrity sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==
 
 canvg@^3.0.9:
   version "3.0.11"
