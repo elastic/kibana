@@ -22,7 +22,7 @@ import { convertToFieldDefinitionConfig } from '../utils';
 interface SamplePreviewTableProps {
   stream: Streams.ingest.all.Definition;
   nextField: SchemaField;
-  onValidate?: (isValid: boolean) => void;
+  onValidate?: ({ isValid, isIgnored }: { isValid: boolean; isIgnored: boolean }) => void;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
@@ -68,7 +68,10 @@ const SamplePreviewTableContent = ({
 
   useEffect(() => {
     if (onValidate) {
-      onValidate(value?.status === 'failure' || error ? false : true);
+      onValidate({
+        isValid: value?.status === 'failure' || error ? false : true,
+        isIgnored: value?.ignoredFields ? true : false,
+      });
     }
   }, [value, error, onValidate]);
 
