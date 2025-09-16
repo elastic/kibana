@@ -65,10 +65,10 @@ import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { isFullLicense } from '@kbn/ml-license/is_full_license';
 import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
-import { getMlLocator } from '@kbn/ml-locator/get_ml_locator';
 import type { getMlManagementLocator } from '@kbn/ml-locator/get_ml_management_locator';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
 import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
+import { MlLocatorDefinition } from '@kbn/ml-locator/ml_locator';
 
 import { AnomalySwimLane } from './shared_components';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
@@ -135,7 +135,6 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  private getLocator: undefined | (() => ReturnType<typeof getMlLocator>);
   private getManagementLocator: undefined | (() => ReturnType<typeof getMlManagementLocator>);
 
   private isServerless: boolean = false;
@@ -221,7 +220,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     if (pluginsSetup.share) {
-      this.getLocator = async () => await getMlLocator(pluginsSetup.share);
+      pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
       this.getManagementLocator = async () =>
         await new MlManagementLocatorInternal(pluginsSetup.share);
     }
@@ -313,7 +312,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       .subscribe();
 
     return {
-      getLocator: this.getLocator,
       getManagementLocator: this.getManagementLocator,
       getElasticModels: async () => await getElasticModels(core.http),
     };
@@ -321,7 +319,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   start(core: CoreStart, deps: MlStartDependencies): MlPluginStart {
     return {
-      getLocator: this.getLocator,
       getElasticModels: async () => await getElasticModels(core.http),
       getMlApi: async () => await getMlSharedServices(core.http),
       getManagementLocator: this.getManagementLocator,
