@@ -60,9 +60,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const {
       http,
       notifications: { toasts },
+      triggersActionsUi,
     } = services;
 
-    const actionTypeRegistry = services.plugins.triggersActionsUi?.actionTypeRegistry;
+    const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
 
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);

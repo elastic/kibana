@@ -11,7 +11,7 @@ import type {
   ToolCallProgress,
   ToolCallStep,
 } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import { isToolCallStep, isConversationNotFoundError } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
 import { useQueryClient } from '@tanstack/react-query';
@@ -230,10 +230,18 @@ export const useConversationActions = () => {
       navigateToConversation({ nextConversationId: id });
     },
     deleteConversation: async (id: string) => {
-      await conversationsService.delete({ conversationId: id });
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      removeNewConversationQuery();
-      navigateToConversation({ nextConversationId: '' });
+      try {
+        await conversationsService.delete({ conversationId: id });
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+        removeNewConversationQuery();
+        navigateToConversation({ nextConversationId: '' });
+      } catch (error) {
+        // If conversation is not found on server, set localStorageLastConversation to empty string
+        if (isConversationNotFoundError(error)) {
+          setLastConversation({ id: '' });
+        }
+        throw error;
+      }
     },
   };
 };

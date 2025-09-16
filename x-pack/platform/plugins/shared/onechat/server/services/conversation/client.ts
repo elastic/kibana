@@ -84,18 +84,26 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async get(conversationId: string, spaceId?: string): Promise<Conversation> {
-    const document = await this.storage.getClient().get({ id: conversationId });
+    try {
+      const document = await this.storage.getClient().get({ id: conversationId });
 
-    if (!hasAccess({ conversation: document, user: this.user })) {
-      throw createConversationNotFoundError({ conversationId });
+      if (!hasAccess({ conversation: document, user: this.user })) {
+        throw createConversationNotFoundError({ conversationId });
+      }
+
+      // If spaceId is provided, verify the conversation belongs to that space
+      if (spaceId && document._source?.space_id !== spaceId) {
+        throw createConversationNotFoundError({ conversationId });
+      }
+
+      return fromEs(document);
+    } catch (error) {
+      // If document doesn't exist, throw conversation not found error
+      if (isNotFoundError(error)) {
+        throw createConversationNotFoundError({ conversationId });
+      }
+      throw error;
     }
-
-    // If spaceId is provided, verify the conversation belongs to that space
-    if (spaceId && document._source?.space_id !== spaceId) {
-      throw createConversationNotFoundError({ conversationId });
-    }
-
-    return fromEs(document);
   }
 
   async exists(conversationId: string): Promise<boolean> {

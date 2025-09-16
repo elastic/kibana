@@ -15,11 +15,15 @@ import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
+import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
+import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
 import type { ConversationSettings } from '../../services/types';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
+  const spaceId = useOnechatSpaceId();
+  const { setLastConversation } = useOnechatLastConversation({ spaceId });
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
   const {
@@ -35,7 +39,12 @@ export const useConversation = () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
       }
-      return conversationsService.get({ conversationId });
+      return conversationsService.get({ conversationId }).catch((error) => {
+        // If conversation is not found on server, set localStorageLastConversation to empty string
+        if (error.response.status === 404) {
+          setLastConversation({ id: '' });
+        }
+      });
     },
   });
 
