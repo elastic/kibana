@@ -131,7 +131,10 @@ export function ExportContentPackFlyout({
             <ContentPackObjectsList
               definition={definition}
               objects={exportResponse.contentPack.entries}
-              onSelectionChange={setIncludedObjects}
+              onSelectionChange={(objects) => {
+                console.log(JSON.stringify(objects, null, 2));
+                setIncludedObjects(objects);
+              }}
             />
           </>
         ) : null}

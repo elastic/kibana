@@ -12,6 +12,9 @@ import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { IndexConfiguration } from './advanced_view/index_configuration';
 import { DeleteStreamPanel } from './advanced_view/delete_stream';
+import { ImportExportPanel } from './advanced_view/import_export';
+import { useKibana } from '../../../hooks/use_kibana';
+import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
 
 export function WiredAdvancedView({
   definition,
@@ -20,8 +23,23 @@ export function WiredAdvancedView({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { featureFlags },
+  } = useKibana();
+  const renderContentPackItems = featureFlags.getBooleanValue(
+    FeatureFlagStreamsContentPackUIEnabled,
+    false
+  );
+
   return (
     <>
+      {renderContentPackItems && (
+        <>
+          <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
+          <EuiSpacer />
+        </>
+      )}
+
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
           iconType="warning"

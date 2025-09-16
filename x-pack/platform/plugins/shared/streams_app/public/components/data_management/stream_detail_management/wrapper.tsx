@@ -57,11 +57,6 @@ export function Wrapper({
     features: { groupStreams },
   } = useStreamsPrivileges();
 
-  const renderContentPackItems = featureFlags.getBooleanValue(
-    FeatureFlagStreamsContentPackUIEnabled,
-    false
-  );
-
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
       return [
@@ -117,33 +112,6 @@ export function Wrapper({
                 </EuiFlexGroup>
               </EuiFlexItem>
 
-              {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiButton
-                      size="s"
-                      iconType="importAction"
-                      onClick={() => setIsImportFlyoutOpen(true)}
-                      data-test-subj="streamsAppImportButton"
-                    >
-                      {i18n.translate('xpack.streams.importButton', {
-                        defaultMessage: 'Import',
-                      })}
-                    </EuiButton>
-                    <EuiButton
-                      size="s"
-                      iconType="exportAction"
-                      onClick={() => setIsExportFlyoutOpen(true)}
-                      data-test-subj="streamsAppExportButton"
-                    >
-                      {i18n.translate('xpack.streams.exportButton', {
-                        defaultMessage: 'Export',
-                      })}
-                    </EuiButton>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-
               {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
                 <GroupStreamControls />
               )}
@@ -157,31 +125,6 @@ export function Wrapper({
         }))}
       />
       <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
-
-      {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
-        <>
-          {isExportFlyoutOpen && (
-            <ExportContentPackFlyout
-              onClose={() => setIsExportFlyoutOpen(false)}
-              definition={definition}
-              onExport={() => {
-                setIsExportFlyoutOpen(false);
-              }}
-            />
-          )}
-
-          {isImportFlyoutOpen && (
-            <ImportContentPackFlyout
-              onClose={() => setIsImportFlyoutOpen(false)}
-              definition={definition}
-              onImport={() => {
-                setIsImportFlyoutOpen(false);
-                refreshDefinition();
-              }}
-            />
-          )}
-        </>
-      )}
     </>
   );
 }

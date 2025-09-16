@@ -5,55 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-  EuiSpacer,
-  EuiAccordion,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackStream,
 } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import {
-  getAncestors,
-  getAncestorsAndSelf,
-  getSegments,
-  isChildOf,
-  isDescendantOf,
-} from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { getSegments, isChildOf } from '@kbn/streams-schema';
+import { EuiCheckbox, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
-import { StreamQueriesList } from './queries_list';
+import { StreamTree } from './tree';
 
-type StreamRow = ContentPackStream & {
-  level: number;
-  isParent: boolean;
-};
-
-function sortDescendants(descendants: ContentPackStream[]): StreamRow[] {
-  const sorted = descendants.sort((a, b) => a.name.localeCompare(b.name));
-
-  return sorted.map((entry, index) => {
-    const next = sorted[index + 1];
-    return {
-      ...entry,
-      level: getSegments(entry.name).length - 1,
-      isParent: next ? isChildOf(entry.name, next.name) : false,
-    };
-  });
-}
 export function ContentPackObjectsList({
   definition,
   objects,
@@ -68,12 +33,21 @@ export function ContentPackObjectsList({
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.available;
+  const [includeAssets, setIncludeAssets] = useState<boolean>(isSignificantEventsEnabled);
+  const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({});
 
-  const [selectedItems, setSelectedItems] = useState<
-    Record<string, { selected: boolean; queries: StreamQuery[] }>
-  >({
-    [ROOT_STREAM_ID]: { selected: true, queries: definition.queries },
-  });
+  useEffect(() => {
+    if (!significantEvents) return;
+    setIncludeAssets(significantEvents.available);
+    setSelection({
+      ...objects
+        .filter((entry): entry is ContentPackStream => entry.type === 'stream')
+        .reduce((map, stream) => {
+          map[stream.name] = { selected: true };
+          return map;
+        }, {} as Record<string, { selected: boolean }>),
+    });
+  }, [significantEvents?.available, objects]);
 
   const { rootEntry, descendants } = useMemo(() => {
     if (objects.length === 0) {
@@ -85,170 +59,45 @@ export function ContentPackObjectsList({
         entry.type === 'stream' && entry.name === ROOT_STREAM_ID
     )!;
 
-    const rows = sortDescendants(
-      objects.filter(
-        (entry): entry is ContentPackStream =>
-          entry.type === 'stream' && entry.name !== ROOT_STREAM_ID
-      )
+    const descendants = objects.filter(
+      (entry): entry is ContentPackStream =>
+        entry.type === 'stream' && entry.name !== ROOT_STREAM_ID
     );
 
-    setSelectedItems({
-      [root.name]: { selected: true, queries: root.request.queries },
-      ...rows.reduce((selection, { name, request }) => {
-        selection[name] = { selected: true, queries: request.queries };
-        return selection;
-      }, {} as Record<string, { selected: boolean; queries: StreamQuery[] }>),
-    });
-
-    return { rootEntry: root, descendants: rows };
+    return { rootEntry: root, descendants };
   }, [objects]);
 
   return !rootEntry ? null : (
     <>
-      {isSignificantEventsEnabled && (
-        <>
-          <StreamQueriesList
-            definition={{ name: rootEntry.name, queries: rootEntry.request.queries }}
-            selectedQueries={selectedItems[rootEntry.name].queries}
-            setSelectedQueries={(queries) => {
-              const selection = { ...selectedItems };
-              selection[rootEntry.name] = { ...selection[rootEntry.name], queries };
-              setSelectedItems(selection);
-              onSelectionChange(toIncludedObjects(selection));
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="s">
+        {isSignificantEventsEnabled ? (
+          <EuiCheckbox
+            id="include-all-assets"
+            checked={includeAssets}
+            label={i18n.translate('xpack.streams.contentPackObjectsList.includeAllAssets', {
+              defaultMessage:
+                'Include significant events of the root stream and selected streams partitions',
+            })}
+            onChange={() => {
+              const include = !includeAssets;
+              setIncludeAssets(include);
+              onSelectionChange(toIncludedObjects(selection, [rootEntry, ...descendants], include));
             }}
           />
-          <EuiSpacer />
-        </>
-      )}
+        ) : null}
+      </EuiFlexGroup>
 
-      <EuiTitle size="xxs">
-        <h5>
-          {i18n.translate('xpack.streams.contentPackObjectsList.routing', {
-            defaultMessage: 'Routing',
-          })}
-        </h5>
-      </EuiTitle>
-      <EuiBasicTable
-        items={descendants}
-        itemId="name"
-        columns={[
-          {
-            field: 'select',
-            name: '',
-            width: '40px',
-            render: (_, item: StreamRow) => {
-              return (
-                <EuiCheckbox
-                  id={`checkbox-${item.name}`}
-                  checked={selectedItems[item.name].selected}
-                  onChange={(e) => {
-                    const selection = { ...selectedItems };
-                    if (e.target.checked) {
-                      [
-                        ...getAncestorsAndSelf(item.name),
-                        ...descendants
-                          .filter(({ name }) => isDescendantOf(item.name, name))
-                          .map(({ name }) => name),
-                      ].forEach((name) => {
-                        selection[name] = { ...selection[name], selected: true };
-                      });
-                    } else {
-                      [
-                        item.name,
-                        ...descendants
-                          .filter(({ name }) => isDescendantOf(item.name, name))
-                          .map(({ name }) => name),
-                      ].forEach((name) => {
-                        selection[name] = { ...selection[name], selected: false };
-                      });
+      <EuiSpacer size="m" />
 
-                      getAncestors(item.name).forEach((ancestor) => {
-                        const hasSelectedChild = descendants.some(
-                          ({ name }) => isDescendantOf(ancestor, name) && selection[name].selected
-                        );
-                        selection[ancestor] = {
-                          ...selection[ancestor],
-                          selected: hasSelectedChild,
-                        };
-                      });
-                    }
+      <StreamTree
+        streams={descendants}
+        onSelectionChange={(streamsSelection) => {
+          setSelection(streamsSelection);
 
-                    setSelectedItems(selection);
-                    onSelectionChange(toIncludedObjects(selection));
-                  }}
-                />
-              );
-            },
-          },
-          {
-            field: 'name',
-            name: '',
-            render: (name: string, item: StreamRow) => (
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                css={css`
-                  margin-left: ${item.level * 16}px;
-                `}
-              >
-                {item.isParent ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="arrowDown" />
-                  </EuiFlexItem>
-                ) : (
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      margin-left: 16px;
-                    `}
-                  />
-                )}
-
-                <EuiFlexItem grow={3}>
-                  {!isSignificantEventsEnabled ? (
-                    <EuiFlexItem grow={false}>{name.split('.').pop()}</EuiFlexItem>
-                  ) : (
-                    <EuiAccordion
-                      id={name}
-                      buttonContent={
-                        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                          <EuiFlexItem grow={false}>{name.split('.').pop()}</EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiText color="subdued" size="xs">
-                              {i18n.translate(
-                                'xpack.streams.contentPackObjectsList.streamDetails',
-                                {
-                                  defaultMessage: 'details',
-                                }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      arrowDisplay="none"
-                    >
-                      <EuiPanel color="subdued">
-                        <StreamQueriesList
-                          definition={{ name: item.name, queries: item.request.queries }}
-                          disabled={!selectedItems[item.name].selected}
-                          selectedQueries={selectedItems[item.name].queries}
-                          setSelectedQueries={(queries) => {
-                            const selection = { ...selectedItems };
-                            selection[item.name] = { ...selection[item.name], queries };
-                            setSelectedItems(selection);
-                            onSelectionChange(toIncludedObjects(selection));
-                          }}
-                        />
-                      </EuiPanel>
-                    </EuiAccordion>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-          },
-        ]}
-        rowHeader="name"
+          onSelectionChange(
+            toIncludedObjects(streamsSelection, [rootEntry, ...descendants], includeAssets)
+          );
+        }}
       />
     </>
   );
@@ -256,7 +105,9 @@ export function ContentPackObjectsList({
 
 function buildIncludedObjects(
   parent: string,
-  selection: Record<string, { selected: boolean; queries: StreamQuery[] }>
+  selection: Record<string, { selected: boolean }>,
+  objects: ContentPackStream[],
+  includeAssets: boolean
 ): ContentPackIncludedObjects {
   const children = Object.keys(selection).filter((key) => {
     if (!selection[key].selected) {
@@ -271,17 +122,23 @@ function buildIncludedObjects(
 
   return {
     objects: {
-      queries: selection[parent].queries.map((query) => ({ id: query.id })),
+      queries: !includeAssets
+        ? []
+        : objects
+            .find(({ name }) => name === parent)!
+            .request.queries.map((query) => ({ id: query.id })),
       routing: children.map((child) => ({
         destination: child,
-        ...buildIncludedObjects(child, selection),
+        ...buildIncludedObjects(child, selection, objects, includeAssets),
       })),
     },
   };
 }
 
 function toIncludedObjects(
-  selection: Record<string, { selected: boolean; queries: StreamQuery[] }>
+  selection: Record<string, { selected: boolean }>,
+  objects: ContentPackStream[],
+  includeAssets: boolean
 ): ContentPackIncludedObjects {
-  return buildIncludedObjects(ROOT_STREAM_ID, selection);
+  return buildIncludedObjects(ROOT_STREAM_ID, selection, objects, includeAssets);
 }
