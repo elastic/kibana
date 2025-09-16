@@ -61,9 +61,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
       // If there are no initial selections, the min/max values will be displayed initially in the control.
       // Therefore, make sure the control is initially in a loading state
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(
-        !selections.hasInitialSelections
-      );
+      const dataLoading$ = new BehaviorSubject<boolean>(!selections.hasInitialSelections);
       const loadingMinMax$ = new BehaviorSubject<boolean>(!selections.hasInitialSelections);
 
       function serializeState() {
@@ -245,7 +243,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               fieldName={fieldName}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
-              isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
+              isLoading={dataLoading}
               max={max}
               min={min}
               onChange={selections.setValue}
