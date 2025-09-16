@@ -43,7 +43,9 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
     type: RANGE_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
+      const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
       const editorStateManager = initializeEditorStateManager(state);
 
@@ -62,13 +64,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         state,
         dataControlManager.internalApi.onSelectionChange
       );
-
-      // If there are no initial selections, the min/max values will be displayed initially in the control.
-      // Therefore, make sure the control is initially in a loading state
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(
-        !selections.hasInitialSelections
-      );
-      const loadingMinMax$ = new BehaviorSubject<boolean>(!selections.hasInitialSelections);
 
       function serializeState() {
         return {
