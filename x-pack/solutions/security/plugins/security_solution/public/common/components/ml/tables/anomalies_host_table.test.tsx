@@ -21,7 +21,7 @@ jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('../hooks/use_installed_security_jobs');
-jest.mock('@kbn/ml-plugin/public');
+jest.mock('@kbn/ml-locator/use_ml_href');
 
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;
