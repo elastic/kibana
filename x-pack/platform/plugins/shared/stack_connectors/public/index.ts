@@ -10,3 +10,6 @@ import { StackConnectorsPublicPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) =>
   new StackConnectorsPublicPlugin(context);
+
+// Re-export everything from common (following existing pattern)
+export * from './common';

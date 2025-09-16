@@ -11,6 +11,426 @@ import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
+// Import connector schemas from the organized structure
+import {
+  // Inference connector schemas
+  InferenceUnifiedCompletionParamsSchema,
+  InferenceCompletionParamsSchema,
+  InferenceRerankParamsSchema,
+  InferenceTextEmbeddingParamsSchema,
+  InferenceSparseEmbeddingParamsSchema,
+  InferenceUnifiedCompletionResponseSchema,
+  InferenceCompletionResponseSchema,
+  InferenceRerankResponseSchema,
+  InferenceTextEmbeddingResponseSchema,
+  InferenceSparseEmbeddingResponseSchema,
+  // Other connector schemas
+  SlackParamsSchema,
+  SlackResponseSchema,
+  EmailParamsSchema,
+  EmailResponseSchema,
+  WebhookParamsSchema,
+  WebhookResponseSchema,
+  JiraCreateIssueParamsSchema,
+  JiraUpdateIssueParamsSchema,
+  JiraGetIssueParamsSchema,
+  JiraIssueResponseSchema,
+  JiraCreateIssueResponseSchema,
+  ServiceNowCreateIncidentParamsSchema,
+  ServiceNowUpdateIncidentParamsSchema,
+  ServiceNowGetIncidentParamsSchema,
+  ServiceNowCreateSecurityIncidentParamsSchema,
+  ServiceNowIncidentResponseSchema,
+  PagerDutyParamsSchema,
+  PagerDutyResponseSchema,
+  TeamsParamsSchema,
+  TeamsResponseSchema,
+  BedrockParamsSchema,
+  BedrockResponseSchema,
+  OpenAIParamsSchema,
+  OpenAIResponseSchema,
+  GeminiParamsSchema,
+  GeminiResponseSchema,
+  EsIndexParamsSchema,
+  EsIndexResponseSchema,
+  ServerLogParamsSchema,
+  ServerLogResponseSchema,
+  OpsgenieCreateAlertParamsSchema,
+  OpsgenieCloseAlertParamsSchema,
+  OpsgenieResponseSchema,
+  ResilientCreateIncidentParamsSchema,
+  ResilientUpdateIncidentParamsSchema,
+  ResilientAddCommentParamsSchema,
+  ResilientIncidentResponseSchema,
+  SwimlaneCreateRecordParamsSchema,
+  SwimlaneUpdateRecordParamsSchema,
+  SwimlaneResponseSchema,
+  CasesWebhookCreateCaseParamsSchema,
+  CasesWebhookUpdateCaseParamsSchema,
+  CasesWebhookCreateCommentParamsSchema,
+  CasesWebhookResponseSchema,
+  SentinelOneIsolateHostParamsSchema,
+  SentinelOneReleaseHostParamsSchema,
+  SentinelOneGetAgentsParamsSchema,
+  SentinelOneResponseSchema,
+  CrowdStrikeHostActionsParamsSchema,
+  CrowdStrikeGetAgentOnlineStatusParamsSchema,
+  CrowdStrikeResponseSchema,
+  SlackApiPostMessageParamsSchema,
+  SlackApiGetChannelsParamsSchema,
+  SlackApiGetUsersParamsSchema,
+  SlackApiResponseSchema,
+  // Tines connector schemas
+  TinesStoriesParamsSchema,
+  TinesWebhooksParamsSchema,
+  TinesRunParamsSchema,
+  TinesTestParamsSchema,
+  TinesResponseSchema,
+  // Jira Service Management connector schemas
+  JiraServiceManagementCreateAlertParamsSchema,
+  JiraServiceManagementCloseAlertParamsSchema,
+  JiraServiceManagementResponseSchema,
+  // Updated SentinelOne schemas
+  SentinelOneExecuteScriptParamsSchema,
+  SentinelOneGetRemoteScriptsParamsSchema,
+  SentinelOneGetRemoteScriptStatusParamsSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  // Updated CrowdStrike schemas
+  CrowdStrikeGetAgentDetailsParamsSchema,
+  CrowdStrikeExecuteRTRCommandParamsSchema,
+  CrowdStrikeExecuteActiveResponderRTRParamsSchema,
+  CrowdStrikeExecuteAdminRTRParamsSchema,
+  CrowdStrikeGetRTRCloudScriptsParamsSchema,
+} from './stack_connectors_schema';
+
+/**
+ * Get parameter schema for a specific sub-action
+ */
+function getSubActionParamsSchema(actionTypeId: string, subActionName: string): z.ZodSchema {
+  // Handle inference connector sub-actions
+  if (actionTypeId === '.inference') {
+    switch (subActionName) {
+      case 'unified_completion':
+      case 'unified_completion_stream':
+      case 'unified_completion_async_iterator':
+        return InferenceUnifiedCompletionParamsSchema;
+      case 'completion':
+        return InferenceCompletionParamsSchema;
+      case 'rerank':
+        return InferenceRerankParamsSchema;
+      case 'text_embedding':
+        return InferenceTextEmbeddingParamsSchema;
+      case 'sparse_embedding':
+        return InferenceSparseEmbeddingParamsSchema;
+    }
+  }
+
+  // Handle other connector types
+  switch (actionTypeId) {
+    case '.slack':
+      return SlackParamsSchema;
+    case '.email':
+      return EmailParamsSchema;
+    case '.webhook':
+      return WebhookParamsSchema;
+    case '.teams':
+      return TeamsParamsSchema;
+    case '.bedrock':
+      return BedrockParamsSchema;
+    case '.openai':
+      return OpenAIParamsSchema;
+    case '.gemini':
+      return GeminiParamsSchema;
+    case '.index':
+      return EsIndexParamsSchema;
+    case '.server-log':
+      return ServerLogParamsSchema;
+    case '.pagerduty':
+      return PagerDutyParamsSchema;
+  }
+
+  // Handle Jira sub-actions
+  if (actionTypeId === '.jira') {
+    switch (subActionName) {
+      case 'pushToService':
+        return JiraCreateIssueParamsSchema;
+      case 'updateIncident':
+        return JiraUpdateIssueParamsSchema;
+      case 'getIncident':
+        return JiraGetIssueParamsSchema;
+    }
+  }
+
+  // Handle ServiceNow sub-actions
+  if (actionTypeId === '.servicenow' || actionTypeId === '.servicenow-itom' || actionTypeId === '.servicenow-itsm') {
+    switch (subActionName) {
+      case 'pushToService':
+        return ServiceNowCreateIncidentParamsSchema;
+      case 'updateIncident':
+        return ServiceNowUpdateIncidentParamsSchema;
+      case 'getIncident':
+        return ServiceNowGetIncidentParamsSchema;
+    }
+  }
+
+  // Handle ServiceNow SIR
+  if (actionTypeId === '.servicenow-sir') {
+    switch (subActionName) {
+      case 'pushToService':
+        return ServiceNowCreateSecurityIncidentParamsSchema;
+    }
+  }
+
+  // Handle Opsgenie sub-actions
+  if (actionTypeId === '.opsgenie') {
+    switch (subActionName) {
+      case 'createAlert':
+        return OpsgenieCreateAlertParamsSchema;
+      case 'closeAlert':
+        return OpsgenieCloseAlertParamsSchema;
+    }
+  }
+
+  // Handle Resilient sub-actions
+  if (actionTypeId === '.resilient') {
+    switch (subActionName) {
+      case 'pushToService':
+        return ResilientCreateIncidentParamsSchema;
+      case 'updateIncident':
+        return ResilientUpdateIncidentParamsSchema;
+      case 'addComment':
+        return ResilientAddCommentParamsSchema;
+    }
+  }
+
+  // Handle Swimlane sub-actions
+  if (actionTypeId === '.swimlane') {
+    switch (subActionName) {
+      case 'pushToService':
+        return SwimlaneCreateRecordParamsSchema;
+      case 'updateIncident':
+        return SwimlaneUpdateRecordParamsSchema;
+    }
+  }
+
+  // Handle Cases Webhook sub-actions
+  if (actionTypeId === '.cases-webhook') {
+    switch (subActionName) {
+      case 'pushToService':
+        return CasesWebhookCreateCaseParamsSchema;
+      case 'updateIncident':
+        return CasesWebhookUpdateCaseParamsSchema;
+      case 'addComment':
+        return CasesWebhookCreateCommentParamsSchema;
+    }
+  }
+
+  // Handle SentinelOne sub-actions
+  if (actionTypeId === '.sentinelone') {
+    switch (subActionName) {
+      case 'isolateHost':
+        return SentinelOneIsolateHostParamsSchema;
+      case 'releaseHost':
+        return SentinelOneReleaseHostParamsSchema;
+      case 'getAgents':
+        return SentinelOneGetAgentsParamsSchema;
+      case 'executeScript':
+        return SentinelOneExecuteScriptParamsSchema;
+      case 'getRemoteScripts':
+        return SentinelOneGetRemoteScriptsParamsSchema;
+      case 'getRemoteScriptStatus':
+        return SentinelOneGetRemoteScriptStatusParamsSchema;
+      case 'getRemoteScriptResults':
+        return SentinelOneGetRemoteScriptResultsParamsSchema;
+      case 'downloadRemoteScriptResults':
+        return SentinelOneDownloadRemoteScriptResultsParamsSchema;
+      case 'fetchAgentFiles':
+        return SentinelOneFetchAgentFilesParamsSchema;
+      case 'downloadAgentFile':
+        return SentinelOneDownloadAgentFileParamsSchema;
+      case 'getActivities':
+        return SentinelOneGetActivitiesParamsSchema;
+    }
+  }
+
+  // Handle CrowdStrike sub-actions
+  if (actionTypeId === '.crowdstrike') {
+    switch (subActionName) {
+      case 'hostActions':
+        return CrowdStrikeHostActionsParamsSchema;
+      case 'getAgentDetails':
+        return CrowdStrikeGetAgentDetailsParamsSchema;
+      case 'getAgentOnlineStatus':
+        return CrowdStrikeGetAgentOnlineStatusParamsSchema;
+      case 'executeRTRCommand':
+        return CrowdStrikeExecuteRTRCommandParamsSchema;
+      case 'batchActiveResponderExecuteRTR':
+        return CrowdStrikeExecuteActiveResponderRTRParamsSchema;
+      case 'batchAdminExecuteRTR':
+        return CrowdStrikeExecuteAdminRTRParamsSchema;
+      case 'getRTRCloudScripts':
+        return CrowdStrikeGetRTRCloudScriptsParamsSchema;
+    }
+  }
+
+  // Handle Slack API sub-actions
+  if (actionTypeId === '.slack_api') {
+    switch (subActionName) {
+      case 'postMessage':
+        return SlackApiPostMessageParamsSchema;
+      case 'getChannels':
+        return SlackApiGetChannelsParamsSchema;
+      case 'getUsers':
+        return SlackApiGetUsersParamsSchema;
+    }
+  }
+
+  // Handle Tines sub-actions
+  if (actionTypeId === '.tines') {
+    switch (subActionName) {
+      case 'stories':
+        return TinesStoriesParamsSchema;
+      case 'webhooks':
+        return TinesWebhooksParamsSchema;
+      case 'run':
+        return TinesRunParamsSchema;
+      case 'test':
+        return TinesTestParamsSchema;
+    }
+  }
+
+  // Handle Jira Service Management sub-actions
+  if (actionTypeId === '.jira-service-management') {
+    switch (subActionName) {
+      case 'createAlert':
+        return JiraServiceManagementCreateAlertParamsSchema;
+      case 'closeAlert':
+        return JiraServiceManagementCloseAlertParamsSchema;
+    }
+  }
+
+  // Generic fallback for unknown sub-actions
+  return z.object({
+    subAction: z.literal(subActionName),
+    subActionParams: z.any(),
+  }).required();
+}
+
+/**
+ * Get output schema for a specific sub-action
+ */
+function getSubActionOutputSchema(actionTypeId: string, subActionName: string): z.ZodSchema {
+  // Handle inference connector sub-actions
+  if (actionTypeId === '.inference') {
+    switch (subActionName) {
+      case 'unified_completion':
+      case 'unified_completion_stream':
+      case 'unified_completion_async_iterator':
+        return InferenceUnifiedCompletionResponseSchema;
+      case 'completion':
+        return InferenceCompletionResponseSchema;
+      case 'rerank':
+        return InferenceRerankResponseSchema;
+      case 'text_embedding':
+        return InferenceTextEmbeddingResponseSchema;
+      case 'sparse_embedding':
+        return InferenceSparseEmbeddingResponseSchema;
+    }
+  }
+
+  // Handle other connector types
+  switch (actionTypeId) {
+    case '.slack':
+      return SlackResponseSchema;
+    case '.email':
+      return EmailResponseSchema;
+    case '.webhook':
+      return WebhookResponseSchema;
+    case '.teams':
+      return TeamsResponseSchema;
+    case '.bedrock':
+      return BedrockResponseSchema;
+    case '.openai':
+      return OpenAIResponseSchema;
+    case '.gemini':
+      return GeminiResponseSchema;
+    case '.index':
+      return EsIndexResponseSchema;
+    case '.server-log':
+      return ServerLogResponseSchema;
+    case '.pagerduty':
+      return PagerDutyResponseSchema;
+  }
+
+  // Handle Jira sub-actions
+  if (actionTypeId === '.jira') {
+    switch (subActionName) {
+      case 'pushToService':
+        return JiraCreateIssueResponseSchema;
+      case 'updateIncident':
+      case 'getIncident':
+        return JiraIssueResponseSchema;
+    }
+  }
+
+  // Handle ServiceNow sub-actions
+  if (actionTypeId === '.servicenow' || actionTypeId === '.servicenow-itom' || actionTypeId === '.servicenow-itsm' || actionTypeId === '.servicenow-sir') {
+    return ServiceNowIncidentResponseSchema;
+  }
+
+  // Handle Opsgenie sub-actions
+  if (actionTypeId === '.opsgenie') {
+    return OpsgenieResponseSchema;
+  }
+
+  // Handle Resilient sub-actions
+  if (actionTypeId === '.resilient') {
+    return ResilientIncidentResponseSchema;
+  }
+
+  // Handle Swimlane sub-actions
+  if (actionTypeId === '.swimlane') {
+    return SwimlaneResponseSchema;
+  }
+
+  // Handle Cases Webhook sub-actions
+  if (actionTypeId === '.cases-webhook') {
+    return CasesWebhookResponseSchema;
+  }
+
+  // Handle SentinelOne sub-actions
+  if (actionTypeId === '.sentinelone') {
+    return SentinelOneResponseSchema;
+  }
+
+  // Handle CrowdStrike sub-actions
+  if (actionTypeId === '.crowdstrike') {
+    return CrowdStrikeResponseSchema;
+  }
+
+  // Handle Slack API sub-actions
+  if (actionTypeId === '.slack_api') {
+    return SlackApiResponseSchema;
+  }
+
+  // Handle Tines sub-actions
+  if (actionTypeId === '.tines') {
+    return TinesResponseSchema;
+  }
+
+  // Handle Jira Service Management sub-actions
+  if (actionTypeId === '.jira-service-management') {
+    return JiraServiceManagementResponseSchema;
+  }
+
+  // Generic fallback
+  return z.any();
+}
+
 // Static connectors used for schema generation
 const staticConnectors: ConnectorContract[] = [
   {
@@ -34,46 +454,7 @@ const staticConnectors: ConnectorContract[] = [
       message: z.string(),
     }),
   },
-  {
-    type: 'inference.unified_completion',
-    connectorIdRequired: true,
-    paramsSchema: z
-      .object({
-        body: z.object({
-          messages: z.array(
-            z.object({
-              role: z.string(),
-              content: z.string(),
-            })
-          ),
-        }),
-      })
-      .required(),
-    // TODO: use UnifiedChatCompleteResponseSchema from stack_connectors/common/inference/schema.ts
-    outputSchema: z.object({
-      id: z.string(),
-      choices: z.array(
-        z.object({
-          message: z.object({
-            content: z.string(),
-            role: z.string(),
-          }),
-        })
-      ),
-    }),
-  },
-  {
-    type: 'inference.completion',
-    connectorIdRequired: true,
-    paramsSchema: z.object({
-      input: z.string(),
-    }),
-    outputSchema: z.array(
-      z.object({
-        result: z.string(),
-      })
-    ),
-  },
+  // Note: inference sub-actions are now generated dynamically
   // Generic request types for raw API calls
   {
     type: 'elasticsearch.request',
@@ -164,9 +545,15 @@ export function convertDynamicConnectorsToContracts(
     enabledInConfig?: boolean;
     enabledInLicense?: boolean;
     minimumLicenseRequired?: string;
+    subActions?: Array<{
+      name: string;
+      displayName: string;
+    }>;
   }>
 ): ConnectorContract[] {
-  return Object.values(connectorTypes).map((connectorType) => {
+  const connectorContracts: ConnectorContract[] = [];
+
+  Object.values(connectorTypes).forEach((connectorType) => {
     try {
       // Create connector ID schema with available instances
       // If no instances exist, use a generic string schema
@@ -174,27 +561,47 @@ export function convertDynamicConnectorsToContracts(
         ? z.enum([connectorType.instances[0].id, ...connectorType.instances.slice(1).map(i => i.id)] as [string, ...string[]])
         : z.string();
 
-      return {
-        type: connectorType.actionTypeId,
-        paramsSchema: z.any(), // Generic schema for now - can be enhanced later
-        connectorIdRequired: true, // Most dynamic connectors require an ID
-        connectorId: connectorIdSchema,
-        outputSchema: z.any(), // Generic output schema for now
-        description: `${connectorType.displayName} connector${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
-      };
+      // If the connector has sub-actions, create separate contracts for each sub-action
+      if (connectorType.subActions && connectorType.subActions.length > 0) {
+        connectorType.subActions.forEach((subAction) => {
+          // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
+          const subActionType = `${connectorType.actionTypeId.replace(/^\./, '')}.${subAction.name}`;
+          
+          connectorContracts.push({
+            type: subActionType,
+            paramsSchema: getSubActionParamsSchema(connectorType.actionTypeId, subAction.name),
+            connectorIdRequired: true,
+            connectorId: connectorIdSchema,
+            outputSchema: getSubActionOutputSchema(connectorType.actionTypeId, subAction.name),
+            description: `${connectorType.displayName} - ${subAction.displayName}${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
+          });
+        });
+      } else {
+        // Fallback: create a generic connector contract if no sub-actions
+        connectorContracts.push({
+          type: connectorType.actionTypeId,
+          paramsSchema: z.any(),
+          connectorIdRequired: true,
+          connectorId: connectorIdSchema,
+          outputSchema: z.any(),
+          description: `${connectorType.displayName} connector${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
+        });
+      }
     } catch (error) {
       console.warn(`Error processing connector type ${connectorType.actionTypeId}:`, error);
       // Return a basic connector contract as fallback
-      return {
+      connectorContracts.push({
         type: connectorType.actionTypeId,
         paramsSchema: z.any(),
         connectorIdRequired: true,
         connectorId: z.string(),
         outputSchema: z.any(),
         description: `${connectorType.displayName || connectorType.actionTypeId} connector`,
-      };
+      });
     }
   });
+
+  return connectorContracts;
 }
 
 // Global cache for all connectors (static + generated + dynamic)
@@ -213,6 +620,10 @@ export function addDynamicConnectorsToCache(
     enabledInConfig?: boolean;
     enabledInLicense?: boolean;
     minimumLicenseRequired?: string;
+    subActions?: Array<{
+      name: string;
+      displayName: string;
+    }>;
   }>
 ) {
   // Get base connectors if cache is empty
@@ -285,6 +696,10 @@ export function getAllConnectorsWithDynamic(
     enabledInConfig?: boolean;
     enabledInLicense?: boolean;
     minimumLicenseRequired?: string;
+    subActions?: Array<{
+      name: string;
+      displayName: string;
+    }>;
   }>
 ): ConnectorContract[] {
   const staticAndGeneratedConnectors = getAllConnectors();

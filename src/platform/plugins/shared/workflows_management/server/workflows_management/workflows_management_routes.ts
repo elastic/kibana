@@ -29,6 +29,68 @@ import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
 import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
 
+// Import SUB_ACTION enums from all stack connectors
+import { SUB_ACTION as INFERENCE_SUB_ACTION, INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
+import { SUB_ACTION as BEDROCK_SUB_ACTION, BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { SUB_ACTION as OPENAI_SUB_ACTION, OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { SUB_ACTION as GEMINI_SUB_ACTION, GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { SUB_ACTION as THEHIVE_SUB_ACTION, THEHIVE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/thehive/constants';
+import { SUB_ACTION as TINES_SUB_ACTION, TINES_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/tines/constants';
+import { SUB_ACTION as XSOAR_SUB_ACTION, XSOAR_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/xsoar/constants';
+import { SUB_ACTION as SENTINELONE_SUB_ACTION, SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { SUB_ACTION as D3SECURITY_SUB_ACTION, D3_SECURITY_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/d3security/constants';
+import { SUB_ACTION as CROWDSTRIKE_SUB_ACTION, CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION, MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { JiraServiceManagementSubActions, JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID } from '@kbn/stack-connectors-plugin/common/jira-service-management/constants';
+import { OpsgenieSubActions, OpsgenieConnectorTypeId } from '@kbn/stack-connectors-plugin/common/opsgenie';
+
+// Helper function to format sub-action names for display
+function formatSubActionName(action: string): string {
+  // Handle both snake_case and camelCase
+  return action
+    // First, split camelCase: insertCamelCaseSpaces
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    // Then split on underscores and other separators
+    .split(/[_\s-]+/)
+    // Capitalize each word
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+// Helper function to create sub-actions mapping
+function createSubActionsMapping() {
+  const mapping: Record<string, Array<{ name: string; displayName: string }>> = {};
+  
+  // Define all connector sub-actions
+  const connectorSubActions = [
+    { id: INFERENCE_CONNECTOR_ID, actions: INFERENCE_SUB_ACTION },
+    { id: BEDROCK_CONNECTOR_ID, actions: BEDROCK_SUB_ACTION },
+    { id: OPENAI_CONNECTOR_ID, actions: OPENAI_SUB_ACTION },
+    { id: GEMINI_CONNECTOR_ID, actions: GEMINI_SUB_ACTION },
+    { id: THEHIVE_CONNECTOR_ID, actions: THEHIVE_SUB_ACTION },
+    { id: TINES_CONNECTOR_ID, actions: TINES_SUB_ACTION },
+    { id: XSOAR_CONNECTOR_ID, actions: XSOAR_SUB_ACTION },
+    { id: SENTINELONE_CONNECTOR_ID, actions: SENTINELONE_SUB_ACTION },
+    { id: D3_SECURITY_CONNECTOR_ID, actions: D3SECURITY_SUB_ACTION },
+    { id: CROWDSTRIKE_CONNECTOR_ID, actions: CROWDSTRIKE_SUB_ACTION },
+    { id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID, actions: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION },
+    { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
+    { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
+  ];
+  
+  connectorSubActions.forEach(({ id, actions }) => {
+    mapping[id] = Object.values(actions).map(action => ({
+      name: action,
+      displayName: formatSubActionName(action),
+    }));
+  });
+  
+  return mapping;
+}
+
+// Create the sub-actions mapping
+const CONNECTOR_SUB_ACTIONS_MAP = createSubActionsMapping();
+
 // Note: Display names are now fetched dynamically from the actions plugin
 
 export function defineRoutes(
@@ -192,10 +254,17 @@ export function defineRoutes(
           enabledInConfig: boolean;
           enabledInLicense: boolean;
           minimumLicenseRequired: string;
+          subActions?: Array<{
+            name: string;
+            displayName: string;
+          }>;
         }> = {};
         
         // First, add all action types (even those without instances)
         actionTypes.forEach((actionType: any) => {
+          // Get sub-actions from our static mapping
+          const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+          
           connectorsByType[actionType.id] = {
             actionTypeId: actionType.id,
             displayName: actionType.name,
@@ -204,6 +273,7 @@ export function defineRoutes(
             enabledInConfig: actionType.enabledInConfig,
             enabledInLicense: actionType.enabledInLicense,
             minimumLicenseRequired: actionType.minimumLicenseRequired,
+            ...(subActions && { subActions }),
           };
         });
         

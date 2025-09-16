@@ -20,7 +20,9 @@
       "security",
       "triggersActionsUi",
       "spaces",
-      "embeddable"
+      "embeddable",
+      "esUiShared",
+      "stackConnectors",
     ],
     "optionalPlugins": ["alerting"]
   }

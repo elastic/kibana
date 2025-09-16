@@ -12,7 +12,6 @@ import { jsx } from '@emotion/react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { renderToStaticMarkup } from 'react-dom/server';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -22,9 +21,11 @@ import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
+import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose, addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../hooks/use_available_connectors';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
@@ -285,7 +286,7 @@ function improveTypeFieldDescriptions(schema: any, connectorsData?: any): any {
  * Inject dynamic CSS for connector icons in Monaco autocompletion
  * This creates CSS rules for each connector type to show custom icons
  */
-function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, services: any) {
+async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, services: any) {
   console.log('🎯 injectDynamicConnectorIcons called with:', Object.keys(connectorTypes).length, 'connectors');
   
   const styleId = 'dynamic-connector-icons';
@@ -299,23 +300,38 @@ function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, servic
   // Generate CSS for each connector type
   let css = '';
   
-  Object.values(connectorTypes).forEach((connector: any) => {
-    const connectorType = connector.actionTypeId;
-    const displayName = connector.displayName;
+  for (const connector of Object.values(connectorTypes)) {
+    const connectorType = (connector as any).actionTypeId;
+    const displayName = (connector as any).displayName;
     
     // Skip if we already have hardcoded CSS for this connector
-    if (['slack', 'elasticsearch', 'kibana', 'inference'].some(type => connectorType.includes(type))) {
-      return;
+    if (['elasticsearch', 'kibana'].some(type => connectorType.includes(type))) {
+      continue;
     }
     
-    // Generate CSS rule for this connector - try multiple targeting strategies
-    const iconBase64 = getConnectorIconBase64(connectorType, services);
-    
-    // Only inject CSS if we successfully generated an icon
-    if (iconBase64) {
-      css += `
-        /* Strategy 1: Target by aria-label content */
+    try {
+      // Generate CSS rule for this connector - try multiple targeting strategies
+      const iconBase64 = await getConnectorIconBase64(connectorType, services);
+      
+      // Only inject CSS if we successfully generated an icon
+      if (iconBase64) {
+        // Handle base connector type extraction properly
+        let baseConnectorType: string;
+        if (connectorType.startsWith('.')) {
+          // For connectors like ".jira", remove the leading dot
+          baseConnectorType = connectorType.substring(1);
+        } else if (connectorType.includes('.')) {
+          // For connectors like "thehive.createAlert", use base name
+          baseConnectorType = connectorType.split('.')[0];
+        } else {
+          // For simple connectors like "slack", use as-is
+          baseConnectorType = connectorType;
+        }
+        
+        css += `
+        /* Strategy 1: Target by aria-label content - catch connector and all its sub-actions */
         .monaco-list .monaco-list-row[aria-label*="${connectorType}"] .suggest-icon:before,
+        .monaco-list .monaco-list-row[aria-label*="${baseConnectorType}."] .suggest-icon:before,
         .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before {
           background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
           background-size: 16px 16px !important;
@@ -327,13 +343,17 @@ function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, servic
           display: block !important;
         }
         
-        /* Strategy 2: Target by detail text (fallback) */
-        .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before {
+        /* Strategy 2: Target by detail text (fallback) - catch connector and all its sub-actions */
+        .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before,
+        .monaco-list .monaco-list-row .suggest-detail:contains("${baseConnectorType}.") ~ .suggest-icon:before {
           background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
         }
       `;
+      }
+    } catch (error) {
+      console.warn('🔍 Failed to generate icon for connector:', connectorType, error);
     }
-  });
+  }
 
   // Inject the CSS
   if (css) {
@@ -345,91 +365,127 @@ function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, servic
   }
 }
 
-
 /**
- * Get icon class from action type registry if available
+ * Inject dynamic CSS for connector shadow icons (::after pseudo-elements)
+ * This creates CSS rules for each connector type to show custom icons in the editor
  */
-function getConnectorIconFromRegistry(connectorType: string, services: any): string | React.ComponentType | null {
-  try {
-    // Try to access triggersActionsUi from services
-    if (services.triggersActionsUi?.actionTypeRegistry) {
-      const registry = services.triggersActionsUi.actionTypeRegistry;
-      if (registry.has(connectorType)) {
-        return registry.get(connectorType).iconClass;
-      }
-    }
-  } catch (error) {
-    console.warn('🔍 Failed to access action type registry for', connectorType, ':', error);
+async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, services: any) {
+  console.log('🎯 injectDynamicShadowIcons called with:', Object.keys(connectorTypes).length, 'connectors');
+  
+  const styleId = 'dynamic-shadow-icons';
+  
+  // Remove existing dynamic shadow styles
+  const existingStyle = document.getElementById(styleId);
+  if (existingStyle) {
+    existingStyle.remove();
   }
-  return null;
-}
 
-/**
- * Map connector types to EUI icon types (fallback)
- */
-function getEuiIconType(connectorType: string): string {
-  const iconMap: Record<string, string> = {
-    '.email': 'email',
-    '.teams': 'logoMicrosoftTeams',
-    '.jira': 'logoAtlassian',
-    '.webhook': 'logoWebhook',
-    '.slack': 'logoSlack',
-    'elasticsearch.search': 'logoElasticsearch',
-    'elasticsearch.index': 'indexOpen',
-    'kibana.dashboard': 'logoKibana',
-    'kibana.lens': 'lensApp',
-    'http': 'globe',
-    'console': 'console',
-    'inference': 'machineLearningApp',
-    'foreach': 'refresh',
-    'if': 'branch',
-    'parallel': 'list',
-    'merge': 'merge',
-    'wait': 'clock',
-    // Add more mappings as needed
-  };
+  // Generate CSS for each connector type
+  let css = '';
   
-  return iconMap[connectorType] || 'apps'; // Default icon
+  for (const connector of Object.values(connectorTypes)) {
+    const connectorType = (connector as any).actionTypeId;
+    
+    // Skip if we already have hardcoded CSS for this connector
+    if (['elasticsearch', 'kibana', 'inference', 'console', 'http', 'foreach', 'if', 'parallel', 'merge', 'wait'].some(type => connectorType.includes(type))) {
+      continue;
+    }
+    
+    try {
+      // Generate CSS rule for this connector shadow icon
+      const iconBase64 = await getConnectorIconBase64(connectorType, services);
+      
+      // Only inject CSS if we successfully generated an icon
+      if (iconBase64) {
+        // Get the class name for this connector (same logic as getConnectorIcon)
+        let className = connectorType;
+        if (connectorType.startsWith('elasticsearch.')) {
+          className = 'elasticsearch';
+        } else if (connectorType.startsWith('kibana.')) {
+          className = 'kibana';
+        } else if (connectorType.startsWith('inference')) {
+          className = 'inference';
+        } else {
+          // Handle connectors with dot notation properly
+          if (connectorType.startsWith('.')) {
+            // For connectors like ".jira", remove the leading dot
+            className = connectorType.substring(1);
+          } else if (connectorType.includes('.')) {
+            // For connectors like "thehive.createAlert", use base name
+            className = connectorType.split('.')[0];
+          } else {
+            // For simple connectors like "slack", use as-is
+            className = connectorType;
+          }
+        }
+        
+        css += `
+        .connector-inline-highlight.connector-${className}::after {
+          background-image: url("data:image/svg+xml;base64,${iconBase64}");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+        `;
+      }
+    } catch (error) {
+      console.warn('🔍 Failed to generate shadow icon for connector:', connectorType, error);
+    }
+  }
+
+  // Inject the CSS
+  if (css) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = css;
+    document.head.appendChild(style);
+    console.log('✅ Dynamic shadow icon CSS injected:', css.length, 'characters');
+  }
 }
 
+
+
 /**
- * Get base64 encoded SVG icon for a connector type using action registry or EUI icons
+ * Default fallback SVG for unknown connectors
  */
-function getConnectorIconBase64(connectorType: string, services: any): string {
-  console.log('🔍 getConnectorIconBase64 called for:', connectorType);
+const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+  <circle cx="8" cy="8" r="2" fill="currentColor"/>
+</svg>`;
+
+/**
+ * Get base64 encoded SVG icon for a connector type (super simplified!)
+ * Uses regular imports - much cleaner!
+ */
+async function getConnectorIconBase64(connectorType: string, services: any): Promise<string> {
+  // console.log('🔍 getConnectorIconBase64 called for:', connectorType);
   
   try {
-    // First try to get from action type registry (official icons)
-    const registryIcon = getConnectorIconFromRegistry(connectorType, services);
-    
-    if (registryIcon && typeof registryIcon === 'string') {
-      // Use the official EUI icon from the registry
-      const iconElement = React.createElement(EuiIcon, { type: registryIcon, size: 'm' });
-      const svgString = renderToStaticMarkup(iconElement);
+    // First, try to get the logo directly from stack connectors (regular import!)
+    if (connectorType in STACK_CONNECTOR_LOGOS) {
+      const LogoComponent = STACK_CONNECTOR_LOGOS[connectorType as keyof typeof STACK_CONNECTOR_LOGOS];
+      
+      // Render the actual logo component to SVG string
+      const logoElement = React.createElement(LogoComponent, { width: 32, height: 32 });
+      const svgString = renderToStaticMarkup(logoElement);
       const base64 = btoa(svgString);
-      console.log('🔍 Generated icon from registry for', connectorType, 'using iconType:', registryIcon);
+      if(connectorType === '.bedrock') {
+        console.log('🔍 Generated stack connector logo for', connectorType, base64);
+      }
+      
+      // console.log('🎨 Generated stack connector logo for', connectorType);
       return base64;
     }
     
-    // If registry icon is a React component, we can't easily convert it to base64
-    // so fall back to our EUI mapping
-    if (registryIcon && typeof registryIcon !== 'string') {
-      console.log('🔍 Registry has custom component for', connectorType, ', falling back to EUI mapping');
-    }
-    
-    // Fallback to our EUI mapping
-    const iconType = getEuiIconType(connectorType);
-    const iconElement = React.createElement(EuiIcon, { type: iconType, size: 'm' });
-    const svgString = renderToStaticMarkup(iconElement);
-    const base64 = btoa(svgString);
-    console.log('🔍 Generated fallback EUI icon for', connectorType, 'using iconType:', iconType);
-    return base64;
+    // Fallback to default icon for other connector types
+    // console.log('🔍 Using default icon for', connectorType);
+    return btoa(DEFAULT_CONNECTOR_SVG);
   } catch (error) {
     console.warn('🔍 Failed to generate icon for', connectorType, ':', error);
-    // Fallback to empty string if icon generation fails
-    return '';
+    // Fallback to default static icon
+    return btoa(DEFAULT_CONNECTOR_SVG);
   }
 }
+
 
 export interface WorkflowYAMLEditorProps {
   workflowId?: string;
@@ -485,9 +541,21 @@ export const WorkflowYAMLEditor = ({
     if (connectorsData?.connectorTypes) {
       addDynamicConnectorsToCache(connectorsData.connectorTypes);
       // Inject dynamic CSS for connector icons
+      // Note: We don't await this to avoid blocking the UI
       injectDynamicConnectorIcons(connectorsData.connectorTypes, { ...otherServices, http, notifications });
+      // Inject dynamic CSS for shadow icons (::after pseudo-elements)
+      injectDynamicShadowIcons(connectorsData.connectorTypes, { ...otherServices, http, notifications });
     }
   }, [connectorsData?.connectorTypes, otherServices, http, notifications]);
+  
+  // Add debug functions to window in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      import('../lib/connector_logo_debug').then(({ addDebugToWindow }) => {
+        addDebugToWindow({ ...otherServices, http, notifications });
+      });
+    }
+  }, [otherServices, http, notifications]);
   
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas: SchemasSettings[] = useMemo(() => {
@@ -1253,7 +1321,19 @@ export const WorkflowYAMLEditor = ({
     } else if (connectorType.startsWith('inference')) {
       return { className: 'inference' };
     } else {
-      return { className: connectorType };
+      // Handle connectors with dot notation properly
+      let className: string;
+      if (connectorType.startsWith('.')) {
+        // For connectors like ".jira", remove the leading dot
+        className = connectorType.substring(1);
+      } else if (connectorType.includes('.')) {
+        // For connectors like "thehive.createAlert", use base name
+        className = connectorType.split('.')[0];
+      } else {
+        // For simple connectors like "slack", use as-is
+        className = connectorType;
+      }
+      return { className };
     }
   };
 
@@ -1360,6 +1440,9 @@ export const WorkflowYAMLEditor = ({
         }
 
         /* FOR SHADOW ICONS */
+        /* Dynamic connector shadow icons are now handled by injectDynamicShadowIcons() function */
+        /* Only built-in connector types (elasticsearch, kibana, inference, etc.) remain hardcoded below */
+   
 
         .connector-inline-highlight.connector-elasticsearch::after {
           background-image: url("data:image/svg+xml;base64,PHN2ZyBkYXRhLXR5cGU9ImxvZ29FbGFzdGljIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSIgdmlld0JveD0iMCAwIDMyIDMyIj4KPHBhdGggZD0iTTI3LjU2NDggMTEuMjQyNUMzMi42NjU0IDEzLjE4MiAzMi40MzczIDIwLjYzNzggMjcuMzE5NyAyMi4zNjk0TDI3LjE1NzYgMjIuNDI0MUwyNi45OTA2IDIyLjM4NTFMMjEuNzEwMyAyMS4xNDY4TDIxLjQ0MjcgMjEuMDg0M0wyMS4zMTU4IDIwLjg0MDFMMTkuOTE1NCAxOC4xNDk3TDE5LjY5ODYgMTcuNzMyN0wyMC4wNTExIDE3LjQyMjJMMjYuOTU1NCAxMS4zNTI4TDI3LjIyNjkgMTEuMTEzNkwyNy41NjQ4IDExLjI0MjVaIiBmaWxsPSIjMEI2NEREIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNMjIuMDQ3MiAyMS4yMzlMMjYuODQ3IDIyLjM2NEwyNy4xNjI1IDIyLjQzODJMMjcuMjczOCAyMi43NDE5TDI3LjMzOTIgMjIuOTMyNEMyNy45NjE1IDI0Ljg5NjIgMjcuMDc5NyAyNi43MTE3IDI1LjY4NjkgMjcuNzI5MkMyNC4yNTI4IDI4Ljc3NjcgMjIuMTc3NSAyOS4wNDg4IDIwLjUwNTIgMjcuNzUwN0wyMC4yMTUyIDI3LjUyNjFMMjAuMjgzNiAyNy4xNjQ4TDIxLjMyMDcgMjEuNzEwN0wyMS40Mzc5IDIxLjA5NjRMMjIuMDQ3MiAyMS4yMzlaIiBmaWxsPSIjOUFEQzMwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNNS4wMTA3NCA5LjYyOTk3TDEwLjI3NzMgMTAuODg0OUwxMC41NTk2IDEwLjk1MjJMMTAuNjgxNiAxMS4yMTU5TDExLjkxNyAxMy44NjUzTDEyLjEwMzUgMTQuMjY2N0wxMS43NzY0IDE0LjU2MzZMNS4wNDI5NyAyMC42NjQyTDQuNzcwNTEgMjAuOTEyMkw0LjQyNTc4IDIwLjc4MDRDMS45Mzg5IDE5LjgzMDMgMC43MjA0MDcgMTcuNDU1OCAwLjc1MTk1MyAxNS4xNTM0QzAuNzgzNjg2IDEyLjg0NTMgMi4wNzMwNSAxMC41MDk0IDQuNjgzNTkgOS42NDQ2Mkw0Ljg0NTcgOS41OTA5MUw1LjAxMDc0IDkuNjI5OTdaIiBmaWxsPSIjMUJBOUY1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNNi4yODEwMSA0LjMxOTgyQzcuNjk3MjMgMy4yMzk0IDkuNzYxMzUgMi45MzM0IDExLjUwMjcgNC4yNTE0NkwxMS43OTk2IDQuNDc3MDVMMTEuNzI5MiA0Ljg0MzI2TDEwLjY3NzUgMTAuMzE2OUwxMC41NTkzIDEwLjkzMjFMOS45NDk5NSAxMC43ODc2TDUuMTUwMTUgOS42NTA4OEw0LjgzMzc0IDkuNTc1NjhMNC43MjMzOSA5LjI3MDAyQzQuMDE1MDcgNy4zMDI5NSA0Ljg3MjYzIDUuMzk0MjkgNi4yODEwMSA0LjMxOTgyWiIgZmlsbD0iI0YwNEU5OCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPHBhdGggZD0iTTEyLjQ2NjEgMTQuNDMzMUwxOS40OTYzIDE3LjY0NEwxOS42ODM4IDE3LjczTDE5Ljc3ODYgMTcuOTEyNkwyMS4zMzQyIDIwLjg5NzlMMjEuNDI5OSAyMS4wODI1TDIxLjM5MDkgMjEuMjg3NkwyMC4yMjQ5IDI3LjM4OTJMMjAuMjAxNCAyNy41MTEyTDIwLjEzMzEgMjcuNjEzOEMxNy40NTM0IDMxLjU3MiAxMy4yMzA1IDMyLjMyNDUgOS44NjQ1IDMwLjg3MzVDNi41MDkzMiAyOS40MjcyIDQuMDMwNyAyNS44MDQ0IDQuNzM5NSAyMS4xMzgyTDQuNzcxNzMgMjAuOTI3Mkw0LjkyOTkzIDIwLjc4MzdMMTEuODEzNyAxNC41MzQ3TDEyLjEwNjcgMTQuMjY5TDEyLjQ2NjEgMTQuNDMzMVoiIGZpbGw9IiMwMkJDQjciIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS4yIi8+CjxwYXRoIGQ9Ik0xMS44OTIzIDQuNDEwMjJDMTQuNDM4MSAwLjY3NjQyNiAxOC43NDEgMC4xMDUzMDMgMjIuMTMzNSAxLjUzOTEyQzI1LjUyNjMgMi45NzMwMiAyOC4xMjMxIDYuNDU5NzkgMjcuMjM2MSAxMC45MDI0TDI3LjE5NyAxMS4xMDE2TDI3LjA0MzcgMTEuMjM1NEwxOS45NzgzIDE3LjQ0ODNMMTkuNjg1MyAxNy43MDYxTDE5LjMzMTggMTcuNTQzTDEyLjMyOTggMTQuMzMyMUwxMi4xMjg3IDE0LjI0MDNMMTIuMDM0OSAxNC4wMzkxTDEwLjY1NSAxMS4wNTE4TDEwLjU3NCAxMC44NzUxTDEwLjYxMTEgMTAuNjg0NkwxMS43OTk2IDQuNjMyODdMMTEuODIzIDQuNTExNzhMMTEuODkyMyA0LjQxMDIyWiIgZmlsbD0iI0ZFQzUxNCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPC9zdmc+");

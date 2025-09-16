@@ -135,6 +135,9 @@ export class PluginsSystem<T extends PluginType> {
         });
       }
 
+      if(plugin.name === 'workflowsManagement') {
+        console.log('🚀 Setting up workflowsManagement plugin...');
+      }
       await plugin.init();
       let contract: unknown;
       const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
