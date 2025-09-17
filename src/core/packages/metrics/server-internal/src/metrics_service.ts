@@ -52,6 +52,7 @@ export class MetricsService
 {
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
+  private readonly eluLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
@@ -65,6 +66,7 @@ export class MetricsService
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
+    this.eluLogger = coreContext.logger.get('metrics', 'elu');
   }
 
   public async setup({
@@ -104,14 +106,13 @@ export class MetricsService
           ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
       )
       .subscribe(this.elu$);
-    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
+    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value, this.eluLogger);
 
     this.service = {
       collectionInterval,
       getOpsMetrics$: () => this.metrics$,
       getEluMetrics$: () => this.elu$,
     };
-
     return this.service;
   }
 

@@ -10,6 +10,7 @@
 import type { IRouter } from '@kbn/core-http-server';
 import apm from 'elastic-apm-node';
 import type { EluMetrics } from '@kbn/core-metrics-server';
+import type { Logger } from '@kbn/logging';
 
 interface ELUHistoryResponse {
   /**
@@ -24,7 +25,7 @@ interface ELUHistoryResponse {
 /**
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
-export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
+export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics, logger: Logger) {
   // Report the same metrics to APM
   apm.registerMetric('elu.history.short', () => elu().short);
   apm.registerMetric('elu.history.medium', () => elu().medium);
@@ -58,6 +59,7 @@ export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) 
         const body: ELUHistoryResponse = {
           history: elu(),
         };
+        logger.debug(`ELU history: ${JSON.stringify(body)}`);
         return res.ok({ body });
       }
     );
