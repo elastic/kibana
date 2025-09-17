@@ -558,7 +558,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiPanel>
           </EuiFlexItem>
         )}
-        <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+        <EuiFlexGroup direction="column" gutterSize="s">
           {hasMLPermissions && !hasSemanticText && (
             <EuiFlexItem grow={false}>
               <SemanticTextBanner
@@ -573,7 +573,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 <EmptyMappingsContent addFieldButton={AddFieldButton} />
               </EuiFlexItem>
             ) : (
-              <EuiFlexItem grow={false} justifyContent="flexStart" alignItems="flexStart">
+              <EuiFlexItem grow={false}>
                 <span>{saveMappingsButton}</span>
               </EuiFlexItem>
             ))}
