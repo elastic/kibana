@@ -7,11 +7,53 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { PreconfiguredInputs } from '../../../common/types';
+import type {
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+  PreconfiguredInputs,
+  PreconfiguredVar,
+} from '../../../common/types';
 import type { PackagePolicy } from '../../types';
 import { packagePolicyService } from '../package_policy';
 
 import { isDifferent } from './utils';
+
+function isFrozenAndDifferent(
+  preconfiguredVar: PreconfiguredVar,
+  existingVar?: PackagePolicyConfigRecordEntry
+): existingVar is PackagePolicyConfigRecordEntry {
+  return (
+    (preconfiguredVar?.frozen ?? false) &&
+    existingVar !== undefined &&
+    (isDifferent(existingVar.value, preconfiguredVar.value) ||
+      isDifferent(existingVar.frozen, preconfiguredVar.frozen))
+  );
+}
+
+function updateFrozenVars(
+  preconfiguredVars: PreconfiguredVar[],
+  currentVars?: PackagePolicyConfigRecord
+) {
+  for (const inputVar of preconfiguredVars) {
+    const varToUpdate = currentVars ? currentVars[inputVar.name] : undefined;
+    if (isFrozenAndDifferent(inputVar, varToUpdate)) {
+      varToUpdate.value = inputVar.value;
+      varToUpdate.frozen = inputVar.frozen;
+    }
+  }
+}
+
+function frozenVarsAreDifferent(
+  preconfiguredVars: PreconfiguredVar[],
+  currentVars?: PackagePolicyConfigRecord
+) {
+  for (const preconfiguredInputVar of preconfiguredVars) {
+    const currentVar = currentVars ? currentVars[preconfiguredInputVar.name] : undefined;
+    if (isFrozenAndDifferent(preconfiguredInputVar, currentVar)) {
+      return true;
+    }
+  }
+}
 
 export function packagePolicyHasFrozenVariablesUpdate(
   existingPackagePolicy: PackagePolicy,
@@ -24,40 +66,23 @@ export function packagePolicyHasFrozenVariablesUpdate(
     if (!currentInput) {
       continue;
     }
-    for (const preconfiguredInputVar of preconfiguredInput.vars ?? []) {
-      const currentVar = currentInput?.vars
-        ? currentInput.vars[preconfiguredInputVar.name]
-        : undefined;
-      if (
-        preconfiguredInputVar.frozen &&
-        currentVar &&
-        isDifferent(currentVar.value, preconfiguredInputVar.value)
-      ) {
-        return true;
-      }
+    if (frozenVarsAreDifferent(preconfiguredInput.vars ?? [], currentInput.vars)) {
+      return true;
     }
 
-    for (const stream of preconfiguredInput.streams ?? []) {
-      if (!stream.vars) {
+    for (const preconfiguredStream of preconfiguredInput.streams ?? []) {
+      const currentStream = currentInput?.streams?.find(
+        (s) =>
+          s.data_stream.dataset === preconfiguredStream.data_stream.dataset &&
+          s.data_stream.type === preconfiguredStream.data_stream.type
+      );
+
+      if (!currentStream) {
         continue;
       }
-      for (const preconfiguredStreamVar of stream.vars ?? []) {
-        const currentStream = currentInput?.streams?.find(
-          (s) =>
-            s.data_stream.dataset === stream.data_stream.dataset &&
-            s.data_stream.type === stream.data_stream.type
-        );
 
-        const currentVar = currentStream?.vars
-          ? currentStream.vars[preconfiguredStreamVar.name]
-          : undefined;
-        if (
-          preconfiguredStreamVar.frozen &&
-          currentVar &&
-          isDifferent(currentVar?.value, preconfiguredStreamVar.value)
-        ) {
-          return true;
-        }
+      if (frozenVarsAreDifferent(preconfiguredStream.vars ?? [], currentStream.vars)) {
+        return true;
       }
     }
   }
@@ -82,12 +107,7 @@ export async function updateFrozenInputs(
     if (!inputToUpdate) {
       continue;
     }
-    for (const inputVar of input.vars ?? []) {
-      const varToUpdate = inputToUpdate.vars ? inputToUpdate.vars[inputVar.name] : undefined;
-      if (inputVar.frozen && varToUpdate && isDifferent(varToUpdate.value, inputVar.value)) {
-        varToUpdate.value = inputVar.value;
-      }
-    }
+    updateFrozenVars(input.vars ?? [], inputToUpdate.vars);
     for (const stream of input.streams ?? []) {
       const streamToUpdate = inputToUpdate.streams?.find(
         (s) =>
@@ -98,12 +118,7 @@ export async function updateFrozenInputs(
         continue;
       }
 
-      for (const streamVar of stream.vars ?? []) {
-        const varToUpdate = streamToUpdate.vars ? streamToUpdate.vars[streamVar.name] : undefined;
-        if (streamVar.frozen && varToUpdate && varToUpdate.value !== streamVar.value) {
-          varToUpdate.value = streamVar.value;
-        }
-      }
+      updateFrozenVars(stream.vars ?? [], streamToUpdate.vars);
     }
   }
 

@@ -23,13 +23,13 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
 
-export type PreconfiguredVars = PackagePolicyConfigRecordEntry & { name: string };
+export type PreconfiguredVar = PackagePolicyConfigRecordEntry & { name: string };
 
 export type PreconfiguredInputs = Omit<NewPackagePolicy['inputs'][0], 'vars' | 'streams'> & {
-  vars?: Array<PreconfiguredVars>;
+  vars?: Array<PreconfiguredVar>;
   streams?: Array<
     Omit<NewPackagePolicy['inputs'][0]['streams'][0], 'vars'> & {
-      vars?: Array<PreconfiguredVars>;
+      vars?: Array<PreconfiguredVar>;
     }
   >;
 };

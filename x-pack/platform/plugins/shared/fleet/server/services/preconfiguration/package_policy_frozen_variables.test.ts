@@ -10,6 +10,8 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 
 import { packagePolicyService } from '../package_policy';
 
+import type { PackagePolicy } from '../../types';
+
 import {
   packagePolicyHasFrozenVariablesUpdate,
   updateFrozenInputs,
@@ -17,7 +19,7 @@ import {
 
 jest.mock('../package_policy');
 
-const basePolicy = {
+const basePolicy: PackagePolicy = {
   id: '1',
   name: 'test',
   namespace: 'default',
@@ -26,9 +28,16 @@ const basePolicy = {
   inputs: [
     {
       enabled: true,
-      streams: [],
+      streams: [
+        {
+          enabled: true,
+          data_stream: { dataset: 'test1', type: 'logs' },
+          id: 'stream1',
+          vars: { streamVar1: { type: 'text', value: 'old_value' } },
+        },
+      ],
       type: 'logfile',
-      vars: { var1: { type: 'text', value: 'old_value' } },
+      vars: { var1: { type: 'text', value: 'old_value', frozen: true } },
     },
   ],
   created_at: '2020-01-01T00:00:00Z',
@@ -64,6 +73,9 @@ describe('packagePolicyHasFrozenVariablesUpdate', () => {
 });
 
 describe('updateFrozenInputs', () => {
+  beforeEach(() => {
+    jest.mocked(packagePolicyService.update).mockReset();
+  });
   it('should update only frozen variables', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const soClient = savedObjectsClientMock.create();
@@ -86,7 +98,52 @@ describe('updateFrozenInputs', () => {
       expect.objectContaining({
         inputs: [
           expect.objectContaining({
-            vars: { var1: { type: 'text', value: 'new_value' } },
+            vars: { var1: { type: 'text', value: 'new_value', frozen: true } },
+          }),
+        ],
+      }),
+      expect.objectContaining({ force: true, bumpRevision: false })
+    );
+  });
+
+  it('should update variables that are newly frozen', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const soClient = savedObjectsClientMock.create();
+    await updateFrozenInputs(esClient, soClient, clone(basePolicy), [
+      {
+        type: 'logfile',
+        enabled: true,
+        vars: [
+          { name: 'var1', type: 'text', frozen: true, value: 'old_value' },
+          { name: 'var2', type: 'text', value: 'new_value' },
+        ],
+        streams: [
+          {
+            data_stream: { dataset: 'test1', type: 'logs' },
+            enabled: true,
+            vars: [
+              { name: 'streamVar1', type: 'text', frozen: true, value: 'old_value' },
+              { name: 'streamVar2', type: 'text', value: 'new_value' },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(packagePolicyService.update).toHaveBeenCalledTimes(1);
+    expect(packagePolicyService.update).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      '1',
+      expect.objectContaining({
+        inputs: [
+          expect.objectContaining({
+            vars: { var1: { type: 'text', value: 'old_value', frozen: true } },
+            streams: [
+              expect.objectContaining({
+                vars: { streamVar1: { type: 'text', value: 'old_value', frozen: true } },
+              }),
+            ],
           }),
         ],
       }),
