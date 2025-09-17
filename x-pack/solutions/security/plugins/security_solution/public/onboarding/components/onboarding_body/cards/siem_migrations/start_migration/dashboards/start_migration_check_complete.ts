@@ -24,14 +24,14 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
     .map(({ description }) => description);
 
   let isComplete = false;
-  const migrationsCount = 0;
+  let migrationsCount = 0;
 
   if (siemMigrations.dashboards.isAvailable()) {
-    // const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
-    // isComplete = migrationsStats.some(
-    //   (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
-    // );
-    // migrationsCount = migrationsStats.length;
+    const migrationsStats = await siemMigrations.dashboards.getMigrationsStats();
+    isComplete = migrationsStats.some(
+      (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
+    );
+    migrationsCount = migrationsStats.length;
     isComplete = false; // Placeholder for actual completion logic
   }
 

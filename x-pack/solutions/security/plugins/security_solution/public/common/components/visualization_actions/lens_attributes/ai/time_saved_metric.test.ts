@@ -52,7 +52,6 @@ describe('getTimeSavedMetricLensAttributes', () => {
       ...defaultParams,
     });
     expect(result).toHaveProperty('title', 'Analyst time saved');
-    expect(result).toHaveProperty('type', 'lens');
     expect(result).toHaveProperty('visualizationType', 'lnsMetric');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');

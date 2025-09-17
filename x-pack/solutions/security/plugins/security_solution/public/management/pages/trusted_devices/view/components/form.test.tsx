@@ -79,9 +79,9 @@ describe('Trusted devices form', () => {
       list_id: 'trusted-devices-list-id',
       name: '',
       description: '',
-      // start with Windows to let the component normalize to [Windows, Mac] for create mode
+      // Use Windows-only OS for USERNAME field compatibility, or HOST field for other combinations
       os_types: [OperatingSystem.WINDOWS],
-      entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', '')],
+      entries: [createEntry(TrustedDeviceConditionEntryField.HOST, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
       meta: { temporaryUuid: 'td-1111' },
@@ -266,7 +266,37 @@ describe('Trusted devices form', () => {
       expect(labels).toEqual(expect.arrayContaining(['Field', 'Operator', 'Value']));
     });
 
-    it('should display 5 options for Field with proper labels', async () => {
+    it('should display field options based on OS selection', async () => {
+      // Form defaults to Windows+Mac OS, so USERNAME field should NOT be available
+      const fieldSelect = getConditionsFieldSelect();
+      await userEvent.click(fieldSelect);
+
+      const options = Array.from(
+        renderResult.baseElement.querySelectorAll(
+          '.euiSuperSelect__listbox button.euiSuperSelect__item'
+        )
+      ).map((button) => button.textContent?.trim());
+
+      // USERNAME should not be available with Windows+Mac OS
+      expect(options).toEqual([
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+      ]);
+      expect(options).not.toContain(
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
+      );
+    });
+
+    it('should show USERNAME field when Windows-only OS is selected', async () => {
+      // Change to Windows-only OS first
+      await openOsCombo();
+      await userEvent.click(
+        screen.getByRole('option', { name: OS_TITLES[OperatingSystem.WINDOWS] })
+      );
+
+      // Check field options - USERNAME should now be available
       const fieldSelect = getConditionsFieldSelect();
       await userEvent.click(fieldSelect);
 
@@ -283,6 +313,40 @@ describe('Trusted devices form', () => {
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
       ]);
+    });
+
+    it('should hide USERNAME field when Mac-only OS is selected', async () => {
+      // Change to Mac-only OS first
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      // Wait for component to update after OS change
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      // Re-render to ensure component reflects the OS change
+      rerenderWithLatestProps();
+
+      // Check field options - USERNAME should be hidden
+      const fieldSelect = getConditionsFieldSelect();
+      await userEvent.click(fieldSelect);
+
+      const options = Array.from(
+        renderResult.baseElement.querySelectorAll(
+          '.euiSuperSelect__listbox button.euiSuperSelect__item'
+        )
+      ).map((button) => button.textContent?.trim());
+
+      expect(options).toEqual([
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+      ]);
+      expect(options).not.toContain(
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
+      );
     });
 
     it('should toggle operator from "is" to "matches" and update entry type to wildcard', async () => {
@@ -334,6 +398,66 @@ describe('Trusted devices form', () => {
           text.toLowerCase().includes('double wildcards')
         )
       ).toBeTruthy();
+    });
+
+    it('should reset USERNAME field to HOST when OS changes from Windows to Mac', async () => {
+      // Start with USERNAME field and Windows OS
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
+      });
+      rerenderWithLatestProps();
+
+      // Change OS to Mac-only
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      // Expect field to be reset to HOST and value cleared
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('');
+      expect(lastCall?.item.os_types).toEqual([OperatingSystem.MAC]);
+    });
+
+    it('should reset USERNAME field to HOST when OS changes from Windows to Windows+Mac', async () => {
+      // Start with USERNAME field and Windows OS
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
+      });
+      rerenderWithLatestProps();
+
+      // Change OS to Windows+Mac
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
+
+      // Expect field to be reset to HOST and value cleared
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('');
+      expect(lastCall?.item.os_types).toEqual([OperatingSystem.WINDOWS, OperatingSystem.MAC]);
+    });
+
+    it('should preserve HOST field value when OS changes', async () => {
+      // Start with HOST field and Mac OS
+      formProps.item = createItem({
+        os_types: [OperatingSystem.MAC],
+        entries: [createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'myhost')],
+      });
+      latestUpdatedItem = formProps.item;
+      rerenderWithLatestProps();
+
+      // Clear onChange calls to get only the OS change call
+      (formProps.onChange as jest.Mock).mockClear();
+
+      // Change OS to Windows+Mac - HOST field should be preserved
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
+
+      // Expect field and value to be preserved (no reset for HOST field)
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('myhost');
     });
   });
 

@@ -15,20 +15,32 @@ import type {
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { SplunkRow } from '../../../../../../../common/hooks/use_parse_file_input';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
+import { UploadFileButton } from '../../../common/upload_file_button';
 import * as i18n from './translations';
 import type { SplunkDashboardsResult } from '../../../../types';
+import type { CreateMigration } from '../../../../../../../rules/service/hooks/use_create_migration';
 
 export interface DashboardsFileUploadProps {
+  createMigration: CreateMigration;
   isLoading: boolean;
   isCreated: boolean;
   onDashboardsFileChanged?: (files: FileList | null) => void;
   migrationName: string | undefined;
   apiError: string | undefined;
   onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;
+  createMigration: CreateMigration;
 }
 export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
-  ({ migrationName, apiError, isLoading, isCreated, onDashboardsFileChanged, onFileUpload }) => {
-    const [, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
+  ({
+    createMigration,
+    migrationName,
+    apiError,
+    isLoading,
+    isCreated,
+    onDashboardsFileChanged,
+    onFileUpload,
+  }) => {
+    const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const onFileParsed = useCallback(
@@ -39,6 +51,13 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
       },
       [onFileUpload]
     );
+
+    const createDashboards = useCallback(() => {
+      if (migrationName) {
+        filePickerRef.current?.removeFiles();
+        createMigration?.(uploadedDashboards);
+      }
+    }, [migrationName, createMigration, uploadedDashboards]);
 
     const { parseFile, isParsing, error: fileError } = useParseFileInput(onFileParsed);
 
@@ -66,6 +85,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
+              isInvalid={error != null}
               id="dashboardsFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
@@ -84,6 +104,17 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
               data-loading={isParsing}
             />
           </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <UploadFileButton
+                onClick={createDashboards}
+                isLoading={showLoader}
+                disabled={isButtonDisabled}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

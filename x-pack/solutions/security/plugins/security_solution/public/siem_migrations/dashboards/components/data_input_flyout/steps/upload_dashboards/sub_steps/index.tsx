@@ -13,20 +13,14 @@ import { MigrationDataInputSubSteps } from '../../../../../../common/components/
 import { useCopyExportQueryStep } from './copy_export_query';
 import type { SplunkDashboardsResult } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
-import { useSelectDashboardsSubStep } from './select_dashboards';
 
 interface DashboardsUploadSubStepsProps {
   migrationStats?: RuleMigrationTaskStats;
 }
 
-const END = 5 as const;
+const END = 4 as const;
 
-type SubStep =
-  | 1 /* name */
-  | 2 /* copy query */
-  | 3 /* file */
-  | 4 /* select */
-  | typeof END /* END */;
+type SubStep = 1 /* name */ | 2 /* copy query */ | 3 /* file */ | typeof END /* END */;
 
 export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubSteps({
   migrationStats,
@@ -104,15 +98,9 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
     onDashboardsFileChanged,
   });
 
-  const selectDashboardsStep = useSelectDashboardsSubStep({
-    status: getEuiStepStatus(4, currentSubStep),
-    dashboards: uploadedDashboards,
-    onSelectionChange: onSelectedDashboardsChange,
-  });
-
   const steps = useMemo(() => {
-    return [nameStep, copyQueryStep, dashboardsFileUploadStep, selectDashboardsStep];
-  }, [nameStep, copyQueryStep, dashboardsFileUploadStep, selectDashboardsStep]);
+    return [nameStep, copyQueryStep, dashboardsFileUploadStep];
+  }, [nameStep, copyQueryStep, dashboardsFileUploadStep]);
 
   return <MigrationDataInputSubSteps steps={steps} />;
 });

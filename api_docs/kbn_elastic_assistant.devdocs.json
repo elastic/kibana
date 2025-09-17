@@ -1484,20 +1484,6 @@
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.AssistantAvailability.isAssistantSharingEnabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAssistantSharingEnabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2796,20 +2782,6 @@
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.UseAssistantAvailability.isAssistantSharingEnabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAssistantSharingEnabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3083,7 +3055,7 @@
         "label": "ManagementSettingsTabs",
         "description": [],
         "signature": [
-          "\"connectors\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"anonymization\" | \"knowledge_base\" | \"evaluation\""
+          "\"connectors\" | \"knowledge_base\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"anonymization\" | \"evaluation\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/types.ts",
         "deprecated": false,

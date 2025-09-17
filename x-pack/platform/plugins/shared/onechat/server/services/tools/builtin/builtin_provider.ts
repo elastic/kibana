@@ -55,6 +55,7 @@ export const convertTool = (tool: BuiltinToolDefinition): InternalToolDefinition
     description: tool.description,
     tags: tool.tags,
     configuration: {},
+    readonly: true,
     schema: tool.schema,
     handler: tool.handler,
   };

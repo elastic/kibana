@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DashboardMigrationDataInputWrapper } from '../../../../../../../siem_migrations/dashboards/components/data_input_flyout/wrapper';
 import { UploadDashboardsPanel } from '../../../../../../../siem_migrations/dashboards/components/status_panels/upload_panel';
 import {
   MissingPrivilegesCallOut,
   MissingPrivilegesDescription,
-} from '../../../../../../../common/missing_privileges';
+} from '../../../../../../../common/components/missing_privileges';
 import { useUpsellingComponent } from '../../../../../../../common/hooks/use_upselling';
 import { PanelText } from '../../../../../../../common/components/panel_text';
 import { CenteredLoadingSpinner } from '../../../../../../../common/components/centered_loading_spinner';
+import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardComponent } from '../../../../../../types';
 import { OnboardingCardContentPanel } from '../../../common/card_content_panel';
 import type { StartMigrationCardMetadata } from '../common/types';
@@ -26,14 +27,14 @@ const StartDashboardMigrationBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
     const styles = useStyles();
 
-    // const isConnectorsCardComplete = useMemo(
-    //   () => isCardComplete(OnboardingCardId.siemMigrationsAiConnectors),
-    //   [isCardComplete]
-    // );
-    //
-    // const expandConnectorsCard = useCallback(() => {
-    //   setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
-    // }, [setExpandedCardId]);
+    const isConnectorsCardComplete = useMemo(
+      () => isCardComplete(OnboardingCardId.siemMigrationsAiConnectors),
+      [isCardComplete]
+    );
+
+    const expandConnectorsCard = useCallback(() => {
+      setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
+    }, [setExpandedCardId]);
 
     const onFlyoutClosed = useCallback(() => {
       checkComplete();

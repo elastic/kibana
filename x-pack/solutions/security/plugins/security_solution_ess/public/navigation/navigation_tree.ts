@@ -72,6 +72,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               id: SecurityPageName.assetInventory,
               link: securityLink(SecurityPageName.assetInventory),
             },
+            {
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
+            },
             defaultNavigationTree.assets(services),
           ],
         },
