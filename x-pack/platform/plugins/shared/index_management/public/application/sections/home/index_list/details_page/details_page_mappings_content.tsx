@@ -559,6 +559,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
+          {hasMLPermissions && !hasSemanticText && (
+            <EuiFlexItem grow={true}>
+              <SemanticTextBanner
+                isSemanticTextEnabled={isSemanticTextEnabled}
+                isPlatinumLicense={isPlatinumLicense}
+              />
+            </EuiFlexItem>
+          )}
           {!hasMappings &&
             (!isAddingFields ? (
               <EmptyMappingsContent addFieldButton={AddFieldButton} />
@@ -620,14 +628,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 </EuiFilterGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          )}
-          {hasMLPermissions && !hasSemanticText && (
-            <EuiFlexItem grow={true}>
-              <SemanticTextBanner
-                isSemanticTextEnabled={isSemanticTextEnabled}
-                isPlatinumLicense={isPlatinumLicense}
-              />
-            </EuiFlexItem>
           )}
           {errorSavingMappings}
           {isAddingFields && (
