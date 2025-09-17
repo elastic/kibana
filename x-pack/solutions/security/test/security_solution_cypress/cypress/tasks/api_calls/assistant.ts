@@ -11,11 +11,11 @@ import type {
   PerformPromptsBulkActionResponse,
   PromptCreateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { deleteAllDocuments } from './elasticsearch';
 import { getMockConversation, getMockCreatePrompt } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';
 import { rootRequest, waitForRootRequest, API_HEADERS } from './common';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 const createConversation = (
   body?: Partial<ConversationCreateProps>
