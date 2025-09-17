@@ -11,7 +11,7 @@ import { isValidOwner } from '../../../../common/utils/owner';
 import type { SuggestionResponse } from '../../../../common';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { INTERNAL_CASE_SUGGESTIONS_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_SUGGESTIONS_URL, GENERAL_CASES_OWNER } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 
 const params = {
@@ -54,8 +54,8 @@ export const getSuggestionsRoute = createCasesRoute({
       }
 
       // Cases (platform) suggestions are always included
-      const owners: SuggestionOwner[] = ['cases'];
-      if (caseOwner !== 'cases') {
+      const owners: SuggestionOwner[] = [GENERAL_CASES_OWNER];
+      if (caseOwner !== GENERAL_CASES_OWNER) {
         owners.push(caseOwner);
       }
 
