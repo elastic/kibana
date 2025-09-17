@@ -99,13 +99,14 @@ export const performBulkCreate = async <T>(
     const objectManaged = managed;
     if (!allowedTypes.includes(type)) {
       error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      return left({ id: requestId, type, error: errorContent(error) });
     } else {
       try {
         id = commonHelper.getValidId(type, requestId, version, overwrite);
         validationHelper.validateInitialNamespaces(type, initialNamespaces);
         validationHelper.validateOriginId(type, object);
       } catch (e) {
-        error = e;
+        return left({ id: requestId, type, error: errorContent(e) });
       }
     }
     const method = requestId && overwrite ? 'index' : 'create';
@@ -117,12 +118,14 @@ export const performBulkCreate = async <T>(
       error = SavedObjectsErrorHelpers.createBadRequestError(
         `The "accessMode" field is not supported for saved objects of type "${type}".`
       );
+      return left({ id: requestId, type, error: errorContent(error) });
     }
 
     if (!createdBy && accessMode === 'read_only') {
       error = SavedObjectsErrorHelpers.createBadRequestError(
         `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
       );
+      return left({ id: requestId, type, error: errorContent(error) });
     }
 
     if (error) {
