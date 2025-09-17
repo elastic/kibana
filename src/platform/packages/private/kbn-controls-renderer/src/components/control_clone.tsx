@@ -26,19 +26,21 @@ import { controlWidthStyles } from './control_panel.styles';
  */
 export const ControlClone = ({
   state,
+  width,
 }: {
   state: SerializedPanelState<ControlsGroupState['controls'][number]> | undefined;
+  width: number | undefined;
 }) => {
   const styles = useMemoCss(controlCloneStyles);
 
   return !state ? null : (
     <EuiFlexItem
-      css={styles.container}
-      className={classNames({
-        'controlFrameWrapper--medium': state.rawState.width === 'medium',
-        'controlFrameWrapper--small': state.rawState.width === 'small',
-        'controlFrameWrapper--large': state.rawState.width === 'large',
-      })}
+      css={(styles.container, width !== undefined && css({ width: `${width}px` }))}
+      // className={classNames({
+      //   'controlFrameWrapper--medium': state.rawState.width === 'medium',
+      //   'controlFrameWrapper--small': state.rawState.width === 'small',
+      //   'controlFrameWrapper--large': state.rawState.width === 'large',
+      // })}
     >
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>

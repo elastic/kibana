@@ -134,18 +134,12 @@ export const ControlsRenderer = ({
       </SortableContext>
       <DragOverlay>
         {draggingId ? (
-          <ControlPanel
+          <ControlClone
             key={draggingId}
-            type={'optionsListControl'}
-            uuid={draggingId}
-            grow={DEFAULT_CONTROL_GROW}
-            width={'small'}
-            lockedWidth={controlPanelRefs.current[draggingId]?.getBoundingClientRect().width}
-            parentApi={parentApi}
-            compressed={getInitialState().compressed ?? true}
+            state={parentApi.getSerializedStateForChild(draggingId)}
+            width={controlPanelRefs.current[draggingId]?.getBoundingClientRect().width}
           />
-        ) : // <ControlClone key={draggingId} state={parentApi.getSerializedStateForChild(draggingId)} />
-        null}
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

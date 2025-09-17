@@ -19,6 +19,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiToolTip,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
@@ -47,7 +48,6 @@ export const ControlPanel = ({
   type,
   grow,
   width,
-  lockedWidth,
   compressed,
   setControlPanelRef,
 }: {
@@ -61,7 +61,6 @@ export const ControlPanel = ({
   type: string;
   grow: ControlsGroupState['controls'][number]['grow'];
   width: ControlsGroupState['controls'][number]['width'];
-  lockedWidth?: number;
   compressed?: boolean;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
@@ -130,7 +129,7 @@ export const ControlPanel = ({
   const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
   const styles = useMemoCss(controlPanelStyles);
-  console.log({ lockedWidth });
+
   return (
     <EuiFlexItem
       component="li"
@@ -146,15 +145,13 @@ export const ControlPanel = ({
       data-control-id={uuid}
       data-test-subj="control-frame"
       data-render-complete="true"
-      css={css([
-        isDragging && styles.draggingItem,
-        lockedWidth && css({ width: `${lockedWidth}px` }),
-        styles.controlWidthStyles,
-      ])}
+      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles, styles.dragStyles])}
       className={classNames({
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--large': controlWidth === 'large',
+        'controlFrameWrapper--insertBefore': insertBefore,
+        'controlFrameWrapper--insertAfter': insertAfter,
       })}
     >
       <EuiFormRow
@@ -177,11 +174,9 @@ export const ControlPanel = ({
           isLoading={Boolean(dataLoading)}
           className={classNames('controlFrame__formControlLayout', {
             'controlFrame__formControlLayout--edit': isEditable,
-            'controlFrame_formControlAfter--insertBefore': insertBefore,
-            'controlFrame_formControlAfter--insertAfter': insertAfter,
             type,
           })}
-          css={css(styles.formControl)}
+          css={styles.formControl}
           prepend={
             <>
               <DragHandle
@@ -234,4 +229,56 @@ const controlPanelStyles = {
     opacity: 0,
   }),
   controlWidthStyles,
+  dragStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&.controlFrameWrapper--insertBefore': {
+        '&:after': {
+          content: "''",
+          position: 'absolute' as const,
+          borderRadius: euiTheme.border.radius.medium,
+          top: 0,
+          bottom: 0,
+          width: euiTheme.size.xxs,
+          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
+          left: `calc(-${euiTheme.size.xs} - 1px)`,
+        },
+      },
+      '&.controlFrameWrapper--insertAfter': {
+        '&:after': {
+          content: "''",
+          position: 'absolute' as const,
+          borderRadius: euiTheme.border.radius.medium,
+          top: 0,
+          bottom: 0,
+          width: euiTheme.size.xxs,
+          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
+          right: `calc(-${euiTheme.size.xs} - 1px)`,
+        },
+      },
+    }),
+  formControl: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.euiFormControlLayout__prepend': {
+        paddingLeft: 0,
+        gap: 0,
+        '&.timeSlider': {
+          paddingInlineStart: `0 !important`,
+        },
+        '.euiFormControlLayout__prepend': {
+          // non-editable
+          paddingInlineStart: `${euiTheme.size.s} !important`,
+        },
+      },
+      '&.controlFrame__formControlLayout--edit': {
+        // editable
+        '.euiFormControlLayout__prepend': {
+          paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
+        },
+      },
+      '.controlPanel--label': {
+        padding: '0 !important',
+        height: '100%',
+        maxWidth: '100%',
+      },
+    }),
 };
