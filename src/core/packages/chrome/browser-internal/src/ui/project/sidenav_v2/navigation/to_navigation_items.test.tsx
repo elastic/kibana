@@ -236,6 +236,21 @@ describe('panel opener href', () => {
     expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/rules');
   });
 
+  it('should ignore external urls', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    tree.body[0]!.children![2].children[0].children[0].children[0].isExternalLink = true; // 'securityGroup:rules' first child is now external
+
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    // Find a panel opener from the existing mock tree - 'securityGroup:rules' is a panel opener
+    const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
+    expect(rulesPanel).toBeDefined();
+    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
+  });
+
   it('should return panel opener href as last active child href', () => {
     // Set up a last active item for the securityGroup:rules panel
     mockPanelStateManager.setPanelLastActive(
@@ -251,5 +266,18 @@ describe('panel opener href', () => {
     const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
     expect(rulesPanel).toBeDefined();
     expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
+  });
+});
+
+describe('empty panel opener', () => {
+  it('should not return panel opener if it has no children', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    tree.body[0]!.children![2].children = []; // 'securityGroup:rules' panel opener has no children now
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    expect(primaryItems.find((item) => item.id === 'securityGroup:rules')).toBeUndefined();
   });
 });

@@ -557,6 +557,7 @@ export interface DocLinks {
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
     agentReleaseProcess: string;
+    fipsIngest: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
