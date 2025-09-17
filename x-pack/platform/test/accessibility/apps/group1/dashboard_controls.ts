@@ -91,10 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const optionsControlId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.optionsListOpenPopover(optionsControlId);
       await a11y.testAppSnapshot();
-      // a11y error on range control https://github.com/elastic/kibana/issues/135266 - uncomment after the fix
-      // const rangeControlId = (await dashboardControls.getAllControlIds())[1];
-      // await dashboardControls.rangeSliderOpenPopover(rangeControlId);
-      // await a11y.testAppSnapshot();
+      const rangeControlId = (await dashboardControls.getAllControlIds())[1];
+      await dashboardControls.rangeSliderOpenPopover(rangeControlId);
+      await a11y.testAppSnapshot();
     });
   });
 }
