@@ -63,7 +63,6 @@ export class ExtensionsService {
       setEmptyListContent: this.setEmptyListContent.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
       setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
-      setIndexMappingsContent: this.setIndexMappingsContent.bind(this),
       setIndexDetailsPageRoute: this.setIndexDetailsPageRoute.bind(this),
     };
 
@@ -114,13 +113,6 @@ export class ExtensionsService {
     }
   }
 
-  private setIndexMappingsContent(content: IndexContent) {
-    if (this._indexMappingsContent) {
-      throw new Error(`The content for index mappings has already been set.`);
-    } else {
-      this._indexMappingsContent = content;
-    }
-  }
   private setIndexDetailsPageRoute(route: IndexDetailsPageRoute) {
     if (this._indexDetailsPageRoute) {
       throw new Error(`The route for index details has already been set.`);

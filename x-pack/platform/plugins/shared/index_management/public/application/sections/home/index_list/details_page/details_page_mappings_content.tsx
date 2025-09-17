@@ -472,9 +472,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
       <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
-        {showAboutMappings && (
+        {showAboutMappings && hasMappings && (
           <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
-            <EuiPanel grow={false} paddingSize="l" color="subdued">
+            <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="info" />
@@ -497,7 +497,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
                     defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
                       (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
-                      available in your relevance tuning and search experience."
+                      available in your relevance tuning and search experience. asdf"
                   />
                 </p>
               </EuiText>
@@ -514,12 +514,48 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 />
               </EuiLink>
             </EuiPanel>
-            {extensionsService.indexMappingsContent && (
-              <>
-                <EuiSpacer />
-                {extensionsService.indexMappingsContent.renderContent({ index, getUrlForApp })}
-              </>
-            )}
+            <EuiSpacer size="l" />
+            <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="info" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexDetails.mappings.transform.title"
+                        defaultMessage="Transform your searchable content"
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexDetails.mappings.transform.description"
+                    defaultMessage="Want to add custom fields, or use trained ML models 
+            to analyze and enrich your indexed documents? Use index-specific ingest pipelines 
+            to customize documents to your needs."
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiLink
+                data-test-subj="indexDetailsMappingsLearnMoreLink"
+                href={documentationService.docLinks.enterpriseSearch.ingestPipelines}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.mappings.transform.docLink"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            </EuiPanel>
           </EuiFlexItem>
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
