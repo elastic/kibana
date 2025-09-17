@@ -52,6 +52,7 @@ export function StreamsSettingsFlyout({
       },
     },
     core,
+    services: { telemetryClient },
   } = context;
 
   const {
@@ -83,6 +84,7 @@ export function StreamsSettingsFlyout({
       try {
         setLoading(true);
         await enableWiredMode(signal);
+        telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: true });
         refreshStreams();
       } catch (error) {
         core.notifications.toasts.addError(error, {
@@ -103,6 +105,7 @@ export function StreamsSettingsFlyout({
     setIsDisabling(true);
     try {
       await disableWiredMode(signal);
+      telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: false });
       refreshStreams();
       setShowDisableModal(false);
       setDisableConfirmChecked(false);

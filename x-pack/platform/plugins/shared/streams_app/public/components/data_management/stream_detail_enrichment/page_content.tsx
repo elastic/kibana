@@ -53,7 +53,11 @@ interface StreamDetailEnrichmentContentProps {
 }
 
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
-  const { core, dependencies } = useKibana();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     data,
     streams: { streamsRepositoryClient },
@@ -69,6 +73,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
       urlStateStorageContainer={urlStateStorageContainer}
+      telemetryClient={telemetryClient}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
