@@ -332,4 +332,3 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     assertGenericConversationErrorToast();
   });
 });
-
