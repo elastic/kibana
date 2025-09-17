@@ -76,6 +76,9 @@ export function LayerPanels(
   const dispatchLens = useLensDispatch();
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
+
+  const [selectedLayerId, setSelectedLayerId] = useState(layerIds[0] || '');
+
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -256,9 +259,10 @@ export function LayerPanels(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
       );
 
+      setSelectedLayerId(layerId);
       setNextFocusedLayerId(layerId);
     },
-    [dispatchLens, setNextFocusedLayerId]
+    [dispatchLens, setNextFocusedLayerId, setSelectedLayerId]
   );
 
   const registerLibraryAnnotationGroupFunction = useCallback<
@@ -277,8 +281,6 @@ export function LayerPanels(
       }),
     }));
   }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
-
-  const [selectedLayerId, setSelectedLayerId] = useState(layerIds[0] || '');
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedLayerId(id);
