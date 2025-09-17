@@ -207,6 +207,12 @@ export const updateTabs: InternalStateThunkActionCreator<
           query ?? services.data.query.queryString.getDefaultQuery()
         );
 
+        if (nextTab.dataRequestParams.searchSessionId) {
+          services.data.search.session.continue(nextTab.dataRequestParams.searchSessionId, true);
+        } else {
+          services.data.search.session.start();
+        }
+
         nextTabStateContainer.actions.initializeAndSync();
 
         if (nextTab.forceFetchOnSelect) {

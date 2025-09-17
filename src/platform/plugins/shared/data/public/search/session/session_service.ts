@@ -115,7 +115,7 @@ interface TrackSearchHandler {
 /**
  * Represents a search session state in {@link SessionService} in any given moment of time
  */
-export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
+export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor, TrackSearchMeta>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -188,12 +188,7 @@ export class SessionService {
 
   private toastService?: ToastService;
 
-  /**
-   * Holds snapshot of last cleared session so that it can be continued
-   * Can be used to re-use a session between apps
-   * @internal
-   */
-  private lastSessionSnapshot?: SessionSnapshot;
+  private sessionSnapshots: Map<string, SessionSnapshot>;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -212,6 +207,8 @@ export class SessionService {
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
+
+    this.sessionSnapshots = new Map<string, SessionSnapshot>();
 
     this.disableSaveAfterSearchesExpire$ = combineLatest([
       this._disableSaveAfterSearchesExpire$,
@@ -397,7 +394,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
-    this.lastSessionSnapshot = undefined;
+    this.sessionSnapshots = new Map();
   }
 
   /**
@@ -439,6 +436,8 @@ export class SessionService {
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
 
+    this.storeSessionSnapshot();
+
     this.state.transitions.start({ appName: this.currentApp });
 
     return this.getSessionId()!;
@@ -466,25 +465,30 @@ export class SessionService {
    *
    * @deprecated
    */
-  public continue(sessionId: string) {
-    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+  public continue(sessionId: string, keepSearches = false) {
+    const sessionSnapshot = this.sessionSnapshots.get(sessionId);
+    if (sessionSnapshot) {
+      this.storeSessionSnapshot();
       this.state.set({
-        ...this.lastSessionSnapshot,
+        ...sessionSnapshot,
         // have to change a name, so that current app can cancel a session that it continues
         appName: this.currentApp,
         // also have to drop all pending searches which are used to derive client side state of search session indicator,
         // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
         // possible solution to this problem is to refactor session service to support multiple sessions
-        trackedSearches: [],
+        trackedSearches: keepSearches ? sessionSnapshot.trackedSearches : [],
         isContinued: true,
       });
-      this.lastSessionSnapshot = undefined;
+      this.sessionSnapshots.delete(sessionId);
     } else {
       // eslint-disable-next-line no-console
-      console.warn(
-        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
-      );
+      console.warn(`Unknown ${sessionId} search session id recevied`);
     }
+  }
+
+  private storeSessionSnapshot() {
+    if (!this.getSessionId()) return;
+    this.sessionSnapshots.set(this.getSessionId()!, this.state.get());
   }
 
   /**
@@ -503,9 +507,7 @@ export class SessionService {
       return;
     }
 
-    if (this.getSessionId()) {
-      this.lastSessionSnapshot = this.state.get();
-    }
+    this.storeSessionSnapshot();
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
