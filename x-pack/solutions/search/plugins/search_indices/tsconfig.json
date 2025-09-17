@@ -43,6 +43,7 @@
     "@kbn/search-navigation",
     "@kbn/search-queries",
     "@kbn/sample-data-ingest",
+    "@kbn/management-settings-ids",
   ],
   "exclude": [
     "target/**/*",
