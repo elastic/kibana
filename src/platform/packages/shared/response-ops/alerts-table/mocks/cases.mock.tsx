@@ -58,6 +58,7 @@ const helpersMock: jest.MockedObject<CasesService['helpers']> = {
   canUseCases: jest.fn(),
   groupAlertsByRule: jest.fn(),
   getRuleIdFromEvent: jest.fn(),
+  getObservablesFromEcs: jest.fn(),
 };
 
 export const createCasesServiceMock = (): jest.MaybeMockedDeep<CasesService> => ({

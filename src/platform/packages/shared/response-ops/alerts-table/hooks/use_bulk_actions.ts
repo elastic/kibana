@@ -14,6 +14,7 @@ import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type {
   BulkActionsConfig,
@@ -154,9 +155,18 @@ export const useBulkAddToCaseActions = ({
               const caseAttachments = alerts
                 ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
                 : [];
-
+              const observables = alerts
+                ? alerts
+                    .map((alert) =>
+                      casesService?.helpers.getObservablesFromEcs(
+                        alert.ecs as unknown as EcsSecurityExtension
+                      )
+                    )
+                    .flat() ?? []
+                : [];
               createCaseFlyout.open({
                 attachments: caseAttachments,
+                observables,
               });
             },
           },
@@ -178,6 +188,18 @@ export const useBulkAddToCaseActions = ({
                     caseId: theCase.id,
                     groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
                   });
+                },
+                getObservables: ({ theCase }) => {
+                  if (!alerts || theCase == null) return [];
+                  return (
+                    alerts
+                      .map((alert) =>
+                        casesService?.helpers.getObservablesFromEcs(
+                          alert.ecs as unknown as EcsSecurityExtension
+                        )
+                      )
+                      .flat() ?? []
+                  );
                 },
               });
             },
