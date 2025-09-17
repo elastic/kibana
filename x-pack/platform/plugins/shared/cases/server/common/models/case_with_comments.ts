@@ -12,6 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { intersection } from 'lodash';
 import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
@@ -46,7 +47,6 @@ import {
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
-import { intersection } from 'lodash';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
