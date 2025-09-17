@@ -22,13 +22,13 @@ import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 const getFullScreenStyles = (euiTheme: EuiThemeComputed) => {
   const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
   return {
-    [METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS]: css`
+    [METRICS_GRID_FULL_SCREEN_CLASS]: css`
       z-index: ${fullScreenZIndex} !important;
       position: fixed;
       inset: 0;
       background-color: ${euiTheme.colors.backgroundBasePlain};
     `,
-    [METRICS_EXPERIENCE_GRID_RESTRICT_BODY_CLASS]: css`
+    [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
       ${logicalCSS('height', '100vh')}
       overflow: hidden;
 
@@ -48,17 +48,14 @@ const getFullScreenStyles = (euiTheme: EuiThemeComputed) => {
   };
 };
 
-export const METRICS_EXPERIENCE_GRID_WRAPPER_FULL_SCREEN_CLASS =
-  'metricsExperienceGridWrapper--fullScreen';
-export const METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS = 'metricsExperienceGrid--fullScreen';
-export const METRICS_EXPERIENCE_GRID_RESTRICT_BODY_CLASS = 'metricsExperienceGrid--restrictBody';
-// Ensure full screen data grids are not covered by elements with a z-index
-const fullScreenStyles = css`
+export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsExperienceGridWrapper--fullScreen';
+export const METRICS_GRID_FULL_SCREEN_CLASS = 'metricsExperienceGrid--fullScreen';
+export const METRICS_GRID_RESTRICT_BODY_CLASS = 'metricsExperienceGrid--restrictBody';
+// Ensure full screen metrics grids are not covered by elements with a z-index
+const fullScreenBodyStyles = css`
   *:not(
       .euiFlyout,
-      .${METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS},
-        .${METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS}
-        *,
+      .${METRICS_GRID_FULL_SCREEN_CLASS}, .${METRICS_GRID_FULL_SCREEN_CLASS} *,
       [data-euiportal='true'],
       [data-euiportal='true'] *
     ) {
@@ -66,48 +63,51 @@ const fullScreenStyles = css`
   }
 `;
 
-const classesToToggle = [fullScreenStyles, METRICS_EXPERIENCE_GRID_WRAPPER_FULL_SCREEN_CLASS];
-const toggleFullScreen = (dataGrid: HTMLElement) => {
-  const fullScreenClass = dataGrid.classList.contains(METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS);
+const bodyClassesToToggle = [fullScreenBodyStyles, METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS];
+const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
+  const hasFullScreenClass = metricsGrid.classList.contains(METRICS_GRID_FULL_SCREEN_CLASS);
 
-  if (fullScreenClass) {
-    document.body.classList.add(...classesToToggle);
+  if (hasFullScreenClass) {
+    document.body.classList.add(...bodyClassesToToggle);
   } else {
-    document.body.classList.remove(...classesToToggle);
+    document.body.classList.remove(...bodyClassesToToggle);
   }
 };
 
-export const useFullScreenWatcher = () => {
-  const dataGridId = useGeneratedHtmlId({ prefix: 'metricsExperienceGrid' });
-  const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
-  const [dataGrid, setDataGrid] = useState<HTMLElement | null>(null);
+export const useMetricsGridFullScreen = () => {
+  const metricsGridId = useGeneratedHtmlId({ prefix: 'metricsExperienceGrid' });
+  const [metricsGridWrapper, setMetricsGridWrapper] = useState<HTMLElement | null>(null);
+  const [metricsGrid, setMetricsGrid] = useState<HTMLElement | null>(null);
 
-  const checkForDataGrid = useCallback<MutationCallback>(
+  const findMetricsGridElement = useCallback<MutationCallback>(
     (_, observer) => {
-      const foundDataGrid = document.getElementById(dataGridId);
+      const foundMetricsGrid = document.getElementById(metricsGridId);
 
-      if (foundDataGrid) {
-        setDataGrid(foundDataGrid);
+      if (foundMetricsGrid) {
+        setMetricsGrid(foundMetricsGrid);
         observer.disconnect();
       }
     },
-    [dataGridId]
+    [metricsGridId]
   );
 
-  const watchForFullScreen = useCallback<MutationCallback>(() => {
-    if (dataGrid) {
-      toggleFullScreen(dataGrid);
+  const handleMetricsGridFullScreenToggle = useCallback<MutationCallback>(() => {
+    if (metricsGrid) {
+      toggleMetricsGridFullScreen(metricsGrid);
     }
-  }, [dataGrid]);
+  }, [metricsGrid]);
 
-  useMutationObserver(dataGridWrapper, checkForDataGrid, { childList: true, subtree: true });
+  useMutationObserver(metricsGridWrapper, findMetricsGridElement, {
+    childList: true,
+    subtree: true,
+  });
 
-  useMutationObserver(dataGrid, watchForFullScreen, {
+  useMutationObserver(metricsGrid, handleMetricsGridFullScreenToggle, {
     attributes: true,
     attributeFilter: ['class'],
   });
 
-  return { dataGridId, dataGridWrapper, setDataGridWrapper };
+  return { metricsGridId, metricsGridWrapper, setMetricsGridWrapper };
 };
 
 export interface MetricsGridWrapperProps
@@ -135,47 +135,45 @@ export const MetricsGridWrapper = ({
   const { euiTheme } = useEuiTheme();
   const { searchTerm, onSearchTermChange, isFullscreen } = useMetricsGridState();
 
-  const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
+  const { metricsGridId, setMetricsGridWrapper } = useMetricsGridFullScreen();
   const styles = useMemo(() => getFullScreenStyles(euiTheme), [euiTheme]);
 
-  const restrictBodyClass = styles[METRICS_EXPERIENCE_GRID_RESTRICT_BODY_CLASS];
-  const gridFullScreenClass = styles[METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS];
+  const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];
+  const metricsGridFullScreenClass = styles[METRICS_GRID_FULL_SCREEN_CLASS];
 
   useEffect(() => {
-    // When the data grid is fullscreen, we add a class to the body to remove the extra scrollbar and stay above any fixed headers
+    // When the metrics grid is fullscreen, we add a class to the body to remove the extra scrollbar and stay above any fixed headers
     if (isFullscreen) {
-      document.body.classList.add(METRICS_EXPERIENCE_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
+      document.body.classList.add(METRICS_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
 
       return () => {
-        document.body.classList.remove(
-          METRICS_EXPERIENCE_GRID_RESTRICT_BODY_CLASS,
-          restrictBodyClass
-        );
+        document.body.classList.remove(METRICS_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
       };
     }
   }, [isFullscreen, restrictBodyClass]);
 
   return (
     <div
-      data-test-subj="metricsExperienceGrid"
+      data-test-subj="metricsExperienceGridWrapper"
       className={cx(
         'metricsExperienceGridWrapper',
         {
-          [METRICS_EXPERIENCE_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
         },
         css`
           height: 100%;
         `
       )}
-      ref={setDataGridWrapper}
+      ref={setMetricsGridWrapper}
     >
       <div
-        id={dataGridId}
+        id={metricsGridId}
+        data-test-subj="metricsExperienceGrid"
         className={cx(
           'metricsExperienceGrid',
           {
-            [METRICS_EXPERIENCE_GRID_FULL_SCREEN_CLASS]: isFullscreen,
-            [gridFullScreenClass]: isFullscreen,
+            [METRICS_GRID_FULL_SCREEN_CLASS]: isFullscreen,
+            [metricsGridFullScreenClass]: isFullscreen,
           },
           css`
             height: 100%;
@@ -190,14 +188,14 @@ export const MetricsGridWrapper = ({
             additionalControls: {
               prependRight: (
                 <RightSideActions
-                  key="rightSideActions"
+                  key="metricsExperienceGridRightSideActions"
                   searchTerm={searchTerm}
                   onSearchTermChange={onSearchTermChange}
                   fields={fields}
                   indexPattern={indexPattern}
                   renderToggleActions={renderToggleActions}
                   requestParams={requestParams}
-                  data-test-subj="metricsExperienceToolbarSearchInput"
+                  data-test-subj="metricsExperienceGridToolbarSearch"
                 />
               ),
             },

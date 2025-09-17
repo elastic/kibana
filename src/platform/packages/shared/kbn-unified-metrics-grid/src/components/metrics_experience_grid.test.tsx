@@ -243,7 +243,7 @@ describe('MetricsExperienceGrid', () => {
     expect(inputButton).toBeInTheDocument();
     await inputButton.click();
 
-    const input = getByTestId('metricsExperienceToolbarSearchInput');
+    const input = getByTestId('metricsExperienceGridToolbarSearch');
     expect(input).toBeInTheDocument();
 
     input.focus();
