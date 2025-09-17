@@ -18,7 +18,7 @@ import {
   EuiSwitch,
   type EuiSwitchEvent,
   EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -274,16 +274,15 @@ export const EmbedContent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
                 defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
-          >
-            <EuiIcon type="question" />
-          </EuiToolTip>
+            type="question"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
