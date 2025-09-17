@@ -34,7 +34,7 @@ export const useGetEvents = (
         }
 
         toasts.addError(error, {
-          title: i18n.ERROR_TITLE,
+          title: i18n.EVENTS_ERROR_TITLE,
         });
       },
     }
