@@ -113,6 +113,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                     })}
                   </EuiText>
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="warning"
                     title={i18n.translate(

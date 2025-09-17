@@ -172,6 +172,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <>
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryWarningTitle"

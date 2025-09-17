@@ -161,6 +161,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           css={dimensionEditorWarningStyles(euiThemeContext)}
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {

@@ -64,6 +64,7 @@ const UpgradeStep = () => {
     if (error) {
       callToAction = (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.upgradeAssistant.overview.errorLoadingUpgradeStatus', {
             defaultMessage: 'An error occurred while retrieving the upgrade status',
           })}

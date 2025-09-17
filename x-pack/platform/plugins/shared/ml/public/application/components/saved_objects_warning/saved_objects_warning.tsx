@@ -97,6 +97,7 @@ export const SavedObjectsWarning: FC<Props> = ({
   return showWarning === false ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.title"

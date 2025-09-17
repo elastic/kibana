@@ -82,6 +82,7 @@ export const SimulateTemplate = React.memo(({ template, filters, templateName }:
   if (isEmpty && hasFilters) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.idxMgmt.simulateTemplate.noFilterSelected"

@@ -61,7 +61,7 @@ export function SpatialJoinPopoverContent(props: Props) {
 
   const dataViewCallout = unableToLoadDataView ? (
     <>
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount color="warning">
         <p>
           {i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
             defaultMessage: 'Unable to load data view {dataViewId}.',

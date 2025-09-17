@@ -44,6 +44,7 @@ const IndicesErrorCallout = ({ emptyIndices, isFieldsLoading }: IndicesErrorCall
   if (emptyIndices.length > 0) {
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         data-test-subj="NoIndicesFieldsMessage"
         title={

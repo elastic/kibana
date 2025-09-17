@@ -143,6 +143,7 @@ export const IndicesConfigurationPanel = ({
           <>
             <EuiSpacer size="s" />
             <EuiCallOut
+              announceOnMount
               data-test-subj="infraIndicesPanelSettingsWarningCalloutUsedByRules"
               size="s"
               title={METRIC_INDICES_USED_BY_RULES}
@@ -171,6 +172,7 @@ export const IndicesConfigurationPanel = ({
           <>
             <EuiSpacer size="s" />
             <EuiCallOut
+              announceOnMount
               size="s"
               title={METRIC_INDICES_WARNING_TITLE}
               color="warning"
@@ -188,6 +190,7 @@ export const IndicesConfigurationPanel = ({
           <>
             <EuiSpacer size="s" />
             <EuiCallOut
+              announceOnMount
               data-test-subj="infraIndicesPanelSettingsDangerCallout"
               size="s"
               title={REMOTE_CLUSTER_ERROR_TITLE}

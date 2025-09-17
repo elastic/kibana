@@ -26,6 +26,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
     return (
       <>
         <EuiCallOut
+          announceOnMount
           iconType="offline"
           color="warning"
           data-test-subj="offlineCallout"

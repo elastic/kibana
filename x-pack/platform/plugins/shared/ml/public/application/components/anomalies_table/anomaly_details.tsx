@@ -336,6 +336,7 @@ const CategoryExamples: FC<{
       {error && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="danger"
             iconType="warning"

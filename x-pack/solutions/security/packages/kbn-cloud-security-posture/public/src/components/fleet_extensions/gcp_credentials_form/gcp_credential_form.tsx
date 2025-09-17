@@ -344,7 +344,7 @@ export const GcpCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.gcpNotSupportedMessage"
             defaultMessage="CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP"

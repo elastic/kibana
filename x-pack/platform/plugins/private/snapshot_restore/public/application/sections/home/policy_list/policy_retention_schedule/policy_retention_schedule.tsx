@@ -249,6 +249,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
     return (
       <Fragment>
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.policyRetentionSchedulePanel.errorFetchingRetentionScheduleTitle"

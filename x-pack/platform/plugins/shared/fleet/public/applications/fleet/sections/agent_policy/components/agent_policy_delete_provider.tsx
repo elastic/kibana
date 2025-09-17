@@ -186,6 +186,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
         {packagePoliciesWithMultiplePolicies && (
           <>
             <EuiCallOut
+              announceOnMount
               color="primary"
               iconType="info"
               title={
@@ -205,6 +206,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="warning"
             title={i18n.translate(

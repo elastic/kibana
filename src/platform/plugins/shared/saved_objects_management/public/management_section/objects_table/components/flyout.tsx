@@ -567,6 +567,7 @@ export class FlyoutClass extends Component<
     if (this.hasUnmatchedReferences) {
       indexPatternConflictsWarning = (
         <EuiCallOut
+          announceOnMount
           data-test-subj="importSavedObjectsConflictsWarning"
           title={
             <FormattedMessage

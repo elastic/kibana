@@ -703,6 +703,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               size="s"
               iconType="question"
               color="warning"

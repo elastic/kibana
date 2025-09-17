@@ -38,6 +38,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
     if (displayWarning || (error.statusCode === 404 && isCustom)) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             isCustom ? (
               <FormattedMessage

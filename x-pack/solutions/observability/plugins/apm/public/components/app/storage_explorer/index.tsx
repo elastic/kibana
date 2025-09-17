@@ -131,6 +131,7 @@ export function StorageExplorer() {
 
       {!calloutDismissed.optimizePerformance && (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.apm.storageExplorer.longLoadingTimeCalloutTitle', {
             defaultMessage: 'Long loading time?',
           })}
@@ -172,6 +173,7 @@ export function StorageExplorer() {
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutTitle', {
               defaultMessage: 'Searching across clusters?',
             })}

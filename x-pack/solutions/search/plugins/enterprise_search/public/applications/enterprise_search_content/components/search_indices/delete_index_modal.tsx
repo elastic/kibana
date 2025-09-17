@@ -101,6 +101,7 @@ export const DeleteIndexModal: React.FC = () => {
       {deleteModalIndexHasInProgressSyncs && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={i18n.translate(

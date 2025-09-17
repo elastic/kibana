@@ -133,6 +133,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       {componentTemplate?.deprecated && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"

@@ -97,6 +97,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
           </>
         ) : (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.fleet.epm.packageDetails.apiReference.noDocumentationMessage"

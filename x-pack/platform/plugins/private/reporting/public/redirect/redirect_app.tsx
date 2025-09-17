@@ -102,7 +102,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
       }
     >
       {error ? (
-        <EuiCallOut title={i18nTexts.errorTitle} color="danger">
+        <EuiCallOut announceOnMount title={i18nTexts.errorTitle} color="danger">
           <p>{error.message}</p>
           {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
         </EuiCallOut>

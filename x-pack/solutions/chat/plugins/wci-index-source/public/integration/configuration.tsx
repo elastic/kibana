@@ -198,6 +198,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
         {filterFieldsArray.fields.length === 0 ? (
           <EuiFormRow>
             <EuiCallOut
+              announceOnMount
               title={translations.indexSourceConfiguration.filterFields.noFields.title}
               color="primary"
             >
@@ -313,6 +314,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
         {contextFieldsArray.fields.length === 0 ? (
           <EuiFormRow>
             <EuiCallOut
+              announceOnMount
               title={translations.indexSourceConfiguration.contextFields.noFields.title}
               color="primary"
             >

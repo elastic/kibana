@@ -134,6 +134,7 @@ export const ApiKeyConfig: React.FC<{
         <></>
       ) : indexName === '' ? (
         <EuiCallOut
+          announceOnMount
           iconType="info"
           title={i18n.translate(
             'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.waitingForAttachedIndex',
@@ -145,6 +146,7 @@ export const ApiKeyConfig: React.FC<{
         />
       ) : !hasApiKey ? (
         <EuiCallOut
+          announceOnMount
           iconType="warning"
           color="danger"
           title={i18n.translate(
@@ -178,6 +180,7 @@ export const ApiKeyConfig: React.FC<{
           {status === Status.SUCCESS && (
             <EuiFlexItem grow={false}>
               <EuiCallOut
+                announceOnMount
                 color="success"
                 size="s"
                 iconType="check"

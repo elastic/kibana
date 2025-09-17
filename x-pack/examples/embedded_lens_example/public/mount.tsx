@@ -28,6 +28,7 @@ export const mount =
           <App core={core} plugins={plugins} defaultDataView={defaultDataView} formula={formula} />
         ) : (
           <EuiCallOut
+            announceOnMount
             title="Please define a default index pattern to use this demo"
             color="danger"
             iconType="warning"

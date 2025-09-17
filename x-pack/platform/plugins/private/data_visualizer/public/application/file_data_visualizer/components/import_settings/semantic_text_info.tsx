@@ -23,6 +23,7 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
       <EuiSpacer size="m" />
 
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.dataVisualizer.semanticTextInfo.title"

@@ -237,6 +237,7 @@ export const ActionStatusesPanel = () => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
                 defaultMessage: 'This action contains errors',
               })}

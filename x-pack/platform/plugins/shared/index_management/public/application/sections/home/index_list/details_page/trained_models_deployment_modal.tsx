@@ -173,6 +173,7 @@ export function TrainedModelsDeploymentModal({
         </ul>
         <EuiSpacer />
         <EuiCallOut
+          announceOnMount
           iconType="warning"
           color="warning"
           title={i18n.translate(

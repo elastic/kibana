@@ -54,6 +54,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
       </EuiText>
       <EuiSpacer size="m" />
       <EuiCallOut
+        announceOnMount
         color="warning"
         iconType="warning"
         title={
