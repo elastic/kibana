@@ -31,6 +31,9 @@ export const i18nMessages = {
   paramTypeLabel: i18n.translate('xpack.onechat.tools.newTool.paramTypeLabel', {
     defaultMessage: 'Type',
   }),
+  optionalParamLabel: i18n.translate('xpack.onechat.tools.newTool.optionalParamLabel', {
+    defaultMessage: 'Optional?',
+  }),
   removeParamButtonLabel: i18n.translate('xpack.onechat.tools.newTool.removeParamButtonLabel', {
     defaultMessage: 'Remove parameter',
   }),
