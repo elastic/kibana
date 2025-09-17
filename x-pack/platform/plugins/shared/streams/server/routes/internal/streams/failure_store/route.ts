@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { Streams } from '@kbn/streams-schema';
 import {
   getFailureStore,
   getFailureStoreStats,
@@ -14,7 +15,6 @@ import {
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
-import { Streams } from '@kbn/streams-schema';
 
 export interface UpdateFailureStoreResponse {
   acknowledged: true;
