@@ -7,7 +7,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -386,7 +385,7 @@ export function LayerPanel(props: LayerPanelProps) {
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
       >
-        <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+        <div>
           <header
             className="lnsLayerPanel__layerHeader"
             css={css`
@@ -722,7 +721,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 </EuiFormRow>
               );
             })}
-        </EuiPanel>
+        </div>
       </section>
       {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
