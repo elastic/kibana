@@ -716,6 +716,7 @@ describe('createPrivilegedUsersCrudService', () => {
             hits: [
               {
                 _id: 'existing-user-id',
+                _index: TEST_INDEX,
                 _source: existingUser,
                 _score: 1.0,
               },
