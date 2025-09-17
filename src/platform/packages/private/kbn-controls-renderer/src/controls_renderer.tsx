@@ -24,9 +24,10 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import type { ControlState } from '@kbn/controls-schemas';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { ControlState } from '@kbn/controls-schemas';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 
 import { ControlPanel } from './components/control_panel';
 
@@ -34,7 +35,9 @@ export const ControlsRenderer = ({
   parentApi,
   getInitialState,
 }: {
-  parentApi: HasSerializedChildState<object>;
+  parentApi: HasSerializedChildState<object> & {
+    registerChildApi: (api: DefaultEmbeddableApi) => void;
+  };
   getInitialState: () => {
     [controlId: string]: ControlState;
   };
@@ -123,18 +126,4 @@ export const ControlsRenderer = ({
       </EuiFlexGroup>
     </EuiPanel>
   );
-
-  // return Object.values(getInitialState()).map((control) => (
-  //   <EmbeddableRenderer
-  //     key={control.id}
-  //     maybeId={control.id}
-  //     type={control.type}
-  //     getParentApi={() => parentApi}
-  //     onApiAvailable={(api) => {
-  //       // console.log('REFIST', parentApi.registerChildApi);
-  //       parentApi.registerChildApi(api);
-  //     }}
-  //     hidePanelChrome
-  //   />
-  // ));
 };
