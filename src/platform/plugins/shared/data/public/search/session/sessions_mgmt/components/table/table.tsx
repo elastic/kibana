@@ -17,7 +17,6 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../constants';
 import type { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns as getDefaultColumns } from './columns/get_columns';
 import type { BackgroundSearchOpenedHandler, LocatorsStart, UISession } from '../../types';
@@ -77,9 +76,7 @@ export function SearchSessionsMgmtTable({
     [config.management.refreshInterval]
   );
   const enableOpeningInNewTab = useMemo(
-    () =>
-      core.featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false) &&
-      core.featureFlags.getBooleanValue('discover.tabsEnabled', false),
+    () => core.featureFlags.getBooleanValue('discover.tabsEnabled', false),
     [core.featureFlags]
   );
 
