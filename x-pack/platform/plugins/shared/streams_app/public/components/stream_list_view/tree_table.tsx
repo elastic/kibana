@@ -220,8 +220,8 @@ export function StreamsTreeTable({
       noItemsMessage={NO_STREAMS_MESSAGE}
       onTableChange={handleTableChange}
       pagination={{
-        initialPageSize: 3,
-        pageSizeOptions: [3, 25, 50, 100],
+        initialPageSize: 25,
+        pageSizeOptions: [25, 50, 100],
       }}
       search={{
         query: searchQuery,
