@@ -34,10 +34,22 @@ const prettifyQuery = (src: string): string => {
 };
 
 const prettifyQueryTemplate = (query: string) => {
+  // Check if the original query has any pipe characters
+  if (!query.includes('|')) {
+    // If no pipes, this is just a FROM command, return empty template
+    return '';
+  }
   const formattedQuery = prettifyQuery(query);
   // remove the FROM command if it exists
   const queryParts = formattedQuery.split('|');
-  return `\n|${queryParts.slice(1).join('|')}`;
+  const remainingParts = queryParts.slice(1);
+
+  if (remainingParts.length === 0 || remainingParts.every((part) => part.trim() === '')) {
+    return '';
+  }
+
+  const result = `\n|${remainingParts.join('|')}`;
+  return result;
 };
 
 // Order starts with the simple ones and goes to more complex ones
