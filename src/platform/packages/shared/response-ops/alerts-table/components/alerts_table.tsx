@@ -353,6 +353,14 @@ const AlertsTableContent = typedForwardRef(
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
 
+    const fieldWithSortingError = useMemo(
+      () =>
+        queryParams.sort.find((sortField) =>
+          alertsError?.message?.includes(Object.keys(sortField)[0])
+        ),
+      [alertsError, queryParams]
+    );
+
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
       ruleIds,
@@ -441,12 +449,10 @@ const AlertsTableContent = typedForwardRef(
 
     // allow to reset to previous set in case of sorting error
     const handleResetToPreviousState = useCallback(() => {
-      const fieldName = queryParams.sort.find((sortField) =>
-        alertsError?.message?.includes(Object.keys(sortField)[0])
-      );
-
-      if (fieldName) {
-        const newSort = queryParams.sort.filter((sortField) => !deepEqual(sortField, fieldName));
+      if (fieldWithSortingError) {
+        const newSort = queryParams.sort.filter(
+          (sortField) => !deepEqual(sortField, fieldWithSortingError)
+        );
         storageAlertsTable.current = {
           ...storageAlertsTable.current,
           sort: newSort,
@@ -455,7 +461,7 @@ const AlertsTableContent = typedForwardRef(
         storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       }
-    }, [alertsError, setSort, storageRef, queryParams, id]);
+    }, [setSort, storageRef, queryParams, id, fieldWithSortingError]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -648,7 +654,9 @@ const AlertsTableContent = typedForwardRef(
               height={emptyState?.height}
               variant={emptyState?.variant}
               error={alertsError as Error}
-              onResetToPreviousState={handleResetToPreviousState}
+              onResetToPreviousState={
+                fieldWithSortingError ? handleResetToPreviousState : undefined
+              }
             />
           </InspectButtonContainer>
         )}

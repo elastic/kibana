@@ -35,6 +35,11 @@ const heights = {
 const panelStyle = {
   maxWidth: 500,
 };
+
+const textStyle = css`
+  word-break: break-word;
+`;
+
 type EmptyState = NonNullable<AlertsTableProps['emptyState' | 'errorState']>;
 type EmptyStateMessage = Pick<EmptyState, 'messageTitle' | 'messageBody'>;
 
@@ -61,7 +66,9 @@ export const EmptyState: React.FC<
 }) => {
   const renderErrorState = () => (
     <EuiFlexItem>
-      <EuiText color="danger">{error?.message}</EuiText>
+      <EuiText color="danger" css={textStyle}>
+        {error?.message}
+      </EuiText>
       <EuiSpacer size="m" />
 
       {onResetToPreviousState ? (
@@ -74,7 +81,7 @@ export const EmptyState: React.FC<
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.empty.resetButton"
-                defaultMessage={'Go back'}
+                defaultMessage={'Reset Sort'}
               />
             </EuiButton>
           </EuiFlexItem>
