@@ -260,7 +260,7 @@ export const createCasesClientMockSearchRequest = (
   overwrites?: CasesSearchRequest
 ): CasesSearchRequest => ({
   search: '',
-  searchFields: ['title', 'description'],
+  searchFields: ['title', 'description', 'incremental_id.text'],
   severity: CaseSeverity.LOW,
   assignees: [],
   reporters: [],
