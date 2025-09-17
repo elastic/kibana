@@ -354,12 +354,7 @@ export function LayerPanels(
         isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
       });
 
-      if (addLayerButton)
-        layerTabs.push(
-          <EuiTab key="lsnLayerTabAdd" disabled={false}>
-            {addLayerButton}
-          </EuiTab>
-        );
+      if (addLayerButton) layerTabs.push(addLayerButton);
     }
 
     return layerTabs;
