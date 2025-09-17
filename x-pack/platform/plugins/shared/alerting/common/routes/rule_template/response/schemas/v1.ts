@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleResponseSchema } from '../../../rule/response';
+import { ruleResponseSchemaV1 } from '../../../rule/response';
 
 export const ruleTemplateResponseSchema = schema.object({
   id: schema.string({
@@ -28,9 +28,9 @@ export const ruleTemplateResponseSchema = schema.object({
     meta: { description: 'The rule type identifier.' },
   }),
 
-  schedule: ruleResponseSchema.getPropSchemas().schedule,
-  params: ruleResponseSchema.getPropSchemas().params,
+  schedule: ruleResponseSchemaV1.getPropSchemas().schedule,
+  params: ruleResponseSchemaV1.getPropSchemas().params,
 
-  alert_delay: ruleResponseSchema.getPropSchemas().alert_delay,
-  flapping: ruleResponseSchema.getPropSchemas().flapping,
+  alert_delay: ruleResponseSchemaV1.getPropSchemas().alert_delay,
+  flapping: ruleResponseSchemaV1.getPropSchemas().flapping,
 });
