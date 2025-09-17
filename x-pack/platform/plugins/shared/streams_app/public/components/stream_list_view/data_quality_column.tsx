@@ -49,7 +49,7 @@ export function DataQualityColumn({
     [allTimeseries]
   );
 
-  const degradedDocCount = failedDocsResult?.value
+  const degradedDocCount = degradedDocsResult?.value
     ? Number(failedDocsResult.value?.values?.[0]?.[0])
     : 0;
   const failedDocCount = degradedDocsResult?.value
