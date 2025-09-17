@@ -11,6 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
+  chatDataRegistry: 4162
   cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
@@ -163,7 +164,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 67939
   streams: 8494
-  streamsApp: 12431
+  streamsApp: 15200
   streamsAppWrapper: 5787
   synthetics: 31571
   telemetry: 25755
@@ -201,4 +202,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 6200
+  workflowsManagement: 6555

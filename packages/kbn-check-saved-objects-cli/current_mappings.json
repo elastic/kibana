@@ -1808,6 +1808,32 @@
       }
     }
   },
+  "fleet-cloud-connector": {
+    "dynamic": false,
+    "properties": {
+      "cloudProvider": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "namespace": {
+        "type": "keyword"
+      },
+      "packagePolicyCount": {
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "vars": {
+        "type": "flattened"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "dynamic": false,
     "properties": {
@@ -1842,6 +1868,9 @@
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
+      },
+      "cloud_connector_id": {
+        "type": "keyword"
       },
       "created_at": {
         "type": "date"
@@ -1915,6 +1944,9 @@
         }
       },
       "supports_agentless": {
+        "type": "boolean"
+      },
+      "supports_cloud_connector": {
         "type": "boolean"
       },
       "updated_at": {
@@ -2434,6 +2466,9 @@
       "bump_agent_policy_revision": {
         "type": "boolean"
       },
+      "cloud_connector_id": {
+        "type": "keyword"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2506,6 +2541,9 @@
         }
       },
       "supports_agentless": {
+        "type": "boolean"
+      },
+      "supports_cloud_connector": {
         "type": "boolean"
       },
       "updated_at": {
@@ -4277,7 +4315,6 @@
       }
     }
   },
-
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
