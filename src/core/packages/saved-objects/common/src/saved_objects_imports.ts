@@ -80,6 +80,15 @@ export interface SavedObjectsImportUnexpectedAccessControlMetadataError {
 }
 
 /**
+ * Represents a failure to import due to an access control conflict.
+ * This happens when attempting to import and overwrite an object owned by another user.
+ * @public
+ */
+export interface SavedObjectsImportAccessControlConflict {
+  type: 'access_control_conflict';
+}
+
+/**
  * Represents a failure to import due to requiring a profile ID when the
  * current user does not have one (never activated), or there is no
  * authenticated user.
@@ -130,7 +139,8 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportUnknownError
     | SavedObjectsImportMissingAccessControlMetadataError
     | SavedObjectsImportRequiresProfileIdError
-    | SavedObjectsImportUnexpectedAccessControlMetadataError;
+    | SavedObjectsImportUnexpectedAccessControlMetadataError
+    | SavedObjectsImportAccessControlConflict;
 }
 
 /**

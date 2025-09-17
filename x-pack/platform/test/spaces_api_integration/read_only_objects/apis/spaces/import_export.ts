@@ -13,7 +13,6 @@ import { adminTestUser } from '@kbn/test';
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
@@ -138,8 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body).not.to.have.property('accessControl');
       });
 
-      // ToDo: this is forcing supporting types to have access control metadata, is that what we want?
-      it.skip('should import objects with no access control metadata', async () => {
+      it('should apply defaults to objects with no access control metadata', async () => {
         const { cookie: objectOwnerCookie, profileUid: testProfileId } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -195,7 +193,9 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', objectOwnerCookie.cookieString())
           .expect(200);
 
-        expect(getResponse.body).not.to.have.property('accessControl');
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+        expect(getResponse.body.accessControl).to.have.property('owner', testProfileId);
 
         getResponse = await supertestWithoutAuth
           .get(`/non_read_only_objects/${results[1].destinationId}`)
@@ -328,7 +328,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(errors[0].error).to.have.property('type', 'requires_profile_id');
       });
 
-      // ToDo: this needs to be updated once the create/bulk create operations are updated to address overwrite of owned objects
       it('should disallow overwrite of owned objects if not owned by the current user', async () => {
         const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
@@ -342,13 +341,26 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
 
-        const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsNotObjectOwner(
-          'test_user',
-          'changeme'
-        );
+        const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
 
         const toImport = [
           {
+            // this first object will import ok
+            accessControl: { accessMode: 'read_only', owner: '' },
+            attributes: { description: 'test' },
+            coreMigrationVersion: '8.8.0',
+            created_at: '2025-07-16T10:03:03.253Z',
+            created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+            id: '8dd4fb4f-aec8-448b-973b-72f02656688d',
+            managed: false,
+            references: [],
+            type: READ_ONLY_TYPE,
+            updated_at: '2025-07-16T10:03:03.253Z',
+            updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+            version: 'WzY5LDFd',
+          },
+          {
+            // this second object will be rejected because it is owned by another user
             accessControl: { accessMode: 'read_only', owner: '' },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
@@ -365,7 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             excludedObjects: [],
             excludedObjectsCount: 0,
-            exportedCount: 1,
+            exportedCount: 2,
             missingRefCount: 0,
             missingReferences: [],
           },
@@ -375,14 +387,16 @@ export default function ({ getService }: FtrProviderContext) {
           toImport,
           testUserCookie.cookieString(),
           true, // overwrite = true,
-          false // createNewCopies = false
+          false, // createNewCopies = false
+          403 // expect forbidden...this is because bulk create will throw if unauthorized for any of the objects being created, rather than filter left/right
+          // We could try to intercept this in import before getting to the bulk create op
         );
 
-        // This should return an error, injected by the create operation (ToDo)
-        const results = importResponse.body.successResults;
+        const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
         expect(Array.isArray(results)).to.be(true);
         expect(results.length).to.be(1);
-        expect(results[0].type).to.be(READ_ONLY_TYPE);
+        expect(results[0]).to.have.property('error', 'Forbidden');
+        expect(results[0]).to.have.property('message', 'Unable to bulk_create read_only_type'); // ToDo: not the best message, is it possible to notify if failure is due to privs or ownership?
       });
 
       it('should allow overwrite of owned objects if owned by the current user', async () => {
@@ -557,6 +571,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(results[0].accessControl).to.have.property('owner', '');
         expect(results[1]).to.have.property('exportedCount', 1);
       });
+    });
+
+    describe('#resolve_import_errors', () => {
+      // Do we need to explicitly test anything here?
+      // Probably just the case where we want to apply a new destination ID in the event of a conflict with object owned by another user
     });
   });
 }
