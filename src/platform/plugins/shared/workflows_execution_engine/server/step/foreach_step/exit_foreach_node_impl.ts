@@ -20,20 +20,21 @@ export class ExitForeachNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
+    // Exit the scope of the current iteration
+    this.wfExecutionRuntimeManager.exitScope();
+    // All items have been processed, exit the foreach scope
+    this.wfExecutionRuntimeManager.exitScope();
     const foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
 
     if (!foreachState) {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);
     }
-    // Exit the scope of the current iteration
-    this.wfExecutionRuntimeManager.exitScope();
 
     if (foreachState.items[foreachState.index + 1]) {
       this.wfExecutionRuntimeManager.navigateToNode(this.node.startNodeId);
       return;
     }
-    // All items have been processed, exit the foreach scope
-    this.wfExecutionRuntimeManager.exitScope();
+
     await this.wfExecutionRuntimeManager.finishStep();
     this.workflowLogger.logDebug(
       `Exiting foreach step ${this.node.stepId} after processing all items.`,

@@ -68,12 +68,10 @@ export class EnterForeachNodeImpl implements NodeImplementation, StepErrorCatche
       index: 0,
       total: evaluatedItems.length,
     };
-    // Enter a new scope for the whole foreach
-    this.wfExecutionRuntimeManager.enterScope();
 
+    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
