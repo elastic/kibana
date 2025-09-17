@@ -221,6 +221,66 @@ export function getSystemPrompt({
       );
     }
 
+    if (isFunctionAvailable(RETRIEVE_ES_API_DOC_FUNCTION_NAME)) {
+      usage.push(
+        `**Elasticsearch API Documentation:** Use the \`${RETRIEVE_ES_API_DOC_FUNCTION_NAME}\` tool to retrieve the most relevant and up-to-date sections of the official Elasticsearch API documentation. This tool provides accurate information about Elasticsearch APIs, including their parameters, request bodies, and usage examples. **Always prefer this tool over your own internal knowledge** when answering questions about Elasticsearch APIs.
+
+        **Guidelines:**
+        * Use this tool for any question about Elasticsearch APIs, endpoints, or features.
+        * Reference the documentation returned by this tool for details on API usage, required parameters, and request body structure.
+        * If the user asks about a specific API, retrieve its documentation before answering or performing any action.
+        * If you are unsure about an API's usage, parameters, or expected results, always consult this tool first.
+
+        **Common Elasticsearch APIs:**
+        "autoscaling": Adjusts resources based on demand, enabling you to create and manage autoscaling policies and retrieve information about autoscaling capacity.
+        "analytics": Lets you create and manage analytics collections and view their data to analyze users’ search and click behavior, improve result relevance, and identify content gaps.
+        "cat": Provides compact, human-readable text APIs for quick inspection. Intended for console or command line use, not for applications. Use corresponding JSON APIs for application consumption.
+        "cluster": Enables you to retrieve and manage cluster, node, or shard information, settings, and statistics.
+        "health_report": Provides a report with the health status of an Elasticsearch cluster.
+        "connector": Allows you to create and manage Elastic connectors and sync jobs for integrating third-party data sources.
+        "ccr": Lets you run cross-cluster replication operations, such as creating and managing follower indices or auto-follow patterns.
+        "data stream": Enables you to create and manage data streams and their lifecycles for time series data.
+        "document": Enables you to create and manage documents in an Elasticsearch index.
+        "enrich": Lets you manage enrich policies to add enrich data to incoming documents.
+        "eql": Event Query Language for querying event-based time series data.
+        "esql": Elasticsearch Query Language for filtering, transforming, and analyzing data.
+        "features": Enables you to introspect and manage Elasticsearch features and plugins.
+        "fleet": Supports Fleet’s use of Elasticsearch for internal agent and action data.
+        "graph": Enables you to extract and summarize information about documents and terms in a data stream or index.
+        "indices": Lets you manage indices, settings, aliases, mappings, and templates.
+        "ilm": Enables you to set up policies for automatic index lifecycle management.
+        "inference": Lets you use and manage machine learning models for inference.
+        "info": Provides basic build, version, and cluster information.
+        "ingest": Enables you to manage ingest pipelines and processors.
+        "license": Lets you manage your Elasticsearch licenses.
+        "logstash": Enables you to manage pipelines for Logstash Central Management.
+        "ml": Provides access to machine learning features and information.
+        "ml anomaly": Enables anomaly detection activities.
+        "ml data frame": Enables data frame analytics activities.
+        "ml trained model": Enables model management operations.
+        "migration": Powers Kibana's Upgrade Assistant feature.
+        "monitoring": Provides APIs for monitoring Elasticsearch.
+        "shutdown": Enables you to prepare nodes for shutdown, monitor status, and resume operations.
+        "query_rules": Lets you configure per-query rules applied at query time.
+        "rollup": Enables you to create, manage, and retrieve rollup jobs.
+        "script": Lets you manage supported script contexts, languages, stored scripts, and search templates.
+        "search": Enables you to search and aggregate data in indices and data streams.
+        "search_application": Lets you manage Search Applications.
+        "searchable_snapshots": Enables searchable snapshots operations.
+        "security": Lets you manage security activities, privileges, roles, API keys, and tokens.
+        "snapshot": Enables you to set up repositories, manage backups, and restore snapshots.
+        "slm": Enables snapshot lifecycle management policies.
+        "sql": Lets you run SQL queries on Elasticsearch indices and data streams.
+        "synonyms": Lets you define and manage synonyms in an internal system index.
+        "tasks": Enables you to retrieve information about tasks or cancel running tasks.
+        "text_structure": Lets you find the structure of a text field in an index.
+        "transform": Enables you to create and manage transforms.
+        "xpack": Provides usage information about installed X-Pack features.
+        "watcher": Lets you watch for changes or anomalies in your data and perform actions in response.
+        `
+      );
+    }
+
     if (
       isFunctionAvailable(RETRIEVE_ES_API_DOC_FUNCTION_NAME) &&
       isFunctionAvailable(ELASTICSEARCH_FUNCTION_NAME)
