@@ -497,7 +497,7 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick} disabled={isReadOnly}>
                 {i18n.CREATE_BUTTON}
               </EuiButton>
             }
@@ -533,6 +533,7 @@ export const SharedLists = React.memo(() => {
             data-test-subj="importSharedExceptionList"
             iconType={'importAction'}
             onClick={() => setDisplayImportListFlyout(true)}
+            disabled={isReadOnly && !canWriteEndpointExceptions}
           >
             {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
           </EuiButton>,
