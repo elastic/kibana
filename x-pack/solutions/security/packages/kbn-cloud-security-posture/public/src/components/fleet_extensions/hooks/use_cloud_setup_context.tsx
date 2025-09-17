@@ -50,6 +50,43 @@ type CloudForCloudConnector = Pick<
   | 'isServerlessEnabled'
 >;
 
+export interface CloudSetupContextValue {
+  getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
+  config: CloudSetupConfig;
+  showCloudTemplates: boolean;
+  defaultProvider: CloudProviders;
+  defaultProviderType: string;
+  awsInputFieldMapping: AwsInputFieldMapping | undefined;
+  awsPolicyType: string;
+  awsOrganizationEnabled: boolean;
+  awsOverviewPath: string;
+  awsCloudConnectorRemoteRoleTemplate?: string;
+  isAwsCloudConnectorEnabled: boolean;
+  azureEnabled: boolean;
+  azureCloudConnectorRemoteRoleTemplate?: string;
+  isAzureCloudConnectorEnabled: boolean;
+  azureManualFieldsEnabled?: boolean;
+  azureOrganizationEnabled: boolean;
+  azureOverviewPath: string;
+  azurePolicyType: string;
+  gcpEnabled: boolean;
+  gcpOrganizationEnabled: boolean;
+  gcpCloudConnectorRemoteRoleTemplate?: string;
+  isGcpCloudConnectorEnabled: boolean;
+  gcpOverviewPath: string;
+  gcpPolicyType: string;
+  shortName?: string;
+  templateInputOptions: Array<{
+    value: CloudProviders;
+    id: CloudProviders;
+    label: string;
+    icon: string;
+    testId: string;
+  }>;
+  templateName: string;
+  elasticStackId?: string;
+}
+
 interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyInput;
   cloud: CloudForCloudConnector;
@@ -332,43 +369,6 @@ const buildCloudSetupState = ({
 
   return cloudSetupContextValues;
 };
-
-interface CloudSetupContextValue {
-  getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
-  config: CloudSetupConfig;
-  showCloudTemplates: boolean;
-  defaultProvider: CloudProviders;
-  defaultProviderType: string;
-  awsInputFieldMapping: AwsInputFieldMapping | undefined;
-  awsPolicyType: string;
-  awsOrganizationEnabled: boolean;
-  awsOverviewPath: string;
-  awsCloudConnectorRemoteRoleTemplate?: string;
-  isAwsCloudConnectorEnabled: boolean;
-  azureEnabled: boolean;
-  azureCloudConnectorRemoteRoleTemplate?: string;
-  isAzureCloudConnectorEnabled: boolean;
-  azureManualFieldsEnabled?: boolean;
-  azureOrganizationEnabled: boolean;
-  azureOverviewPath: string;
-  azurePolicyType: string;
-  gcpEnabled: boolean;
-  gcpOrganizationEnabled: boolean;
-  gcpCloudConnectorRemoteRoleTemplate?: string;
-  isGcpCloudConnectorEnabled: boolean;
-  gcpOverviewPath: string;
-  gcpPolicyType: string;
-  shortName?: string;
-  templateInputOptions: Array<{
-    value: CloudProviders;
-    id: CloudProviders;
-    label: string;
-    icon: string;
-    testId: string;
-  }>;
-  templateName: string;
-  elasticStackId?: string;
-}
 
 export function useCloudSetup(): CloudSetupContextValue {
   const context = useContext(CloudSetupContext);
