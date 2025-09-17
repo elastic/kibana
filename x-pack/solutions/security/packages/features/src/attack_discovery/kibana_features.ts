@@ -45,7 +45,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
         read: [],
       },
       alerting: {
-        rule: { all: alertingFeatures },
+        rule: { read: alertingFeatures },
         alert: { all: alertingFeatures },
       },
       ui: [],

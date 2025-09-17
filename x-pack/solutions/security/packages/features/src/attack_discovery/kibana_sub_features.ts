@@ -7,19 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { APP_ID } from '../constants';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { APP_ID, SERVER_APP_ID } from '../constants';
+
+const alertingFeatures = [
+  {
+    ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+    consumers: [SERVER_APP_ID],
+  },
+];
 
 const updateScheduleSubFeature: SubFeatureConfig = {
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.attackDiscovery.updateScheduleSubFeatureName',
     {
-      defaultMessage: 'Attack discovery schedules',
+      defaultMessage: 'Schedules',
     }
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.attackDiscovery.description',
     {
-      defaultMessage: 'Create new and update existing Attack Discovery schedules.',
+      defaultMessage: 'Create, edit, enable, disable, or delete Attack discovery schedules.',
     }
   ),
   privilegeGroups: [
@@ -39,6 +47,10 @@ const updateScheduleSubFeature: SubFeatureConfig = {
           savedObject: {
             all: [],
             read: [],
+          },
+          alerting: {
+            rule: { all: alertingFeatures },
+            alert: { all: alertingFeatures },
           },
           ui: ['updateAttackDiscoverySchedule'],
         },

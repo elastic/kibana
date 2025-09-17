@@ -11,6 +11,6 @@ export const MISSING_UPDATE_SCHEDULE_PRIVILEGES_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.schedule.missingUpdateSchedulePrivilegesDescription',
   {
     defaultMessage:
-      'You are missing update Attack Discovery privileges. Without that privilege you cannot create or edit schedules.',
+      'You are missing the update Attack discovery privilege. Without that privilege you cannot create, edit, enable, disable, or delete schedules.',
   }
 );
