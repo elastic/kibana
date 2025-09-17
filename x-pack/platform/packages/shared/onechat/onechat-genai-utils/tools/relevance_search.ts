@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { PerformMatchSearchResponse } from './steps';
 import { performMatchSearch } from './steps';
-import { resolveResource } from './steps/resolve_resource';
+import { resolveResource } from './utils/resources';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
@@ -31,6 +31,10 @@ export const relevanceSearch = async ({
   const selectedFields = fields.filter(
     (field) => field.type === 'text' || field.type === 'semantic_text'
   );
+
+  if (selectedFields.length === 0) {
+    throw new Error('No text or semantic_text fields found, aborting search.');
+  }
 
   return performMatchSearch({
     term,

@@ -51,9 +51,10 @@ const renderDefaultAdHocDataViewsHook = () => {
     internalStateActions.setDefaultProfileAdHocDataViews(previousDataViews)
   );
   const { result, unmount } = renderHook(useDefaultAdHocDataViews, {
-    initialProps: { internalState: stateContainer.internalState },
     wrapper: ({ children }) => (
-      <DiscoverTestProvider services={discoverServiceMock}>{children}</DiscoverTestProvider>
+      <DiscoverTestProvider services={discoverServiceMock} stateContainer={stateContainer}>
+        {children}
+      </DiscoverTestProvider>
     ),
   });
   return {

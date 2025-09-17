@@ -6,7 +6,7 @@
  */
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import { packagePolicyService } from '../..';
+import { agentPolicyService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
 
 import { installPackage } from './install';
@@ -23,11 +23,15 @@ jest.mock('../..', () => ({
     cleanupRollbackSavedObjects: jest.fn(),
     bumpAgentPolicyRevisionAfterRollback: jest.fn(),
   },
+  agentPolicyService: {
+    getByIds: jest.fn().mockResolvedValue([]),
+  },
 }));
 
 jest.mock('../../audit_logging');
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
+const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 const esClient = {} as any;
 const pkgName = 'test-package';
@@ -276,5 +280,53 @@ describe('rollbackInstallation', () => {
     expect(packagePolicyServiceMock.restoreRollback).not.toHaveBeenCalled();
     expect(packagePolicyServiceMock.cleanupRollbackSavedObjects).toHaveBeenCalled();
     expect(packagePolicyServiceMock.bumpAgentPolicyRevisionAfterRollback).toHaveBeenCalled();
+  });
+
+  it('should throw error on rollback when package policy is managed', async () => {
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    const savedObjectsClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+          },
+        ],
+      }),
+    } as any;
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+      ],
+    } as any);
+    agentPolicyServiceMock.getByIds.mockResolvedValue([
+      {
+        is_managed: true,
+      } as any,
+    ]);
+
+    await expect(
+      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+    ).rejects.toThrow('Cannot rollback integration with managed package policies');
   });
 });

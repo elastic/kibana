@@ -18,20 +18,20 @@ import {
   EuiNotificationBadge,
   EuiText,
 } from '@elastic/eui';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
+
+const MAX_VALUES_SELECTIONS = 10;
 
 interface ValuesFilterProps {
   selectedDimensions: string[];
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
-  timeRange?: {
-    from?: string;
-    to?: string;
-  };
+  timeRange: TimeRange;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -51,13 +51,14 @@ export const ValuesSelector = ({
   } = useDimensionsQuery({
     dimensions: selectedDimensions,
     indices,
-    from: timeRange?.from,
-    to: timeRange?.to,
+    from: timeRange.from,
+    to: timeRange.to,
   });
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
     const groupedValues = new Map<string, string[]>();
     const selectedSet = new Set(selectedValues);
+    const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
     values.forEach(({ value, field }) => {
       const arr = groupedValues.get(field) ?? [];
@@ -69,10 +70,14 @@ export const ValuesSelector = ({
       { label: field, isGroupLabel: true, value: field },
       ...fieldValues.map<SelectableEntry>((value) => {
         const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
+        const isSelected = selectedSet.has(key);
+        const isDisabledByLimit = !isSelected && isAtMaxLimit;
+
         return {
           value,
           label: value,
-          checked: selectedSet.has(key) ? 'on' : undefined,
+          checked: isSelected ? 'on' : undefined,
+          disabled: isDisabledByLimit,
           key,
         };
       }),
@@ -85,7 +90,9 @@ export const ValuesSelector = ({
         ?.filter((option) => !option.isGroupLabel && option.key)
         .map((option) => option.key!);
 
-      onChange(newSelectedValues ?? []);
+      // Enforce the maximum limit
+      const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
+      onChange(limitedSelection);
     },
     [onChange]
   );
@@ -125,17 +132,22 @@ export const ValuesSelector = ({
   }, [isLoading, selectedValues.length]);
 
   const popoverContentBelowSearch = useMemo(() => {
+    const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
+    const statusMessage = isAtMaxLimit
+      ? i18n.translate('metricsExperience.valuesSelector.maxLimitStatusMessage', {
+          defaultMessage: 'Maximum of {maxValues} values selected ({count}/{maxValues})',
+          values: { count: selectedValues.length, maxValues: MAX_VALUES_SELECTIONS },
+        })
+      : i18n.translate('metricsExperience.valuesSelector.selectedStatusMessage', {
+          defaultMessage: '{count, plural, one {# value selected} other {# values selected}}',
+          values: { count: selectedValues.length },
+        });
+
     return (
       <ClearAllSection
         selectedOptionsLength={selectedValues.length}
         onClearAllAction={onClear}
-        selectedOptionsMessage={i18n.translate(
-          'metricsExperience.valuesSelector.selectedStatusMessage',
-          {
-            defaultMessage: '{count, plural, one {# value selected} other {# values selected}}',
-            values: { count: selectedValues.length },
-          }
-        )}
+        selectedOptionsMessage={statusMessage}
       />
     );
   }, [selectedValues.length, onClear]);
