@@ -90,9 +90,13 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     [onAgentChange]
   );
 
+  const panelStyles = css`
+    inline-size: calc(${euiTheme.size.xxl} * 7);
+  `;
+
   return (
     <EuiPopover
-      panelStyle={{ inlineSize: `calc(${euiTheme.size.xxl} * 7)` }}
+      panelProps={{ css: panelStyles }}
       panelPaddingSize="none"
       button={
         <AgentSelectButton
@@ -120,7 +124,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText
                     css={css`
-                      font-weight: bold;
+                      font-weight: ${euiTheme.font.weight.bold};
                     `}
                     size="xs"
                   >
