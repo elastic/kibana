@@ -26,14 +26,25 @@ export class TourManager {
   constructor(private core: () => Promise<CoreStart>, private spacesManager: SpacesManager) {}
 
   async startTour(): Promise<{ result: 'not_available' | 'started' }> {
-    const isAvailable = await this.isTourAvailable();
-
-    if (!isAvailable) {
+    const core = await this.core();
+    if (!canManageSpaces(core) || hasCompletedTour(core)) {
       return { result: 'not_available' };
     }
 
-    this.tourState$.next('in_progress');
-    return { result: 'started' };
+    if (await hasSingleDefaultSolutionSpace(this.spacesManager)) {
+      // we have a single space, and it's not the classic solution, so we can show the tour
+      // presumably the user is the admin who created the deployment
+      this.tourState$.next('in_progress');
+      return { result: 'started' };
+    } else {
+      // If we have either (1) multiple space or (2) only one space and it's the default space with the classic solution,
+      // we don't want to show the tour later on. This can happen in the following scenarios:
+      // - the user deletes all the spaces but one (and that last space has a solution set)
+      // - the user edits the default space and sets a solution
+      // So we can immediately hide the tour in the global settings from now on.
+      await preserveTourCompletion(core);
+      return { result: 'not_available' };
+    }
   }
 
   async finishTour(): Promise<void> {
@@ -47,15 +58,6 @@ export class TourManager {
         first((state) => state === 'ended'),
         map(() => void 0)
       )
-    );
-  }
-
-  private async isTourAvailable(): Promise<boolean> {
-    const core = await this.core();
-    return (
-      canManageSpaces(core) &&
-      !hasCompletedTour(core) &&
-      (await hasSingleDefaultSolutionSpace(this.spacesManager))
     );
   }
 }
