@@ -14,7 +14,8 @@ import type {
 import { deleteAllDocuments } from './elasticsearch';
 import { getMockConversation, getMockCreatePrompt } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';
-import { rootRequest, waitForRootRequest } from './common';
+import { rootRequest, waitForRootRequest, API_HEADERS } from './common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 const createConversation = (
   body?: Partial<ConversationCreateProps>
@@ -74,6 +75,10 @@ export const verifyUserProfileExists = (username: string): Cypress.Chainable<boo
         ? getSpaceUrl(spaceId, `internal/elastic_assistant/users/_suggest`)
         : `internal/elastic_assistant/users/_suggest`,
       body: { searchTerm: username, size: 10 },
+      headers: {
+        ...API_HEADERS,
+        [ELASTIC_HTTP_VERSION_HEADER]: ['1'], // Override version for elastic assistant internal API
+      },
     }).then((response) => {
       const users = response.body.users || [];
       const userExists = users.some((user) => user.user.username === username);
