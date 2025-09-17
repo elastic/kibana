@@ -10,6 +10,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type { DocumentMatchFilterOptions } from '.';
 
@@ -20,6 +21,7 @@ export interface StreamRoutingServiceDependencies {
   timeState$: TimefilterHook['timeState$'];
   core: CoreStart;
   data: DataPublicPluginStart;
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export interface StreamRoutingInput {
