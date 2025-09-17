@@ -112,7 +112,7 @@ const RemoveButton = ({
 };
 
 const SaveButton = (props: EuiButtonPropsForButton) => (
-  <EuiButton data-test-subj="streamsAppStreamDetailRoutingSaveButton" size="s" {...props}>
+  <EuiButton data-test-subj="streamsAppStreamDetailRoutingSaveButton" size="s" fill {...props}>
     {i18n.translate('xpack.streams.streamDetailRouting.add', {
       defaultMessage: 'Save',
     })}
