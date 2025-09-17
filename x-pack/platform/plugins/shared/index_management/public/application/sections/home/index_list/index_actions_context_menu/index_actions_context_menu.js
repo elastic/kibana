@@ -545,13 +545,14 @@ export class IndexActionsContextMenu extends Component {
   isConvertableToLookupIndex = (indexName) => {
     const index = this.props.indices.find((index) => index.name === indexName);
 
-    if (!index || !index.documents || !index.primary) {
+    if (!index) {
       return false;
     }
 
     if (
-      index.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
-      Number(index.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
+      index?.documents >= 0 &&
+      index?.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
+      Number(index?.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
     ) {
       return true;
     }
