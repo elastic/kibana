@@ -295,7 +295,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ resource: 'index' }),
             expect.objectContaining({ resource: 'index' }),
             expect.objectContaining({ resource: 'ilm_policy' }),
-            expect.objectContaining({ resource: 'ilm_policy' }),
             expect.objectContaining({ resource: 'component_template' }),
           ]);
         });
