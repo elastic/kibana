@@ -28,7 +28,7 @@ export const CancelRouteRequestBody = BaseActionSchema.merge(
       /**
        * ID of the response action to cancel
        */
-      action_id: z.string().min(1),
+      id: z.string().min(1),
     }),
   })
 );
