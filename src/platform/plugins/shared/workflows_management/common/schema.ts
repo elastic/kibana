@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
@@ -21,6 +22,9 @@ const staticConnectors: ConnectorContract[] = [
       })
       .required(),
     outputSchema: z.string(),
+    description: i18n.translate('workflows.connectors.console.description', {
+      defaultMessage: 'Debug workflow with a message',
+    }),
   },
   {
     type: 'slack',
@@ -32,6 +36,9 @@ const staticConnectors: ConnectorContract[] = [
       .required(),
     outputSchema: z.object({
       message: z.string(),
+    }),
+    description: i18n.translate('workflows.connectors.slack.description', {
+      defaultMessage: 'Send a message to a Slack channel',
     }),
   },
   {
@@ -61,6 +68,9 @@ const staticConnectors: ConnectorContract[] = [
         })
       ),
     }),
+    description: i18n.translate('workflows.connectors.inference.unified_completion.description', {
+      defaultMessage: 'Generate text using a model with advanced input parameters',
+    }),
   },
   {
     type: 'inference.completion',
@@ -73,6 +83,9 @@ const staticConnectors: ConnectorContract[] = [
         result: z.string(),
       })
     ),
+    description: i18n.translate('workflows.connectors.inference.completion.description', {
+      defaultMessage: 'Generate text using a model',
+    }),
   },
   // Generic request types for raw API calls
   {
@@ -85,6 +98,9 @@ const staticConnectors: ConnectorContract[] = [
       params: z.any().optional(),
     }),
     outputSchema: z.any(),
+    description: i18n.translate('workflows.connectors.elasticsearch.request.description', {
+      defaultMessage: 'Make a generic request to an Elasticsearch API',
+    }),
   },
   {
     type: 'kibana.request',
@@ -96,6 +112,9 @@ const staticConnectors: ConnectorContract[] = [
       headers: z.any().optional(),
     }),
     outputSchema: z.any(),
+    description: i18n.translate('workflows.connectors.kibana.request.description', {
+      defaultMessage: 'Make a generic request to a Kibana API',
+    }),
   },
 ];
 
