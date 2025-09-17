@@ -164,11 +164,11 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
 
 const getOtelEsComponents = (type: string): string[] => {
   if (type === 'metrics') {
-    return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_METRICS_COMPONENT_TEMPLATES];
+    return OTEL_METRICS_COMPONENT_TEMPLATES;
   } else if (type === 'logs') {
-    return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_LOGS_COMPONENT_TEMPLATES];
+    return OTEL_LOGS_COMPONENT_TEMPLATES;
   } else if (type === 'traces') {
-    return [...OTEL_BASE_COMPONENT_TEMPLATES, ...OTEL_TRACES_COMPONENT_TEMPLATES];
+    return OTEL_TRACES_COMPONENT_TEMPLATES;
   }
   return [];
 };
