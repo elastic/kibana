@@ -208,7 +208,8 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors or _ml/anomaly_detectors/_all',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
+        'no error calling the Elasticsearch function',
         'Returns the list of ML jobs based on the response from the Elasticsearch function',
         'Includes job_1 in the list of ML jobs',
       ]);
@@ -222,7 +223,8 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors/_stats',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or ml/anomaly_detectors/_all/_stats',
+        'no error calling the Elasticsearch function',
         'Returns the ML job stats based on the response from the Elasticsearch function',
         'Includes job_1 in the ML job stats',
       ]);
@@ -236,8 +238,9 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors or _ml/anomaly_detectors/_all',
-        'Returns the list of open ML jobs based on the response from the Elasticsearch function',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or ml/anomaly_detectors/_all',
+        'no error calling the Elasticsearch function',
+        'Returns the open ML jobs based on the response from the Elasticsearch function',
         'Includes job_1 in the list of open ML jobs',
       ]);
 
@@ -250,8 +253,9 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors or _ml/anomaly_detectors/_all',
-        'Returns the list of closed ML jobs based on the response from the Elasticsearch function',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or ml/anomaly_detectors/_all',
+        'no error calling the Elasticsearch function',
+        'Returns the closed ML jobs based on the response from the Elasticsearch function',
         'Does not include job_1 in the list of closed ML jobs',
       ]);
 
@@ -264,7 +268,8 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors/job_1',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/job_1',
+        'no error calling the Elasticsearch function',
         'Returns the details of job_1 based on the response from the Elasticsearch function',
         'Includes job_1 in the response',
       ]);
@@ -278,14 +283,14 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors/job_1',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/job_1',
         'Determines if job_1 is open or closed based on the response from the Elasticsearch function',
-        'Informs the user that job_1 is currently open',
+        'Informs the user that job_1 is running',
       ]);
 
       expect(result.passed).to.be(true);
     });
-    it('Can you check if there is any anomalies in .ml-anomalies* index in the last 3 hours ? and explain what the anomaly is about?', async () => {
+    it('Can you check if there is any anomalies in index in the last 3 hours? and explain what the anomaly is about?', async () => {
       const conversation = await chatClient.complete({
         messages:
           'Can you check if there is any anomalies in logs-test index in the last 3 hours? and explain what the anomaly is about?',
@@ -293,9 +298,10 @@ describe('Elasticsearch function', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with method: GET and path: _ml/anomaly_detectors/_stats',
-        'Returns the ML job stats based on the response from the Elasticsearch function',
-        'Includes job_1 in the ML job stats',
+        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/_stats',
+        'no error calling the Elasticsearch function',
+        'Returns the anomalies found in the last 3 hours based on the response from the Elasticsearch function',
+        'Includes job_1 in the anomalies',
       ]);
 
       expect(result.passed).to.be(true);
