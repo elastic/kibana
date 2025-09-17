@@ -86,6 +86,10 @@ export interface UrlTracker {
   setTrackingEnabled: (value: boolean) => void;
 }
 
+export interface DiscoverFeatureFlags {
+  getTabsEnabled: () => boolean;
+}
+
 export interface DiscoverServices {
   aiops?: AiopsPluginStart;
   application: ApplicationStart;
@@ -98,6 +102,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  discoverFeatureFlags: DiscoverFeatureFlags;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
@@ -192,6 +197,9 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
+    discoverFeatureFlags: {
+      getTabsEnabled: () => true,
+    },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
     i18n: core.i18n,
