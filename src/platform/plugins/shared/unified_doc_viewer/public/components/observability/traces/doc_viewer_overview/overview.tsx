@@ -36,13 +36,9 @@ import { SimilarSpans } from '../components/similar_spans';
 import { SpanLinks } from '../components/span_links';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { TraceWaterfall } from '../components/trace_waterfall';
-<<<<<<< HEAD
 import { isTransaction } from '../helpers';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { TraceRootItemProvider } from './hooks/use_fetch_trace_root_item';
-=======
-import { ErrorsTable } from '../components/errors';
->>>>>>> 0f021a0ed6ada56e039e74641176c782909475e9
 
 export type OverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
