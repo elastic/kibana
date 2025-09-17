@@ -35,7 +35,7 @@ import {
   NEW_TAB_ID,
 } from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
-import { createInternalStateAsyncThunk } from '../utils';
+import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 
