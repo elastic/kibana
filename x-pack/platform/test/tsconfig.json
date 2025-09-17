@@ -168,6 +168,7 @@
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
     "@kbn/reindex-service-plugin",
+    "@kbn/streamlang",
     "@kbn/onechat-plugin",
   ]
 }

@@ -15,6 +15,7 @@ describe('CoreApp Config', () => {
     expect(configValue).toMatchInlineSnapshot(`
       CoreAppConfig {
         "allowDynamicConfigOverrides": false,
+        "skipBundleRoutesIfCdnEnabled": false,
       }
     `);
   });

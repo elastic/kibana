@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Observable, map, debounceTime } from 'rxjs';
+import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type {
+  EuiSideNavItemTypeEnhanced,
   NavigationTreeDefinition,
   NodeDefinition,
-  EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
@@ -122,6 +122,21 @@ export const getNavigationTreeDefinition = ({
                     return pathNameSerialized.startsWith(prepend('/app/dashboards'));
                   },
                   link: 'dashboards',
+                },
+                {
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate(
+                      'xpack.enterpriseSearch.searchNav.workflowsBadgeTooltip',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    ),
+                  },
+                  badgeTypeV2: 'techPreview' as const,
+                  link: 'workflows',
+                  withBadge: true,
                 },
                 {
                   children: [
