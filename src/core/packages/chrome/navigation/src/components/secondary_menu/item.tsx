@@ -12,7 +12,7 @@ import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useScrollToActive } from './use_scroll_to_active';
+import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';

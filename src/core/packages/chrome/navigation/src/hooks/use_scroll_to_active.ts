@@ -9,14 +9,21 @@
 
 import { useEffect, useRef } from 'react';
 
+/**
+ * Custom hook that provides a ref and scrolls to the element when condition is true.
+ *
+ * @template T - HTML element type (defaults to HTMLElement)
+ * @param condition - When true, scrolls the referenced element into view
+ * @returns Ref to attach to the target element
+ */
 export const useScrollToActive = <T extends HTMLElement = HTMLElement>(condition?: boolean) => {
   const ref = useRef<T>(null);
 
   useEffect(() => {
     if (condition && ref?.current) {
       ref.current.scrollIntoView({
-        behavior: 'instant',
-        block: 'start',
+        behavior: 'smooth',
+        block: 'nearest',
       });
     }
   }, [condition]);
