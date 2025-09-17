@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, useCallback } from 'react';
-import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
+import React, { useEffect, useMemo, useState, memo, useCallback } from 'react';
+import {
+  EuiForm,
+  EuiTabs,
+  EuiTab,
+  euiBreakpoint,
+  useEuiTheme,
+  useEuiOverflowScroll,
+} from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
@@ -263,24 +270,145 @@ export function LayerPanels(
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
-  const LayerPanelComponents = useMemo(() => {
-    return layerIds.map((layerId, layerIndex) => {
-      const { hidden, groups } = activeVisualization.getConfiguration({
+  const layerConfigs = useMemo(() => {
+    return layerIds.map((layerId) => ({
+      layerId,
+      config: activeVisualization.getConfiguration({
         layerId,
         frame: props.framePublicAPI,
         state: visualization.state,
+      }),
+    }));
+  }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
+
+  const [selectedTabId, setSelectedTabId] = useState(layerIds[0] || '');
+
+  const onSelectedTabChanged = (id: string) => {
+    setSelectedTabId(id);
+  };
+
+  // if the selected tab is removed, switch back first tab
+  useEffect(() => {
+    if (!layerIds.includes(selectedTabId)) {
+      setSelectedTabId(layerIds[0] || '');
+    }
+  }, [selectedTabId, layerIds]);
+
+  const renderTabs = useCallback(() => {
+    const layerTabs = layerConfigs
+      .filter((layer) => !layer.config.hidden)
+      .map((layerConfig, layerIndex) => {
+        return (
+          <EuiTab
+            key={layerIndex}
+            onClick={() => onSelectedTabChanged(layerConfig.layerId)}
+            isSelected={layerConfig.layerId === selectedTabId}
+            disabled={false}
+            data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
+          >
+            Layer {layerIndex + 1}
+          </EuiTab>
+        );
       });
 
-      if (hidden) {
-        return null;
-      }
+    if (!hideAddLayerButton) {
+      const addLayerButton = activeVisualization?.getAddLayerButtonComponent?.({
+        state: visualization.state,
+        supportedLayers: activeVisualization.getSupportedLayers(
+          visualization.state,
+          props.framePublicAPI
+        ),
+        addLayer,
+        ensureIndexPattern: async (specOrId) => {
+          let indexPatternId;
 
-      return (
+          if (typeof specOrId === 'string') {
+            indexPatternId = specOrId;
+          } else {
+            const dataView = await props.dataViews.create(specOrId);
+
+            if (!dataView.id) {
+              return;
+            }
+
+            indexPatternId = dataView.id;
+          }
+
+          const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
+            id: indexPatternId,
+            cache: props.framePublicAPI.dataViews.indexPatterns,
+          });
+
+          if (newIndexPatterns) {
+            dispatchLens(
+              changeIndexPattern({
+                dataViews: { indexPatterns: newIndexPatterns },
+                datasourceIds: Object.keys(datasourceStates),
+                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                indexPatternId,
+              })
+            );
+          }
+        },
+        registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
+        isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
+      });
+
+      if (addLayerButton)
+        layerTabs.push(
+          <EuiTab key="lsnLayerTabAdd" disabled={false}>
+            {addLayerButton}
+          </EuiTab>
+        );
+    }
+
+    return layerTabs;
+  }, [
+    activeVisualization,
+    addLayer,
+    datasourceStates,
+    dispatchLens,
+    hideAddLayerButton,
+    indexPatternService,
+    layerConfigs,
+    props.dataViews,
+    props.framePublicAPI,
+    props?.setIsInlineFlyoutVisible,
+    registerLibraryAnnotationGroupFunction,
+    selectedTabId,
+    visualization.activeId,
+    visualization.state,
+  ]);
+
+  const layerId = selectedTabId;
+  const layerIndex = layerIds.indexOf(layerId);
+  const layerConfig = useMemo(
+    () => layerConfigs.find((l) => l.layerId === selectedTabId),
+    [layerConfigs, selectedTabId]
+  );
+
+  return (
+    <EuiForm
+      css={css`
+        .lnsApp & {
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
+            calc(400px + ${euiTheme.size.base});
+          margin-left: -400px;
+          ${useEuiOverflowScroll('y')}
+          ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+            padding-left: ${euiTheme.size.base};
+            margin-left: 0;
+          }
+        }
+      `}
+    >
+      <EuiTabs>{renderTabs()}</EuiTabs>
+      {layerConfig && (
         <LayerPanel
           {...props}
           onDropToDimension={handleDimensionDrop}
           registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
-          dimensionGroups={groups}
+          dimensionGroups={layerConfig.config.groups}
           activeVisualization={activeVisualization}
           registerNewLayerRef={registerNewLayerRef}
           key={layerId}
@@ -339,88 +467,7 @@ export function LayerPanels(
           toggleFullscreen={toggleFullscreen}
           indexPatternService={indexPatternService}
         />
-      );
-    });
-  }, [
-    activeDatasourceId,
-    activeVisualization,
-    addLayer,
-    datasourceMap,
-    dispatchLens,
-    handleDimensionDrop,
-    indexPatternService,
-    layerIds,
-    onChangeIndexPattern,
-    onRemoveLayer,
-    props,
-    registerLibraryAnnotationGroupFunction,
-    registerNewLayerRef,
-    setVisualizationState,
-    toggleFullscreen,
-    updateAll,
-    updateDatasource,
-    updateDatasourceAsync,
-    visualization.state,
-  ]);
-
-  return (
-    <EuiForm
-      css={css`
-        .lnsApp & {
-          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
-          margin-left: -400px;
-          ${useEuiOverflowScroll('y')}
-          ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-            padding-left: ${euiTheme.size.base};
-            margin-left: 0;
-          }
-        }
-      `}
-    >
-      {LayerPanelComponents}
-      {!hideAddLayerButton &&
-        activeVisualization?.getAddLayerButtonComponent?.({
-          state: visualization.state,
-          supportedLayers: activeVisualization.getSupportedLayers(
-            visualization.state,
-            props.framePublicAPI
-          ),
-          addLayer,
-          ensureIndexPattern: async (specOrId) => {
-            let indexPatternId;
-
-            if (typeof specOrId === 'string') {
-              indexPatternId = specOrId;
-            } else {
-              const dataView = await props.dataViews.create(specOrId);
-
-              if (!dataView.id) {
-                return;
-              }
-
-              indexPatternId = dataView.id;
-            }
-
-            const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
-              id: indexPatternId,
-              cache: props.framePublicAPI.dataViews.indexPatterns,
-            });
-
-            if (newIndexPatterns) {
-              dispatchLens(
-                changeIndexPattern({
-                  dataViews: { indexPatterns: newIndexPatterns },
-                  datasourceIds: Object.keys(datasourceStates),
-                  visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-                  indexPatternId,
-                })
-              );
-            }
-          },
-          registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-          isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
-        })}
+      )}
     </EuiForm>
   );
 }
