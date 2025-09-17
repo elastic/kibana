@@ -1,0 +1,24 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "src/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-common",
+    "@kbn/openapi-common",
+    "@kbn/spaces-plugin",
+    "@kbn/security-solution-plugin",
+    "@kbn/test"
+  ]
+}

@@ -12,6 +12,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     { "path": "../security_solution_endpoint/tsconfig.json" },
+    "@kbn/security-test-api-clients",
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
