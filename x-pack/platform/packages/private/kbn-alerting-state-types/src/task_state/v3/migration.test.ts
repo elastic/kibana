@@ -60,7 +60,6 @@ describe('upMigration', () => {
       summaryActions: {
         action1: { date: '2023-07-31T12:00:00Z' },
       },
-      trackedExecutions: ['111-22-33'],
     };
 
     const result = upMigration(inputState);
