@@ -292,14 +292,40 @@ export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted')
 };
 
 export const shareConversationWithUser = (user: string) => {
+  cy.log(`Attempting to share conversation with user: ${user}`);
+
   // Clear the input first to ensure clean state
   cy.get(USER_PROFILES_SEARCH).find('input').clear();
-  cy.get(USER_PROFILES_SEARCH).find('input').type(user);
 
-  // Wait for the user profile options to load after typing with explicit timeout
-  cy.get(USER_PROFILES_SEARCH)
-    .find(USER_PROFILES_SELECT_OPTION(user), { timeout: 10000 })
-    .should('exist');
+  // Type the username to trigger search
+  cy.get(USER_PROFILES_SEARCH).find('input').type(user);
+  cy.log(`Typed username: ${user} in search field`);
+
+  // Wait for user profile options to load and become available
+  cy.get(USER_PROFILES_SEARCH, { timeout: 15000 }).should('be.visible');
+
+  // Add more robust waiting for the user profile option to appear
+  const waitForUserProfileOption = (attempt: number = 1, maxAttempts: number = 5) => {
+    if (attempt > maxAttempts) {
+      cy.log(`Failed to find user profile option for ${user} after ${maxAttempts} attempts`);
+      cy.get(USER_PROFILES_SEARCH).find('input').clear();
+      cy.get(USER_PROFILES_SEARCH).find('input').type(user);
+    }
+
+    cy.get(USER_PROFILES_SEARCH)
+      .find(USER_PROFILES_SELECT_OPTION(user))
+      .should('exist')
+      .then(($element) => {
+        if ($element.length === 0 && attempt <= maxAttempts) {
+          cy.log(`User profile option not found, attempt ${attempt}/${maxAttempts}`);
+          waitForUserProfileOption(attempt + 1, maxAttempts);
+        } else {
+          cy.log(`Found user profile option for ${user} on attempt ${attempt}`);
+        }
+      });
+  };
+
+  waitForUserProfileOption();
 
   // Ensure the option is visible and ready for interaction
   cy.get(USER_PROFILES_SEARCH)
@@ -314,6 +340,8 @@ export const shareConversationWithUser = (user: string) => {
   cy.get(USER_PROFILES_SEARCH)
     .find(USER_PROFILES_SELECT_OPTION(user))
     .should('have.attr', 'aria-checked', 'true');
+
+  cy.log(`Successfully selected user: ${user}`);
 };
 
 export const selectPrivate = () => {
@@ -463,9 +491,23 @@ export const assertMessageUser = (user: string, messageIndex: number) => {
 };
 
 export function assertAccessErrorToast(): void {
-  cy.get(TOASTER).should('contain', 'Access denied to conversation');
+  cy.log('Waiting for access denied toast to appear');
+
+  // Wait for toast with increased timeout for serverless environments
+  cy.get(TOASTER, { timeout: 30000 })
+    .should('be.visible')
+    .should('contain', 'Access denied to conversation');
+
+  cy.log('Access denied toast found and verified');
 }
 
 export function assertGenericConversationErrorToast(): void {
-  cy.get(TOASTER).should('contain', 'Error fetching conversation by id');
+  cy.log('Waiting for generic conversation error toast to appear');
+
+  // Wait for toast with increased timeout for serverless environments
+  cy.get(TOASTER, { timeout: 30000 })
+    .should('be.visible')
+    .should('contain', 'Error fetching conversation by id');
+
+  cy.log('Generic conversation error toast found and verified');
 }

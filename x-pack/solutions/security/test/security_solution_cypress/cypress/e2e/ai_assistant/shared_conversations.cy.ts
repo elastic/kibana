@@ -41,7 +41,11 @@ import {
   assertAccessErrorToast,
   assertGenericConversationErrorToast,
 } from '../../tasks/assistant';
-import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
+import {
+  deleteConversations,
+  waitForConversation,
+  waitForUserProfile,
+} from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
@@ -95,6 +99,14 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     loginSecondaryUser(isServerless, secondaryUser);
     // Visit a page to ensure the user profile is properly initialized
     visitGetStartedPage();
+
+    // Wait for the user profile to be available for sharing functionality
+    waitForUserProfile(secondaryUser).then((profileExists) => {
+      if (!profileExists) {
+        cy.log(`Warning: User profile for ${secondaryUser} may not be properly seeded`);
+      }
+    });
+
     cy.clearCookies();
   });
   beforeEach(() => {

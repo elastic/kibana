@@ -59,3 +59,55 @@ export const waitForCreatePrompts = (prompts: Array<Partial<PromptCreateProps>>)
     bulkPrompts({ create: prompts.map((prompt) => getMockCreatePrompt(prompt)) })
   );
 };
+
+/**
+ * Verify that a user profile exists and is searchable
+ * This ensures the user profile is seeded properly for sharing functionality
+ */
+export const verifyUserProfileExists = (username: string): Cypress.Chainable<boolean> => {
+  cy.log(`Verifying user profile exists for: ${username}`);
+
+  return cy.currentSpace().then((spaceId) => {
+    return rootRequest<{ users: Array<{ uid: string; user: { username: string } }> }>({
+      method: 'POST',
+      url: spaceId
+        ? getSpaceUrl(spaceId, `internal/elastic_assistant/users/_suggest`)
+        : `internal/elastic_assistant/users/_suggest`,
+      body: { searchTerm: username, size: 10 },
+    }).then((response) => {
+      const users = response.body.users || [];
+      const userExists = users.some((user) => user.user.username === username);
+      cy.log(`User profile exists for ${username}: ${userExists}`);
+      return userExists;
+    });
+  });
+};
+
+/**
+ * Wait for user profile to exist with retry logic
+ */
+export const waitForUserProfile = (
+  username: string,
+  maxRetries: number = 10
+): Cypress.Chainable<boolean> => {
+  cy.log(`Waiting for user profile: ${username}`);
+
+  const checkUserProfile = (attempt: number): Cypress.Chainable<boolean> => {
+    if (attempt > maxRetries) {
+      cy.log(`Failed to find user profile for ${username} after ${maxRetries} attempts`);
+      return cy.wrap(false);
+    }
+
+    return verifyUserProfileExists(username).then((exists) => {
+      if (exists) {
+        cy.log(`User profile found for ${username} on attempt ${attempt}`);
+        return cy.wrap(true);
+      } else {
+        cy.log(`User profile not found for ${username}, attempt ${attempt}/${maxRetries}`);
+        return checkUserProfile(attempt + 1);
+      }
+    });
+  };
+
+  return checkUserProfile(1);
+};
