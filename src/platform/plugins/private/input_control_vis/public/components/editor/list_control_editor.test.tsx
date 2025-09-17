@@ -16,7 +16,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
-import { ControlParams } from '../../editor_utils';
+import type { ControlParams } from '../../editor_utils';
 import { getDepsMock, updateComponent } from '../../test_utils';
 
 const controlParamsBase: ControlParams = {

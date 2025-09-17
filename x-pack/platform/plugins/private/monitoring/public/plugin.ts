@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   App,
   AppMountParameters,
   CoreSetup,
@@ -16,8 +16,8 @@ import {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   CCS_REMOTE_PATTERN,
   RULE_DETAILS,
@@ -34,7 +34,7 @@ import { createMissingMonitoringDataAlertType } from './alerts/missing_monitorin
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { setConfig } from './external_config';
 import { Legacy } from './legacy_shims';
-import {
+import type {
   MonitoringConfig,
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,

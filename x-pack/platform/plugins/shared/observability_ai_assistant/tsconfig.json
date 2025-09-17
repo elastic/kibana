@@ -58,6 +58,8 @@
     "@kbn/lock-manager",
     "@kbn/i18n-react",
     "@kbn/inference-tracing",
+    "@kbn/licensing-types",
+    "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-base-plugin"
   ],
   "exclude": ["target/**/*"]

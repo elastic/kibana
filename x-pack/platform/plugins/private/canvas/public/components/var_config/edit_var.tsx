@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -22,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CanvasVariable } from '../../../types';
+import type { CanvasVariable } from '../../../types';
 import { VarValueField } from './var_value_field';
 
 const strings = {

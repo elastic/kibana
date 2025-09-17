@@ -16,7 +16,7 @@ import type {
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,
@@ -459,5 +459,7 @@ export type {
   RawRuleLastRun,
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
+
+export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

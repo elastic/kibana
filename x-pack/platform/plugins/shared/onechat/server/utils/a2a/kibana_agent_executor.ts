@@ -7,9 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
+import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
 import type { Part, TextPart } from '@a2a-js/sdk';
-import { AgentMode, isRoundCompleteEvent } from '@kbn/onechat-common';
+import { isRoundCompleteEvent } from '@kbn/onechat-common';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -49,7 +49,6 @@ export class KibanaAgentExecutor implements AgentExecutor {
 
       const chatEvents$ = chat.converse({
         agentId: this.agentId,
-        mode: AgentMode.normal,
         nextInput: { message: userText },
         request: this.kibanaRequest,
         conversationId: a2aConversationId,

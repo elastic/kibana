@@ -18,7 +18,6 @@ import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
 import type { ToolbarProps } from './types';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 
 interface Props extends ToolbarProps {
   groupByFields: string[];
@@ -32,35 +31,27 @@ export const MetricsAndGroupByToolbarItems = ({
   ...props
 }: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
-  const { featureFlags } = usePluginConfig();
-  const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
+  const { data: timeRangeMetadata, loading = false } = useTimeRangeMetadataContext();
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
-    [timeRangeMetadata]
+    [timeRangeMetadata?.schemas]
   );
 
   useEffect(() => {
-    if (
-      !allowSchemaSelection ||
-      !timeRangeMetadata ||
-      schemas.length === 0 ||
-      !featureFlags.hostOtelEnabled
-    ) {
+    if (!allowSchemaSelection || !timeRangeMetadata?.preferredSchema || schemas.length === 0) {
       return;
     }
 
-    const current = preferredSchema;
-    if (current === null) {
+    if (preferredSchema === null) {
       changePreferredSchema(timeRangeMetadata.preferredSchema);
     }
   }, [
     allowSchemaSelection,
     changePreferredSchema,
-    featureFlags.hostOtelEnabled,
     preferredSchema,
     schemas,
-    timeRangeMetadata,
+    timeRangeMetadata?.preferredSchema,
   ]);
 
   const { value: aggregations } = useAsync(
@@ -109,12 +100,12 @@ export const MetricsAndGroupByToolbarItems = ({
         </EuiFlexItem>
       )}
 
-      {featureFlags.hostOtelEnabled && allowSchemaSelection && (
-        <EuiFlexItem>
+      {allowSchemaSelection && (
+        <EuiFlexItem grow={false}>
           <SchemaSelector
-            value={preferredSchema ?? 'ecs'}
+            value={preferredSchema ?? 'semconv'}
             schemas={schemas}
-            isLoading={loading ?? false}
+            isLoading={loading}
             onChange={changePreferredSchema}
           />
         </EuiFlexItem>

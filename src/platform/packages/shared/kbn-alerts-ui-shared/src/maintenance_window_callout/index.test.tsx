@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor, cleanup } from '@testing-library/react';
@@ -178,7 +179,8 @@ describe('MaintenanceWindowCallout', () => {
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance windows are active',
-        toastMessage: 'Rule notifications are stopped while maintenance windows are running.',
+        toastMessage:
+          'Some rule notifications may be stopped while maintenance windows are running.',
       });
     });
   });

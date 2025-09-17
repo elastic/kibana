@@ -32,10 +32,8 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import {
-  GetBenchmarkDynamicValues,
-  useBenchmarkDynamicValues,
-} from '../../common/hooks/use_benchmark_dynamic_values';
+import type { GetBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
+import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';

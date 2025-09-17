@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLSingleAstItem,
   ESQLFunction,
@@ -20,7 +22,6 @@ import type {
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
-  ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
@@ -31,13 +32,8 @@ import {
   isLiteralDateItem,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
-import {
-  type SupportedDataType,
-  isParameterType,
-  FunctionDefinition,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '../../types';
+import type { FunctionDefinition, FunctionReturnType } from '../../types';
+import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
 import { getColumnForASTNode, getOverlapRange } from '../shared';
 import { getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';
@@ -172,14 +168,12 @@ export async function getFieldsOrFunctionsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   {
     functions,
-    fields,
-    userDefinedColumns,
+    columns: fields,
     values = false,
     literals = false,
   }: {
     functions: boolean;
-    fields: boolean;
-    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
+    columns: boolean;
     literals?: boolean;
     values?: boolean;
   },
@@ -190,7 +184,7 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
   activeProduct?: PricingProduct
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
@@ -204,34 +198,6 @@ export async function getFieldsOrFunctionsSuggestions(
     functions
   );
 
-  const filteredColumnByType: string[] = [];
-  if (userDefinedColumns) {
-    for (const userDefinedColumn of userDefinedColumns.values()) {
-      if (
-        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
-        !ignoreColumns.includes(userDefinedColumn[0].name)
-      ) {
-        filteredColumnByType.push(userDefinedColumn[0].name);
-      }
-    }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
-    // avg( numberField ) => avg_numberField_
-    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-    if (
-      filteredColumnByType.length &&
-      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
-    ) {
-      for (const userDefinedColumn of filteredColumnByType) {
-        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
-        const index = filteredFieldsByType.findIndex(
-          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
-        );
-        if (index >= 0) {
-          filteredFieldsByType.splice(index);
-        }
-      }
-    }
-  }
   // could also be in stats (bucket) but our autocomplete is not great yet
   const displayDateSuggestions =
     types.includes('date') && [Location.WHERE, Location.EVAL].includes(location);
@@ -248,9 +214,6 @@ export async function getFieldsOrFunctionsSuggestions(
           hasMinimumLicenseRequired,
           activeProduct
         )
-      : [],
-    userDefinedColumns
-      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
     literals ? getCompatibleLiterals(types) : []
   );
@@ -367,7 +330,7 @@ export async function suggestForExpression({
   activeProduct?: PricingProduct;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
@@ -383,11 +346,7 @@ export async function suggestForExpression({
     case 'after_literal':
     case 'after_column':
     case 'after_function':
-      const expressionType = getExpressionType(
-        expressionRoot,
-        context?.fields,
-        context?.userDefinedColumns
-      );
+      const expressionType = getExpressionType(expressionRoot, context?.columns);
 
       if (!isParameterType(expressionType)) {
         break;
@@ -475,8 +434,7 @@ export async function suggestForExpression({
           location,
           rootOperator: rightmostOperator,
           preferredExpressionType,
-          getExpressionType: (expression) =>
-            getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+          getExpressionType: (expression) => getExpressionType(expression, context?.columns),
           getColumnsByType,
           hasMinimumLicenseRequired,
           activeProduct,

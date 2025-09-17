@@ -5,11 +5,11 @@ workflow:
   description: 'Remind users to enroll in JAMF'
   enabled: true
   triggers:
-    - type: triggers.elastic.scheduled
+    - type: scheduled
       with:
         every: 1
         unit: day
-    - type: triggers.elastic.manual
+    - type: manual
   inputs:
   consts:
     - name: jamf-server-url

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -16,7 +17,6 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -40,14 +40,14 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
-import { useGenAIConnectors } from '../hooks/use_genai_connectors';
+import type { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
 import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
-import { FlyoutPositionMode } from './chat_flyout';
+import type { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
@@ -57,7 +57,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
-import { useConversationContextMenu } from '../hooks';
+import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -167,6 +167,8 @@ export function ChatBody({
     false
   );
 
+  const scopes = useScopes();
+
   const {
     conversation,
     conversationId,
@@ -247,11 +249,15 @@ export function ChatBody({
         conversation: { id, last_updated: lastUpdated },
       };
 
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
+
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
           feedback,
           conversation: conversationWithoutMessagesAndTitle,
+          connector,
+          scopes,
         },
       });
     }

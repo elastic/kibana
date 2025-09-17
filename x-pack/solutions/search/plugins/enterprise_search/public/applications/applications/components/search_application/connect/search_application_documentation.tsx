@@ -36,7 +36,7 @@ export const SearchApplicationDocumentation = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.title',
                 {
-                  defaultMessage: 'Learn more about Search Applications',
+                  defaultMessage: 'Learn more about search applications',
                 }
               )}
             </h2>
@@ -48,7 +48,7 @@ export const SearchApplicationDocumentation = () => {
                 'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.description',
                 {
                   defaultMessage:
-                    'Search Applications help make your Elasticsearch data easily searchable for end users.',
+                    'Search applications help make your Elasticsearch data easily searchable for end users.',
                 }
               )}
             </p>

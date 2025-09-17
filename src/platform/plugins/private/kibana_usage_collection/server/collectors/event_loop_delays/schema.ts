@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface EventLoopDelaysUsageReport {
   daily: Array<{
@@ -23,6 +23,7 @@ export interface EventLoopDelaysUsageReport {
     percentiles: {
       '50': number;
       '75': number;
+      '90': number;
       '95': number;
       '99': number;
     };
@@ -99,6 +100,12 @@ export const eventLoopDelaysUsageSchema: MakeSchemaFrom<EventLoopDelaysUsageRepo
           type: 'long',
           _meta: {
             description: 'The 75th accumulated percentile distribution in ms',
+          },
+        },
+        '90': {
+          type: 'long',
+          _meta: {
+            description: 'The 90th accumulated percentile distribution in ms',
           },
         },
         '95': {

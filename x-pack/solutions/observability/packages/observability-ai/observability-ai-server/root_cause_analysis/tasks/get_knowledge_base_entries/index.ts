@@ -9,7 +9,7 @@ import { ShortIdTable } from '@kbn/observability-ai-assistant-plugin/common';
 import { decode, encode } from 'gpt-tokenizer';
 import { orderBy, sumBy } from 'lodash';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { RootCauseAnalysisContext } from '../../types';
+import type { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
 import { toBlockquote } from '../../util/to_blockquote';
 

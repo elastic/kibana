@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchSourceLogstashPipelineVertex } from '../../../common/types/es';
+import type { ElasticsearchSourceLogstashPipelineVertex } from '../../../common/types/es';
 import { _vertexStats, _enrichStateWithStatsAggregation } from './get_pipeline';
 
 describe('get_pipeline', () => {

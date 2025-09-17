@@ -8,21 +8,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
-import {
-  apiCanAccessViewMode,
-  apiHasParentApi,
-  apiHasUniqueId,
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasParentApi,
   HasUniqueId,
   PublishesDescription,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
+import {
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasUniqueId,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { CONVERT_LEGACY_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
 
 const displayName = i18n.translate('dashboardMarkdown.convertLegacyDisplayName', {

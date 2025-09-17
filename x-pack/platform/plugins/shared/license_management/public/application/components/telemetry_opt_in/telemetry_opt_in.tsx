@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LazyOptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
-import { TelemetryPluginStart } from '../../lib/telemetry';
+import type { TelemetryPluginStart } from '../../lib/telemetry';
 
 interface State {
   showMoreTelemetryInfo: boolean;

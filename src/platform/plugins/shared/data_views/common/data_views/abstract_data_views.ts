@@ -12,7 +12,7 @@ import type {
   FieldFormatsStartCommon,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { cloneDeep } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {

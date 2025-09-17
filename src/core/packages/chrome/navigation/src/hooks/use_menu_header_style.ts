@@ -25,7 +25,7 @@ export function useMenuHeaderStyle() {
     colorMode === 'DARK' ? `calc(${euiTheme.size.base} - var(--border-width))` : euiTheme.size.base;
 
   return css`
-    --border-width: 1px;
+    --border-width: ${euiTheme.border.width.thin};
     // 20px is forced by section dividers
     --horizontal-padding: calc(20px - var(--border-width));
     position: sticky;

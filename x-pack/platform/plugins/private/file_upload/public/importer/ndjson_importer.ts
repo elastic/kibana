@@ -5,52 +5,14 @@
  * 2.0.
  */
 
+import { NdjsonReader } from '@kbn/file-upload-common';
 import { Importer } from './importer';
-import type { CreateDocsResponse } from './types';
 
 export class NdjsonImporter extends Importer {
+  protected _reader: NdjsonReader;
+
   constructor() {
     super();
-  }
-
-  protected _createDocs(json: string, isLastPart: boolean): CreateDocsResponse<string> {
-    let remainder = 0;
-    try {
-      const splitJson = json.split(/}\s*\n/);
-      const incompleteLastLine = json.match(/}\s*\n?$/) === null;
-
-      const docs: string[] = [];
-      if (splitJson.length) {
-        for (let i = 0; i < splitJson.length - 1; i++) {
-          if (splitJson[i] !== '') {
-            // note the extra } at the end of the line, adding back
-            // the one that was eaten in the split
-            docs.push(`${splitJson[i]}}`);
-          }
-        }
-
-        const lastDoc = splitJson[splitJson.length - 1];
-        if (lastDoc) {
-          if (incompleteLastLine === true) {
-            remainder = lastDoc.length;
-          } else {
-            docs.push(`${lastDoc}}`);
-          }
-        }
-      }
-
-      return {
-        success: true,
-        docs,
-        remainder,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        docs: [],
-        remainder,
-        error,
-      };
-    }
+    this._reader = new NdjsonReader();
   }
 }

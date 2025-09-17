@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -15,7 +15,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
@@ -108,7 +108,7 @@ import type {
 } from './plugin_contract';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { artifactService } from './lib/telemetry/artifact';
+import { type CdnConfig, artifactService } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
@@ -139,6 +139,10 @@ import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/threat_intelligence/constants';
+import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
+import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
+import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
+import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -155,6 +159,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
+
+  private readonly healthDiagnosticService: HealthDiagnosticService;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -209,6 +215,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.logger.debug('plugin initialized');
+
+    this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
   public setup(
@@ -227,7 +235,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
-    productFeaturesService.init(plugins.features);
+    productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
@@ -304,7 +312,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       productFeaturesService,
     });
 
-    productFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -579,6 +586,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointContext: this.endpointContext.service,
     });
 
+    if (plugins.taskManager) {
+      this.healthDiagnosticService.setup({
+        taskManager: plugins.taskManager,
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not registered.');
+    }
+
     return {
       setProductFeaturesConfigurator:
         productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
@@ -621,9 +636,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
+    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolEnabled
+      ? assistantTools
+      : assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID);
+
+    plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      defendInsightsPolicyResponseFailure:
+        config.experimentalFeatures.defendInsightsPolicyResponseFailure,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -641,6 +662,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
+      licenseService,
     });
 
     this.endpointAppContextService.start({
@@ -729,6 +751,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         .catch(() => {}); // it shouldn't refuse, but just in case
     }
 
+    let queryConfig: TelemetryQueryConfiguration | undefined;
+
+    if (this.config.telemetry?.queryConfig !== undefined) {
+      queryConfig = {
+        pageSize: this.config.telemetry.queryConfig.pageSize ?? 500,
+        maxResponseSize: this.config.telemetry.queryConfig.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
+        maxCompressedResponseSize:
+          this.config.telemetry.queryConfig.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
+      };
+    }
+
     this.telemetryReceiver
       .start(
         core,
@@ -736,11 +769,22 @@ export class Plugin implements ISecuritySolutionPlugin {
         DEFAULT_ALERTS_INDEX,
         this.endpointAppContextService,
         exceptionListClient,
-        packageService
+        packageService,
+        queryConfig
       )
       .catch(() => {});
 
-    artifactService.start(this.telemetryReceiver).catch(() => {});
+    if (this.config.cdn?.url && this.config.cdn?.publicKey) {
+      const cdnConfig: CdnConfig = {
+        url: this.config.cdn.url,
+        pubKey: this.config.cdn.publicKey,
+      };
+      this.logger.info('Starting artifact service with custom CDN config');
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
+    } else {
+      this.logger.info('Starting artifact service with default CDN config');
+      artifactService.start(this.telemetryReceiver).catch(() => {});
+    }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
 
@@ -799,6 +843,23 @@ export class Plugin implements ISecuritySolutionPlugin {
           return packagePolicy;
         }
       );
+    }
+
+    if (plugins.taskManager) {
+      const serviceStart = {
+        taskManager: plugins.taskManager,
+        esClient: core.elasticsearch.client.asInternalUser,
+        analytics: core.analytics,
+        receiver: this.telemetryReceiver,
+      };
+
+      this.healthDiagnosticService.start(serviceStart).catch((e) => {
+        this.logger.warn('Error starting health diagnostic task', {
+          error: e.message,
+        } as LogMeta);
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
     return {};

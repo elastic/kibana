@@ -60,6 +60,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
+    "@kbn/licensing-types",
   ],
   "exclude": ["target/**/*"]
 }

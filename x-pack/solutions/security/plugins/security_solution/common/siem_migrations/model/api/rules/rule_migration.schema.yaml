@@ -284,6 +284,11 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: is_missing_index
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         200:
           description: Indicates rule migration have been retrieved correctly.
@@ -531,7 +536,7 @@ paths:
             application/json:
               schema:
                 $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationStats'
-        204:
+        404:
           description: Indicates the migration id was not found.
 
   /internal/siem_migrations/rules/{migration_id}/stop:
@@ -618,7 +623,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+                $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceData'
       responses:
         200:
           description: Indicates migration resources have been created or updated correctly.
@@ -653,7 +658,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceType'
+            $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceType'
         - name: names
           in: query
           required: false
@@ -680,7 +685,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResource'
 
   /internal/siem_migrations/rules/{migration_id}/resources/missing:
     get:
@@ -708,7 +713,7 @@ paths:
                 type: array
                 description: The identified resources missing
                 items:
-                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceBase'
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
 
   /internal/siem_migrations/rules/missing_privileges:
     get:

@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { IndexTemplateDef } from '../data_sources/fake_hosts/index_template_def';
+import type { IndexTemplateDef } from '../data_sources/fake_hosts/index_template_def';
 
 export async function installTemplate(
   client: Client,

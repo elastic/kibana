@@ -14,10 +14,13 @@ import {
   initializeControlGroupTelemetry,
   type ControlGroupTelemetry,
 } from '@kbn/controls-plugin/server';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { DashboardSavedObjectAttributes, SavedDashboardPanel } from '../dashboard_saved_object';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 

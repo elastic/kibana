@@ -13,7 +13,7 @@ import type { PrivMonBulkUser } from '../../types';
  *
  * For each user:
  * - If the user already exists (has an ID), generates an `update` operation using a Painless script
- *   to append the index name to `labels.source_indices` and ensure `'index'` is listed in `labels.sources`.
+ *   to append the source id to `labels.source_ids` and ensure `'index'` is listed in `labels.sources`.
  * - If the user is new, generates an `index` operation to create a new document with default labels.
  *
  * Logs key steps during operation generation and returns the bulk operations array, ready for submission to the ES Bulk API.
@@ -29,11 +29,12 @@ export const bulkUpsertOperationsFactory =
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
     dataClient.log('info', `Building bulk operations for ${users.length} users`);
+    const now = new Date().toISOString();
     for (const user of users) {
       if (user.existingUserId) {
         // Update user with painless script
         dataClient.log(
-          'info',
+          'debug',
           `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
         );
         ops.push(
@@ -41,34 +42,58 @@ export const bulkUpsertOperationsFactory =
           {
             script: {
               source: `
-              if (!ctx._source.labels.source_indices.contains(params.index)) {
-                ctx._source.labels.source_indices.add(params.index);
+              boolean userModified = false;
+              if (ctx._source.labels == null) {
+                ctx._source.labels = new HashMap();
+              }
+              if (ctx._source.labels.source_ids == null) {
+                ctx._source.labels.source_ids = new ArrayList();
+              }
+              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
+                ctx._source.labels.source_ids.add(params.source_id);
+                userModified = true;
+              }
+              if (ctx._source.labels.sources == null) {
+                ctx._source.labels.sources = new ArrayList();
               }
               if (!ctx._source.labels.sources.contains("index")) {
                 ctx._source.labels.sources.add("index");
+                userModified = true;
+              }
+
+              if (ctx._source.user.is_privileged != true) {
+                ctx._source.user.is_privileged = true;
+                userModified = true;
+              }
+              
+              if (userModified) {
+                ctx._source['@timestamp'] = params.now;
+                ctx._source.event.ingested = params.now;
               }
             `,
               params: {
-                index: user.indexName,
+                source_id: user.sourceId,
+                now,
               },
             },
           }
         );
       } else {
         // New user — create
-        dataClient.log('info', `Creating new user: ${user.username} with index: ${user.indexName}`);
+        dataClient.log('info', `Creating new user: ${user.username}`);
         ops.push(
           { index: { _index: userIndexName } },
           {
+            '@timestamp': now,
             user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],
-              source_indices: [user.indexName],
+              source_ids: [user.sourceId],
             },
           }
         );
       }
     }
-    dataClient.log('info', `Built ${ops.length} bulk operations for users`);
+    dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
     return ops;
   };

@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 
 import { euiTextTruncate } from '@elastic/eui';
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 export const AnalyticsCollectionCardStyles = (euiTheme: EuiThemeComputed) => ({
   badge: {

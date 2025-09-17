@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function uniq<T>(input: T[]): T[] {
   return [...new Set(input)];

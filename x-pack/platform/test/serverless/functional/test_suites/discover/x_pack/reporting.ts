@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reporting');
@@ -214,7 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // logs SOs include a canvas SO which is not supported in Serverless
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
+          'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs'
         );
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
@@ -225,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // instead of using `reportingAPI.teardownLogs()` since the original
         // logs SOs include a canvas SO which is not supported in Serverless
         await kibanaServer.importExport.unload(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
+          'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs'
         );
         await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await reset();

@@ -6,54 +6,50 @@
  */
 
 import * as React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { WhenExpression } from './when';
-import { FormattedMessage } from '@kbn/i18n-react';
+
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
 
 describe('when expression', () => {
-  it('renders with builtin aggregation types', () => {
+  it('renders with builtin aggregation types', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggType = jest.fn();
-    const wrapper = shallow(
+    renderWithIntl(
       <WhenExpression aggType={'count'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );
-    expect(wrapper.find('[data-test-subj="whenExpressionSelect"]')).toMatchInlineSnapshot(`
-    <EuiSelect
-      data-test-subj="whenExpressionSelect"
-      fullWidth={true}
-      id="aggTypeField"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "text": "count()",
-            "value": "count",
-          },
-          Object {
-            "text": "average()",
-            "value": "avg",
-          },
-          Object {
-            "text": "sum()",
-            "value": "sum",
-          },
-          Object {
-            "text": "min()",
-            "value": "min",
-          },
-          Object {
-            "text": "max()",
-            "value": "max",
-          },
-        ]
-      }
-      value="count"
-    />
-    `);
+
+    expect(screen.getByTestId('whenExpression')).toBeInTheDocument();
+    expect(screen.getByText('count()')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('whenExpression'));
+
+    expect(await screen.findByTestId('whenExpressionSelect')).toBeInTheDocument();
+
+    const select = screen.getByTestId('whenExpressionSelect');
+    expect(select).toHaveValue('count');
+
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(5);
+    expect(options[0]).toHaveTextContent('count()');
+    expect(options[1]).toHaveTextContent('average()');
+    expect(options[2]).toHaveTextContent('sum()');
+    expect(options[3]).toHaveTextContent('min()');
+    expect(options[4]).toHaveTextContent('max()');
   });
 
-  it('renders with custom aggregation types', () => {
+  it('renders with custom aggregation types', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggType = jest.fn();
-    const wrapper = shallow(
+    renderWithIntl(
       <WhenExpression
         aggType={'count'}
         onChangeSelectedAggType={onChangeSelectedAggType}
@@ -74,43 +70,38 @@ describe('when expression', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="whenExpressionSelect"]')).toMatchInlineSnapshot(`
-    <EuiSelect
-      data-test-subj="whenExpressionSelect"
-      fullWidth={true}
-      id="aggTypeField"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "text": "Test1()",
-            "value": "test1",
-          },
-          Object {
-            "text": "Test2()",
-            "value": "test2",
-          },
-        ]
-      }
-      value="count"
-    />
-    `);
+    expect(screen.getByTestId('whenExpression')).toBeInTheDocument();
+    expect(screen.getByText('Test1()')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('whenExpression'));
+
+    expect(await screen.findByTestId('whenExpressionSelect')).toBeInTheDocument();
+
+    const select = screen.getByTestId('whenExpressionSelect');
+    expect(select).toHaveValue('test1');
+
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
+    expect(options[0]).toHaveTextContent('Test1()');
+    expect(options[1]).toHaveTextContent('Test2()');
   });
 
-  it('renders when popover title', () => {
+  it('renders when popover title', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggType = jest.fn();
-    const wrapper = shallow(
+    renderWithIntl(
       <WhenExpression aggType={'avg'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );
-    wrapper.simulate('click');
-    expect(wrapper.find('[value="avg"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.contains(
-        <FormattedMessage
-          id="xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle"
-          defaultMessage="when"
-        />
-      )
-    ).toBeTruthy();
+
+    expect(screen.getByTestId('whenExpression')).toBeInTheDocument();
+    expect(screen.getByText('average()')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('whenExpression'));
+
+    const select = await screen.findByTestId('whenExpressionSelect');
+
+    expect(select).toBeInTheDocument();
+    expect(select).toHaveValue('avg');
+    expect(screen.getAllByText('when').length).toBeGreaterThan(0);
   });
 });

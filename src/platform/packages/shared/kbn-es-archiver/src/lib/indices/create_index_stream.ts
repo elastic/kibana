@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Transform, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { Stats } from '../stats';
+import type { Stats } from '../stats';
 import {
   cleanSavedObjectIndices,
   deleteSavedObjectIndices,

@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
@@ -16,8 +14,11 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
+  EuiFlyoutFooter,
   useGeneratedHtmlId,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,10 +27,10 @@ import { DEGRADED_DOCS_QUERY, FAILURE_STORE_SELECTOR } from '../../../../common/
 import { _IGNORED } from '../../../../common/es_fields';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
-  discoverAriaText,
   fieldIgnoredText,
+  flyoutCancelText,
+  discoverAriaText,
   openInDiscoverText,
-  overviewQualityIssuesSectionTitle,
 } from '../../../../common/translations';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -71,7 +72,7 @@ export default function QualityIssueFlyout() {
   });
 
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: datasetDetails.rawName,
     timeRangeConfig: timeRange,
     query: {
       language: 'kuery',
@@ -96,15 +97,12 @@ export default function QualityIssueFlyout() {
       data-test-subj={'datasetQualityDetailsDegradedFieldFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiBadge color="warning">{overviewQualityIssuesSectionTitle}</EuiBadge>
-        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
           <EuiTitle size="m">
             <EuiText>
               {expandedDegradedField?.type === 'degraded' ? (
                 <>
-                  {expandedDegradedField?.name}{' '}
-                  <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
+                  {expandedDegradedField?.name} {fieldIgnoredText}
                 </>
               ) : (
                 <span style={{ fontWeight: 400 }}>
@@ -118,16 +116,6 @@ export default function QualityIssueFlyout() {
               )}
             </EuiText>
           </EuiTitle>
-          <EuiToolTip content={openInDiscoverText}>
-            <EuiButtonIcon
-              display="base"
-              iconType="discoverApp"
-              aria-label={discoverAriaText}
-              size="s"
-              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover"
-              {...redirectLinkProps.linkProps}
-            />
-          </EuiToolTip>
         </EuiFlexGroup>
         {expandedDegradedField?.type === 'degraded' &&
           !isUserViewingTheIssueOnLatestBackingIndex && (
@@ -174,6 +162,23 @@ export default function QualityIssueFlyout() {
         {expandedDegradedField?.type === 'degraded' && <DegradedFieldFlyout />}
         {expandedDegradedField?.type === 'failed' && <FailedDocsFlyout />}
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={closeDegradedFieldFlyout}>{flyoutCancelText}</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              aria-label={discoverAriaText}
+              size="s"
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover"
+              {...redirectLinkProps.linkProps}
+            >
+              {openInDiscoverText}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

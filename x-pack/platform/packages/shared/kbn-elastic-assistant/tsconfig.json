@@ -45,5 +45,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-security",
     "@kbn/inference-common",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-user-profile-common",
   ]
 }

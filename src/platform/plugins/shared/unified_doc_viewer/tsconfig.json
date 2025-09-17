@@ -54,7 +54,9 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/css-utils",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/esql-composer",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

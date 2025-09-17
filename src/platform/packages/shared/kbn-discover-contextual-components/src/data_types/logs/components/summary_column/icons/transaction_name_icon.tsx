@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
-import { useEuiTheme, IconType, EuiIcon } from '@elastic/eui';
-import { AgentName, isRumAgentName } from '@kbn/elastic-agent-utils';
+import type { IconType } from '@elastic/eui';
+import { useEuiTheme, EuiIcon } from '@elastic/eui';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import { isRumAgentName } from '@kbn/elastic-agent-utils';
 import { css } from '@emotion/react';
 
 export const TransactionNameIcon = (agentName: AgentName) => {

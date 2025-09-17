@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { IMetricAggConfig } from './metric_agg_type';
+import type { IMetricAggConfig } from './metric_agg_type';
 import { getCountMetricAgg } from './count';
 
 function makeAgg(emptyAsNull: boolean = false, timeShift?: moment.Duration): IMetricAggConfig {

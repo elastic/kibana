@@ -27,6 +27,9 @@ export const ArtifactConstants = {
 
   SUPPORTED_BLOCKLISTS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_BLOCKLISTS_NAME: 'endpoint-blocklist',
+
+  SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS: ['macos', 'windows'],
+  GLOBAL_TRUSTED_DEVICES_NAME: 'endpoint-trusteddevicelist',
 };
 
 export const ManifestConstants = {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { JourneyStep } from '../../../../../common/runtime_types/ping/synthetics';
+import type { JourneyStep } from '../../../../../common/runtime_types/ping/synthetics';
 import { PingTimestamp } from '../../monitor/ping_list/columns/ping_timestamp';
 
 interface Props {

@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { countBy } from 'lodash';
 import { useDatasetQualityTable } from '.';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicators } from '../../common/types';
+import type { QualityIndicators } from '../../common/types';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
 

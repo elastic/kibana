@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
-import { RenderWizardArguments } from '../layer_wizard_registry';
+import type { RenderWizardArguments } from '../layer_wizard_registry';
 import { GeoJsonVectorLayer } from '../../vector_layer';
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../../connected_components/add_layer_panel/view';

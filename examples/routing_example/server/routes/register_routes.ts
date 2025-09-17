@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { registerGetRandomNumberRoute } from './random_number_generator';
 import { registerGetRandomNumberBetweenRoute } from './random_number_between_generator';
 import { registerGetMessageByIdRoute, registerPostMessageRoute } from './message_routes';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../../state/selectors/workpad';
-import { State } from '../../../../types';
+import type { State } from '../../../../types';
 import { SidebarContent as Component } from './sidebar_content.component';
 
 interface SidebarContentProps {

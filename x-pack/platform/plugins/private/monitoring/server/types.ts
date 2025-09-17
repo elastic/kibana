@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type {
   IRouter,
   Logger,
@@ -14,26 +14,26 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import type Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { TypeOf } from '@kbn/config-schema';
-import { LicenseFeature, ILicense } from '@kbn/licensing-plugin/server';
+import type { errors } from '@elastic/elasticsearch';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { LicenseFeature, ILicense } from '@kbn/licensing-types';
 import type {
   PluginStartContract as ActionsPluginsStartContact,
   ActionsApiRequestHandlerContext,
 } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
-import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
-import { ActionTypeRegistry } from '@kbn/actions-plugin/server/action_type_registry';
-import { ElasticsearchModifiedSource } from '../common/types/es';
-import { RulesByType } from '../common/types/alerts';
-import { configSchema, MonitoringConfig } from './config';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
+import type { ActionTypeRegistry } from '@kbn/actions-plugin/server/action_type_registry';
+import type { ElasticsearchModifiedSource } from '../common/types/es';
+import type { RulesByType } from '../common/types/alerts';
+import type { configSchema, MonitoringConfig } from './config';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;

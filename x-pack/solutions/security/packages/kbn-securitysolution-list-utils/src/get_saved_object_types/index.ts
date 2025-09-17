@@ -7,7 +7,7 @@
 
 import type { NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SavedObjectType } from '../types';
+import type { SavedObjectType } from '../types';
 import { getSavedObjectType } from '../get_saved_object_type';
 
 export const getSavedObjectTypes = ({

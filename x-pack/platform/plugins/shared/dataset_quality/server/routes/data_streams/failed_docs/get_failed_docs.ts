@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
-import { DataStreamDocsStat } from '../../../../common/api_types';
-import { DataStreamType } from '../../../../common/types';
+import type { DataStreamDocsStat } from '../../../../common/api_types';
+import type { DataStreamType } from '../../../../common/types';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
 import { getAggregatedDatasetPaginatedResults } from '../get_dataset_aggregated_paginated_results';
 

@@ -7,11 +7,11 @@
 
 import React from 'react';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { getData, getShareService } from '../../kibana_services';
 import { ViewInMaps } from '../view_in_maps';
 import { extractLayerDescriptorParams } from './utils';
-import { RegionMapVisParams } from './types';
+import type { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
 
 export function RegionMapEditor(props: VisEditorOptionsProps) {

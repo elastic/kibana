@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { IScopedClusterClient, Logger, CoreStart } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
@@ -22,11 +23,21 @@ import {
   ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
   ASSET_INVENTORY_INDEX_PATTERN,
 } from './constants';
+import type {
+  SecuritySolutionPluginStart,
+  SecuritySolutionPluginStartDependencies,
+} from '../../plugin_contract';
+import { registerAssetInventoryUsageCollector } from './telemetry/collectors/register';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
+
+  usageCollection?: UsageCollectionSetup;
+  coreStartPromise: Promise<
+    [CoreStart, SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart]
+  >;
 }
 
 type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
@@ -52,13 +63,27 @@ export const ASSET_INVENTORY_STATUS: Record<string, string> = {
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  constructor(private readonly options: AssetInventoryClientOpts) {}
+  private static usageCollectorRegistered = false;
+  constructor(private readonly options: AssetInventoryClientOpts) {
+    this.init().catch((e) => this.options.logger.error(`Init error: ${e.message}`));
+  }
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
   public async init() {
-    const { logger } = this.options;
+    const { logger, coreStartPromise, usageCollection } = this.options;
 
     logger.debug(`Initializing asset inventory`);
+
+    if (!AssetInventoryDataClient.usageCollectorRegistered && usageCollection) {
+      try {
+        logger.debug('Registering Asset Inventory Telemetry');
+        registerAssetInventoryUsageCollector(logger, coreStartPromise, usageCollection);
+        AssetInventoryDataClient.usageCollectorRegistered = true;
+        logger.debug('Asset Inventory Telemetry Registered');
+      } catch (e) {
+        logger.error(`Failed to register usage collector: ${e.message}`);
+      }
+    }
 
     this.asyncSetup().catch((e) =>
       logger.error(`Error during async setup of asset inventory: ${e.message}`)

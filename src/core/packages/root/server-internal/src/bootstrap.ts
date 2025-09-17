@@ -9,7 +9,8 @@
 
 import chalk from 'chalk';
 import { getPackages } from '@kbn/repo-packages';
-import { CliArgs, Env, RawConfigService } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
+import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';

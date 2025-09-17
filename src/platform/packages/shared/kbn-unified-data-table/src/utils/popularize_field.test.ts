@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { popularizeField } from './popularize_field';
 
 const capabilities = {

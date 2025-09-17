@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -22,15 +21,6 @@ import * as i18n from '../translations';
 import { TruncatedText } from './truncated_text';
 import { useMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 
-export const ExperimentalBadge = React.memo(() => (
-  <EuiBetaBadge
-    label={i18n.EXPERIMENTAL_LABEL}
-    tooltipContent={i18n.EXPERIMENTAL_DESCRIPTION}
-    tooltipPosition="bottom"
-  />
-));
-ExperimentalBadge.displayName = 'ExperimentalBadge';
-
 interface TitleProps {
   title: string;
   description?: string;
@@ -44,9 +34,6 @@ const Title = React.memo<TitleProps>(({ title, description }) => {
             <EuiTitle size="l">
               <h1>{<TruncatedText text={title} />}</h1>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ExperimentalBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -10,7 +10,7 @@ import type {
   CreateMonitoringEntitySource,
   MonitoringEntitySource,
   ListEntitySourcesRequestQuery,
-} from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+} from '../../../../../common/api/entity_analytics';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 
 interface MonitoringEntitySourceDataClientOpts {
@@ -42,7 +42,9 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.get(id);
   }
 
-  public async update(update: Partial<MonitoringEntitySource> & { id: string }) {
+  public async update(
+    update: Partial<MonitoringEntitySource> & { id: string }
+  ): Promise<MonitoringEntitySource> {
     this.log('debug', `Updating Monitoring Entity Source Sync saved object with id: ${update.id}`);
 
     const sanitizedUpdate = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { APM_ALERTS_INDEX } from './constants';
 export async function getActiveApmAlerts({

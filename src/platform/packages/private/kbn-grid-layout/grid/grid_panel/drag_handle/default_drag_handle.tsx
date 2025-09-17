@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { DragHandleApi } from './use_drag_handle_api';
+import type { DragHandleApi } from './use_drag_handle_api';
 
 export const DefaultDragHandle = React.memo(
   ({ dragHandleApi }: { dragHandleApi: DragHandleApi }) => {

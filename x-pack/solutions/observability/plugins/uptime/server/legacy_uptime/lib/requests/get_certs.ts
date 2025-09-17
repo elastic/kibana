@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PromiseType } from 'utility-types';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
+import type { PromiseType } from 'utility-types';
+import type { UMElasticsearchQueryFn } from '../adapters';
+import type { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
 import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../../../common/requests/get_certs_request_body';
-import { UptimeEsClient } from '../lib';
+import type { UptimeEsClient } from '../lib';
 
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async (
   requestParams

@@ -8,16 +8,15 @@
  */
 
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
   initializeUnsavedChanges,
 } from '@kbn/presentation-containers';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import {
-  StateComparators,
-  WithAllKeys,
   getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
@@ -28,7 +27,11 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { MARKDOWN_ID } from './constants';
-import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
+import type {
+  MarkdownEditorApi,
+  MarkdownEditorSerializedState,
+  MarkdownEditorState,
+} from './types';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';

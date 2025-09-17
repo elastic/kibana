@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SettingType } from './setting_type';
-import { UnsavedFieldChange } from './unsaved_change';
+import type { SettingType } from './setting_type';
+import type { UnsavedFieldChange } from './unsaved_change';
 
 export type {
   ArrayFieldDefinition,

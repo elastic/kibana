@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { ListConnectorsResponse } from '../../../common/http_api/connectors';
+import type { ListConnectorsResponse } from '../../../common/http_api/connectors';
 import { queryKeys } from '../query_keys';
 import { useKibana } from './use_kibana';
 

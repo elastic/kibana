@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface IndexPatternsTestStartDeps {
   data: DataPluginStart;

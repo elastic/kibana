@@ -9,8 +9,8 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
+import type { UMElasticsearchQueryFn } from '../adapters';
+import type { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 
 /**

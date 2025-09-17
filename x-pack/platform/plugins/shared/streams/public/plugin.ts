@@ -5,28 +5,35 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { Logger } from '@kbn/logging';
-import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
+import type {
+  ApplicationStart,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import { of, Observable, from, shareReplay, startWith } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
-import {
+import type {
+  StreamsNavigationStatus,
   StreamsPluginClass,
   StreamsPluginSetup,
   StreamsPluginSetupDependencies,
   StreamsPluginStart,
   StreamsPluginStartDependencies,
-  StreamsStatus,
+  WiredStreamsStatus,
 } from './types';
-import { StreamsRepositoryClient } from './api';
+import type { StreamsRepositoryClient } from './api';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
   public logger: Logger;
 
   private repositoryClient!: StreamsRepositoryClient;
+  private wiredStatusSubject = new BehaviorSubject<WiredStreamsStatus>(UNKNOWN_STATUS);
 
   constructor(context: PluginInitializerContext<{}>) {
     this.config = context.config.get();
@@ -39,50 +46,75 @@ export class Plugin implements StreamsPluginClass {
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
+    this.refreshWiredStatus();
+
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(core, this.repositoryClient, this.logger),
+      navigationStatus$: createStreamsNavigationStatusObservable(pluginsStart, core.application),
+      wiredStatus$: this.wiredStatusSubject.asObservable(),
+      enableWiredMode: async (signal: AbortSignal) => {
+        const response = await this.repositoryClient.fetch('POST /api/streams/_enable 2023-10-31', {
+          signal,
+        });
+        this.wiredStatusSubject.next({
+          ...this.wiredStatusSubject.value,
+          enabled: true,
+        });
+        return response;
+      },
+      disableWiredMode: async (signal: AbortSignal) => {
+        const response = await this.repositoryClient.fetch(
+          'POST /api/streams/_disable 2023-10-31',
+          { signal }
+        );
+        this.wiredStatusSubject.next({
+          ...this.wiredStatusSubject.value,
+          enabled: false,
+        });
+        return response;
+      },
       config$: of(this.config),
     };
+  }
+
+  private async refreshWiredStatus() {
+    try {
+      const response = await this.repositoryClient.fetch('GET /api/streams/_status', {
+        signal: new AbortController().signal,
+      });
+      this.wiredStatusSubject.next(response);
+    } catch (error) {
+      this.logger.error(error);
+      this.wiredStatusSubject.next(UNKNOWN_STATUS);
+    }
   }
 
   stop() {}
 }
 
-const ENABLED_STATUS: StreamsStatus = { status: 'enabled' };
-const DISABLED_STATUS: StreamsStatus = { status: 'disabled' };
-const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
+const UNKNOWN_STATUS: WiredStreamsStatus = { enabled: 'unknown', can_manage: false };
 
-const createStreamsStatusObservable = once(
+const createStreamsNavigationStatusObservable = once(
   (
-    core: CoreStart,
-    repositoryClient: StreamsRepositoryClient,
-    logger: Logger
-  ): Observable<StreamsStatus> => {
-    const { application, uiSettings } = core;
+    deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
+    application: ApplicationStart
+  ): Observable<StreamsNavigationStatus> => {
     const hasCapabilities = application.capabilities?.streams?.show;
-    const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
+    const isServerless = deps.cloud?.isServerlessEnabled;
+    const isObservability = deps.cloud?.serverless.projectType === 'observability';
 
     if (!hasCapabilities) {
-      return of(DISABLED_STATUS);
+      return of({ status: 'disabled' });
     }
 
-    if (isUIEnabled) {
-      return of(ENABLED_STATUS);
+    if (!isServerless) {
+      return of({ status: 'enabled' });
     }
 
-    return from(
-      repositoryClient
-        .fetch('GET /api/streams/_status', {
-          signal: new AbortController().signal,
-        })
-        .then(
-          (response) => (response.enabled ? ENABLED_STATUS : DISABLED_STATUS),
-          (error) => {
-            logger.error(error);
-            return UNKNOWN_STATUS;
-          }
-        )
-    ).pipe(startWith(UNKNOWN_STATUS), shareReplay(1));
+    if (isServerless && isObservability) {
+      return of({ status: 'enabled' });
+    }
+
+    return of({ status: 'disabled' });
   }
 );

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiButtonEmptyProps, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonEmptyProps, EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { i18n } from '@kbn/i18n';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 
 export type GroupingLicenseCtaMessageDetailsButtonProps = Pick<EuiButtonEmptyProps, 'size'> & {

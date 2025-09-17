@@ -6,15 +6,18 @@
  */
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { Streams } from '@kbn/streams-schema';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ComponentTemplatePanel } from './component_template_panel';
 import { IndexTemplateDetails } from './index_template_details';
 import { IngestPipelineDetails } from './ingest_pipeline_details';
 import { DataStreamDetails } from './data_stream_details';
+import { IndexConfiguration } from './advanced_view/index_configuration';
+import { DeleteStreamPanel } from './advanced_view/delete_stream';
+import { Row, RowMetadata } from './advanced_view/row';
 
 export function UnmanagedElasticsearchAssets({
   definition,
@@ -100,38 +103,96 @@ export function UnmanagedElasticsearchAssets({
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-              defaultMessage:
-                'Use composable index and component templates to automatically apply settings, mappings, and aliases to indices',
-            })}
-          </EuiText>
-        </EuiFlexItem>
+        <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+          <Row
+            left={
+              <RowMetadata
+                label={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.indexTemplateTitle',
+                  {
+                    defaultMessage: 'Index template',
+                  }
+                )}
+                description={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.indexTemplateDescription',
+                  {
+                    defaultMessage:
+                      'Use composable index and component templates to automatically apply settings, mappings, and aliases to indices',
+                  }
+                )}
+              />
+            }
+            right={
+              <IndexTemplateDetails
+                indexTemplate={unmanagedAssetsDetailsFetch.value?.indexTemplate}
+                onFlyoutOpen={(name) => setCurrentFlyout({ type: 'index_template', name })}
+              />
+            }
+          />
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="m" wrap>
-            <IndexTemplateDetails
-              indexTemplate={unmanagedAssetsDetailsFetch.value?.indexTemplate}
-              onFlyoutOpen={(name) => setCurrentFlyout({ type: 'index_template', name })}
-            />
-            <IngestPipelineDetails
-              ingestPipeline={unmanagedAssetsDetailsFetch.value?.ingestPipeline}
-              onFlyoutOpen={(name) => setCurrentFlyout({ type: 'ingest_pipeline', name })}
-            />
-            <DataStreamDetails
-              indexManagementLocator={indexManagementLocator}
-              dataStream={unmanagedAssetsDetailsFetch.value?.dataStream}
-              onFlyoutOpen={(name) => setCurrentFlyout({ type: 'data_stream', name })}
-            />
-          </EuiFlexGroup>
-        </EuiFlexItem>
+          <EuiHorizontalRule margin="m" />
+
+          <Row
+            left={
+              <RowMetadata
+                label={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.pipelineTitle',
+                  {
+                    defaultMessage: 'Pipeline',
+                  }
+                )}
+                description={''}
+              />
+            }
+            right={
+              <IngestPipelineDetails
+                ingestPipeline={unmanagedAssetsDetailsFetch.value?.ingestPipeline}
+                onFlyoutOpen={(name) => setCurrentFlyout({ type: 'ingest_pipeline', name })}
+              />
+            }
+          />
+
+          <EuiHorizontalRule margin="m" />
+
+          <Row
+            left={
+              <RowMetadata
+                label={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.dataStreamTitle',
+                  {
+                    defaultMessage: 'Data stream',
+                  }
+                )}
+                description={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.dataStreamDescription',
+                  {
+                    defaultMessage:
+                      'Data streams store time-series data across multiple indices and can be created from index templates',
+                  }
+                )}
+              />
+            }
+            right={
+              <DataStreamDetails
+                indexManagementLocator={indexManagementLocator}
+                dataStream={unmanagedAssetsDetailsFetch.value?.dataStream}
+                onFlyoutOpen={(name) => setCurrentFlyout({ type: 'data_stream', name })}
+              />
+            }
+          />
+
+          <EuiHorizontalRule margin="m" />
+        </IndexConfiguration>
+
         <EuiFlexItem grow={false}>
           <ComponentTemplatePanel
             componentTemplates={unmanagedAssetsDetailsFetch.value?.componentTemplates}
             onFlyoutOpen={(name) => setCurrentFlyout({ type: 'component_template', name })}
           />
         </EuiFlexItem>
+
+        <DeleteStreamPanel definition={definition} />
+        <EuiSpacer size="s" />
       </EuiFlexGroup>
       {currentFlyout && currentFlyout.type === 'component_template' && (
         <ComponentTemplateFlyout

@@ -6,9 +6,9 @@
  */
 
 import { castProvider } from '@kbn/interpreter';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
-import { InitializeArguments } from '.';
+import type { InitializeArguments } from '.';
 
 export interface Arguments {
   type: string[];

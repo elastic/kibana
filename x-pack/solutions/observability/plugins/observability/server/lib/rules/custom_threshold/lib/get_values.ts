@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
-import { Evaluation } from './evaluate_rule';
+import type { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import type { Evaluation } from './evaluate_rule';
 
 export const getEvaluationValues = (
   alertResults: Array<Record<string, Evaluation>>,

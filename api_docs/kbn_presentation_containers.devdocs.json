@@ -167,6 +167,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiCanFocusPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanFocusPanel",
+        "description": [
+          "\nA type guard which can be used to determine if a given API can focus a child panel"
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.CanFocusPanel",
+            "text": "CanFocusPanel"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiCanFocusPanel.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiHasLastSavedChildState",
         "type": "Function",
         "tags": [],
@@ -320,6 +362,48 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiSupportsPassThroughContext",
+        "type": "Function",
+        "tags": [],
+        "label": "apiSupportsPassThroughContext",
+        "description": [
+          "\nA type guard which can be used to determine if a given API supports PassThroughContext"
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.PassThroughContext",
+            "text": "PassThroughContext"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiSupportsPassThroughContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1230,6 +1314,54 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.CanFocusPanel",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanFocusPanel",
+        "description": [
+          "\nThis API can focus a child panel"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.CanFocusPanel.setFocusedPanelId",
+            "type": "Function",
+            "tags": [],
+            "label": "setFocusedPanelId",
+            "description": [],
+            "signature": [
+              "(panelId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.CanFocusPanel.setFocusedPanelId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "panelId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.HasLastSavedChildState",
         "type": "Interface",
         "tags": [],
@@ -1466,6 +1598,46 @@
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.PassThroughContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PassThroughContext",
+        "description": [
+          "\nAllows the Presentation Container to provide generic untyped context to its children.\n\nFor example, alerting page links to dashboards.\nLinked dashboard panels should show the alert from alerting page.\nThe alerting page can use passThroughContext to pass '{ alert }' state to embeddables.\nEmbeddables can access passThroughContext from 'parentApi.getPassThroughContext()'\nand use the state to show the alert from the alerting page."
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PassThroughContext.getPassThroughContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getPassThroughContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

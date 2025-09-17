@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ConnectorDefinition, ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';

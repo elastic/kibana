@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useEffect, useState } from 'react';
-import { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { Global, css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme, UseEuiTheme } from '@elastic/eui';
+import type { ComponentProps } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
+import { css, Global } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { Navigation } from '../components/navigation';
-import { LOGO, PRIMARY_MENU_ITEMS, PRIMARY_MENU_FOOTER_ITEMS } from '../mocks/observability';
+import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
@@ -71,7 +73,7 @@ export default {
       id: 'observability',
       href: LOGO.href,
       label: LOGO.label,
-      iconType: LOGO.type,
+      iconType: LOGO.iconType,
     },
     setWidth: () => {},
   },
@@ -89,6 +91,7 @@ export const Default: StoryObj<PropsAndArgs> = {
       );
     },
   ],
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const Collapsed: StoryObj<PropsAndArgs> = {
@@ -106,6 +109,7 @@ export const Collapsed: StoryObj<PropsAndArgs> = {
   args: {
     isCollapsed: true,
   },
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const WithMinimalItems: StoryObj<PropsAndArgs> = {
@@ -126,6 +130,7 @@ export const WithMinimalItems: StoryObj<PropsAndArgs> = {
       footerItems: PRIMARY_MENU_FOOTER_ITEMS.slice(0, 2),
     },
   },
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const WithManyItems: StoryObj<PropsAndArgs> = {
@@ -166,6 +171,24 @@ export const WithManyItems: StoryObj<PropsAndArgs> = {
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
     },
   },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithinLayout: StoryObj<PropsAndArgs> = {
+  name: 'Navigation within Layout',
+  render: (args) => <Layout {...args} />,
+};
+
+const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+
+  return (
+    <Navigation
+      {...props}
+      activeItemId={activeItemId}
+      onItemClick={(item) => setActiveItemId(item.id)}
+    />
+  );
 };
 
 const Layout = ({ ...props }: PropsAndArgs) => {
@@ -183,7 +206,6 @@ const Layout = ({ ...props }: PropsAndArgs) => {
           footerHeight: 48,
           headerHeight,
           navigationWidth,
-          sidebarPanelWidth: 368,
           sidebarWidth: 48,
           applicationTopBarHeight: 48,
           applicationBottomBarHeight: 48,
@@ -211,15 +233,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               backgroundColor={euiTheme.colors.backgroundFilledText}
             />
           }
-          navigation={
-            <Navigation
-              activeItemId={props.activeItemId}
-              isCollapsed={props.isCollapsed}
-              items={props.items}
-              logo={props.logo}
-              setWidth={setNavigationWidth}
-            />
-          }
+          navigation={<ControlledNavigation {...props} setWidth={setNavigationWidth} />}
           sidebar={
             <Box
               label="Global Sidebar"
@@ -229,30 +243,6 @@ const Layout = ({ ...props }: PropsAndArgs) => {
                 transform: translate(-50%, -50%) rotate(90deg);
               `}
             />
-          }
-          sidebarPanel={
-            <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-              <EuiFlexItem
-                grow={false}
-                style={{ height: headerHeight }}
-                css={css`
-                  white-space: nowrap;
-                `}
-              >
-                <Box
-                  label="Sidebar Header"
-                  color={euiTheme.colors.accentSecondary}
-                  backgroundColor={euiTheme.colors.textAccentSecondary}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Box
-                  label="Sidebar Panel"
-                  color={euiTheme.colors.accentSecondary}
-                  backgroundColor={euiTheme.colors.textAccentSecondary}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
           }
           applicationTopBar={
             <Box
@@ -282,9 +272,4 @@ const Layout = ({ ...props }: PropsAndArgs) => {
       </ChromeLayoutConfigProvider>
     </>
   );
-};
-
-export const WithinLayout: StoryObj<PropsAndArgs> = {
-  name: 'Navigation within Layout',
-  render: (args) => <Layout {...args} />,
 };

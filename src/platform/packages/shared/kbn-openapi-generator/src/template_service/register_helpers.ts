@@ -8,7 +8,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
-import { HelperOptions } from 'handlebars';
+import type { HelperOptions } from 'handlebars';
 import { snakeCase, camelCase, upperCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {

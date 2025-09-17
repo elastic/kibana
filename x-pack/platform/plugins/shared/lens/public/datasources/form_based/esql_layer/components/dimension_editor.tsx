@@ -8,18 +8,18 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
-import { FormatSelector, FormatSelectorProps } from '../../dimension_panel/format_selector';
+import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
+import { FormatSelector } from '../../dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
-import { TextBasedLayer } from '../types';
+import type { TextBasedLayer } from '../types';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -176,8 +176,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       {props.dataSectionExtra && (
         <div
           style={{
-            paddingLeft: euiThemeVars.euiSize,
-            paddingRight: euiThemeVars.euiSize,
+            paddingLeft: euiTheme.size.base,
+            paddingRight: euiTheme.size.base,
           }}
         >
           {props.dataSectionExtra}

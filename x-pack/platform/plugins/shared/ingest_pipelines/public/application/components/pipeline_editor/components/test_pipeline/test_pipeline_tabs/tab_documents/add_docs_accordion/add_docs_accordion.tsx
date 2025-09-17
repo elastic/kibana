@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
-import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiText, EuiSpacer, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { useKibana } from '../../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../../use_is_mounted';
 import { AddDocumentForm } from '../add_document_form';
-
-import './add_docs_accordion.scss';
 
 const i18nTexts = {
   addDocumentsButton: i18n.translate(
@@ -36,8 +36,19 @@ interface Props {
   onAddDocuments: (document: any) => void;
 }
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    addDocumentsAccordion: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      padding: ${euiTheme.size.m};
+    `,
+  };
+};
+
 export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments }) => {
   const { services } = useKibana();
+  const styles = useStyles();
   const isMounted = useIsMounted();
   const [discoverLink, setDiscoverLink] = useState<string | undefined>(undefined);
 
@@ -63,7 +74,7 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
       paddingSize="s"
       data-test-subj="addDocumentsAccordion"
     >
-      <div className="addDocumentsAccordion">
+      <div css={styles.addDocumentsAccordion}>
         <EuiText size="s" color="subdued">
           <p>
             {i18nTexts.addDocumentsDescription}

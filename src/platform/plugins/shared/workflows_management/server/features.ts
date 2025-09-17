@@ -8,9 +8,9 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { WorkflowsManagementPluginServerDependenciesSetup } from './types';
+import { i18n } from '@kbn/i18n';
+import type { WorkflowsManagementPluginServerDependenciesSetup } from './types';
 
 /**
  * The order of appearance in the feature privilege page
@@ -26,7 +26,7 @@ export const registerFeatures = (plugins: WorkflowsManagementPluginServerDepende
     name: i18n.translate(
       'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
       {
-        defaultMessage: 'Workflows Management',
+        defaultMessage: 'Workflows',
       }
     ),
     order: FEATURE_ORDER,
@@ -158,6 +158,22 @@ export const registerFeatures = (plugins: WorkflowsManagementPluginServerDepende
                   all: [],
                 },
                 ui: ['readWorkflowExecution'],
+              },
+              {
+                api: ['workflow_execution:cancel'],
+                id: 'workflow_execution_cancel',
+                name: i18n.translate(
+                  'platform.plugins.shared.workflows_management.featureRegistry.cancelWorkflowExecutionSubFeaturePrivilege',
+                  {
+                    defaultMessage: 'Cancel Workflow Execution',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  read: ['workflow_execution'],
+                  all: [],
+                },
+                ui: ['cancelWorkflowExecution'],
               },
             ],
           },

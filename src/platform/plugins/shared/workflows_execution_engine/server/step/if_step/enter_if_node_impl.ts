@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
+import type { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
 import { KQLSyntaxError } from '@kbn/es-query';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepImplementation } from '../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { evaluateKql } from './eval_kql';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 export class EnterIfNodeImpl implements StepImplementation {
   constructor(
@@ -25,13 +25,16 @@ export class EnterIfNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    this.wfExecutionRuntimeManager.enterScope();
     const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
 
-    if (successors.some((node) => node.type !== 'enter-condition-branch')) {
+    if (
+      successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))
+    ) {
       throw new Error(
         `EnterIfNode with id ${
           this.step.id
-        } must have only 'enter-condition-branch' successors, but found: ${successors
+        } must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: ${successors
           .map((node) => node.type)
           .join(', ')}.`
       );

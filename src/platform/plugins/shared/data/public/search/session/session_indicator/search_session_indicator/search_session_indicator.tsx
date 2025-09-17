@@ -9,11 +9,10 @@
 
 import React, { useCallback, useImperativeHandle } from 'react';
 import { css } from '@emotion/react';
+import type { EuiButtonEmptyProps, EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -52,6 +51,8 @@ export interface SearchSessionIndicatorProps {
   startedTime?: Date;
   completedTime?: Date;
   canceledTime?: Date;
+
+  hasBackgroundSearchEnabled: boolean;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -136,210 +137,297 @@ const SaveButton = ({
   </EuiToolTip>
 );
 
-const searchSessionIndicatorViewStateToProps: {
-  [state in SearchSessionState]: {
-    button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & {
-      tooltipText: string;
-    };
-    popover: {
-      title: string;
-      description: string;
-      whenText: (props: SearchSessionIndicatorProps) => string;
-      primaryAction?: React.ComponentType<ActionButtonProps>;
-      secondaryAction?: React.ComponentType<ActionButtonProps>;
-    };
-  } | null;
-} = {
-  [SearchSessionState.None]: null,
-  [SearchSessionState.Loading]: {
-    button: {
-      color: 'text',
-      iconType: PartialClock,
-      'aria-label': i18n.translate('data.searchSessionIndicator.loadingResultsIconAriaLabel', {
-        defaultMessage: 'Search session loading',
-      }),
-      tooltipText: i18n.translate('data.searchSessionIndicator.loadingResultsIconTooltipText', {
-        defaultMessage: 'Search session loading',
-      }),
-    },
-    popover: {
-      title: i18n.translate('data.searchSessionIndicator.loadingResultsTitle', {
-        defaultMessage: 'Your search is taking a while...',
-      }),
-      description: i18n.translate('data.searchSessionIndicator.loadingResultsDescription', {
-        defaultMessage: 'Save your session, continue your work, and return to completed results',
-      }),
-      whenText: (props: SearchSessionIndicatorProps) =>
-        i18n.translate('data.searchSessionIndicator.loadingResultsWhenText', {
-          defaultMessage: 'Started {when}',
-          values: {
-            when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
-          },
+const searchSessionIndicatorViewStateToProps = ({
+  hasBackgroundSearchEnabled,
+  state,
+}: {
+  hasBackgroundSearchEnabled: boolean;
+  state: SearchSessionState;
+}) => {
+  const stateProps: {
+    [state in SearchSessionState]: {
+      button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & {
+        tooltipText: string;
+      };
+      popover: {
+        title: string;
+        description: string;
+        whenText: (props: SearchSessionIndicatorProps) => string;
+        primaryAction?: React.ComponentType<ActionButtonProps>;
+        secondaryAction?: React.ComponentType<ActionButtonProps>;
+      };
+    } | null;
+  } = {
+    [SearchSessionState.None]: null,
+    [SearchSessionState.Loading]: {
+      button: {
+        color: 'text',
+        iconType: PartialClock,
+        'aria-label': hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchLoadingResultsIconAriaLabel',
+              {
+                defaultMessage: 'Background search loading',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.loadingResultsIconAriaLabel', {
+              defaultMessage: 'Search session loading',
+            }),
+        tooltipText: hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.backgroundSearchIndicator.backgroundSearchLoadingResultsIconTooltipText',
+              {
+                defaultMessage: 'Background search loading',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.loadingResultsIconTooltipText', {
+              defaultMessage: 'Search session loading',
+            }),
+      },
+      popover: {
+        title: i18n.translate('data.searchSessionIndicator.loadingResultsTitle', {
+          defaultMessage: 'Your search is taking a while...',
         }),
-      primaryAction: CancelButton,
-      secondaryAction: ContinueInBackgroundButton,
-    },
-  },
-  [SearchSessionState.Completed]: {
-    button: {
-      color: 'text',
-      iconType: 'check',
-      'aria-label': i18n.translate('data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
-        defaultMessage: 'Search session complete',
-      }),
-      tooltipText: i18n.translate('data.searchSessionIndicator.resultsLoadedIconTooltipText', {
-        defaultMessage: 'Search session complete',
-      }),
-    },
-    popover: {
-      title: i18n.translate('data.searchSessionIndicator.resultsLoadedText', {
-        defaultMessage: 'Search session complete',
-      }),
-      description: i18n.translate('data.searchSessionIndicator.resultsLoadedDescriptionText', {
-        defaultMessage: 'Save your session and return to it later',
-      }),
-      whenText: (props: SearchSessionIndicatorProps) =>
-        i18n.translate('data.searchSessionIndicator.resultsLoadedWhenText', {
-          defaultMessage: 'Completed {when}',
-          values: {
-            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
-          },
+        description: i18n.translate('data.searchSessionIndicator.loadingResultsDescription', {
+          defaultMessage: 'Save your session, continue your work, and return to completed results',
         }),
-      primaryAction: SaveButton,
-      secondaryAction: ViewAllSearchSessionsButton,
+        whenText: (props: SearchSessionIndicatorProps) =>
+          i18n.translate('data.searchSessionIndicator.loadingResultsWhenText', {
+            defaultMessage: 'Started {when}',
+            values: {
+              when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
+            },
+          }),
+        primaryAction: CancelButton,
+        secondaryAction: ContinueInBackgroundButton,
+      },
     },
-  },
-  [SearchSessionState.BackgroundLoading]: {
-    button: {
-      iconType: EuiLoadingSpinner,
-      'aria-label': i18n.translate(
-        'data.searchSessionIndicator.loadingInTheBackgroundIconAriaLabel',
-        {
+    [SearchSessionState.Completed]: {
+      button: {
+        color: 'text',
+        iconType: 'check',
+        'aria-label': hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchResultsLoadedIconAriaLabel',
+              {
+                defaultMessage: 'Background search complete',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
+              defaultMessage: 'Search session complete',
+            }),
+        tooltipText: hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchResultsLoadedIconTooltipText',
+              {
+                defaultMessage: 'Background search complete',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.resultsLoadedIconTooltipText', {
+              defaultMessage: 'Search session complete',
+            }),
+      },
+      popover: {
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.searchSessionIndicator.backgroundSearchResultsLoadedText', {
+              defaultMessage: 'Background search complete',
+            })
+          : i18n.translate('data.searchSessionIndicator.resultsLoadedText', {
+              defaultMessage: 'Search session complete',
+            }),
+        description: i18n.translate('data.searchSessionIndicator.resultsLoadedDescriptionText', {
+          defaultMessage: 'Save your session and return to it later',
+        }),
+        whenText: (props: SearchSessionIndicatorProps) =>
+          i18n.translate('data.searchSessionIndicator.resultsLoadedWhenText', {
+            defaultMessage: 'Completed {when}',
+            values: {
+              when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+            },
+          }),
+        primaryAction: SaveButton,
+        secondaryAction: ViewAllSearchSessionsButton,
+      },
+    },
+    [SearchSessionState.BackgroundLoading]: {
+      button: {
+        iconType: EuiLoadingSpinner,
+        'aria-label': hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchLoadingInTheBackgroundIconAriaLabel',
+              {
+                defaultMessage: 'Saved background search in progress',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundIconAriaLabel', {
+              defaultMessage: 'Saved session in progress',
+            }),
+        tooltipText: hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchLoadingInTheBackgroundIconTooltipText',
+              {
+                defaultMessage: 'Saved background search in progress',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundIconTooltipText', {
+              defaultMessage: 'Saved session in progress',
+            }),
+      },
+      popover: {
+        title: i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundTitleText', {
           defaultMessage: 'Saved session in progress',
-        }
-      ),
-      tooltipText: i18n.translate(
-        'data.searchSessionIndicator.loadingInTheBackgroundIconTooltipText',
-        {
-          defaultMessage: 'Saved session in progress',
-        }
-      ),
-    },
-    popover: {
-      title: i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundTitleText', {
-        defaultMessage: 'Saved session in progress',
-      }),
-      description: i18n.translate(
-        'data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
-        {
-          defaultMessage: 'You can return to completed results from Management',
-        }
-      ),
-      whenText: (props: SearchSessionIndicatorProps) =>
-        i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundWhenText', {
-          defaultMessage: 'Started {when}',
-          values: {
-            when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
-          },
         }),
-      primaryAction: CancelButton,
-      secondaryAction: ViewAllSearchSessionsButton,
+        description: i18n.translate(
+          'data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
+          {
+            defaultMessage: 'You can return to completed results from Management',
+          }
+        ),
+        whenText: (props: SearchSessionIndicatorProps) =>
+          i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundWhenText', {
+            defaultMessage: 'Started {when}',
+            values: {
+              when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
+            },
+          }),
+        primaryAction: CancelButton,
+        secondaryAction: ViewAllSearchSessionsButton,
+      },
     },
-  },
-  [SearchSessionState.BackgroundCompleted]: {
-    button: {
-      color: 'success',
-      iconType: 'checkInCircleFilled',
-      'aria-label': i18n.translate(
-        'data.searchSessionIndicator.resultLoadedInTheBackgroundIconAriaLabel',
-        {
-          defaultMessage: 'Saved session complete',
-        }
-      ),
-      tooltipText: i18n.translate(
-        'data.searchSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
-        {
-          defaultMessage: 'Saved session complete',
-        }
-      ),
+    [SearchSessionState.BackgroundCompleted]: {
+      button: {
+        color: 'success',
+        iconType: 'checkInCircleFilled',
+        'aria-label': i18n.translate(
+          'data.searchSessionIndicator.resultLoadedInTheBackgroundIconAriaLabel',
+          {
+            defaultMessage: 'Saved session complete',
+          }
+        ),
+        tooltipText: i18n.translate(
+          'data.searchSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
+          {
+            defaultMessage: 'Saved session complete',
+          }
+        ),
+      },
+      popover: {
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchResultLoadedInTheBackgroundTitleText',
+              {
+                defaultMessage: 'Background search saved',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.resultLoadedInTheBackgroundTitleText', {
+              defaultMessage: 'Search session saved',
+            }),
+        description: i18n.translate(
+          'data.searchSessionIndicator.resultLoadedInTheBackgroundDescriptionText',
+          {
+            defaultMessage: 'You can return to these results from Management',
+          }
+        ),
+        whenText: (props: SearchSessionIndicatorProps) =>
+          i18n.translate('data.searchSessionIndicator.resultLoadedInTheBackgroundWhenText', {
+            defaultMessage: 'Completed {when}',
+            values: {
+              when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+            },
+          }),
+        secondaryAction: ViewAllSearchSessionsButton,
+      },
     },
-    popover: {
-      title: i18n.translate('data.searchSessionIndicator.resultLoadedInTheBackgroundTitleText', {
-        defaultMessage: 'Search session saved',
-      }),
-      description: i18n.translate(
-        'data.searchSessionIndicator.resultLoadedInTheBackgroundDescriptionText',
-        {
-          defaultMessage: 'You can return to these results from Management',
-        }
-      ),
-      whenText: (props: SearchSessionIndicatorProps) =>
-        i18n.translate('data.searchSessionIndicator.resultLoadedInTheBackgroundWhenText', {
-          defaultMessage: 'Completed {when}',
-          values: {
-            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
-          },
+    [SearchSessionState.Restored]: {
+      button: {
+        color: 'success',
+        iconType: CheckInEmptyCircle,
+        'aria-label': hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchRestoredResultsIconAriaLabel',
+              {
+                defaultMessage: 'Saved background search restored',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.restoredResultsIconAriaLabel', {
+              defaultMessage: 'Saved session restored',
+            }),
+        tooltipText: hasBackgroundSearchEnabled
+          ? i18n.translate(
+              'data.searchSessionIndicator.backgroundSearchRestoredResultsTooltipText',
+              {
+                defaultMessage: 'Background search restored',
+              }
+            )
+          : i18n.translate('data.searchSessionIndicator.restoredResultsTooltipText', {
+              defaultMessage: 'Search session restored',
+            }),
+      },
+      popover: {
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.searchSessionIndicator.backgroundSearchRestoredTitleText', {
+              defaultMessage: 'Background search restored',
+            })
+          : i18n.translate('data.searchSessionIndicator.restoredTitleText', {
+              defaultMessage: 'Search session restored',
+            }),
+        description: i18n.translate('data.searchSessionIndicator.restoredDescriptionText', {
+          defaultMessage:
+            'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session',
         }),
-      secondaryAction: ViewAllSearchSessionsButton,
+        whenText: (props: SearchSessionIndicatorProps) =>
+          i18n.translate('data.searchSessionIndicator.restoredWhenText', {
+            defaultMessage: 'Completed {when}',
+            values: {
+              when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+            },
+          }),
+        secondaryAction: ViewAllSearchSessionsButton,
+      },
     },
-  },
-  [SearchSessionState.Restored]: {
-    button: {
-      color: 'success',
-      iconType: CheckInEmptyCircle,
-      'aria-label': i18n.translate('data.searchSessionIndicator.restoredResultsIconAriaLabel', {
-        defaultMessage: 'Saved session restored',
-      }),
-      tooltipText: i18n.translate('data.searchSessionIndicator.restoredResultsTooltipText', {
-        defaultMessage: 'Search session restored',
-      }),
-    },
-    popover: {
-      title: i18n.translate('data.searchSessionIndicator.restoredTitleText', {
-        defaultMessage: 'Search session restored',
-      }),
-      description: i18n.translate('data.searchSessionIndicator.restoredDescriptionText', {
-        defaultMessage:
-          'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session',
-      }),
-      whenText: (props: SearchSessionIndicatorProps) =>
-        i18n.translate('data.searchSessionIndicator.restoredWhenText', {
-          defaultMessage: 'Completed {when}',
-          values: {
-            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
-          },
+    [SearchSessionState.Canceled]: {
+      button: {
+        color: 'danger',
+        iconType: 'error',
+        'aria-label': hasBackgroundSearchEnabled
+          ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledIconAriaLabel', {
+              defaultMessage: 'Background search stopped',
+            })
+          : i18n.translate('data.searchSessionIndicator.canceledIconAriaLabel', {
+              defaultMessage: 'Search session stopped',
+            }),
+        tooltipText: hasBackgroundSearchEnabled
+          ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledTooltipText', {
+              defaultMessage: 'Background search stopped',
+            })
+          : i18n.translate('data.searchSessionIndicator.canceledTooltipText', {
+              defaultMessage: 'Search session stopped',
+            }),
+      },
+      popover: {
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledTitleText', {
+              defaultMessage: 'Background search stopped',
+            })
+          : i18n.translate('data.searchSessionIndicator.canceledTitleText', {
+              defaultMessage: 'Search session stopped',
+            }),
+        description: i18n.translate('data.searchSessionIndicator.canceledDescriptionText', {
+          defaultMessage: 'You are viewing incomplete data',
         }),
-      secondaryAction: ViewAllSearchSessionsButton,
+        whenText: (props: SearchSessionIndicatorProps) =>
+          i18n.translate('data.searchSessionIndicator.canceledWhenText', {
+            defaultMessage: 'Stopped {when}',
+            values: {
+              when: props.canceledTime ? moment(props.canceledTime).format(`L @ LTS`) : '',
+            },
+          }),
+        secondaryAction: ViewAllSearchSessionsButton,
+      },
     },
-  },
-  [SearchSessionState.Canceled]: {
-    button: {
-      color: 'danger',
-      iconType: 'error',
-      'aria-label': i18n.translate('data.searchSessionIndicator.canceledIconAriaLabel', {
-        defaultMessage: 'Search session stopped',
-      }),
-      tooltipText: i18n.translate('data.searchSessionIndicator.canceledTooltipText', {
-        defaultMessage: 'Search session stopped',
-      }),
-    },
-    popover: {
-      title: i18n.translate('data.searchSessionIndicator.canceledTitleText', {
-        defaultMessage: 'Search session stopped',
-      }),
-      description: i18n.translate('data.searchSessionIndicator.canceledDescriptionText', {
-        defaultMessage: 'You are viewing incomplete data',
-      }),
-      whenText: (props: SearchSessionIndicatorProps) =>
-        i18n.translate('data.searchSessionIndicator.canceledWhenText', {
-          defaultMessage: 'Stopped {when}',
-          values: {
-            when: props.canceledTime ? moment(props.canceledTime).format(`L @ LTS`) : '',
-          },
-        }),
-      secondaryAction: ViewAllSearchSessionsButton,
-    },
-  },
+  };
+
+  return stateProps[state];
 };
 
 export interface SearchSessionIndicatorRef {
@@ -380,9 +468,14 @@ export const SearchSessionIndicator = React.forwardRef<
     [openPopover, closePopover]
   );
 
-  if (!searchSessionIndicatorViewStateToProps[props.state]) return null;
+  const stateProps = searchSessionIndicatorViewStateToProps({
+    hasBackgroundSearchEnabled: props.hasBackgroundSearchEnabled,
+    state: props.state,
+  });
 
-  const { button, popover } = searchSessionIndicatorViewStateToProps[props.state]!;
+  if (!stateProps) return null;
+
+  const { button, popover } = stateProps;
 
   return (
     <EuiPopover
@@ -418,6 +511,7 @@ export const SearchSessionIndicator = React.forwardRef<
           <SearchSessionName
             name={props.searchSessionName}
             editName={props.saveSearchSessionNameFn}
+            hasBackgroundSearchEnabled={props.hasBackgroundSearchEnabled}
           />
         ) : (
           <EuiText size={'s'}>

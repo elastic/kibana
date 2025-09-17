@@ -8,13 +8,15 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { CreatePrivMonUserRequestBody } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
-import type { CreatePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
+import {
+  CreatePrivMonUserRequestBody,
+  type CreatePrivMonUserResponse,
+} from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_USERS_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
@@ -24,7 +26,7 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users',
+      path: MONITORING_USERS_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -50,9 +52,12 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           );
           const secSol = await context.securitySolution;
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const config = secSol.getConfig();
+          const maxUsersAllowed =
+            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
           const crudService = createPrivilegedUsersCrudService(dataClient);
 
-          const body = await crudService.create(request.body, 'api');
+          const body = await crudService.create(request.body, 'api', maxUsersAllowed);
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

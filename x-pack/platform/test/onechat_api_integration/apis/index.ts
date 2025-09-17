@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('OneChat Endpoints', function () {
@@ -13,18 +14,22 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': true,
+        [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
       });
     });
 
     after(async () => {
       await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': false,
+        [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
       });
     });
 
+    loadTestFile(require.resolve('./converse/simple_conversation.ts'));
+    loadTestFile(require.resolve('./converse/tool_calling.ts'));
     loadTestFile(require.resolve('./esql_tools.ts'));
     loadTestFile(require.resolve('./esql_tools_internal.ts'));
     loadTestFile(require.resolve('./agents.ts'));
+    loadTestFile(require.resolve('./builtin_tools.ts'));
+    loadTestFile(require.resolve('./builtin_tools_internal.ts'));
   });
 }

@@ -159,27 +159,15 @@ function ConfigureSDKInstructions({
   apmServerUrl: string;
   apiKeyDetails?: AgentApiDetails;
 }) {
-  const [selectedOptionId, setSelectedOptionId] = useState<SDKInstructionsOptionID>('apm');
+  const [selectedOptionId, setSelectedOptionId] = useState<SDKInstructionsOptionID>('otlp');
 
   return (
     <>
       <EuiButtonGroup
         legend="Default single select button group"
         options={[
+          { id: 'otlp', label: 'Managed OTLP Endpoint' },
           { id: 'apm', label: 'Classic APM Endpoint' },
-          {
-            id: 'otlp',
-            label: 'Managed OTLP Endpoint',
-            iconType: 'beaker',
-            iconSide: 'right',
-            toolTipContent: (
-              <FormattedMessage
-                id="xpack.apm.onboarding.otel.managedOtlpEndpointTooltip"
-                defaultMessage="This functionality is in Tech Preview."
-              />
-            ),
-            toolTipProps: { position: 'right' },
-          },
         ]}
         idSelected={selectedOptionId}
         onChange={(id) => setSelectedOptionId(id as SDKInstructionsOptionID)}
@@ -350,7 +338,7 @@ function ManagedOTLPEndpointInstructions({
       <EuiMarkdownFormat>
         {i18n.translate('xpack.apm.onboarding.otel.configureAgent.textPre', {
           defaultMessage:
-            'The Managed OTLP Endpoint provides native support for handling of log, metric, and trace data from OpenTelemetry sources. It preserves OpenTelemetry semantic conventions and resource attributes, offering a native experience aligned with OpenTelemetry standards. Managed OTLP endpoint is currently in **Technical Preview.** Specify the following OpenTelemetry settings as part of the startup of your application.',
+            'The Managed OTLP Endpoint provides native support for handling of log, metric, and trace data from OpenTelemetry sources. It preserves OpenTelemetry semantic conventions and resource attributes, offering a native experience aligned with OpenTelemetry standards. Specify the following OpenTelemetry settings as part of the startup of your application.',
         })}
       </EuiMarkdownFormat>
       <EuiSpacer />

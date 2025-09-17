@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('starred-queries-tab');
 
       const starredItems = await esql.getStarredItems();
-      await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', starredItems);
+      await esql.isQueryPresentInTable('FROM logstash-*', starredItems);
     });
 
     it('should persist the starred query after a browser refresh', async () => {
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ESQLEditor-toggle-query-history-button');
       await testSubjects.click('starred-queries-tab');
       const starredItems = await esql.getStarredItems();
-      await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', starredItems);
+      await esql.isQueryPresentInTable('FROM logstash-*', starredItems);
     });
 
     it('should select a query from the starred and submit it', async () => {
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       const editorValue = await monacoEditor.getCodeEditorValue();
-      expect(editorValue).to.eql(`FROM logstash-* | LIMIT 10`);
+      expect(editorValue).to.eql(`FROM logstash-*`);
     });
 
     it('should delete a query from the starred queries tab', async () => {

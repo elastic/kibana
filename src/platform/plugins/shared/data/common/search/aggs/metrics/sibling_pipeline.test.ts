@@ -13,7 +13,7 @@ import { getBucketMinMetricAgg } from './bucket_min';
 import { getBucketMaxMetricAgg } from './bucket_max';
 
 import { AggConfigs } from '../agg_configs';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import type { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
 
 describe('sibling pipeline aggs', () => {

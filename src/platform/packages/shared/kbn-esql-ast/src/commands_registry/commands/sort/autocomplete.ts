@@ -16,12 +16,8 @@ import { getExpressionType, isExpressionComplete } from '../../../definitions/ut
 import type { ESQLCommand } from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import {
-  ICommandCallbacks,
-  Location,
-  type ICommandContext,
-  type ISuggestionItem,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {
   getNullsPrefixRange,
   getSortPos,
@@ -82,12 +78,7 @@ export async function autocomplete(
 
       const columnExists = (name: string) => _columnExists(name, context);
 
-      if (
-        isExpressionComplete(
-          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-          innerText
-        )
-      ) {
+      if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
         suggestions.push(
           ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
         );

@@ -15,7 +15,8 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts" ],
+    "emotion.d.ts"
+  ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
@@ -211,6 +212,7 @@
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture-graph",
+    "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
@@ -254,5 +256,9 @@
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
     "@kbn/spaces-utils",
+    "@kbn/core-lifecycle-server-mocks",
+    "@kbn/licensing-types",
+    "@kbn/core-metrics-server",
+    "@kbn/core-analytics-server-mocks",
   ]
 }

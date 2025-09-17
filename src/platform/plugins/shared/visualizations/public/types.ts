@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, SavedObjectsMigrationVersion } from '@kbn/core/public';
-import {
+import type {
   IAggConfigs,
   SerializedSearchSourceFields,
   TimefilterContract,
@@ -16,7 +16,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { Vis } from './vis';

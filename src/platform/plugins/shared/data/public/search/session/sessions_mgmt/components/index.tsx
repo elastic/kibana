@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiTextProps } from '@elastic/eui';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 export type { OnActionComplete } from './table/actions';

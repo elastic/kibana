@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import { ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
+import type {
+  ConversationRound,
+  ReasoningStep,
+  ToolCallProgress,
+  ToolCallStep,
+} from '@kbn/onechat-common';
+import { isToolCallStep } from '@kbn/onechat-common';
 
-import { Conversation } from '@kbn/onechat-common';
+import type { Conversation } from '@kbn/onechat-common';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useConversationId } from './use_conversation_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { queryKeys } from '../query_keys';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
+
+const pendingRoundId = '__pending__';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
@@ -62,6 +70,7 @@ export const useConversationActions = () => {
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
+            id: pendingRoundId,
             input: { message: userMessage },
             response: { message: '' },
             steps: [],
@@ -94,9 +103,31 @@ export const useConversationActions = () => {
         })
       );
     },
+    addReasoningStep: ({ step }: { step: ReasoningStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
     addToolCall: ({ step }: { step: ToolCallStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
+      });
+    },
+    setToolCallProgress: ({
+      progress,
+      toolCallId,
+    }: {
+      progress: ToolCallProgress;
+      toolCallId: string;
+    }) => {
+      setCurrentRound((round) => {
+        const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
+        if (step) {
+          if (!step.progression) {
+            step.progression = [];
+          }
+          step.progression.push(progress);
+        }
       });
     },
     setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {

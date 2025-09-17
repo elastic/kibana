@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiMarkdownFormat, EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 const markdownRendererStyles = {

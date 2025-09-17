@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
+import { BinaryExpressionGroup } from '../ast/grouping';
+import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
-import {
+import type {
   CommandOptionVisitorContext,
-  CommandVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
   ListLiteralExpressionVisitorContext,
   MapExpressionVisitorContext,
-  Visitor,
 } from '../visitor';
+import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
-import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { BasicPrettyPrinter } from './basic_pretty_printer';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
@@ -156,6 +157,8 @@ export class WrappingPrettyPrinter {
     const [left, right] = ctx.arguments();
     const groupLeft = binaryExpressionGroup(left);
     const groupRight = binaryExpressionGroup(right);
+    const doGroupLeft = groupLeft && groupLeft < group;
+    const doGroupRight = groupRight && groupRight < group;
     const continueVerticalFlattening = group && inp.flattenBinExpOfType === group;
     const suffix = inp.suffix ?? '';
     const oneArgumentPerLine =
@@ -197,11 +200,11 @@ export class WrappingPrettyPrinter {
     let leftFormatted = BasicPrettyPrinter.expression(left, this.opts);
     let rightFormatted = BasicPrettyPrinter.expression(right, this.opts);
 
-    if (groupLeft && groupLeft < group) {
+    if (doGroupLeft) {
       leftFormatted = `(${leftFormatted})`;
     }
 
-    if (groupRight && groupRight < group) {
+    if (doGroupRight) {
       rightFormatted = `(${rightFormatted})`;
     }
 
@@ -233,6 +236,14 @@ export class WrappingPrettyPrinter {
       };
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
+
+      if (doGroupLeft) {
+        leftOut.txt = `(${leftOut.txt})`;
+      }
+
+      if (doGroupRight) {
+        rightOut.txt = `(${rightOut.txt})`;
+      }
 
       txt = `${leftOut.txt}${operatorLeadingWhitespace}${operator}\n`;
 
@@ -290,6 +301,10 @@ export class WrappingPrettyPrinter {
     let maxArgsPerLine = 0;
     let remainingCurrentLine = inp.remaining;
     let oneArgumentPerLine = false;
+
+    if (ctx.node.name === 'fork') {
+      oneArgumentPerLine = true;
+    }
 
     for (const child of children(ctx.node)) {
       if (getPrettyPrintStats(child).hasLineBreakingDecorations) {
@@ -374,9 +389,13 @@ export class WrappingPrettyPrinter {
           remaining: this.opts.wrap - indent.length,
           suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
         });
-        const separator = isFirstArg ? '' : '\n';
         const indentation = arg.indented ? '' : indent;
-        txt += separator + indentation + arg.txt;
+        let formattedArg = arg.txt;
+        if (args[i].type === 'query') {
+          formattedArg = `(\n${this.opts.tab.repeat(2)}${formattedArg}\n${indentation})`;
+        }
+        const separator = isFirstArg ? '' : '\n';
+        txt += separator + indentation + formattedArg;
         lines++;
       }
     }
@@ -588,18 +607,35 @@ export class WrappingPrettyPrinter {
 
       switch (node.subtype) {
         case 'unary-expression': {
-          const separator = operator === '-' || operator === '+' ? '' : ' ';
-          const formatted = ctx.visitArgument(0, inp);
+          operator = this.keyword(operator);
 
-          txt = `${operator}${separator}${formatted.txt}`;
+          const separator = operator === '-' || operator === '+' ? '' : ' ';
+          const argument = ctx.arguments()[0];
+          const argumentFormatted = ctx.visitArgument(0, inp);
+
+          const operatorPrecedence = unaryExpressionGroup(ctx.node);
+          const argumentPrecedence = binaryExpressionGroup(argument);
+
+          if (
+            argumentPrecedence !== BinaryExpressionGroup.none &&
+            argumentPrecedence < operatorPrecedence
+          ) {
+            argumentFormatted.txt = `(${argumentFormatted.txt})`;
+          }
+
+          txt = `${operator}${separator}${argumentFormatted.txt}`;
           break;
         }
         case 'postfix-unary-expression': {
+          operator = this.keyword(operator);
+
           const suffix = inp.suffix ?? '';
           txt = `${ctx.visitArgument(0, { ...inp, suffix: '' }).txt} ${operator}${suffix}`;
           break;
         }
         case 'binary-expression': {
+          operator = this.keyword(operator);
+
           return this.printBinaryOperatorExpression(ctx, operator, inp);
         }
         default: {
@@ -705,9 +741,10 @@ export class WrappingPrettyPrinter {
       return { txt, lines: args.lines /* add options lines count */ };
     })
 
-    .on('visitQuery', (ctx) => {
+    .on('visitQuery', (ctx, inp: Input): Output => {
       const opts = this.opts;
-      const indent = opts.indent ?? '';
+      const indent = inp?.indent ?? opts.indent ?? '';
+      const remaining = inp?.remaining ?? opts.wrap;
       const commands = ctx.node.commands;
       const commandCount = commands.length;
 
@@ -722,20 +759,21 @@ export class WrappingPrettyPrinter {
 
       if (!multiline) {
         const oneLine = indent + BasicPrettyPrinter.print(ctx.node, opts);
-        if (oneLine.length <= opts.wrap) {
-          return oneLine;
+        if (oneLine.length <= remaining) {
+          return { txt: oneLine };
         } else {
           multiline = true;
         }
       }
 
+      // Regular top-level query formatting
       let text = indent;
       const pipedCommandIndent = `${indent}${opts.pipeTab ?? '  '}`;
       const cmdSeparator = multiline ? `${pipedCommandIndent}| ` : ' | ';
       let i = 0;
       let prevOut: Output | undefined;
 
-      for (const out of ctx.visitCommands({ indent, remaining: opts.wrap - indent.length })) {
+      for (const out of ctx.visitCommands({ indent, remaining: remaining - indent.length })) {
         const isFirstCommand = i === 0;
         const isSecondCommand = i === 1;
 
@@ -766,10 +804,10 @@ export class WrappingPrettyPrinter {
         prevOut = out;
       }
 
-      return text;
+      return { txt: text };
     });
 
   public print(query: ESQLAstQueryExpression) {
-    return this.visitor.visitQuery(query, undefined);
+    return this.visitor.visitQuery(query, undefined).txt;
   }
 }

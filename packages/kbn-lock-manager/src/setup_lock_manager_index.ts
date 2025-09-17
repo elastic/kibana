@@ -8,8 +8,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const LOCKS_INDEX_ALIAS = '.kibana_locks';
 const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;

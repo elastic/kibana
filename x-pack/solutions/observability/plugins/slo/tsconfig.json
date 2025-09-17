@@ -107,5 +107,9 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/lock-manager",
     "@kbn/object-utils",
+    "@kbn/licensing-types",
+    "@kbn/deeplinks-analytics",
+    "@kbn/content-management-plugin",
+    "@kbn/dashboards-selector",
   ]
 }

@@ -13,13 +13,13 @@ import {
 } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
-import { Observable } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { Observable } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-types';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { userEvent } from '@testing-library/user-event';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import React from 'react';
-import { RecursivePartial, UseEuiTheme } from '@elastic/eui';
+import type { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import ReportSchedulesTable from './report_schedules_table';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

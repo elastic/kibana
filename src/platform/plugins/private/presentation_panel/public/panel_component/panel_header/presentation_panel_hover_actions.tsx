@@ -9,39 +9,30 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, {
-  MouseEventHandler,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { MouseEventHandler, ReactElement } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiIconTip,
   EuiNotificationBadge,
   EuiPopover,
   EuiToolTip,
-  IconType,
   useEuiTheme,
 } from '@elastic/eui';
-import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import { css } from '@emotion/react';
+import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiCanLockHoverActions,
-  EmbeddableApiContext,
-  PublishesTitle,
   useBatchedOptionalPublishingSubjects,
-  ViewMode,
 } from '@kbn/presentation-publishing';
-import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { Subscription, switchMap } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
@@ -50,8 +41,8 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
   panelNotificationTrigger,
 } from '../../panel_actions';
-import { AnyApiAction } from '../../panel_actions/types';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { AnyApiAction } from '../../panel_actions/types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {

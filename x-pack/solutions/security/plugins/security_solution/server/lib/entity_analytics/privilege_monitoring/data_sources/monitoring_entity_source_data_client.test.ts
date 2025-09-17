@@ -12,7 +12,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { monitoringEntitySourceTypeName } from '../saved_objects';
 
 describe('MonitoringEntitySourceDataClient', () => {
@@ -57,12 +57,11 @@ describe('MonitoringEntitySourceDataClient', () => {
         (err as Error & { output?: { statusCode: number } }).output = { statusCode: 404 };
         throw err;
       });
-      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
-        find: jest.fn().mockResolvedValue({
-          total: 0,
-          saved_objects: [],
-        }),
-      } as unknown as SavedObjectsClientContract);
+
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+      } as unknown as SavedObjectsFindResponse<unknown>);
 
       defaultOpts.soClient.create.mockResolvedValue({
         id: 'abcdefg',
@@ -87,12 +86,10 @@ describe('MonitoringEntitySourceDataClient', () => {
         attributes: testDescriptor,
       } as unknown as SavedObject<unknown>;
 
-      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
-        find: jest.fn().mockResolvedValue({
-          total: 1,
-          saved_objects: [existingSavedObject],
-        }),
-      } as unknown as SavedObjectsClientContract);
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [existingSavedObject],
+      } as unknown as SavedObjectsFindResponse<unknown>);
 
       await expect(dataClient.init(testDescriptor)).rejects.toThrow(
         `A monitoring entity source with the name "${testDescriptor.name}" already exists.`
@@ -127,12 +124,10 @@ describe('MonitoringEntitySourceDataClient', () => {
         id, // it preserves the id when updating
       };
 
-      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
-        find: jest.fn().mockResolvedValue({
-          total: 0,
-          saved_objects: [],
-        }),
-      } as unknown as SavedObjectsClientContract);
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+      } as unknown as SavedObjectsFindResponse<unknown>);
 
       defaultOpts.soClient.update.mockResolvedValue({
         id,

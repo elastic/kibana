@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export { useAddFromLibraryTypes } from './add_from_library/registry';
-export { AddFromLibraryFlyout } from './add_from_library/add_from_library_flyout';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
@@ -40,7 +39,7 @@ export type {
 } from './ui_actions/triggers';
 export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
 export type { EmbeddableSetup, EmbeddableStart } from './types';
-export type { EnhancementRegistryDefinition } from './enhancements/types';
+export type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
 export {
   EmbeddableRenderer,

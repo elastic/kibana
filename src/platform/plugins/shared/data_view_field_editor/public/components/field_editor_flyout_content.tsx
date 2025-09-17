@@ -21,10 +21,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
-import { PreviewState } from './preview/types';
+import type { PreviewState } from './preview/types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
-import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
+import type { FieldEditorFormState } from './field_editor/field_editor';
+import { FieldEditor } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
 import { FieldPreview, useFieldPreviewContext } from './preview';

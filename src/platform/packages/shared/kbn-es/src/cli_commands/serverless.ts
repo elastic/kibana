@@ -17,16 +17,16 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { basename } from 'path';
 import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import { Cluster } from '../cluster';
+import type { ServerlessOptions } from '../utils';
 import {
   ES_SERVERLESS_REPO_ELASTICSEARCH,
   ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
-  ServerlessOptions,
   isServerlessProjectType,
   serverlessProjectTypes,
   serverlessProductTiers,
 } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 import { createCliError } from '../errors';
 
 const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();

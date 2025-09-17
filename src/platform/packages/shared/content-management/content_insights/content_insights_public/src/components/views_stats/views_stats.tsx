@@ -16,7 +16,7 @@ import type { ContentInsightsStats } from '@kbn/content-management-content-insig
 import { css } from '@emotion/react';
 import moment from 'moment';
 
-import { Item } from '../../types';
+import type { Item } from '../../types';
 import { ViewsChart } from './views_chart';
 import { useServices } from '../../services';
 

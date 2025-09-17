@@ -11,7 +11,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { AppDependencies } from '..';
+import type { AppDependencies } from '..';
 import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (

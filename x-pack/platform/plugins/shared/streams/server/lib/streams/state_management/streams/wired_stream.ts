@@ -6,11 +6,12 @@
  */
 
 import { isNotFoundError } from '@kbn/es-errors';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamLifecycle,
   MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
+  getInheritedSettings,
   getSegments,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
@@ -34,7 +35,12 @@ import {
   validateDescendantFields,
   validateSystemFields,
 } from '../../helpers/validate_fields';
-import { validateRootStreamChanges } from '../../helpers/validate_stream';
+import {
+  validateNoManualIngestPipelineUsage,
+  validateRootStreamChanges,
+  validateBracketsInFieldNames,
+  validateSettings,
+} from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
 import { generateIngestPipeline } from '../../ingest_pipelines/generate_ingest_pipeline';
@@ -50,12 +56,14 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
+import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
   routing: boolean;
   processing: boolean;
   lifecycle: boolean;
+  settings: boolean;
 }
 
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
@@ -64,6 +72,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     routing: false,
     processing: false,
     lifecycle: false,
+    settings: false,
   };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
@@ -132,6 +141,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
+    this._changes.settings =
+      !startingStateStreamDefinition ||
+      !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
+
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
     if (parentId && !desiredState.has(parentId)) {
@@ -142,13 +155,15 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [
                 {
                   destination: this._definition.name,
-                  if: { never: {} },
+                  where: { never: {} },
+                  status: 'disabled',
                 },
               ],
             },
@@ -171,7 +186,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: { steps: [] },
+                settings: {},
                 wired: {
                   fields: {},
                   routing: [],
@@ -206,7 +222,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                     ...currentParentRouting,
                     {
                       destination: this._definition.name,
-                      if: { never: {} },
+                      where: { never: {} },
+                      status: 'disabled',
                     },
                   ],
                 },
@@ -296,6 +313,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     const existsInStartingState = startingState.has(this._definition.name);
+
+    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
+      // recursively go through all steps to make sure it's not using manual_ingest_pipeline
+      validateNoManualIngestPipelineUsage(this._definition.ingest.processing.steps);
+    }
 
     if (!existsInStartingState) {
       // Check for conflicts
@@ -410,10 +432,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     validateSystemFields(this._definition);
+    validateBracketsInFieldNames(this._definition);
 
     if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
       return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
     }
+
+    validateSettings(this._definition, this.dependencies.isServerless);
 
     return { isValid: true, errors: [] };
   }
@@ -501,6 +526,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
+    const settings = getInheritedSettings(ancestors);
 
     return [
       {
@@ -550,6 +576,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: formatSettings(settings, this.dependencies.isServerless),
+        },
+      },
+      {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
@@ -562,6 +595,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   public hasChangedLifecycle(): boolean {
     return this._changes.lifecycle;
+  }
+
+  public hasChangedSettings(): boolean {
+    return this._changes.settings;
   }
 
   public getLifecycle(): IngestStreamLifecycle {
@@ -639,6 +676,35 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
+    const ancestors = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!
+    ) as WiredStream[];
+    if (ancestors.some((ancestor) => ancestor.hasChangedSettings())) {
+      const settings = getInheritedSettings(
+        ancestors.map((ancestor) => ancestor.definition) as Streams.WiredStream.Definition[]
+      );
+
+      actions.push({
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: formatSettings(settings, this.dependencies.isServerless),
+        },
+      });
+
+      const oldSettings = getInheritedSettings(
+        getAncestorsAndSelf(this._definition.name).map(
+          (id) => startingState.get(id)!.definition
+        ) as Streams.WiredStream.Definition[]
+      );
+      if (settingsUpdateRequiresRollover(oldSettings, settings)) {
+        actions.push({
+          type: 'rollover',
+          request: { name: this._definition.name },
+        });
+      }
+    }
+
     const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
     if (definitionChanged) {
       actions.push({
@@ -690,6 +756,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'delete_queries',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

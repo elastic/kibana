@@ -9,17 +9,14 @@ import {
   EuiFlexGroup,
   EuiSkeletonLoading,
   EuiSkeletonText,
-  EuiSwitch,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
-import { useToolsActions } from '../../../context/tools_table_provider';
+import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
 
 export interface ToolsTableHeaderProps {
@@ -40,11 +37,10 @@ export const ToolsTableHeader = ({
   setSelectedTools,
 }: ToolsTableHeaderProps) => {
   const { euiTheme } = useEuiTheme();
-  const { includeSystemTools, setIncludeSystemTools } = useToolsPreferences();
   const { bulkDeleteTools } = useToolsActions();
 
   const selectAll = useCallback(() => {
-    setSelectedTools(tools.filter(isEsqlTool));
+    setSelectedTools(tools.filter((tool) => !tool.readonly));
   }, [setSelectedTools, tools]);
 
   const clearSelection = useCallback(() => {
@@ -56,97 +52,80 @@ export const ToolsTableHeader = ({
   }, [bulkDeleteTools, selectedTools]);
 
   return (
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      css={css`
-        margin-block: ${euiTheme.size.s};
-      `}
-    >
-      <EuiSkeletonLoading
-        isLoading={isLoading}
-        loadingContent={
-          <EuiSkeletonText
-            css={css`
-              display: inline-block;
-              width: 200px;
-            `}
-            lines={1}
-            size="xs"
-          />
-        }
-        loadedContent={
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            css={css`
-              min-height: 24px;
-            `}
-          >
-            <EuiText size="xs">
-              <FormattedMessage
-                id="xpack.onechat.tools.toolsTableSummary"
-                defaultMessage="Showing {start}-{end} of {total} {tools}"
-                values={{
-                  start: <strong>{Math.min(pageIndex * 10 + 1, tools.length)}</strong>,
-                  end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
-                  total,
-                  tools: <strong>{labels.tools.toolsLabel}</strong>,
-                }}
-              />
-            </EuiText>
-            {selectedTools.length > 0 && (
-              <EuiFlexGroup gutterSize="none">
-                <EuiButtonEmpty
-                  iconType="trash"
-                  iconSize="m"
+    <EuiSkeletonLoading
+      isLoading={isLoading}
+      loadingContent={
+        <EuiSkeletonText
+          css={css`
+            display: inline-block;
+            width: 200px;
+          `}
+          lines={1}
+          size="xs"
+        />
+      }
+      loadedContent={
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          css={css`
+            min-height: 24px;
+          `}
+        >
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.onechat.tools.toolsTableSummary"
+              defaultMessage="Showing {start}-{end} of {total} {tools}"
+              values={{
+                start: <strong>{Math.min(pageIndex * 10 + 1, tools.length)}</strong>,
+                end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
+                total,
+                tools: <strong>{labels.tools.toolsLabel}</strong>,
+              }}
+            />
+          </EuiText>
+          {selectedTools.length > 0 && (
+            <EuiFlexGroup gutterSize="none">
+              <EuiButtonEmpty
+                iconType="trash"
+                iconSize="m"
+                size="xs"
+                color="danger"
+                onClick={deleteSelection}
+              >
+                <EuiText
                   size="xs"
-                  color="danger"
-                  onClick={deleteSelection}
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
                 >
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.semiBold};
-                    `}
-                  >
-                    {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
-                  </EuiText>
-                </EuiButtonEmpty>
-                <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.semiBold};
-                    `}
-                  >
-                    {labels.tools.selectAllToolsButtonLabel}
-                  </EuiText>
-                </EuiButtonEmpty>
-                <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.semiBold};
-                    `}
-                  >
-                    {labels.tools.clearSelectionButtonLabel}
-                  </EuiText>
-                </EuiButtonEmpty>
-              </EuiFlexGroup>
-            )}
-          </EuiFlexGroup>
-        }
-      />
-      <EuiSwitch
-        disabled={isLoading}
-        label={<EuiText size="s">{labels.tools.includeSystemToolsSwitchLabel}</EuiText>}
-        css={css`
-          align-items: center;
-        `}
-        compressed
-        checked={includeSystemTools}
-        onChange={() => setIncludeSystemTools(!includeSystemTools)}
-      />
-    </EuiFlexGroup>
+                  {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
+                </EuiText>
+              </EuiButtonEmpty>
+              <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  {labels.tools.selectAllToolsButtonLabel}
+                </EuiText>
+              </EuiButtonEmpty>
+              <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  {labels.tools.clearSelectionButtonLabel}
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexGroup>
+          )}
+        </EuiFlexGroup>
+      }
+    />
   );
 };

@@ -17,11 +17,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
+import type {
+  GroupingLicenseCtaMessageDetailsButtonProps,
+  GroupingLicenseCtaMessageTrialButtonDependencies,
+} from './grouping_license_cta_shared';
 import {
   GroupingLicenseCtaMessageDetailsButton,
-  GroupingLicenseCtaMessageDetailsButtonProps,
   GroupingLicenseCtaMessageTrialButton,
-  GroupingLicenseCtaMessageTrialButtonDependencies,
   groupingLicenseCtaMessageDescription,
   groupingLicenseCtaMessageTitle,
 } from './grouping_license_cta_shared';

@@ -18,8 +18,8 @@ import {
 } from './utils';
 import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
-import { TermsIndexPatternColumn } from './operations';
-import { FormBasedLayer } from './types';
+import type { TermsIndexPatternColumn } from './operations';
+import type { FormBasedLayer } from './types';
 import { createMockedIndexPatternWithAdditionalFields } from './mocks';
 import { getLongMessage } from '../../user_messages_utils';
 

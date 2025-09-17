@@ -8,8 +8,8 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
-import { ISessionsClient } from './sessions_client';
-import { ISessionService } from './session_service';
+import type { ISessionsClient } from './sessions_client';
+import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
 import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';

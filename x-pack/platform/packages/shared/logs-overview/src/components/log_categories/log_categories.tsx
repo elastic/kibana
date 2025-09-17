@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import hash from 'object-hash';
-import React, { CSSProperties, useCallback, useMemo } from 'react';
+import type { CSSProperties } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   CategorizeLogsServiceContext,
   categorizeLogsService,
@@ -21,20 +22,20 @@ import {
   categoryDetailsService,
   createCategoryDetailsServiceImplementations,
 } from '../../services/category_details_service';
-import { LogCategory } from '../../types';
-import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import {
-  LogCategoriesControlBar,
+import type { LogCategory } from '../../types';
+import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type {
   LogCategoriesControlBarDependencies,
   LogCategoriesControlBarProps,
 } from './log_categories_control_bar';
+import { LogCategoriesControlBar } from './log_categories_control_bar';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
-import {
-  LogCategoriesResultContent,
+import type {
   LogCategoriesResultContentDependencies,
   LogCategoriesResultContentProps,
 } from './log_categories_result_content';
+import { LogCategoriesResultContent } from './log_categories_result_content';
 
 export type LogCategoriesProps = LogCategoriesContentProps & {
   dependencies: LogCategoriesDependencies;

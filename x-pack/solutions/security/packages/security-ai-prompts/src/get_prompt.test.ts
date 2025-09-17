@@ -6,8 +6,8 @@
  */
 
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { localPrompts, promptDictionary, promptGroupId } from './mock_prompts';
 
 jest.mock('@kbn/core-saved-objects-api-server');

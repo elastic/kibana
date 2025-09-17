@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
 import { SUB_ACTION } from '../../../common/thehive/constants';
-import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
+import type {
+  ExecutorParams,
+  ExecutorSubActionCreateAlertParams,
+} from '../../../common/thehive/types';
 import userEvent from '@testing-library/user-event';
 
 describe('TheHiveParamsFields renders', () => {

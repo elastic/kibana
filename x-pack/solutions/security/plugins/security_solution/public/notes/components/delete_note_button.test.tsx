@@ -12,6 +12,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import type { Note } from '../../../common/api/timeline';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import { ReqStatus } from '..';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -29,6 +30,8 @@ jest.mock('../../common/hooks/use_app_toasts', () => ({
   }),
 }));
 
+jest.mock('../../common/components/user_privileges');
+
 const note: Note = {
   eventId: '1',
   noteId: '1',
@@ -43,6 +46,13 @@ const note: Note = {
 const index = 0;
 
 describe('DeleteNoteButtonIcon', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { crud: true },
+    });
+  });
+
   it('should render the delete icon', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -116,5 +126,19 @@ describe('DeleteNoteButtonIcon', () => {
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: DELETE_NOTE_ERROR,
     });
+  });
+
+  it('should not render the icon if user does not have crud privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { crud: false },
+    });
+
+    const { container } = render(
+      <TestProviders>
+        <DeleteNoteButtonIcon note={note} index={index} />
+      </TestProviders>
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

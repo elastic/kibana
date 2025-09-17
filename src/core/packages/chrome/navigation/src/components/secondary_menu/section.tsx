@@ -8,13 +8,14 @@
  */
 
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
   hasGap?: boolean;
-  label: string | null;
+  label?: string;
 }
 
 /**

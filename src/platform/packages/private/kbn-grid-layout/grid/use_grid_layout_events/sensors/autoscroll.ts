@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserMouseEvent } from './mouse';
+import type { UserMouseEvent } from './mouse';
 
 const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll.
 const MAX_DISTANCE = 0.6; // percent of the distance from the center of the screen on either side of the middle is considered max distance and will scroll at max speed.

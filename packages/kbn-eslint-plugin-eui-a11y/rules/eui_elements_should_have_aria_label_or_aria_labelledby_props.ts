@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as EsLint from 'eslint';
-import * as EsTree from 'estree';
+import type * as EsLint from 'eslint';
+import type * as EsTree from 'estree';
 import * as TypescriptEsTree from '@typescript-eslint/typescript-estree';
 
 import { getPropValues } from '../helpers/get_prop_values';

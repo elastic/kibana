@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Intercept } from '@kbn/intercepts-plugin/public';
+import type { Intercept } from '@kbn/intercepts-plugin/public';
 import type { PromptTelemetry } from './telemetry';
 import { NPSScoreInput } from './components';
 
@@ -138,14 +138,14 @@ export const productInterceptRegistrationConfig = ({
       });
     },
     onFinish: ({ response: feedbackResponse, runId }) => {
-      eventReporter.reportInterceptInteraction({
+      eventReporter.reportInterceptInteractionTermination({
         interactionType: 'completion',
         interceptRunId: runId,
       });
     },
     onDismiss: ({ runId }) => {
       // still update user profile run count, a dismissal is still an interaction
-      eventReporter.reportInterceptInteraction({
+      eventReporter.reportInterceptInteractionTermination({
         interactionType: 'dismissal',
         interceptRunId: runId,
       });

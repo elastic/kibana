@@ -13,12 +13,14 @@ export type MyGetLensAttributes = (params: {
   euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
   esql?: string;
+  backgroundColor: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
 }) => LensAttributes;
 
 export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
   analystHourlyRate,
+  backgroundColor,
   extraOptions,
   minutesPerAlert,
 }) => {
@@ -99,7 +101,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
       internalReferences: [],
       query: { language: 'kuery', query: '' },
       visualization: {
-        color: 'e8f9f3',
+        color: backgroundColor,
         icon: 'launch',
         iconAlign: 'right',
         valuesTextAlign: 'left',
@@ -118,8 +120,5 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2025-07-21T15:51:38.660Z',
-    version: 'WzI0LDFd',
   } as LensAttributes;
 };

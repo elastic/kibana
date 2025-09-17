@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Integration } from '../../common';
+import type { Integration } from '../../common';
 
 export const testIntegration: Integration = {
   name: 'integration',

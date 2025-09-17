@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { CreateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
+import type { CreateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { createAttackDiscoverySchedulesRoute } from './create';
@@ -14,7 +14,7 @@ import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { createAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
 import { getAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -58,7 +58,6 @@ describe('createAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     createAttackDiscoverySchedulesRoute(server.router);
     createAttackDiscoverySchedule.mockResolvedValue(
       getAttackDiscoveryScheduleMock(mockRequestBody)
@@ -101,17 +100,6 @@ describe('createAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('Disabled feature flag', () => {
-    it('should return a 404 if scheduling feature is not registered', async () => {
-      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const response = await server.inject(
-        createAttackDiscoverySchedulesRequest(mockRequestBody),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(404);
     });
   });
 });

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import {
-  DataStreamMigrationStatus,
+import type {
   DataStreamMigrationOperation,
   DataStreamMetadata,
   DataStreamMigrationWarning,
   DataStreamReindexTaskStatusResponse,
   DataStreamReindexStatusCancelled,
 } from '../../../common/types';
+import { DataStreamMigrationStatus } from '../../../common/types';
 
 import { DataStreamMigrationError, error } from './error';
 

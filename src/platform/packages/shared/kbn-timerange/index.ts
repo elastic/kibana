@@ -12,4 +12,5 @@ export {
   getDateISORange,
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
+  type TimeRange,
 } from './src';

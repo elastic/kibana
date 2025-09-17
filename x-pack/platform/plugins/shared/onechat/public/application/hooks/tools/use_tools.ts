@@ -5,45 +5,34 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import { queryKeys } from '../../query_keys';
+import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
+import { useToasts } from '../use_toasts';
 
-export interface UseOnechatToolsProps {
-  includeSystemTools?: boolean;
-}
-
-export const useOnechatTools = ({ includeSystemTools }: UseOnechatToolsProps = {}) => {
+export const useToolsService = () => {
   const { toolsService } = useOnechatServices();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
   });
 
-  const tools = useMemo(() => {
-    if (!data) {
-      return [];
-    }
-    if (includeSystemTools) {
-      return data;
-    }
-    return data.filter((tool) => tool.type !== ToolType.builtin);
-  }, [data, includeSystemTools]);
-
-  return { tools, isLoading, error };
+  return { tools: data ?? [], isLoading, error, isError };
 };
 
-export const useOnechatTool = (toolId?: string) => {
+export const useToolService = (toolId?: string) => {
   const { toolsService } = useOnechatServices();
 
   const {
     data: tool,
     isLoading,
     error,
+    isError,
   } = useQuery({
     enabled: !!toolId,
     queryKey: queryKeys.tools.byId(toolId),
@@ -51,5 +40,65 @@ export const useOnechatTool = (toolId?: string) => {
     queryFn: () => toolsService.get({ toolId: toolId! }),
   });
 
-  return { tool: tool as EsqlToolDefinitionWithSchema | undefined, isLoading, error };
+  return {
+    tool: tool as ToolDefinitionWithSchema | undefined,
+    isLoading,
+    error,
+    isError,
+  };
+};
+
+export interface UseToolProps {
+  toolId?: string;
+  onLoadingError?: (error: Error) => void;
+}
+
+export const useTool = ({ toolId, onLoadingError }: UseToolProps) => {
+  const { addErrorToast } = useToasts();
+  const { tool, isLoading, error, isError } = useToolService(toolId);
+
+  useEffect(() => {
+    if (toolId && isError) {
+      const formattedError = formatOnechatErrorMessage(error);
+      addErrorToast({
+        title: labels.tools.loadToolErrorToast(toolId),
+        text: formattedError,
+      });
+      onLoadingError?.(new Error(formattedError));
+    }
+  }, [isError, error, toolId, addErrorToast, onLoadingError]);
+
+  return {
+    tool,
+    isLoading,
+    error,
+    isError,
+  };
+};
+
+export interface UseToolsWithErrorHandlingProps {
+  onLoadingError?: (error: Error) => void;
+}
+
+export const useTools = ({ onLoadingError }: UseToolsWithErrorHandlingProps = {}) => {
+  const { addErrorToast } = useToasts();
+  const { tools, isLoading, error, isError } = useToolsService();
+
+  useEffect(() => {
+    if (isError) {
+      const formattedError = formatOnechatErrorMessage(error);
+      addErrorToast({
+        title: labels.tools.loadToolsErrorToast,
+        text: formattedError,
+      });
+      onLoadingError?.(new Error(formattedError));
+    }
+  }, [isError, error, addErrorToast, onLoadingError]);
+
+  return {
+    tools,
+    isLoading,
+    error,
+    isError,
+  };
 };

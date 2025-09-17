@@ -7,22 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableStateWithType } from './persistable_state/types';
+import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { EmbeddableStateWithType } from './persistable_state/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
-export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
-
-export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
-  extends PersistableStateDefinition<P> {
-  id: string;
-}
-
-export interface EnhancementRegistryItem<P extends SerializableRecord = SerializableRecord>
-  extends PersistableState<P> {
-  id: string;
-}
 
 export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = EmbeddableStateWithType>
   extends PersistableState<P> {

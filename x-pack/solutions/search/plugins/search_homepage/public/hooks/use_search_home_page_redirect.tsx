@@ -24,10 +24,9 @@ export const useSearchHomePageRedirect = () => {
   }, []);
   const {
     data: indicesStatus,
-    isLoading,
+    isLoading: isIndicesStatusLoading,
     error,
   } = useIndicesStatusQuery(undefined, !skipGlobalEmptyState);
-
   const [redirectChecked, setRedirectChecked] = useState(() => false);
 
   useEffect(() => {
@@ -56,8 +55,14 @@ export const useSearchHomePageRedirect = () => {
     }
     setRedirectChecked(true);
   }, [application, indicesStatus, userPrivileges, skipGlobalEmptyState, error]);
+  let isLoading = true;
+  if (skipGlobalEmptyState) {
+    isLoading = false;
+  } else if (redirectChecked) {
+    isLoading = isIndicesStatusLoading;
+  }
 
   return {
-    isLoading: redirectChecked ? isLoading : true,
+    isLoading,
   };
 };

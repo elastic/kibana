@@ -6,7 +6,7 @@
  */
 
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
-import { UseKnowledgeBaseResult } from '../use_knowledge_base';
+import type { UseKnowledgeBaseResult } from '../use_knowledge_base';
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {

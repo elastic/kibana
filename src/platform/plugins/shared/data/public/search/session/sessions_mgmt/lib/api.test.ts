@@ -8,7 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
@@ -64,6 +64,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
 
       const { savedObjects: results, statuses } = await api.fetchTableData();
@@ -80,6 +81,60 @@ describe('Search Sessions Management API', () => {
         },
       ]);
       expect(statuses['hello-pizza-123']).toEqual({ status: 'complete' });
+    });
+
+    test('fetchDataTable returns saved objects for a specific appId', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-123',
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                initialState: {},
+                restoreState: {},
+                idMapping: [],
+              },
+            },
+            {
+              id: 'hello-burguer-123',
+              attributes: {
+                name: 'Cheeseburguer',
+                appId: 'burguer',
+                initialState: {},
+                restoreState: {},
+                idMapping: [],
+              },
+            },
+          ],
+          statuses: {
+            'hello-pizza-123': { status: 'complete' },
+            'hello-burguer-123': { status: 'complete' },
+          },
+        };
+      });
+
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
+      });
+
+      const { savedObjects: results, statuses } = await api.fetchTableData({ appId: 'burguer' });
+      expect(results).toEqual([
+        {
+          id: 'hello-burguer-123',
+          attributes: {
+            name: 'Cheeseburguer',
+            appId: 'burguer',
+            initialState: {},
+            restoreState: {},
+            idMapping: [],
+          },
+        },
+      ]);
+      expect(statuses['hello-burguer-123']).toEqual({ status: 'complete' });
     });
 
     test('expired session is showed as expired', async () => {
@@ -107,6 +162,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
 
       const { savedObjects: res, statuses } = await api.fetchTableData();
@@ -119,6 +175,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.fetchTableData();
 
@@ -147,6 +204,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.fetchTableData();
 
@@ -174,6 +232,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendDelete('abc-123-cool-session-ID');
 
@@ -188,6 +247,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendDelete('abc-123-cool-session-ID');
 
@@ -216,6 +276,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendExtend('my-id', '5d');
 
@@ -228,6 +289,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendExtend('my-id', '5d');
 

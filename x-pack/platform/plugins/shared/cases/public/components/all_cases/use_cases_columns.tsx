@@ -66,6 +66,7 @@ export interface GetCasesColumn {
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
+  disabledCases?: Set<string>;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,6 +82,7 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
+  disabledCases,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -311,15 +313,16 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
+            const disabled = disabledCases?.has(theCase.id) ?? false;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
-                onClick={() => {
-                  assignCaseAction(theCase);
-                }}
+                onClick={() => assignCaseAction(theCase)}
                 size="s"
+                iconType={disabled ? 'check' : undefined}
+                disabled={disabled}
               >
-                {i18n.SELECT}
+                {disabled ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }
@@ -328,7 +331,7 @@ export const useCasesColumns = ({
         width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
   );
 
   // we need to extend the columnsDict with the columns of

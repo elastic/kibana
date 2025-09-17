@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { Query } from '@kbn/es-query';
 import {
   getWarningsTitle,
@@ -17,21 +17,22 @@ import {
   ViewDetailsPopover,
 } from '@kbn/search-response-warnings';
 import _ from 'lodash';
-import React, { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
+import type { LAYER_TYPE } from '../../../common/constants';
 import {
-  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
-import {
+import type {
   Attribution,
   CustomIcon,
   LayerDescriptor,
@@ -41,10 +42,10 @@ import {
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { ISource, SourceEditorArgs } from '../sources/source';
-import { DataRequestContext } from '../../actions';
-import { IStyle } from '../styles/style';
-import { LICENSED_FEATURES } from '../../licensed_features';
+import type { ISource, SourceEditorArgs } from '../sources/source';
+import type { DataRequestContext } from '../../actions';
+import type { IStyle } from '../styles/style';
+import type { LICENSED_FEATURES } from '../../licensed_features';
 import { hasESSourceMethod, isESVectorTileSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
 import { isLayerGroup } from './layer_group';
@@ -170,7 +171,7 @@ export class AbstractLayer implements ILayer {
       sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
       __dataRequests: _.get(options, '__dataRequests', []),
       id: _.get(options, 'id', uuidv4()),
-      label: options.label && options.label.length > 0 ? options.label : null,
+      label: options.label && options.label.length > 0 ? options.label : undefined,
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
@@ -178,7 +179,7 @@ export class AbstractLayer implements ILayer {
       style: _.get(options, 'style', null),
       includeInFitToBounds:
         typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
-    };
+    } as LayerDescriptor;
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {

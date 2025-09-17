@@ -7,10 +7,11 @@
 
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
-import { NotificationChannel } from '@kbn/xstate-utils';
-import { ILogViewsClient } from '../../../services/log_views';
-import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
-import {
+import type { NotificationChannel } from '@kbn/xstate-utils';
+import type { ILogViewsClient } from '../../../services/log_views';
+import type { LogViewNotificationEvent } from './notifications';
+import { logViewNotificationEventSelectors } from './notifications';
+import type {
   LogViewContext,
   LogViewContextWithError,
   LogViewContextWithLogView,
@@ -20,7 +21,7 @@ import {
   LogViewEvent,
   LogViewTypestate,
 } from './types';
-import {
+import type {
   InitializeFromUrl,
   UpdateContextInUrl,
   ListenForUrlChanges,

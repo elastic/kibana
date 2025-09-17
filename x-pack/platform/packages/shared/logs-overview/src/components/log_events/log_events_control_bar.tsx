@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { ControlBar, ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
+import type { ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
+import { ControlBar } from '../shared/control_bar';
 
 export type LogEventsControlBarProps = ControlBarProps;
 

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { i18n } from '@kbn/i18n';
+import { useRovingIndex } from '../../hooks/use_roving_index';
 
 export interface SideNavFooterProps {
   children: ReactNode;
@@ -27,8 +29,9 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
 
   return (
     <footer
-      // TODO: translate
-      aria-label="Side navigation footer"
+      aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
+        defaultMessage: 'Side navigation footer',
+      })}
       css={css`
         align-items: center;
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};

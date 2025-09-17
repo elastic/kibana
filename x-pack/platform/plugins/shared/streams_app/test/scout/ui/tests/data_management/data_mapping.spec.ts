@@ -19,8 +19,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', 'logs.info', {
       field: 'severity_text',
-      value: 'info',
-      operator: 'eq',
+      eq: 'info',
     });
 
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
@@ -141,7 +140,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
 
     // Open the field actions menu
@@ -151,7 +150,10 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Verify the flyout opens and set field mapping type
     await pageObjects.streams.expectFieldFlyoutOpen();
     await pageObjects.streams.setFieldMappingType('ip');
-    await pageObjects.streams.saveFieldMappingChanges();
+    await pageObjects.streams.stageFieldMappingChanges();
+
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
 
     // Verify the field is now mapped
     await pageObjects.streams.expectCellValueContains({
@@ -180,7 +182,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
 
     // Open the field actions menu
@@ -190,7 +192,11 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Verify the flyout opens and set field mapping type
     await pageObjects.streams.expectFieldFlyoutOpen();
     await pageObjects.streams.setFieldMappingType('ip');
-    await pageObjects.streams.saveFieldMappingChanges();
+    await pageObjects.streams.stageFieldMappingChanges();
+
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
+    await pageObjects.streams.closeToasts();
 
     // Verify the field is now mapped
     await pageObjects.streams.expectCellValueContains({
@@ -207,6 +213,9 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Now attempt to unmap the field
     await pageObjects.streams.unmapField();
 
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
+
     // Verify the field is now unmapped
     await pageObjects.streams.expectCellValueContains({
       columnName: 'name',
@@ -216,7 +225,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
   });
 });

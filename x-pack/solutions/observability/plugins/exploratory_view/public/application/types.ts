@@ -17,18 +17,18 @@ import type {
   OverlayStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;

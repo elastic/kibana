@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
+import type { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 interface UpdateLastBackingIndexSettingsResponse {
   acknowledged: boolean | undefined;

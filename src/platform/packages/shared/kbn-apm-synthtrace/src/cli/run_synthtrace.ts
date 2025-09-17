@@ -8,7 +8,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
 import { readdirSync } from 'fs';
 import path from 'path';
@@ -36,6 +36,10 @@ function options(y: Argv) {
     })
     .option('kibana', {
       describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
+      string: true,
+    })
+    .option('apiKey', {
+      describe: 'Kibana API key',
       string: true,
     })
     .option('from', {

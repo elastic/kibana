@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
-import {
-  getSelectedFilters,
-  setSelectedFilters,
-  SelectedFilters,
-} from '../actions/selected_filters';
+import type { Action } from 'redux-actions';
+import type { SelectedFilters } from '../actions/selected_filters';
+import { getSelectedFilters, setSelectedFilters } from '../actions/selected_filters';
 
 const initialState: SelectedFilters | null = null;
 

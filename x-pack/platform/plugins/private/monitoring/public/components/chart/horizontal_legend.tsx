@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIcon,
-  UseEuiTheme,
-  euiFontSize,
-  logicalCSS,
-} from '@elastic/eui';
+import type { MouseEvent } from 'react';
+import React from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon, euiFontSize, logicalCSS } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { includes, isFunction } from 'lodash';
 

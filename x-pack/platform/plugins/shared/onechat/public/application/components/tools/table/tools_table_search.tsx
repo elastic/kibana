@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiSearchBar, EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
-import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
+import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
-import { useToolTags } from '../../../hooks/tools/use_tool_tags';
-import { useOnechatTools } from '../../../hooks/tools/use_tools';
+import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
+import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
-import { ToolFilterOption } from './tools_table_filter_option';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
 const toValidSearchQuery = (query: string | null): string => {
   try {
@@ -27,13 +27,9 @@ const toValidSearchQuery = (query: string | null): string => {
 };
 
 const getToolsTableSearchConfig = ({
-  includeSystemTools,
-  matchesByType,
   matchesByTag,
   tags,
 }: {
-  includeSystemTools: boolean;
-  matchesByType: Record<ToolType, number>;
   matchesByTag: Record<string, number>;
   tags: string[];
 }): EuiSearchBarProps => ({
@@ -44,46 +40,15 @@ const getToolsTableSearchConfig = ({
   filters: [
     {
       type: 'field_value_selection',
-      field: 'type',
-      name: labels.tools.typeFilter,
-      multiSelect: false,
-      options: [
-        {
-          value: ToolType.esql,
-          name: labels.tools.esqlLabel,
-          view: (
-            <ToolFilterOption
-              name={labels.tools.esqlLabel}
-              matches={matchesByType[ToolType.esql] ?? 0}
-            />
-          ),
-        },
-        ...(includeSystemTools
-          ? [
-              {
-                value: ToolType.builtin,
-                name: labels.tools.builtinLabel,
-                view: (
-                  <ToolFilterOption
-                    name={labels.tools.builtinLabel}
-                    matches={matchesByType[ToolType.builtin] ?? 0}
-                  />
-                ),
-              },
-            ]
-          : []),
-      ],
-    },
-    {
-      type: 'field_value_selection',
       field: 'tags',
       name: labels.tools.tagsFilter,
       multiSelect: 'or',
       options: tags.map((tag) => ({
         value: tag,
         name: tag,
-        view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+        view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
       })),
+      autoSortOptions: false,
       searchThreshold: 1,
     },
   ],
@@ -95,9 +60,8 @@ export interface ToolsTableSearch {
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
-  const { includeSystemTools } = useToolsPreferences();
-  const { tools } = useOnechatTools({ includeSystemTools });
-  const { tags } = useToolTags({ includeSystemTools });
+  const { tools } = useToolsService();
+  const { tags } = useToolsTags();
   const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
@@ -126,21 +90,17 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
     [tools, setSearchQuery]
   );
 
-  const matchesByType = useMemo(() => {
-    return countBy(tools, 'type') as Record<ToolType, number>;
-  }, [tools]);
-
   const matchesByTag = useMemo(() => {
     return countBy(tools.flatMap((tool) => tool.tags));
   }, [tools]);
 
   const searchConfig: Search = useMemo(
     () => ({
-      ...getToolsTableSearchConfig({ includeSystemTools, matchesByType, matchesByTag, tags }),
+      ...getToolsTableSearchConfig({ matchesByTag, tags }),
       onChange: handleChange,
       query: searchQuery,
     }),
-    [includeSystemTools, handleChange, matchesByType, matchesByTag, tags, searchQuery]
+    [handleChange, matchesByTag, tags, searchQuery]
   );
   return {
     searchConfig,
