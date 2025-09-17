@@ -17,7 +17,6 @@ import { responseActionsHttpMocks } from '../../../../mocks/response_actions_htt
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { getDeferred } from '../../../../mocks/utils';
 import type { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -29,36 +28,48 @@ jest.mock('../../../../../common/experimental_features_service');
 
 const mockedExperimentalFeaturesService = ExperimentalFeaturesService as jest.Mocked<typeof ExperimentalFeaturesService>;
 
+// Test data factories
+const createMockPendingActions = (actions: Record<string, number> = { isolate: 1 }): PendingActionsResponse => ({
+  data: [
+    {
+      agent_id: 'a.b.c',
+      pending_actions: actions,
+    },
+  ],
+});
+
+// Agent types for parameterized tests
+const UNSUPPORTED_AGENT_TYPES = ['endpoint', 'sentinel_one', 'crowdstrike'] as const;
+type AgentType = 'endpoint' | 'microsoft_defender_endpoint' | 'sentinel_one' | 'crowdstrike';
+
 describe('When using cancel action from response actions console', () => {
   let mockedContext: AppContextTestRender;
   let user: UserEvent;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
+  // Simplified render function with minimal setup
   const renderConsole = async (
-    agentType: 'endpoint' | 'microsoft_defender_endpoint' | 'sentinel_one' | 'crowdstrike' = 'microsoft_defender_endpoint',
-    capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES],
+    agentType: AgentType = 'microsoft_defender_endpoint',
     privileges: Partial<ReturnType<typeof getEndpointAuthzInitialState>> = {}
   ) => {
     const renderResult = mockedContext.render(
       <ConsoleManagerTestComponent
-        registerConsoleProps={() => {
-          return {
-            consoleProps: {
-              'data-test-subj': 'test',
-              commands: getEndpointConsoleCommands({
-                agentType,
-                endpointAgentId: 'a.b.c',
-                endpointCapabilities: [...capabilities],
-                endpointPrivileges: {
-                  ...getEndpointAuthzInitialStateMock(),
-                  loading: false,
-                  ...privileges,
-                },
-                platform: 'windows',
-              }),
-            },
-          };
-        }}
+        registerConsoleProps={() => ({
+          consoleProps: {
+            'data-test-subj': 'test',
+            commands: getEndpointConsoleCommands({
+              agentType,
+              endpointAgentId: 'a.b.c',
+              endpointCapabilities: [...ENDPOINT_CAPABILITIES],
+              endpointPrivileges: {
+                ...getEndpointAuthzInitialStateMock(),
+                loading: false,
+                ...privileges,
+              },
+              platform: 'windows',
+            }),
+          },
+        })}
       />
     );
 
@@ -98,27 +109,27 @@ describe('When using cancel action from response actions console', () => {
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
   });
 
-  describe('Microsoft Defender Endpoint cancel functionality', () => {
+  describe('Microsoft Defender Endpoint - Command visibility', () => {
     it('should show cancel command in help when user has write permissions', async () => {
       const renderResult = await renderConsole('microsoft_defender_endpoint');
 
       await enterConsoleCommand(renderResult, user, 'help');
 
-      expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
       expect(renderResult.getByTestId('test-helpOutput').textContent).toContain('cancel');
     });
 
     it('should not show cancel command in help when user lacks write permissions', async () => {
-      const renderResult = await renderConsole('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
+      const renderResult = await renderConsole('microsoft_defender_endpoint', {
         canAccessResponseConsole: false,
       });
 
       await enterConsoleCommand(renderResult, user, 'help');
 
-      expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
       expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
     });
+  });
 
+  describe('Microsoft Defender Endpoint - Command execution', () => {
     it('should show error when trying to cancel without providing action ID', async () => {
       const renderResult = await renderConsole('microsoft_defender_endpoint');
 
@@ -128,19 +139,9 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should show pending actions selector when using cancel command with --action flag', async () => {
-      const mockPendingActions: PendingActionsResponse = {
-        data: [
-          {
-            agent_id: 'a.b.c',
-            pending_actions: {
-              isolate: 1,
-              'kill-process': 1,
-            },
-          },
-        ],
-      };
-
-      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
+      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(
+        createMockPendingActions({ isolate: 1, 'kill-process': 1 })
+      );
 
       const renderResult = await renderConsole('microsoft_defender_endpoint');
 
@@ -150,20 +151,9 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should handle cancel API response correctly', async () => {
-      const mockPendingActions: PendingActionsResponse = {
-        data: [
-          {
-            agent_id: 'a.b.c',
-            pending_actions: {
-              isolate: 1,
-            },
-          },
-        ],
-      };
+      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(createMockPendingActions());
 
-      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
-
-      const renderResult = await renderConsole('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
+      const renderResult = await renderConsole('microsoft_defender_endpoint', {
         canAccessResponseConsole: true,
       });
 
@@ -175,20 +165,11 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should validate user permissions for specific command types', async () => {
-      const mockPendingActions: PendingActionsResponse = {
-        data: [
-          {
-            agent_id: 'a.b.c',
-            pending_actions: {
-              'kill-process': 1,
-            },
-          },
-        ],
-      };
+      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(
+        createMockPendingActions({ 'kill-process': 1 })
+      );
 
-      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
-
-      const renderResult = await renderConsole('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
+      const renderResult = await renderConsole('microsoft_defender_endpoint', {
         canKillProcess: false,
         canAccessResponseConsole: true,
       });
@@ -201,67 +182,48 @@ describe('When using cancel action from response actions console', () => {
     });
   });
 
-  describe.each([
-    'endpoint',
-    'sentinel_one',
-    'crowdstrike',
-  ] as const)('Unsupported agent type: %s', (agentType) => {
+  describe.each(UNSUPPORTED_AGENT_TYPES)('Unsupported agent type: %s', (agentType) => {
     it('should not show cancel command in help', async () => {
       const renderResult = await renderConsole(agentType);
 
       await enterConsoleCommand(renderResult, user, 'help');
 
-      expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
       expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
     });
 
     it('should show error when trying to use cancel command', async () => {
-      const renderResult = await renderConsole(agentType, [...ENDPOINT_CAPABILITIES], {
+      const renderResult = await renderConsole(agentType, {
         canAccessResponseConsole: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel');
 
       await waitFor(() => {
-        const historyItems = renderResult.container.querySelectorAll(
-          '[data-test-subj*="historyItem"]'
-        );
+        const historyItems = renderResult.container.querySelectorAll('[data-test-subj*="historyItem"]');
         expect(historyItems.length).toBeGreaterThan(0);
       });
     });
 
-    it('should not show cancel command even when feature flag is enabled', async () => {
-      mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
-      const renderResult = await renderConsole(agentType);
-
-      await enterConsoleCommand(renderResult, user, 'help');
-
-      expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
-      expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
-    });
-
-    it('should reject cancel command with action ID for unsupported agent type', async () => {
-      const renderResult = await renderConsole(agentType, [...ENDPOINT_CAPABILITIES], {
+    it('should reject cancel command with action ID', async () => {
+      const renderResult = await renderConsole(agentType, {
         canAccessResponseConsole: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action test-action-id');
 
       await waitFor(() => {
-        const historyItems = renderResult.container.querySelectorAll(
-          '[data-test-subj*="historyItem"]'
-        );
+        const historyItems = renderResult.container.querySelectorAll('[data-test-subj*="historyItem"]');
         expect(historyItems.length).toBeGreaterThan(0);
       });
     });
   });
 
   describe('Feature flag behavior', () => {
-    it('should enable cancel command only for Microsoft Defender Endpoint when feature flag is enabled', async () => {
-      mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
-
+    it('should enable cancel command for Microsoft Defender Endpoint when feature flag is enabled', async () => {
       const renderResult = await renderConsole('microsoft_defender_endpoint');
+
       await enterConsoleCommand(renderResult, user, 'help');
+
       expect(renderResult.getByTestId('test-helpOutput').textContent).toContain('cancel');
     });
 
@@ -271,20 +233,23 @@ describe('When using cancel action from response actions console', () => {
         responseActionsMSDefenderEndpointEnabled: true,
         microsoftDefenderEndpointRunScriptEnabled: true,
       } as any);
-
       mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: false });
 
       const renderResult = await renderConsole('microsoft_defender_endpoint');
+
       await enterConsoleCommand(renderResult, user, 'help');
+
       expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
     });
 
-    it('should not enable cancel for unsupported agent types regardless of feature flag', async () => {
-      mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
+    describe.each(UNSUPPORTED_AGENT_TYPES)('Agent type %s with feature flag enabled', (agentType) => {
+      it('should not show cancel command regardless of feature flag', async () => {
+        const renderResult = await renderConsole(agentType);
 
-      const endpointRenderResult = await renderConsole('endpoint');
-      await enterConsoleCommand(endpointRenderResult, user, 'help');
-      expect(endpointRenderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
+        await enterConsoleCommand(renderResult, user, 'help');
+
+        expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
+      });
     });
   });
 });
