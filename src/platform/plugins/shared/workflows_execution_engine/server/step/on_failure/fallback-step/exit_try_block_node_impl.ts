@@ -29,7 +29,6 @@ export class ExitTryBlockNodeImpl implements NodeImplementation {
     }
 
     await this.wfExecutionRuntimeManager.finishStep();
-    this.wfExecutionRuntimeManager.exitScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

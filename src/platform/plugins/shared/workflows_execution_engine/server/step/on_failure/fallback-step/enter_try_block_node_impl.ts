@@ -19,7 +19,6 @@ export class EnterTryBlockNodeImpl implements NodeImplementation {
 
   public async run(): Promise<void> {
     await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 }

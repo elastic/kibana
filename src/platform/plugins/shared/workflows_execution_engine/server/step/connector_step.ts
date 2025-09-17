@@ -52,7 +52,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       const getRandomValue = () => Math.floor(Math.random() * 100) + 1;
       const randomValue = getRandomValue();
 
-      if (randomValue > 40) {
+      if (randomValue > 60) {
         throw new Error(`Failing step due to random value: ${randomValue}`);
       }
 

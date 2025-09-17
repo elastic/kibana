@@ -56,21 +56,23 @@ export class WorkflowContextManager {
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
     allPredecessors.forEach((node) => {
       const stepId = node.stepId;
-      stepContext.steps[stepId] = {};
-      const stepResult = this.getStepResult(stepId);
-      if (stepResult) {
-        stepContext.steps[stepId] = {
-          ...stepContext.steps[stepId],
-          ...stepResult,
-        };
-      }
+      const stepData = this.getStepData(stepId);
 
-      const stepState = this.getStepState(stepId);
-      if (stepState) {
-        stepContext.steps[stepId] = {
-          ...stepContext.steps[stepId],
-          ...stepState,
-        };
+      if (stepData) {
+        stepContext.steps[stepId] = {};
+        if (stepData.runStepResult) {
+          stepContext.steps[stepId] = {
+            ...stepContext.steps[stepId],
+            ...stepData.runStepResult,
+          };
+        }
+
+        if (stepData.stepState) {
+          stepContext.steps[stepId] = {
+            ...stepContext.steps[stepId],
+            ...stepData.stepState,
+          };
+        }
       }
     });
 
@@ -162,16 +164,24 @@ export class WorkflowContextManager {
     }
   }
 
-  private getStepState(stepId: string): Record<string, any> | undefined {
-    return this.workflowExecutionState.getLatestStepExecution(stepId)?.state;
-  }
+  private getStepData(stepId: string):
+    | {
+        runStepResult: RunStepResult;
+        stepState: Record<string, any> | undefined;
+      }
+    | undefined {
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    if (!latestStepExecution) {
+      return;
+    }
 
-  private getStepResult(stepId: string): RunStepResult {
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId)!;
     return {
-      input: latestStepExecution.input,
-      output: latestStepExecution.output,
-      error: latestStepExecution.error,
+      runStepResult: {
+        input: latestStepExecution?.input,
+        output: latestStepExecution?.output,
+        error: latestStepExecution?.error,
+      },
+      stepState: latestStepExecution.state,
     };
   }
 }
