@@ -106,11 +106,13 @@ export const getPrompt = async ({
     providedConnector: connector,
   });
 
+  console.log(`Provider: ${provider}, Model: ${model}`);
   const prompts = await savedObjectsClient.find<Prompt>({
     type: promptSavedObjectType,
     filter: `${promptSavedObjectType}.attributes.promptId: "${promptId}" AND ${promptSavedObjectType}.attributes.promptGroupId: "${promptGroupId}"`,
     fields: ['provider', 'model', 'prompt'],
   });
+  console.log(`Prompts: ${JSON.stringify(prompts)}`);
 
   const prompt = findPromptEntry({
     prompts: prompts?.saved_objects.map((p) => p.attributes) ?? [],

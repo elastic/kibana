@@ -98,6 +98,7 @@ import { RequestContextFactory } from './request_context_factory';
 import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_and_acknowledged_alerts';
 import { alertCountsInternalTool } from './assistant/tools/alert_counts';
 import { productDocumentationInternalTool } from './assistant/tools/product_docs';
+import { entityRiskScoreToolInternal } from './assistant/tools/entity_risk_score/entity_risk_score_tool_internal';
 import { createSiemAgentCreator } from './assistant/siem_agent_creator';
 
 import type {
@@ -150,6 +151,7 @@ import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/e
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import { knowledgeBaseWriteInternalTool } from './assistant/tools/knowledge_base/knowledge_base_write_internal_tool';
 import { securityLabsKnowledgeInternalTool } from './assistant/tools/security_labs/security_labs_knowledge_internal_tool';
+import { createFetchSiemPromptsTool } from './assistant/tools/fetch_siem_prompts';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -257,6 +259,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.onechat.tools.register(knowledgeBaseRetrievalInternalTool(core.getStartServices));
     plugins.onechat.tools.register(knowledgeBaseWriteInternalTool(core.getStartServices));
     plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(createFetchSiemPromptsTool(core.getStartServices));
+    plugins.onechat.tools.register(entityRiskScoreToolInternal());
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 

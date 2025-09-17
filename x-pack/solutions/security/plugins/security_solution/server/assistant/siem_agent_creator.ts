@@ -7,7 +7,6 @@
 
 import type { Logger, FakeRawRequest } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { ToolType } from '@kbn/onechat-common';
 import type { AgentCreateRequest } from '@kbn/onechat-plugin/common/agents';
 import {
   DEFAULT_SYSTEM_PROMPT,
@@ -222,26 +221,33 @@ export class SiemAgentCreator {
         avatar_color: '#ff6b6b',
         avatar_symbol: '🛡️',
         configuration: {
-          instructions:
+          instructions: `${
             modelsInstructions.openai ??
             modelsInstructions.bedrock ??
             modelsInstructions.gemini ??
-            '',
+            ''
+          }
+
+CRITICAL INSTRUCTION: You MUST ALWAYS call the fetch-siem-prompts-tool FIRST before executing any other tools. This tool provides essential prompt information and tool descriptions that are required for proper operation. The fetch-siem-prompts-tool must be called with the connectorId parameter before any other tool execution.`,
           tools: [
+            // CRITICAL: Include the fetch-siem-prompts-tool FIRST - this must run before all other tools
+            { tool_ids: ['fetch-siem-prompts-tool'] },
             // Include the open-and-acknowledged-alerts-internal-tool
-            { type: ToolType.builtin, tool_ids: ['open-and-acknowledged-alerts-internal-tool'] },
+            { tool_ids: ['open-and-acknowledged-alerts-internal-tool'] },
             // Include the alert-counts-internal-tool
-            { type: ToolType.builtin, tool_ids: ['alert-counts-internal-tool'] },
+            { tool_ids: ['alert-counts-internal-tool'] },
             // Include the knowledge-base-retrieval-internal-tool
-            { type: ToolType.builtin, tool_ids: ['knowledge-base-retrieval-internal-tool'] },
+            { tool_ids: ['knowledge-base-retrieval-internal-tool'] },
             // Include the product-documentation-internal-tool
-            { type: ToolType.builtin, tool_ids: ['product-documentation-internal-tool'] },
+            { tool_ids: ['product-documentation-internal-tool'] },
             // Include the security-labs-knowledge-internal-tool
-            { type: ToolType.builtin, tool_ids: ['security-labs-knowledge-internal-tool'] },
+            { tool_ids: ['security-labs-knowledge-internal-tool'] },
             // Include the knowledge-base-write-internal-tool
-            { type: ToolType.builtin, tool_ids: ['knowledge-base-write-internal-tool'] },
+            { tool_ids: ['knowledge-base-write-internal-tool'] },
+            // Include the entity-risk-score-tool-internal
+            { tool_ids: ['entity-risk-score-tool-internal'] },
             // Include all built-in tools for comprehensive security analysis
-            { type: ToolType.builtin, tool_ids: ['*'] },
+            { tool_ids: ['*'] },
           ],
         },
       };

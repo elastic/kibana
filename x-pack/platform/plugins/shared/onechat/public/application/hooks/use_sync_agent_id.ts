@@ -13,6 +13,7 @@ import { useOnechatAgents } from './agents/use_agents';
 import { useConversationActions } from './use_conversation_actions';
 import { useHasActiveConversation } from './use_conversation';
 import { useOnechatServices } from './use_onechat_service';
+import { useConversationId } from './use_conversation_id';
 import type { ConversationSettings } from '../../services/types';
 
 export const useSyncAgentId = () => {
@@ -21,7 +22,9 @@ export const useSyncAgentId = () => {
   const { conversationSettingsService } = useOnechatServices();
   const [searchParams] = useSearchParams();
   const syncedRef = useRef(false);
+  const lastConversationIdRef = useRef<string | undefined>(undefined);
   const hasActiveConversation = useHasActiveConversation();
+  const conversationId = useConversationId();
 
   // Subscribe to conversation settings to get the isFlyoutMode and defaultAgentId
   const conversationSettings = useObservable<ConversationSettings>(
@@ -33,6 +36,12 @@ export const useSyncAgentId = () => {
   const defaultAgentId = conversationSettings?.defaultAgentId;
 
   useEffect(() => {
+    // Reset syncedRef when conversation ID changes (new conversation created)
+    if (lastConversationIdRef.current !== conversationId) {
+      syncedRef.current = false;
+      lastConversationIdRef.current = conversationId;
+    }
+
     if (syncedRef.current || hasActiveConversation) {
       return;
     }
@@ -54,5 +63,13 @@ export const useSyncAgentId = () => {
       syncedRef.current = true;
       return;
     }
-  }, [searchParams, setAgentId, agents, hasActiveConversation, isFlyoutMode, defaultAgentId]);
+  }, [
+    searchParams,
+    setAgentId,
+    agents,
+    hasActiveConversation,
+    isFlyoutMode,
+    defaultAgentId,
+    conversationId,
+  ]);
 };

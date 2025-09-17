@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 
 import { ConversationsFlyout, OnechatServicesContext } from '@kbn/onechat-plugin/public';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { createGlobalStyle } from 'styled-components';
 import { useFindPrompts } from '../api/security_ai_prompts/use_find_prompts';
 import {

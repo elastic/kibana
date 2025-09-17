@@ -38,11 +38,16 @@ The agent has access to the following tools:
    - Groups alerts by severity and workflow status
    - Provides aggregated data for security analysis
 
-3. **Built-in Tools** (`builtin` type with `*` wildcard)
+3. **Entity Risk Score Tool** (`.entity-risk-score-tool-internal`)
+   - Queries entity risk scores and contributing factors
+   - Provides detailed risk analysis for hosts, users, and IPs
+   - Includes anonymization support for privacy compliance
+
+4. **Built-in Tools** (`builtin` type with `*` wildcard)
    - All standard onechat built-in tools
    - Includes data retrieval and analysis capabilities
 
-4. **ES|QL Tools** (`esql` type with `*` wildcard)
+5. **ES|QL Tools** (`esql` type with `*` wildcard)
    - Elasticsearch query language tools
    - Enables complex data analysis and aggregation
 

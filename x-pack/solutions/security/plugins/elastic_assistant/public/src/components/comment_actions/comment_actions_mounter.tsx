@@ -35,7 +35,12 @@ export const CommentActionsMounter = ({ message, getActions$ }: Props) => {
 
   return (
     <BaseCommentActions message={message}>
-      <EuiFlexGroup alignItems="center" gutterSize="none" ref={actionMountPointRef} />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="flexEnd"
+        ref={actionMountPointRef}
+      />
     </BaseCommentActions>
   );
 };
