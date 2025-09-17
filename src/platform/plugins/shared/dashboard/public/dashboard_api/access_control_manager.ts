@@ -47,7 +47,7 @@ export function initializeAccessControlManager(
   }
 
   return {
-    api: {
+    internalApi: {
       accessControl$,
       changeAccessMode,
     },

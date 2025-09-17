@@ -13,7 +13,7 @@ import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
-import type { DashboardState, DashboardUser } from '../../common/types';
+import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import {
@@ -32,7 +32,12 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
+import type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardInternalApi,
+  DashboardUser,
+} from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
@@ -143,7 +148,6 @@ export function getDashboardApi({
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
     ...controlGroupManager.api,
-    ...accessControlManager.api,
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,
@@ -169,7 +173,7 @@ export function getDashboardApi({
         isManaged,
         lastSavedId: savedObjectId$.value,
         viewMode: viewModeManager.api.viewMode$.value,
-        accessControl: accessControlManager.api.accessControl$.value,
+        accessControl: accessControlManager.internalApi.accessControl$.value,
         ...getState(),
       });
 
@@ -224,11 +228,14 @@ export function getDashboardApi({
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
     createdBy: savedObjectResult?.createdBy,
     user,
+    accessControl$: accessControlManager.internalApi.accessControl$,
+    changeAccessMode: accessControlManager.internalApi.changeAccessMode,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
+    ...accessControlManager.internalApi,
     setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),

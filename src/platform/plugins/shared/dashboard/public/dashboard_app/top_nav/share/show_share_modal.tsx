@@ -58,7 +58,7 @@ export interface ShowShareModalProps {
   dashboardTitle?: string;
   anchorElement: HTMLElement;
   canSave: boolean;
-  accessControl?: SavedObjectAccessControl;
+  accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
   accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<SaveDashboardReturn | undefined>;

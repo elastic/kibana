@@ -36,7 +36,7 @@ export const useDashboardMenuItems = ({
   showResetChange?: boolean;
 }) => {
   const isMounted = useMountedState();
-  const accessControlClient = useMemo(() => getAccessControlClient(), []);
+  const accessControlClient = getAccessControlClient();
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();

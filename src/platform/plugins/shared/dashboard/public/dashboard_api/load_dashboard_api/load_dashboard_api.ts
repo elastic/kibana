@@ -8,8 +8,6 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { CONTENT_ID } from '../../../common/content_management';
-import { getAccessControlClient } from '../../services/access_control_service';
 import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
@@ -19,6 +17,7 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
+import { getUserAccessControlData } from './get_user_access_control_data';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -30,9 +29,12 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
-    id: savedObjectId,
-  });
+  const [savedObjectResult, user] = await Promise.all([
+    getDashboardContentManagementService().loadDashboardState({
+      id: savedObjectId,
+    }),
+    getUserAccessControlData(),
+  ]);
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -74,24 +76,6 @@ export async function loadDashboardApi({
   if (viewMode) {
     getDashboardBackupService().storeViewMode(viewMode);
   }
-
-  const getUserAccessControlData = async () => {
-    try {
-      const accessControlClient = getAccessControlClient();
-      const currentUser = await coreServices?.userProfile.getCurrent();
-      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(CONTENT_ID);
-
-      if (!currentUser) {
-        return;
-      }
-
-      return { uid: currentUser.uid, hasGlobalAccessControlPrivilege: isGloballyAuthorized };
-    } catch (error) {
-      return;
-    }
-  };
-
-  const user = await getUserAccessControlData();
 
   // --------------------------------------------------------------------------------------
   // get dashboard Api

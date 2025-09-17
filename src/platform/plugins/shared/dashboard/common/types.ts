@@ -92,8 +92,3 @@ export type DashboardLocatorParams = Partial<
     passThroughContext?: SerializableRecord;
   }
 >;
-
-export interface DashboardUser {
-  uid: string;
-  hasGlobalAccessControlPrivilege: boolean;
-}

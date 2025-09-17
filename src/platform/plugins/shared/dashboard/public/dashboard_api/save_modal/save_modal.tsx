@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback, useMemo } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import {
   EuiFlexGroup,
@@ -74,7 +74,6 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   timeRestore,
   accessControl,
 }) => {
-  const accessControlClient = useMemo(() => getAccessControlClient(), []);
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
   const [selectedAccessMode, setSelectedAccessMode] = React.useState(
@@ -156,19 +155,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             onChangeAccessMode={setSelectedAccessMode}
             getActiveSpace={spacesService?.getActiveSpace}
             getCurrentUser={coreServices.userProfile.getCurrent}
-            accessControlClient={accessControlClient}
+            accessControlClient={getAccessControlClient()}
             contentTypeId={CONTENT_ID}
           />
         </>
       </Fragment>
     );
-  }, [
-    persistSelectedTimeInterval,
-    selectedTags,
-    showStoreTimeOnSave,
-    accessControl,
-    accessControlClient,
-  ]);
+  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave, accessControl]);
 
   return (
     <SavedObjectSaveModalWithSaveResult
