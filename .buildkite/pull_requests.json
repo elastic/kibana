@@ -110,7 +110,7 @@
       "enabled": true,
       "allow_org_users": true,
       "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["elastic-vault-github-plugin-prod[bot]", "elastic-renovate-prod[bot]"],
+      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
       "build_on_commit": true,
       "build_on_comment": true,
       "build_drafts": false,

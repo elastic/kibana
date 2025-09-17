@@ -14,6 +14,8 @@ import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
+import type { IngestStreamSettings } from './settings';
+import { ingestStreamSettingsSchema } from './settings';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -39,6 +41,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
   processing: StreamlangDSL;
+  settings: IngestStreamSettings;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
@@ -46,6 +49,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
     processing: streamlangDSLSchema,
+    settings: ingestStreamSettingsSchema,
   })
 );
 
