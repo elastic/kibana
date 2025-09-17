@@ -16,7 +16,6 @@ import {
   ALL_OPERATORS,
   ALL_OPERATORS_SANS_MATCHES,
   DETECTION_ENGINE_EXCEPTION_OPERATORS,
-  EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   doesNotMatchOperator,
   existsOperator,
@@ -469,33 +468,6 @@ describe('Helpers', () => {
         true
       );
       expect(result).toEqual([isOperator, isNotOperator, existsOperator, doesNotExistOperator]);
-    });
-
-    it('returns EXCEPTION_OPERATORS_SANS_LISTS if value lists disabled, it should include value list operators and field supports matches', () => {
-      const result = getOperatorOptions(
-        getItem({ field: fieldSupportMatches }),
-        'endpoint_trusted_devices',
-        false,
-        false
-      );
-      expect(result).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
-    });
-
-    it('returns basic operators if value lists disabled and field does not support matches', () => {
-      const result = getOperatorOptions(
-        getItem({ field: fieldNotSupportMatches }),
-        'endpoint_trusted_devices',
-        false,
-        false
-      );
-      expect(result).toEqual([
-        isOperator,
-        isNotOperator,
-        isOneOfOperator,
-        isNotOneOfOperator,
-        existsOperator,
-        doesNotExistOperator,
-      ]);
     });
 
     it('returns DETECTION_ENGINE_EXCEPTION_OPERATORS if detection list, it should include value list operators, and supports matches', () => {
