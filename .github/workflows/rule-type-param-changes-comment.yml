@@ -29,7 +29,7 @@ jobs:
               issue_number: context.issue.number,
             })
             const botComment = existingComments.find(c => {
-              return c.body.includes('<!-- Rule type parameter change comment marker -->')
+              return c.body && c.body.includes('<!-- Rule type parameter change comment marker -->')
             })
 
             if (!botComment) {
