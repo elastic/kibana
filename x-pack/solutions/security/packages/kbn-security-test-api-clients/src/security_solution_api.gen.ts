@@ -201,8 +201,8 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/update.gen';
 import type { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
 
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
-import type { FtrProviderContext } from '@kbn/test-suites-xpack-security/api_integration/ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
