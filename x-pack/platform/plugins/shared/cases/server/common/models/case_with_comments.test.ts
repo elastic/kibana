@@ -46,6 +46,7 @@ describe('CaseCommentModel', () => {
   clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValue(
     alertIdsAttachedToCase
   );
+  clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
 
   let model: CaseCommentModel;
 
