@@ -50,7 +50,7 @@ export function getExpressionType(
 
   if (isLiteral(root)) {
     if (root.literalType === 'param' && TIME_SYSTEM_PARAMS.includes(root.text)) {
-      return 'date';
+      return 'keyword';
     }
     return root.literalType;
   }

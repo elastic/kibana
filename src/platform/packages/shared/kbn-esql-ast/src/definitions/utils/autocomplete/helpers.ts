@@ -24,7 +24,7 @@ import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
 import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
 import { getOverlapRange } from '../shared';
-import { getExpressionType } from '../expressions';
+import { argMatchesParamType, getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';
 import { getFunctionSuggestions } from '../functions';
 import { logicalOperators } from '../../all_operators';
@@ -539,7 +539,7 @@ function getValidFunctionSignaturesForPreviousArgs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
-      dataType: string;
+      dataType: SupportedDataType | 'unknown';
     }
   >,
   argIndex: number
@@ -550,9 +550,16 @@ function getValidFunctionSignaturesForPreviousArgs(
   const relevantFuncSignatures = fnDefinition.signatures.filter(
     (s) =>
       s.params?.length >= argIndex &&
-      s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-        return dataType === enrichedArgs[idx].dataType;
-      })
+      s.params
+        .slice(0, argIndex)
+        .every(({ type: dataType }, idx) =>
+          argMatchesParamType(
+            enrichedArgs[idx].dataType,
+            dataType,
+            isLiteral(enrichedArgs[idx]),
+            true
+          )
+        )
   );
   return relevantFuncSignatures;
 }
@@ -569,7 +576,7 @@ function getCompatibleTypesToSuggestNext(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
-      dataType: string;
+      dataType: SupportedDataType | 'unknown';
     }
   >,
   argIndex: number
@@ -616,7 +623,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
     dataType: argTypes[idx],
   })) as Array<
     ESQLAstItem & {
-      dataType: string;
+      dataType: SupportedDataType | 'unknown';
     }
   >;
 

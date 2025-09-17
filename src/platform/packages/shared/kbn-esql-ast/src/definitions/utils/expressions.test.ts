@@ -77,9 +77,10 @@ describe('getExpressionType', () => {
         expression: '?value',
         expectedType: 'param',
       },
+      // time system params are interpreted as keywords... this is not a mistake
       ...TIME_SYSTEM_PARAMS.map((p) => ({
         expression: p,
-        expectedType: 'date' as SupportedDataType,
+        expectedType: 'keyword' as SupportedDataType,
       })),
     ];
     test.each(cases)(
