@@ -88,7 +88,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // migrateAgentState
   const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
-  const [protectedAndFleetAgents, setProtectedAndFleetAgents] = useState<Agent[]>([]);
 
   const {
     allTags,
@@ -180,25 +179,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const updateProtectedAndFleetAgents = useMemo(
-    () => (agents: Agent[] | string) => {
-      const protectedAgents = Array.isArray(agents)
-        ? agents.filter(
-            (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+  const protectedAndFleetAgents = useMemo(() => {
+    const protectedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter(
+          (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+        )
+      : [];
+    const fleetAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
           )
-        : [];
-      const fleetAgents = Array.isArray(agents)
-        ? agents.filter((agent) =>
-            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
-              (p) => p.package?.name === FLEET_SERVER_PACKAGE
-            )
-          )
-        : [];
-      const unallowedAgents = [...protectedAgents, ...fleetAgents];
-      setProtectedAndFleetAgents(unallowedAgents);
-    },
-    [agentPoliciesIndexedById]
-  );
+        )
+      : [];
+    return [...protectedAgents, ...fleetAgents];
+  }, [selectedAgents, agentPoliciesIndexedById]);
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -252,7 +247,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }
     }
     setSelectedAgents(newAgents);
-    updateProtectedAndFleetAgents(newAgents);
   };
 
   const onSelectedStatusChange = (status: string[]) => {
