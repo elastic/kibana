@@ -19,7 +19,7 @@ import { Sample } from '@kbn/grok-ui';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import type { StreamlangProcessorDefinitionWithUIAttributes, GrokProcessor } from '@kbn/streamlang';
+import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
@@ -203,10 +203,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
     if (!currentProcessorRef) return undefined;
 
-    return getSourceField(
-      currentProcessorRef.getSnapshot().context
-        .step as StreamlangProcessorDefinitionWithUIAttributes
-    );
+    const step = currentProcessorRef.getSnapshot().context.step;
+
+    if (!isActionBlock(step)) return undefined;
+
+    return getSourceField(step);
   });
 
   const docViewsRegistry = useDocViewerSetup(true);

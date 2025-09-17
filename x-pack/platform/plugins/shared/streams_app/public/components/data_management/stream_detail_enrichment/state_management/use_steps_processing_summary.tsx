@@ -12,7 +12,6 @@ import {
   useStreamEnrichmentSelector,
 } from './stream_enrichment_state_machine';
 import { selectWhetherAnyProcessorBeforePersisted } from './stream_enrichment_state_machine/selectors';
-import type { StepContext } from './steps_state_machine';
 
 export type StepsProcessingSummaryMap = Map<string, StepProcessingStatus>;
 type StepProcessingStatus =
@@ -26,12 +25,9 @@ type StepProcessingStatus =
 
 export const useStepsProcessingSummary = () => {
   const stepsContext = useStreamEnrichmentSelector((state) => {
-    const stepsContextMap = new Map<string, StepContext>();
-    state.context.stepRefs.forEach((stepRef) => {
-      const stepContext = stepRef.getSnapshot().context;
-      stepsContextMap.set(stepRef.id, stepContext);
-    });
-    return stepsContextMap;
+    return new Map(
+      state.context.stepRefs.map((stepRef) => [stepRef.id, stepRef.getSnapshot().context])
+    );
   });
 
   const hasSimulation = useSimulatorSelector((snapshot) => Boolean(snapshot.context.simulation));

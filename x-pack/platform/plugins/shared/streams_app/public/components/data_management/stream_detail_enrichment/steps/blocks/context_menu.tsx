@@ -10,7 +10,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   useGeneratedHtmlId,
-  EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -18,7 +18,6 @@ import useToggle from 'react-use/lib/useToggle';
 import { useSelector } from '@xstate5/react';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang';
-import { css } from '@emotion/react';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import {
   useStreamEnrichmentSelector,
@@ -119,7 +118,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({ stepRef, stepU
   ];
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       aria-label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
         {
@@ -130,11 +129,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({ stepRef, stepU
       size="s"
       iconType="boxesVertical"
       onClick={togglePopover}
-      css={css`
-        > .euiButtonEmpty__content {
-          gap: 0;
-        }
-      `}
     />
   );
 

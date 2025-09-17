@@ -12,12 +12,11 @@ import {
   useGeneratedHtmlId,
   EuiButton,
   EuiIcon,
-  EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
@@ -57,8 +56,11 @@ interface AddStepProps {
   nestingDisabled?: boolean;
 }
 
-export const CreateStepButton: React.FC<AddStepProps> = ({ parentId, mode, nestingDisabled }) => {
-  const isNestingDisabled = nestingDisabled !== undefined ? nestingDisabled : false;
+export const CreateStepButton: React.FC<AddStepProps> = ({
+  parentId,
+  mode,
+  nestingDisabled = false,
+}) => {
   const { addProcessor, addCondition } = useStreamEnrichmentEvents();
 
   const canAddStep = useStreamEnrichmentSelector(
@@ -76,7 +78,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({ parentId, mode, nesti
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition"
       key="addCondition"
       icon="timeline"
-      disabled={isNestingDisabled}
+      disabled={nestingDisabled}
       onClick={() => {
         togglePopover(false);
         addCondition(undefined, { parentId: parentId ?? null });
@@ -110,18 +112,12 @@ export const CreateStepButton: React.FC<AddStepProps> = ({ parentId, mode, nesti
   );
 
   const inlineButton = (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonInline"
       size="s"
       iconType="plusInCircle"
-      iconSide="left"
       onClick={togglePopover}
       disabled={!canAddStep}
-      css={css`
-        > .euiButtonEmpty__content {
-          gap: 0;
-        }
-      `}
     />
   );
 

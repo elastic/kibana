@@ -53,16 +53,14 @@ export const ProcessorMetricBadges = ({
               values: { parsedRate },
             })}
           >
-            <>
-              <EuiTextColor color="success">
-                <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="check" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>{parsedRate}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiTextColor>
-            </>
+            <EuiTextColor color="success">
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="check" />
+                </EuiFlexItem>
+                <EuiFlexItem>{parsedRate}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTextColor>
           </EuiToolTip>
         </EuiFlexItem>
       )}

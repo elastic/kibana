@@ -92,13 +92,9 @@ export const WhereBlockSummary = ({
           flex-shrink: 0;
         `}
       >
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem>
-            <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="none">
+          <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
+          <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
