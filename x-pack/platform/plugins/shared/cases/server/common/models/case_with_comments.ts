@@ -253,15 +253,15 @@ export class CaseCommentModel {
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
-      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedAttachments([
+      const attachmentsWithoutDuplicates = await this.filterDuplicatedAttachments([
         { ...commentReq, id },
       ]);
 
-      if (attachmentsWithoutDuplicateAlerts.length === 0) {
+      if (attachmentsWithoutDuplicates.length === 0) {
         return this;
       }
 
-      const { id: commentId, ...attachment } = attachmentsWithoutDuplicateAlerts[0];
+      const { id: commentId, ...attachment } = attachmentsWithoutDuplicates[0];
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
