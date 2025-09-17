@@ -397,7 +397,9 @@ export function LayerPanels(
         }
       `}
     >
-      <EuiTabs>{renderTabs()}</EuiTabs>
+      {/* Render layer tabs only if the chart type supports multiple layers */}
+      {!hideAddLayerButton && layerConfigs.length > 1 && <EuiTabs>{renderTabs()}</EuiTabs>}
+      {/* Render the current layer panel */}
       {layerConfig && (
         <LayerPanel
           {...props}
