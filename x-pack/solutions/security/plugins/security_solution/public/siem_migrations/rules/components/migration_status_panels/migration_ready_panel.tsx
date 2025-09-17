@@ -18,7 +18,6 @@ import type { SiemMigrationResourceBase } from '../../../../../common/siem_migra
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
@@ -26,6 +25,7 @@ import { MigrationsLastError } from '../../../common/components/migration_panels
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -119,10 +119,10 @@ MigrationReadyPanel.displayName = 'MigrationReadyPanel';
 
 const StartTranslationButton = React.memo<{ migrationId: string; isStopped: boolean }>(
   ({ migrationId, isStopped }) => {
-    const { mutate: startMutation, isLoading } = useStartSiemMigration('rule');
+    const { startMigration, isLoading } = useStartMigration();
     const onStartMigration = useCallback(() => {
-      startMutation({ migrationId });
-    }, [migrationId, startMutation]);
+      startMigration(migrationId);
+    }, [migrationId, startMigration]);
 
     const text = useMemo(() => {
       if (isStopped) {

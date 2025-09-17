@@ -26,10 +26,10 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import { type RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
-import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 import { DataInputStep } from './steps/constants';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 interface MissingResourcesIndexed {
   macros: string[];
@@ -52,15 +52,13 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     >();
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const { mutate: startMutation, isLoading: isStartLoading } = useStartSiemMigration('rule', {
-      onSuccess: onClose,
-    });
+    const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigration = useCallback(() => {
       if (migrationStats?.id) {
         const retryFilter = isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined;
-        startMutation({ migrationId: migrationStats.id, retry: retryFilter });
+        startMigration(migrationStats.id, retryFilter);
       }
-    }, [startMutation, migrationStats?.id, isRetry]);
+    }, [startMigration, migrationStats?.id, isRetry]);
 
     const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
 

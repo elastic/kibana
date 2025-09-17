@@ -42,7 +42,6 @@ import {
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 import type { RulesFilterOptions, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
@@ -61,6 +60,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -213,9 +213,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         closeMissingIndexPatternFlyout();
       },
     });
-    const { mutate: startMigration, isLoading: isStarting } = useStartSiemMigration('rule', {
-      onSuccess: refetchData,
-    });
+    const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
 
@@ -292,13 +290,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const reprocessFailedRulesWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        startMigration({
-          migrationId,
-          retry: SiemMigrationRetryFilter.FAILED,
-          settings: {
-            ...settings,
-            skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
-          },
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, {
+          ...settings,
+          skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
         });
       },
       [enablePrebuiltRulesMatching, migrationId, startMigration]

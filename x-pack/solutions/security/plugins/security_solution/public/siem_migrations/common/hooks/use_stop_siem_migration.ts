@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/*
- * Generic stop migration hook for both rule and dashboard migrations using React Query.
- * Mirrors the structure of useStartSiemMigration for consistency.
- */
-
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
