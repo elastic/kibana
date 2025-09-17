@@ -496,6 +496,7 @@
     "@kbn/deeplinks-search": "link:src/platform/packages/shared/deeplinks/search",
     "@kbn/deeplinks-security": "link:src/platform/packages/shared/deeplinks/security",
     "@kbn/deeplinks-shared": "link:src/platform/packages/shared/deeplinks/shared",
+    "@kbn/deeplinks-workflows": "link:src/platform/packages/shared/deeplinks/workflows",
     "@kbn/default-nav-analytics": "link:src/platform/packages/private/default-nav/analytics",
     "@kbn/default-nav-devtools": "link:src/platform/packages/private/default-nav/devtools",
     "@kbn/default-nav-management": "link:src/platform/packages/private/default-nav/management",

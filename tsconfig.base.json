@@ -846,6 +846,8 @@
       "@kbn/deeplinks-security/*": ["src/platform/packages/shared/deeplinks/security/*"],
       "@kbn/deeplinks-shared": ["src/platform/packages/shared/deeplinks/shared"],
       "@kbn/deeplinks-shared/*": ["src/platform/packages/shared/deeplinks/shared/*"],
+      "@kbn/deeplinks-workflows": ["src/platform/packages/shared/deeplinks/workflows"],
+      "@kbn/deeplinks-workflows/*": ["src/platform/packages/shared/deeplinks/workflows/*"],
       "@kbn/default-nav-analytics": ["src/platform/packages/private/default-nav/analytics"],
       "@kbn/default-nav-analytics/*": ["src/platform/packages/private/default-nav/analytics/*"],
       "@kbn/default-nav-devtools": ["src/platform/packages/private/default-nav/devtools"],
