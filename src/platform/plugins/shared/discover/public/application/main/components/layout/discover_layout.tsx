@@ -542,7 +542,6 @@ const componentStyles = {
     css({
       overflow: 'hidden',
       padding: 0,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
   savedSearchTitle: css({
     overflow: 'hidden',

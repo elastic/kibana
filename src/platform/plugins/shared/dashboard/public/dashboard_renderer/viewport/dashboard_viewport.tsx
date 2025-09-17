@@ -167,7 +167,6 @@ const dashboardViewportStyles = {
     },
     '.dshDashboardViewport-controls': {
       margin: `0 ${euiTheme.size.s}`,
-      paddingTop: euiTheme.size.s,
     },
   }),
   viewport: {

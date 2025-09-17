@@ -31,7 +31,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { DATA_SECTIONS, DataSections, type DataSectionsApps } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
-import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
@@ -182,8 +181,6 @@ export function OverviewPage() {
         },
       }}
     >
-      <HeaderMenu />
-
       {hasAnyData ? (
         <>
           <ObservabilityOnboardingCallout />
@@ -199,11 +196,8 @@ export function OverviewPage() {
         <EuiEmptyPrompt
           iconType="logoObservability"
           data-test-subj="obltOverviewNoDataPrompt"
-          css={{
-            flexGrow: 1,
-            display: 'flex',
-            alignItems: 'center',
-          }}
+          color="plain"
+          hasBorder
           title={
             <h2>
               {i18n.translate('xpack.observability.overview.emptyState.title', {

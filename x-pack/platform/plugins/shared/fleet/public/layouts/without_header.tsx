@@ -17,7 +17,6 @@ export const Wrapper = styled.div`
 `;
 
 export const Page = styled(EuiPage)`
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
   width: 100%;
   align-self: center;
   margin: auto;

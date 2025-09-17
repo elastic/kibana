@@ -117,6 +117,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
       restrictWidth={false}
       grow={false}
       data-test-subj="monitoringAppContainer"
+      panelled={false}
     >
       <EuiPageTemplate.Section>
         {setHeaderActionMenu && theme$ && (

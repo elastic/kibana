@@ -19,8 +19,6 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
   children,
   customHeader,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiPageTemplate
       css={css`
@@ -31,15 +29,9 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
       <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
         {children}
       </EuiPageTemplate.Section>
-      <EuiSpacer size="xl" />
-      <EuiPageTemplate.Section
-        contentProps={{ css: { paddingBlock: 0 } }}
-        css={css`
-          padding-inline: 0px;
-          border-top: ${euiTheme.border.thin};
-        `}
-      >
+      <EuiPageTemplate.Section color="transparent">
         <Footer />
+        <EuiSpacer size="xl" />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

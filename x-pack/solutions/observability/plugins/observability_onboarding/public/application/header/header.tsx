@@ -22,6 +22,7 @@ export function Header() {
   return (
     <EuiPageTemplate.Section
       paddingSize="xl"
+      color="transparent"
       css={css`
         & > div {
           background-image: url(${backgroundImageUrl});
@@ -51,7 +52,6 @@ export function Header() {
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem />
       </EuiFlexGroup>
     </EuiPageTemplate.Section>
   );

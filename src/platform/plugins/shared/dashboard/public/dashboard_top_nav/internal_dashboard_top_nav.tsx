@@ -73,7 +73,7 @@ export function InternalDashboardTopNav({
   forceHideUnifiedSearch,
   redirectTo,
   setCustomHeaderActionMenu,
-  showBorderBottom = true,
+  showBorderBottom = false,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
@@ -394,7 +394,6 @@ const topNavStyles = {
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
         top: `var(--kbn-application--sticky-headers-offset, 0px)`,
-        background: euiTheme.colors.backgroundBasePlain,
 
         [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
           position: 'unset', // on smaller screens, the top nav should not be sticky

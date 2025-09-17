@@ -206,7 +206,6 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         data-test-subj="epmList.mainColumn"
         style={{
           position: 'relative',
-          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
           alignSelf: 'stretch',
         }}
       >

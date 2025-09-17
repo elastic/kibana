@@ -86,6 +86,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       offset={0}
       minHeight={header ? 'var(--kbn-application--content-height)' : 0}
       grow={header ? false : undefined}
+      panelled={false}
       {...rest}
     >
       {sideBar}
