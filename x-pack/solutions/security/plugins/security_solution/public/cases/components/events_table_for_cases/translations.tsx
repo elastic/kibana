@@ -8,3 +8,5 @@
 export const ERROR_TITLE = 'TODO';
 
 export const DATA_VIEW_ERROR = 'TODO';
+
+export const TABLE_UNIT = 'events';

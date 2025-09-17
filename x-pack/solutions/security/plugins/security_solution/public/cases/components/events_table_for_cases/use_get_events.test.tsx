@@ -34,9 +34,10 @@ describe('useGetEvents', () => {
     const { result } = renderHook(
       () =>
         useGetEvents(mockDataView, {
-          columns: ['col1', 'col2'],
           eventIds: ['id1', 'id2'],
           sort: [],
+          pageIndex: 0,
+          itemsPerPage: 10,
         }),
       { wrapper: TestProviders }
     );
@@ -44,9 +45,10 @@ describe('useGetEvents', () => {
     await waitFor(() => result.current.isSuccess);
 
     expect(searchEvents).toHaveBeenCalledWith(expect.anything(), mockDataView, {
-      columns: ['col1', 'col2'],
       eventIds: ['id1', 'id2'],
       sort: [],
+      pageIndex: 0,
+      itemsPerPage: 10,
     });
     expect(result.current.data).toEqual({ isPartial: false, foo: 'bar' });
   });
@@ -57,9 +59,10 @@ describe('useGetEvents', () => {
     renderHook(
       () =>
         useGetEvents(mockDataView, {
-          columns: [],
           eventIds: [],
           sort: [],
+          pageIndex: 0,
+          itemsPerPage: 10,
         }),
       { wrapper: TestProviders }
     );
@@ -73,9 +76,10 @@ describe('useGetEvents', () => {
     const { rerender } = renderHook(
       (eventIds: string[] = []) =>
         useGetEvents(mockDataView, {
-          columns: [],
           eventIds,
           sort: [],
+          pageIndex: 0,
+          itemsPerPage: 10,
         }),
       { wrapper: TestProviders }
     );

@@ -36,12 +36,12 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import type { State } from '../../../common/store/types';
 import { useGetEvents } from './use_get_events';
 import { useCaseEventsDataView } from './use_events_data_view';
+import { TABLE_UNIT } from './translations';
 
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
 
 const noop = () => {};
-export const emptyObject = {} as const;
-export const emptyArray = [];
+const emptyObject = {} as const;
 
 const MAX_ACTION_BUTTON_COUNT = 4;
 const DEFAULT_MODEL: SubsetDataTableModel = structuredClone(tableDefaults);
@@ -98,11 +98,14 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
     [dispatch, itemsPerPage, itemsPerPageOptions]
   );
 
-  const { data = [] } = useGetEvents(dataView, {
-    eventIds: events.flatMap((event) =>
+  const eventIds = useMemo(() => {
+    return events.flatMap((event) =>
       Array.isArray(event.eventId) ? event.eventId : [event.eventId]
-    ),
-    columns: ['*'],
+    );
+  }, [events]);
+
+  const { data = [] } = useGetEvents(dataView, {
+    eventIds,
     sort,
     pageIndex: currentPageIndex,
     itemsPerPage,
@@ -170,7 +173,7 @@ export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEvents
       getFieldSpec={(fieldName: string) => dataView.fields.getByName(fieldName)?.toSpec()}
       id={EVENTS_TABLE_FOR_CASES_ID}
       totalItems={data.length}
-      unitCountText="events"
+      unitCountText={TABLE_UNIT}
       cellActionsTriggerId={SecurityCellActionsTrigger.CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}
       loadPage={noop}

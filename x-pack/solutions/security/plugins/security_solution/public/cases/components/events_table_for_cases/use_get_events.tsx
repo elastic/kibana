@@ -16,7 +16,6 @@ import { searchEvents } from './search_events';
 export const useGetEvents = (
   dataView: DataView,
   parameters: {
-    columns: string[];
     eventIds: string[];
     sort: SortColumnTable[];
     pageIndex: number;
@@ -26,7 +25,7 @@ export const useGetEvents = (
   const toasts = useToasts();
 
   return useQuery(
-    [dataView.getIndexPattern(), parameters.columns, parameters.eventIds, parameters.sort],
+    [dataView.getIndexPattern(), parameters.eventIds, parameters.sort],
     ({ signal }) => searchEvents(signal, dataView, parameters),
     {
       onError: (error: Error) => {

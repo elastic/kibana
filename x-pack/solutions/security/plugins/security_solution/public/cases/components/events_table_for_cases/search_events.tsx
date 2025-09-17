@@ -18,7 +18,6 @@ export const searchEvents = async (
   signal: AbortSignal | undefined,
   dataView: DataView | undefined,
   parameters: {
-    columns: string[];
     eventIds: string[];
     sort: SortColumnTable[];
     pageIndex: number;
@@ -42,7 +41,7 @@ export const searchEvents = async (
             },
           },
         },
-        fields: parameters.columns,
+        fields: ['*'],
         sort: parameters.sort.map((tableSort) => ({
           [tableSort.columnId]: tableSort.sortDirection,
         })),
