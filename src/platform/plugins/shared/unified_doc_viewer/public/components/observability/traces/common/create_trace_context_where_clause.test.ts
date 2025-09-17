@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getEsqlQuery } from './get_esql_query';
+import { createTraceContextWhereClause } from './create_trace_context_where_clause';
 import { from } from '@kbn/esql-composer';
 
 const source = from('foo-*');
 
-describe('getEsqlQuery', () => {
+describe('createTraceContextWhereClause', () => {
   it('returns a where AST node with only traceId', () => {
-    const pipeline = source.pipe(getEsqlQuery({ traceId: 'abc123' }));
+    const pipeline = source.pipe(createTraceContextWhereClause({ traceId: 'abc123' }));
     expect(pipeline.toString()).toEqual('FROM foo-*\n  | WHERE trace.id == "abc123"');
   });
 
   it('returns a pipeline with traceId and spanId', () => {
-    const pipeline = source.pipe(getEsqlQuery({ traceId: 'abc123', spanId: 'span456' }));
+    const pipeline = source.pipe(
+      createTraceContextWhereClause({ traceId: 'abc123', spanId: 'span456' })
+    );
     expect(pipeline.toString()).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456"'
     );
   });
   it('returns a pipeline with traceId and transactionId', () => {
-    const pipeline = source.pipe(getEsqlQuery({ traceId: 'abc123', transactionId: 'txn789' }));
+    const pipeline = source.pipe(
+      createTraceContextWhereClause({ traceId: 'abc123', transactionId: 'txn789' })
+    );
     expect(pipeline.toString()).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789"'
     );
@@ -33,7 +37,11 @@ describe('getEsqlQuery', () => {
 
   it('returns a pipeline with all fields', () => {
     const pipeline = source.pipe(
-      getEsqlQuery({ traceId: 'abc123', spanId: 'span456', transactionId: 'txn789' })
+      createTraceContextWhereClause({
+        traceId: 'abc123',
+        spanId: 'span456',
+        transactionId: 'txn789',
+      })
     );
     expect(pipeline.toString()).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND span.id == "span456"'
