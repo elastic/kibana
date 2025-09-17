@@ -22,15 +22,6 @@ jest.mock('../../../../common/components/formatted_date', () => {
 
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
-jest.mock('../../../../common/hooks/use_app_toasts', () => {
-  return {
-    useAppToasts: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    }),
-  };
-});
-
 const getMockUser = () => ({
   uid: 'user-1',
   enabled: true,

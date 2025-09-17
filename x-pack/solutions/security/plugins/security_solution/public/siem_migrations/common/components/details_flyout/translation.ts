@@ -14,21 +14,21 @@ export const SUMMARY_TAB_LABEL = i18n.translate(
 );
 
 export const COMMENT_EVENT_TRANSLATED = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboards.translationDetails.summaryTab.commentEvent.translatedLabel',
+  'xpack.securitySolution.siemMigrations.common.translationDetails.summaryTab.commentEvent.translatedLabel',
   {
     defaultMessage: 'created a final translation',
   }
 );
 
 export const COMMENT_EVENT_UNTRANSLATABLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboards.translationDetails.summaryTab.commentEvent.untranslatableLabel',
+  'xpack.securitySolution.siemMigrations.common.translationDetails.summaryTab.commentEvent.untranslatableLabel',
   {
     defaultMessage: 'failed to translate',
   }
 );
 
 export const CLOSE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.dismissButtonLabel',
+  'xpack.securitySolution.siemMigrations.common.translationDetails.dismissButtonLabel',
   {
     defaultMessage: 'Close',
   }

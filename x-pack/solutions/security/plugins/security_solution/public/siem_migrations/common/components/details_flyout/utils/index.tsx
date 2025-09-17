@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
  */
 export const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
   <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiFlexItem grow={true}>
+    <EuiFlexItem grow={false}>
       <EuiTabbedContent {...props} />
     </EuiFlexItem>
   </EuiFlexGroup>

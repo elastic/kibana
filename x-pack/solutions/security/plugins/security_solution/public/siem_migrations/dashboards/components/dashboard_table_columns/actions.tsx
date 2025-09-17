@@ -56,7 +56,7 @@ const ActionName = ({ migrationDashboard, installDashboard, isDisabled }: Action
       migrationDashboard.translation_result === MigrationTranslationResult.PARTIAL)
   ) {
     return (
-      <EuiLink disabled={isDisabled} onClick={onInstall} data-test-subj="installRule">
+      <EuiLink disabled={isDisabled} onClick={onInstall} data-test-subj="installDashboard">
         {i18n.ACTIONS_INSTALL_LABEL}
       </EuiLink>
     );

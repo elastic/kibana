@@ -98,6 +98,7 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
       paddingSize="l"
       key="migration-dashboard-flyout"
       aria-labelledby={migrationsDashboardsFlyoutTitleId}
+      data-test-subj="dashboardDetailsFlyout"
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">

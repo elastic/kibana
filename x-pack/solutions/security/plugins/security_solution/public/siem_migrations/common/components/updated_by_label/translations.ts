@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const LAST_UPDATED_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.lastUpdated.label',
+  'xpack.securitySolution.siemMigrations.common.translationDetails.lastUpdatedLabel',
   {
     defaultMessage: 'Last updated',
   }
