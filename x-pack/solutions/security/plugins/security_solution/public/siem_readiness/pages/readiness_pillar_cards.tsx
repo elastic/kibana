@@ -129,7 +129,7 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
   const levelColors = {
     bronze: bronzeReached ? '#966B03' : levelUnreachedColor,
     silver: silverReached ? '#5A6D8C' : levelUnreachedColor,
-    gold: goldReached ? '#f1c100' : levelUnreachedColor,
+    gold: goldReached ? '#F5BC00' : levelUnreachedColor,
   };
 
   return (
@@ -151,8 +151,8 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
                 {`${tasksToNextLevel} tasks to next level`}
               </EuiBadge>
             ) : (
-              <EuiBadge iconType="check" color="primary">
-                {'Max level reached'}
+              <EuiBadge iconType="check" color="hollow">
+                {'All tasks complete'}
               </EuiBadge>
             )}
           </EuiFlexItem>
