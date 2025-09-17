@@ -8,7 +8,7 @@
 import { type TypeOf } from '@kbn/config-schema';
 import * as v1 from './v1';
 import * as v2 from './v2';
-import * as v3 from './v2';
+import * as v3 from './v3';
 
 export const stateSchemaByVersion = {
   1: v1.versionDefinition,
@@ -35,7 +35,6 @@ export const emptyState: LatestTaskStateSchema = {
   alertRecoveredInstances: {},
   previousStartedAt: null,
   summaryActions: {},
-  trackedExecutions: undefined,
 };
 
 type Mutable<T> = {
