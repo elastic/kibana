@@ -16,6 +16,7 @@ import type {
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import type { StepActorRef, StepToParentEvent } from '../steps_state_machine';
 import type {
@@ -32,6 +33,7 @@ export interface StreamEnrichmentServiceDependencies {
   core: CoreStart;
   data: DataPublicPluginStart;
   urlStateStorageContainer: IKbnUrlStateStorage;
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export interface StreamEnrichmentInput {

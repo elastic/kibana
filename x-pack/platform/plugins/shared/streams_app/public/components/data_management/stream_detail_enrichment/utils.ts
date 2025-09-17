@@ -71,6 +71,8 @@ const PRIORITIZED_DATE_FIELDS = [
   'date',
   'event.time.received',
   'event.ingested',
+  'custom.timestamp',
+  'attributes.custom.timestamp',
 ];
 
 const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {

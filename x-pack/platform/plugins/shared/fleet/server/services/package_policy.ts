@@ -58,7 +58,6 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
-  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -77,6 +76,11 @@ import type {
   PolicySecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  CloudProvider,
+  CloudConnectorResponse,
+  CloudConnectorVars,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
 } from '../../common/types';
 import {
   FleetError,
@@ -92,6 +96,8 @@ import {
   StreamNotFoundError,
   FleetNotFoundError,
   PackageRollbackError,
+  CloudConnectorInvalidVarsError,
+  CloudConnectorCreateError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -112,7 +118,15 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
-import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
+import {
+  validateDeploymentModesForInputs,
+  isAgentlessIntegration,
+} from '../../common/services/agentless_policy_helper';
+
+import {
+  AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
+  AWS_ROLE_ARN_VAR_NAME,
+} from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -125,7 +139,7 @@ import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from '.
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
-import { appContextService } from '.';
+import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -236,6 +250,56 @@ export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: str
   }
 }
 
+/**
+ * Validates package policy variables and extracts cloud connector configuration.
+ *
+ * Currently supports AWS cloud connector only. This function checks for both:
+ * - `aws.role_arn` and `aws.credentials.external_id` (CSPM and Asset Discovery)
+ * - `role_arn` and `external_id` (direct cloud connector variables)
+ *
+ * This is a temporary implementation pending the generic solution proposed by the
+ * Package Spec team. Once approved, this function should be updated to use the
+ * standardized approach.
+ *
+ * @see https://github.com/elastic/security-team/issues/13277#issuecomment-3245273903 for updates
+ * @todo Remove hardcoded checks for `aws.role_arn` and `aws.credentials.external_id`
+ *       and implement the generic Package Spec solution once approved.
+ */
+
+const extractPackagePolicyVars = (
+  cloudProvider: CloudProvider,
+  packagePolicy: NewPackagePolicy,
+  logger: Logger
+): CloudConnectorVars | undefined => {
+  logger.get('extract package policy vars');
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const roleArn: string = vars.role_arn?.value || vars[AWS_ROLE_ARN_VAR_NAME]?.value;
+
+    if (roleArn) {
+      const externalId: CloudConnectorSecretVar = (
+        vars.external_id?.value?.isSecretRef
+          ? vars.external_id
+          : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME]
+      ) as CloudConnectorSecretVar;
+
+      const awsCloudConnectorVars: AwsCloudConnectorVars = {
+        role_arn: { type: 'text', value: roleArn },
+        external_id: externalId,
+      };
+
+      return awsCloudConnectorVars;
+    }
+  }
+};
+
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('PackagePolicyClient', ...childContextPaths);
@@ -303,6 +367,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let secretReferences: PolicySecretReference[] | undefined;
 
     this.keepPolicyIdInSync(packagePolicy);
+
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -422,8 +487,24 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy = secretsRes.packagePolicy;
       secretReferences = secretsRes.secretReferences;
 
+      // Create cloud connector for package policy if it is supported and package supports agentless
+      if (
+        enrichedPackagePolicy?.supports_agentless &&
+        enrichedPackagePolicy?.supports_cloud_connector
+      ) {
+        const cloudConnector = await this.createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicies[0]
+        );
+        if (cloudConnector) {
+          enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+        }
+      }
+
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
     }
+
     const assetsMap = await getAgentTemplateAssetsMap({
       logger,
       packageInfo: pkgInfo,
@@ -433,8 +514,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgInfo,
       enrichedPackagePolicy.vars || {},
       inputs,
-      assetsMap,
-      { otelcolSuffixId: packagePolicyId }
+      assetsMap
     );
 
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -646,13 +726,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
         inputs = pkgInfo
-          ? await _compilePackagePolicyInputs(
-              pkgInfo,
-              packagePolicy.vars || {},
-              inputs,
-              assetsMap,
-              { otelcolSuffixId: id }
-            )
+          ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
           : inputs;
 
         const elasticsearch = pkgInfo?.elasticsearch;
@@ -781,9 +855,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectsClient: soClient,
     });
     inputs = pkgInfo
-      ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap, {
-          otelcolSuffixId: id,
-        })
+      ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
       : inputs;
 
     const elasticsearch = pkgInfo?.elasticsearch;
@@ -1227,8 +1299,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgInfo,
       restOfPackagePolicy.vars || {},
       inputs,
-      assetsMap,
-      { otelcolSuffixId: id }
+      assetsMap
     );
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1246,6 +1317,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
         throw new FleetError(
           'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+        );
+      }
+
+      // Validate that if supports_agentless is true, the package actually supports agentless
+      if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
+        throw new PackagePolicyValidationError(
+          `Package "${pkgInfo.name}" does not support agentless deployment mode`
         );
       }
 
@@ -1622,8 +1700,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgInfo,
           restOfPackagePolicy.vars || {},
           inputs,
-          assetsMap,
-          { otelcolSuffixId: id }
+          assetsMap
         );
         const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -2159,6 +2236,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
+          supports_cloud_connector: newPolicy.supports_cloud_connector,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -2820,6 +2898,56 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await agentPolicyService.bumpAgentPoliciesByIds(agentPolicyIds, {}, namespace);
     }
   }
+
+  public async createCloudConnectorForPackagePolicy(
+    soClient: SavedObjectsClientContract,
+    enrichedPackagePolicy: NewPackagePolicy,
+    agentPolicy: AgentPolicy
+  ): Promise<CloudConnectorResponse | undefined> {
+    const logger = this.getLogger('createCloudConnectorForPackagePolicy');
+
+    // Check if cloud connector setup supported and not already created
+    const isNewCloudConnectorSetup =
+      !!enrichedPackagePolicy?.supports_cloud_connector &&
+      agentPolicy.agentless?.cloud_connectors?.enabled === true &&
+      !enrichedPackagePolicy?.cloud_connector_id;
+
+    if (!isNewCloudConnectorSetup) {
+      logger.debug(
+        `New cloud connector setup is not supported, supports_cloud_connector: ${
+          enrichedPackagePolicy?.supports_cloud_connector
+        }, agentless.cloud_connectors.enabled: ${
+          agentPolicy.agentless?.cloud_connectors?.enabled ?? 'undefined'
+        }, cloud_connector_id: ${enrichedPackagePolicy?.cloud_connector_id}`
+      );
+      return;
+    }
+    const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+
+    if (!cloudProvider) {
+      logger.debug('No cloud provider specified for cloud connector');
+      return;
+    }
+    try {
+      const cloudConnectorVars = extractPackagePolicyVars(
+        cloudProvider,
+        enrichedPackagePolicy,
+        logger
+      );
+      if (cloudConnectorVars) {
+        const cloudConnector = await cloudConnectorService.create(soClient, {
+          name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+          vars: cloudConnectorVars,
+          cloudProvider,
+        });
+        logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
+        return cloudConnector;
+      }
+    } catch (error) {
+      logger.error(`Error creating cloud connector: ${error}`);
+      throw new CloudConnectorCreateError(`${error}`);
+    }
+  }
 }
 
 export class PackagePolicyServiceImpl
@@ -2938,6 +3066,12 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
+    // Add debug logging
+    const logger = appContextService.getLogger();
+    logger.debug(
+      `PackagePolicyService.create called with supports_agentless: ${packagePolicy.supports_agentless}`
+    );
+
     return super.create(soClient, esClient, packagePolicy, options, context, request);
   }
 }
@@ -2978,23 +3112,15 @@ export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: PackagePolicyAssetsMap,
-  opts?: { otelcolSuffixId?: string }
+  assetsMap: PackagePolicyAssetsMap
 ): PackagePolicyInput[] {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
   return inputs.map((input) => {
-    if (experimentalFeature.enableOtelIntegrations && input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      return {
-        ...input,
-        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, opts?.otelcolSuffixId),
-        compiled_input: [],
-      };
-    }
+    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
+    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
     return {
       ...input,
-      compiled_input: _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap),
-      streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap),
+      compiled_input: compiledInput,
+      streams: compiledStreams,
     };
   });
 }
@@ -3052,11 +3178,10 @@ function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap,
-  otelcolSuffixId?: string
+  assetsMap: PackagePolicyAssetsMap
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, otelcolSuffixId)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
   );
 }
 
@@ -3122,8 +3247,7 @@ function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: PackagePolicyAssetsMap,
-  otelcolSuffixId?: string
+  assetsMap: PackagePolicyAssetsMap
 ) {
   let stream = streamIn;
 
@@ -3181,9 +3305,7 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    pkgStreamTemplate.buffer.toString(),
-    input.type,
-    otelcolSuffixId
+    pkgStreamTemplate.buffer.toString()
   );
 
   stream.compiled_stream = yaml;
@@ -3387,7 +3509,6 @@ export function updatePackageInputs(
         packageInfo.type === 'input' &&
         update.streams.length === 1 &&
         originalInput?.streams.length === 1;
-
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -3398,6 +3519,7 @@ export function updatePackageInputs(
         if (!originalStream && isInputPkgUpdate) {
           originalStream = {
             ...update.streams[0],
+            id: originalInput?.streams[0]?.id,
             vars: originalInput?.streams[0].vars,
           };
         }

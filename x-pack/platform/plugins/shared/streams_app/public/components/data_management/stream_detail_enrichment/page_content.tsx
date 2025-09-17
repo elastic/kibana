@@ -22,6 +22,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -34,6 +35,8 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -43,7 +46,11 @@ interface StreamDetailEnrichmentContentProps {
 }
 
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
-  const { core, dependencies } = useKibana();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     data,
     streams: { streamsRepositoryClient },
@@ -59,6 +66,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
       urlStateStorageContainer={urlStateStorageContainer}
+      telemetryClient={telemetryClient}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -66,12 +74,16 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
 }
 
 export function StreamDetailEnrichmentContentImpl() {
-  const { appParams, core } = useKibana();
+  const context = useKibana();
+  const { appParams, core } = context;
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
   );
@@ -91,6 +103,26 @@ export function StreamDetailEnrichmentContentImpl() {
   if (!isReady) {
     return null;
   }
+
+  const openConfirmationModal = () => {
+    const overlay = core.overlays.openModal(
+      toMountPoint(
+        <StreamsAppContextProvider context={context}>
+          <SchemaChangesReviewModal
+            fields={detectedFields}
+            stream={definition.stream.name}
+            storedFields={[]}
+            submitChanges={async () => saveChanges()}
+            onClose={() => overlay.close()}
+          />
+        </StreamsAppContextProvider>,
+        core
+      ),
+      {
+        maxWidth: 500,
+      }
+    );
+  };
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -130,7 +162,7 @@ export function StreamDetailEnrichmentContentImpl() {
       <EuiSplitPanel.Inner grow={false} color="subdued">
         <ManagementBottomBar
           onCancel={resetChanges}
-          onConfirm={saveChanges}
+          onConfirm={detectedFields.length > 0 ? openConfirmationModal : saveChanges}
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}

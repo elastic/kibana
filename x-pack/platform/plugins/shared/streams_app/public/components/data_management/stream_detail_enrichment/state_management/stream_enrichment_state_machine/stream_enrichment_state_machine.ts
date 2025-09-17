@@ -538,12 +538,13 @@ export const createStreamEnrichmentMachineImplementations = ({
   core,
   data,
   urlStateStorageContainer,
+  telemetryClient,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
   typeof streamEnrichmentMachine
 > => ({
   actors: {
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
-    upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    upsertStream: createUpsertStreamActor({ streamsRepositoryClient, telemetryClient }),
     setupGrokCollection: setupGrokCollectionActor(),
     stepMachine,
     dataSourceMachine: dataSourceMachine.provide(
