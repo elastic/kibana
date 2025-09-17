@@ -82,11 +82,11 @@ export const setTabs: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setTabs({
         ...params,
-        recentlyClosedTabs: tabsStorageManager.getNRecentlyClosedTabs(
-          // clean up the recently closed tabs if the same ids are present in next open tabs
-          differenceBy(params.recentlyClosedTabs, params.allTabs, differenceIterateeByTabId),
-          removedTabs
-        ),
+        recentlyClosedTabs: tabsStorageManager.getNRecentlyClosedTabs({
+          previousOpenTabs: previousTabs,
+          previousRecentlyClosedTabs: params.recentlyClosedTabs,
+          nextOpenTabs: params.allTabs,
+        }),
       })
     );
   };

@@ -302,8 +302,6 @@ describe('TabsStorageManager', () => {
         toRestoredTab({ ...mockTab1, closedAt: newClosedAt }),
         toRestoredTab({ ...mockTab2, closedAt: newClosedAt }),
         toRestoredTab(mockRecentlyClosedTab3),
-        toRestoredTab(mockRecentlyClosedTab),
-        toRestoredTab(mockRecentlyClosedTab2),
       ],
     });
     expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
@@ -458,24 +456,55 @@ describe('TabsStorageManager', () => {
     const newClosedAt = 15;
     jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
 
+    const testTabA = {
+      ...mockTab1,
+      id: 'testTabA',
+    };
+
+    const testTabB = {
+      ...mockTab1,
+      id: 'testTabB',
+    };
+
     // no previously closed tabs
-    expect(tabsStorageManager.getNRecentlyClosedTabs([], [mockTab1])).toEqual([
-      { ...mockTab1, closedAt: newClosedAt },
-    ]);
+    expect(
+      tabsStorageManager.getNRecentlyClosedTabs({
+        previousOpenTabs: [mockTab1, testTabA, testTabB],
+        previousRecentlyClosedTabs: [],
+        nextOpenTabs: [testTabA, testTabB],
+      })
+    ).toEqual([{ ...mockTab1, closedAt: newClosedAt }]);
 
     // some previously closed tabs
     expect(
-      tabsStorageManager.getNRecentlyClosedTabs(
-        [
+      tabsStorageManager.getNRecentlyClosedTabs({
+        previousOpenTabs: [testTabA, mockTab1, testTabB],
+        previousRecentlyClosedTabs: [
           { ...mockTab2, closedAt: 1 },
           { ...mockRecentlyClosedTab, closedAt: 100 },
         ],
-        [mockTab1]
-      )
+        nextOpenTabs: [testTabB, testTabA],
+      })
     ).toEqual([
       { ...mockRecentlyClosedTab, closedAt: 100 },
       { ...mockTab1, closedAt: newClosedAt },
       { ...mockTab2, closedAt: 1 },
+    ]);
+
+    // some previously closed tabs got reopened
+    expect(
+      tabsStorageManager.getNRecentlyClosedTabs({
+        previousOpenTabs: [mockTab1, testTabA],
+        previousRecentlyClosedTabs: [
+          { ...mockTab2, closedAt: 1 },
+          { ...mockRecentlyClosedTab, closedAt: 100 },
+        ],
+        nextOpenTabs: [mockTab2],
+      })
+    ).toEqual([
+      { ...mockRecentlyClosedTab, closedAt: 100 },
+      { ...mockTab1, closedAt: newClosedAt },
+      { ...testTabA, closedAt: newClosedAt },
     ]);
 
     // over the limit
@@ -500,10 +529,11 @@ describe('TabsStorageManager', () => {
       label: `Closed tab (new) ${i}`,
     }));
     expect(
-      tabsStorageManager.getNRecentlyClosedTabs(
-        [...closedTabsGroup1, ...closedTabsGroup2],
-        newClosedTabs
-      )
+      tabsStorageManager.getNRecentlyClosedTabs({
+        previousOpenTabs: [testTabA, testTabB, ...newClosedTabs],
+        previousRecentlyClosedTabs: [...closedTabsGroup1, ...closedTabsGroup2],
+        nextOpenTabs: [testTabA, testTabB],
+      })
     ).toEqual([
       ...closedTabsGroup1,
       ...newClosedTabs.map((tab) => ({ ...tab, closedAt: newClosedAt })),

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy, pick } from 'lodash';
+import { differenceBy, orderBy, pick } from 'lodash';
 import {
   createStateContainer,
   type IKbnUrlStateStorage,
@@ -89,10 +89,11 @@ export interface TabsStorageManager {
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
   }) => TabsInternalStatePayload;
-  getNRecentlyClosedTabs: (
-    previousRecentlyClosedTabs: RecentlyClosedTabState[],
-    newClosedTabs: TabState[]
-  ) => RecentlyClosedTabState[];
+  getNRecentlyClosedTabs: (params: {
+    previousOpenTabs: TabState[];
+    previousRecentlyClosedTabs: RecentlyClosedTabState[];
+    nextOpenTabs: TabState[];
+  }) => RecentlyClosedTabState[];
 }
 
 export const createTabsStorageManager = ({
@@ -240,18 +241,28 @@ export const createTabsStorageManager = ({
     };
   };
 
-  const getNRecentlyClosedTabs: TabsStorageManager['getNRecentlyClosedTabs'] = (
+  const getNRecentlyClosedTabs: TabsStorageManager['getNRecentlyClosedTabs'] = ({
+    previousOpenTabs,
     previousRecentlyClosedTabs,
-    newClosedTabs
-  ) => {
+    nextOpenTabs,
+  }) => {
+    const removedTabs = differenceBy(previousOpenTabs, nextOpenTabs, (tab) => tab.id);
+
     const closedAt = Date.now();
-    const newRecentlyClosedTabs: RecentlyClosedTabState[] = newClosedTabs.map((tab) => ({
+    const additionalRecentlyClosedTabs: RecentlyClosedTabState[] = removedTabs.map((tab) => ({
       ...tab,
       closedAt,
     }));
 
+    // clean up the recently closed tabs if the same ids are present in next open tabs
+    const newRecentlyClosedTabsExcludingStillOpen = differenceBy(
+      [...additionalRecentlyClosedTabs, ...previousRecentlyClosedTabs],
+      nextOpenTabs,
+      (tab) => tab.id
+    );
+
     const newSortedRecentlyClosedTabs = orderBy(
-      [...newRecentlyClosedTabs, ...previousRecentlyClosedTabs],
+      newRecentlyClosedTabsExcludingStillOpen,
       'closedAt',
       'desc'
     );
@@ -394,10 +405,14 @@ export const createTabsStorageManager = ({
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab })
     );
-    const openTabs =
-      persistedDiscoverSession?.id === storedTabsState.discoverSessionId
-        ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
-        : persistedTabs ?? [];
+    const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
+      toTabState(tab, defaultTabState)
+    );
+    let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
+    if (persistedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
+      // if the discover session has changed, use the tabs from the session
+      openTabs = persistedTabs ?? [];
+    }
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
@@ -416,35 +431,48 @@ export const createTabsStorageManager = ({
           newTab.label = tabsStateFromURL.tabLabel;
         }
 
-        // TODO: handle shouldClearAllTabs
+        const allTabsWithNewTab = [...openTabs, newTab];
         return {
-          allTabs: [...openTabs, newTab],
+          allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
-          recentlyClosedTabs: closedTabs,
+          recentlyClosedTabs: getNRecentlyClosedTabs({
+            previousOpenTabs,
+            previousRecentlyClosedTabs: closedTabs,
+            nextOpenTabs: allTabsWithNewTab,
+          }),
         };
       }
 
       // try to preselect one of the previously opened tabs
-      if (!shouldClearAllTabs && openTabs.find((tab) => tab.id === selectedTabId)) {
+      if (openTabs.find((tab) => tab.id === selectedTabId)) {
         return {
           allTabs: openTabs,
           selectedTabId,
-          recentlyClosedTabs: closedTabs,
+          recentlyClosedTabs: getNRecentlyClosedTabs({
+            previousOpenTabs,
+            previousRecentlyClosedTabs: closedTabs,
+            nextOpenTabs: openTabs,
+          }),
         };
       }
 
       // try to reopen some of the previously closed tabs
-      if (!shouldClearAllTabs && !persistedDiscoverSession) {
+      if (!persistedDiscoverSession) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
         if (storedClosedTab) {
           // restore previously closed tabs, for example when only the default tab was shown
+          const restoredTabs = storedTabsState.closedTabs
+            .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
+            .map((tab) => toTabState(tab, defaultTabState));
           return {
-            allTabs: storedTabsState.closedTabs
-              .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
-              .map((tab) => toTabState(tab, defaultTabState)),
+            allTabs: restoredTabs,
             selectedTabId,
-            recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+            recentlyClosedTabs: getNRecentlyClosedTabs({
+              previousOpenTabs,
+              previousRecentlyClosedTabs: closedTabs,
+              nextOpenTabs: restoredTabs,
+            }),
           };
         }
       }
@@ -466,7 +494,11 @@ export const createTabsStorageManager = ({
     return {
       allTabs,
       selectedTabId: selectedTab.id,
-      recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+      recentlyClosedTabs: getNRecentlyClosedTabs({
+        previousOpenTabs,
+        previousRecentlyClosedTabs: closedTabs,
+        nextOpenTabs: allTabs,
+      }),
     };
   };
 
