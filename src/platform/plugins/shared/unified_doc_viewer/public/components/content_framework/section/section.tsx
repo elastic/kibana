@@ -57,9 +57,7 @@ export function ContentFrameworkSection({
   'data-test-subj': accordionDataTestSubj,
   isTechPreview = false,
 }: ContentFrameworkSectionProps) {
-  const [isAccordionExpanded, setIsAccordionExpanded] = useState(
-    forceState ? forceState === 'open' : true
-  );
+  const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
 
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
@@ -95,13 +93,11 @@ export function ContentFrameworkSection({
   );
 
   useEffect(() => {
-    if (forceState !== undefined) {
-      setIsAccordionExpanded(forceState === 'open');
-    }
+    setAccordionState(forceState);
   }, [forceState]);
 
   const handleToggle = (isOpen: boolean) => {
-    setIsAccordionExpanded(isOpen);
+    setAccordionState(isOpen ? 'open' : 'closed');
     if (onToggle) {
       onToggle(isOpen);
     }
@@ -112,9 +108,9 @@ export function ContentFrameworkSection({
       <EuiAccordion
         data-test-subj={accordionDataTestSubj}
         id={`sectionAccordion-${id}`}
-        initialIsOpen={forceState !== 'closed'}
+        initialIsOpen={forceState === 'open'}
         onToggle={handleToggle}
-        forceState={isAccordionExpanded ? 'open' : 'closed'}
+        forceState={accordionState}
         buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -160,7 +156,7 @@ export function ContentFrameworkSection({
           </EuiPanel>
         </>
       </EuiAccordion>
-      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
+      {accordionState ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
     </>
   );
 }
