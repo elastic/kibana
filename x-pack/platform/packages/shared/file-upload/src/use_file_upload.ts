@@ -209,7 +209,7 @@ export function useFileUpload(
     [indexCreateMode, fileUploadManager]
   );
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     setIndexName(existingIndexName ?? '');
   }, [existingIndexName]);
 
