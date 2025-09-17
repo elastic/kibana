@@ -7,11 +7,11 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestPipelineManualIngestPipelineProcessor } from '../../../../types/processors/ingest_pipeline_processors';
-import type { IngestPipelineTranspilationOptions } from '..';
 import {
   type ElasticsearchProcessorType,
   elasticsearchProcessorTypes,
-} from '../../../../types/processors';
+} from '../../../../types/processors/manual_ingest_pipeline_processors';
+import type { IngestPipelineTranspilationOptions } from '..';
 
 export const processManualIngestPipelineProcessors = (
   manualIngestPipelineProcessor: IngestPipelineManualIngestPipelineProcessor,
