@@ -44,6 +44,6 @@ export function timeRangeFromRequest(request: any): [number, number] {
   return [timeFrom, timeTo];
 }
 
-export const NOT_AVAILABLE_LABEL = i18n.translate('app_not_found_in_i18nrc.notAvailableLabel', {
+export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.profiling.notAvailableLabel', {
   defaultMessage: 'N/A',
 });
