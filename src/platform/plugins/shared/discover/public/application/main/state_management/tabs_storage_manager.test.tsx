@@ -16,7 +16,7 @@ import {
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
-import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { TAB_STATE_URL_KEY } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
@@ -153,7 +153,7 @@ describe('TabsStorageManager', () => {
     await tabsStorageManager.persistLocally(props, mockGetAppState, mockGetInternalState);
 
     expect(urlStateStorage.set).toHaveBeenCalledWith(
-      TABS_STATE_URL_KEY,
+      TAB_STATE_URL_KEY,
       { tabId: 'tab1' },
       { replace: false }
     );
@@ -181,7 +181,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: 'tab2',
     });
 
@@ -199,7 +199,7 @@ describe('TabsStorageManager', () => {
       selectedTabId: 'tab2',
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
     });
-    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
@@ -228,7 +228,7 @@ describe('TabsStorageManager', () => {
       ],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: mockRecentlyClosedTab2.id,
     });
 
@@ -255,7 +255,7 @@ describe('TabsStorageManager', () => {
         toRestoredTab(mockRecentlyClosedTab2),
       ],
     });
-    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
@@ -283,7 +283,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: props.selectedTabId,
     });
 
@@ -304,7 +304,7 @@ describe('TabsStorageManager', () => {
       })
     );
     expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
-    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
@@ -329,7 +329,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, null);
+    urlStateStorage.set(TAB_STATE_URL_KEY, null);
 
     jest.spyOn(urlStateStorage, 'set');
     jest.spyOn(storage, 'set');
@@ -356,7 +356,7 @@ describe('TabsStorageManager', () => {
       })
     );
     expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
-    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
@@ -530,7 +530,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: mockTab2.id,
     });
 
@@ -566,7 +566,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: mockTab1.id,
     });
 
@@ -610,7 +610,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: 'bad-tab',
     });
 
@@ -654,7 +654,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: mockRecentlyClosedTab.id,
     });
 
@@ -700,7 +700,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
 
-    urlStateStorage.set(TABS_STATE_URL_KEY, {
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: 'new',
       tabLabel: 'New tab test',
     });
@@ -724,7 +724,7 @@ describe('TabsStorageManager', () => {
       })
     );
     expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[2].id);
-    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();

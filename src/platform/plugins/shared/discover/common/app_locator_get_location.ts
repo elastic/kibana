@@ -17,7 +17,7 @@ import {
   APP_STATE_URL_KEY,
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
-  TABS_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
 } from './constants';
 
 export const appLocatorGetLocationCommon = async (
@@ -99,7 +99,7 @@ export const appLocatorGetLocationCommon = async (
 
   if (tab?.id) {
     path = setStateToKbnUrl(
-      TABS_STATE_URL_KEY,
+      TAB_STATE_URL_KEY,
       { tabId: tab.id, tabLabel: tab.id === NEW_TAB_ID && 'label' in tab ? tab.label : undefined },
       { useHash },
       path
