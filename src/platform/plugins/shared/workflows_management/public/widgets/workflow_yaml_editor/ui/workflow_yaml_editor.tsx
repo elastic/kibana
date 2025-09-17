@@ -501,12 +501,16 @@ export const WorkflowYAMLEditor = ({
       } else {
         prepend = 'triggers:\n  ';
       }
-      model.applyEdits([
-        {
-          range,
-          text: prepend + prependIndentToLines(triggerSnippet, indentLevel) + '\n',
-        },
-      ]);
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range,
+            text: prepend + prependIndentToLines(triggerSnippet, indentLevel) + '\n',
+          },
+        ],
+        () => null
+      );
     }
     function insertBuiltInStepSnippet(stepType: string) {
       const model = editorRef.current?.getModel();
@@ -533,12 +537,16 @@ export const WorkflowYAMLEditor = ({
           indentLevel = getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber);
         }
       }
-      model.applyEdits([
-        {
-          range,
-          text: prepend + prependIndentToLines(builtInStepSnippet, indentLevel) + '\n',
-        },
-      ]);
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range,
+            text: prepend + prependIndentToLines(builtInStepSnippet, indentLevel) + '\n',
+          },
+        ],
+        () => null
+      );
     }
     function insertConnectorSnippet(connectorType: string) {
       const model = editorRef.current?.getModel();
@@ -565,12 +573,16 @@ export const WorkflowYAMLEditor = ({
           indentLevel = getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber);
         }
       }
-      model.applyEdits([
-        {
-          range,
-          text: prepend + prependIndentToLines(connectorSnippet, indentLevel) + '\n',
-        },
-      ]);
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range,
+            text: prepend + prependIndentToLines(connectorSnippet, indentLevel) + '\n',
+          },
+        ],
+        () => null
+      );
     }
     if (TriggerTypes.includes(action.id)) {
       insertTriggerSnippet(action.id);
