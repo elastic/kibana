@@ -227,6 +227,7 @@
     "@kbn/chart-icons": "link:src/platform/packages/shared/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/platform/plugins/shared/charts",
     "@kbn/charts-theme": "link:src/platform/packages/shared/kbn-charts-theme",
+    "@kbn/chat-data-registry-plugin": "link:x-pack/platform/plugins/shared/chat_data_registry",
     "@kbn/cloud": "link:src/platform/packages/shared/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat",
     "@kbn/cloud-data-migration-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration",

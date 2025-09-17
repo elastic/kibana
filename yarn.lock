@@ -4256,6 +4256,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chat-data-registry-plugin@link:x-pack/platform/plugins/shared/chat_data_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
