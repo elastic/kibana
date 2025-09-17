@@ -19,7 +19,6 @@ import {
   useBatchedPublishingSubjects,
   useFetchContext,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
@@ -169,18 +168,16 @@ export function getAlertsEmbeddableFactory({
                     sloClient,
                   }}
                 >
-                  <Router history={history}>
-                    <QueryClientProvider client={queryClient}>
-                      <SloAlertsWrapper
-                        onEdit={onEdit}
-                        deps={deps}
-                        slos={slos}
-                        timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
-                        reloadSubject={reload$}
-                        showAllGroupByInstances={showAllGroupByInstances}
-                      />
-                    </QueryClientProvider>
-                  </Router>
+                  <QueryClientProvider client={queryClient}>
+                    <SloAlertsWrapper
+                      onEdit={onEdit}
+                      deps={deps}
+                      slos={slos}
+                      timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
+                      reloadSubject={reload$}
+                      showAllGroupByInstances={showAllGroupByInstances}
+                    />
+                  </QueryClientProvider>
                 </PluginContext.Provider>
               </KibanaContextProvider>
             </I18nContext>
