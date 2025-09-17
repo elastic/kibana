@@ -114,7 +114,7 @@ function getActionOptions(): ActionOptionData[] {
       {
         id: 'if',
         label: i18n.translate('workflows.actionsMenu.if', {
-          defaultMessage: 'If',
+          defaultMessage: 'If Condition',
         }),
         description: i18n.translate('workflows.actionsMenu.ifDescription', {
           defaultMessage: 'If the condition is true, the action is executed.',
