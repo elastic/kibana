@@ -209,6 +209,13 @@ export function useFileUpload(
     [indexCreateMode, fileUploadManager]
   );
 
+  const setExistingIndexName = useCallback(
+    (idxName: string | null) => {
+      fileUploadManager.setExistingIndexName(idxName);
+    },
+    [fileUploadManager]
+  );
+
   useUpdateEffect(() => {
     setIndexName(existingIndexName ?? '');
   }, [existingIndexName]);
@@ -240,6 +247,7 @@ export function useFileUpload(
     setIndexCreateMode,
     indices,
     existingIndexName,
+    setExistingIndexName,
   };
 }
 
