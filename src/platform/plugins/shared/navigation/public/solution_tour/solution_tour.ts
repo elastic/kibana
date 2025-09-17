@@ -66,8 +66,12 @@ const hasAccessToDataManagement = (capabilities: ApplicationStart['capabilities'
 const SOLUTION_NAVIGATION_TOUR_KEY = 'solutionNavigationTour:completed';
 
 async function preserveTourCompletion(userProfiles: UserProfileServiceStart): Promise<void> {
-  localStorage.setItem(SOLUTION_NAVIGATION_TOUR_KEY, 'true');
-  return await userProfiles.update({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
+  try {
+    localStorage.setItem(SOLUTION_NAVIGATION_TOUR_KEY, 'true');
+    return await userProfiles.update({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
+  } catch (e) {
+    // ignore
+  }
 }
 
 async function checkTourCompletion(userProfiles: UserProfileServiceStart): Promise<boolean> {
