@@ -84,7 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       for (let i = 0; i < 600; i++) {
         monitors.push({
           ...projectMonitors.monitors[0],
-          id: `test browser id ${i}`,
+          id: `test-browser-id-${i}`,
           name: `test name ${i}`,
         });
       }
@@ -133,7 +133,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { monitors: firstPageMonitors, total, after_key: afterKey } = firstPageResponse.body;
         expect(firstPageMonitors.length).to.eql(500);
         expect(total).to.eql(600);
-        expect(afterKey).to.eql('test browser id 548');
+        expect(afterKey).to.eql('test-browser-id-548');
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
@@ -184,7 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       for (let i = 0; i < 600; i++) {
         monitors.push({
           ...httpProjectMonitors.monitors[1],
-          id: `test http id ${i}`,
+          id: `test-http-id-${i}`,
           name: `test name ${i}`,
         });
       }
@@ -237,7 +237,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
         expect(total).to.eql(600);
-        expect(afterKey).to.eql('test http id 548');
+        expect(afterKey).to.eql('test-http-id-548');
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
@@ -288,7 +288,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       for (let i = 0; i < 600; i++) {
         monitors.push({
           ...tcpProjectMonitors.monitors[0],
-          id: `test tcp id ${i}`,
+          id: `test-tcp-id-${i}`,
           name: `test name ${i}`,
         });
       }
@@ -341,7 +341,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
         expect(total).to.eql(600);
-        expect(afterKey).to.eql('test tcp id 548');
+        expect(afterKey).to.eql('test-tcp-id-548');
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
@@ -392,7 +392,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       for (let i = 0; i < 600; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
-          id: `test icmp id ${i}`,
+          id: `test-icmp-id-${i}`,
           name: `test name ${i}`,
         });
       }
@@ -444,7 +444,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
         expect(total).to.eql(600);
-        expect(afterKey).to.eql('test icmp id 548');
+        expect(afterKey).to.eql('test-icmp-id-548');
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
@@ -563,7 +563,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
         expect(total).to.eql(600);
-        expect(afterKey).to.eql('test url id 548');
+        expect(afterKey).to.eql('test-url-id-548');
 
         const secondPageResponse = await supertest
           .get(
