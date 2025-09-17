@@ -56,6 +56,7 @@ import type {
   PackagePolicyPackage,
   DeletePackagePoliciesResponse,
   PackagePolicyAssetsMap,
+  PreconfiguredInputs,
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
@@ -4037,7 +4038,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
       });
@@ -4134,7 +4135,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
@@ -4232,7 +4233,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
@@ -4384,7 +4385,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         expect(result.inputs).toHaveLength(2);
@@ -4604,7 +4605,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         const template1Inputs = result.inputs.filter(
@@ -4716,7 +4717,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
       });
