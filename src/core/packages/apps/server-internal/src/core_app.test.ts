@@ -133,7 +133,7 @@ describe('CoreApp', () => {
   });
 
   describe('`/status` route', () => {
-    it('is registered with `authRequired: false` is the status page is anonymous', async () => {
+    it('is registered with disabled authentication and authorization if the status page is anonymous', async () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(true);
       await coreApp.setup(internalCoreSetup, emptyPlugins());
 
@@ -142,14 +142,8 @@ describe('CoreApp', () => {
           path: '/status',
           validate: false,
           security: {
-            authz: {
-              enabled: false,
-              reason: expect.any(String),
-            },
-            authc: {
-              enabled: false,
-              reason: expect.any(String),
-            },
+            authz: { enabled: false, reason: expect.any(String) },
+            authc: { enabled: false, reason: expect.any(String) },
           },
         },
         expect.any(Function)

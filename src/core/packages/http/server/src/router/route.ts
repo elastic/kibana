@@ -277,7 +277,7 @@ export type RouteAuthz = AuthzEnabled | AuthzDisabled;
  */
 export interface RouteSecurity {
   authz: RouteAuthz;
-  authc?: RouteAuthc;
+  authc: RouteAuthc;
 }
 
 /**
@@ -293,13 +293,6 @@ export enum ReservedPrivilegesSet {
  * @public
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
-  /**
-   * Allows to disable authentication for a specific route. If not specified, defaults to `true`.
-   *
-   * @deprecated Use `security.authc.enabled` instead
-   */
-  authRequired?: false;
-
   /**
    * Defines xsrf protection requirements for a route:
    * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
@@ -555,7 +548,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Defines the security requirements for a route, including authorization and authentication.
    */
-  security: RouteSecurity;
+  security: Omit<RouteSecurity, 'authc'> & { authc?: RouteAuthc };
 
   /**
    * Additional route options {@link RouteConfigOptions}.

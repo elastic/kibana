@@ -380,21 +380,23 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: boolean | 'optional' = true
+    authcEnabled: boolean | 'optional'
   ): undefined | false | { mode: 'required' | 'try' } {
-    if (this.authRegistered === false) return undefined;
+    if (!this.authRegistered) {
+      return undefined;
+    }
 
-    if (authRequired === true) {
+    if (authcEnabled === true) {
       return { mode: 'required' };
     }
-    if (authRequired === 'optional') {
+
+    if (authcEnabled === 'optional') {
       // we want to use HAPI `try` mode and not `optional` to not throw unauthorized errors when the user
       // has invalid or expired credentials
       return { mode: 'try' };
     }
-    if (authRequired === false) {
-      return false;
-    }
+
+    return false;
   }
 
   private getDeprecatedRoutes(): RouterDeprecatedApiDetails[] {
@@ -765,7 +767,7 @@ export class HttpServer {
   }
 
   private getSecurity(route: RouterRoute) {
-    const securityConfig = route?.security;
+    const securityConfig = route.security;
 
     // for versioned routes, we need to check if the security config is a function
     return typeof securityConfig === 'function' ? securityConfig() : securityConfig;
@@ -778,8 +780,6 @@ export class HttpServer {
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
     const { tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
-
-    const authRequired = this.getSecurity(route)?.authc?.enabled ?? route.options.authRequired;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -800,7 +800,7 @@ export class HttpServer {
       method: route.method,
       path: route.path,
       options: {
-        auth: this.getAuthOption(authRequired),
+        auth: this.getAuthOption(this.getSecurity(route).authc.enabled),
         app: kibanaRouteOptions,
         tags: tags ? Array.from(tags) : undefined,
         // TODO: This 'validate' section can be removed once the legacy platform is completely removed.

@@ -172,13 +172,13 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
   public emitPostValidate = (
     request: KibanaRequest,
-    postValidateConext: PostValidationMetadata = {
+    postValidateContext: PostValidationMetadata = {
       isInternalApiRequest: true,
       isPublicAccess: false,
     }
   ) => {
     const postValidate: RouterEvents = 'onPostValidate';
-    Router.events.emit(postValidate, request, postValidateConext);
+    Router.events.emit(postValidate, request, postValidateContext);
   };
 
   /** @internal */

@@ -10,7 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import type {
   RouteSecurity,
-  RouteConfigOptions,
   AllRequiredCondition,
   AnyRequiredCondition,
 } from '@kbn/core-http-server';
@@ -148,7 +147,9 @@ const authzSchema = schema.object({
 });
 
 const authcSchema = schema.object({
-  enabled: schema.oneOf([schema.literal(true), schema.literal('optional'), schema.literal(false)]),
+  enabled: schema.oneOf([schema.literal(true), schema.literal('optional'), schema.literal(false)], {
+    defaultValue: true,
+  }),
   reason: schema.conditional(
     schema.siblingRef('enabled'),
     schema.oneOf([schema.literal('optional'), schema.literal(false)]),
@@ -159,20 +160,9 @@ const authcSchema = schema.object({
 
 const routeSecuritySchema = schema.object({
   authz: authzSchema,
-  authc: schema.maybe(authcSchema),
+  authc: authcSchema,
 });
 
-export const validRouteSecurity = (
-  routeSecurity?: DeepPartial<RouteSecurity>,
-  options?: DeepPartial<RouteConfigOptions<any>>
-) => {
-  if (!routeSecurity) {
-    return routeSecurity;
-  }
-
-  if (routeSecurity?.authc !== undefined && options?.authRequired !== undefined) {
-    throw new Error('Cannot specify both security.authc and options.authRequired');
-  }
-
+export const validRouteSecurity = (routeSecurity?: DeepPartial<RouteSecurity>) => {
   return routeSecuritySchema.validate(routeSecurity);
 };

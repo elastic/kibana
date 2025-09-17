@@ -89,7 +89,7 @@ function isSAMLResponseQuery(query: any): query is { SAMLResponse: string } {
 function canStartNewSession(request: KibanaRequest) {
   // We should try to establish new session only if request requires authentication and client
   // can be redirected to the Identity Provider where they can authenticate.
-  return canRedirectRequest(request) && request.route.options.authRequired === true;
+  return canRedirectRequest(request) && request.route.options.security.authc.enabled === true;
 }
 
 /**

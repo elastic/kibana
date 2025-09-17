@@ -20,7 +20,7 @@ import type { Headers } from './headers';
 export type RouteSecurityGetter = (request?: {
   headers: KibanaRequest['headers'];
   query?: KibanaRequest['query'];
-}) => RouteSecurity | undefined;
+}) => RouteSecurity;
 export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
 
 /**
@@ -55,7 +55,7 @@ export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method exte
   | 'get'
   | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
+  : Required<RouteConfigOptions<Method>>) & { security: RouteSecurity };
 
 /**
  * Request specific route information exposed to a handler.
