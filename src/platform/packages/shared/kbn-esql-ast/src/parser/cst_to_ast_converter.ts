@@ -1430,7 +1430,7 @@ export class CstToAstConverter {
       // 1) field assignment: <col> = <booleanExpression>
       if (ctx.ASSIGN()) {
         const left = this.toColumn(qualifiedNameCtx);
-        const assignment = this.createFunction(
+        const assignment = this.toFunction(
           ctx.ASSIGN().getText(),
           ctx,
           undefined,
