@@ -308,7 +308,7 @@ export const GapAutoFillSettings: React.FC = () => {
               rules_filter: '',
               gap_fill_range: 'now-7d',
               schedule: {
-                interval: '1m',
+                interval: '30s',
               },
               scope: ['securitySolution'],
               rule_types: [
