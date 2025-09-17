@@ -13,7 +13,7 @@ import {
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
-  STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
+  STREAMS_SCHEMA_UPDATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
@@ -26,7 +26,7 @@ import {
   streamsChildStreamCreatedSchema,
   streamsProcessingSavedSchema,
   streamsRetentionChangedSchema,
-  streamsSchemaFieldUpdatedSchema,
+  streamsSchemaUpdatedSchema,
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   wiredStreamsStatusChangedSchema,
@@ -67,9 +67,9 @@ const streamsChildStreamCreatedEventType = {
   schema: streamsChildStreamCreatedSchema,
 };
 
-const streamsSchemaFieldUpdatedEventType = {
-  eventType: STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
-  schema: streamsSchemaFieldUpdatedSchema,
+const streamsSchemaUpdatedEventType = {
+  eventType: STREAMS_SCHEMA_UPDATED_EVENT_TYPE,
+  schema: streamsSchemaUpdatedSchema,
 };
 
 const streamsSignificantEventsSuggestionsGeneratedEventType = {
@@ -95,7 +95,7 @@ export {
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
   streamsChildStreamCreatedEventType,
-  streamsSchemaFieldUpdatedEventType,
+  streamsSchemaUpdatedEventType,
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
   wiredStreamsStatusChangedEventType,

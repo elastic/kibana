@@ -205,26 +205,7 @@ const streamsChildStreamCreatedSchema: RootSchema<StreamsChildStreamCreatedProps
   },
 };
 
-const streamsSchemaFieldUpdatedSchema: RootSchema<StreamsSchemaFieldUpdatedProps> = {
-  field_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the updated field',
-    },
-  },
-  field_status: {
-    type: 'keyword',
-    _meta: {
-      description: "Mapping status of the updated field: 'mapped' or 'unmapped'",
-    },
-  },
-  field_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the updated mapped field',
-      optional: true,
-    },
-  },
+const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaFieldUpdatedProps> = {
   stream_type: {
     type: 'keyword',
     _meta: {
@@ -273,7 +254,7 @@ export {
   streamsRetentionChangedSchema,
   streamsProcessingSavedSchema,
   streamsChildStreamCreatedSchema,
-  streamsSchemaFieldUpdatedSchema,
+  streamsSchemaUpdatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   streamsSignificantEventsCreatedSchema,
   wiredStreamsStatusChangedSchema,

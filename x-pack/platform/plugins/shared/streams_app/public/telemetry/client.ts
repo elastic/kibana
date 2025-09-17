@@ -14,7 +14,7 @@ import type {
   StreamsAssetCountProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
-  StreamsSchemaFieldUpdatedProps,
+  StreamsSchemaUpdatedProps,
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
@@ -27,7 +27,7 @@ import {
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
-  STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
+  STREAMS_SCHEMA_UPDATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
@@ -82,8 +82,8 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE, props);
   }
 
-  public trackSchemaFieldUpdated(params: StreamsSchemaFieldUpdatedProps) {
-    this.analytics.reportEvent(STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE, params);
+  public trackSchemaUpdated(props: StreamsSchemaUpdatedProps) {
+    this.analytics.reportEvent(STREAMS_SCHEMA_UPDATED_EVENT_TYPE, props);
   }
 
   public trackSignificantEventsSuggestionsGenerate(

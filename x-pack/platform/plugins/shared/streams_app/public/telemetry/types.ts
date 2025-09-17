@@ -56,10 +56,7 @@ interface StreamsChildStreamCreatedProps {
   name: string;
 }
 
-interface StreamsSchemaFieldUpdatedProps {
-  field_name: string;
-  field_status: 'mapped' | 'unmapped';
-  field_type?: string;
+interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
@@ -81,7 +78,7 @@ export {
   type StreamsRetentionChangedProps,
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,
-  type StreamsSchemaFieldUpdatedProps,
+  type StreamsSchemaUpdatedProps,
   type StreamsSignificantEventsSuggestionsGeneratedEventProps,
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
