@@ -120,7 +120,7 @@ pageLoadAssetSize:
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3058
+  productDocBase: 3074
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -201,4 +201,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 6200
+  workflowsManagement: 6555
