@@ -1382,6 +1382,19 @@ Object {
       ],
       "type": "number",
     },
+    "testParam": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "threshold": Object {
       "flags": Object {
         "error": [Function],
