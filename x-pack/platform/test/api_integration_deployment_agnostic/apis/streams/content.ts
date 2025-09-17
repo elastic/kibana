@@ -12,7 +12,10 @@ import type { ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+} from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -56,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+        [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
       });
 
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
