@@ -4,6 +4,7 @@ on:
   pull_request_target:
     types:
       - opened
+      - synchronize
     paths:
       - 'x-pack/platform/plugins/shared/alerting/server/integration_tests/__snapshots__/serverless_upgrade_and_rollback_checks.test.ts.snap'
 
