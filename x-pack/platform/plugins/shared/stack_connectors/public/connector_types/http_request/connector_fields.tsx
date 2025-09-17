@@ -6,9 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSelect, EuiFormRow } from '@elastic/eui';
+import {
+  UseField,
+  useFormData,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Field,
   SelectField,
@@ -35,9 +39,59 @@ const CONTENT_TYPES: Record<string, string> = {
   }),
 };
 
+const TEMPLATES: Record<string, { name: string; templateValues: Record<string, any>}> = {
+  '': {
+    name: '',
+    templateValues: {},
+  },
+  'jira-create-incident': {
+    name: 'Jira - Create Incident',
+    templateValues: {
+      method: 'post',
+      url: 'jira.com',
+      contentType: 'json',
+      paramFields: [
+        {
+          "name": "summary",
+          "label": "Summary",
+          "type": "text",
+          "required": true,
+          "placeholder": "Enter a short summary"
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "Enter detailed description"
+        },
+        {
+          "name": "priority",
+          "label": "Priority",
+          "type": "select",
+          "required": true,
+          "options": [
+            { "value": "high", "text": "High" },
+            { "value": "medium", "text": "Medium" },
+            { "value": "low", "text": "Low" }
+          ]
+        },
+        {
+          "name": "assignee",
+          "label": "Assignee",
+          "type": "text",
+          "required": false,
+          "placeholder": "Assign to user"
+        }
+      ]
+    },
+  },
+};
+
 const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
+  const { setFieldValue } = useFormContext();
   const [{ config }] = useFormData({
     watch: [
       'config.method',
@@ -48,8 +102,41 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     ],
   });
 
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+
   return (
     <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFormRow
+          fullWidth={true}
+          label={i18n.translate('xpack.stackConnectors.components.httpRequest.templateFieldLabel', {
+            defaultMessage: 'Template',
+          })}
+        >
+          <EuiSelect
+            fullWidth={true}
+            options={Object.keys(TEMPLATES).map((key) => ({
+              text: TEMPLATES[key].name,
+              value: key,
+            }))}
+            value={selectedTemplate}
+            onChange={(e) => {
+              setSelectedTemplate(e.target.value);
+              const templateValues = TEMPLATES[e.target.value].templateValues;
+              setFieldValue('config.method', templateValues.method || '');
+              setFieldValue('config.url', templateValues.url || '');
+              setFieldValue('config.contentType', templateValues.contentType || '');
+              setFieldValue('config.customContentType', templateValues.customContentType || '');
+              setFieldValue(
+                'config.paramFields',
+                JSON.stringify(templateValues.paramFields || [], null, 2)
+              );
+            }}
+          />
+        </EuiFormRow>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <UseField
