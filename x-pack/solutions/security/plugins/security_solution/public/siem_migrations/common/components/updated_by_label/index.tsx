@@ -8,23 +8,18 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-
-import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-
+import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
 
 interface UpdatedByLabelProps {
-  migrationRule: RuleMigrationRule;
+  updatedBy: string;
+  updatedAt: string;
 }
 
 export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(
-  ({ migrationRule }: UpdatedByLabelProps) => {
-    const userProfileId = useMemo(
-      () => new Set([migrationRule.updated_by ?? migrationRule.created_by]),
-      [migrationRule.created_by, migrationRule.updated_by]
-    );
+  ({ updatedBy, updatedAt }: UpdatedByLabelProps) => {
+    const userProfileId = useMemo(() => new Set([updatedBy]), [updatedBy]);
     const { isLoading: isLoadingUserProfiles, data: userProfiles } = useBulkGetUserProfiles({
       uids: userProfileId,
     });
@@ -34,8 +29,7 @@ export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(
     }
 
     const userProfile = userProfiles[0];
-    const updatedBy = userProfile.user.full_name ?? userProfile.user.username;
-    const updatedAt = migrationRule.updated_at ?? migrationRule['@timestamp'];
+    const updatedByName = userProfile.user.full_name ?? userProfile.user.username;
     return (
       <EuiText size="xs">
         <FormattedMessage
@@ -43,7 +37,7 @@ export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(
           defaultMessage="{updated}: {by} on {date}"
           values={{
             updated: <b>{i18n.LAST_UPDATED_LABEL}</b>,
-            by: updatedBy,
+            by: updatedByName,
             date: <FormattedDate value={updatedAt} fieldName="updated_at" />,
           }}
         />
