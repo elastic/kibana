@@ -83,13 +83,17 @@ export const registerStatusRoute = ({
     {
       path: '/api/status',
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'This route should return the full status for authenticated requests and a reduced version for unauthenticated ones.',
+        },
         authz: {
           enabled: false,
           reason: 'Status route should be accessible without authorization.',
         },
       },
       options: {
-        authRequired: 'optional',
         // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.
         // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
         // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.

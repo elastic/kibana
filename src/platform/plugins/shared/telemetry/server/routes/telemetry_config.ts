@@ -99,11 +99,16 @@ export function registerTelemetryConfigRoutes({
     .get({
       access: 'internal',
       path: FetchTelemetryConfigRoute,
-      options: { authRequired: 'optional' },
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Telemetry config is required for both anonymous pages and pages that require authentication.',
+        },
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'Telemetry config is retrieved by the Kibana service account but does not expose sensitive information requiring authorization.',
         },
       },
     })
@@ -121,7 +126,8 @@ export function registerTelemetryConfigRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'Telemetry config is retrieved by the Kibana service account but does not expose sensitive information requiring authorization.',
           },
         },
         validate: v2Validations,
@@ -138,7 +144,8 @@ export function registerTelemetryConfigRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'Telemetry config is retrieved by the Kibana service account but does not expose sensitive information requiring authorization.',
         },
       },
     })

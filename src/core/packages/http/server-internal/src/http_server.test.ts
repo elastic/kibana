@@ -1115,7 +1115,6 @@ test('exposes route details of incoming request to a route handler', async () =>
       path: '/',
       routePath: '/',
       options: {
-        authRequired: true,
         xsrfRequired: false,
         access: 'internal',
         tags: [],
@@ -1341,7 +1340,6 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       path: '/',
       routePath: '/',
       options: {
-        authRequired: true,
         xsrfRequired: true,
         access: 'internal',
         tags: [],
@@ -2139,7 +2137,7 @@ test('exposes authentication details of incoming request to a route handler', as
       path: '/foo',
       validate: false,
       security: {
-        authc: { enabled: 'optional' },
+        authc: { enabled: 'optional', reason: 'test' },
         authz: { enabled: false, reason: 'test' },
       },
     },
@@ -2175,13 +2173,13 @@ test('exposes authentication details of incoming request to a route handler', as
       path: '/foo',
       routePath: '/foo',
       options: {
-        authRequired: 'optional',
+        authRequired: false,
         xsrfRequired: false,
         access: 'internal',
         tags: [],
         timeout: {},
         security: {
-          authc: { enabled: 'optional' },
+          authc: { enabled: 'optional', reason: 'test' },
           authz: { enabled: false, reason: 'test' },
         },
       },

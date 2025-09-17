@@ -79,7 +79,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -104,7 +103,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -129,7 +127,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -157,7 +154,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -185,7 +181,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -210,7 +205,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -235,7 +229,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -261,8 +254,6 @@ export function registerResponseActionRoutes(
         },
       },
       options: {
-        authRequired: true,
-
         body: {
           accepts: ['multipart/form-data'],
           output: 'stream',
@@ -293,7 +284,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -317,7 +307,6 @@ export function registerResponseActionRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

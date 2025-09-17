@@ -244,27 +244,28 @@ export interface AuthzDisabled {
 /**
  * Describes the authentication status when authentication is enabled.
  *
- * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ * - `enabled`: A boolean indicating that authentication is required, can only be set to `true`.
  */
 export interface AuthcEnabled {
-  enabled: true | 'optional';
+  enabled: true;
 }
 
 /**
- * Describes the state when authentication is disabled.
+ * Describes the state when authentication is performed optionally or not performed at all.
  *
- * - `enabled`: A boolean indicating that authentication is not enabled (`false`).
- * - `reason`: A string explaining why authentication is disabled.
+ * - `enabled`: A boolean or string indicating the authentication status. Can be `false` (authentication isn't performed)
+ *   or `optional` (authentication is performed optionally).
+ * - `reason`: A string explaining why authentication is disabled or optional.
  */
-export interface AuthcDisabled {
-  enabled: false;
+export interface AuthcDisabledOrOptional {
+  enabled: false | 'optional';
   reason: string;
 }
 
 /**
  * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`).
  */
-export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+export type RouteAuthc = AuthcEnabled | AuthcDisabledOrOptional;
 
 /**
  * Represents the authorization status for a route. It can either be enabled (`AuthzEnabled`) or disabled (`AuthzDisabled`).
@@ -293,17 +294,11 @@ export enum ReservedPrivilegesSet {
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
-   * Defines authentication mode for a route:
-   * - true. A user has to have valid credentials to access a resource
-   * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
-   *               Can be useful when we grant access to a resource but want to identify a user if possible.
-   *
-   * Defaults to `true` if an auth mechanism is registered.
+   * Allows to disable authentication for a specific route. If not specified, defaults to `true`.
    *
    * @deprecated Use `security.authc.enabled` instead
    */
-  authRequired?: boolean | 'optional';
+  authRequired?: false;
 
   /**
    * Defines xsrf protection requirements for a route:

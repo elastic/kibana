@@ -23,7 +23,6 @@ import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-i
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
-  RouteConfigOptions,
   KibanaRouteOptions,
   KibanaRequestState,
   RouterRoute,
@@ -381,7 +380,7 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: RouteConfigOptions<any>['authRequired'] = true
+    authRequired: boolean | 'optional' = true
   ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 

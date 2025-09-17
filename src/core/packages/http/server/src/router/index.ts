@@ -60,7 +60,7 @@ export type {
   AuthzEnabled,
   RouteAuthz,
   RouteAuthc,
-  AuthcDisabled,
+  AuthcDisabledOrOptional,
   AuthcEnabled,
   RouteSecurity,
   AllRequiredCondition,

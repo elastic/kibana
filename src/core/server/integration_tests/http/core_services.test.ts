@@ -117,8 +117,10 @@ describe('http service', () => {
           {
             path: '/is-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: 'optional' },
+            security: {
+              authc: { enabled: 'optional', reason: '' },
+              authz: { enabled: false, reason: '' },
+            },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
@@ -138,8 +140,10 @@ describe('http service', () => {
           {
             path: '/is-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: 'optional' },
+            security: {
+              authc: { enabled: 'optional', reason: '' },
+              authz: { enabled: false, reason: '' },
+            },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );

@@ -151,7 +151,7 @@ const authcSchema = schema.object({
   enabled: schema.oneOf([schema.literal(true), schema.literal('optional'), schema.literal(false)]),
   reason: schema.conditional(
     schema.siblingRef('enabled'),
-    schema.literal(false),
+    schema.oneOf([schema.literal('optional'), schema.literal(false)]),
     schema.string(),
     schema.never()
   ),

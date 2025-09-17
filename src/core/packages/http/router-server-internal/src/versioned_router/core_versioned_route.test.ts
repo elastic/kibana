@@ -258,7 +258,6 @@ describe('Versioned route', () => {
       summary: 'test',
       description: 'test',
       options: {
-        authRequired: true,
         tags: ['oas:test'],
         timeout: { payload: 60_000, idleSocket: 10_000 },
         xsrfRequired: false,
@@ -281,7 +280,6 @@ describe('Versioned route', () => {
       method: 'post',
       options: {
         access: 'internal',
-        authRequired: true,
         excludeFromOAS: true,
         httpResource: true,
         tags: ['oas:test'],
@@ -667,6 +665,7 @@ describe('Versioned route', () => {
       },
       authc: {
         enabled: 'optional',
+        reason: 'Authentication is optional',
       },
     };
     const securityConfig2: RouteSecurity = {
@@ -813,6 +812,7 @@ describe('Versioned route', () => {
       },
       authc: {
         enabled: 'optional',
+        reason: 'Authentication is optional',
       },
     };
 
@@ -863,6 +863,7 @@ describe('Versioned route', () => {
       },
       authc: {
         enabled: 'optional',
+        reason: 'Authentication is optional',
       },
     };
 
@@ -888,7 +889,7 @@ describe('Versioned route', () => {
     // @ts-expect-error for test purpose
     const security = route.getSecurity({ headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' } });
 
-    expect(security.authc).toEqual({ enabled: 'optional' });
+    expect(security.authc).toEqual({ enabled: 'optional', reason: 'Authentication is optional' });
 
     expect(security.authz).toEqual({ requiredPrivileges: ['foo', 'bar'] });
   });

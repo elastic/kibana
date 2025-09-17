@@ -53,7 +53,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           return res.ok({ body: { req: String(req) } });
@@ -75,7 +74,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           return res.ok({ body: { req: JSON.stringify(req) } });
@@ -112,7 +110,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           return res.ok({ body: { req: inspect(req) } });
@@ -161,7 +158,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
@@ -184,7 +180,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
@@ -208,7 +203,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
@@ -233,7 +227,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
@@ -256,7 +249,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
@@ -282,7 +274,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;

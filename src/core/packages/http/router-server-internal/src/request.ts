@@ -325,7 +325,7 @@ export class CoreKibanaRequest<
     );
   }
 
-  private getAuthRequired(request: RawRequest): boolean | 'optional' {
+  private getAuthRequired(request: RawRequest): boolean {
     if (isFakeRawRequest(request)) {
       return true;
     }
@@ -334,7 +334,7 @@ export class CoreKibanaRequest<
     if (typeof authOptions === 'object') {
       // 'try' is used in the legacy platform
       if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
-        return 'optional';
+        return false;
       }
       if (authOptions.mode === 'required') {
         return true;

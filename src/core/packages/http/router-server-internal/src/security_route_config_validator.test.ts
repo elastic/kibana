@@ -8,7 +8,8 @@
  */
 
 import { validRouteSecurity } from './security_route_config_validator';
-import { ReservedPrivilegesSet } from '@kbn/core-http-server';
+import { ReservedPrivilegesSet, type RouteSecurity } from '@kbn/core-http-server';
+import type { DeepPartial } from '@kbn/utility-types';
 
 describe('RouteSecurity validation', () => {
   it('should pass validation for valid route security with authz enabled and valid required privileges', () => {
@@ -19,6 +20,7 @@ describe('RouteSecurity validation', () => {
         },
         authc: {
           enabled: 'optional',
+          reason: 'Authentication is optional',
         },
       })
     ).not.toThrow();
@@ -176,6 +178,23 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation when authc is optional but reason is missing', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: ['read'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    expect(() =>
+      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authc.reason]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
   it('should fail validation when authc is provided in multiple configs', () => {
     const routeSecurity = {
       authz: {
@@ -201,6 +220,7 @@ describe('RouteSecurity validation', () => {
         },
         authc: {
           enabled: 'optional',
+          reason: 'Authentication is optional',
         },
       })
     ).not.toThrow();

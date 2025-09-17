@@ -803,7 +803,7 @@ describe('Auth', () => {
     registerAuth(authenticate);
 
     await server.start();
-    await supertest(innerServer.listener).get('/').expect(200, { authRequired: true });
+    await supertest(innerServer.listener).get('/').expect(200);
 
     expect(authenticate).toHaveBeenCalledTimes(1);
   });
@@ -829,29 +829,6 @@ describe('Auth', () => {
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: false });
 
     expect(authenticate).toHaveBeenCalledTimes(0);
-  });
-
-  test('supports enabling auth for a route explicitly', async () => {
-    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    router.get(
-      {
-        path: '/',
-        validate: false,
-        security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: true },
-      },
-      (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
-    );
-
-    const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated({}));
-    await registerAuth(authenticate);
-
-    await server.start();
-    await supertest(innerServer.listener).get('/').expect(200, { authRequired: true });
-
-    expect(authenticate).toHaveBeenCalledTimes(1);
   });
 
   it('supports rejecting a request from an unauthenticated user', async () => {

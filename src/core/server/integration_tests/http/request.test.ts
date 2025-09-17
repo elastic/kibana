@@ -52,7 +52,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -62,16 +61,18 @@ describe('KibanaRequest', () => {
           isAuthenticated: false,
         });
       });
-      it('returns false if not authenticated on a route with authRequired: "optional"', async () => {
+      it('returns false if not authenticated on a route with security.authc.enabled: "optional"', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.notHandled());
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: { enabled: 'optional', reason: '' },
+              authz: { enabled: false, reason: '' },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -81,16 +82,18 @@ describe('KibanaRequest', () => {
           isAuthenticated: false,
         });
       });
-      it('returns false if redirected on a route with authRequired: "optional"', async () => {
+      it('returns false if redirected on a route with security.authc.enabled: "optional"', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.redirected({ location: '/any' }));
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: { enabled: 'optional', reason: '' },
+              authz: { enabled: false, reason: '' },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -100,16 +103,18 @@ describe('KibanaRequest', () => {
           isAuthenticated: false,
         });
       });
-      it('returns true if authenticated on a route with authRequired: "optional"', async () => {
+      it('returns true if authenticated on a route with security.authc.enabled: "optional"', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: { enabled: 'optional', reason: '' },
+              authz: { enabled: false, reason: '' },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -128,7 +133,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -162,43 +166,25 @@ describe('KibanaRequest', () => {
           authRequired: false,
         });
       });
-      it('returns "optional" if a route configured with "authRequired": optional', async () => {
+      it('returns "optional" if a route configured with "security.authc.enabled": optional', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: { enabled: 'optional', reason: '' },
+              authz: { enabled: false, reason: '' },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
-          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+          (context, req, res) =>
+            res.ok({ body: { authMode: req.route.options.security?.authc?.enabled } })
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
-          authRequired: 'optional',
-        });
-      });
-      it('returns true if a route configured with "authRequired": true', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
-        registerAuth((req, res, t) => t.authenticated());
-        const router = createRouter('/');
-        router.get(
-          {
-            path: '/',
-            security: { authz: { enabled: false, reason: '' } },
-            validate: false,
-            options: { authRequired: true },
-          },
-          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
-        );
-        await server.start();
-
-        await supertest(innerServer.listener).get('/').expect(200, {
-          authRequired: true,
-        });
+        await supertest(innerServer.listener).get('/').expect(200, { authMode: 'optional' });
       });
     });
   });

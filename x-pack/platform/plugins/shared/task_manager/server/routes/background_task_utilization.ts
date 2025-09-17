@@ -113,10 +113,19 @@ export function backgroundTaskUtilizationRoute(
       {
         path: `/${routeOption.basePath}/task_manager/_background_task_utilization`,
         security: {
+          authc: {
+            ...(routeOption.isAuthenticated === false
+              ? {
+                  enabled: false,
+                  reason:
+                    'If `xpack.task_manager.unsafe.authenticate_background_task_utilization` is set to `false`, this route should return background task utilization information for the unauthenticated requests.',
+                }
+              : { enabled: true }),
+          },
           authz: {
             enabled: false,
             reason:
-              'This route is opted out from authorization. It can be accessed with JWT credentials.',
+              'Unauthenticated requests get a reduced version of background task utilization information, while authenticated ones can get extended version with authorization handled by the ES client.',
           },
         },
         // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
@@ -128,7 +137,6 @@ export function backgroundTaskUtilizationRoute(
         validate: false,
         options: {
           access: 'public', // access must be public to allow "system" users, like metrics collectors, to access these routes
-          authRequired: routeOption.isAuthenticated ?? true,
           // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
           // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
           tags: ['security:acceptJWT'],

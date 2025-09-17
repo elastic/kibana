@@ -156,7 +156,7 @@ describe('CoreApp', () => {
       );
     });
 
-    it('is registered with `authRequired: true` is the status page is not anonymous', async () => {
+    it('is registered with `security.authc.enabled: true` is the status page is not anonymous', async () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(false);
       await coreApp.setup(internalCoreSetup, emptyPlugins());
 

@@ -30,7 +30,16 @@ describe('registerBootstrapRoute', () => {
           access: 'public',
           excludeFromRateLimiter: true,
           tags: ['api'],
-          authRequired: 'optional',
+        },
+        security: {
+          authc: {
+            enabled: 'optional',
+            reason: expect.any(String),
+          },
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
         },
       }),
       expect.any(Function)

@@ -84,13 +84,13 @@ export interface AuthToolkit {
   authenticated: (data?: AuthResultParams) => AuthResult;
   /**
    * User has no credentials.
-   * Allows user to access a resource when authRequired is 'optional'
-   * Rejects a request when authRequired: true
+   * Allows user to access a resource when authentication is 'optional'
+   * Rejects a request when authentication is required.
    * */
   notHandled: () => AuthResult;
   /**
-   * Redirects user to another location to complete authentication when authRequired: true
-   * Allows user to access a resource without redirection when authRequired: 'optional'
+   * Redirects user to another location to complete authentication when authentication is required.
+   * Allows user to access a resource without redirection when authentication is optional.
    * */
   redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;
 }
