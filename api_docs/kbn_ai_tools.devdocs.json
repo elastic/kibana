@@ -1262,7 +1262,13 @@
             "text": "ToolCall"
           },
           "<string, {}>, ",
-          "ToolCallbackResult",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallbackResult",
+            "text": "ToolCallbackResult"
+          },
           ">; } | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
@@ -2436,7 +2442,13 @@
                     "text": "ToolCall"
                   },
                   "<string, {}>, ",
-                  "ToolCallbackResult",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ToolCallbackResult",
+                    "text": "ToolCallbackResult"
+                  },
                   ">; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
