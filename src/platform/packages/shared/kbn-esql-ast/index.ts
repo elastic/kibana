@@ -40,7 +40,6 @@ export {
   createParser,
   parse,
   Parser,
-  parseErrors,
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
