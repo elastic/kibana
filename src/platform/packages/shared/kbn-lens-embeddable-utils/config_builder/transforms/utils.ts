@@ -118,18 +118,33 @@ export const getAdhocDataviews = (dataviews: Record<string, { index: string, tim
  * @param layer Lens State Layer
  * @returns Lens API Dataset configuration
  */
-export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
+export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, config: LensAttributes, layerId: string) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
       query: layer.query?.esql ?? '',
     };
   }
+
+  const reference = config.references.find((ref) => ref.name === `indexpattern-datasource-${layerId}`);
+  if (reference) {
+    if (config.state.adHocDataViews?.[reference.id]) {
+      return {
+        type: 'index',
+        index: config.state.adHocDataViews[reference.id].title!,
+        time_field: config.state.adHocDataViews[reference.id].timeFieldName,
+      };
+    } 
+    return {
+      type: 'dataView',
+      name: reference.id,
+    };
+  }
+
   return {
-    type: 'index',
-    index: layer.indexPatternId,
-    time_field: '@timestamp',
-  };
+    type: 'dataView',
+    name: layer.indexPatternId
+  }
 };
 
 // builds Lens State references from list of dataviews

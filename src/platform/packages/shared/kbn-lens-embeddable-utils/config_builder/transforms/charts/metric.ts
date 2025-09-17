@@ -118,13 +118,14 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer
+  layer: FormBasedLayer | TextBasedLayer,
+  config: LensAttributes
 ): MetricState {
   if (visualization.metricAccessor === undefined) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer);
+  const dataset = buildDatasetState(layer, config, 'layer_0');
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 
@@ -378,29 +379,9 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
   };
 }
 
-const injectReferences = (config: LensAttributes) => {
-  const { references } = config;
-  for (const ref of references) {
-    if (ref.type === 'index-pattern') {
-      const layerId = ref.name.split('-').pop()!;
-      const { layers } = config.state.datasourceStates.formBased || { layers: {}};
-      if (layers[layerId]) {
-        if (config.state.adHocDataViews?.[ref.id]) {
-            // @ts-expect-error: IndexPatternId does not exist on this property
-            layers[layerId].indexPatternId = config.state.adHocDataViews[ref.id].title;
-        } else {
-          // @ts-expect-error: IndexPatternId does not exist on this property
-          layers[layerId].indexPatternId = ref.id;
-        }
-      }
-    }
-  }
-};
-
 export function fromLensStateToAPI(
   config: LensAttributes
 ): Extract<LensApiState, { type: 'metric' }> {
-  injectReferences(config);
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
   const layers =
@@ -411,7 +392,7 @@ export function fromLensStateToAPI(
   const visualizationState = {
     title: config.title,
     description: config.description ?? '',
-    ...reverseBuildVisualizationState(visualization, layer),
+    ...reverseBuildVisualizationState(visualization, layer, config),
   };
 
   return visualizationState;
