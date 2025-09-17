@@ -100,7 +100,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <FieldIcon {...iconProps} />
+          <FieldIcon {...iconProps} data-test-subj={`fieldPopoverHeader_icon-${field.name}`} />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiTitle size="xxs" data-test-subj="fieldPopoverHeader_fieldDisplayName">
