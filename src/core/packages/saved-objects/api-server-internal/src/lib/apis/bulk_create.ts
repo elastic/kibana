@@ -55,6 +55,7 @@ type ExpectedResult = Either<
       accessControl?: SavedObjectAccessControl;
     };
     preflightCheckIndex?: number;
+    accessControlPreflightIndex?: number;
   }
 >;
 
@@ -93,6 +94,7 @@ export const performBulkCreate = async <T>(
   const updatedBy = createdBy;
 
   let preflightCheckIndexCounter = 0;
+  let accessControlPreflightIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
     let error: DecoratedError | undefined;
@@ -154,6 +156,10 @@ export const performBulkCreate = async <T>(
         accessControl: accessControlToWrite,
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
+      ...(overwrite &&
+        typeSupportsAccessControl && {
+          accessControlPreflightIndex: accessControlPreflightIndexCounter++,
+        }),
     }) as ExpectedResult;
   });
 
@@ -180,9 +186,35 @@ export const performBulkCreate = async <T>(
     preflightCheckObjects
   );
 
+  const accessControlPreflightObjects = validObjects
+    .filter(({ value }) => value.accessControlPreflightIndex !== undefined)
+    .map(({ value }) => {
+      const { type, id, initialNamespaces } = value.object;
+      const namespaces = initialNamespaces ?? [namespaceString];
+      return { type, id, overwrite, namespaces };
+    });
+  const accessControlPreflightResponse = await preflightHelper.accessControlPreflightCheck(
+    accessControlPreflightObjects,
+    namespace
+  );
+
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
-    const { object, preflightCheckIndex: index } = element.value;
-    const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
+    const { object, preflightCheckIndex, accessControlPreflightIndex } = element.value;
+
+    const preflightResult =
+      preflightCheckIndex !== undefined ? preflightCheckResponse[preflightCheckIndex] : undefined;
+
+    const AccessControlPreflightResult =
+      accessControlPreflightIndex !== undefined
+        ? accessControlPreflightResponse?.body.docs[accessControlPreflightIndex]
+        : undefined;
+
+    // ToDo: replace this ts expect error
+    // @ts-expect-error MultiGetHit._source is optional
+    const existingAccessControl = AccessControlPreflightResult?._source?.accessControl;
+    if (existingAccessControl) {
+      object.accessControl = existingAccessControl as SavedObjectAccessControl;
+    }
 
     return {
       type: object.type,
@@ -194,7 +226,6 @@ export const performBulkCreate = async <T>(
     };
   });
 
-  // ToDo: need to pass in overwrite flag to check owned objects!
   const authorizationResult = await securityExtension?.authorizeBulkCreate({
     namespace,
     objects: authObjects,

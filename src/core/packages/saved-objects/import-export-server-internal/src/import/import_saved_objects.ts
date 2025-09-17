@@ -174,7 +174,8 @@ export async function importSavedObjectsFromStream({
 
     // ToDo: check access control conflicts
     // This should look like the above check conflict functions, but it would check for overwrites to any objects owned by someone other than the current user
-    // The alternative is to let this fall through to the create operation and have the import fail there, which I think is fine for now
+    // It would be nice to work this into the check conflicts API
+    // The alternative is to let this fall through to the create operation and have the import fail there, but this is not ideal
   }
 
   // Create objects in bulk

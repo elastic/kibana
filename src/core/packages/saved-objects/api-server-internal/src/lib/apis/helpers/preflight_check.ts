@@ -29,6 +29,10 @@ import {
   preflightCheckForCreate,
   PreflightCheckForCreateObject,
 } from '../internals/preflight_check_for_create';
+import {
+  AccessControlPreflightObject,
+  accessControlPreflightCheck,
+} from '../internals/preflight_check_access_control';
 
 export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;
 
@@ -67,6 +71,19 @@ export class PreflightCheckHelper {
       serializer: this.serializer,
       getIndexForType: this.getIndexForType.bind(this),
       createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+    });
+  }
+
+  public async accessControlPreflightCheck(
+    objects: AccessControlPreflightObject[],
+    namespace: string | undefined
+  ) {
+    return await accessControlPreflightCheck({
+      objects,
+      client: this.client,
+      serializer: this.serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      namespace,
     });
   }
 

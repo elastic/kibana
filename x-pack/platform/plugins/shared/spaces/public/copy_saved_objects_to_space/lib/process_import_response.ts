@@ -6,6 +6,7 @@
  */
 
 import type {
+  SavedObjectsImportAccessControlConflict,
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
   SavedObjectsImportFailure,
@@ -29,7 +30,8 @@ export interface FailedImport {
     | SavedObjectsImportUnknownError
     | SavedObjectsImportMissingAccessControlMetadataError
     | SavedObjectsImportRequiresProfileIdError
-    | SavedObjectsImportUnexpectedAccessControlMetadataError;
+    | SavedObjectsImportUnexpectedAccessControlMetadataError
+    | SavedObjectsImportAccessControlConflict;
 }
 
 export interface ProcessedImportResponse {

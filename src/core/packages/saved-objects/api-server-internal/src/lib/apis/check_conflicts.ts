@@ -110,13 +110,14 @@ export const performCheckConflicts = async <T>(
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
     if (isMgetDoc(doc) && doc.found) {
+      // Check here for access control??
       errors.push({
         id,
         type,
         error: {
           ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
           ...(!rawDocExistsInNamespace(registry, doc! as SavedObjectsRawDoc, namespace) && {
-            metadata: { isNotOverwritable: true },
+            metadata: { isNotOverwritable: true }, // is also unoverwritable if owned by another user and current user does not have manage_access_control in this space
           }),
         },
       });

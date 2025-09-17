@@ -203,6 +203,7 @@ export type {
   SavedObjectsImportMissingAccessControlMetadataError,
   SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
+  SavedObjectsImportAccessControlConflict,
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,

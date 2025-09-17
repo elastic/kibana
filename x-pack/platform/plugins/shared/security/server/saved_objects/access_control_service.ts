@@ -35,6 +35,9 @@ export class AccessControlService {
     const typesRequiringCheck = new Set<string>();
 
     for (const obj of objects) {
+      // ToDo: This logic behaves strangely if accessControl.mode is undefined, which for some reason it can be?
+      // Is this due to the overuse of ts expect error?
+      // Shouldn't we only need to check that accessControl is defined?
       if (
         typeRegistry.supportsAccessControl(obj.type) &&
         obj.accessControl?.accessMode === 'read_only' &&
