@@ -130,6 +130,13 @@ export class MetricsService
       const { message, meta } = getEcsOpsMetricsLog(metrics);
       this.opsMetricsLogger.debug(message!, meta);
     }
+    if (this.eluLogger.isLevelEnabled('debug')) {
+      const elu = this.elu$.value;
+      const eluAverage = (elu.short + elu.medium + elu.long) / 3;
+      this.eluLogger.debug(
+        `ELU short:${elu.short} medium:${elu.medium} long:${elu.long} average: ${eluAverage}`
+      );
+    }
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }
