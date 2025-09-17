@@ -15,7 +15,7 @@ import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
-  onSubmit: () => void;
+  onSubmit?: () => void;
 }
 
 const fullHeightStyles = css`
@@ -35,7 +35,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     }
     sendMessage({ message: input });
     setInput('');
-    onSubmit();
+    onSubmit?.();
   };
 
   const formContainerStyles = css`

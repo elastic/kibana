@@ -77,7 +77,7 @@ export const Conversation: React.FC<{}> = () => {
   `;
 
   if (!hasActiveConversation) {
-    return <NewConversationPrompt onConversationStart={scrollToMostRecentRoundTop} />;
+    return <NewConversationPrompt />;
   }
 
   return (

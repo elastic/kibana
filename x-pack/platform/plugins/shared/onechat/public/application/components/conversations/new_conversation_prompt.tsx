@@ -239,9 +239,7 @@ const WithMarginsContainer: React.FC<{ children: ReactNode }> = ({ children }) =
   <div css={withMarginContainerStyles}>{children}</div>
 );
 
-export const NewConversationPrompt: React.FC<{ onConversationStart: () => void }> = ({
-  onConversationStart,
-}) => {
+export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const centerColumnWidth = useConversationGridCenterColumnWidth();
   const inputRowHeight = `calc(${euiTheme.size.l} * 7)`;
@@ -258,7 +256,7 @@ export const NewConversationPrompt: React.FC<{ onConversationStart: () => void }
           <WelcomeText />
         </MainContainer>
         <WithMarginsContainer>
-          <ConversationInputForm onSubmit={onConversationStart} />
+          <ConversationInputForm />
         </WithMarginsContainer>
         <WithMarginsContainer>
           <QuickNavigationCards />
