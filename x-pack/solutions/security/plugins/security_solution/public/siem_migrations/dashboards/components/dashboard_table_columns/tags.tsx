@@ -39,7 +39,7 @@ export const createTagsColumn = (): TableColumn => {
     },
     sortable: false,
     truncateText: true,
-    align: 'center',
+    align: 'left',
     width: '20%',
   };
 };
