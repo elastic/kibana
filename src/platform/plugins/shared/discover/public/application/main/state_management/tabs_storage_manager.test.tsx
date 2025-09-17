@@ -683,4 +683,50 @@ describe('TabsStorageManager', () => {
     expect(loadedProps.selectedTabId).toBe(persistedTabId);
     expect(loadedProps.allTabs.find((t) => t.id === mockTab1.id)).toBeUndefined();
   });
+
+  it('should load tabs state from local storage and append a new tab', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+    jest.spyOn(urlStateStorage, 'get');
+    jest.spyOn(storage, 'get');
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, {
+      tabId: 'new',
+      tabLabel: 'New tab test',
+    });
+
+    jest.spyOn(urlStateStorage, 'set');
+    jest.spyOn(storage, 'set');
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.recentlyClosedTabs).toEqual([toRestoredTab(mockRecentlyClosedTab)]);
+    expect(loadedProps.allTabs).toHaveLength(3);
+    expect(loadedProps.allTabs[0]).toEqual(toRestoredTab(mockTab1));
+    expect(loadedProps.allTabs[1]).toEqual(toRestoredTab(mockTab2));
+    expect(loadedProps.allTabs[2]).toEqual(
+      expect.objectContaining({
+        label: 'New tab test',
+      })
+    );
+    expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[2].id);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
+    expect(urlStateStorage.set).not.toHaveBeenCalled();
+    expect(storage.set).not.toHaveBeenCalled();
+  });
 });
