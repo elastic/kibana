@@ -14,7 +14,6 @@ import {
   type FtrConfigProvider,
   type FtrConfigProviderContext,
   defineDockerServersConfig,
-  dockerRegistryPort,
   packageRegistryDocker,
 } from '@kbn/test';
 import { v4 as uuidV4 } from 'uuid';
