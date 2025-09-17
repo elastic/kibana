@@ -179,6 +179,6 @@ describe('formatValidationError', () => {
       })
       .safeParse({ steps: [{ type: 'invalid' }] });
     const result = formatValidationError(error!);
-    expect(result.message).toBe('Invalid connector type. Available: noop');
+    expect(result.message).toBe('Invalid connector type. Use Ctrl+Space to see available options.');
   });
 });

@@ -290,7 +290,7 @@ export class WorkflowsService {
             parsedYaml.error.formattedZodError
           ) {
             validationErrors.push(
-              ...parsedYaml.error.formattedZodError?.issues.map((error) => error.message)
+              ...parsedYaml.error.formattedZodError.issues.map((error) => error.message)
             );
           } else {
             validationErrors.push(parsedYaml.error.message);

@@ -9,9 +9,21 @@
 
 import type { ZodIssue } from '@kbn/zod';
 
+export interface MockZodIssue {
+  code: 'invalid_literal' | 'unknown';
+  message: string;
+  path: string[];
+  received: string;
+}
+
+export interface MockZodError {
+  message: string;
+  issues: MockZodIssue[];
+}
+
 export interface FormattedZodError {
   message: string;
-  issues: ZodIssue[];
+  issues: ZodIssue[] | MockZodIssue[];
 }
 
 export class InvalidYamlSchemaError extends Error {

@@ -23,7 +23,7 @@ import {
   visit,
 } from 'yaml';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
-import type { FormattedZodError } from './errors/invalid_yaml_schema';
+import type { FormattedZodError, MockZodError } from './errors/invalid_yaml_schema';
 
 interface FormatValidationErrorResult {
   message: string;
@@ -34,7 +34,7 @@ interface FormatValidationErrorResult {
  * Custom error message formatter for Zod validation errors
  * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
  */
-export function formatValidationError(error: ZodError): FormatValidationErrorResult {
+export function formatValidationError(error: ZodError | MockZodError): FormatValidationErrorResult {
   // If it's not a Zod error structure, return as-is
   if (!error?.issues || !Array.isArray(error.issues)) {
     const message = error?.message || String(error);
@@ -98,7 +98,7 @@ export function formatValidationError(error: ZodError): FormatValidationErrorRes
 
   return {
     message: formattedError.message,
-    formattedError,
+    formattedError: formattedError as FormattedZodError,
   };
 }
 
