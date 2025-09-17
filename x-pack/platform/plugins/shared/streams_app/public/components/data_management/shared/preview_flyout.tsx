@@ -11,7 +11,6 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import useAsync from 'react-use/lib/useAsync';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
@@ -24,13 +23,14 @@ export const PreviewFlyout = ({
   hits,
   setExpandedDoc,
   docViewsRegistry,
+  streamName,
 }: {
   currentDoc?: DataTableRecordWithIndex;
   hits: DataTableRecordWithIndex[];
   setExpandedDoc: (doc?: DataTableRecordWithIndex) => void;
   docViewsRegistry: DocViewsRegistry;
+  streamName: string;
 }) => {
-  const streamName = useSimulatorSelector((state) => state.context.streamName);
   const { core, dependencies } = useKibana();
   const { data } = dependencies.start;
 
