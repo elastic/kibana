@@ -61,7 +61,7 @@ export const McpConnectionButton = () => {
             )}
           </EuiCopy>,
 
-          <EuiContextMenuItem key="documentation" icon="popout" href="#">
+          <EuiContextMenuItem key="documentation" href="#" target="_blank">
             {i18n.translate('xpack.onechat.tools.aboutMcpServerDocumentationButton', {
               defaultMessage: 'Documentation',
             })}
