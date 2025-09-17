@@ -6,6 +6,7 @@
  */
 
 import type { ToolDefinition } from './definition';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export type ToolSelectionRelevantFields = Pick<ToolDefinition, 'id'>;
 
@@ -43,7 +44,14 @@ export interface ByIdsToolSelection {
 /**
  * All possible subtypes for tool selection - for now there is only one.
  */
-export type ToolSelection = ByIdsToolSelection;
+
+export const TOOL_SELECTION_SCHEMA = schema.arrayOf(
+  schema.object({
+    tool_ids: schema.arrayOf(schema.string()),
+  })
+);
+
+export type ToolSelection = TypeOf<typeof TOOL_SELECTION_SCHEMA>;
 
 /**
  * Check if a given {@link ToolSelection} is a {@link ByIdsToolSelection}

@@ -22,6 +22,8 @@ import type {
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
+import { TOOL_DEFINITION_WITH_SCHEMA_SCHEMA } from '@kbn/onechat-common/tools/constants';
+import { TOOL_RESULT_SCHEMA } from '@kbn/onechat-common/tools/tool_result';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
 
@@ -46,7 +48,15 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
     })
     .addVersion(
-      { version: '2023-10-31', validate: false },
+      { version: '2023-10-31', validate: {
+        response: {
+          200: {
+            body: () => schema.object({ 
+              results: schema.arrayOf(TOOL_DEFINITION_WITH_SCHEMA_SCHEMA)
+            })
+          }
+        }
+      } },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -85,6 +95,11 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               id: schema.string(),
             }),
           },
+          response: {
+            200: {
+              body: () => schema.arrayOf(TOOL_DEFINITION_WITH_SCHEMA_SCHEMA)
+            }
+          }
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -129,6 +144,11 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               // actual config validation is done in the tool service
               configuration: schema.recordOf(schema.string(), schema.any()),
             }),
+          },
+          response: {
+            200: {
+              body: () => schema.arrayOf(TOOL_DEFINITION_WITH_SCHEMA_SCHEMA)
+            }
           },
         },
       },
@@ -175,6 +195,11 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               configuration: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             }),
           },
+          response: {
+            200: {
+              body: () => schema.arrayOf(TOOL_DEFINITION_WITH_SCHEMA_SCHEMA)
+            }
+          },
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -215,6 +240,13 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               id: schema.string(),
             }),
           },
+          response: {
+            200: {
+              body: () => schema.object({
+                success: schema.boolean()
+              })
+            }
+          },
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -252,6 +284,16 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               tool_id: schema.string({}),
               tool_params: schema.recordOf(schema.string(), schema.any()),
             }),
+          },
+          response: {
+            200: {
+              body: () => schema.object({
+                results: schema.arrayOf(TOOL_RESULT_SCHEMA)
+              })
+            },
+            400: {
+              body: () => schema.object({message: schema.string()})
+            }
           },
         },
       },

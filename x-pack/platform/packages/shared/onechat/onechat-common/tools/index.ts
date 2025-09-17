@@ -22,6 +22,7 @@ export {
   filterToolsBySelection,
   allToolsSelectionWildcard,
   allToolsSelection,
+  TOOL_SELECTION_SCHEMA,
 } from './tool_selection';
 export {
   type EsqlToolConfig,
