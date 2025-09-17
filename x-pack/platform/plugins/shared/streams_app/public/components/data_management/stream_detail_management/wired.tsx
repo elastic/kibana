@@ -144,5 +144,5 @@ export function WiredStreamDetailManagement({
     return null;
   }
 
-  <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
+  <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />;
 }
