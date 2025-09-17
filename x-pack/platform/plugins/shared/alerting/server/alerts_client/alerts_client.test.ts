@@ -522,7 +522,7 @@ describe('Alerts Client', () => {
             },
             ignore_unavailable: true,
             size: 20,
-            sort: [{ [ALERT_START]: { order: 'desc' } }],
+            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
           });
 
           spy.mockRestore();

@@ -16,8 +16,8 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
-  ALERT_START,
   ALERT_STATUS_UNTRACKED,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -204,7 +204,7 @@ export class AlertsClient<
               size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
             },
           },
-          sort: [{ [ALERT_START]: { order: 'desc' } }],
+          sort: [{ [TIMESTAMP]: { order: 'desc' } }],
         });
         return result.hits.map((hit) => hit.inner_hits?.alerts.hits.hits || []).flat();
       };
