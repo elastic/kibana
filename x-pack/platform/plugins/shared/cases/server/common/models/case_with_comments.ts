@@ -46,6 +46,7 @@ import {
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
+import { intersection } from 'lodash';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
@@ -252,7 +253,7 @@ export class CaseCommentModel {
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
-      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedEvents([
+      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedAttachments([
         { ...commentReq, id },
       ]);
 
@@ -294,7 +295,7 @@ export class CaseCommentModel {
     }
   }
 
-  private async filterDuplicatedEvents(
+  private async filterDuplicatedAttachments(
     attachments: CommentRequestWithId
   ): Promise<CommentRequestWithId> {
     /**
@@ -355,8 +356,8 @@ export class CaseCommentModel {
       if (isCommentRequestTypeEvent(attachment)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
 
-        // do not allow adding events already present in the case
-        if (eventsAttachedToCase.intersection(new Set(ids)).size) {
+        // filter out events already present in the case
+        if (intersection(Array.from(eventsAttachedToCase), ids).length) {
           return;
         }
 
@@ -538,7 +539,7 @@ export class CaseCommentModel {
     try {
       await this.validateCreateCommentRequest(attachments);
 
-      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedEvents(attachments);
+      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAttachments(attachments);
 
       if (attachmentWithoutDuplicateAlerts.length === 0) {
         return this;
