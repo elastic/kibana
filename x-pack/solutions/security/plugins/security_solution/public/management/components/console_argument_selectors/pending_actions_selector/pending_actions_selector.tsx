@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -115,24 +116,45 @@ export const PendingActionsSelector = memo<
 
       const content = (
         <div data-test-subj={testId('script')}>
-          <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
-            <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
-          </EuiText>
-          {hasDescription ? (
-            <EuiToolTip position="right" content={descriptionText}>
-              <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
-                <small css={SHARED_TRUNCATION_STYLE}>{descriptionText}</small>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
+                <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
               </EuiText>
-            </EuiToolTip>
-          ) : null}
+              {hasDescription ? (
+                <EuiText
+                  data-test-subj={`${option.label}-description`}
+                  color="subdued"
+                  size="s"
+                  css={{
+                    width: '100%',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  <small>{descriptionText}</small>
+                </EuiText>
+              ) : null}
+            </EuiFlexItem>
+            {option.disabled && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type="lock"
+                  size="s"
+                  color="subdued"
+                  data-test-subj={`${option.label}-disabled-icon`}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </div>
       );
 
-      // If the option has toolTipContent (typically for disabled options), wrap in tooltip
-      if (hasToolTipContent) {
+      // Single tooltip for entire disabled item
+      if (option.disabled) {
         return (
-          <EuiToolTip position="right" content={toolTipText}>
-            {content}
+          <EuiToolTip position="right" content={toolTipText} display="block">
+            <div style={{ cursor: 'not-allowed' }}>{content}</div>
           </EuiToolTip>
         );
       }
@@ -183,7 +205,7 @@ export const PendingActionsSelector = memo<
           listProps={{
             rowHeight: PENDING_ACTIONS_CONFIG.rowHeight,
             showIcons: true,
-            textWrap: 'truncate',
+            textWrap: 'wrap',
           }}
           errorMessage={
             error ? (

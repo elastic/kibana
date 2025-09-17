@@ -193,7 +193,6 @@ export const usePendingActionsOptions = ({
         data: action,
         checked: isChecked ? 'on' : undefined,
         disabled: isDisabled,
-        toolTipContent: isDisabled ? permissionCheck.reason : undefined,
       };
     });
   }, [response, selectedValue, privilegeChecker, dateFormat, timeZone]);
