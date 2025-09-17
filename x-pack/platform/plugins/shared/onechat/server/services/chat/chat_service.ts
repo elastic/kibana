@@ -19,6 +19,7 @@ import {
   throwError,
   map,
   take,
+  EMPTY,
 } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -188,10 +189,16 @@ class ChatServiceImpl implements ChatService {
             conversationClient,
           });
 
-          // Extract the ID from the conversation and emit the event
-          const conversationIdSetEvent$ = conversation$.pipe(
-            map((conversation) => createConversationIdSetEvent(conversation.id)),
-            take(1)
+          // Extract the ID from the conversation and emit the event ONLY for new conversations
+          const conversationIdSetEvent$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? conversation$.pipe(
+                    map((conversation) => createConversationIdSetEvent(conversation.id)),
+                    take(1)
+                  )
+                : EMPTY
+            )
           );
 
           const agentEvents$ = executeAgent$({
