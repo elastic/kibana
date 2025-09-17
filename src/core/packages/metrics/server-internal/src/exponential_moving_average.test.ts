@@ -127,18 +127,18 @@ describe('exponentialMovingAverage', () => {
 
         expectObservable(observable).toBe('abcdefghijklmn|', {
           // First 12 values use mean calculation
-          a: expect.closeTo(0.08, 2), // mean: 1.0 * 5 / 60 = 0.083
-          b: expect.closeTo(0.17, 2), // mean: (1.0 + 1.0) * 5 / 60 = 0.167
-          c: expect.closeTo(0.21, 2), // mean: (1.0 + 1.0 + 0.48) * 5 / 60 = 0.207
-          d: expect.closeTo(0.21, 2), // mean continues...
-          e: expect.closeTo(0.21, 2),
+          a: expect.closeTo(0.083, 3), // mean: 1.0 * 5 / 60 = 0.083
+          b: expect.closeTo(0.167, 3), // mean: (1.0 + 1.0) * 5 / 60 = 0.167
+          c: expect.closeTo(0.207, 3), // mean: (1.0 + 1.0 + 0.48) * 5 / 60 = 0.207
+          d: expect.closeTo(0.209, 3), // mean continues...
+          e: expect.closeTo(0.212, 3),
           f: expect.closeTo(0.22, 2),
-          g: expect.closeTo(0.22, 2),
-          h: expect.closeTo(0.22, 2),
-          i: expect.closeTo(0.22, 2),
-          j: expect.closeTo(0.23, 2),
-          k: expect.closeTo(0.23, 2),
-          l: expect.closeTo(0.23, 2),
+          g: expect.closeTo(0.222, 3),
+          h: expect.closeTo(0.226, 3),
+          i: expect.closeTo(0.229, 3),
+          j: expect.closeTo(0.234, 3),
+          k: expect.closeTo(0.237, 3),
+          l: expect.closeTo(0.238, 3),
           // 13th value switches to EMA - takes current value directly
           m: 0.1,
           // 14th value uses EMA calculation
@@ -181,10 +181,10 @@ describe('exponentialMovingAverage', () => {
           b: expect.closeTo(0.013, 3), // mean: (0.02 + 0.02) * 5 / 15 = 0.013
           c: expect.closeTo(0.02, 3), // mean: (0.02 + 0.02 + 0.02) * 5 / 15 = 0.02
           d: 0.48, // switch point for short window
-          e: expect.closeTo(0.344, 3), // EMA: alpha=0.283, previous=0.48, current=0.03
-          f: expect.closeTo(0.253, 3), // EMA: alpha=0.283, previous=0.344, current=0.03
-          g: expect.closeTo(0.186, 3), // EMA: alpha=0.283, previous=0.253, current=0.02
-          h: expect.closeTo(0.138, 3), // EMA: alpha=0.283, previous=0.186, current=0.02
+          e: expect.closeTo(0.352, 3), // EMA: alpha=0.283, previous=0.48, current=0.03
+          f: expect.closeTo(0.261, 3), // EMA: alpha=0.283, previous=0.352, current=0.03
+          g: expect.closeTo(0.193, 3), // EMA: alpha=0.283, previous=0.261, current=0.02
+          h: expect.closeTo(0.144, 3), // EMA: alpha=0.283, previous=0.193, current=0.02
         });
 
         expectObservable(longWindow).toBe(values, {
