@@ -27,10 +27,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { ContentPackObjectsList } from './objects_list';
 import { previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';
-import { hasSelectedObjects } from './helpers';
+import { hasSelectedObjects, isEmptyContentPack } from './helpers';
 
 export function ExportContentPackFlyout({
   definition,
@@ -51,6 +52,10 @@ export function ExportContentPackFlyout({
       },
     },
   } = useKibana();
+
+  const {
+    features: { significantEvents },
+  } = useStreamsPrivileges();
 
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
@@ -96,7 +101,7 @@ export function ExportContentPackFlyout({
   );
 
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
-    objects: { queries: [], routing: [] },
+    objects: { all: {} },
   });
   const [isExporting, setIsExporting] = useState(false);
 
@@ -113,25 +118,18 @@ export function ExportContentPackFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {isLoadingContentPack ? (
+        {isLoadingContentPack || !significantEvents ? (
           <EuiLoadingSpinner />
         ) : !exportResponse ? null : exportResponse.contentPack.entries ? (
           <>
-            {manifest ? (
-              <ContentPackMetadata
-                manifest={manifest}
-                onChange={(updatedManifest) => {
-                  setManifest(updatedManifest);
-                }}
-              />
-            ) : null}
+            {manifest ? <ContentPackMetadata manifest={manifest} onChange={setManifest} /> : null}
 
             <EuiSpacer size="xl" />
 
             <ContentPackObjectsList
-              definition={definition}
               objects={exportResponse.contentPack.entries}
-              onSelectionChange={(objects) => setIncludedObjects(objects)}
+              onSelectionChange={setIncludedObjects}
+              significantEventsAvailable={significantEvents.available}
             />
           </>
         ) : null}
@@ -151,7 +149,12 @@ export function ExportContentPackFlyout({
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
               isLoading={isExporting}
-              isDisabled={isLoadingContentPack || !manifest || !hasSelectedObjects(includedObjects)}
+              isDisabled={
+                isLoadingContentPack ||
+                !manifest ||
+                isEmptyContentPack(exportResponse?.contentPack.entries ?? []) ||
+                !hasSelectedObjects(includedObjects)
+              }
               fill
               onClick={async () => {
                 if (!exportResponse || !manifest) {

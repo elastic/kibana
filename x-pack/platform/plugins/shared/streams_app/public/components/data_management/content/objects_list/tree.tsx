@@ -60,6 +60,10 @@ export function StreamTree({
       getAncestors(name).every((ancestor) => rows[ancestor].expanded)
     );
   }, [rows]);
+  const hasDepth = React.useMemo(
+    () => sortedRows.some((row) => getSegments(row.name).length > 1),
+    [sortedRows]
+  );
 
   const selectedCount = Object.values(rows).filter(({ selected }) => selected).length;
 
@@ -172,10 +176,14 @@ export function StreamTree({
               ) : (
                 <EuiFlexItem
                   grow={false}
-                  css={css`
-                    margin-left: 24px;
-                    height: 24px;
-                  `}
+                  css={
+                    hasDepth
+                      ? css`
+                          margin-left: 24px;
+                          height: 24px;
+                        `
+                      : undefined
+                  }
                 />
               )}
 

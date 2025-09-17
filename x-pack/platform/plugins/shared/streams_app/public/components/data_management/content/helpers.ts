@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
+import type {
+  ContentPackEntry,
+  ContentPackIncludedObjects,
+  ContentPackStream,
+} from '@kbn/content-packs-schema';
 import { isIncludeAll } from '@kbn/content-packs-schema';
 
 export function hasSelectedObjects(includedObjects: ContentPackIncludedObjects): boolean {
@@ -18,4 +22,18 @@ export function hasSelectedObjects(includedObjects: ContentPackIncludedObjects):
 
 export function containsAssets(streams: ContentPackStream[]): boolean {
   return streams.some((stream) => stream.request.queries.length > 0);
+}
+
+export function isEmptyContentPack(entries: ContentPackEntry[]): boolean {
+  if (entries.length === 0) {
+    return true;
+  }
+
+  const streams = entries.filter((entry): entry is ContentPackStream => entry.type === 'stream');
+  if (entries.length === streams.length && streams.length === 1) {
+    // only the root stream without assets
+    return streams[0].request.queries.length === 0;
+  }
+
+  return false;
 }

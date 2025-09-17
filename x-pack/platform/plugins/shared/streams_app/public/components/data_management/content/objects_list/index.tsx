@@ -5,53 +5,40 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackStream,
 } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import type { Streams } from '@kbn/streams-schema';
 import { getSegments, isChildOf } from '@kbn/streams-schema';
 import { EuiCheckbox, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { StreamTree } from './tree';
 import { containsAssets } from '../helpers';
 
 export function ContentPackObjectsList({
-  definition,
   objects,
   onSelectionChange,
+  significantEventsAvailable,
 }: {
-  definition: Streams.WiredStream.GetResponse;
   objects: ContentPackEntry[];
   onSelectionChange: (objects: ContentPackIncludedObjects) => void;
+  significantEventsAvailable: boolean;
 }) {
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
-
-  const isSignificantEventsEnabled = !!significantEvents?.available;
-  const [includeAssets, setIncludeAssets] = useState<boolean>(false);
-  const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({});
-
-  useEffect(() => {
-    if (!significantEvents) return;
-
-    const streams = objects.filter((entry): entry is ContentPackStream => entry.type === 'stream');
-    const include = significantEvents.available && containsAssets(streams);
-    const selection = {
-      ...streams.reduce((map, stream) => {
+  const [includeAssets, setIncludeAssets] = useState<boolean>(
+    significantEventsAvailable &&
+      containsAssets(objects.filter((entry): entry is ContentPackStream => entry.type === 'stream'))
+  );
+  const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
+    ...objects
+      .filter((entry): entry is ContentPackStream => entry.type === 'stream')
+      .reduce((map, stream) => {
         map[stream.name] = { selected: true };
         return map;
       }, {} as Record<string, { selected: boolean }>),
-    };
-    setIncludeAssets(include);
-    setSelection(selection);
-    onSelectionChange(toIncludedObjects(selection, streams, include));
-  }, [significantEvents, objects]);
+  });
 
   const { rootEntry, descendants } = useMemo(() => {
     if (objects.length === 0) {
@@ -74,10 +61,10 @@ export function ContentPackObjectsList({
   return !rootEntry ? null : (
     <>
       <EuiFlexGroup alignItems="center" direction="row" gutterSize="s">
-        {isSignificantEventsEnabled ? (
+        {significantEventsAvailable ? (
           <EuiCheckbox
             id="include-all-assets"
-            disabled={!containsAssets([rootEntry, ...descendants])}
+            disabled={!significantEventsAvailable || !containsAssets([rootEntry, ...descendants])}
             checked={includeAssets}
             label={i18n.translate('xpack.streams.contentPackObjectsList.includeAllAssets', {
               defaultMessage:

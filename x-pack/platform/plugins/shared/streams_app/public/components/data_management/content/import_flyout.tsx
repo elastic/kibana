@@ -32,10 +32,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
 import { getFormattedError } from '../../../util/errors';
-import { hasSelectedObjects } from './helpers';
+import { hasSelectedObjects, isEmptyContentPack } from './helpers';
 
 export function ImportContentPackFlyout({
   definition,
@@ -50,13 +51,17 @@ export function ImportContentPackFlyout({
     core: { http, notifications },
   } = useKibana();
 
+  const {
+    features: { significantEvents },
+  } = useStreamsPrivileges();
+
   const modalTitleId = useGeneratedHtmlId();
 
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
-    objects: { queries: [], routing: [] },
+    objects: { all: {} },
   });
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
@@ -89,7 +94,13 @@ export function ImportContentPackFlyout({
             `}
             id={'streams-content-import'}
             multiple={false}
-            initialPromptText="Select a streams content file"
+            initialPromptText={i18n.translate(
+              'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
+              {
+                defaultMessage:
+                  'You can drop your streams .zip content here and install them right away.',
+              }
+            )}
             fullWidth
             onChange={async (files) => {
               if (files?.length) {
@@ -129,7 +140,7 @@ export function ImportContentPackFlyout({
           />
         )}
 
-        {file && manifest ? (
+        {file && manifest && significantEvents ? (
           <>
             <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -152,9 +163,9 @@ export function ImportContentPackFlyout({
             <EuiSpacer />
 
             <ContentPackObjectsList
-              definition={definition}
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
+              significantEventsAvailable={significantEvents.available}
             />
           </>
         ) : null}
@@ -173,7 +184,11 @@ export function ImportContentPackFlyout({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              isDisabled={!file || !hasSelectedObjects(includedObjects)}
+              isDisabled={
+                !file ||
+                isEmptyContentPack(contentPackObjects) ||
+                !hasSelectedObjects(includedObjects)
+              }
               isLoading={isLoading}
               fill
               onClick={async () => {
