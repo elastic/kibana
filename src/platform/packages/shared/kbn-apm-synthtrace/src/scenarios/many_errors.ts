@@ -41,22 +41,25 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         .interval('1m')
         .rate(2000)
         .generator((timestamp, index) => {
-          const severity = severities[index % severities.length];
-          const errorMessage = `${severity}: ${getRandomNameForIndex(index)} ${index}`;
+          const errors = Array.from({ length: 10 }, (_, errorIndex) => {
+            const severity = severities[errorIndex % severities.length];
+            const errorMessage = `${severity}: ${getRandomNameForIndex(index)}`;
+
+            return instance
+              .error({
+                message: errorMessage + ` ${errorIndex}`,
+                type: getExceptionTypeForIndex(index + errorIndex),
+                culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
+              })
+              .timestamp(timestamp + 50 * (errorIndex + 1)); // Stagger error timestamps
+          });
+
           return instance
             .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(1000)
             .failure()
-            .errors(
-              instance
-                .error({
-                  message: errorMessage,
-                  type: getExceptionTypeForIndex(index),
-                  culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
-                })
-                .timestamp(timestamp + 50)
-            );
+            .errors(...errors);
         });
 
       return withClient(
