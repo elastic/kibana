@@ -9,7 +9,6 @@ import { clickAction, openBarchartPopoverMenu } from './common';
 import {
   CLOSE_TIMELINE_BTN,
   FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM,
-  FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON,
   INDICATORS_TABLE_CELL_TIMELINE_BUTTON,
   INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON,
   UNTITLED_TIMELINE_BUTTON,
@@ -18,7 +17,6 @@ import {
   BARCHART_TIMELINE_BUTTON,
   FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
-  FLYOUT_TABLE_MORE_ACTIONS_BUTTON,
   INDICATOR_TYPE_CELL,
 } from '../../screens/threat_intelligence/indicators';
 
@@ -54,8 +52,9 @@ export const closeTimeline = () => {
  * Add data to timeline from flyout overview tab table
  */
 export const addToTimelineFromFlyoutOverviewTabTable = () => {
-  cy.get(FLYOUT_TABLE_MORE_ACTIONS_BUTTON).first().click();
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON).first().click();
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(`[data-test-subj="showExtraActionsButton"]`).click();
+  cy.get(`[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]`).click();
 };
 
 /**

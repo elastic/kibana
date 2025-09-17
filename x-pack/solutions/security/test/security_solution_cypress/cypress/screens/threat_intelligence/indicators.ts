@@ -73,15 +73,9 @@ export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON = getDataTestSubjectSe
 export const FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE = getDataTestSubjectSelector(
   'tiFlyoutOverviewTableRow'
 );
-export const FLYOUT_TABLE_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowPopoverButton'
-)} button`;
 export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
   'tiFlyoutOverviewHighLevelBlocksPopoverButton'
 )} button`;
-export const FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'actionItem-security-default-cellActions-filterIn'
-);
 export const FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterOut'
 );
