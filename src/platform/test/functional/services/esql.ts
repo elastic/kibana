@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
 export class ESQLService extends FtrService {
@@ -176,8 +177,16 @@ export class ESQLService extends FtrService {
     await this.waitESQLEditorLoaded();
   }
 
-  public async selectEsqlSuggestionByLabel(label: string) {
+  public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
+    const editor = await this.testSubjects.find(editorSubjId);
+    const textarea = await editor.findByCssSelector('textarea');
+    await textarea.type([Key.CONTROL, Key.SPACE]);
+  }
+
+  public async selectEsqlSuggestionByLabel(label: string, editorSubjId = 'ESQLEditor') {
     await this.retry.try(async () => {
+      await this.triggerSuggestions(editorSubjId);
+
       const suggestions = await this.findService.allByCssSelector(
         '.monaco-editor .suggest-widget .monaco-list-row'
       );
