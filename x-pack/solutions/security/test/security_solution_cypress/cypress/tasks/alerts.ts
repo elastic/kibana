@@ -152,6 +152,7 @@ export const expandFirstAlertActions = () => {
   waitForAlerts();
 
   const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().scrollIntoView();
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible');
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
     cy.get(TIMELINE_CONTEXT_MENU_BTN)
