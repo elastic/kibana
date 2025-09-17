@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { agentToDescriptor } from './to_descriptor';
+export { type BuiltinAgentRegistry, createBuiltinAgentRegistry } from './registry';

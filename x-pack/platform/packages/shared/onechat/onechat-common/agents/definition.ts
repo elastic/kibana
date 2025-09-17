@@ -21,16 +21,6 @@ export enum AgentType {
 export const oneChatDefaultAgentId = 'elastic-ai-agent';
 
 /**
- * Base descriptor for an agent.
- */
-export interface AgentDescriptor {
-  type: AgentType;
-  agentId: string;
-  providerId: string;
-  description: string;
-}
-
-/**
  * Definition of a onechat agent.
  */
 export interface AgentDefinition {
@@ -50,6 +40,11 @@ export interface AgentDefinition {
    * Human-readable description for the agent.
    */
   description: string;
+  /**
+   * read-only attribute.
+   * Built-in agents are readonly, user-created agent are not.
+   */
+  readonly: boolean;
   /**
    * Optional labels used to organize or filter agents
    */
