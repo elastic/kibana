@@ -74,18 +74,16 @@ streamlangApiTest.describe(
       // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
-          templateLabel: 'double-braces',
           templateType: '{{ }}',
           to: '{{template_to}}',
           value: ['{{template_value_01}}', '{{template_value_02}}'],
         },
         {
-          templateLabel: 'triple-braces',
           templateType: '{{{ }}}',
           to: '{{{template_to}}}',
           value: ['{{{template_value_01}}}', '{{{template_value_02}}}'],
         },
-      ].forEach(({ templateLabel, templateType, to, value }) => {
+      ].forEach(({ templateType, to, value }) => {
         streamlangApiTest(
           `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
           async () => {

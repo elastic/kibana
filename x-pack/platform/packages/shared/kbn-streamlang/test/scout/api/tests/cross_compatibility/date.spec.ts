@@ -101,18 +101,16 @@ streamlangApiTest.describe(
       // Template validation tests - both transpilers should consistently REJECT Mustache templates
       [
         {
-          templateLabel: 'double-braces',
           templateType: '{{ }}',
           from: '{{template_from}}',
           to: '{{template_to}}',
         },
         {
-          templateLabel: 'triple-braces',
           templateType: '{{{ }}}',
           from: '{{{template_from}}}',
           to: '{{{template_to}}}',
         },
-      ].forEach(({ templateLabel, templateType, from, to }) => {
+      ].forEach(({ templateType, from, to }) => {
         streamlangApiTest(
           `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
           async () => {
@@ -135,11 +133,47 @@ streamlangApiTest.describe(
         );
       });
 
-      // TODO: Implement compatibility test with multiple input date formats
       streamlangApiTest(
         'should parse the first matching among a list of input formats',
         async ({ testBed, esql }) => {
-          //
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'date',
+                from: 'log.timestamp',
+                to: 'parsed_timestamp',
+                formats: ['yyyy-MM-dd HH:mm:ss', 'dd/MM/yyyy HH:mm:ss', 'ISO8601', 'epoch_millis'],
+              } as DateProcessor,
+            ],
+          };
+
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+
+          // Test documents with different formats that should match different patterns in the list
+          const docs = [
+            { log: { timestamp: '31/12/2024 23:59:59' } }, // Should match 2nd format: dd/MM/yyyy HH:mm:ss
+            { log: { timestamp: '2025-01-01 12:34:56' } }, // Should match 1st format: yyyy-MM-dd HH:mm:ss
+            { log: { timestamp: '2025-01-15T08:30:00.123Z' } }, // Should match 3rd format: ISO8601
+            { log: { timestamp: '1704067200000' } }, // Should match 4th format: epoch_millis (2024-01-01 00:00:00 UTC)
+          ];
+
+          await testBed.ingest('ingest-date-multiple-patterns', docs, processors);
+          const ingestResult = await testBed.getDocs('ingest-date-multiple-patterns');
+
+          await testBed.ingest('esql-date-multiple-patterns', docs);
+          const esqlResult = await esql.queryOnIndex('esql-date-multiple-patterns', query);
+
+          // Verify that all formats were parsed correctly by both transpilers
+          expect(ingestResult[0].parsed_timestamp).toEqual('2024-12-31T23:59:59.000Z'); // dd/MM/yyyy format
+          expect(ingestResult[1].parsed_timestamp).toEqual('2025-01-01T12:34:56.000Z'); // yyyy-MM-dd format
+          expect(ingestResult[2].parsed_timestamp).toEqual('2025-01-15T08:30:00.123Z'); // ISO8601 format
+          expect(ingestResult[3].parsed_timestamp).toEqual('2024-01-01T00:00:00.000Z'); // epoch_millis format
+
+          expect(esqlResult.documents[0].parsed_timestamp).toEqual('2024-12-31T23:59:59.000Z');
+          expect(esqlResult.documents[1].parsed_timestamp).toEqual('2025-01-01T12:34:56.000Z');
+          expect(esqlResult.documents[2].parsed_timestamp).toEqual('2025-01-15T08:30:00.123Z');
+          expect(esqlResult.documents[3].parsed_timestamp).toEqual('2024-01-01T00:00:00.000Z');
         }
       );
     });
