@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Condition, conditionToQueryDsl } from '@kbn/streams-schema';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { format } from 'util';
 import pLimit from 'p-limit';
 import { compact, isEqual } from 'lodash';
+import type { Condition } from '@kbn/streamlang';
+import { conditionToQueryDsl } from '@kbn/streamlang';
 import { clusterDocs } from './cluster_docs';
 
 export interface ClusterLogsResponse {

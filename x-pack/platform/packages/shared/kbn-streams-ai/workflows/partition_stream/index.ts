@@ -6,10 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { Condition, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
+import type { Condition } from '@kbn/streamlang';
 import { clusterLogs } from '../../tools/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
@@ -21,6 +22,7 @@ export async function partitionStream({
   logger,
   start,
   end,
+  maxSteps,
   signal,
 }: {
   definition: Streams.ingest.all.Definition;
@@ -29,6 +31,7 @@ export async function partitionStream({
   logger: Logger;
   start: number;
   end: number;
+  maxSteps?: number | undefined;
   signal: AbortSignal;
 }): Promise<Array<{ name: string; condition: Condition }>> {
   const initialClusters = await clusterLogs({
@@ -41,6 +44,16 @@ export async function partitionStream({
     size: 1000,
   });
 
+  // No need to involve reasoning if there are no initial clusters
+  if (initialClusters.length === 0) {
+    return [];
+  }
+
+  // No need to involve reasoning if there are no sample documents
+  if (initialClusters.every((cluster) => cluster.clustering.sampled === 0)) {
+    return [];
+  }
+
   const response = await executeAsReasoningAgent({
     inferenceClient,
     prompt: SuggestStreamPartitionsPrompt,
@@ -49,6 +62,7 @@ export async function partitionStream({
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
     },
+    maxSteps,
     toolCallbacks: {
       partition_logs: async (toolCall) => {
         const partitions = (toolCall.function.arguments.partitions ?? []) as Array<{
@@ -65,7 +79,7 @@ export async function partitionStream({
           logger,
         });
 
-        return { partitions: partitionsResponse };
+        return { response: { partitions: partitionsResponse } };
       },
     },
     abortSignal: signal,

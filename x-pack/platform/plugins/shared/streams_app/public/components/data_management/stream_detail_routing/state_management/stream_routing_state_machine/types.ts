@@ -10,6 +10,8 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
+import type { Condition } from '@kbn/streamlang';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type { DocumentMatchFilterOptions } from '.';
 
@@ -43,4 +45,6 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
-  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions };
+  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
+  | { type: 'suggestion.preview'; condition: Condition }
+  | { type: 'suggestion.append'; definitions: RoutingDefinition[] };

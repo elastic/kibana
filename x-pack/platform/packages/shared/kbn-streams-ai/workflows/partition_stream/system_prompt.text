@@ -66,16 +66,14 @@ You start with a broad hypothesis based on a common field like `service.name`.
         "name": "apache-logs",
         "condition": {
           "field": "service.name",
-          "operator": "eq",
-          "value": "apache"
+          "eq": "apache"
         }
       },
       {
         "name": "system-logs",
         "condition": {
           "field": "service.name",
-          "operator": "eq",
-          "value": "system"
+          "eq": "system"
         }
       }
     ]
@@ -112,8 +110,8 @@ You now submit a more detailed and complete set of partitions.
         "name": "apache-webapp-alpha",
         "condition": {
           "and": [
-            { "field": "service.name", "operator": "eq", "value": "apache" },
-            { "field": "http.virtualhost", "operator": "eq", "value": "alpha.example.com" }
+            { "field": "service.name", "eq": "apache" },
+            { "field": "http.virtualhost", "eq": "alpha.example.com" }
           ]
         }
       },
@@ -121,8 +119,8 @@ You now submit a more detailed and complete set of partitions.
         "name": "apache-webapp-beta",
         "condition": {
           "and": [
-            { "field": "service.name", "operator": "eq", "value": "apache" },
-            { "field": "http.virtualhost", "operator": "eq", "value": "beta.internal" }
+            { "field": "service.name", "eq": "apache" },
+            { "field": "http.virtualhost", "eq": "beta.internal" }
           ]
         }
       },
@@ -130,8 +128,8 @@ You now submit a more detailed and complete set of partitions.
         "name": "apache-monitoring",
         "condition": {
           "and": [
-            { "field": "service.name", "operator": "eq", "value": "apache" },
-            { "field": "http.url", "operator": "startsWith", "value": "/server-status" }
+            { "field": "service.name", "eq": "apache" },
+            { "field": "http.url", "startsWith": "/server-status" }
           ]
         }
       },
@@ -139,16 +137,14 @@ You now submit a more detailed and complete set of partitions.
         "name": "redis-cache",
         "condition": {
           "field": "process.name",
-          "operator": "eq",
-          "value": "redis-server"
+          "eq": "redis-server"
         }
       },
       {
         "name": "system-logs",
         "condition": {
           "field": "service.name",
-          "operator": "eq",
-          "value": "system"
+          "eq": "system"
         }
       }
     ]
@@ -163,20 +159,20 @@ You now submit a more detailed and complete set of partitions.
 *   **Analyze Clusters:** Your primary feedback is the cluster analysis. A partition with more than one cluster is a problem. Investigate the fields of the documents in those different clusters to find a differentiator.
 *   **Inspect the Unmatched:** Logs in the "unmatched" (fall-through) bucket are your biggest clue for what partitions are missing. Analyze their common fields to define new partitions.
 *   **Don't Trust Clustering Blindly:** Clustering is a *hint*, not ground truth. If logs from `auth-service` and `user-profile-service` are clustered together due to a similar schema, you must still separate them. They are different operational systems and require their own partitions. Your job is to enforce this logical separation.
-*   **Be Specific:** Use `and` conditions to combine multiple fields. This creates highly specific, accurate rules. A rule like `{"field": "application", "operator": "eq", "value": "database"}` is bad. A rule like `{"and": [{"field":"process.name", "operator":"eq", "value":"mysqld"}, {"field":"host.name", "operator":"eq", "value":"db-prod-1"}]}` is good because it isolates a specific system.
+*   **Be Specific:** Use `and` conditions to combine multiple fields. This creates highly specific, accurate rules. A rule like `{"field": "application", "eq": "database"}` is bad. A rule like `{"and": [{"field":"process.name", "eq":"mysqld"}, {"field":"host.name", "eq":"db-prod-1"}]}` is good because it isolates a specific system.
 
 ---
 
 ### **Error => Repair Examples**
 
 *   **Error: Partition is too broad.**
-    *   **Bad Partition:** `{"name": "database-logs", "condition": {"field": "log.type", "operator": "eq", "value": "database"}}`
+    *   **Bad Partition:** `{"name": "database-logs", "condition": {"field": "log.type", "eq": "database"}}`
     *   **Symptom:** The `partition_logs` tool returns 5 clusters for this partition.
     *   **Reasoning:** "database" is a category, not a system. The clusters likely correspond to `mysql`, `redis`, `postgres`, etc.
     *   **Repair:** Replace the single partition with multiple, specific partitions: one for `mysql` (e.g., matching `process.name: 'mysqld'`), one for `redis` (`process.name: 'redis-server'`), etc.
 
 *   **Error: Misinterpreting schema similarity.**
-    *   **Partition:** `{"name": "java-apps", "condition": {"field": "log.logger_name", "operator": "exists"}}`
+    *   **Partition:** `{"name": "java-apps", "condition": {"field": "log.logger_name", "exists": true}}`
     *   **Symptom:** The tool returns a single, large cluster. It looks pure.
     *   **Reasoning:** A single cluster is a good sign, but is "java-apps" truly a single system? Deeper inspection of the log samples might show fields like `application.id: 'order-service'` in some logs and `application.id: 'inventory-service'` in others. These are two different systems sharing a common logging library.
     *   **Repair:** Split the `java-apps` partition. Create a partition for `order-service` and another for `inventory-service` using the `application.id` field to differentiate them.
@@ -187,7 +183,7 @@ You now submit a more detailed and complete set of partitions.
 
 *   Partition names must be alphanumeric with dashes (e.g., `my-cool-service-prod`). No underscores or dots.
 *   Partitions are evaluated top-to-bottom. Place more specific rules first. A catch-all rule like `{ "always": {} }` should always be last.
-*   Use the `exists` operator to find logs that have a uniquely identifying field.
+*   Use the `exists` condition to find logs that have a uniquely identifying field.
 *   The goal is **one cluster per partition** and an **empty unmatched bucket**.
 
 ### **System Variables**

@@ -15,7 +15,9 @@ import {
   EuiDraggable,
   EuiButton,
   EuiToolTip,
+  EuiCallOut,
   euiDragDropReorder,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -28,7 +30,18 @@ import { RoutingStreamEntry } from './routing_stream_entry';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
+  useStreamsRoutingActorRef,
 } from './state_management/stream_routing_state_machine';
+import {
+  useReviewSuggestionsForm,
+  FormProvider,
+} from './review_suggestions_form/use_review_suggestions_form';
+import {
+  GenerateSuggestionButton,
+  useAIFeatures,
+} from './review_suggestions_form/generate_suggestions_button';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { SuggestedStreamPanel } from './review_suggestions_form/suggested_stream_panel';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -46,7 +59,10 @@ function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestin
 
 export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
+  const streamsRoutingActorRef = useStreamsRoutingActorRef();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const aiFeatures = useAIFeatures();
+  const { timeState } = useTimefilter();
 
   const { currentRuleId, definition, routing } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
@@ -54,6 +70,16 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const canManageRoutingRules = definition.privileges.manage;
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
+
+  const {
+    reviewSuggestionsForm,
+    isEmpty: isEmptyPartitions,
+    reset: resetForm,
+    partitions,
+    removePartition,
+    isLoadingSuggestedPartitions,
+    fetchSuggestedPartitions,
+  } = useReviewSuggestionsForm();
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -155,6 +181,116 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
+        <EuiSpacer size="m" />
+
+        {aiFeatures && shouldDisplayCreateButton && (
+          <>
+            {isEmptyPartitions ? (
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.streams.streamDetailRouting.childStreamList.noSuggestionsTitle',
+                  {
+                    defaultMessage: 'No suggestions available',
+                  }
+                )}
+                onDismiss={resetForm}
+              >
+                <EuiText size="s">
+                  {i18n.translate(
+                    'xpack.streams.streamDetailRouting.childStreamList.noSuggestionsDescription',
+                    {
+                      defaultMessage: 'Retry using a different time range or stream.',
+                    }
+                  )}
+                </EuiText>
+              </EuiCallOut>
+            ) : partitions.length === 0 ? (
+                <EuiFlexGroup justifyContent="center" alignItems="flexStart">
+                  <EuiFlexItem grow={false}>
+                    <GenerateSuggestionButton
+                      size="s"
+                      onClick={(connectorId) =>
+                        fetchSuggestedPartitions({
+                          streamName: definition.stream.name,
+                          connectorId,
+                          start: timeState.start,
+                          end: timeState.end,
+                        })
+                      }
+                      isLoading={isLoadingSuggestedPartitions}
+                      aiFeatures={aiFeatures}
+                    >
+                      {i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
+                        {
+                          defaultMessage: 'Suggest partitions with AI',
+                        }
+                      )}
+                    </GenerateSuggestionButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+            ) : (
+              <FormProvider {...reviewSuggestionsForm}>
+                <EuiCallOut
+                  title="Review partitioning suggestions"
+                  onDismiss={resetForm}
+                  className={css`
+                    min-block-size: auto; /* Prevent background clipping */
+                  `}
+                >
+                  <EuiText size="s">
+                    {i18n.translate(
+                      'xpack.streams.streamDetailRouting.childStreamList.suggestPartitionsDescription',
+                      {
+                        defaultMessage:
+                          'Preview each suggestion before accepting - They will change how your data is ingested. All suggestions are based on the same sample: each proposal uses 1,000 documents from the original stream.',
+                      }
+                    )}
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                  {partitions.map((partition, index) => (
+                    <NestedView key={partition.id} last={index === partitions.length - 1}>
+                      <SuggestedStreamPanel
+                        partition={partition}
+                        parentName={definition.stream.name}
+                        onDismiss={() => removePartition(index)}
+                        onPreview={() =>
+                          streamsRoutingActorRef.send({
+                            type: 'suggestion.preview',
+                            condition: partition.condition,
+                          })
+                        }
+                      />
+                      <EuiSpacer size="s" />
+                    </NestedView>
+                  ))}
+                  <EuiSpacer size="m" />
+                  <GenerateSuggestionButton
+                    iconType="refresh"
+                    size="s"
+                    onClick={(connectorId) =>
+                      fetchSuggestedPartitions({
+                        streamName: definition.stream.name,
+                        connectorId,
+                        start: timeState.start,
+                        end: timeState.end,
+                      })
+                    }
+                    isLoading={isLoadingSuggestedPartitions}
+                    aiFeatures={aiFeatures}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                      {
+                        defaultMessage: 'Regenerate',
+                      }
+                    )}
+                  </GenerateSuggestionButton>
+                </EuiCallOut>
+              </FormProvider>
+            )}
+          </>
+        )}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
