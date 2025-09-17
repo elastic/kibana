@@ -15,9 +15,9 @@ import { getFocusableElements } from './get_focusable_elements';
  * Utility function for focus trap functionality
  */
 export const trapFocus = (ref: RefObject<HTMLElement>) => (e: KeyboardEvent) => {
-  const elements = getFocusableElements(ref);
-
   if (!ref.current || e.key !== 'Tab') return;
+
+  const elements = getFocusableElements(ref.current);
   if (!ref.current.contains(document.activeElement)) return;
   if (!elements.length) return;
 
