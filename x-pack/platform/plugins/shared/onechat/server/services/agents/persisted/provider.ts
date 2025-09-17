@@ -10,6 +10,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { WritableAgentProvider, AgentProviderFn } from '../agent_source';
+import type { ToolsServiceStart } from '../../tools';
 import { createClient } from './client';
 
 export const createPersistedProviderFn =
@@ -26,18 +27,45 @@ export const createPersistedProviderFn =
     });
   };
 
-const createPersistedProvider = ({}: {
+const createPersistedProvider = async ({
+  request,
+  security,
+  elasticsearch,
+  toolsService,
+  logger,
+}: {
   request: KibanaRequest;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
-}): WritableAgentProvider => {
-  const client = createClient({ elasticsearch, logger, request, security, toolsService });
+}): Promise<WritableAgentProvider> => {
+  const client = await createClient({ elasticsearch, logger, request, security, toolsService });
 
   return {
     id: 'persisted',
     readonly: false,
-    // TODO: implement the rest
+    has: (agentId: string) => {
+      return client.has(agentId);
+    },
+    get: (agentId: string) => {
+      // TODO: convert
+      return client.get(agentId);
+    },
+    list: (opts) => {
+      // TODO: convert
+      return client.list(opts);
+    },
+    create: (createRequest) => {
+      // TODO: convert
+      return client.create(createRequest);
+    },
+    update: (agentId, update) => {
+      // TODO: convert
+      return client.update(agentId, update);
+    },
+    delete: (agentId: string) => {
+      return client.delete({ id: agentId });
+    },
   };
 };
