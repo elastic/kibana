@@ -227,7 +227,7 @@ export class HttpService
     return this.internalSetup;
   }
 
-  // this method exists because we need thee start contract to create th `CoreStart` used to start
+  // this method exists because we need the start contract to create `CoreStart` used to start
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
     return {
