@@ -37,9 +37,11 @@ export function buildStepExecutionId(
   stepId: string,
   path: StackEntry[]
 ): string {
-  const generatedId = [executionId, ...path.flatMap((x) => [x.stepId, x.subScopeId]), stepId].join(
-    '_'
-  );
+  const generatedId = [
+    executionId,
+    ...path.flatMap((stackEntry) => [stackEntry.stepId, stackEntry.subScopeId]),
+    stepId,
+  ].join('_');
   const hashedId = crypto.createHash('sha256').update(generatedId).digest('hex');
   return hashedId;
 }

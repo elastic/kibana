@@ -442,36 +442,6 @@ describe('WorkflowContextManager', () => {
       testContainer.workflowExecutionRuntime.getCurrentNode = jest
         .fn()
         .mockReturnValue({ id: 'thirdLogStep' });
-      // testContainer.workflowExecutionRuntime.getCurrentStepState = jest
-      //   .fn()
-      //   .mockImplementation((nodeId) => {
-      //     switch (nodeId) {
-      //       case 'firstLogStep':
-      //         return { stateValue: 'first' };
-      //       case 'secondLogStep':
-      //         return { stateValue: 'second' };
-      //       case 'thirdLogStep':
-      //         return { stateValue: 'third' };
-      //       case 'fourthLogStep':
-      //         return { stateValue: 'fourth' };
-      //     }
-      //     return undefined;
-      //   });
-      // testContainer.workflowExecutionRuntime.getCurrentStepResult = jest
-      //   .fn()
-      //   .mockImplementation((nodeId) => {
-      //     switch (nodeId) {
-      //       case 'firstLogStep':
-      //         return { output: 'output1', error: null };
-      //       case 'secondLogStep':
-      //         return { output: null, error: new Error('Error in second step') };
-      //       case 'thirdLogStep':
-      //         return { output: 'output3', error: null };
-      //       case 'fourthLogStep':
-      //         return { output: 'output4', error: null };
-      //     }
-      //     return undefined;
-      //   });
 
       testContainer.workflowExecutionState.getLatestStepExecution = jest
         .fn()

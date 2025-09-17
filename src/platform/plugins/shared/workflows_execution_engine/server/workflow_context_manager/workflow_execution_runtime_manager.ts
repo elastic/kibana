@@ -504,10 +504,6 @@ export class WorkflowExecutionRuntimeManager {
       );
     }
 
-    if (!this.topologicalOrder.length) {
-      throw new Error('Workflow has no steps to execute');
-    }
-
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       currentNodeId: this.topologicalOrder[0],
       stack: [],
