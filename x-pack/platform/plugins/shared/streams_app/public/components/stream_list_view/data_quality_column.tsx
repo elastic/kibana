@@ -50,7 +50,7 @@ export function DataQualityColumn({
   );
 
   const degradedDocCount = degradedDocsResult?.value
-    ? Number(failedDocsResult.value?.values?.[0]?.[0])
+    ? Number(degradedDocsResult.value?.values?.[0]?.[0])
     : 0;
   const failedDocCount = degradedDocsResult?.value
     ? Number(failedDocsResult.value.values?.[0]?.[0])
