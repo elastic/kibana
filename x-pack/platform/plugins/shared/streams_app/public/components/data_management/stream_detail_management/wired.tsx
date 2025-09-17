@@ -15,13 +15,17 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { WiredAdvancedView } from './wired_advanced_view';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
   'processing',
   'schema',
   'retention',
+  'advanced',
   'significantEvents',
+  'dataQuality',
   'references',
 ] as const;
 
@@ -91,7 +95,35 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Schema',
       }),
     },
+    dataQuality: {
+      content: <StreamDetailDataQuality definition={definition} />,
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
+            defaultMessage: 'View details about this stream’s data quality',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+              defaultMessage: 'Data quality',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    },
     ...otherTabs,
+    ...(definition.privileges.manage
+      ? {
+          advanced: {
+            content: (
+              <WiredAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            }),
+          },
+        }
+      : {}),
   };
 
   const redirectConfig = tabRedirects[tab];

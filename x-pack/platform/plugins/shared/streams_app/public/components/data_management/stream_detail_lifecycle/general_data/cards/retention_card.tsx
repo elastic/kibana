@@ -9,92 +9,22 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
-import { useBoolean } from '@kbn/react-hooks';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isRoot } from '@kbn/streams-schema';
 import { BaseMetricCard } from '../../common/base_metric_card';
-import type { LifecycleEditAction } from '../modal';
 import { IlmLink } from '../ilm_link';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
 
 export const RetentionCard = ({
   definition,
-  lifecycleActions,
   openEditModal,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
-  openEditModal: (action: LifecycleEditAction) => void;
+  openEditModal: () => void;
 }) => {
-  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
+  const { euiTheme } = useEuiTheme();
   const lifecycle = definition.effective_lifecycle;
-
-  const editDataRetention = i18n.translate(
-    'xpack.streams.streamDetailLifecycle.storageSize.editDataRetentionButton',
-    {
-      defaultMessage: 'Edit data retention',
-    }
-  );
-
-  const contextualMenu =
-    lifecycleActions.length === 0 ? null : (
-      <EuiPopover
-        button={
-          <EuiToolTip
-            content={
-              !definition.privileges.lifecycle
-                ? i18n.translate(
-                    'xpack.streams.entityDetailViewWithoutParams.editDataRetention.insufficientPrivileges',
-                    {
-                      defaultMessage: "You don't have sufficient privileges to change retention.",
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.streams.entityDetailViewWithoutParams.editDataRetention.edit',
-                    {
-                      defaultMessage: 'Edit data retention',
-                    }
-                  )
-            }
-          >
-            <EuiButtonIcon
-              data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-              onClick={toggleMenu}
-              disabled={!definition.privileges.lifecycle}
-              iconType="pencil"
-              size="xs"
-              color="text"
-              display="base"
-              aria-label={editDataRetention}
-            />
-          </EuiToolTip>
-        }
-        isOpen={isMenuOpen}
-        closePopover={closeMenu}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          items={lifecycleActions.map(({ name, action }) => (
-            <EuiContextMenuItem
-              key={action}
-              onClick={() => {
-                closeMenu();
-                openEditModal(action);
-              }}
-            >
-              {name}
-            </EuiContextMenuItem>
-          ))}
-        />
-      </EuiPopover>
-    );
 
   const isInheritingFromParent = isInheritLifecycle(definition.stream.ingest.lifecycle);
   const isRootStream = isRoot(definition.stream.name);
@@ -181,5 +111,26 @@ export const RetentionCard = ({
 
   const metrics = isIlmLifecycle(lifecycle) ? getIlmMetrics() : getDslMetrics();
 
-  return <BaseMetricCard title={title} actions={contextualMenu} metrics={metrics} />;
+  return (
+    <BaseMetricCard
+      title={title}
+      actions={
+        <EuiButtonEmpty
+          data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+          size="s"
+          onClick={openEditModal}
+          disabled={!definition.privileges.lifecycle}
+          iconType="pencil"
+          css={css`
+            margin-bottom: -${euiTheme.size.s};
+          `}
+        >
+          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
+            defaultMessage: 'Edit data retention',
+          })}
+        </EuiButtonEmpty>
+      }
+      metrics={metrics}
+    />
+  );
 };
