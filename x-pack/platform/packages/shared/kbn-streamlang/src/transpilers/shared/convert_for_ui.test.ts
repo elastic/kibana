@@ -146,7 +146,7 @@ describe('convertUIStepsToDSL', () => {
         parentId: null,
       },
     ];
-    const dsl = convertUIStepsToDSL(uiSteps) as any;
+    const dsl = convertUIStepsToDSL(uiSteps, false) as any;
     expect(dsl.steps).toHaveLength(2); // where1 and set2 at root
     const where1 = dsl.steps[0];
     expect(where1).toHaveProperty('where');

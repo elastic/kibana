@@ -48,7 +48,7 @@ export const simulateProcessing = ({
   input: SimulationRunnerInput;
   signal?: AbortSignal | null;
 }) => {
-  const dsl = convertUIStepsToDSL(input.steps);
+  const dsl = convertUIStepsToDSL(input.steps, false);
 
   return streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
     signal,

@@ -62,7 +62,10 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
 };
 
 type StreamlangStepWithParentId = StreamlangStep & { parentId: string | null };
-export const convertUIStepsToDSL = (steps: StreamlangStepWithUIAttributes[]): StreamlangDSL => {
+export const convertUIStepsToDSL = (
+  steps: StreamlangStepWithUIAttributes[],
+  stripCustomIdentifiers: boolean = true
+): StreamlangDSL => {
   const idToStep: Record<string, StreamlangStepWithParentId> = {};
   const rootSteps: Array<StreamlangStepWithParentId> = [];
 
@@ -94,21 +97,28 @@ export const convertUIStepsToDSL = (steps: StreamlangStepWithUIAttributes[]): St
   }
 
   // Remove parentId from all steps for the final DSL
-  function stripParentId(step: StreamlangStepWithParentId): any {
-    const { parentId, ...rest } = step;
-    if (isWhereBlock(rest)) {
+  function stripUIProperties(
+    step: StreamlangStepWithParentId,
+    removeCustomIdentifiers: boolean
+  ): StreamlangStep {
+    if (isWhereBlock(step)) {
+      const { parentId, customIdentifier, ...whereRest } = step;
       return {
-        ...rest,
+        ...(removeCustomIdentifiers ? { ...whereRest } : { ...whereRest, customIdentifier }),
         where: {
-          ...rest.where,
-          steps: (rest.where.steps as StreamlangStepWithParentId[]).map(stripParentId),
+          ...whereRest.where,
+          steps: (whereRest.where.steps as StreamlangStepWithParentId[]).map((child) =>
+            stripUIProperties(child, removeCustomIdentifiers)
+          ),
         },
       };
+    } else {
+      const { parentId, customIdentifier, ...actionRest } = step;
+      return removeCustomIdentifiers ? actionRest : { ...actionRest, customIdentifier };
     }
-    return rest;
   }
 
   return {
-    steps: rootSteps.map(stripParentId),
+    steps: rootSteps.map((child) => stripUIProperties(child, stripCustomIdentifiers)),
   };
 };
