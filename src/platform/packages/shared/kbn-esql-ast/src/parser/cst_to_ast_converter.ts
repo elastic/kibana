@@ -1594,68 +1594,6 @@ export class CstToAstConverter {
     return fn;
   }
 
-  /**
-   * Constructs a tuple list (round parens):
-   *
-   * ```
-   * (1, 2, 3)
-   * ```
-   *
-   * Can be used in IN-expression:
-   *
-   * ```
-   * WHERE x IN (1, 2, 3)
-   * ```
-   *
-   * @todo Rename this method.
-   * @todo Move to "list"
-   */
-  private visitTuple(
-    ctxs: cst.ValueExpressionContext[],
-    leftParen?: antlr.TerminalNode,
-    rightParen?: antlr.TerminalNode
-  ): ast.ESQLList {
-    const values: ast.ESQLAstExpression[] = [];
-    let incomplete = false;
-
-    for (const elementCtx of ctxs) {
-      const element = this.visitValueExpression(elementCtx);
-
-      if (!element) {
-        continue;
-      }
-
-      const resolved = resolveItem(element) as ast.ESQLAstExpression;
-
-      if (!resolved) {
-        continue;
-      }
-
-      values.push(resolved);
-
-      if (resolved.incomplete) {
-        incomplete = true;
-      }
-    }
-
-    if (!values.length) {
-      incomplete = true;
-    }
-
-    const node = Builder.expression.list.tuple(
-      { values },
-      {
-        incomplete,
-        location: getPosition(
-          leftParen?.symbol ?? ctxs[0]?.start,
-          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
-        ),
-      }
-    );
-
-    return node;
-  }
-
   private visitLogicalIns(ctx: cst.LogicalInContext) {
     const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
     const left = resolveItem(
@@ -2671,6 +2609,67 @@ export class CstToAstConverter {
     const parserFields = this.createParserFields(ctx);
 
     return Builder.expression.list.literal({ values }, parserFields);
+  }
+
+  /**
+   * Constructs a tuple list (round parens):
+   *
+   * ```
+   * (1, 2, 3)
+   * ```
+   *
+   * Can be used in IN-expression:
+   *
+   * ```
+   * WHERE x IN (1, 2, 3)
+   * ```
+   *
+   * @todo Rename this method.
+   */
+  private visitTuple(
+    ctxs: cst.ValueExpressionContext[],
+    leftParen?: antlr.TerminalNode,
+    rightParen?: antlr.TerminalNode
+  ): ast.ESQLList {
+    const values: ast.ESQLAstExpression[] = [];
+    let incomplete = false;
+
+    for (const elementCtx of ctxs) {
+      const element = this.visitValueExpression(elementCtx);
+
+      if (!element) {
+        continue;
+      }
+
+      const resolved = resolveItem(element) as ast.ESQLAstExpression;
+
+      if (!resolved) {
+        continue;
+      }
+
+      values.push(resolved);
+
+      if (resolved.incomplete) {
+        incomplete = true;
+      }
+    }
+
+    if (!values.length) {
+      incomplete = true;
+    }
+
+    const node = Builder.expression.list.tuple(
+      { values },
+      {
+        incomplete,
+        location: getPosition(
+          leftParen?.symbol ?? ctxs[0]?.start,
+          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
+        ),
+      }
+    );
+
+    return node;
   }
 
   // -------------------------------------- constant expression: "timeInterval"
