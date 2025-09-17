@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { getAdvancedParameters } from '@kbn/streams-schema';
-import { isEqual, omit } from 'lodash';
-import { useMemo, useCallback } from 'react';
+import { isEqual } from 'lodash';
+import { useMemo, useCallback, useState } from 'react';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { SchemaField } from '../types';
-import { isSchemaFieldTyped } from '../types';
+import type { MappedSchemaField, SchemaField } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 import { getFormattedError } from '../../../../util/errors';
 
@@ -36,6 +36,7 @@ export const useSchemaFields = ({
     core: {
       notifications: { toasts },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const abortController = useAbortController();
@@ -73,7 +74,9 @@ export const useSchemaFields = ({
     [dataViews, definition.stream.name]
   );
 
-  const fields = useMemo(() => {
+  const [fields, setFields] = useState<SchemaField[]>([]);
+
+  const storedFields = useMemo(() => {
     let inheritedFields: SchemaField[] = [];
 
     if (Streams.WiredStream.GetResponse.is(definition)) {
@@ -135,7 +138,14 @@ export const useSchemaFields = ({
           status: 'unmapped',
         })) ?? [];
 
-    return [...inheritedFields, ...mappedFields, ...unmappedFields, ...unmanagedFields];
+    const nextStoredFields = [
+      ...inheritedFields,
+      ...mappedFields,
+      ...unmanagedFields,
+      ...unmappedFields,
+    ];
+    setFields(nextStoredFields);
+    return nextStoredFields;
   }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
 
   const refreshFields = useCallback(() => {
@@ -146,150 +156,108 @@ export const useSchemaFields = ({
 
   const updateField = useCallback(
     async (field: SchemaField) => {
-      try {
-        if (!isSchemaFieldTyped(field)) {
-          throw new Error('The field is not complete or fully mapped.');
-        }
-
-        const nextFieldDefinitionConfig = convertToFieldDefinitionConfig(field);
-        const persistedFieldDefinitionConfig = Streams.WiredStream.GetResponse.is(definition)
-          ? definition.stream.ingest.wired.fields[field.name]
-          : definition.stream.ingest.classic.field_overrides?.[field.name];
-
-        if (!hasChanges(persistedFieldDefinitionConfig, nextFieldDefinitionConfig)) {
-          throw new Error('The field is not different, hence updating is not necessary.');
-        }
-
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
-          signal: abortController.signal,
-          params: {
-            path: {
-              name: definition.stream.name,
-            },
-            body: {
-              ingest: {
-                ...definition.stream.ingest,
-                ...(Streams.WiredStream.GetResponse.is(definition)
-                  ? {
-                      wired: {
-                        ...definition.stream.ingest.wired,
-                        fields: {
-                          ...definition.stream.ingest.wired.fields,
-                          [field.name]: nextFieldDefinitionConfig,
-                        },
-                      },
-                    }
-                  : {
-                      classic: {
-                        ...definition.stream.ingest.classic,
-                        field_overrides: {
-                          ...definition.stream.ingest.classic.field_overrides,
-                          [field.name]: nextFieldDefinitionConfig,
-                        },
-                      },
-                    }),
-              },
-            },
-          },
-        });
-
-        toasts.addSuccess(
-          i18n.translate('xpack.streams.streamDetailSchemaEditorEditSuccessToast', {
-            defaultMessage: '{field} was successfully edited',
-            values: { field: field.name },
-          })
-        );
-
-        refreshFields();
-      } catch (error) {
-        toasts.addError(new Error(error.body.message), {
-          title: i18n.translate('xpack.streams.streamDetailSchemaEditorEditErrorToast', {
-            defaultMessage: 'Something went wrong editing the {field} field',
-            values: { field: field.name },
-          }),
-          toastMessage: getFormattedError(error).message,
-          toastLifeTimeMs: 5000,
-        });
+      const index = fields.findIndex((f) => f.name === field.name);
+      if (index === -1) {
+        return;
       }
+
+      const before = fields.slice(0, index);
+      const after = fields.slice(index + 1);
+      const nextFields = [...before, field, ...after];
+      setFields(nextFields);
     },
-    [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
+    [fields]
   );
 
-  const unmapField = useCallback(
-    async (fieldName: SchemaField['name']) => {
-      try {
-        const persistedFieldDefinitionConfig = Streams.WiredStream.GetResponse.is(definition)
-          ? definition.stream.ingest.wired.fields[fieldName]
-          : definition.stream.ingest.classic.field_overrides?.[fieldName];
+  const pendingChangesCount = useMemo(() => {
+    const added = fields.length - storedFields.length;
 
-        if (!persistedFieldDefinitionConfig) {
-          throw new Error('The field is not mapped, hence it cannot be unmapped.');
-        }
+    const changed = fields.filter((field) => {
+      const stored = storedFields.find((storedField) => storedField.name === field.name);
+      return stored && !isEqual(field, stored);
+    }).length;
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
-          signal: abortController.signal,
-          params: {
-            path: {
-              name: definition.stream.name,
-            },
-            body: {
-              ingest: {
-                ...definition.stream.ingest,
-                ...(Streams.WiredStream.GetResponse.is(definition)
-                  ? {
-                      wired: {
-                        ...definition.stream.ingest.wired,
-                        fields: omit(definition.stream.ingest.wired.fields, fieldName),
-                      },
-                    }
-                  : {
-                      classic: {
-                        ...definition.stream.ingest.classic,
-                        field_overrides: omit(
-                          definition.stream.ingest.classic.field_overrides,
-                          fieldName
-                        ),
-                      },
-                    }),
-              },
+    return added + changed;
+  }, [fields, storedFields]);
+
+  const discardChanges = useCallback(() => {
+    setFields(storedFields);
+  }, [storedFields]);
+
+  const submitChanges = useCallback(async () => {
+    try {
+      const mappedFields = fields
+        .filter((field) => field.status === 'mapped')
+        .reduce((acc, field) => {
+          acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
+          return acc;
+        }, {} as Record<string, FieldDefinitionConfig>);
+
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
+        signal: abortController.signal,
+        params: {
+          path: {
+            name: definition.stream.name,
+          },
+          body: {
+            ingest: {
+              ...definition.stream.ingest,
+              ...(Streams.WiredStream.GetResponse.is(definition)
+                ? {
+                    wired: {
+                      ...definition.stream.ingest.wired,
+                      fields: mappedFields,
+                    },
+                  }
+                : {
+                    classic: {
+                      ...definition.stream.ingest.classic,
+                      field_overrides: mappedFields,
+                    },
+                  }),
             },
           },
-        });
+        },
+      });
 
-        toasts.addSuccess(
-          i18n.translate('xpack.streams.streamDetailSchemaEditorUnmapSuccessToast', {
-            defaultMessage: '{field} was successfully unmapped',
-            values: { field: fieldName },
-          })
-        );
+      telemetryClient.trackSchemaUpdated({
+        stream_type: getStreamTypeFromDefinition(definition.stream),
+      });
 
-        refreshFields();
-      } catch (error) {
-        toasts.addError(error, {
-          title: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmapErrorToast', {
-            defaultMessage: 'Something went wrong unmapping the {field} field',
-            values: { field: fieldName },
-          }),
-          toastMessage: getFormattedError(error).message,
-          toastLifeTimeMs: 5000,
-        });
-      }
-    },
-    [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
-  );
+      toasts.addSuccess(
+        i18n.translate('xpack.streams.streamDetailSchemaEditorEditSuccessToast', {
+          defaultMessage: 'Schema was successfully modified',
+        })
+      );
+
+      refreshFields();
+    } catch (error) {
+      toasts.addError(new Error(error.body.message), {
+        title: i18n.translate('xpack.streams.streamDetailSchemaEditorEditErrorToast', {
+          defaultMessage: 'Something went wrong when modifying the schema',
+        }),
+        toastMessage: getFormattedError(error).message,
+        toastLifeTimeMs: 5000,
+      });
+    }
+  }, [
+    fields,
+    streamsRepositoryClient,
+    abortController.signal,
+    definition,
+    telemetryClient,
+    toasts,
+    refreshFields,
+  ]);
 
   return {
     fields,
+    storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
     refreshFields,
-    unmapField,
     updateField,
+    pendingChangesCount,
+    discardChanges,
+    submitChanges,
   };
-};
-
-const hasChanges = (
-  field: Partial<NamedFieldDefinitionConfig> | undefined,
-  fieldUpdate: Partial<NamedFieldDefinitionConfig>
-) => {
-  return !isEqual(field, fieldUpdate);
 };
