@@ -331,3 +331,21 @@ POST kbn://api/agent_builder/tools
   "tags": ["salesforce"]
 }
 ```
+
+
+## Use custom LLM connector
+
+Create new LLM connector in UI (in search bar type “connectors” ), fill it in with creds. In dev console:
+
+```
+GET kbn://api/actions/connectors # find id of your connector
+
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "genAiSettings:defaultAIConnector": "{connecotor id}"
+   }
+}
+```
+
+Or, set the default LLM in the UI under Management > GenAI Settings.
