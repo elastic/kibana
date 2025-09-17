@@ -374,11 +374,6 @@ export class Parser {
 }
 
 /**
- * @deprecated Use `Parser.parseErrors` instead.
- */
-export const parseErrors = Parser.parseErrors;
-
-/**
  * @deprecated Use `Parser.parse` instead.
  */
 export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {

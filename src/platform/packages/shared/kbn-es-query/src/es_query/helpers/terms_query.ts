@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import type { TypedUseSelectorHook } from 'react-redux';
-import type { RootState, AppDispatch } from '.';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-// Use throughout your app instead of plain `useDispatch` and `useSelector`
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export function termsQuery<T extends string>(
+  field: T,
+  values: Array<string | boolean | number>
+): QueryDslQueryContainer[] {
+  return [{ terms: { [field]: values } }];
+}

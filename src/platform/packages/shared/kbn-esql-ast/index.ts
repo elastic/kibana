@@ -39,7 +39,6 @@ export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/b
 export {
   parse,
   Parser,
-  parseErrors,
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
