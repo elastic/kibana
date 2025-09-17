@@ -115,11 +115,13 @@ export class AssetCriticalityDataClient {
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
     sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
+    fields,
   }: {
     query: ESFilter;
     size?: number;
     from?: number;
     sort?: SearchRequest['sort'];
+    fields?: string[];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
@@ -128,6 +130,7 @@ export class AssetCriticalityDataClient {
       size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
+      fields,
       post_filter: {
         bool: {
           must_not: {

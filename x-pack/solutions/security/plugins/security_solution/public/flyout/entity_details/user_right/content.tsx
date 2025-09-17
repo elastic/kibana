@@ -8,7 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
-import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_highlights';
+import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import type { UserItem } from '../../../../common/search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';

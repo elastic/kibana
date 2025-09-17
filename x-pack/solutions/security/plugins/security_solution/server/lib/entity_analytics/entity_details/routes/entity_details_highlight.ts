@@ -23,12 +23,12 @@ import {
   AnonymizationFieldResponse,
   getAnonymizedValue,
   getRawDataOrDefault,
-  transformRawData,
 } from '@kbn/elastic-assistant-common';
-import { forOwn, isPlainObject, omit } from 'lodash';
+import { omit } from 'lodash';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
 import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_data';
-import { getCsvFromData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_csv_from_data';
+import { transformRawDataToRecord } from '@kbn/elastic-assistant-common/impl/data_anonymization/transform_raw_data';
+import { flattenObject } from '@kbn/object-utils/src/flatten_object';
 import type { EntityRiskScoreRecord } from '../../../../../common/api/entity_analytics/common';
 import { getThreshold } from '../../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
@@ -40,6 +40,8 @@ import { APP_ID, API_VERSIONS, DEFAULT_ANOMALY_SCORE } from '../../../../../comm
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createGetRiskScores } from '../../risk_score/get_risk_score';
+import type { IdentifierValuesByField } from '../../asset_criticality';
+import { buildCriticalitiesQuery } from '../../asset_criticality';
 
 export const RouteRequestBody = z.object({
   entityType: z.string(),
@@ -49,7 +51,7 @@ export const RouteRequestBody = z.object({
   to: z.number(),
 });
 
-export const highlightEntityDetailsAIRoute = (
+export const entityDetailsHighlightsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
@@ -103,10 +105,26 @@ export const highlightEntityDetailsAIRoute = (
           });
 
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-          const assetCriticality = await assetCriticalityClient.get({
-            idField: entityField,
-            idValue: entityIdentifier,
+
+          const fields = anonymizationFields
+            .filter((fieldItem) => fieldItem.allowed)
+            .map((fieldItem) => ({
+              field: fieldItem.field,
+              include_unmapped: true,
+            }));
+
+          const param: IdentifierValuesByField = {
+            [entityField]: [entityIdentifier],
+          };
+
+          const criticalitiesQuery = buildCriticalitiesQuery(param);
+
+          const criticalitySearchResponse = await assetCriticalityClient.search({
+            query: criticalitiesQuery,
+            size: 1,
+            fields,
           });
+
           let localReplacements: Replacements = {};
           const localOnNewReplacements = (newReplacements: Replacements) => {
             localReplacements = { ...localReplacements, ...newReplacements };
@@ -126,29 +144,29 @@ export const highlightEntityDetailsAIRoute = (
           }
 
           const anonymizedRiskScore = latestRiskScore
-            ? {
-                score: [latestRiskScore.calculated_score_norm],
-                id_field: [latestRiskScore.id_field],
-                inputs: latestRiskScore.inputs.map((input) =>
-                  getCsvFromData({
+            ? [
+                {
+                  score: [latestRiskScore.calculated_score_norm],
+                  id_field: [latestRiskScore.id_field],
+                  inputs: latestRiskScore.inputs.map((input) => ({
                     risk_score: [input.risk_score?.toString() ?? ''],
                     contribution_score: [input.contribution_score?.toString() ?? ''],
                     description: [input.description ?? ''],
                     timestamp: [input.timestamp ?? ''],
-                  })
-                ),
-              }
-            : undefined;
+                  })),
+                },
+              ]
+            : [];
 
-          const assetCriticalityAnonymized = assetCriticality
-            ? transformRawData({
-                anonymizationFields,
-                currentReplacements: localReplacements,
-                getAnonymizedValue,
-                onNewReplacements: localOnNewReplacements,
-                rawData: getRawDataOrDefault(flattenObject(assetCriticality)),
-              })
-            : null;
+          const assetCriticalityAnonymized = criticalitySearchResponse.hits.hits.map((hit) =>
+            transformRawDataToRecord({
+              anonymizationFields,
+              currentReplacements: localReplacements,
+              getAnonymizedValue,
+              onNewReplacements: localOnNewReplacements,
+              rawData: getRawDataOrDefault(hit.fields),
+            })
+          );
 
           const misconfigurationQuery = buildMisconfigurationsFindingsQuery(
             {
@@ -161,13 +179,6 @@ export const highlightEntityDetailsAIRoute = (
             },
             {}
           ); // second param is rulesStates which is only available inside cloud posture plugin server
-
-          const fields = anonymizationFields
-            .filter((fieldItem) => fieldItem.allowed)
-            .map((fieldItem) => ({
-              field: fieldItem.field,
-              include_unmapped: true,
-            }));
 
           const misconfigurations = await esClient.search<unknown, unknown>({
             ...misconfigurationQuery,
@@ -189,7 +200,7 @@ export const highlightEntityDetailsAIRoute = (
           });
 
           const misconfigurationsAnonymized = misconfigurations.hits.hits.map((hit) =>
-            transformRawData({
+            transformRawDataToRecord({
               anonymizationFields,
               currentReplacements: localReplacements,
               getAnonymizedValue,
@@ -198,8 +209,9 @@ export const highlightEntityDetailsAIRoute = (
             })
           );
 
+          // TODO: got a bug where agent.id was anonymized but not present into replacements
           const vulnerabilitiesAnonymized = vulnerabilities.hits.hits.map((hit) =>
-            transformRawData({
+            transformRawDataToRecord({
               anonymizationFields,
               currentReplacements: localReplacements,
               getAnonymizedValue,
@@ -208,7 +220,7 @@ export const highlightEntityDetailsAIRoute = (
             })
           );
 
-          let anomaliesAnonymized: string[] = [];
+          let anomaliesAnonymized: Record<string, string[]>[] = [];
           if (ml) {
             const jobs = await ml.jobServiceProvider(request, soClient).jobsSummary();
             const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
@@ -261,25 +273,23 @@ export const highlightEntityDetailsAIRoute = (
               });
               localOnNewReplacements(relatedEntities.replacements);
 
-              return getCsvFromData(
-                flattenObject({
-                  id: formattedAnomaly.job_id,
-                  score: formattedAnomaly.record_score,
-                  job: jobNameById[anomaly.jobId],
-                  entities: relatedEntities.anonymizedData,
-                })
-              );
+              return flattenObject({
+                id: formattedAnomaly.job_id,
+                score: formattedAnomaly.record_score,
+                job: jobNameById[anomaly.jobId],
+                entities: relatedEntities.anonymizedData,
+              });
             });
           }
 
           return response.ok({
             body: {
               summary: {
-                assetCriticalityAnonymized,
-                anonymizedRiskScore,
-                misconfigurationsAnonymized,
-                vulnerabilitiesAnonymized,
-                anomaliesAnonymized,
+                assetCriticality: assetCriticalityAnonymized,
+                riskScore: anonymizedRiskScore,
+                misconfigurations: misconfigurationsAnonymized,
+                vulnerabilities: vulnerabilitiesAnonymized,
+                anomalies: anomaliesAnonymized,
               },
               replacements: localReplacements,
             },
@@ -295,15 +305,3 @@ export const highlightEntityDetailsAIRoute = (
       }
     );
 };
-
-function flattenObject(obj, parentKey = '', result = {}) {
-  forOwn(obj, (value, key) => {
-    const newKey = parentKey ? `${parentKey}.${key}` : key;
-    if (isPlainObject(value)) {
-      flattenObject(value, newKey, result);
-    } else {
-      result[newKey] = Array.isArray(value) ? value : [value];
-    }
-  });
-  return result;
-}

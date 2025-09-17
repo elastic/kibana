@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { highlightEntityDetailsAIRoute } from './entity_details_highlight';
+import { entityDetailsHighlightsRoute } from './entity_details_highlight';
 
 export const registerEntityDetailsRoutes = ({
   router,
@@ -16,5 +16,5 @@ export const registerEntityDetailsRoutes = ({
   ml,
 }: EntityAnalyticsRoutesDeps) => {
   // Internal routes
-  highlightEntityDetailsAIRoute(router, logger, getStartServices, ml);
+  entityDetailsHighlightsRoute(router, logger, getStartServices, ml);
 };

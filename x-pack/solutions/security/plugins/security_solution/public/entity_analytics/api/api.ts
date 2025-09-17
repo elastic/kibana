@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
   CreateEntitySourceResponse,
@@ -444,6 +445,23 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
+    const fetchEntityDetailsHighlights = (
+      params: {
+        entityType: string;
+        entityIdentifier: string;
+        anonymizationFields: string[];
+        from: number;
+        to: number;
+      },
+      signal?: AbortSignal
+    ) =>
+      http.fetch(ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -473,6 +491,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntitiesList,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
+      fetchEntityDetailsHighlights,
     };
   }, [http]);
 };
