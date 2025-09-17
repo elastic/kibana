@@ -93,10 +93,6 @@ export const JsonCodeEditorCommon = ({
         wrappingIndent: 'indent',
       }}
       enableFindAction={enableFindAction}
-      fitToContent={{
-        minLines: 3,
-        maxLines: 30,
-      }}
     />
   );
   if (hideCopyButton) {
@@ -104,7 +100,7 @@ export const JsonCodeEditorCommon = ({
   }
   return (
     <EuiFlexGroup css={styles.codeEditor} direction="column" gutterSize="s">
-      <EuiFlexItem css={styles.copyButtonContainer}>
+      <EuiFlexItem grow={false} css={styles.copyButtonContainer}>
         <EuiCopy textToCopy={jsonValue}>
           {(copy) => (
             <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>

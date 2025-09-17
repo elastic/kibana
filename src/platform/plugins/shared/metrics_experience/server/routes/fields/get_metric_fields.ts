@@ -11,7 +11,7 @@ import type { Fields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { isNumber } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { MetricField, MetricFieldsResponse } from '../../../common/fields/types';
+import type { MetricField, MetricFieldsResponse } from '../../../common/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
 import { getEcsFieldDescriptions } from '../../lib/fields/get_ecs_field_descriptions';
 import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
@@ -34,8 +34,8 @@ export async function getMetricFields({
   esClient: TracedElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
-  from: string;
-  to: string;
+  from: number;
+  to: number;
   page: number;
   size: number;
   logger: Logger;
@@ -99,12 +99,15 @@ export async function getMetricFields({
 
     // Priority: existing description -> ECS description
     const description = field.description || ecsDescription;
-    const source = field.description ? 'custom' : ecsDescription ? 'ecs' : 'custom';
+    const source: MetricField['source'] = field.description
+      ? 'custom'
+      : ecsDescription
+      ? 'ecs'
+      : 'custom';
 
     return {
       ...field,
       description,
-      unit: field.unit,
       source,
       // Sort dimensions alphabetically by name
       dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),

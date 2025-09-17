@@ -171,7 +171,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         descriptionForInspector,
         ignoreGlobalFilters,
       },
-      { abortSignal, inspectorAdapters, getKibanaRequest }
+      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -272,7 +272,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {

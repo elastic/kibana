@@ -6,7 +6,6 @@
  */
 
 import {
-  OBSERVABILITY_ENABLE_STREAMS_UI,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
 } from '@kbn/management-settings-ids';
@@ -34,6 +33,7 @@ export interface StreamsPrivileges {
     show: boolean;
   };
   features: StreamsFeatures;
+  isLoading?: boolean;
 }
 
 export function useStreamsPrivileges(): StreamsPrivileges {
@@ -51,8 +51,6 @@ export function useStreamsPrivileges(): StreamsPrivileges {
   } = useKibana();
 
   const license = useObservable(licensing.license$);
-
-  const uiEnabled = uiSettings.get<boolean>(OBSERVABILITY_ENABLE_STREAMS_UI);
 
   const groupStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS, false);
 
@@ -72,7 +70,7 @@ export function useStreamsPrivileges(): StreamsPrivileges {
     },
     features: {
       ui: {
-        enabled: uiEnabled,
+        enabled: true,
       },
       significantEvents: license && {
         enabled: significantEventsEnabled,
@@ -85,5 +83,6 @@ export function useStreamsPrivileges(): StreamsPrivileges {
         enabled: groupStreamsEnabled,
       },
     },
+    isLoading: !license,
   };
 }

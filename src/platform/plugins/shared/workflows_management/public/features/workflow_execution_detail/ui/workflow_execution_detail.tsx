@@ -11,7 +11,7 @@ import React, { useEffect, useCallback } from 'react';
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowStepExecutionList } from './workflow_step_execution_list';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
@@ -32,8 +32,12 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
-  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedExecution } =
-    useWorkflowUrlState();
+  const {
+    setSelectedStepExecution,
+    selectedStepExecutionId,
+    setSelectedExecution,
+    setSelectedStep,
+  } = useWorkflowUrlState();
 
   const closeFlyout = useCallback(() => {
     setSelectedStepExecution(null);
@@ -102,18 +106,23 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     return (
       <WorkflowStepExecutionFlyout
         workflowExecutionId={workflowExecutionId}
-        stepId={selectedStepExecution.stepId}
+        stepExecutionId={selectedStepExecution.id}
+        stepExecution={selectedStepExecution}
         closeFlyout={closeFlyout}
         goNext={goNext}
         goPrevious={goPrevious}
+        setSelectedStepId={setSelectedStep}
+        isLoading={isLoading}
       />
     );
   }, [
     workflowExecution?.stepExecutions,
     workflowExecutionId,
+    closeFlyout,
+    setSelectedStep,
     selectedStepExecutionId,
     setSelectedStepExecution,
-    closeFlyout,
+    isLoading,
   ]);
 
   const closeSidePanel = useCallback(() => {

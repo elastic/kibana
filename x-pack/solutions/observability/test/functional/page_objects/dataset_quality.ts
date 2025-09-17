@@ -11,7 +11,7 @@ import {
   datasetQualityDetailsUrlSchemaV1,
   datasetQualityUrlSchemaV1,
   datasetQualityDetailsUrlSchemaV2,
-} from '@kbn/data-quality-plugin/common';
+} from '@kbn/data-quality/common';
 import {
   DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
@@ -77,7 +77,7 @@ type SummaryPanelKPI = Record<
 const texts = {
   noActivityText: 'No activity in the selected timeframe',
   datasetHealthPoor: 'Poor',
-  datasetHealthWarning: 'Warning',
+  datasetHealthDegraded: 'Degraded',
   datasetHealthGood: 'Good',
   activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
@@ -184,6 +184,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     editFailureStoreModal: 'editFailureStoreModal',
     enableFailureStoreToggle: 'enableFailureStoreToggle',
     failureStoreModalSaveButton: 'failureStoreModalSaveButton',
+    editFailureStoreIcon: 'datasetQualityDetailsEditFailureStore',
   };
 
   return {
@@ -293,7 +294,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
-        { title: texts.datasetHealthWarning, key: 'datasetHealthWarning' },
+        { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
         { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
         { title: texts.activeDatasets, key: 'activeDatasets' },
         { title: texts.estimatedData, key: 'estimatedData' },

@@ -20,7 +20,7 @@ export const NO_CONFIGURATION_REQUIRED = i18n.translate(
 export const WORKFLOW_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.workflows.workflowIdTextFieldLabel',
   {
-    defaultMessage: 'Workflow ID',
+    defaultMessage: 'Select Workflow',
   }
 );
 

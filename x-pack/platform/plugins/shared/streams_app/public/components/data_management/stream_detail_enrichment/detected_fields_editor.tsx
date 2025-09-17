@@ -73,13 +73,18 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={isWiredStream ? ['name', 'type', 'format', 'status'] : ['name', 'type']}
+        defaultColumns={['name', 'type', 'format', 'status']}
         fields={detectedFields}
         stream={definition.stream}
-        onFieldUnmap={unmapField}
-        onFieldUpdate={mapField}
-        withTableActions={isWiredStream}
-        withToolbar={isWiredStream}
+        onFieldUpdate={(field) => {
+          if (field.status === 'mapped') {
+            mapField(field);
+          } else if (field.status === 'unmapped') {
+            unmapField(field.name);
+          }
+        }}
+        withControls
+        withTableActions
       />
     </>
   );

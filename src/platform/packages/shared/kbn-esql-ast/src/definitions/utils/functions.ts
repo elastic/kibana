@@ -24,7 +24,7 @@ import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
-import type { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
+import type { ESQLColumnData, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
@@ -374,8 +374,8 @@ const getVariablePrefix = (variableType: ESQLVariableType) =>
     ? '??'
     : '?';
 
-export const buildFieldsDefinitionsWithMetadata = (
-  fields: ESQLFieldWithMetadata[],
+export const buildColumnSuggestions = (
+  columns: ESQLColumnData[],
   recommendedFieldsFromExtensions: RecommendedField[] = [],
   options?: {
     advanceCursor?: boolean;
@@ -386,20 +386,23 @@ export const buildFieldsDefinitionsWithMetadata = (
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
-  const fieldsSuggestions = fields.map((field) => {
-    const fieldType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
-    const titleCaseType = `${field.name} (${fieldType})`;
+  const fieldsSuggestions = columns.map((column) => {
+    const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
+    const titleCaseType = `${column.name} (${fieldType})`;
     // Check if the field is in the recommended fields from extensions list
     // and if so, mark it as recommended. This also ensures that recommended fields
     // that are registered wrongly, won't be shown as suggestions.
     const fieldIsRecommended = recommendedFieldsFromExtensions.some(
-      (recommendedField) => recommendedField.name === field.name
+      (recommendedField) => recommendedField.name === column.name
     );
-    const sortText = getFieldsSortText(Boolean(field.isEcs), Boolean(fieldIsRecommended));
+    const sortText = getFieldsSortText(
+      !column.userDefined && Boolean(column.isEcs),
+      Boolean(fieldIsRecommended)
+    );
     return {
-      label: field.name,
+      label: column.name,
       text:
-        getSafeInsertText(field.name) +
+        getSafeInsertText(column.name) +
         (options?.addComma ? ',' : '') +
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
@@ -415,7 +418,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     const userDefinedColumns =
       variables?.filter((variable) => variable.type === variableType) ?? [];
 
-    const controlSuggestions = fields.length
+    const controlSuggestions = columns.length
       ? getControlSuggestion(
           variableType,
           userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
@@ -426,3 +429,51 @@ export const buildFieldsDefinitionsWithMetadata = (
 
   return [...suggestions];
 };
+
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
+  return {
+    label: indexName
+      ? i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
+
+          {
+            defaultMessage: 'Create lookup index "{indexName}"',
+
+            values: { indexName },
+          }
+        )
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
+          defaultMessage: 'Create lookup index',
+        }),
+
+    text: indexName,
+
+    kind: 'Issue',
+
+    filterText: indexName,
+
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+      {
+        defaultMessage: 'Click to create',
+      }
+    ),
+
+    sortText: '1A',
+
+    command: {
+      id: `esql.lookup_index.create`,
+
+      title: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+
+      arguments: [{ indexName }],
+    },
+  } as ISuggestionItem;
+}

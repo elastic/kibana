@@ -14,7 +14,6 @@ import type {
   ConversationResponse,
   DeleteAllConversationsRequestBody,
   ConversationUpdateProps,
-  ConversationSummary,
 } from '@kbn/elastic-assistant-common';
 import type {
   CreateMessageSchema,
@@ -100,7 +99,7 @@ export const getDeleteAllConversationsSchemaMock = (): DeleteAllConversationsReq
 
 export const getUpdateConversationSchemaMock = (
   conversationId = 'conversation-1'
-): ConversationUpdateProps & { summary?: ConversationSummary } => ({
+): ConversationUpdateProps => ({
   title: 'Welcome 2',
   apiConfig: {
     actionTypeId: '.gen-ai',
@@ -138,9 +137,7 @@ export const getAppendConversationMessagesSchemaMock =
     ],
   });
 
-export type ConversationMockParams = (ConversationCreateProps | ConversationUpdateProps) & {
-  summary?: ConversationSummary;
-};
+export type ConversationMockParams = ConversationCreateProps | ConversationUpdateProps;
 
 export const getConversationMock = (params: ConversationMockParams): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -252,5 +249,38 @@ export const getEsCreateConversationSchemaMock = (
   users: [{ name: 'elastic' }],
   created_by: { name: 'elastic' },
   namespace: 'default',
+  ...rest,
+});
+
+export const getEsConversationSchemaMock = (
+  rest?: Partial<EsConversationSchema>
+): EsConversationSchema => ({
+  '@timestamp': '2020-04-20T15:25:31.830Z',
+  created_at: '2020-04-20T15:25:31.830Z',
+  title: 'title-1',
+  updated_at: '2020-04-20T15:25:31.830Z',
+  messages: [],
+  id: '1',
+  namespace: 'default',
+  exclude_from_last_conversation_storage: false,
+  api_config: {
+    action_type_id: '.gen-ai',
+    connector_id: 'c1',
+    default_system_prompt_id: 'prompt-1',
+    model: 'test',
+    provider: 'Azure OpenAI',
+  },
+  category: 'assistant',
+  users: [
+    {
+      id: '1111',
+      name: 'elastic',
+    },
+  ],
+  created_by: {
+    id: '1111',
+    name: 'elastic',
+  },
+  replacements: undefined,
   ...rest,
 });

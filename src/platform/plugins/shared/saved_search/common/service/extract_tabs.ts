@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import type {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
@@ -38,7 +39,7 @@ export const extractTabs = (
       label: i18n.translate('savedSearch.defaultTabLabel', {
         defaultMessage: 'Untitled',
       }),
-      attributes: tabAttrs,
+      attributes: omit(tabAttrs, 'tabs'),
     },
   ];
   return { ...attributes, tabs };

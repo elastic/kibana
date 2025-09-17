@@ -8,3 +8,5 @@
  */
 
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+
+export const MAX_DISPLAYED_RELATIONSHIPS = 10;

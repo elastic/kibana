@@ -14,7 +14,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
-import { AgentlessAgentCreateOverProvisionedError } from '../../../../../../../../common/errors';
+import {
+  AgentlessAgentCreateFleetUnreachableError,
+  AgentlessAgentCreateOverProvisionedError,
+} from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import {
   type AgentPolicy,
@@ -137,7 +140,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void,
+  setPackagePolicy: (policy: NewPackagePolicy) => void
 ) => {
   const input = packagePolicy.inputs?.filter(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
@@ -167,6 +171,11 @@ export const updateAgentlessCloudConnectorConfig = (
           cloud_connectors: undefined,
         },
       });
+
+      setPackagePolicy({
+        ...packagePolicy,
+        supports_cloud_connector: false,
+      });
       return;
     }
 
@@ -180,6 +189,11 @@ export const updateAgentlessCloudConnectorConfig = (
             target_csp: targetCsp,
           },
         },
+      });
+
+      setPackagePolicy({
+        ...packagePolicy,
+        supports_cloud_connector: true,
       });
     }
   }
@@ -427,7 +441,12 @@ export function useOnSubmit({
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
-  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
+  updateAgentlessCloudConnectorConfig(
+    packagePolicy,
+    newAgentPolicy,
+    setNewAgentPolicy,
+    setPackagePolicy
+  );
 
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,
@@ -499,6 +518,33 @@ export function useOnSubmit({
                     defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
                     values={{
                       limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
+                      docLink: (
+                        <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.createAgentlessPolicy.seeDocLink"
+                            defaultMessage="See agentless documentation."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </>
+              ),
+            });
+          }
+          if (e?.attributes?.type === AgentlessAgentCreateFleetUnreachableError.name) {
+            notifications.toasts.addError(e, {
+              title: i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                defaultMessage: 'Unable to create integration',
+              }),
+              // @ts-expect-error
+              toastMessage: (
+                <>
+                  <FormattedMessage
+                    id="xpack.fleet.createAgentlessPolicy.FleetUnreachableErrorMessage"
+                    defaultMessage="Fleet is not reachable and required to create agentless policy. Error: {errorMessage}. {docLink}"
+                    values={{
+                      errorMessage: e?.message ?? '',
                       docLink: (
                         <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
                           <FormattedMessage
