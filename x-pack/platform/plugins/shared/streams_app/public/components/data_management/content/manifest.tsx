@@ -63,7 +63,7 @@ export function ContentPackMetadata({
           labelAppend={
             !readonly && (
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.streamsApp.contentPack.description.optionalLabel', {
+                {i18n.translate('xpack.streams.contentPack.description.optionalLabel', {
                   defaultMessage: 'Optional',
                 })}
               </EuiText>

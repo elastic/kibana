@@ -96,7 +96,7 @@ export function ExportContentPackFlyout({
   );
 
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
-    objects: { all: {} },
+    objects: { queries: [], routing: [] },
   });
   const [isExporting, setIsExporting] = useState(false);
 
@@ -131,10 +131,7 @@ export function ExportContentPackFlyout({
             <ContentPackObjectsList
               definition={definition}
               objects={exportResponse.contentPack.entries}
-              onSelectionChange={(objects) => {
-                console.log(JSON.stringify(objects, null, 2));
-                setIncludedObjects(objects);
-              }}
+              onSelectionChange={(objects) => setIncludedObjects(objects)}
             />
           </>
         ) : null}
@@ -178,6 +175,11 @@ export function ExportContentPackFlyout({
                   saveAs(
                     new Blob([contentPack], { type: 'application/zip' }),
                     `${manifest.name}-${manifest.version}.zip`
+                  );
+                  notifications.toasts.addSuccess(
+                    i18n.translate('xpack.streams.exportContentPackFlyout.exportSuccess', {
+                      defaultMessage: 'Export completed',
+                    })
                   );
                   onExport();
                 } catch (err) {

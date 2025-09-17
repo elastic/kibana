@@ -39,15 +39,19 @@ export function ContentPackObjectsList({
 
   useEffect(() => {
     if (!significantEvents) return;
+
     const streams = objects.filter((entry): entry is ContentPackStream => entry.type === 'stream');
-    setIncludeAssets(significantEvents.available && containsAssets(streams));
-    setSelection({
+    const include = significantEvents.available && containsAssets(streams);
+    const selection = {
       ...streams.reduce((map, stream) => {
         map[stream.name] = { selected: true };
         return map;
       }, {} as Record<string, { selected: boolean }>),
-    });
-  }, [significantEvents?.available, objects]);
+    };
+    setIncludeAssets(include);
+    setSelection(selection);
+    onSelectionChange(toIncludedObjects(selection, streams, include));
+  }, [significantEvents, objects]);
 
   const { rootEntry, descendants } = useMemo(() => {
     if (objects.length === 0) {
@@ -59,12 +63,12 @@ export function ContentPackObjectsList({
         entry.type === 'stream' && entry.name === ROOT_STREAM_ID
     )!;
 
-    const descendants = objects.filter(
+    const others = objects.filter(
       (entry): entry is ContentPackStream =>
         entry.type === 'stream' && entry.name !== ROOT_STREAM_ID
     );
 
-    return { rootEntry: root, descendants };
+    return { rootEntry: root, descendants: others };
   }, [objects]);
 
   return !rootEntry ? null : (

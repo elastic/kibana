@@ -56,7 +56,7 @@ export function ImportContentPackFlyout({
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
-    objects: { all: {} },
+    objects: { queries: [], routing: [] },
   });
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
@@ -192,6 +192,11 @@ export function ImportContentPackFlyout({
                   setIsLoading(false);
                   setContentPackObjects([]);
                   setFile(null);
+                  notifications.toasts.addSuccess(
+                    i18n.translate('xpack.streams.exportContentPackFlyout.importSuccess', {
+                      defaultMessage: 'Content imported successfully',
+                    })
+                  );
                   onImport();
                 } catch (err) {
                   setIsLoading(false);
