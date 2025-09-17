@@ -162,7 +162,9 @@ export const PresentationPanelInternal = <
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
-          {...(api && (api as unknown as HasType).type === 'lens' ? reportingAttributes : {})}
+          {...(api && ['lens', 'links'].includes((api as unknown as HasType).type)
+            ? reportingAttributes
+            : {})}
           ref={(ref) => (reportingRef.current = ref as HTMLElement)}
         >
           <EuiErrorBoundary>
