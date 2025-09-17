@@ -28,14 +28,16 @@ const upsertApiLabel = (
 
   const existingLabelIndex = mergedLabels.findIndex(
     (label) =>
-      label.field === apiLabel.field &&
-      label.value === apiLabel.value &&
-      label.source === 'api'
+      label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
   );
-  
+
   if (existingLabelIndex >= 0) {
     // Update existing API label
-    mergedLabels[existingLabelIndex] = { field: apiLabel.field, value: apiLabel.value, source: 'api' };
+    mergedLabels[existingLabelIndex] = {
+      field: apiLabel.field,
+      value: apiLabel.value,
+      source: 'api',
+    };
   } else {
     // Add new API label
     mergedLabels.push({ field: apiLabel.field, value: apiLabel.value, source: 'api' });
@@ -70,7 +72,7 @@ export const createPrivilegedUsersCrudService = ({
     // This method handles two scenarios:
     // 1. If user exists: Update existing user with new labels and sources
     // 2. If user doesn't exist: Create a new user
-    
+
     // Check if user already exists by username
     const username = user.user?.name;
     if (username) {
