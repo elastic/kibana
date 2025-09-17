@@ -261,7 +261,11 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
 /**
  * Generate a snippet template for a connector type with required parameters
  */
-function generateConnectorSnippet(connectorType: string, shouldBeQuoted: boolean, dynamicConnectorTypes?: Record<string, any>): string {
+function generateConnectorSnippet(
+  connectorType: string,
+  shouldBeQuoted: boolean,
+  dynamicConnectorTypes?: Record<string, any>
+): string {
   const quotedType = shouldBeQuoted ? `"${connectorType}"` : connectorType;
 
   // Get required parameters for this connector type
@@ -514,23 +518,25 @@ function getEnhancedTypeInfo(schema: z.ZodType): {
 } {
   let currentSchema = schema;
   let isOptional = false;
-  
+
   // Unwrap ZodOptional
   if (currentSchema instanceof z.ZodOptional) {
     isOptional = true;
     currentSchema = currentSchema._def.innerType;
   }
-  
+
   const baseType = getZodTypeName(currentSchema);
   const description = (currentSchema as any)?._def?.description || '';
-  
+
   // Extract example from description if available
   let example = '';
-  const exampleMatch = description.match(/e\.g\.,?\s*['"]*([^'"]+)['"]*|example[:\s]+['"]*([^'"]+)['"]*/i);
+  const exampleMatch = description.match(
+    /e\.g\.,?\s*['"]*([^'"]+)['"]*|example[:\s]+['"]*([^'"]+)['"]*/i
+  );
   if (exampleMatch) {
     example = exampleMatch[1] || exampleMatch[2] || '';
   }
-  
+
   // Enhanced type information based on schema type
   let enhancedType = baseType;
   if (currentSchema instanceof z.ZodArray) {
@@ -546,7 +552,7 @@ function getEnhancedTypeInfo(schema: z.ZodType): {
   } else if (currentSchema instanceof z.ZodLiteral) {
     enhancedType = `"${currentSchema._def.value}"`;
   }
-  
+
   return {
     type: enhancedType,
     isRequired: !isOptional,
@@ -705,7 +711,10 @@ const connectorSchemaCache = new Map<string, Record<string, any> | null>();
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
 
-function getConnectorParamsSchema(connectorType: string, dynamicConnectorTypes?: Record<string, any>): Record<string, any> | null {
+function getConnectorParamsSchema(
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, any>
+): Record<string, any> | null {
   // Check cache first
   if (connectorSchemaCache.has(connectorType)) {
     return connectorSchemaCache.get(connectorType)!;
@@ -1015,7 +1024,11 @@ function getConnectorTypeSuggestions(
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
-    const snippetText = generateConnectorSnippet(connectorType, shouldBeQuoted, dynamicConnectorTypes);
+    const snippetText = generateConnectorSnippet(
+      connectorType,
+      shouldBeQuoted,
+      dynamicConnectorTypes
+    );
 
     // For YAML, we insert the actual text without snippet placeholders
     const simpleText = snippetText;
@@ -1417,7 +1430,7 @@ export function getCompletionItemProvider(
         if (connectorType) {
           // First check if we're inside an array item - if so, don't show parameter suggestions
           const isInArrayItem = lineUpToCursor.match(/^\s*-\s+/) !== null;
-          
+
           if (isInArrayItem) {
             // We're in an array item, don't show connector parameter suggestions
             // Instead, return empty suggestions or appropriate array value suggestions
@@ -1426,7 +1439,7 @@ export function getCompletionItemProvider(
               incomplete: false,
             };
           }
-          
+
           // Check if we're typing a value (after colon with content)
           const colonIndex = lineUpToCursor.lastIndexOf(':');
 
@@ -1581,14 +1594,29 @@ export function getCompletionItemProvider(
                   insertText = `${key}:\n  - \${1:}`;
                 }
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-              } else if (typeInfo.type === 'boolean' || key.includes('enabled') || key.includes('disabled') || key.endsWith('Stream')) {
+              } else if (
+                typeInfo.type === 'boolean' ||
+                key.includes('enabled') ||
+                key.includes('disabled') ||
+                key.endsWith('Stream')
+              ) {
                 insertText = `${key}: \${1:true}`;
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-              } else if (typeInfo.type === 'number' || key.includes('size') || key.includes('count') || key.includes('limit')) {
+              } else if (
+                typeInfo.type === 'number' ||
+                key.includes('size') ||
+                key.includes('count') ||
+                key.includes('limit')
+              ) {
                 const defaultValue = typeInfo.example || '10';
                 insertText = `${key}: \${1:${defaultValue}}`;
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-              } else if (typeInfo.type === 'string' || key.includes('message') || key.includes('text') || key.includes('content')) {
+              } else if (
+                typeInfo.type === 'string' ||
+                key.includes('message') ||
+                key.includes('text') ||
+                key.includes('content')
+              ) {
                 const placeholder = typeInfo.example || '';
                 insertText = `${key}: "\${1:${placeholder}}"`;
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
@@ -1618,15 +1646,15 @@ export function getCompletionItemProvider(
               let documentation = `**${connectorType} Parameter: ${key}**\n\n`;
               documentation += `**Type:** \`${typeInfo.type}\`\n`;
               documentation += `**Required:** ${typeInfo.isRequired ? 'Yes' : 'No'}\n`;
-              
+
               if (typeInfo.description) {
                 documentation += `\n**Description:** ${typeInfo.description}\n`;
               }
-              
+
               if (typeInfo.example) {
                 documentation += `\n**Example:** \`${typeInfo.example}\`\n`;
               }
-              
+
               documentation += `\n*This parameter is specific to the ${connectorType} connector.*`;
 
               const suggestion: monaco.languages.CompletionItem = {
@@ -1687,8 +1715,9 @@ export function getCompletionItemProvider(
 
         for (const [key, currentSchema] of Object.entries(context.shape) as [string, z.ZodType][]) {
           // Check if manually triggered (Cmd+I/Ctrl+I) to show all suggestions
-          const isManualTrigger = completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
-          
+          const isManualTrigger =
+            completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
+
           if (lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger) {
             continue;
           }
@@ -1773,28 +1802,28 @@ export function getCompletionItemProvider(
               typeInfo.type,
               typeInfo.description
             );
-            
+
             // Enhance the suggestion with better detail and documentation
             const requiredIndicator = typeInfo.isRequired ? '(required)' : '(optional)';
             enhancedSuggestion.detail = `${typeInfo.type} ${requiredIndicator}`;
-            
+
             if (typeInfo.description || typeInfo.example) {
               let documentation = `**Type:** \`${typeInfo.type}\`\n`;
               documentation += `**Required:** ${typeInfo.isRequired ? 'Yes' : 'No'}\n`;
-              
+
               if (typeInfo.description) {
                 documentation += `\n**Description:** ${typeInfo.description}\n`;
               }
-              
+
               if (typeInfo.example) {
                 documentation += `\n**Example:** \`${typeInfo.example}\`\n`;
               }
-              
+
               enhancedSuggestion.documentation = {
                 value: documentation,
               };
             }
-            
+
             suggestions.push(enhancedSuggestion);
           }
         }

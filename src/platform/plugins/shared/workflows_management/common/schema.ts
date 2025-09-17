@@ -766,14 +766,16 @@ export function convertDynamicConnectorsToContracts(
         // Try to get the proper schema for this connector type
         const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, '');
         const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, '');
-        
+
         connectorContracts.push({
           type: connectorType.actionTypeId,
           paramsSchema,
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
           outputSchema,
-          description: `${connectorType.displayName} connector${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
+          description: `${connectorType.displayName} connector${
+            connectorType.instances.length === 0 ? ' (no instances configured)' : ''
+          }`,
         });
       }
     } catch (error) {

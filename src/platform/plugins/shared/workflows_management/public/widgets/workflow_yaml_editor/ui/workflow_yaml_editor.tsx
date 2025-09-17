@@ -796,13 +796,10 @@ export const WorkflowYAMLEditor = ({
     });
 
     // Add custom keybinding for Cmd+I (Mac) / Ctrl+I (Windows) to trigger suggestions
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
-      () => {
-        // Trigger the suggest widget manually
-        editor.getAction('editor.action.triggerSuggest')?.run();
-      }
-    );
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
+      // Trigger the suggest widget manually
+      editor.getAction('editor.action.triggerSuggest')?.run();
+    });
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
