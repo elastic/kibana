@@ -9,7 +9,7 @@
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 
-export const getEsqlQuery = ({
+export const createTraceContextWhereClause = ({
   traceId,
   spanId,
   transactionId,
