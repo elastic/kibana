@@ -40,6 +40,7 @@ export interface Props {
 const sorting: EuiInMemoryTableProps['sorting'] = {
   sort: { field: 'lastSeen', direction: 'desc' as const },
 };
+
 export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
   ({ traceId, docId }, ref) => {
     const { indexes } = useDataSourcesContext();
@@ -65,66 +66,63 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     }
 
     return (
-      <ScrollableSectionWrapper ref={ref} defaultState="open">
-        {({ forceState, onToggle }) => {
-          return (
-            <ContentFrameworkSection
-              data-test-subj="unifiedDocViewerErrorsAccordion"
-              id="errorsSection"
-              title={i18n.translate(
-                'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
-                {
-                  defaultMessage: 'Errors',
-                }
-              )}
-              description={i18n.translate(
-                'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
-                { defaultMessage: 'Errors that occurred during this span and their causes' }
-              )}
-              actions={
-                openInDiscoverLink
-                  ? [
-                      {
-                        icon: 'discoverApp',
-                        label: OPEN_IN_DISCOVER_LABEL,
-                        ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
-                        href: openInDiscoverLink,
-                        dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
-                      },
-                    ]
-                  : undefined
+      <ScrollableSectionWrapper ref={ref}>
+        {({ onToggle, forceState }) => (
+          <ContentFrameworkSection
+            data-test-subj="unifiedDocViewerErrorsAccordion"
+            id="errorsSection"
+            title={i18n.translate(
+              'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
+              {
+                defaultMessage: 'Errors',
               }
-              initialIsOpen={forceState === 'open'}
-              onToggle={onToggle}
-            >
-              <EuiSpacer size="s" />
-              {error ? (
-                <EuiText color="subdued">
-                  {i18n.translate(
-                    'unifiedDocViewer.observability.traces.docViewerSpanOverview.error',
+            )}
+            description={i18n.translate(
+              'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
+              { defaultMessage: 'Errors that occurred during this span and their causes' }
+            )}
+            actions={
+              openInDiscoverLink
+                ? [
                     {
-                      defaultMessage:
-                        'An error happened when trying to fetch data. Please try again',
-                    }
-                  )}
-                </EuiText>
-              ) : (
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiInMemoryTable
-                      responsiveBreakpoint={false}
-                      items={response.traceErrors}
-                      columns={columns}
-                      pagination={{ showPerPageOptions: false, pageSize: 5 }}
-                      sorting={sorting}
-                      compressed
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </ContentFrameworkSection>
-          );
-        }}
+                      icon: 'discoverApp',
+                      label: OPEN_IN_DISCOVER_LABEL,
+                      ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+                      href: openInDiscoverLink,
+                      dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
+                    },
+                  ]
+                : undefined
+            }
+            initialIsOpen={forceState === 'open'}
+            onToggle={onToggle}
+          >
+            <EuiSpacer size="s" />
+            {error ? (
+              <EuiText color="subdued">
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.error',
+                  {
+                    defaultMessage: 'An error happened when trying to fetch data. Please try again',
+                  }
+                )}
+              </EuiText>
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiInMemoryTable
+                    responsiveBreakpoint={false}
+                    items={response.traceErrors}
+                    columns={columns}
+                    pagination={{ showPerPageOptions: false, pageSize: 5 }}
+                    sorting={sorting}
+                    compressed
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </ContentFrameworkSection>
+        )}
       </ScrollableSectionWrapper>
     );
   }

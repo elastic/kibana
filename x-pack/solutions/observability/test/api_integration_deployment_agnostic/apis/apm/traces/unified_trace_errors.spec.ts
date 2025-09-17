@@ -23,7 +23,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     async function fetchUnifiedTraceErrors({
       traceId,
       spanId,
-      transactionId,
     }: {
       traceId: string;
       spanId?: string;
@@ -36,8 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           query: {
             start: new Date(start).toISOString(),
             end: new Date(endWithOffset).toISOString(),
-            ...(spanId && { spanId }),
-            ...(transactionId && { transactionId }),
+            ...(spanId && { docId: spanId }),
           },
         },
       });
