@@ -113,6 +113,7 @@ export const EnhancedFieldSelector = ({
         helpText={helpText ?? defaultHelpText}
         isInvalid={fieldState.invalid}
         error={fieldState.error?.message}
+        fullWidth
       >
         <EuiComboBox
           data-test-subj="streamsAppProcessorFieldSelectorComboFieldText"
@@ -124,6 +125,7 @@ export const EnhancedFieldSelector = ({
           singleSelection={{ asPlainText: true }}
           isInvalid={fieldState.invalid}
           isClearable
+          fullWidth
           customOptionText={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.enhancedFieldSelectorCustomOptionText',
             {
