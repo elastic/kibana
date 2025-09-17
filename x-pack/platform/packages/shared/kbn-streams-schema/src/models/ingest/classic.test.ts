@@ -103,12 +103,6 @@ describe('ClassicStream', () => {
           manage_failure_store: true,
         },
         data_stream_exists: true,
-        failure_store: {
-          enabled: false,
-          retentionPeriod: {
-            default: '30d',
-          },
-        },
         ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
