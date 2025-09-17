@@ -150,7 +150,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             })}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                {labels.agents.settings.optionalLabel}
+                {labels.common.optional}
               </EuiText>
             }
             isInvalid={!!formState.errors.configuration?.instructions}
@@ -212,7 +212,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             })}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                {labels.agents.settings.optionalLabel}
+                {labels.common.optional}
               </EuiText>
             }
             isInvalid={!!formState.errors.labels}
@@ -379,7 +379,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 })}
                 labelAppend={
                   <EuiText size="xs" color="subdued">
-                    {labels.agents.settings.optionalLabel}
+                    {labels.common.optional}
                   </EuiText>
                 }
                 isInvalid={!!formState.errors.avatar_color}
@@ -409,7 +409,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 })}
                 labelAppend={
                   <EuiText size="xs" color="subdued">
-                    {labels.agents.settings.optionalLabel}
+                    {labels.common.optional}
                   </EuiText>
                 }
                 isInvalid={!!formState.errors.avatar_symbol}

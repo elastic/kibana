@@ -34,6 +34,10 @@ export interface EsqlToolParam {
    * Description of the parameter's purpose or expected values.
    */
   description: string;
+  /**
+   * Whether the parameter is optional.
+   */
+  optional?: boolean;
 }
 
 // To make compatible with ToolDefinition['configuration']
