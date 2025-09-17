@@ -17,7 +17,6 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +39,6 @@ import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
-import { DeprecatedAIConnectorCallOut } from './deprecated_callout';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -62,7 +60,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     application: { capabilities },
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -219,31 +216,20 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   const banner = useMemo(() => {
-    const redirectToInferenceConnector = (provider: string) => {
-      if (allActionTypes) {
-        const inferenceAction = allActionTypes['.inference'];
-        setActionType(inferenceAction);
-
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set('selectedConnector', `${inferenceAction.id}`);
-        newSearchParams.set('connectorState', JSON.stringify({ provider }));
-        // Update the URL without a full page refresh
-        setSearchParams(newSearchParams);
-      }
-    };
-
     const banners = [];
     if (!actionType && hasActionsUpgradeableByTrial) {
       banners.push(<UpgradeLicenseCallOut />);
     }
 
-    if (actionTypeModel?.id && actionTypeModel?.isDeprecated && actionTypeModel?.actionTypeTitle) {
+    if (allActionTypes && actionTypeModel?.deprecationMessage) {
+      const DeprecationMessageComponent = actionTypeModel?.deprecationMessage;
       banners.push(
         banners.length ? <EuiSpacer /> : null,
-        <DeprecatedAIConnectorCallOut
-          name={actionTypeModel.actionTypeTitle}
+        <DeprecationMessageComponent
+          allActionTypes={allActionTypes}
+          handleActionTypeChange={setActionType}
           id={actionTypeModel.id}
-          onClick={redirectToInferenceConnector}
+          name={actionTypeModel.actionTypeTitle}
         />
       );
     }
@@ -252,12 +238,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, [
     allActionTypes,
     actionType,
+    actionTypeModel?.deprecationMessage,
     actionTypeModel?.id,
-    actionTypeModel?.isDeprecated,
     actionTypeModel?.actionTypeTitle,
     hasActionsUpgradeableByTrial,
-    searchParams,
-    setSearchParams,
   ]);
 
   return (

@@ -21,6 +21,7 @@ export function getConnectorType(): OpenAIConnector {
     id: OPENAI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     isDeprecated: true,
+    deprecationMessage: lazy(() => import('../../common/genai_connectors/deprecated_callout')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
       defaultMessage: 'Send a request to an OpenAI or Azure OpenAI service.',
     }),

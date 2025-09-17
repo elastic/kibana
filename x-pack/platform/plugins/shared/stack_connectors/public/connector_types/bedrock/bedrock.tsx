@@ -21,6 +21,7 @@ export function getConnectorType(): BedrockConnector {
     id: BEDROCK_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     isDeprecated: true,
+    deprecationMessage: lazy(() => import('../../common/genai_connectors/deprecated_callout')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.bedrock.selectMessageText', {
       defaultMessage: 'Send a request to Amazon Bedrock.',
     }),
