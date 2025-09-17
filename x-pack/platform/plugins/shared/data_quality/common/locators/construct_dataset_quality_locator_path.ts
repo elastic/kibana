@@ -9,8 +9,11 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
-import { datasetQualityUrlSchemaV2, DATA_QUALITY_URL_STATE_KEY } from '../url_schema';
-import { deepCompactObject } from '../utils/deep_compact_object';
+import {
+  datasetQualityUrlSchemaV1,
+  DATA_QUALITY_URL_STATE_KEY,
+  deepCompactObject,
+} from '@kbn/data-quality/common';
 
 interface LocatorPathConstructionParams {
   locatorParams: DataQualityLocatorParams;
@@ -25,9 +28,9 @@ export const constructDatasetQualityLocatorPath = async (params: LocatorPathCons
     managementLocator,
   } = params;
 
-  const pageState = datasetQualityUrlSchemaV2.urlSchemaRT.encode(
+  const pageState = datasetQualityUrlSchemaV1.urlSchemaRT.encode(
     deepCompactObject({
-      v: 2,
+      v: 1,
       filters,
     })
   );

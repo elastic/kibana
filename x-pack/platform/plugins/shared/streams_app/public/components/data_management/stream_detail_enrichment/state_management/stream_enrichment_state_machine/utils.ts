@@ -118,14 +118,16 @@ export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
     .map((proc) => proc.context.processor);
 }
 
-export function getUpsertWiredFields(
-  context: StreamEnrichmentContextType
-): FieldDefinition | undefined {
-  if (!Streams.WiredStream.GetResponse.is(context.definition)) {
+export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
+  if (!context.simulatorRef) {
     return undefined;
   }
 
-  const originalFieldDefinition = { ...context.definition.stream.ingest.wired.fields };
+  const originalFieldDefinition = {
+    ...(Streams.WiredStream.GetResponse.is(context.definition)
+      ? context.definition.stream.ingest.wired.fields
+      : context.definition.stream.ingest.classic.field_overrides),
+  };
 
   const { detectedSchemaFields } = context.simulatorRef.getSnapshot().context;
 
@@ -135,9 +137,7 @@ export function getUpsertWiredFields(
     delete originalFieldDefinition[field.name];
   });
 
-  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields).filter(
-    (field) => !originalFieldDefinition[field.name]
-  );
+  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields);
 
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 

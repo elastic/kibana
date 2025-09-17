@@ -28,6 +28,7 @@ export const keywords = [
   'limit',
   'mv_expand',
   'rename',
+  'rerank',
   'row',
   'show',
   'sort',

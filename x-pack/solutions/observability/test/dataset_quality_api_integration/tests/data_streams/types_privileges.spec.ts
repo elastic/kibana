@@ -39,12 +39,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         canRead: false,
         canMonitor: false,
         canReadFailureStore: false,
+        canManageFailureStore: false,
       };
 
       const fullPrivileges = {
         canRead: true,
         canMonitor: true,
         canReadFailureStore: true,
+        canManageFailureStore: true,
       };
 
       it('returns no privileges for noAccessUser with single type', async () => {

@@ -20,6 +20,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 import { AlertActions } from './alert_actions';
 import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -39,12 +40,25 @@ const caseHooksReturnedValue = {
   close: jest.fn(),
 };
 
-const mockKibana = kibanaStartMock.startContract();
+const mockTelemetryClient = createTelemetryClientMock();
+const mockKibana = {
+  ...kibanaStartMock.startContract(),
+  services: {
+    ...kibanaStartMock.startContract().services,
+    telemetryClient: mockTelemetryClient,
+  },
+};
 mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(caseHooksReturnedValue);
 
 mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
+
+mockKibana.services.cases.hooks.useRemoveAlertFromCaseModal.mockReturnValue({
+  ...caseHooksReturnedValue,
+  onSuccess: jest.fn(),
+  onClose: jest.fn(),
+});
 
 mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 const mockLicensing = licensingMock.createStart();
@@ -60,6 +74,7 @@ const config: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
+    managedOtlpServiceUrl: '',
   },
 };
 
@@ -97,6 +112,7 @@ describe('ObservabilityActions component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
+    mockTelemetryClient.reportAlertAddedToCase.mockClear();
   });
 
   const setup = async (pageId: string) => {
@@ -248,7 +264,7 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('should refresh when when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
+  it('should refresh when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
     await setup('nothing');
 
     // @ts-expect-error: The object will always be defined

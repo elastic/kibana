@@ -531,7 +531,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await toggle.click();
+        await toggle.click({
+          bottomOffset: 100 /* account for fixed footer when deciding if toggle is visible */,
+        });
 
         await header.waitUntilLoadingHasFinished();
 

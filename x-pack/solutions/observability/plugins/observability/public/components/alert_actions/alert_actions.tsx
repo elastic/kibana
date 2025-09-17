@@ -17,10 +17,7 @@ import {
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
-import {
-  RELATED_ALERTS_TABLE_ID,
-  SLO_ALERTS_TABLE_ID,
-} from '@kbn/observability-shared-plugin/common';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useCaseActions } from './use_case_actions';
@@ -35,6 +32,7 @@ import { useKibana } from '../../utils/kibana_react';
 export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
+  caseData,
   tableId,
   refresh,
   openAlertInFlyout,
@@ -84,22 +82,36 @@ export function AlertActions({
 
   const onAddToCase = useCallback(
     ({ isNewCase }: { isNewCase: boolean }) => {
-      if (tableId === RELATED_ALERTS_TABLE_ID) {
-        telemetryClient.reportRelatedAlertAddedToCase(isNewCase);
-      }
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+
       refresh?.();
     },
-    [refresh, telemetryClient, tableId]
+    [telemetryClient, tableId, observabilityAlert.fields, refresh]
   );
 
-  const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
-    useCaseActions({
-      onAddToCase,
-      alerts: [alert],
-      services: {
-        cases,
-      },
-    });
+  const onRemoveAlertFromCase = useCallback(() => {
+    refresh?.();
+  }, [refresh]);
+
+  const {
+    isPopoverOpen,
+    setIsPopoverOpen,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    handleRemoveAlertsFromCaseClick,
+  } = useCaseActions({
+    onAddToCase,
+    onRemoveAlertFromCase,
+    alerts: [alert],
+    services: {
+      cases,
+    },
+    caseId: caseData?.id,
+  });
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -108,6 +120,23 @@ export function AlertActions({
   const toggleActionsPopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
+
+  const removeFromCaseAction = [
+    ...(caseData?.id
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="remove-from-case-action"
+            key="removeFromCase"
+            onClick={handleRemoveAlertsFromCaseClick}
+            size="s"
+          >
+            {i18n.translate('xpack.observability.alerts.actions.removeFromCase', {
+              defaultMessage: 'Remove from case',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
 
   const actionsMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
@@ -132,6 +161,7 @@ export function AlertActions({
               defaultMessage: 'Add to new case',
             })}
           </EuiContextMenuItem>,
+          ...removeFromCaseAction,
         ]
       : []),
     useMemo(
@@ -154,11 +184,13 @@ export function AlertActions({
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
           services={services}
+          caseData={caseData}
           {...rest}
         />
       ),
       [
         alert,
+        caseData,
         closeActionsPopover,
         observabilityRuleTypeRegistry,
         openAlertInFlyout,

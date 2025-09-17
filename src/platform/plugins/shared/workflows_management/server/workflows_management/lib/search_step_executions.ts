@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 
-interface SearchStepExectionsParams {
+interface SearchStepExecutionsParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   stepsExecutionIndex: string;
   workflowExecutionId: string;
+  additionalQuery?: estypes.QueryDslQueryContainer;
+  spaceId: string;
 }
 
 export const searchStepExecutions = async ({
@@ -22,15 +25,31 @@ export const searchStepExecutions = async ({
   logger,
   stepsExecutionIndex,
   workflowExecutionId,
-}: SearchStepExectionsParams): Promise<EsWorkflowStepExecution[]> => {
+  additionalQuery,
+  spaceId,
+}: SearchStepExecutionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
     logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
+
+    const mustQueries: estypes.QueryDslQueryContainer[] = [
+      { match: { workflowRunId: workflowExecutionId } },
+      { term: { spaceId } },
+    ];
+
+    if (additionalQuery) {
+      mustQueries.push(additionalQuery);
+    }
+
     const response = await esClient.search<EsWorkflowStepExecution>({
       index: stepsExecutionIndex,
       query: {
-        match: { workflowRunId: workflowExecutionId },
+        bool: {
+          must: mustQueries,
+        },
       },
-      sort: 'startedAt:dsc',
+      sort: 'startedAt:desc',
+      from: 0,
+      size: 1000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
 
     logger.info(

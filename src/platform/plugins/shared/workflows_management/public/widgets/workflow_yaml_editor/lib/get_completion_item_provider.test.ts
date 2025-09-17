@@ -119,7 +119,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{|<-}}"
 `.trim();
@@ -128,8 +128,10 @@ steps:
         'consts',
         'event',
         'now',
+        'workflow',
         'steps',
-        'workflowRunId',
+        'execution',
+        'inputs',
       ]);
     });
 
@@ -141,7 +143,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: @|<-
 `.trim();
@@ -158,7 +160,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: hey, this is @|<-
 `.trim();
@@ -175,7 +177,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "@<-"
 `.trim();
@@ -184,8 +186,10 @@ steps:
         'consts',
         'event',
         'now',
+        'workflow',
         'steps',
-        'workflowRunId',
+        'execution',
+        'inputs',
       ]);
       testCompletion(completionProvider, yamlContent, (suggestion) => {
         return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
@@ -206,7 +210,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.|<-}}"
 `.trim();
@@ -239,7 +243,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.templates[0].|<-}}"
 `.trim();
@@ -263,11 +267,11 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log  
+    type: console.log
     with:
       message: "hello"
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{steps.|<-}}"
 `.trim();
@@ -288,16 +292,16 @@ steps:
       condition: "{{steps.step0.output.message == 'hello'}}"
     steps:
       - name: first-true-step
-        type: console.log  
+        type: console.log
         with:
           message: "im true"
       - name: second-true-step
-        type: console.log  
+        type: console.log
         with:
           message: "im true, {{steps.|<-}}"
     else:
       - name: false-step
-        type: console.log  
+        type: console.log
         with:
           message: "im unreachable"
 `.trim();
@@ -313,7 +317,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.a|<-}}"
 `.trim();
@@ -329,7 +333,7 @@ consts:
   api-url: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.|<-}}"
 `.trim();
@@ -344,7 +348,7 @@ steps:
         api-url: "https://api.example.com"
       steps:
         - name: step0
-          type: console.log  
+          type: console.log
           with:
             message: '{{consts.|<-}}'
       `.trim();
@@ -384,19 +388,19 @@ steps:
     describe('mustache unfinished scenarios', () => {
       it('should parse unfinished mustache at end of line', () => {
         const result = parseLineForCompletion('message: "{{ consts');
-        expect(result.matchType).toBe('mustache-unfinished');
+        expect(result.matchType).toBe('variable-unfinished');
         expect(result.fullKey).toBe('consts');
       });
 
       it('should parse unfinished mustache with dotted path', () => {
         const result = parseLineForCompletion('url: "{{ consts.api');
-        expect(result.matchType).toBe('mustache-unfinished');
+        expect(result.matchType).toBe('variable-unfinished');
         expect(result.fullKey).toBe('consts.api');
       });
 
       it('should parse unfinished mustache with trailing dot', () => {
         const result = parseLineForCompletion('value: {{ steps.');
-        expect(result.matchType).toBe('mustache-unfinished');
+        expect(result.matchType).toBe('variable-unfinished');
         expect(result.fullKey).toBe('steps');
       });
     });
@@ -404,19 +408,19 @@ steps:
     describe('complete mustache scenarios', () => {
       it('should parse complete mustache expression', () => {
         const result = parseLineForCompletion('message: "{{ consts.apiUrl }} - more text');
-        expect(result.matchType).toBe('mustache-complete');
+        expect(result.matchType).toBe('variable-complete');
         expect(result.fullKey).toBe('consts.apiUrl');
       });
 
       it('should parse last complete mustache when multiple present', () => {
         const result = parseLineForCompletion('url: {{ consts.baseUrl }}/users/{{ steps.getUser');
-        expect(result.matchType).toBe('mustache-unfinished');
+        expect(result.matchType).toBe('variable-unfinished');
         expect(result.fullKey).toBe('steps.getUser');
       });
 
       it('should parse complex nested path', () => {
         const result = parseLineForCompletion('data: {{ steps.fetchData.output.results.items }}');
-        expect(result.matchType).toBe('mustache-complete');
+        expect(result.matchType).toBe('variable-complete');
         expect(result.fullKey).toBe('steps.fetchData.output.results.items');
       });
     });
@@ -430,7 +434,7 @@ steps:
 
       it('should prioritize unfinished over complete mustache', () => {
         const result = parseLineForCompletion('{{ consts.apiUrl }} and {{ steps.step1');
-        expect(result.matchType).toBe('mustache-unfinished');
+        expect(result.matchType).toBe('variable-unfinished');
         expect(result.fullKey).toBe('steps.step1');
       });
     });
@@ -453,13 +457,13 @@ steps:
     describe('edge cases', () => {
       it('should parse special dot in mustache', () => {
         const result = parseLineForCompletion('message: "{{ . }}');
-        expect(result.matchType).toBe('mustache-complete');
+        expect(result.matchType).toBe('variable-complete');
         expect(result.fullKey).toBe('.');
       });
 
       it('should handle whitespace in mustache expressions', () => {
         const result = parseLineForCompletion('message: "{{  consts.apiUrl  }} other');
-        expect(result.matchType).toBe('mustache-complete');
+        expect(result.matchType).toBe('variable-complete');
         expect(result.fullKey).toBe('consts.apiUrl');
       });
 

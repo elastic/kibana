@@ -193,17 +193,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
           });
         });
-        describe('With dense vecotrs', () => {
+        describe('With dense vectors', () => {
           it('should have ai quick stats for index with semantic mappings', async () => {
             await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
             await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
         });
         describe('has index actions enabled', () => {
-          before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
-          });
-
           beforeEach(async () => {
             await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });

@@ -4,7 +4,7 @@ This directory serves as a centralized location to place the security solution t
 
 ## Subdirectories
 
-- `config` stores base configurations specific to both the Serverless and ESS environments, These configurations build upon the base configuration provided by `xpack/test_serverless` and `x-pack-api_integrations`, incorporating additional settings such as environment variables and tagging options.
+- `config` stores base configurations specific to both the Serverless and ESS environments, These configurations build upon the base configuration provided by `xpack/platform/test/serverless` and `xpack/platform/test/api_integration`, incorporating additional settings such as environment variables and tagging options.
 - `es_archive` and `es_archive_path_builder` directories contain the data that can be used by the tests
 - `scripts` directory contains various scripts used to run the tests
 - `test_suites` directory houses all the tests along with their utility functions. As an initial step, we have introduced the `detection_response` directory to consolidate all the integration tests related to detection and response APIs.

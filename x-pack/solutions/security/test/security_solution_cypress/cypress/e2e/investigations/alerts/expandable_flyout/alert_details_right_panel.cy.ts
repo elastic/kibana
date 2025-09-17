@@ -66,6 +66,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../../env_var_names_constants';
 import {
+  confirmAlertCloseModal,
   goToAcknowledgedAlerts,
   goToClosedAlerts,
   toggleKPICharts,
@@ -202,6 +203,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     expandAlertAtIndexExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
+    confirmAlertCloseModal();
 
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');

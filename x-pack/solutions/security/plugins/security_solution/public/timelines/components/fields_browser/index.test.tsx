@@ -27,12 +27,7 @@ let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const mockIndexFieldsSearch = jest.fn();
-jest.mock('../../../common/containers/source/use_data_view', () => ({
-  useDataView: () => ({
-    indexFieldsSearch: mockIndexFieldsSearch,
-  }),
-}));
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockRemoveColumn = jest.fn();
 const mockUpsertColumn = jest.fn();
@@ -187,7 +182,6 @@ describe('useFieldBrowserOptions', () => {
     onSave!(savedField);
     await runAllPromises();
 
-    expect(mockIndexFieldsSearch).toHaveBeenCalled();
     expect(mockUpsertColumn).toHaveBeenCalledTimes(1);
     expect(mockUpsertColumn).toHaveBeenCalledWith(
       {
@@ -225,7 +219,6 @@ describe('useFieldBrowserOptions', () => {
     onSave!(savedField);
     await runAllPromises();
 
-    expect(mockIndexFieldsSearch).toHaveBeenCalled();
     expect(mockRemoveColumn).toHaveBeenCalledWith(fieldItem.name);
     expect(mockUpsertColumn).toHaveBeenCalledWith(
       {
@@ -262,7 +255,6 @@ describe('useFieldBrowserOptions', () => {
     onDelete!([fieldItem.name]);
     await runAllPromises();
 
-    expect(mockIndexFieldsSearch).toHaveBeenCalled();
     expect(mockRemoveColumn).toHaveBeenCalledTimes(1);
     expect(mockRemoveColumn).toHaveBeenCalledWith(fieldItem.name);
   });

@@ -692,7 +692,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       SaveExtendedTimeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
       async expectAndCloseSavedPlaygroundToast() {
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.equal('Playground saved');
+        expect(toastTitle).to.equal('playground saved');
       },
       async getPlaygroundIdFromUrl() {
         const url = await browser.getCurrentUrl();

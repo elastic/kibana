@@ -146,6 +146,7 @@ export const SideNavPopover = ({
         offset={POPOVER_OFFSET}
         ownFocus={false}
         panelPaddingSize="none"
+        repositionOnScroll
       >
         <div
           ref={popoverRef}

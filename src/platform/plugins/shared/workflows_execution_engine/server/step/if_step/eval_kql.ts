@@ -51,7 +51,7 @@ function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
   if ((rightLiteral.type as any) === KQL_NODE_TYPE_WILDCARD) {
     return true;
   } else if (typeof contextValue === 'string') {
-    return wildcardToRegex(rightLiteral.value as string).test(contextValue);
+    return wildcardToRegex(rightLiteral.value?.toString() as string).test(contextValue);
   }
 
   try {

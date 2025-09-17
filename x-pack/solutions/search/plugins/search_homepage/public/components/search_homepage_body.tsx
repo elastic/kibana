@@ -33,13 +33,13 @@ export const SearchHomepageBody = () => {
           <EuiHorizontalRule />
         </EuiFlexItem>
         <EuiFlexItem>
-          <AlternateSolutions />
+          <DiveDeeperWithElasticsearch />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />
         </EuiFlexItem>
         <EuiFlexItem>
-          <DiveDeeperWithElasticsearch />
+          <AlternateSolutions />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />

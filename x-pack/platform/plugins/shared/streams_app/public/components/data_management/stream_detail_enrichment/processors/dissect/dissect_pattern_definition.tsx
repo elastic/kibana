@@ -66,7 +66,10 @@ export const DissectPatternDefinition = () => {
         onChange={(value) => field.onChange(deserialize(value))}
         languageId="text"
         height={75}
-        options={{ minimap: { enabled: false } }}
+        options={{
+          automaticLayout: true,
+          minimap: { enabled: false },
+        }}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsAriaLabel',
           { defaultMessage: 'Pattern editor' }

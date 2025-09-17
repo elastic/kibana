@@ -7,7 +7,6 @@
 
 import type {
   ConversationCategory,
-  ConversationConfidence,
   MessageRole,
   Provider,
   Reader,
@@ -23,15 +22,10 @@ export interface EsConversationSchema {
   '@timestamp': string;
   created_at: string;
   title: string;
-  summary?: {
-    content?: string;
-    timestamp?: string;
-    public?: boolean;
-    confidence?: ConversationConfidence;
-  };
   category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
+    id?: string;
     content: string;
     reader?: Reader;
     role: MessageRole;
@@ -39,6 +33,13 @@ export interface EsConversationSchema {
     trace_data?: {
       transaction_id?: string;
       trace_id?: string;
+    };
+    user?: {
+      id?: string;
+      name?: string;
+    };
+    metadata?: {
+      content_references?: unknown;
     };
   }>;
   api_config?: {
@@ -54,6 +55,10 @@ export interface EsConversationSchema {
     id?: string;
     name?: string;
   }>;
+  created_by: {
+    id?: string;
+    name?: string;
+  };
   updated_at?: string;
   namespace: string;
 }
@@ -66,6 +71,7 @@ export interface CreateMessageSchema {
   category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
+    id: string;
     content: string;
     reader?: Reader;
     role: MessageRole;
@@ -84,6 +90,10 @@ export interface CreateMessageSchema {
   };
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
+  created_by: {
+    id?: string;
+    name?: string;
+  };
   users: Array<{
     id?: string;
     name?: string;

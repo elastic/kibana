@@ -26,12 +26,11 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import { durationToNumber } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
-
 import {
   getSharedComponents,
-  reportingCsvExportProvider,
-  reportingPDFExportProvider,
-  reportingPNGExportProvider,
+  reportingCsvExportShareIntegration,
+  reportingPDFExportShareIntegration,
+  reportingPNGExportShareIntegration,
 } from '@kbn/reporting-public/share';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
@@ -219,27 +218,18 @@ export class ReportingPublicPlugin
     shareSetup.registerShareIntegration<ExportShare>(
       'search',
       // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-      reportingCsvExportProvider({
-        apiClient,
-        startServices$,
-      })
+      reportingCsvExportShareIntegration({ apiClient, startServices$ })
     );
 
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPDFExportProvider({
-          apiClient,
-          startServices$,
-        })
+        reportingPDFExportShareIntegration({ apiClient, startServices$ })
       );
 
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPNGExportProvider({
-          apiClient,
-          startServices$,
-        })
+        reportingPNGExportShareIntegration({ apiClient, startServices$ })
       );
     }
 
