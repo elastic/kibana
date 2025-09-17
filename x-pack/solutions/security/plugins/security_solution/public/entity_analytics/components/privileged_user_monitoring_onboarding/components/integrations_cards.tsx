@@ -63,6 +63,7 @@ export const IntegrationCards = ({
             id={name}
             name={name}
             title={title}
+            titleSize="s"
             version={version}
             onCardClick={() => {
               navigateToIntegration(name, version);
