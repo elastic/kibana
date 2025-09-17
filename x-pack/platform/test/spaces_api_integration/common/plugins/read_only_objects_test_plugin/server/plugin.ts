@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const READ_ONLY_TYPE = 'read_only_type';
 const NON_READ_ONLY_TYPE = 'non_read_only_type';
@@ -77,10 +78,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.customError({
-            statusCode: 400,
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );
@@ -128,14 +134,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          if (error.output && error.output.statusCode === 404) {
-            return response.notFound({
-              body: error.message,
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
             });
           }
-          return response.forbidden({
-            body: error.message,
-          });
+          throw error;
         }
       }
     );
@@ -170,9 +177,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.forbidden({
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );
@@ -211,9 +224,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.forbidden({
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );
@@ -251,9 +270,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.forbidden({
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );
@@ -280,9 +305,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.badRequest({
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );
@@ -320,9 +351,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.forbidden({
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );
@@ -364,9 +401,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             body: result,
           });
         } catch (error) {
-          return response.forbidden({
-            body: error.message,
-          });
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
         }
       }
     );

@@ -70,6 +70,46 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
     });
+    describe('default state of read only objects', () => {
+      it('types supporting access control are created with default access mode when not specified', async () => {
+        const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
+        const response = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type' })
+          .expect(200);
+        expect(response.body).to.have.property('accessControl');
+        expect(response.body.accessControl).to.have.property('accessMode', 'default');
+        expect(response.body.accessControl).to.have.property('owner', profileUid);
+      });
+
+      it('objects with default accessMode can be modified by non-owners', async () => {
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        const response = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type' })
+          .expect(200);
+        const objectId = response.body.id;
+
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+        const updateResponse = await supertestWithoutAuth
+          .put('/read_only_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', notOwnerCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' });
+
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+      });
+    });
+
     describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
         const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
@@ -86,11 +126,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should throw when trying to create read only object with no user', async () => {
-        await supertest
+        const response = await supertest
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(400);
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.contain(
+          'Unable to create "read_only" "read_only_type" saved object. User profile ID not found.: Bad Request'
+        );
       });
 
       it('should update read only objects owned by the same user', async () => {
@@ -357,7 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`/read_only_objects/${objectId}`)
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
-          .expect(400);
+          .expect(403);
         expect(deleteResponse.body).to.have.property('message');
         expect(deleteResponse.body.message).to.contain(`Unable to delete read_only_type`);
       });

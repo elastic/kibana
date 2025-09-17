@@ -6,6 +6,7 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   AuthorizeObject,
   CheckAuthorizationResult,
@@ -60,7 +61,9 @@ export class AccessControlService {
   }) {
     if (authorizationResult.status === 'unauthorized') {
       const typeList = [...typesRequiringAccessControl].sort().join(',');
-      throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error(`Access denied: Unable to manage access control for ${typeList}`)
+      );
     }
 
     const { typeMap } = authorizationResult;
@@ -85,7 +88,9 @@ export class AccessControlService {
     // If we found unauthorized types, throw an error
     if (unauthorizedTypes.size > 0) {
       const typeList = [...unauthorizedTypes].sort().join(',');
-      throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error(`Access denied: Unable to manage access control for ${typeList}`)
+      );
     }
   }
 }
