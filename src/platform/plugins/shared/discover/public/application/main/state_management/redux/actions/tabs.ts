@@ -117,16 +117,15 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       };
 
       if (!existingTab) {
+        // the following assignments for initialAppState, globalState, and dataRequestParams are for supporting `openInNewTab` action
         tab.initialAppState =
           'initialAppState' in item
             ? cloneDeep(item.initialAppState as TabState['initialAppState'])
             : tab.initialAppState;
-
         tab.globalState =
           'globalState' in item
             ? cloneDeep(item.globalState as TabState['globalState'])
             : tab.globalState;
-
         tab.dataRequestParams =
           'dataRequestParams' in item
             ? (item.dataRequestParams as TabState['dataRequestParams'])
