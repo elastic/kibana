@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -38,6 +38,8 @@ import type {
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
+import { css } from '@emotion/react';
+import classNames from 'classnames';
 
 export const ControlsRenderer = ({
   parentApi,
@@ -54,6 +56,11 @@ export const ControlsRenderer = ({
     compressed?: boolean;
   };
 }) => {
+  const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
+  const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
+    controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
+  }, []);
+
   const [controlsInOrder, setControlsInOrder] = useState(
     Object.values(getInitialState().controls).sort((controlA, controlB) => {
       return controlA.order - controlB.order;
@@ -82,68 +89,64 @@ export const ControlsRenderer = ({
   if (controlsInOrder.length === 0) {
     return null;
   }
-  console.log({ draggingId, api: draggingId ? parentApi.getChildApi(draggingId) : undefined });
+
   return (
-    <EuiPanel
-      borderRadius="m"
-      paddingSize="none"
-      color={draggingId ? 'success' : 'transparent'}
-      className="controlsWrapper"
-      data-test-subj="controls-group-wrapper"
+    <DndContext
+      onDragStart={({ active }) => {
+        console.log('HERE!!!!', { active });
+        setDraggingId(`${active.id}`);
+      }}
+      onDragEnd={onDragEnd}
+      onDragCancel={() => setDraggingId(null)}
+      sensors={sensors}
+      measuring={{
+        droppable: {
+          strategy: MeasuringStrategy.BeforeDragging,
+        },
+      }}
     >
-      <EuiFlexGroup
-        gutterSize="s"
-        direction="row"
-        responsive={false}
-        data-test-subj="controls-group"
-      >
-        <EuiFlexItem>
-          <DndContext
-            onDragStart={({ active }) => {
-              console.log('HERE!!!!', { active });
-              setDraggingId(`${active.id}`);
-            }}
-            onDragEnd={onDragEnd}
-            onDragCancel={() => setDraggingId(null)}
-            sensors={sensors}
-            measuring={{
-              droppable: {
-                strategy: MeasuringStrategy.BeforeDragging,
-              },
-            }}
-          >
-            <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-              <EuiFlexGroup
-                component="ul"
-                className="controlGroup"
-                alignItems="center"
-                gutterSize="s"
-                wrap={true}
-              >
-                {controlsInOrder.map(({ id, type, grow, width }) => (
-                  <ControlPanel
-                    key={id}
-                    type={type}
-                    uuid={id!}
-                    grow={grow ?? DEFAULT_CONTROL_GROW}
-                    width={width ?? DEFAULT_CONTROL_WIDTH}
-                    parentApi={parentApi}
-                    compressed={getInitialState().compressed ?? true}
-                  />
-                ))}
-              </EuiFlexGroup>
-            </SortableContext>
-            <DragOverlay>
-              {draggingId ? (
-                <ControlClone
-                  key={draggingId}
-                  state={parentApi.getSerializedStateForChild(draggingId)}
-                />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
+        <EuiFlexGroup
+          component="ul"
+          className={'controlGroup'}
+          alignItems="center"
+          gutterSize="s"
+          wrap={true}
+          css={css({
+            padding: '8px',
+            paddingTop: '0',
+          })}
+          data-test-subj="controls-group-wrapper"
+        >
+          {controlsInOrder.map(({ id, type, grow, width }) => (
+            <ControlPanel
+              key={id}
+              type={type}
+              uuid={id!}
+              grow={grow ?? DEFAULT_CONTROL_GROW}
+              width={width ?? DEFAULT_CONTROL_WIDTH}
+              parentApi={parentApi}
+              compressed={getInitialState().compressed ?? true}
+              setControlPanelRef={setControlPanelRef}
+            />
+          ))}
+        </EuiFlexGroup>
+      </SortableContext>
+      <DragOverlay>
+        {draggingId ? (
+          <ControlPanel
+            key={draggingId}
+            type={'optionsListControl'}
+            uuid={draggingId}
+            grow={DEFAULT_CONTROL_GROW}
+            width={'small'}
+            lockedWidth={controlPanelRefs.current[draggingId]?.getBoundingClientRect().width}
+            parentApi={parentApi}
+            compressed={getInitialState().compressed ?? true}
+          />
+        ) : // <ControlClone key={draggingId} state={parentApi.getSerializedStateForChild(draggingId)} />
+        null}
+      </DragOverlay>
+    </DndContext>
   );
 };

@@ -47,7 +47,9 @@ export const ControlPanel = ({
   type,
   grow,
   width,
+  lockedWidth,
   compressed,
+  setControlPanelRef,
 }: {
   parentApi: PresentationContainer &
     PublishesViewMode &
@@ -59,7 +61,9 @@ export const ControlPanel = ({
   type: string;
   grow: ControlsGroupState['controls'][number]['grow'];
   width: ControlsGroupState['controls'][number]['width'];
+  lockedWidth?: number;
   compressed?: boolean;
+  setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
   const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
   const {
@@ -126,127 +130,101 @@ export const ControlPanel = ({
   const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
   const styles = useMemoCss(controlPanelStyles);
-
+  console.log({ lockedWidth });
   return (
     <EuiFlexItem
       component="li"
-      ref={setNodeRef}
+      ref={(ref: HTMLElement | null) => {
+        setNodeRef(ref);
+        setControlPanelRef?.(uuid, ref);
+      }}
       style={{
         transition,
-        transform: isSorting ? undefined : CSS.Translate.toString(transform),
+        transform: CSS.Translate.toString(transform),
       }}
       grow={controlGrow}
       data-control-id={uuid}
       data-test-subj="control-frame"
       data-render-complete="true"
-      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
+      css={css([
+        isDragging && styles.draggingItem,
+        lockedWidth && css({ width: `${lockedWidth}px` }),
+        styles.controlWidthStyles,
+      ])}
       className={classNames({
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--large': controlWidth === 'large',
       })}
     >
-      <PresentationPanelHoverActionsWrapper
-        {...{
-          index,
-          api,
-          getActions: async () => {
-            return [] as Action[];
-          },
-          viewMode,
-          showNotifications: false,
-          showBorder: false,
-          // ...attributes,
-          // ...listeners,
-        }}
-        setDragHandle={(id: string, ref: HTMLElement | null) => {
-          if (!ref) return;
-          console.log({ id, ref });
-          for (const [title, attribute] of Object.entries(attributes)) {
-            ref.setAttribute(title, attribute);
-          }
-          // for (const [title, listener] of Object.entries(listeners)) {
-          //   console.log({ ref, title, listener });
-          //   ref.addEventListener(title, (e) => listener(e));
-          // }
-          console.log(listeners);
-          ref.addEventListener('pointerdown', (e) => {
-            listeners?.onPointerDown?.(e);
-          });
-          ref.addEventListener('keydown', (e) => {
-            listeners?.onKeyDown?.(e);
-          });
-        }}
-      >
-        <EuiFormRow
-          data-test-subj="control-frame-title"
-          fullWidth
-          label={controlLabel}
-          id={`control-title-${uuid}`}
-          aria-label={`Control for ${controlLabel}`}
-          css={css({
-            '.euiFormControlLayout__childrenWrapper': {
-              '.euiPopover, .euiFilterGroup': {
-                // TODO: Remove options list styles
-                height: '100%',
-              },
+      <EuiFormRow
+        data-test-subj="control-frame-title"
+        fullWidth
+        label={controlLabel}
+        id={`control-title-${uuid}`}
+        aria-label={`Control for ${controlLabel}`}
+        css={css({
+          '.euiFormControlLayout__childrenWrapper': {
+            '.euiPopover, .euiFilterGroup': {
+              // TODO: Remove options list styles
+              height: '100%',
             },
+          },
+        })}
+      >
+        <EuiFormControlLayout
+          fullWidth
+          isLoading={Boolean(dataLoading)}
+          className={classNames('controlFrame__formControlLayout', {
+            'controlFrame__formControlLayout--edit': isEditable,
+            'controlFrame_formControlAfter--insertBefore': insertBefore,
+            'controlFrame_formControlAfter--insertAfter': insertAfter,
+            type,
           })}
-        >
-          <EuiFormControlLayout
-            fullWidth
-            isLoading={Boolean(dataLoading)}
-            className={classNames('controlFrame__formControlLayout', {
-              'controlFrame__formControlLayout--edit': isEditable,
-              'controlFrame_formControlAfter--insertBefore': insertBefore,
-              'controlFrame_formControlAfter--insertAfter': insertAfter,
-              type,
-            })}
-            css={css(styles.formControl)}
-            prepend={
-              <>
-                {/* <DragHandle
-                  isEditable={isEditable}
-                  controlTitle={panelTitle || defaultPanelTitle}
-                  {...attributes}
-                  {...listeners}
-                /> */}
-                {/* {api?.CustomPrependComponent ? (
+          css={css(styles.formControl)}
+          prepend={
+            <>
+              <DragHandle
+                isEditable={isEditable}
+                controlTitle={panelTitle || defaultPanelTitle}
+                {...attributes}
+                {...listeners}
+              />
+              {/* {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : */}
-                <EuiToolTip
-                  content={panelTitle || defaultPanelTitle}
-                  anchorProps={{ className: 'eui-textTruncate' }}
-                >
-                  <EuiFormLabel className="controlPanel--label">
-                    {panelTitle || defaultPanelTitle}
-                  </EuiFormLabel>
-                </EuiToolTip>
-                {/* )} */}
-              </>
-            }
-            compressed={compressed}
-          >
-            <EmbeddableRenderer
-              key={uuid}
-              maybeId={uuid}
-              type={type}
-              getParentApi={() => parentApi}
-              onApiAvailable={(panelApi) => {
-                const newPanelApi = {
-                  ...panelApi,
-                  serializeState: () => {
-                    return { rawState: { ...panelApi.serializeState().rawState, grow, width } };
-                  },
-                };
-                setApi(newPanelApi);
-                parentApi.registerChildApi(newPanelApi);
-              }}
-              hidePanelChrome
-            />
-          </EuiFormControlLayout>
-        </EuiFormRow>
-      </PresentationPanelHoverActionsWrapper>
+              <EuiToolTip
+                content={panelTitle || defaultPanelTitle}
+                anchorProps={{ className: 'eui-textTruncate' }}
+              >
+                <EuiFormLabel className="controlPanel--label">
+                  {panelTitle || defaultPanelTitle}
+                </EuiFormLabel>
+              </EuiToolTip>
+              {/* )} */}
+            </>
+          }
+          compressed={compressed}
+        >
+          <EmbeddableRenderer
+            key={uuid}
+            maybeId={uuid}
+            type={type}
+            getParentApi={() => parentApi}
+            onApiAvailable={(panelApi) => {
+              const newPanelApi = {
+                ...panelApi,
+                serializeState: () => {
+                  return { rawState: { ...panelApi.serializeState().rawState, grow, width } };
+                },
+              };
+              setApi(newPanelApi);
+              parentApi.registerChildApi(newPanelApi);
+            }}
+            hidePanelChrome
+          />
+        </EuiFormControlLayout>
+      </EuiFormRow>
     </EuiFlexItem>
   );
 };
