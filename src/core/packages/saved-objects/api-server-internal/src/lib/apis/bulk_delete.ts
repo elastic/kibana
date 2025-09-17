@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import pMap from 'p-map';
 import type {
   AuthorizeUpdateObject,
@@ -48,6 +48,12 @@ import type {
 export interface PerformBulkDeleteParams<T = unknown> {
   objects: SavedObjectsBulkDeleteObject[];
   options: SavedObjectsBulkDeleteOptions;
+}
+
+export function isGetGetResult<TDocument = unknown>(
+  item: estypes.MgetResponseItem<TDocument> | undefined
+): item is estypes.GetGetResult<TDocument> {
+  return (item as estypes.MgetMultiGetError).error === undefined;
 }
 
 export const performBulkDelete = async <T>(
@@ -98,35 +104,42 @@ export const performBulkDelete = async <T>(
 
   if (securityExtension) {
     // Perform Auth Check (on both L/R, we'll deal with that later)
-    const authObjects: AuthorizeUpdateObject[] = expectedBulkDeleteMultiNamespaceDocsResults.map(
-      (element) => {
-        const index = (element.value as { esRequestIndex: number }).esRequestIndex;
-        const { type, id } = element.value;
-        const preflightResult =
-          index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+    const bulkDeleteAuthObjects = expectedBulkDeleteMultiNamespaceDocsResults.map((element) => {
+      const index = (element.value as { esRequestIndex: number }).esRequestIndex;
+      const { type, id } = element.value;
+      const preflightResult =
+        index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
-        // @ts-expect-error MultiGetHit._source is optional
+      // Confirm that the preflight result is a valid get result and not an MGetError
+      if (isGetGetResult(preflightResult)) {
         const accessControl = preflightResult?._source?.accessControl;
         const name = preflightResult
-          ? SavedObjectsUtils.getName(
-              registry.getNameAttribute(type),
-              // @ts-expect-error MultiGetHit._source is optional
-              { attributes: preflightResult?._source?.[type] }
-            )
+          ? SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+              attributes: preflightResult?._source?.[type],
+            })
           : undefined;
 
-        return {
+        return right({
           type,
           id,
           name,
           ...(accessControl ? { accessControl } : {}),
-          // @ts-expect-error MultiGetHit._source is optional
           existingNamespaces: preflightResult?._source?.namespaces ?? [],
-        };
+        });
       }
-    );
-
-    await securityExtension.authorizeBulkDelete({ namespace, objects: authObjects });
+      return left({
+        type,
+        id,
+        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+      });
+    });
+    const authObjects: AuthorizeUpdateObject[] = bulkDeleteAuthObjects
+      .filter(isRight)
+      .map((element) => element.value);
+    await securityExtension.authorizeBulkDelete({
+      namespace,
+      objects: authObjects,
+    });
   }
 
   // Filter valid objects

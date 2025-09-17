@@ -8,11 +8,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type {
-  DecoratedError,
-  AuthorizeCreateObject,
-  SavedObjectsRawDoc,
-} from '@kbn/core-saved-objects-server';
+import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
@@ -94,11 +90,11 @@ export const performBulkCreate = async <T>(
   let preflightCheckIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
-    let error: DecoratedError | undefined;
+
     let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
     const objectManaged = managed;
     if (!allowedTypes.includes(type)) {
-      error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       return left({ id: requestId, type, error: errorContent(error) });
     } else {
       try {
@@ -115,20 +111,16 @@ export const performBulkCreate = async <T>(
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
 
     if (!typeSupportsAccessControl && accessMode) {
-      error = SavedObjectsErrorHelpers.createBadRequestError(
+      const error = SavedObjectsErrorHelpers.createBadRequestError(
         `The "accessMode" field is not supported for saved objects of type "${type}".`
       );
       return left({ id: requestId, type, error: errorContent(error) });
     }
 
     if (!createdBy && accessMode === 'read_only') {
-      error = SavedObjectsErrorHelpers.createBadRequestError(
+      const error = SavedObjectsErrorHelpers.createBadRequestError(
         `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
       );
-      return left({ id: requestId, type, error: errorContent(error) });
-    }
-
-    if (error) {
       return left({ id: requestId, type, error: errorContent(error) });
     }
 
