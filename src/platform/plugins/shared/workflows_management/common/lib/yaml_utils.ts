@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { z } from '@kbn/zod';
+import type { ZodError, z } from '@kbn/zod';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -23,28 +23,36 @@ import {
   visit,
 } from 'yaml';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
+import type { FormattedZodError } from './errors/invalid_yaml_schema';
+
+interface FormatValidationErrorResult {
+  message: string;
+  formattedError: FormattedZodError;
+}
 
 /**
  * Custom error message formatter for Zod validation errors
  * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
  */
-export function formatValidationError(error: any): { message: string; formattedError: any } {
+export function formatValidationError(error: ZodError): FormatValidationErrorResult {
   // If it's not a Zod error structure, return as-is
   if (!error?.issues || !Array.isArray(error.issues)) {
     const message = error?.message || String(error);
     return { message, formattedError: error };
   }
 
-  const formattedIssues = error.issues.map((issue: any) => {
+  const formattedIssues = error.issues.map((issue) => {
     let formattedMessage: string;
 
     // Handle discriminated union errors for type field
-    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+      formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
+    } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
     }
     // Handle literal type errors for type field (avoid listing all 1000+ options)
     else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
-      const receivedValue = issue.received;
+      const receivedValue = issue.received as string;
       if (receivedValue?.startsWith?.('elasticsearch.')) {
         formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
       } else if (receivedValue?.startsWith?.('kibana.')) {
@@ -56,6 +64,18 @@ export function formatValidationError(error: any): { message: string; formattedE
     // Handle union errors with too many options
     else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+    } else if (
+      issue.code === 'invalid_type' &&
+      issue.path.length === 1 &&
+      issue.path[0] === 'triggers'
+    ) {
+      formattedMessage = `No triggers found. Add at least one trigger.`;
+    } else if (
+      issue.code === 'invalid_type' &&
+      issue.path.length === 1 &&
+      issue.path[0] === 'steps'
+    ) {
+      formattedMessage = `No steps found. Add at least one step.`;
     }
     // Return original message for other errors
     else {

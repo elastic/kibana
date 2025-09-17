@@ -202,6 +202,7 @@ export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: Date;
   lastUpdatedBy: string | undefined;
+  enabled: boolean;
   valid: boolean;
   validationErrors: string[];
 }
@@ -225,7 +226,7 @@ export interface WorkflowListItemDto {
   name: string;
   description: string;
   enabled: boolean;
-  definition: WorkflowYaml;
+  definition: WorkflowYaml | null;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];

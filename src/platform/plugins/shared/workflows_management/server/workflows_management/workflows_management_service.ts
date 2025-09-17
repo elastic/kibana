@@ -34,11 +34,11 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
-import { WorkflowValidationError } from '../../common/lib/errors';
+import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
-import { getWorkflowZodSchemaLoose } from '../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
@@ -280,12 +280,21 @@ export class WorkflowsService {
       if (workflow.yaml) {
         // we always update the yaml, even if it's not valid, to allow users to save draft
         updatedData.yaml = workflow.yaml;
-        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchemaLoose());
+        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchema());
         if (!parsedYaml.success) {
           updatedData.definition = undefined;
           updatedData.enabled = false;
           updatedData.valid = false;
-          validationErrors.push(parsedYaml.error.message);
+          if (
+            parsedYaml.error instanceof InvalidYamlSchemaError &&
+            parsedYaml.error.formattedZodError
+          ) {
+            validationErrors.push(
+              ...parsedYaml.error.formattedZodError?.issues.map((error) => error.message)
+            );
+          } else {
+            validationErrors.push(parsedYaml.error.message);
+          }
           shouldUpdateScheduler = true;
         } else {
           // Validate step name uniqueness
@@ -411,6 +420,7 @@ export class WorkflowsService {
         id,
         lastUpdatedAt: new Date(finalData.updated_at),
         lastUpdatedBy: finalData.lastUpdatedBy,
+        enabled: finalData.enabled,
         validationErrors,
         valid: finalData.valid,
       };
@@ -582,10 +592,6 @@ export class WorkflowsService {
           throw new Error('Missing _source in search result');
         }
         const workflow = this.transformStorageDocumentToWorkflowDto(hit._id!, hit._source);
-        // Skip workflows with null definition for the list
-        if (!workflow.definition) {
-          return null;
-        }
         return {
           ...workflow,
           description: workflow.description || '',

@@ -9,7 +9,11 @@
 
 import type { SafeParseReturnType } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import { stringifyWorkflowDefinition, parseWorkflowYamlToJSON } from './yaml_utils';
+import {
+  stringifyWorkflowDefinition,
+  parseWorkflowYamlToJSON,
+  formatValidationError,
+} from './yaml_utils';
 import type { ConnectorContract, WorkflowYaml } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 
@@ -146,5 +150,35 @@ steps:
   it('it should throw an error if the input is not a plain object', () => {
     const json: any = [1, 2, 3];
     expect(() => stringifyWorkflowDefinition(json)).toThrow();
+  });
+});
+
+describe('formatValidationError', () => {
+  it('should format invalid trigger type', () => {
+    const { error } = z
+      .object({
+        triggers: z.array(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('manual') }),
+            z.object({ type: z.literal('alert') }),
+            z.object({ type: z.literal('scheduled') }),
+          ])
+        ),
+      })
+      .safeParse({
+        triggers: [{ type: 'invalid' }],
+      });
+    const result = formatValidationError(error!);
+    expect(result.message).toBe('Invalid trigger type. Available: manual, alert, scheduled');
+  });
+
+  it('should format invalid connector type', () => {
+    const { error } = z
+      .object({
+        steps: z.array(z.discriminatedUnion('type', [z.object({ type: z.literal('noop') })])),
+      })
+      .safeParse({ steps: [{ type: 'invalid' }] });
+    const result = formatValidationError(error!);
+    expect(result.message).toBe('Invalid connector type. Available: noop');
   });
 });
