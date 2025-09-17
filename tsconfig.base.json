@@ -1854,6 +1854,8 @@
       "@kbn/security-solution-storybook-config/*": ["x-pack/solutions/security/packages/storybook/config/*"],
       "@kbn/security-solution-upselling": ["x-pack/solutions/security/packages/upselling"],
       "@kbn/security-solution-upselling/*": ["x-pack/solutions/security/packages/upselling/*"],
+      "@kbn/security-test-api-clients": ["x-pack/solutions/security/packages/kbn-security-test-api-clients"],
+      "@kbn/security-test-api-clients/*": ["x-pack/solutions/security/packages/kbn-security-test-api-clients/*"],
       "@kbn/security-test-endpoints-plugin": ["x-pack/platform/test/security_functional/plugins/test_endpoints"],
       "@kbn/security-test-endpoints-plugin/*": ["x-pack/platform/test/security_functional/plugins/test_endpoints/*"],
       "@kbn/security-ui-components": ["x-pack/platform/packages/private/security/ui_components"],
