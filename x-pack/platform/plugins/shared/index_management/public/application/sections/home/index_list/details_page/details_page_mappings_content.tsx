@@ -558,9 +558,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiPanel>
           </EuiFlexItem>
         )}
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
           {hasMLPermissions && !hasSemanticText && (
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={false}>
               <SemanticTextBanner
                 isSemanticTextEnabled={isSemanticTextEnabled}
                 isPlatinumLicense={isPlatinumLicense}
@@ -569,11 +569,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           )}
           {!hasMappings &&
             (!isAddingFields ? (
-              <EmptyMappingsContent addFieldButton={AddFieldButton} />
+              <EuiFlexItem grow={false}>
+                <EmptyMappingsContent addFieldButton={AddFieldButton} />
+              </EuiFlexItem>
             ) : (
-              <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>{saveMappingsButton}</EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiFlexItem grow={false} justifyContent="flexStart" alignItems="flexStart">
+                <span>{saveMappingsButton}</span>
+              </EuiFlexItem>
             ))}
           {hasMappings && (
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
@@ -683,17 +685,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              min-width: 600px;
-              height: 100%;
-            `}
-          >
-            <EuiPanel hasShadow={false} paddingSize="none">
-              {isJSONVisible ? jsonBlock : treeViewBlock}
-            </EuiPanel>
-          </EuiFlexItem>
+          {hasMappings && (
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 600px;
+                height: 100%;
+              `}
+            >
+              <EuiPanel hasShadow={false} paddingSize="none">
+                {isJSONVisible ? jsonBlock : treeViewBlock}
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexGroup>
       {isSemanticTextEnabled && isAddingFields && hasSavedFields && (
