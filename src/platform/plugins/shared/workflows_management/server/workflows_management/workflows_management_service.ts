@@ -303,9 +303,6 @@ export class WorkflowsService {
             // Update all fields from the transformed YAML, not just definition
             updatedData.definition = workflowDef.definition;
             updatedData.name = workflowDef.name;
-            // Update all fields from the transformed YAML, not just definition
-            updatedData.definition = workflowDef.definition;
-            updatedData.name = workflowDef.name;
             updatedData.enabled = workflowDef.enabled;
             updatedData.description = workflowDef.description;
             updatedData.tags = workflowDef.tags;
