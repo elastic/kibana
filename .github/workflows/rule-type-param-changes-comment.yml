@@ -16,7 +16,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const comment = `@${context.payload.issue.user.login}, it looks like you're updating the parameters for a rule type!
+            const comment = `@${context.payload.pull_request.user.login}, it looks like you're updating the parameters for a rule type!
 
             Please review the [guidelines](https://docs.elastic.dev/reops/developer-guide/best-practices-rules#upgrades-and-rollbacks) for making additive changes to rule type parameters and determine if your changes require an intermediate release.`;
 
