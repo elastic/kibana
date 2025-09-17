@@ -45,6 +45,21 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
+    key: 'infer_spans',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.infer_spans.label', {
+      defaultMessage: 'Inferred Spans On/Off',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.edot.infer_spans.description', {
+      defaultMessage:
+        'Set Inferred Spans to be on or off\n' +
+        'Note with Java for this to apply, inferred spans needs to be enabled at JVM startup by setting OTEL_INFERRED_SPANS_ENABLED to true\n' +
+        '\n',
+    }),
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/php/elastic'],
+  },
+  {
     key: 'logging_level',
     validation: loggingLevelRt,
     type: 'select',
