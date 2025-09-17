@@ -57,7 +57,11 @@ describe('When using cancel action from response actions console', () => {
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
     render = async (
-      agentType: 'endpoint' | 'microsoft_defender_endpoint' | 'sentinel_one' | 'crowdstrike' = 'microsoft_defender_endpoint',
+      agentType:
+        | 'endpoint'
+        | 'microsoft_defender_endpoint'
+        | 'sentinel_one'
+        | 'crowdstrike' = 'microsoft_defender_endpoint',
       capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES],
       privileges: Partial<ReturnType<typeof getEndpointAuthzInitialState>> = {}
     ) => {
@@ -285,7 +289,11 @@ describe('When using cancel action from response actions console', () => {
     beforeEach(() => {
       // Update the render function to support sentinel_one agent type
       render = async (
-        agentType: 'endpoint' | 'microsoft_defender_endpoint' | 'sentinel_one' | 'crowdstrike' = 'microsoft_defender_endpoint',
+        agentType:
+          | 'endpoint'
+          | 'microsoft_defender_endpoint'
+          | 'sentinel_one'
+          | 'crowdstrike' = 'microsoft_defender_endpoint',
         capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES],
         privileges: Partial<ReturnType<typeof getEndpointAuthzInitialState>> = {}
       ) => {
@@ -464,12 +472,9 @@ describe('When using cancel action from response actions console', () => {
       mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: false });
 
       // Test all agent types - none should show cancel command
-      const agentTypes: Array<'microsoft_defender_endpoint' | 'endpoint' | 'sentinel_one' | 'crowdstrike'> = [
-        'microsoft_defender_endpoint',
-        'endpoint',
-        'sentinel_one',
-        'crowdstrike',
-      ];
+      const agentTypes: Array<
+        'microsoft_defender_endpoint' | 'endpoint' | 'sentinel_one' | 'crowdstrike'
+      > = ['microsoft_defender_endpoint', 'endpoint', 'sentinel_one', 'crowdstrike'];
 
       for (const agentType of agentTypes) {
         await render(agentType);
