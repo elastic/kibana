@@ -172,7 +172,7 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     if (doc.errors.length > 0) {
       return {
         success: false,
-        error: new InvalidYamlSyntaxError(doc.errors.map((err) => err?.message).join(', ')),
+        error: new InvalidYamlSyntaxError(doc.errors.map((err) => err.message).join(', ')),
       };
     }
 
