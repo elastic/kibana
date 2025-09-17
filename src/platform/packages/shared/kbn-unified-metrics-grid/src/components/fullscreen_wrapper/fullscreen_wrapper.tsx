@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFocusTrap, EuiOverlayMask, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -16,33 +17,44 @@ interface FullScreenProps {
   dataTestSubj?: string;
 }
 
+export const getFullScreenStyles = (euiTheme: EuiThemeComputed, isFullscreen: boolean) => {
+  if (!isFullscreen) {
+    return css`
+      position: relative;
+      width: 100%;
+      height: 100%;
+    `;
+  }
+
+  return css`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: ${euiTheme.colors.body};
+    z-index: ${euiTheme.levels.modal};
+    overflow: auto;
+  `;
+};
 export const FullScreenWrapper = ({
   isFullscreen,
   dataTestSubj,
   children,
 }: React.PropsWithChildren<FullScreenProps>) => {
   const { euiTheme } = useEuiTheme();
-
-  if (!isFullscreen) return <>{children}</>;
+  const styles = useMemo(
+    () => getFullScreenStyles(euiTheme, isFullscreen),
+    [euiTheme, isFullscreen]
+  );
 
   return (
-    <EuiOverlayMask headerZindexLocation="above">
-      <EuiFocusTrap>
-        <div
-          css={css`position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              background: ${euiTheme.colors.backgroundBasePlain},
-              display: 'flex',
-              flex-direction: 'column',
-              min-height: 0,
-              z-index: ${euiTheme.levels.modal},
-              overscroll-behavior: 'contain',
-            `}
-          data-test-subj={`${dataTestSubj}FullScreenWrapper`}
-        >
+    <EuiOverlayMask
+      headerZindexLocation="above"
+      css={isFullscreen ? undefined : { display: 'contents' }}
+    >
+      <EuiFocusTrap disabled={!isFullscreen}>
+        <div css={styles} data-test-subj={`${dataTestSubj}FullScreenWrapper`}>
           {children}
         </div>
       </EuiFocusTrap>
