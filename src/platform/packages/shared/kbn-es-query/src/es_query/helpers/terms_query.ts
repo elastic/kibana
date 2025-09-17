@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './kql_query';
-export * from './range_query';
-export * from './term_query';
-export * from './terms_query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
+export function termsQuery<T extends string>(
+  field: T,
+  values: Array<string | boolean | number>
+): QueryDslQueryContainer[] {
+  return [{ terms: { [field]: values } }];
+}
