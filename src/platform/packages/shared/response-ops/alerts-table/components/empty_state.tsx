@@ -81,7 +81,7 @@ export const EmptyState: React.FC<
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.empty.resetButton"
-                defaultMessage={'Reset Sort'}
+                defaultMessage={'Reset sort'}
               />
             </EuiButton>
           </EuiFlexItem>
