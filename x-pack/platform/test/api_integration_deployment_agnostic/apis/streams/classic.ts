@@ -53,9 +53,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            settings: {},
+            processing: { steps: [] },
             classic: {},
           },
         } satisfies Streams.ClassicStream.Definition);
@@ -73,6 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
+                  settings: {},
                   processing: {
                     steps: [
                       {
@@ -121,6 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [
                 {
@@ -177,9 +178,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: {
-                    steps: [],
-                  },
+                  processing: { steps: [] },
+                  settings: {},
                   classic: {},
                 },
               },
@@ -221,6 +221,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -269,9 +270,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: {
-                    steps: [],
-                  },
+                  processing: { steps: [] },
+                  settings: {},
                   classic: {
                     field_overrides: {
                       'foo.bar': {
@@ -298,9 +298,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: {
-                    steps: [],
-                  },
+                  processing: { steps: [] },
+                  settings: {},
                   classic: {
                     field_overrides: {
                       'foo.bar': {
@@ -434,6 +433,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -498,6 +498,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -532,9 +533,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               classic: {},
             },
           },
@@ -555,6 +555,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
+              settings: {},
               classic: {},
             },
           },
@@ -587,6 +588,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -663,6 +665,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -712,6 +715,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
+                  settings: {},
                   classic: {},
                 },
               },

@@ -146,6 +146,18 @@ export interface UnlinkSystemsAction {
   };
 }
 
+export interface UpdateIngestSettingsAction {
+  type: 'update_ingest_settings';
+  request: {
+    name: string;
+    settings: {
+      'index.number_of_replicas'?: number | null;
+      'index.number_of_shards'?: number | null;
+      'index.refresh_interval': string | -1 | null;
+    };
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -165,7 +177,8 @@ export type ElasticsearchAction =
   | UpdateDataStreamMappingsAction
   | DeleteQueriesAction
   | UnlinkAssetsAction
-  | UnlinkSystemsAction;
+  | UnlinkSystemsAction
+  | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -187,4 +200,5 @@ export interface ActionsByType {
   delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
   unlink_systems: UnlinkSystemsAction[];
+  update_ingest_settings: UpdateIngestSettingsAction[];
 }
