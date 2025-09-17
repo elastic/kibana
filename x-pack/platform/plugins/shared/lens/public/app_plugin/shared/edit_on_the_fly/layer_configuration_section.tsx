@@ -92,11 +92,15 @@ export function LayerConfiguration({
       `}
     >
       <EuiSpacer size="xs" />
-      <VisualizationToolbar
-        activeVisualization={activeVisualization}
-        framePublicAPI={framePublicAPI}
-      />
-      <EuiSpacer size="m" />
+      {activeVisualization?.ToolbarComponent && (
+        <>
+          <VisualizationToolbar
+            activeVisualization={activeVisualization}
+            framePublicAPI={framePublicAPI}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <ConfigPanelWrapper {...layerPanelsProps} />
     </div>
   );
