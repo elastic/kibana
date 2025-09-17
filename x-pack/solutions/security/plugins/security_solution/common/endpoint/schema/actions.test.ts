@@ -1120,7 +1120,7 @@ describe('actions schemas', () => {
           comment: 'Cancelling action due to change in requirements',
           agent_type: 'microsoft_defender_endpoint',
           parameters: {
-            action_id: '12345678-1234-5678-9012-123456789012',
+            id: '12345678-1234-5678-9012-123456789012',
           },
         });
       }).not.toThrow();
@@ -1130,36 +1130,36 @@ describe('actions schemas', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           parameters: {
-            action_id: '12345678-1234-5678-9012-123456789012',
+            id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
         });
       }).not.toThrow();
     });
 
-    it('should reject empty action_id', () => {
+    it('should reject empty id', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           parameters: {
-            action_id: '',
+            id: '',
           },
           endpoint_ids: ['endpoint-123'],
         });
       }).toThrow();
     });
 
-    it('should reject whitespace-only action_id', () => {
+    it('should reject whitespace-only id', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           parameters: {
-            action_id: '    ',
+            id: '    ',
           },
           endpoint_ids: ['endpoint-123'],
         });
       }).toThrow();
     });
 
-    it('should reject missing action_id', () => {
+    it('should reject missing id', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint-123'],
@@ -1173,7 +1173,7 @@ describe('actions schemas', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           parameters: {
-            action_id: '12345678-1234-5678-9012-123456789012',
+            id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
           comment: 'Cancelling due to policy change',
@@ -1185,7 +1185,7 @@ describe('actions schemas', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           parameters: {
-            action_id: '12345678-1234-5678-9012-123456789012',
+            id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
         });
@@ -1196,7 +1196,7 @@ describe('actions schemas', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           parameters: {
-            action_id: '12345678-1234-5678-9012-123456789012',
+            id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
           alert_ids: ['alert-456'],

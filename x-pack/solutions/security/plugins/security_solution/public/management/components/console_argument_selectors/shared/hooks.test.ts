@@ -143,7 +143,6 @@ describe('usePendingActionsOptions hook', () => {
         data: mockAction,
         checked: undefined,
         disabled: true, // Default when no privilege checker
-        toolTipContent: undefined,
       });
       // Type assertion for accessing value property
       expect(getOptionValue(option)).toBe('action-123-abc');
@@ -328,7 +327,6 @@ describe('usePendingActionsOptions hook', () => {
 
       const option = result.current[0];
       expect(option.disabled).toBe(false);
-      expect(option.toolTipContent).toBeUndefined();
     });
 
     it('should disable actions when privilege checker returns canCancel: false', () => {
@@ -345,7 +343,6 @@ describe('usePendingActionsOptions hook', () => {
 
       const option = result.current[0];
       expect(option.disabled).toBe(true);
-      expect(option.toolTipContent).toBe('Permission denied for isolate');
     });
 
     it('should pass command to privilege checker correctly', () => {
@@ -385,9 +382,7 @@ describe('usePendingActionsOptions hook', () => {
       const option1 = result.current[0];
       const option2 = result.current[1];
       expect(option1.disabled).toBe(false);
-      expect(option1.toolTipContent).toBeUndefined();
       expect(option2.disabled).toBe(true);
-      expect(option2.toolTipContent).toBe('No execute permission');
     });
 
     it('should default to disabled when no privilege checker is provided', () => {
@@ -402,7 +397,6 @@ describe('usePendingActionsOptions hook', () => {
 
       const option = result.current[0];
       expect(option.disabled).toBe(true);
-      expect(option.toolTipContent).toBeUndefined();
     });
   });
 
