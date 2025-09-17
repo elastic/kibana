@@ -9,24 +9,27 @@
 import uniqBy from 'lodash/uniqBy';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import type { ESQLCommand, ESQLAstRerankCommand } from '../../../types';
-import type { ESQLColumnData } from '../../types';
+import type { ESQLColumnData, ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
 
-export const columnsAfter = (
-  command: ESQLCommand,
-  previousColumns: ESQLColumnData[],
-  query: string
-) => {
+export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
   const { targetField } = command as ESQLAstRerankCommand;
 
-  if (targetField) {
-    const newColumn = {
-      name: LeafPrinter.column(targetField),
-      type: 'double' as const,
-      userDefined: true,
-      location: targetField.location,
-    };
-    return uniqBy([newColumn, ...previousColumns], 'name');
-  }
-
-  return previousColumns;
+  return uniqBy(
+    [
+      ...previousColumns,
+      targetField
+        ? ({
+            name: LeafPrinter.column(targetField),
+            type: 'keyword' as const,
+            userDefined: true,
+            location: targetField.location,
+          } as ESQLUserDefinedColumn)
+        : ({
+            name: '_score',
+            type: 'keyword' as const,
+            userDefined: false,
+          } as ESQLFieldWithMetadata),
+    ],
+    'name'
+  );
 };

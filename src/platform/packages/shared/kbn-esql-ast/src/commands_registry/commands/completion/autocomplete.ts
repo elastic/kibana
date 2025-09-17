@@ -24,8 +24,8 @@ import {
   handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
-  createBasicConstants,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {
   type ISuggestionItem,
   Location,
@@ -87,6 +87,7 @@ function getPosition(
   return undefined;
 }
 const promptText = 'Your prompt to the LLM.';
+const promptSnippetText = `"$\{0:${promptText}}"`;
 
 export async function autocomplete(
   query: string,
@@ -154,7 +155,11 @@ export async function autocomplete(
       const lastWord = findFinalWord(innerText);
 
       if (!lastWord) {
-        suggestions.push(...createBasicConstants(promptText));
+        suggestions.push({
+          ...buildConstantsDefinitions([promptSnippetText], '', '1')[0],
+          label: promptText,
+          asSnippet: true,
+        });
       }
 
       if (position !== CompletionPosition.AFTER_TARGET_ID) {

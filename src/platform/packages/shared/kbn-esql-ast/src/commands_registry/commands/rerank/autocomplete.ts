@@ -19,17 +19,19 @@ import {
   suggestForExpression,
   withinQuotes,
   createInferenceEndpointToCompletionItem,
-  createBasicConstants,
   handleFragment,
   columnExists,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
-export const QUERY_TEXT = 'Your search query.' as const;
+export const QUERY_TEXT = 'Your search query' as const;
+export const QUERY_TEXT_SNIPPET = `"$\{0:${QUERY_TEXT}}"`;
+
 const FIELD_LIST_TYPES = ['keyword', 'text', 'boolean', 'integer', 'double', 'long'] as const;
 
 export async function autocomplete(
@@ -65,7 +67,14 @@ export async function autocomplete(
         callbacks.getSuggestedUserDefinedColumnName?.() || ''
       );
 
-      return [targetField, ...createBasicConstants(QUERY_TEXT)];
+      return [
+        targetField,
+        {
+          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0],
+          label: QUERY_TEXT,
+          asSnippet: true,
+        },
+      ];
     }
 
     case CaretPosition.RERANK_AFTER_TARGET_FIELD: {
@@ -73,7 +82,13 @@ export async function autocomplete(
     }
 
     case CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT: {
-      return createBasicConstants(QUERY_TEXT);
+      return [
+        {
+          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0],
+          label: QUERY_TEXT,
+          asSnippet: true,
+        },
+      ];
     }
 
     case CaretPosition.ON_KEYWORD: {
@@ -136,7 +151,6 @@ async function handleOnFieldList({
   innerText,
   callbacks,
   context,
-  rerankCommand,
 }: {
   innerText: string;
   callbacks: ICommandCallbacks;
@@ -217,16 +231,16 @@ export function buildNextActions(options?: { withSpaces?: boolean }): ISuggestio
   const items: ISuggestionItem[] = [];
 
   items.push({
-    ...commaCompleteItem,
-    text: commaCompleteItem.text + ' ',
+    ...withCompleteItem,
+    text: withSpaces ? ' ' + withCompleteItem.text + ' ' : withCompleteItem.text,
     sortText: '01',
-    command: TRIGGER_SUGGESTION_COMMAND,
   });
 
   items.push({
-    ...withCompleteItem,
-    text: withSpaces ? ' ' + withCompleteItem.text + ' ' : withCompleteItem.text,
+    ...commaCompleteItem,
+    text: commaCompleteItem.text + ' ',
     sortText: '02',
+    command: TRIGGER_SUGGESTION_COMMAND,
   });
 
   items.push({

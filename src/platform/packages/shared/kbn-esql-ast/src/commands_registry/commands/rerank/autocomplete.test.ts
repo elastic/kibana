@@ -11,7 +11,7 @@ import {
   lookupIndexFields,
   getMockCallbacks,
 } from '../../../__tests__/context_fixtures';
-import { QUERY_TEXT, autocomplete } from './autocomplete';
+import { QUERY_TEXT_SNIPPET, autocomplete } from './autocomplete';
 import {
   onCompleteItem,
   pipeCompleteItem,
@@ -20,7 +20,7 @@ import {
 } from '../../complete_items';
 import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
-import { createBasicConstants } from '../../../definitions/utils/autocomplete/helpers';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 
 // ============================================================================
 // Single Source of Truth - Operator Suggestions by Group
@@ -37,10 +37,10 @@ const OPERATOR_SUGGESTIONS = {
 // Helper to add placeholder to operator labels for test expectations
 const addPlaceholder = (operators: string[]) => operators.map((op) => `${op} $0`);
 
-const QUERY_LITERAL = createBasicConstants(QUERY_TEXT)[0].text;
+const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0].text;
 const NEXT_ACTIONS = [
-  commaCompleteItem.text.endsWith(' ') ? commaCompleteItem.text : `${commaCompleteItem.text} `,
   withCompleteItem.text,
+  commaCompleteItem.text.endsWith(' ') ? commaCompleteItem.text : `${commaCompleteItem.text} `,
   pipeCompleteItem.text,
 ];
 
