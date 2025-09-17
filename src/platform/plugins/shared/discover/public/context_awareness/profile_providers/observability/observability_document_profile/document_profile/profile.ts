@@ -14,14 +14,14 @@ import { DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 
-const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
+const OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID = 'observability-generic-document-profile';
 
 export const createObservabilityGenericDocumentProfileProvider = ({
   tracesContextService,
   apmErrorsContextService,
   logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
-  profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
+  profileId: OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDocViewer: createGetDocViewer({

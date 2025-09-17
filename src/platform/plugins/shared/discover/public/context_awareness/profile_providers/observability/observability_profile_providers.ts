@@ -16,8 +16,8 @@ export const createObservabilityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
   return [
-    createObservabilityGenericDocumentProfileProvider(providerServices),
     createObservabilityLogDocumentProfileProvider(providerServices),
     createObservabilityTracesDocumentProfileProvider(providerServices),
+    createObservabilityGenericDocumentProfileProvider(providerServices),
   ];
 };

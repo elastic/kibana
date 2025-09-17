@@ -31,7 +31,6 @@ export type OverviewProps = DocViewRenderProps & {
 };
 
 export function Overview({
-  columns,
   hit,
   filter,
   onAddColumn,
