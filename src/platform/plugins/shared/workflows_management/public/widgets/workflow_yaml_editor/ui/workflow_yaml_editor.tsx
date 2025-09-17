@@ -26,11 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
 import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public';
-import {
-  getWorkflowZodSchema,
-  getWorkflowZodSchemaLoose,
-  addDynamicConnectorsToCache,
-} from '../../../../common/schema';
+import { getWorkflowZodSchemaLoose, addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../hooks/use_available_connectors';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -203,7 +199,7 @@ const useWorkflowJsonSchema = () => {
   // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
-      const zodSchema = getWorkflowZodSchema(connectorsData?.connectorTypes);
+      const zodSchema = getWorkflowZodSchemaLoose(connectorsData?.connectorTypes);
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
       // Post-process to improve validation messages and add display names for connectors
@@ -589,7 +585,7 @@ export const WorkflowYAMLEditor = ({
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { http, notifications, ...otherServices },
+    services: { http, notifications },
   } = useKibana<CoreStart>();
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -602,29 +598,12 @@ export const WorkflowYAMLEditor = ({
       addDynamicConnectorsToCache(connectorsData.connectorTypes);
       // Inject dynamic CSS for connector icons
       // Note: We don't await this to avoid blocking the UI
-      injectDynamicConnectorIcons(connectorsData.connectorTypes, {
-        ...otherServices,
-        http,
-        notifications,
-      });
+      // The icon functions don't actually use the services, so we pass null
+      injectDynamicConnectorIcons(connectorsData.connectorTypes, null);
       // Inject dynamic CSS for shadow icons (::after pseudo-elements)
-      injectDynamicShadowIcons(connectorsData.connectorTypes, {
-        ...otherServices,
-        http,
-        notifications,
-      });
+      injectDynamicShadowIcons(connectorsData.connectorTypes, null);
     }
-  }, [connectorsData?.connectorTypes, otherServices, http, notifications]);
-
-  // Add debug functions to window in development
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      import('../lib/connector_logo_debug').then(({ addDebugToWindow }) => {
-        addDebugToWindow({ ...otherServices, http, notifications });
-      });
-    }
-  }, [otherServices, http, notifications]);
-
+  }, [connectorsData?.connectorTypes]);
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas: SchemasSettings[] = useMemo(() => {
     return [
@@ -815,6 +794,15 @@ export const WorkflowYAMLEditor = ({
     editor.updateOptions({
       glyphMargin: true,
     });
+
+    // Add custom keybinding for Cmd+I (Mac) / Ctrl+I (Windows) to trigger suggestions
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+      () => {
+        // Trigger the suggest widget manually
+        editor.getAction('editor.action.triggerSuggest')?.run();
+      }
+    );
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
@@ -1418,8 +1406,8 @@ export const WorkflowYAMLEditor = ({
   };
 
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose);
-  }, [workflowYamlSchemaLoose]);
+    return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
+  }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
 
   useEffect(() => {
     monaco.editor.defineTheme('workflows-subdued', {

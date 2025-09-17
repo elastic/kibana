@@ -25,7 +25,7 @@ import {
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getAllConnectors } from '../../../../common/schema';
+import { getAllConnectors, getAllConnectorsWithDynamic } from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
@@ -33,8 +33,12 @@ import {
 } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
-// Use the global connector cache - no need for local caching
-function getCachedAllConnectors(): any[] {
+// Use the provided dynamic connectors or fall back to global cache
+function getCachedAllConnectors(dynamicConnectorTypes?: Record<string, any>): any[] {
+  if (dynamicConnectorTypes) {
+    // Use the same function that generates the schema to ensure consistency
+    return getAllConnectorsWithDynamic(dynamicConnectorTypes);
+  }
   return getAllConnectors();
 }
 
@@ -257,11 +261,11 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
 /**
  * Generate a snippet template for a connector type with required parameters
  */
-function generateConnectorSnippet(connectorType: string, shouldBeQuoted: boolean): string {
+function generateConnectorSnippet(connectorType: string, shouldBeQuoted: boolean, dynamicConnectorTypes?: Record<string, any>): string {
   const quotedType = shouldBeQuoted ? `"${connectorType}"` : connectorType;
 
   // Get required parameters for this connector type
-  const requiredParams = getRequiredParamsForConnector(connectorType);
+  const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
 
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder
@@ -499,6 +503,60 @@ function getIndentLevel(line: string): number {
 }
 
 /**
+ * Get enhanced type information for better completion suggestions
+ */
+function getEnhancedTypeInfo(schema: z.ZodType): {
+  type: string;
+  isRequired: boolean;
+  isOptional: boolean;
+  description?: string;
+  example?: string;
+} {
+  let currentSchema = schema;
+  let isOptional = false;
+  
+  // Unwrap ZodOptional
+  if (currentSchema instanceof z.ZodOptional) {
+    isOptional = true;
+    currentSchema = currentSchema._def.innerType;
+  }
+  
+  const baseType = getZodTypeName(currentSchema);
+  const description = (currentSchema as any)?._def?.description || '';
+  
+  // Extract example from description if available
+  let example = '';
+  const exampleMatch = description.match(/e\.g\.,?\s*['"]*([^'"]+)['"]*|example[:\s]+['"]*([^'"]+)['"]*/i);
+  if (exampleMatch) {
+    example = exampleMatch[1] || exampleMatch[2] || '';
+  }
+  
+  // Enhanced type information based on schema type
+  let enhancedType = baseType;
+  if (currentSchema instanceof z.ZodArray) {
+    const elementType = getZodTypeName(currentSchema._def.type);
+    enhancedType = `${elementType}[]`;
+  } else if (currentSchema instanceof z.ZodUnion) {
+    const options = currentSchema._def.options;
+    const unionTypes = options.map((opt: z.ZodType) => getZodTypeName(opt)).join(' | ');
+    enhancedType = unionTypes;
+  } else if (currentSchema instanceof z.ZodEnum) {
+    const values = currentSchema._def.values;
+    enhancedType = `enum: ${values.slice(0, 3).join(' | ')}${values.length > 3 ? '...' : ''}`;
+  } else if (currentSchema instanceof z.ZodLiteral) {
+    enhancedType = `"${currentSchema._def.value}"`;
+  }
+  
+  return {
+    type: enhancedType,
+    isRequired: !isOptional,
+    isOptional,
+    description: description || undefined,
+    example: example || undefined,
+  };
+}
+
+/**
  * Get existing parameters in the current with block to avoid suggesting duplicates
  */
 function getExistingParametersInWithBlock(model: any, position: any): Set<string> {
@@ -647,14 +705,14 @@ const connectorSchemaCache = new Map<string, Record<string, any> | null>();
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
 
-function getConnectorParamsSchema(connectorType: string): Record<string, any> | null {
+function getConnectorParamsSchema(connectorType: string, dynamicConnectorTypes?: Record<string, any>): Record<string, any> | null {
   // Check cache first
   if (connectorSchemaCache.has(connectorType)) {
     return connectorSchemaCache.get(connectorType)!;
   }
 
   try {
-    const allConnectors = getCachedAllConnectors();
+    const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
     const connector = allConnectors.find((c: any) => c.type === connectorType);
 
     if (!connector || !connector.paramsSchema) {
@@ -805,10 +863,11 @@ function extractRequiredParamsFromSchema(
  * Get required parameters for a connector type from generated schemas
  */
 function getRequiredParamsForConnector(
-  connectorType: string
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, any>
 ): Array<{ name: string; example?: string; defaultValue?: string }> {
   // Get all connectors (both static and generated)
-  const allConnectors = getCachedAllConnectors();
+  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
 
   // Find the connector by type
   const connector = allConnectors.find((c: any) => c.type === connectorType);
@@ -935,7 +994,8 @@ function getConnectorTypeSuggestions(
   range: monaco.IRange,
   context: monaco.languages.CompletionContext,
   scalarType: Scalar.Type | null,
-  shouldBeQuoted: boolean
+  shouldBeQuoted: boolean,
+  dynamicConnectorTypes?: Record<string, any>
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
   const cacheKey = `${typePrefix}|${shouldBeQuoted}|${JSON.stringify(range)}`;
@@ -951,11 +1011,11 @@ function getConnectorTypeSuggestions(
   const builtInStepTypes = getBuiltInStepTypesFromSchema();
 
   // Get all connectors
-  const allConnectors = getCachedAllConnectors();
+  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
-    const snippetText = generateConnectorSnippet(connectorType, shouldBeQuoted);
+    const snippetText = generateConnectorSnippet(connectorType, shouldBeQuoted, dynamicConnectorTypes);
 
     // For YAML, we insert the actual text without snippet placeholders
     const simpleText = snippetText;
@@ -1174,7 +1234,8 @@ export function getSuggestion(
 }
 
 export function getCompletionItemProvider(
-  workflowYamlSchema: z.ZodSchema
+  workflowYamlSchema: z.ZodSchema,
+  dynamicConnectorTypes?: Record<string, any>
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', ' '],
@@ -1334,7 +1395,8 @@ export function getCompletionItemProvider(
               adjustedRange,
               completionContext,
               scalarType,
-              shouldBeQuoted
+              shouldBeQuoted,
+              dynamicConnectorTypes
             );
           }
 
@@ -1353,6 +1415,18 @@ export function getCompletionItemProvider(
 
         // If we're in a connector with block, prioritize connector-specific suggestions
         if (connectorType) {
+          // First check if we're inside an array item - if so, don't show parameter suggestions
+          const isInArrayItem = lineUpToCursor.match(/^\s*-\s+/) !== null;
+          
+          if (isInArrayItem) {
+            // We're in an array item, don't show connector parameter suggestions
+            // Instead, return empty suggestions or appropriate array value suggestions
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
+          
           // Check if we're typing a value (after colon with content)
           const colonIndex = lineUpToCursor.lastIndexOf(':');
 
@@ -1456,7 +1530,7 @@ export function getCompletionItemProvider(
         let schemaToUse: Record<string, z.ZodType> | null = null;
 
         if (connectorType) {
-          schemaToUse = getConnectorParamsSchema(connectorType);
+          schemaToUse = getConnectorParamsSchema(connectorType, dynamicConnectorTypes);
           // Schema lookup for connector type
 
           // Connector registry lookup
@@ -1489,25 +1563,42 @@ export function getCompletionItemProvider(
                 continue;
               }
 
-              const propertyTypeName = getZodTypeName(currentSchema);
+              // Get enhanced type information
+              const typeInfo = getEnhancedTypeInfo(currentSchema);
 
               // Create a YAML key-value snippet suggestion with cursor positioning
               let insertText = `${key}: `;
               let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
 
-              // For boolean-like parameters, provide default values with cursor positioning
-              if (key.includes('enabled') || key.includes('disabled') || key.endsWith('Stream')) {
+              // Smart default values based on type and parameter name
+              // Check array types first to avoid conflicts with name-based matching
+              if (typeInfo.type.includes('[]')) {
+                // Array type - provide proper array structure
+                const elementType = typeInfo.type.replace('[]', '');
+                if (elementType === 'string') {
+                  insertText = `${key}:\n  - "\${1:}"`;
+                } else {
+                  insertText = `${key}:\n  - \${1:}`;
+                }
+                insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+              } else if (typeInfo.type === 'boolean' || key.includes('enabled') || key.includes('disabled') || key.endsWith('Stream')) {
                 insertText = `${key}: \${1:true}`;
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-              } else if (key.includes('size') || key.includes('count') || key.includes('limit')) {
-                insertText = `${key}: \${1:10}`;
+              } else if (typeInfo.type === 'number' || key.includes('size') || key.includes('count') || key.includes('limit')) {
+                const defaultValue = typeInfo.example || '10';
+                insertText = `${key}: \${1:${defaultValue}}`;
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-              } else if (
-                key.includes('message') ||
-                key.includes('text') ||
-                key.includes('content')
-              ) {
-                insertText = `${key}: "\${1:}"`;
+              } else if (typeInfo.type === 'string' || key.includes('message') || key.includes('text') || key.includes('content')) {
+                const placeholder = typeInfo.example || '';
+                insertText = `${key}: "\${1:${placeholder}}"`;
+                insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+              } else if (typeInfo.type === 'object') {
+                // Object type
+                insertText = `${key}:\n  \${1:}`;
+                insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+              } else if (typeInfo.example) {
+                // Use example if available
+                insertText = `${key}: \${1:${typeInfo.example}}`;
                 insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
               } else {
                 // Generic case - just add colon and space, then trigger suggestions
@@ -1519,6 +1610,25 @@ export function getCompletionItemProvider(
                 continue;
               }
 
+              // Create enhanced detail with type and required status
+              const requiredIndicator = typeInfo.isRequired ? '(required)' : '(optional)';
+              const detail = `${typeInfo.type} ${requiredIndicator}`;
+
+              // Create rich documentation
+              let documentation = `**${connectorType} Parameter: ${key}**\n\n`;
+              documentation += `**Type:** \`${typeInfo.type}\`\n`;
+              documentation += `**Required:** ${typeInfo.isRequired ? 'Yes' : 'No'}\n`;
+              
+              if (typeInfo.description) {
+                documentation += `\n**Description:** ${typeInfo.description}\n`;
+              }
+              
+              if (typeInfo.example) {
+                documentation += `\n**Example:** \`${typeInfo.example}\`\n`;
+              }
+              
+              documentation += `\n*This parameter is specific to the ${connectorType} connector.*`;
+
               const suggestion: monaco.languages.CompletionItem = {
                 label: key,
                 kind: monaco.languages.CompletionItemKind.Variable,
@@ -1526,9 +1636,9 @@ export function getCompletionItemProvider(
                 insertTextRules,
                 range,
                 sortText: `!${key}`, // High priority sorting
-                detail: `🎯 ${connectorType} parameter`,
+                detail,
                 documentation: {
-                  value: `**${connectorType} Parameter**\n\nType: ${propertyTypeName}\n\nThis parameter is specific to the ${connectorType} connector.`,
+                  value: documentation,
                 },
                 preselect: true,
                 // Trigger autocomplete for value suggestions if no snippet placeholders
@@ -1576,7 +1686,10 @@ export function getCompletionItemProvider(
         }
 
         for (const [key, currentSchema] of Object.entries(context.shape) as [string, z.ZodType][]) {
-          if (lastPathSegment && !key.startsWith(lastPathSegment)) {
+          // Check if manually triggered (Cmd+I/Ctrl+I) to show all suggestions
+          const isManualTrigger = completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
+          
+          if (lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger) {
             continue;
           }
 
@@ -1617,7 +1730,8 @@ export function getCompletionItemProvider(
                   adjustedRange,
                   completionContext,
                   scalarType,
-                  shouldBeQuoted
+                  shouldBeQuoted,
+                  dynamicConnectorTypes
                 );
               }
 
@@ -1648,18 +1762,40 @@ export function getCompletionItemProvider(
               suggestions.push(typeKeySuggestion);
             }
           } else {
-            const propertyTypeName = getZodTypeName(currentSchema);
-            suggestions.push(
-              getSuggestion(
-                key,
-                completionContext,
-                range,
-                scalarType,
-                shouldBeQuoted,
-                propertyTypeName,
-                currentSchema?.description
-              )
+            // Enhanced type information for generic suggestions
+            const typeInfo = getEnhancedTypeInfo(currentSchema);
+            const enhancedSuggestion = getSuggestion(
+              key,
+              completionContext,
+              range,
+              scalarType,
+              shouldBeQuoted,
+              typeInfo.type,
+              typeInfo.description
             );
+            
+            // Enhance the suggestion with better detail and documentation
+            const requiredIndicator = typeInfo.isRequired ? '(required)' : '(optional)';
+            enhancedSuggestion.detail = `${typeInfo.type} ${requiredIndicator}`;
+            
+            if (typeInfo.description || typeInfo.example) {
+              let documentation = `**Type:** \`${typeInfo.type}\`\n`;
+              documentation += `**Required:** ${typeInfo.isRequired ? 'Yes' : 'No'}\n`;
+              
+              if (typeInfo.description) {
+                documentation += `\n**Description:** ${typeInfo.description}\n`;
+              }
+              
+              if (typeInfo.example) {
+                documentation += `\n**Example:** \`${typeInfo.example}\`\n`;
+              }
+              
+              enhancedSuggestion.documentation = {
+                value: documentation,
+              };
+            }
+            
+            suggestions.push(enhancedSuggestion);
           }
         }
 

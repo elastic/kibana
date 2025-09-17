@@ -136,6 +136,9 @@ import {
   GenAIStreamResponseSchema,
   GenAIDashboardResponseSchema,
   GenAITestResponseSchema,
+  // Torq connector schemas
+  TorqParamsSchema,
+  TorqResponseSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -160,7 +163,8 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     }
   }
 
-  // Handle other connector types
+  // Handle other connector types (both with and without sub-actions)
+  // For connectors without sub-actions, subActionName will be empty string
   switch (actionTypeId) {
     case '.slack':
       return SlackParamsSchema;
@@ -182,6 +186,8 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
       return ServerLogParamsSchema;
     case '.pagerduty':
       return PagerDutyParamsSchema;
+    case '.torq':
+      return TorqParamsSchema;
   }
 
   // Handle Jira sub-actions
@@ -439,7 +445,8 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
     }
   }
 
-  // Handle other connector types
+  // Handle other connector types (both with and without sub-actions)
+  // For connectors without sub-actions, subActionName will be empty string
   switch (actionTypeId) {
     case '.slack':
       return SlackResponseSchema;
@@ -461,6 +468,8 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
       return ServerLogResponseSchema;
     case '.pagerduty':
       return PagerDutyResponseSchema;
+    case '.torq':
+      return TorqResponseSchema;
   }
 
   // Handle Jira sub-actions
@@ -754,15 +763,17 @@ export function convertDynamicConnectorsToContracts(
         });
       } else {
         // Fallback: create a generic connector contract if no sub-actions
+        // Try to get the proper schema for this connector type
+        const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, '');
+        const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, '');
+        
         connectorContracts.push({
           type: connectorType.actionTypeId,
-          paramsSchema: z.any(),
+          paramsSchema,
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
-          outputSchema: z.any(),
-          description: `${connectorType.displayName} connector${
-            connectorType.instances.length === 0 ? ' (no instances configured)' : ''
-          }`,
+          outputSchema,
+          description: `${connectorType.displayName} connector${connectorType.instances.length === 0 ? ' (no instances configured)' : ''}`,
         });
       }
     } catch (error) {

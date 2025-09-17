@@ -194,3 +194,9 @@ export {
   GenAIDashboardResponseSchema,
   GenAITestResponseSchema,
 } from './genai';
+
+// Torq connector schemas
+export {
+  TorqParamsSchema,
+  TorqResponseSchema,
+} from './torq';
