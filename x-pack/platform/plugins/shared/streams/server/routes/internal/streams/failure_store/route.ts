@@ -14,6 +14,7 @@ import {
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { Streams } from '@kbn/streams-schema';
 
 export interface UpdateFailureStoreResponse {
   acknowledged: true;
@@ -91,6 +92,12 @@ export const updateFailureStoreRoute = createServerRoute({
 
     const { name } = params.path;
     const { failureStoreEnabled, customRetentionPeriod } = params.body;
+
+    const stream = await streamsClient.getStream(name);
+
+    if (Streams.WiredStream.Definition.is(stream)) {
+      throw new Error('Failure store cannot be configured for wired streams');
+    }
 
     // Check if user has failure store manage privileges
     const privileges = await streamsClient.getPrivileges(name);
