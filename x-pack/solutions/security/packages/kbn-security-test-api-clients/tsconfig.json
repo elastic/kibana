@@ -16,7 +16,6 @@
   ],
   "kbn_references": [
     "@kbn/core-http-common",
-    "@kbn/ftr-common-functional-services",
     "@kbn/openapi-common",
     "@kbn/security-solution-plugin",
     "@kbn/spaces-plugin",

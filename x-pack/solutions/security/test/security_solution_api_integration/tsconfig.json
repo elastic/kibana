@@ -55,6 +55,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/std",
-    "@kbn/securitysolution-utils"
+    "@kbn/securitysolution-utils",
+    "@kbn/security-test-api-clients"
   ]
 }
