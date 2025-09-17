@@ -13998,7 +13998,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    action_id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_CancelRouteRequestBody'
         required: true
@@ -82549,13 +82549,13 @@ components:
             parameters:
               type: object
               properties:
-                action_id:
+                id:
                   description: ID of the response action to cancel
                   example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
                   minLength: 1
                   type: string
               required:
-                - action_id
+                - id
           required:
             - parameters
     Security_Endpoint_Management_API_CloudFileScriptParameters:
