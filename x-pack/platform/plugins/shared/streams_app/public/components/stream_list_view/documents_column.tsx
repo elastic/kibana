@@ -24,14 +24,14 @@ import {
   Tooltip,
   TooltipStickTo,
 } from '@elastic/charts';
-import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import useAsync from 'react-use/lib/useAsync';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
+import type { StreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
 
 export function DocumentsColumn({
   indexPattern,
@@ -40,20 +40,22 @@ export function DocumentsColumn({
   numDataPoints,
 }: {
   indexPattern: string;
-  histogramQueryFetch: AbortableAsyncState<UnparsedEsqlResponse>;
+  histogramQueryFetch: StreamHistogramFetch;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
+  const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
+
   const allTimeseries = React.useMemo(
     () =>
       esqlResultToTimeseries({
-        result: histogramQueryFetch,
+        result: histogramQueryResult,
         metricNames: ['doc_count'],
       }),
-    [histogramQueryFetch]
+    [histogramQueryResult]
   );
 
   const docCount = React.useMemo(
@@ -70,13 +72,13 @@ export function DocumentsColumn({
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
   const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
-  const noDocCountData = histogramQueryFetch.error ? '' : '-';
+  const noDocCountData = histogramQueryResult.error ? '' : '-';
 
-  const noHistogramData = histogramQueryFetch.error ? (
+  const noHistogramData = histogramQueryResult.error ? (
     <TooltipOrPopoverIcon
       dataTestSubj="streamsDocCount-error"
       icon="warning"
-      title={getFormattedError(histogramQueryFetch.error).message}
+      title={getFormattedError(histogramQueryResult.error).message}
       mode="popover"
       iconColor="danger"
     />
@@ -105,7 +107,7 @@ export function DocumentsColumn({
       role="group"
       aria-label={cellAriaLabel}
     >
-      {histogramQueryFetch.loading ? (
+      {histogramQueryResult.loading ? (
         <LoadingPlaceholder />
       ) : (
         <>

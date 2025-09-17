@@ -26,7 +26,7 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useHistogramFetchMap } from '../../hooks/use_histogram_fetch_map';
+import { useStreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import {
@@ -84,11 +84,7 @@ export function StreamsTreeTable({
 
   const numDataPoints = 25;
 
-  const histogramMap = useHistogramFetchMap(
-    streams.map((s) => s.stream.name),
-    timeState,
-    numDataPoints
-  );
+  const { getStreamDocCounts } = useStreamHistogramFetch(numDataPoints);
 
   const sorting = {
     sort: {
@@ -157,7 +153,7 @@ export function StreamsTreeTable({
             item.data_stream ? (
               <DocumentsColumn
                 indexPattern={item.stream.name}
-                histogramQueryFetch={histogramMap[item.stream.name]}
+                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
                 timeState={timeState}
                 numDataPoints={numDataPoints}
               />
@@ -173,7 +169,7 @@ export function StreamsTreeTable({
             item.data_stream ? (
               <DataQualityColumn
                 indexPattern={item.stream.name}
-                histogramQueryFetch={histogramMap[item.stream.name]}
+                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
                 considerFailedQuality={
                   item.can_read_failure_store && item.data_stream?.failure_store?.enabled
                 }
@@ -224,8 +220,8 @@ export function StreamsTreeTable({
       noItemsMessage={NO_STREAMS_MESSAGE}
       onTableChange={handleTableChange}
       pagination={{
-        initialPageSize: 25,
-        pageSizeOptions: [25, 50, 100],
+        initialPageSize: 3,
+        pageSizeOptions: [3, 25, 50, 100],
       }}
       search={{
         query: searchQuery,

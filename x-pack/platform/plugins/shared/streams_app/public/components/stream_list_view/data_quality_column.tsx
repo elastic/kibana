@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
 import { DatasetQualityIndicator, calculatePercentage } from '@kbn/dataset-quality-plugin/public';
+import useAsync from 'react-use/lib/useAsync';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../hooks/use_kibana';
+import type { StreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
 
 export function DataQualityColumn({
   indexPattern,
@@ -20,18 +18,26 @@ export function DataQualityColumn({
   considerFailedQuality,
 }: {
   indexPattern: string;
-  histogramQueryFetch: AbortableAsyncState<UnparsedEsqlResponse>;
+  histogramQueryFetch: StreamHistogramFetch;
   considerFailedQuality?: boolean;
 }) {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+  const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
+  const failedDocsResult = useAsync(
+    () => histogramQueryFetch.failedDocCount,
+    [histogramQueryFetch]
+  );
+  const degradedDocsResult = useAsync(
+    () => histogramQueryFetch.degradedDocCount,
+    [histogramQueryFetch]
+  );
 
   const allTimeseries = React.useMemo(
     () =>
       esqlResultToTimeseries({
-        result: histogramQueryFetch,
+        result: histogramQueryResult,
         metricNames: ['doc_count'],
       }),
-    [histogramQueryFetch]
+    [histogramQueryResult]
   );
 
   const docCount = React.useMemo(
@@ -43,56 +49,11 @@ export function DataQualityColumn({
     [allTimeseries]
   );
 
-  const failedDocsQueryFetch = useStreamsAppFetch(
-    async ({ signal, timeState: { start, end } }) => {
-      // Only fetch failed documents if we need to consider them for quality calculation
-      return considerFailedQuality
-        ? streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-            params: {
-              body: {
-                operationName: 'get_failed_doc_count_for_stream',
-                query: `FROM ${indexPattern}::failures | STATS failed_doc_count = count(*)`,
-                start,
-                end,
-              },
-            },
-            signal,
-          })
-        : undefined;
-    },
-    [streamsRepositoryClient, indexPattern, considerFailedQuality],
-    {
-      withTimeRange: true,
-      disableToastOnError: true,
-    }
-  );
-
-  const degradedDocsQueryFetch = useStreamsAppFetch(
-    async ({ signal, timeState: { start, end } }) => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_degraded_doc_count_for_stream',
-            query: `FROM ${indexPattern} METADATA _ignored | WHERE _ignored IS NOT NULL | STATS degraded_doc_count = count(*)`,
-            start,
-            end,
-          },
-        },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, indexPattern],
-    {
-      withTimeRange: true,
-      disableToastOnError: true,
-    }
-  );
-
-  const degradedDocCount = degradedDocsQueryFetch?.value
-    ? Number(degradedDocsQueryFetch.value?.values?.[0]?.[0])
+  const degradedDocCount = failedDocsResult?.value
+    ? Number(failedDocsResult.value?.values?.[0]?.[0])
     : 0;
-  const failedDocCount = failedDocsQueryFetch?.value
-    ? Number(failedDocsQueryFetch.value.values?.[0]?.[0])
+  const failedDocCount = degradedDocsResult?.value
+    ? Number(degradedDocsResult.value.values?.[0]?.[0])
     : 0;
 
   const degradedPercentage = calculatePercentage({
@@ -110,7 +71,7 @@ export function DataQualityColumn({
     : mapPercentageToQuality([degradedPercentage]);
 
   const isLoading =
-    histogramQueryFetch.loading || failedDocsQueryFetch?.loading || degradedDocsQueryFetch.loading;
+    histogramQueryResult.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
   return <DatasetQualityIndicator quality={quality} isLoading={isLoading} />;
 }
