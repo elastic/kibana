@@ -463,6 +463,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'step.addProcessor': {
