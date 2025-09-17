@@ -26,8 +26,27 @@ export interface ConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
+  connectorId?: z.ZodType;
   outputSchema: z.ZodType;
   description?: string;
+}
+
+export interface DynamicConnectorContract extends ConnectorContract {
+  /** Action type ID from Kibana actions plugin */
+  actionTypeId: string;
+  /** Display name from actions plugin */
+  displayName: string;
+  /** Available connector instances */
+  instances: Array<{
+    id: string;
+    name: string;
+    isPreconfigured: boolean;
+    isDeprecated: boolean;
+  }>;
+  /** Whether this connector type is enabled */
+  enabled?: boolean;
+  /** Whether this is a system action type */
+  isSystemActionType?: boolean;
 }
 
 export interface InternalConnectorContract extends ConnectorContract {

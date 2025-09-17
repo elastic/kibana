@@ -47,7 +47,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
-    "@kbn/core-i18n-browser-mocks"
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/stack-connectors-plugin"
   ],
   "exclude": ["target/**/*"]
 }
