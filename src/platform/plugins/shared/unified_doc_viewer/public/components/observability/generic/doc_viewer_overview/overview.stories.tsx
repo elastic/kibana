@@ -14,7 +14,7 @@ import { Overview, type OverviewProps } from './overview';
 
 type Args = UnifiedDocViewerStorybookArgs<OverviewProps>;
 const meta = {
-  title: 'Generiv Overview',
+  title: 'Generic Overview',
   component: Overview,
 } satisfies Meta<typeof Overview>;
 
@@ -24,7 +24,7 @@ type Story = StoryObj<Args>;
 /**
  * An example generic document
  */
-export const MinimalApm: Story = {
+export const MinimalGeneric: Story = {
   name: 'Minimal Generic Document',
   args: {
     hit: genericDocument,
