@@ -7,6 +7,7 @@
 
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
+import { streamObjectNameSchema } from './shared/stream_object_name';
 
 export interface System {
   name: string;
@@ -15,7 +16,7 @@ export interface System {
 }
 
 export const systemSchema: z.Schema<System> = z.object({
-  name: z.string(),
+  name: streamObjectNameSchema,
   description: z.string(),
   filter: conditionSchema,
 });

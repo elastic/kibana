@@ -141,6 +141,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('cannot create a system with a name starting with an underscore', async () => {
+        const resp = await createSystem('_invalid-system', {
+          description: 'A system with an invalid name',
+          filter: { always: {} },
+        });
+        expect(resp.status).to.be(400);
+      });
+
+      it('cannot create a system with a name starting with a dot', async () => {
+        const resp = await createSystem('.invalid-system', {
+          description: 'A system with an invalid name',
+          filter: { always: {} },
+        });
+        expect(resp.status).to.be(400);
+      });
+
       describe('after update', () => {
         beforeEach(async () => {
           const resp = await updateSystem('system-a', {

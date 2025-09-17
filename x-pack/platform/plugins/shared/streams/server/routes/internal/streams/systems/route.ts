@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { systemSchema, type System } from '@kbn/streams-schema';
+import { streamObjectNameSchema, systemSchema, type System } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -32,7 +32,7 @@ export const getSystemRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), systemName: z.string() }),
+    path: z.object({ name: z.string(), systemName: streamObjectNameSchema }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ system: System }> => {
     const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
@@ -69,7 +69,7 @@ export const deleteSystemRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), systemName: z.string() }),
+    path: z.object({ name: z.string(), systemName: streamObjectNameSchema }),
   }),
   handler: async ({
     params,
@@ -109,7 +109,7 @@ export const updateSystemRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), systemName: z.string() }),
+    path: z.object({ name: z.string(), systemName: streamObjectNameSchema }),
     body: z.object({
       description: z.string(),
       filter: conditionSchema,
@@ -216,7 +216,7 @@ export const bulkSystemsRoute = createServerRoute({
           z.object({
             delete: z.object({
               system: z.object({
-                name: z.string(),
+                name: streamObjectNameSchema,
               }),
             }),
           }),

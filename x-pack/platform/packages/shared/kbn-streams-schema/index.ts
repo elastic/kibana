@@ -77,6 +77,8 @@ export {
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
+export { streamObjectNameSchema } from './src/shared/stream_object_name';
+
 export {
   type IngestStreamLifecycle,
   type ClassicIngestStreamEffectiveLifecycle,
