@@ -167,13 +167,7 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DataQualityColumn
-                indexPattern={item.stream.name}
-                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
-                considerFailedQuality={
-                  item.can_read_failure_store && item.data_stream?.failure_store?.enabled
-                }
-              />
+              <DataQualityColumn histogramQueryFetch={getStreamDocCounts(item.stream.name)} />
             ) : null,
         },
         {
