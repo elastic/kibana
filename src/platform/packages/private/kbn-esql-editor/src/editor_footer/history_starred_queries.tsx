@@ -26,8 +26,6 @@ import {
   EuiFieldSearch,
   EuiText,
   EuiIconTip,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
@@ -61,27 +59,24 @@ export function QueryHistoryAction({
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiLink
-            onClick={toggleHistory}
-            external={false}
-            data-test-subj="ESQLEditor-hide-queries-link"
+          <EuiToolTip
+            position="top"
+            content={
+              isHistoryOpen
+                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                    defaultMessage: 'Hide recent queries',
+                  })
+                : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                    defaultMessage: 'Show recent queries',
+                  })
+            }
           >
-            <EuiIconTip
-              type="clockCounter"
-              color="primary"
-              size="m"
-              content={
-                isHistoryOpen
-                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                      defaultMessage: 'Hide recent queries',
-                    })
-                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                      defaultMessage: 'Show recent queries',
-                    })
-              }
-              position="top"
+            <EuiButtonIcon
+              onClick={toggleHistory}
+              iconType="clockCounter"
+              data-test-subj="ESQLEditor-hide-queries-link"
             />
-          </EuiLink>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
@@ -140,51 +135,48 @@ export const getTableColumns = (
           case 'success':
           default:
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-              >
-                <EuiIcon
-                  type="checkInCircleFilled"
-                  color="success"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-success"
-                />
-              </EuiToolTip>
+                type="checkInCircleFilled"
+                color="success"
+                size="m"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-success',
+                }}
+              />
             );
           case 'error':
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              >
-                <EuiIcon
-                  type="error"
-                  color="danger"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-error"
-                />
-              </EuiToolTip>
+                type="error"
+                color="danger"
+                size="m"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-error',
+                }}
+              />
             );
           case 'warning':
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              >
-                <EuiIcon
-                  type="warning"
-                  color="warning"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-warning"
-                />
-              </EuiToolTip>
+                type="warning"
+                color="warning"
+                size="m"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-warning',
+                }}
+              />
             );
         }
       },
