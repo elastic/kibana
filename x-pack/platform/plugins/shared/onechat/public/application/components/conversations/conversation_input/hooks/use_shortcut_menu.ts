@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { WorkflowSuggestion } from '../../../../../services/workflow_autocomplete/workflow_autocomplete_service';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export interface ShortcutItem {
   id: string;
@@ -56,6 +57,7 @@ export interface UseShortcutMenuProps {
 }
 
 export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: UseShortcutMenuProps) => {
+  const { services: { http } } = useKibana();
   const [state, setState] = useState<ShortcutMenuState>({
     isVisible: false,
     level: 'main',
@@ -63,6 +65,26 @@ export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: 
     triggerPosition: 0,
     items: [],
   });
+  const [loadedWorkflowSuggestions, setLoadedWorkflowSuggestions] = useState<WorkflowSuggestion[]>([]);
+  
+  // Load workflow suggestions when needed
+  const loadWorkflowSuggestions = useCallback(async () => {
+    console.log('Loading workflow suggestions...');
+    try {
+      const response = await http.get<{ workflows: WorkflowSuggestion[] }>(
+        '/api/onechat/workflows/autocomplete',
+        {
+          query: { query: '', limit: 10 },
+        }
+      );
+      console.log('Loaded workflow suggestions:', response.workflows);
+      setLoadedWorkflowSuggestions(response.workflows || []);
+      return response.workflows || [];
+    } catch (error) {
+      console.error('Failed to load workflow suggestions:', error);
+      return [];
+    }
+  }, [http]);
 
   // Check if cursor is at a "/" trigger
   const checkForShortcutTrigger = useCallback(() => {
@@ -102,27 +124,49 @@ export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: 
 
   const navigateSelection = useCallback((direction: 'up' | 'down') => {
     setState(prev => {
-      const items = prev.level === 'main' ? prev.items : workflowSuggestions || [];
+      const items = prev.level === 'main' 
+        ? prev.items 
+        : (loadedWorkflowSuggestions.length > 0 ? loadedWorkflowSuggestions : workflowSuggestions || []);
       const newIndex = direction === 'up' 
         ? Math.max(0, prev.selectedIndex - 1)
         : Math.min(items.length - 1, prev.selectedIndex + 1);
       
       return { ...prev, selectedIndex: newIndex };
     });
-  }, [workflowSuggestions]);
+  }, [workflowSuggestions, loadedWorkflowSuggestions]);
 
   const selectItem = useCallback(() => {
+    console.log('selectItem called:', {
+      level: state.level,
+      selectedIndex: state.selectedIndex,
+      items: state.items,
+      workflowSuggestions: workflowSuggestions?.length
+    });
+    
     if (state.level === 'main') {
       const selectedItem = state.items[state.selectedIndex];
+      console.log('Selected item:', selectedItem);
       
       if (selectedItem?.action === 'workflow') {
-        // Switch to workflow level
-        setState(prev => ({
-          ...prev,
-          level: 'workflow',
-          selectedIndex: 0,
-          workflowSuggestions,
-        }));
+        console.log('Switching to workflow level');
+        // Load workflow suggestions if not already loaded
+        if (loadedWorkflowSuggestions.length === 0) {
+          loadWorkflowSuggestions().then((suggestions) => {
+            setState(prev => ({
+              ...prev,
+              level: 'workflow',
+              selectedIndex: 0,
+              workflowSuggestions: suggestions,
+            }));
+          });
+        } else {
+          setState(prev => ({
+            ...prev,
+            level: 'workflow',
+            selectedIndex: 0,
+            workflowSuggestions: loadedWorkflowSuggestions,
+          }));
+        }
         return null; // Don't close menu, just switch level
       } else {
         // Handle other shortcuts
@@ -134,7 +178,8 @@ export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: 
       }
     } else if (state.level === 'workflow') {
       // Handle workflow selection
-      const selectedWorkflow = workflowSuggestions[state.selectedIndex];
+      const currentWorkflows = loadedWorkflowSuggestions.length > 0 ? loadedWorkflowSuggestions : workflowSuggestions;
+      const selectedWorkflow = currentWorkflows[state.selectedIndex];
       if (selectedWorkflow) {
         const workflowName = selectedWorkflow.name.includes(' ') ? `"${selectedWorkflow.name}"` : selectedWorkflow.name;
         
@@ -150,10 +195,11 @@ export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: 
           inputPlaceholders = ` with {${placeholders}}`;
         }
         
-        const replacement = `/workflow ${workflowName}${inputPlaceholders} `;
+        const replacement = `/workflow ${workflowName}${inputPlaceholders}`;
+        const finalInput = input.slice(0, state.triggerPosition) + replacement + ' ' + input.slice(cursorPosition);
         return {
-          newInput: input.slice(0, state.triggerPosition) + replacement + input.slice(cursorPosition),
-          newCursorPosition: state.triggerPosition + replacement.length,
+          newInput: finalInput,
+          newCursorPosition: state.triggerPosition + replacement.length + 1, // +1 for the space
         };
       }
     }
@@ -180,7 +226,9 @@ export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: 
     if (state.level === 'main') {
       return state.items;
     } else if (state.level === 'workflow') {
-      return workflowSuggestions.map(workflow => ({
+      const currentWorkflows = loadedWorkflowSuggestions.length > 0 ? loadedWorkflowSuggestions : workflowSuggestions;
+      console.log('Getting current workflow items:', currentWorkflows?.length);
+      return currentWorkflows.map(workflow => ({
         id: workflow.id,
         label: workflow.name,
         description: workflow.description || 'No description',
@@ -188,7 +236,7 @@ export const useShortcutMenu = ({ input, cursorPosition, workflowSuggestions }: 
       }));
     }
     return [];
-  }, [state.level, state.items, workflowSuggestions]);
+  }, [state.level, state.items, workflowSuggestions, loadedWorkflowSuggestions]);
 
   return {
     ...state,

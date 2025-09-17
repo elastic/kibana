@@ -17,9 +17,9 @@ export interface WorkflowCommand {
  * Patterns to match workflow commands
  */
 const WORKFLOW_COMMAND_PATTERNS = {
-  // Support both quoted multi-word names and single words
-  slash: /\/workflow\s+("[^"]+"|[^\s@/]+)(?:\s+(.*))?/gi,
-  mention: /@workflow\s+("[^"]+"|[^\s@/]+)(?:\s+(.*))?/gi,
+  // Support both quoted multi-word names and single words, with optional parameters in braces
+  slash: /\/workflow\s+("[^"]+"|[^\s@/]+)(?:\s+with\s+\{[^}]*\})?/gi,
+  mention: /@workflow\s+("[^"]+"|[^\s@/]+)(?:\s+with\s+\{[^}]*\})?/gi,
 };
 
 /**
