@@ -8,7 +8,7 @@
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
-  FullThreeWayRuleDiff,
+  FullRuleDiff,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   RuleUpgradeSpecifier,
@@ -272,7 +272,7 @@ export const performRuleUpgradeHandler = async (
 };
 
 function getRuleUpgradeConflictState(
-  ruleDiff: FullThreeWayRuleDiff,
+  ruleDiff: FullRuleDiff,
   ruleUpgradeSpecifier?: RuleUpgradeSpecifier
 ): ThreeWayDiffConflict {
   if (ruleDiff.num_fields_with_conflicts === 0) {
