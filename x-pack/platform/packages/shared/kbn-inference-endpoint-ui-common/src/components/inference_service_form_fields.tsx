@@ -414,12 +414,25 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const params = parse(location.search, {
         sort: false,
       });
-      const selectedProvider = params.connectorProvider;
-      const providerKey =
-        typeof selectedProvider === 'string' ? ServiceProviderKeyMap[selectedProvider] : null;
+      const { selectedConnector, connectorState } = params;
 
-      if (typeof providerKey === 'string' && !config?.provider) {
-        onProviderChange(providerKey);
+      try {
+        const selectedProvider =
+          typeof connectorState === 'string' && JSON.parse(connectorState).provider;
+        const providerKey =
+          typeof selectedProvider === 'string' ? ServiceProviderKeyMap[selectedProvider] : null;
+
+        if (
+          selectedConnector === '.inference' &&
+          typeof providerKey === 'string' &&
+          !config?.provider
+        ) {
+          onProviderChange(providerKey);
+        }
+      } catch (e) {
+        // No action necessary - the params are malformed or not relevant to this page
+        // eslint-disable-next-line no-console
+        console.error('Error parsing url params:', e);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

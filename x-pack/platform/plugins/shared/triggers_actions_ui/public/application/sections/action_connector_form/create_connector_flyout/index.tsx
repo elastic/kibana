@@ -221,10 +221,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const banner = useMemo(() => {
     const redirectToInferenceConnector = (provider: string) => {
       if (allActionTypes) {
-        setActionType(allActionTypes['.inference']);
+        const inferenceAction = allActionTypes['.inference'];
+        setActionType(inferenceAction);
 
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set('connectorProvider', provider);
+        newSearchParams.set('selectedConnector', `${inferenceAction.id}`);
+        newSearchParams.set('connectorState', JSON.stringify({ provider }));
         // Update the URL without a full page refresh
         setSearchParams(newSearchParams);
       }
@@ -305,6 +307,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="danger"
                   iconType="warning"

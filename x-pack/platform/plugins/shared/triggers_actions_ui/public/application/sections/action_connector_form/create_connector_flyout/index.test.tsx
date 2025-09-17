@@ -62,6 +62,18 @@ describe('CreateConnectorFlyout', () => {
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
+  const renderFlyout = () =>
+    appMockRenderer.render(
+      <Router history={history}>
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      </Router>
+    );
+
   beforeEach(() => {
     jest.clearAllMocks();
     actionTypeRegistry.has.mockReturnValue(true);
@@ -75,16 +87,7 @@ describe('CreateConnectorFlyout', () => {
   });
 
   it('renders', async () => {
-    const { getByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      </Router>
-    );
+    const { getByTestId } = renderFlyout();
     await act(() => Promise.resolve());
 
     expect(getByTestId('create-connector-flyout')).toBeInTheDocument();
@@ -93,33 +96,14 @@ describe('CreateConnectorFlyout', () => {
   });
 
   it('renders action type menu on flyout open', async () => {
-    const { getByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      </Router>
-    );
-
+    const { getByTestId } = renderFlyout();
     await act(() => Promise.resolve());
 
     expect(await getByTestId(`${actionTypeModel.id}-card`)).toBeInTheDocument();
   });
 
   it('shows the correct buttons without an action type selected', async () => {
-    const { getByTestId, queryByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      </Router>
-    );
+    const { getByTestId, queryByTestId } = renderFlyout();
     await act(() => Promise.resolve());
 
     expect(getByTestId('create-connector-flyout-close-btn')).toBeInTheDocument();
@@ -128,18 +112,8 @@ describe('CreateConnectorFlyout', () => {
   });
 
   it('shows the correct buttons when selecting an action type', async () => {
-    const { getByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      </Router>
-    );
+    const { getByTestId } = renderFlyout();
     await act(() => Promise.resolve());
-
     await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
     await waitFor(() => {
@@ -150,15 +124,7 @@ describe('CreateConnectorFlyout', () => {
   });
 
   it('does not show the save and test button if the onTestConnector is not provided', async () => {
-    const { queryByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-        />
-      </Router>
-    );
+    const { queryByTestId } = renderFlyout();
 
     expect(queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
   });
@@ -169,32 +135,14 @@ describe('CreateConnectorFlyout', () => {
       actions: { save: false, show: true },
     };
 
-    const { getByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      </Router>
-    );
+    const { getByTestId } = renderFlyout();
     await act(() => Promise.resolve());
 
     expect(getByTestId('create-connector-flyout-close-btn')).not.toBeDisabled();
   });
 
   it('disables the buttons when there are error on the form', async () => {
-    const { getByTestId } = appMockRenderer.render(
-      <Router history={history}>
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      </Router>
-    );
+    const { getByTestId } = renderFlyout();
     await act(() => Promise.resolve());
 
     await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
@@ -235,16 +183,7 @@ describe('CreateConnectorFlyout', () => {
           supportedFeatureIds: ['alerting'],
         },
       ]);
-      const { getByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId } = renderFlyout();
       await act(() => Promise.resolve());
       expect(getByTestId('upgrade-your-license-callout')).toBeInTheDocument();
     });
@@ -270,16 +209,7 @@ describe('CreateConnectorFlyout', () => {
           minimumLicenseRequired: 'platinum',
         },
       ]);
-      const { queryByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { queryByTestId } = renderFlyout();
       await act(() => Promise.resolve());
       expect(queryByTestId('upgrade-your-license-callout')).toBeFalsy();
     });
@@ -305,16 +235,7 @@ describe('CreateConnectorFlyout', () => {
           supportedFeatureIds: ['alerting'],
         },
       ]);
-      const { queryByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { queryByTestId } = renderFlyout();
       await act(() => Promise.resolve());
       expect(queryByTestId('upgrade-your-license-callout')).toBeFalsy();
     });
@@ -322,44 +243,17 @@ describe('CreateConnectorFlyout', () => {
 
   describe('Header', () => {
     it('does not shows the icon when selection connector type', async () => {
-      const { queryByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { queryByTestId } = renderFlyout();
       await act(() => Promise.resolve());
       expect(queryByTestId('create-connector-flyout-header-icon')).not.toBeInTheDocument();
     });
     it('shows the correct title when selecting connector type', async () => {
-      const { getByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByText } = renderFlyout();
       await act(() => Promise.resolve());
       expect(getByText('Select a connector')).toBeInTheDocument();
     });
     it('shows the compatibility badges when the connector type is selected', async () => {
-      const { getByTestId, getByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId, getByText } = renderFlyout();
       await act(() => Promise.resolve());
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       await waitFor(() => {
@@ -369,16 +263,7 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText('Alerting Rules')).toBeInTheDocument();
     });
     it('shows the icon when the connector type is selected', async () => {
-      const { getByTestId, getByText, queryByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId, getByText, queryByText } = renderFlyout();
       await act(() => Promise.resolve());
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       await waitFor(() => {
@@ -390,46 +275,19 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText(`selectMessage-${actionTypeModel.id}`)).toBeInTheDocument();
     });
     it('does not show beta badge when isExperimental is undefined', async () => {
-      const { queryByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { queryByText } = renderFlyout();
       await act(() => Promise.resolve());
       expect(queryByText(TECH_PREVIEW_LABEL)).not.toBeInTheDocument();
     });
     it('does not show beta badge when isExperimental is false', async () => {
       actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
-      const { queryByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { queryByText } = renderFlyout();
       await act(() => Promise.resolve());
       expect(queryByText(TECH_PREVIEW_LABEL)).not.toBeInTheDocument();
     });
     it('shows beta badge when isExperimental is true', async () => {
       actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
-      const { getByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByText } = renderFlyout();
       await act(() => Promise.resolve());
       expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
     });
@@ -437,50 +295,24 @@ describe('CreateConnectorFlyout', () => {
 
   describe('Filters', () => {
     it('displays search field', async () => {
-      appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { findByTestId } = renderFlyout();
 
-      expect(await screen.findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+      expect(await findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
     });
 
     it('does not show the search field after an action type is selected', async () => {
-      appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
-      expect(await screen.findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+      const { findByTestId, queryByTestId } = renderFlyout();
+      expect(await findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
 
       await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
-      expect(await screen.queryByTestId('createConnectorsModalSearch')).not.toBeInTheDocument();
+      expect(await queryByTestId('createConnectorsModalSearch')).not.toBeInTheDocument();
     });
   });
 
   describe('Submitting', () => {
     it('creates a connector correctly', async () => {
-      const { getByTestId, queryByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId, queryByTestId } = renderFlyout();
+
       await act(() => Promise.resolve());
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       await waitFor(() => {
@@ -513,58 +345,32 @@ describe('CreateConnectorFlyout', () => {
       expect(queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
     it('show error message in the form header', async () => {
-      appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { findByTestId } = renderFlyout();
       await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
-      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
-      await userEvent.type(
-        await screen.findByTestId('test-connector-text-field'),
-        'My text field',
-        {
-          delay: 100,
-        }
-      );
-      await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+      expect(await findByTestId('test-connector-text-field')).toBeInTheDocument();
+      await userEvent.type(await findByTestId('test-connector-text-field'), 'My text field', {
+        delay: 100,
+      });
+      await userEvent.click(await findByTestId('create-connector-flyout-save-btn'));
       expect(onClose).not.toHaveBeenCalled();
       expect(onConnectorCreated).not.toHaveBeenCalled();
-      expect(await screen.findByTestId('connector-form-header-error-label')).toBeInTheDocument();
+      expect(await findByTestId('connector-form-header-error-label')).toBeInTheDocument();
     });
     it('removes error message from the form header', async () => {
-      appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { findByTestId } = renderFlyout();
       await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
-      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
-      await userEvent.type(
-        await screen.findByTestId('test-connector-text-field'),
-        'My text field',
-        {
-          delay: 100,
-        }
-      );
-      await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
-      expect(onClose).not.toHaveBeenCalled();
-      expect(onConnectorCreated).not.toHaveBeenCalled();
-      expect(await screen.findByTestId('connector-form-header-error-label')).toBeInTheDocument();
-      await userEvent.type(await screen.findByTestId('nameInput'), 'My test', {
+      expect(await findByTestId('test-connector-text-field')).toBeInTheDocument();
+      await userEvent.type(await findByTestId('test-connector-text-field'), 'My text field', {
         delay: 100,
       });
       await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onConnectorCreated).not.toHaveBeenCalled();
+      expect(await findByTestId('connector-form-header-error-label')).toBeInTheDocument();
+      await userEvent.type(await findByTestId('nameInput'), 'My test', {
+        delay: 100,
+      });
+      await userEvent.click(await findByTestId('create-connector-flyout-save-btn'));
       expect(onClose).toHaveBeenCalled();
       expect(onConnectorCreated).toHaveBeenCalled();
       expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
@@ -584,16 +390,8 @@ describe('CreateConnectorFlyout', () => {
           minimumLicenseRequired: 'basic' as const,
         },
       ]);
-      const { getByTestId, getByText } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId, getByText } = renderFlyout();
+
       await act(() => Promise.resolve());
       await userEvent.click(getByTestId(`${errorActionTypeModel.id}-card`));
       await waitFor(() => {
@@ -614,16 +412,7 @@ describe('CreateConnectorFlyout', () => {
 
   describe('Testing', () => {
     it('saves and test correctly', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId } = renderFlyout();
       await act(() => Promise.resolve());
 
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
@@ -673,16 +462,7 @@ describe('CreateConnectorFlyout', () => {
 
   describe('Footer', () => {
     it('shows the action types when pressing the back button', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId } = renderFlyout();
       await act(() => Promise.resolve());
 
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
@@ -700,16 +480,7 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('closes the flyout when pressing close', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <Router history={history}>
-          <CreateConnectorFlyout
-            actionTypeRegistry={actionTypeRegistry}
-            onClose={onClose}
-            onConnectorCreated={onConnectorCreated}
-            onTestConnector={onTestConnector}
-          />
-        </Router>
-      );
+      const { getByTestId } = renderFlyout();
       await act(() => Promise.resolve());
 
       await userEvent.click(getByTestId('create-connector-flyout-close-btn'));
