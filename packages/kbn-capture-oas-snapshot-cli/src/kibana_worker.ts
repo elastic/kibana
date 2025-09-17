@@ -75,6 +75,6 @@ export type Result = string;
   const oas = await http.generateOas({ baseUrl: 'http://localhost:5622', filters });
   process.send(JSON.stringify(oas));
 })().catch((error) => {
-  process.stderr.write(`UNHANDLED ERROR: ${error.stack}`);
+  process.stderr.write(`UNHANDLED ERROR: ${error}`);
   process.exit(1);
 });
