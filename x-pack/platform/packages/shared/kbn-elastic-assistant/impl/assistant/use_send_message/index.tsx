@@ -32,7 +32,7 @@ interface UseSendMessage {
 }
 
 export const useSendMessage = (): UseSendMessage => {
-  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions } =
+  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions, toasts } =
     useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
@@ -55,12 +55,19 @@ export const useSendMessage = (): UseSendMessage => {
           screenContext: {
             timeZone: moment.tz.guess(),
           },
+          toasts,
         });
       } finally {
         setIsLoading(false);
       }
     },
-    [alertsIndexPattern, assistantStreamingEnabled, knowledgeBase.latestAlerts, traceOptions]
+    [
+      alertsIndexPattern,
+      assistantStreamingEnabled,
+      knowledgeBase.latestAlerts,
+      toasts,
+      traceOptions,
+    ]
   );
 
   const cancelRequest = useCallback(() => {
