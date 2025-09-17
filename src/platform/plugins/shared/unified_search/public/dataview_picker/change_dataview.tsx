@@ -157,6 +157,7 @@ export function ChangeDataView({
     const editData = await dataViews.create({
       ...dataView.toSpec(),
       id: undefined,
+      version: undefined,
       managed: false,
     });
 
