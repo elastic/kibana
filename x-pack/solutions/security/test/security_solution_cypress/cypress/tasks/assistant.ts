@@ -69,7 +69,7 @@ import {
   CONVO_CONTEXT_MENU_DUPLICATE,
   SHARED_SELECT_OPTION,
 } from '../screens/ai_assistant';
-import { SUCCESS_TOASTER_HEADER } from '../screens/alerts_detection_rules';
+import { SUCCESS_TOASTER_HEADER, TOASTER } from '../screens/alerts_detection_rules';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
   if (!context) {
@@ -446,3 +446,11 @@ export const duplicateConversation = (conversationName: string) => {
 export const assertMessageUser = (user: string, messageIndex: number) => {
   cy.get(`.euiCommentEvent__headerUsername`).eq(messageIndex).should('have.text', user);
 };
+
+export function assertAccessErrorToast(): void {
+  cy.get(TOASTER).should('contain', 'Access denied to conversation');
+}
+
+export function assertGenericConversationErrorToast(): void {
+  cy.get(TOASTER).should('contain', 'Error fetching conversation by id');
+}

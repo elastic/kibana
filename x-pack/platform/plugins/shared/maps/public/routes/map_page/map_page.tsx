@@ -15,10 +15,10 @@ import {
   getInitialLayersFromUrlParam,
   getOpenLayerWizardFromUrlParam,
 } from './saved_map';
-import type { MapSerializedState } from '../../react_embeddable/types';
+import type { MapEmbeddableState } from '../../../common';
 
 interface Props {
-  mapSerializedState?: MapSerializedState;
+  mapEmbeddableState?: MapEmbeddableState;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -45,7 +45,7 @@ export class MapPage extends Component<Props, State> {
     this.state = {
       savedMap: new SavedMap({
         defaultLayers: getInitialLayersFromUrlParam(),
-        mapSerializedState: props.mapSerializedState,
+        mapEmbeddableState: props.mapEmbeddableState,
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
         originatingPath: props.originatingPath,
