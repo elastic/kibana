@@ -52,7 +52,6 @@ import { getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getSuggestionsToRightOfOperatorExpression } from '../operators';
 import { buildValueDefinitions } from '../values';
 import {
-  extractTypeFromASTArg,
   getFieldsOrFunctionsSuggestions,
   getValidSignaturesAndTypesToSuggestNext,
   pushItUpInTheList,
@@ -452,9 +451,7 @@ async function getListArgsSuggestions(
 
     const [firstArg] = node.args;
     if (isColumn(firstArg)) {
-      const argType = extractTypeFromASTArg(firstArg, {
-        columns: columnMap,
-      });
+      const argType = getExpressionType(firstArg, columnMap);
       if (argType) {
         // do not propose existing columns again
         const otherArgs = isList(list)

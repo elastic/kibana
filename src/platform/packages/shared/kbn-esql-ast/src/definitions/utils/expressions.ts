@@ -208,7 +208,7 @@ export function getMatchingSignatures(
  * @param expectedType
  * @param givenIsLiteral
  */
-function argMatchesParamType(
+export function argMatchesParamType(
   givenType: SupportedDataType | 'unknown',
   expectedType: FunctionParameterType,
   givenIsLiteral: boolean,

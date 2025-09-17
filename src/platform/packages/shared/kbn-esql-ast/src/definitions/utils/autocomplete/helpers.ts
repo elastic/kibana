@@ -12,13 +12,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type {
-  ESQLSingleAstItem,
-  ESQLFunction,
-  ESQLAstItem,
-  ESQLLiteral,
-  ESQLLocation,
-} from '../../../types';
+import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLocation } from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
@@ -32,12 +26,12 @@ import {
   isLiteralDateItem,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition, FunctionReturnType } from '../../types';
+import type { FunctionDefinition } from '../../types';
 import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
-import { getColumnForASTNode, getOverlapRange } from '../shared';
+import { getOverlapRange } from '../shared';
 import { getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';
-import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
+import { getFunctionSuggestions } from '../functions';
 import { logicalOperators } from '../../all_operators';
 import {
   getOperatorSuggestion,
@@ -45,7 +39,7 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import { isColumn, isFunctionExpression, isIdentifier, isLiteral } from '../../../ast/is';
+import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
 import { Walker } from '../../../walker';
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
@@ -546,38 +540,6 @@ export function getControlSuggestionIfSupported(
   return controlSuggestion;
 }
 
-/** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
-export function extractTypeFromASTArg(
-  arg: ESQLAstItem,
-  context: ICommandContext
-):
-  | ESQLLiteral['literalType']
-  | SupportedDataType
-  | FunctionReturnType
-  | string // @TODO remove this
-  | undefined {
-  if (Array.isArray(arg)) {
-    return extractTypeFromASTArg(arg[0], context);
-  }
-  if (isLiteral(arg)) {
-    return arg.literalType;
-  }
-  if (isColumn(arg) || isIdentifier(arg)) {
-    const hit = getColumnForASTNode(arg, context);
-    if (hit) {
-      return hit.type;
-    }
-  }
-  if (isFunctionExpression(arg)) {
-    const fnDef = getFunctionDefinition(arg.name);
-    if (fnDef) {
-      // @TODO: improve this to better filter down the correct return type based on existing arguments
-      // just mind that this can be highly recursive...
-      return fnDef.signatures[0].returnType;
-    }
-  }
-}
-
 function getValidFunctionSignaturesForPreviousArgs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
@@ -654,7 +616,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
   offset: number
 ) {
   const enrichedArgs = node.args.map((nodeArg) => {
-    let dataType = extractTypeFromASTArg(nodeArg, context);
+    let dataType = getExpressionType(nodeArg, context?.columns);
 
     // For named system time parameters ?start and ?end, make sure it's compatiable
     if (isLiteralDateItem(nodeArg)) {
