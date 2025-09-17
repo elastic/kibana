@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy, orderBy, pick } from 'lodash';
+import { differenceBy, orderBy, pick, uniqBy } from 'lodash';
 import {
   createStateContainer,
   type IKbnUrlStateStorage,
@@ -246,7 +246,7 @@ export const createTabsStorageManager = ({
     previousRecentlyClosedTabs,
     nextOpenTabs,
   }) => {
-    const removedTabs = differenceBy(previousOpenTabs, nextOpenTabs, (tab) => tab.id);
+    const removedTabs = differenceBy(previousOpenTabs, nextOpenTabs, 'id');
 
     const closedAt = Date.now();
     const additionalRecentlyClosedTabs: RecentlyClosedTabState[] = removedTabs.map((tab) => ({
@@ -254,15 +254,8 @@ export const createTabsStorageManager = ({
       closedAt,
     }));
 
-    // clean up the recently closed tabs if the same ids are present in next open tabs
-    const newRecentlyClosedTabsExcludingStillOpen = differenceBy(
-      [...additionalRecentlyClosedTabs, ...previousRecentlyClosedTabs],
-      nextOpenTabs,
-      (tab) => tab.id
-    );
-
     const newSortedRecentlyClosedTabs = orderBy(
-      newRecentlyClosedTabsExcludingStillOpen,
+      uniqBy([...additionalRecentlyClosedTabs, ...previousRecentlyClosedTabs], 'id'), // prevent duplicates
       'closedAt',
       'desc'
     );

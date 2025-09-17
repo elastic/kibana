@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { differenceBy } from 'lodash';
 import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -54,10 +55,14 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
     );
-    const recentlyClosedTabsList = useMemo(
-      () => getRecentlyClosedTabsList(recentlyClosedItems),
-      [recentlyClosedItems]
-    );
+    const recentlyClosedTabsList = useMemo(() => {
+      const recentlyClosedItemsExcludingCurrentlyOpenTabs = differenceBy(
+        recentlyClosedItems,
+        items,
+        'id'
+      );
+      return getRecentlyClosedTabsList(recentlyClosedItemsExcludingCurrentlyOpenTabs);
+    }, [recentlyClosedItems, items]);
 
     const [isPopoverOpen, setPopover] = useState(false);
     const contextMenuPopoverId = useGeneratedHtmlId();

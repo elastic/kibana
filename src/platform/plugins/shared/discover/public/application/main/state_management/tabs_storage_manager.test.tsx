@@ -302,6 +302,8 @@ describe('TabsStorageManager', () => {
         toRestoredTab({ ...mockTab1, closedAt: newClosedAt }),
         toRestoredTab({ ...mockTab2, closedAt: newClosedAt }),
         toRestoredTab(mockRecentlyClosedTab3),
+        toRestoredTab(mockRecentlyClosedTab),
+        toRestoredTab(mockRecentlyClosedTab2),
       ],
     });
     expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
@@ -495,16 +497,13 @@ describe('TabsStorageManager', () => {
     expect(
       tabsStorageManager.getNRecentlyClosedTabs({
         previousOpenTabs: [mockTab1, testTabA],
-        previousRecentlyClosedTabs: [
-          { ...mockTab2, closedAt: 1 },
-          { ...mockRecentlyClosedTab, closedAt: 100 },
-        ],
+        previousRecentlyClosedTabs: [{ ...mockTab2, closedAt: 1 }],
         nextOpenTabs: [mockTab2],
       })
     ).toEqual([
-      { ...mockRecentlyClosedTab, closedAt: 100 },
       { ...mockTab1, closedAt: newClosedAt },
       { ...testTabA, closedAt: newClosedAt },
+      { ...mockTab2, closedAt: 1 },
     ]);
 
     // over the limit
