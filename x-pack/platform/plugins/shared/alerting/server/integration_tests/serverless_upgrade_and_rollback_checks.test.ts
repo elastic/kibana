@@ -27,6 +27,7 @@ jest.mock('../rule_type_registry', () => {
 /**
  * These rule types are manually updated.
  *
+ * I am another change
  * TODO: We should spin up three serverless projects and pull the rule types
  * directly from them to ensure the list below remains up to date. We will still
  * need a copied list of rule types here because they are needed to write
