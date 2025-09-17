@@ -12,6 +12,7 @@ import React, { useCallback, useState } from 'react';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   MeasuringStrategy,
   PointerSensor,
@@ -20,52 +21,67 @@ import {
 } from '@dnd-kit/core';
 import {
   SortableContext,
+  arrayMove,
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { ControlState } from '@kbn/controls-schemas';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type {
+  PublishesDisabledActionIds,
+  PublishesTitle,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 
+import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
 
 export const ControlsRenderer = ({
   parentApi,
   getInitialState,
 }: {
-  parentApi: HasSerializedChildState<object> & {
-    registerChildApi: (api: DefaultEmbeddableApi) => void;
-  };
+  parentApi: PresentationContainer &
+    PublishesViewMode &
+    HasSerializedChildState<ControlsGroupState['controls'][number] & { order: number }> &
+    Partial<PublishesDisabledActionIds> & {
+      registerChildApi: (api: DefaultEmbeddableApi) => void;
+    };
   getInitialState: () => {
-    [controlId: string]: ControlState;
+    controls: { [controlId: string]: ControlsGroupState['controls'][number] & { order: number } };
+    compressed?: boolean;
   };
 }) => {
-  const controlsInOrder = Object.values(getInitialState()).sort((controlA, controlB) => {
-    return controlA.order - controlB.order;
-  });
-
+  const [controlsInOrder, setControlsInOrder] = useState(
+    Object.values(getInitialState().controls).sort((controlA, controlB) => {
+      return controlA.order - controlB.order;
+    })
+  );
   /** Handle drag and drop */
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const onDragEnd = useCallback(({ over, active }: DragEndEvent) => {
-    // const oldIndex = active?.data.current?.sortable.index;
-    // const newIndex = over?.data.current?.sortable.index;
-    // if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-    //   controlsManager.controlsInOrder$.next(arrayMove([...controlsInOrder], oldIndex, newIndex));
-    // }
-    // (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
-    // setDraggingId(null);
-  }, []);
+  const onDragEnd = useCallback(
+    ({ over, active }: DragEndEvent) => {
+      const oldIndex = active?.data.current?.sortable.index;
+      const newIndex = over?.data.current?.sortable.index;
+      if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+        setControlsInOrder(arrayMove([...controlsInOrder], oldIndex, newIndex));
+      }
+      (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
+      setDraggingId(null);
+    },
+    [controlsInOrder]
+  );
 
   if (controlsInOrder.length === 0) {
     return null;
   }
-
+  console.log({ draggingId, api: draggingId ? parentApi.getChildApi(draggingId) : undefined });
   return (
     <EuiPanel
       borderRadius="m"
@@ -108,19 +124,19 @@ export const ControlsRenderer = ({
                     grow={grow ?? DEFAULT_CONTROL_GROW}
                     width={width ?? DEFAULT_CONTROL_WIDTH}
                     parentApi={parentApi}
+                    compressed={getInitialState().compressed ?? true}
                   />
                 ))}
               </EuiFlexGroup>
             </SortableContext>
-            {/* <DragOverlay>
+            <DragOverlay>
               {draggingId ? (
                 <ControlClone
                   key={draggingId}
-                  labelPosition={labelPosition}
-                  controlApi={controlsManager.getControlApi(draggingId)}
+                  state={parentApi.getSerializedStateForChild(draggingId)}
                 />
               ) : null}
-            </DragOverlay> */}
+            </DragOverlay>
           </DndContext>
         </EuiFlexItem>
       </EuiFlexGroup>

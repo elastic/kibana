@@ -8,7 +8,8 @@
  */
 
 import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { type Subscription, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -24,12 +25,14 @@ import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-const
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
-  apiHasParentApi,
-  apiPublishesViewMode,
-  useBatchedOptionalPublishingSubjects,
+  type PublishesViewMode,
+  apiPublishesDataLoading,
+  apiPublishesTitle,
+  useBatchedPublishingSubjects,
   type PublishesDisabledActionIds,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import { controlWidthStyles } from './control_panel.styles';
@@ -42,8 +45,11 @@ export const ControlPanel = ({
   type,
   grow,
   width,
+  compressed,
 }: {
-  parentApi: HasSerializedChildState<object> &
+  parentApi: PresentationContainer &
+    PublishesViewMode &
+    HasSerializedChildState<object> &
     Partial<PublishesDisabledActionIds> & {
       registerChildApi: (api: DefaultEmbeddableApi) => void;
     };
@@ -51,6 +57,7 @@ export const ControlPanel = ({
   type: string;
   grow: ControlsGroupState['controls'][number]['grow'];
   width: ControlsGroupState['controls'][number]['width'];
+  compressed?: boolean;
 }) => {
   const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
   const {
@@ -68,30 +75,45 @@ export const ControlPanel = ({
     id: uuid,
   });
 
-  const viewModeSubject = (() => {
-    if (
-      apiHasParentApi(api) &&
-      apiHasParentApi(api.parentApi) && // api.parentApi => controlGroupApi
-      apiPublishesViewMode(api.parentApi.parentApi) // controlGroupApi.parentApi => dashboardApi
-    )
-      return api.parentApi.parentApi.viewMode$; // get view mode from dashboard API
-  })();
+  const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
+    parentApi.viewMode$,
+    parentApi?.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
+  );
+  const [panelTitle, setPanelTitle] = useState<string | undefined>();
+  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
+  const [dataLoading, setDataLoading] = useState<boolean | undefined>();
 
-  const [dataLoading, panelTitle, defaultPanelTitle, disabledActionIds, rawViewMode] =
-    useBatchedOptionalPublishingSubjects(
-      api?.dataLoading$,
-      api?.title$,
-      api?.defaultTitle$,
-      parentApi.disabledActionIds$,
-      viewModeSubject
-    );
+  useEffect(() => {
+    if (!api) return;
 
-  const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
-    setInitialLoadComplete(true);
-  }
+    /** Setup subscriptions for necessary state once API is available */
+    const subscriptions: Subscription[] = [];
+    if (apiPublishesDataLoading(api)) {
+      subscriptions.push(
+        api.dataLoading$.subscribe((result) => {
+          setDataLoading(result);
+        })
+      );
+    }
+    if (apiPublishesTitle(api)) {
+      subscriptions.push(
+        api.title$.subscribe((result) => {
+          setPanelTitle(result);
+        })
+      );
+      if (api.defaultTitle$) {
+        subscriptions.push(
+          api.defaultTitle$.subscribe((result) => {
+            setDefaultPanelTitle(result);
+          })
+        );
+      }
+    }
+    return () => {
+      subscriptions.forEach((subscription) => subscription?.unsubscribe());
+    };
+  }, [api]);
 
-  const viewMode = rawViewMode ?? 'view';
   const isEditable = viewMode === 'edit';
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
@@ -176,8 +198,7 @@ export const ControlPanel = ({
                 {/* )} */}
               </>
             }
-            // compressed={isCompressed(api)}
-            compressed={true}
+            compressed={compressed}
           >
             <EmbeddableRenderer
               key={uuid}

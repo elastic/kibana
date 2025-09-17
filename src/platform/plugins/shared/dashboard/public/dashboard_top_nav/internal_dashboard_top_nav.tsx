@@ -406,7 +406,7 @@ export function InternalDashboardTopNav({
       <ControlsRenderer
         parentApi={dashboardApi}
         getInitialState={() => {
-          return dashboardApi.layout$.getValue().controls;
+          return { controls: dashboardApi.layout$.getValue().controls };
         }}
       />
       {showBorderBottom && <EuiHorizontalRule margin="none" />}

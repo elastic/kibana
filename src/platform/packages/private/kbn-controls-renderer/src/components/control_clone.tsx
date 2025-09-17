@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import React from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon, euiFontSize } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import classNames from 'classnames';
-import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
-import type { DefaultControlApi } from '../../controls/types';
 import { controlWidthStyles } from './control_panel.styles';
 
 /**
@@ -26,26 +24,28 @@ import { controlWidthStyles } from './control_panel.styles';
  * the title, because individual controls can be any size, and dragging a wide item
  * can be quite cumbersome.
  */
-export const ControlClone = ({ controlApi }: { controlApi: DefaultControlApi | undefined }) => {
-  const [width, panelTitle, defaultPanelTitle] = useBatchedPublishingSubjects(
-    controlApi ? controlApi.width$ : new BehaviorSubject(DEFAULT_CONTROL_GROW),
-    controlApi?.title$ ? controlApi.title$ : new BehaviorSubject(undefined),
-    controlApi?.defaultTitle$ ? controlApi.defaultTitle$ : new BehaviorSubject('')
-  );
+export const ControlClone = ({
+  state,
+}: {
+  state: SerializedPanelState<ControlsGroupState['controls'][number]> | undefined;
+}) => {
   const styles = useMemoCss(controlCloneStyles);
 
-  return (
+  return !state ? null : (
     <EuiFlexItem
       css={styles.container}
       className={classNames({
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper--medium': state.rawState.width === 'medium',
+        'controlFrameWrapper--small': state.rawState.width === 'small',
+        'controlFrameWrapper--large': state.rawState.width === 'large',
       })}
     >
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <label>{state.rawState.title}</label>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
