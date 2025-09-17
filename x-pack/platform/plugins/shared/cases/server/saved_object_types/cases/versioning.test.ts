@@ -59,7 +59,7 @@ describe('caseSavedObjectType model version transformations', () => {
   });
 
   describe('Model version 3 to 4', () => {
-    const version4Fields = ['incremental_id.text'];
+    const version4Fields = ['incremental_id.keyword'];
 
     it('by default does not add the new fields to the object', () => {
       const migrated = migrator.migrate({
