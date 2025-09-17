@@ -1683,15 +1683,6 @@ export class CstToAstConverter {
     );
   }
 
-  /**
-   * @todo Inline this method.
-   */
-  private getComparisonName(ctx: cst.ComparisonOperatorContext) {
-    return (
-      (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || ''
-    );
-  }
-
   private visitValueExpression(ctx: cst.ValueExpressionContext) {
     if (!textExistsAndIsValid(ctx.getText())) {
       return [];
@@ -1700,10 +1691,19 @@ export class CstToAstConverter {
       return this.visitOperatorExpression(ctx.operatorExpression());
     }
     if (ctx instanceof cst.ComparisonContext) {
-      const comparisonNode = ctx.comparisonOperator();
+      const operatorCtx = ctx.comparisonOperator();
+      const comparisonOperatorText =
+        (
+          operatorCtx.EQ() ||
+          operatorCtx.NEQ() ||
+          operatorCtx.LT() ||
+          operatorCtx.LTE() ||
+          operatorCtx.GT() ||
+          operatorCtx.GTE()
+        ).getText() || '';
       const comparisonFn = this.createFunction(
-        this.getComparisonName(comparisonNode),
-        comparisonNode,
+        comparisonOperatorText,
+        operatorCtx,
         undefined,
         'binary-expression'
       );
