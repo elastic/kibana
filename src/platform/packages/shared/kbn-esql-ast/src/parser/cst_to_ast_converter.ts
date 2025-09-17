@@ -597,9 +597,11 @@ export class CstToAstConverter {
     }
 
     if (ctx._grouping) {
-      const options = this.toByOption(ctx, ctx.fields());
+      const option = this.toByOption(ctx, ctx.fields());
 
-      command.args.push(...options);
+      if (option) {
+        command.args.push(option);
+      }
     }
 
     return command;
@@ -634,17 +636,14 @@ export class CstToAstConverter {
     return aggField;
   }
 
-  /**
-   * @todo Do not return array here.
-   */
   private toByOption(
     ctx: cst.StatsCommandContext | cst.InlinestatsCommandContext,
     expr: cst.FieldsContext | undefined
-  ): ast.ESQLCommandOption[] {
+  ): ast.ESQLCommandOption | undefined {
     const byCtx = ctx.BY();
 
     if (!byCtx || !expr) {
-      return [];
+      return;
     }
 
     const option = this.toOption(byCtx.getText().toLowerCase(), ctx);
@@ -656,7 +655,7 @@ export class CstToAstConverter {
 
     if (lastArg) option.location.max = lastArg.location.max;
 
-    return [option];
+    return option;
   }
 
   // --------------------------------------------------------------------- SORT
@@ -1248,7 +1247,11 @@ export class CstToAstConverter {
       command.args.push(...this.fromAggFields(ctx.aggFields()));
     }
     if (ctx._grouping) {
-      command.args.push(...this.toByOption(ctx, ctx.fields()));
+      const option = this.toByOption(ctx, ctx.fields());
+
+      if (option) {
+        command.args.push(option);
+      }
     }
 
     return command;
