@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 200 when feature flag is enabled', async () => {
+    it('should return 200 when the metrics experience feature flag is enabled', async () => {
       const { status } = await sendRequest({
         from: timerange.min,
         to: timerange.max,
