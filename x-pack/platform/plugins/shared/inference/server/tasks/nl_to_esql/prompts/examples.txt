@@ -180,6 +180,7 @@
             | EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
             | KEEP user_name, birth
             | SORT birth
+            | LIMIT 100
         </esql>
     </example>
 
@@ -213,6 +214,32 @@
             FROM library
             | WHERE MATCH(author, "Frank Herbert")
             | KEEP title, author
+            | LIMIT 100
+        </esql>
+    </example>
+
+    <example>
+        <natural-language>
+            Find the latest articles from the "hr" category, and return their titles and document ids
+        </natural-language>
+        <esql>
+            FROM articles METADATA _id
+            | WHERE category == "hr"
+            | KEEP _id, title
+            | SORT publish_date DESC
+            | LIMIT 100
+        </esql>
+    </example>
+
+    <example>
+        <natural-language>
+            Find products with a description matching "wireless headphones" and sort them by relevance
+        </natural-language>
+        <esql>
+            FROM products METADATA _score
+            | WHERE MATCH(description, "wireless headphones")
+            | SORT _score DESC
+            | KEEP name, description, _score
             | LIMIT 100
         </esql>
     </example>

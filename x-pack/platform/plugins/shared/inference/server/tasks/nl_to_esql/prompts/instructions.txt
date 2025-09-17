@@ -14,6 +14,16 @@
     the provided fields to create your query. Do not assume other fields may exist. Only use the set of fields
     which were provided by the user.
 
+    ## Use a safety LIMIT
+
+    1. **LIMIT is Mandatory:** All multi-row queries **must** end with a `LIMIT`. The only exception is for single-row aggregations (e.g., `STATS` without a `GROUP BY`).
+
+    2. **Applying Limits:**
+        * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the `LIMIT`.
+        * **Default:** If no number is given, default to `LIMIT 100` for both raw events and `GROUP BY` results. Notify the user when you apply this default (e.g., "I've added a `LIMIT 100` for safety.").
+
+    3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety `LIMIT 250` and state that this limit was added to protect the system.
+
     ## Don't use tech preview features unless specified otherwise
 
     Using tech preview commands, functions or other features should be avoided unless specifically asked by the user.
