@@ -108,7 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await reporting.clickGenerateReportButton();
     await exports.closeExportFlyout();
     await exports.clickExportTopNavButton();
-    await browser.pressKeys(Key.ESCAPE);
 
     const url = await reporting.getReportURL(timeout);
     const res = await reporting.getResponse(url ?? '');
