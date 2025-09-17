@@ -268,7 +268,9 @@ export class StreamsApp {
   }
 
   async fillFieldInput(value: string) {
-    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+    const comboBoxInput = this.page.getByTestId('streamsAppProcessorFieldSelectorComboFieldText');
+    await comboBoxInput.click();
+    await comboBoxInput.pressSequentially(value, { delay: 50 });
   }
 
   async fillGrokPatternInput(value: string) {

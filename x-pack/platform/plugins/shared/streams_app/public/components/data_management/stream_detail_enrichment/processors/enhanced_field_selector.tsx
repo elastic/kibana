@@ -115,7 +115,7 @@ export const EnhancedFieldSelector = ({
         error={fieldState.error?.message}
       >
         <EuiComboBox
-          data-test-subj={`streamsAppFieldSelector-${fieldKey}`}
+          data-test-subj="streamsAppProcessorFieldSelectorComboFieldText"
           placeholder={placeholder ?? defaultPlaceholder}
           options={suggestions}
           selectedOptions={selectedOptions}
