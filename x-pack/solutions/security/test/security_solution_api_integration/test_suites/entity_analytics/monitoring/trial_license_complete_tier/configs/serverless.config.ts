@@ -15,6 +15,7 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
     '--xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed=100',
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['integrationsSyncEnabled'])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {
