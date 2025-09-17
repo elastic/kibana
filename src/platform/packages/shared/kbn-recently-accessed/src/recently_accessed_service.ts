@@ -32,6 +32,7 @@ export class RecentlyAccessedService {
           link,
           label,
           id,
+          lastAccessed: Date.now(),
         });
       },
 

@@ -14,7 +14,6 @@
       "share"
     ],
     "optionalPlugins": [
-      "home",
       "serverless"
     ],
     "requiredBundles": [
