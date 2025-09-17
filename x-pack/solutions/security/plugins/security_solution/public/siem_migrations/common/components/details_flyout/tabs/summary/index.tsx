@@ -44,7 +44,8 @@ export const SummaryTabBase: React.FC<SummaryTabBaseProps> = React.memo(function
     if (isLoadingUserProfiles) {
       return undefined;
     }
-    return comments?.map(({ message, created_at: createdAt, created_by: createdBy }) => {
+    return comments?.map((comment) => {
+      const { message, created_at: createdAt, created_by: createdBy } = comment;
       const profile = userProfiles?.find(({ uid }) => uid === createdBy);
       const isCreatedByAssistant = createdBy === SIEM_MIGRATIONS_ASSISTANT_USER || !profile;
       const username = isCreatedByAssistant
@@ -63,7 +64,7 @@ export const SummaryTabBase: React.FC<SummaryTabBaseProps> = React.memo(function
             size={'l'}
           />
         ),
-        event: getEventDetails({ message, created_at: createdAt, created_by: createdBy }),
+        event: getEventDetails(comment),
         timestamp: moment(createdAt).format('ll'), // Date formats https://momentjs.com/docs/#/displaying/format/
         children: <EuiMarkdownFormat textSize="s">{message}</EuiMarkdownFormat>,
       };

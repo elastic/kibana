@@ -31,7 +31,7 @@ export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(
     const userProfile = userProfiles[0];
     const updatedByName = userProfile.user.full_name ?? userProfile.user.username;
     return (
-      <EuiText size="xs">
+      <EuiText data-test-subj="updated_at" size="xs">
         <FormattedMessage
           id="xpack.securitySolution.siemMigrations.rules.translationDetails.updatedByLabel"
           defaultMessage="{updated}: {by} on {date}"
