@@ -67,6 +67,10 @@ export const createPrivilegedUsersCrudService = ({
     source: PrivMonUserSource,
     maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
+    // This method handles two scenarios:
+    // 1. If user exists: Update existing user with new labels and sources
+    // 2. If user doesn't exist: Create a new user
+    
     // Check if user already exists by username
     const username = user.user?.name;
     if (username) {
@@ -77,6 +81,7 @@ export const createPrivilegedUsersCrudService = ({
       });
 
       if (existingUserResponse.hits.hits.length > 0) {
+        // Update existing user
         const existingUser = existingUserResponse.hits.hits[0];
         const existingUserId = existingUser._id;
 
@@ -117,6 +122,7 @@ export const createPrivilegedUsersCrudService = ({
       }
     }
 
+    // Create new user if none exists
     // Check user count limit before creating new user
     const currentUserCount = await esClient.count({
       index,
