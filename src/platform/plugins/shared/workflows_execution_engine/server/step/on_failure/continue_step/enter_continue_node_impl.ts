@@ -20,6 +20,7 @@ export class EnterContinueNodeImpl implements NodeImplementation, StepErrorCatch
   ) {}
 
   public async run(): Promise<void> {
+    this.workflowRuntime.enterScope();
     this.workflowRuntime.navigateToNextNode();
   }
 

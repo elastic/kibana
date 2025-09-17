@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackEntry } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
@@ -101,7 +101,7 @@ export class WorkflowExecutionRuntimeManager {
     return buildStepExecutionId(
       this.workflowExecution.id,
       this.getCurrentNode().stepId,
-      this.buildCurrentStepPath()
+      this.workflowExecution.stack
     );
   }
 
@@ -130,23 +130,33 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public getCurrentNodeScope(): string[] {
+  public getCurrentNodeScope(): StackEntry[] {
     return [...this.workflowExecution.stack];
   }
 
-  public enterScope(scopeId?: string): void {
-    if (!scopeId) {
-      scopeId = this.getCurrentNode().stepId;
-    }
+  public enterScope(subScopeId?: string): void {
+    const currentNode = this.getCurrentNode();
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      stack: [...this.workflowExecution.stack, scopeId as string],
-    });
+    if (
+      this.workflowExecution.stack[this.workflowExecution.stack.length - 1]?.nodeId !==
+      currentNode.id
+    ) {
+      const stackEntry: StackEntry = {
+        nodeId: currentNode.id,
+        stepId: currentNode.stepId,
+      };
+      if (subScopeId) {
+        stackEntry.subScopeId = subScopeId;
+      }
+      this.workflowExecutionState.updateWorkflowExecution({
+        stack: this.workflowExecution.stack.concat([stackEntry]),
+      });
+    }
   }
 
   public exitScope(): void {
     this.workflowExecutionState.updateWorkflowExecution({
-      stack: this.workflowExecution.stack.slice(0, -1),
+      stack: this.workflowExecution.stack.slice(0, -1), // pop last element
     });
   }
 
@@ -157,13 +167,8 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentStepResult(): RunStepResult | undefined {
-    const currentNode = this.getCurrentNode();
     const stepExecution = this.workflowExecutionState.getStepExecution(
-      buildStepExecutionId(
-        this.workflowExecution.id,
-        currentNode.stepId,
-        this.buildCurrentStepPath()
-      )
+      this.getCurrentStepExecutionId()
     );
 
     if (!stepExecution) {
@@ -184,11 +189,7 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.workflowExecutionState.upsertStep({
-      id: buildStepExecutionId(
-        this.workflowExecution.id,
-        currentNode.stepId,
-        this.buildCurrentStepPath()
-      ),
+      id: this.getCurrentStepExecutionId(),
       stepId: currentNode.stepId,
       path: this.buildCurrentStepPath(),
       input: result.input,
@@ -199,15 +200,13 @@ export class WorkflowExecutionRuntimeManager {
 
   public getCurrentStepState(): Record<string, any> | undefined {
     const stepId = this.getCurrentNode().stepId;
-    return this.workflowExecutionState.getStepExecution(
-      buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath())
-    )?.state;
+    return this.workflowExecutionState.getStepExecution(this.getCurrentStepExecutionId())?.state;
   }
 
   public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
     const stepId = this.getCurrentNode().stepId;
     this.workflowExecutionState.upsertStep({
-      id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
+      id: this.getCurrentStepExecutionId(),
       stepId,
       path: this.buildCurrentStepPath(),
       state,
@@ -234,11 +233,7 @@ export class WorkflowExecutionRuntimeManager {
         const stepStartedAt = new Date();
 
         const stepExecution = {
-          id: buildStepExecutionId(
-            this.workflowExecution.id,
-            currentNode.stepId,
-            this.buildCurrentStepPath()
-          ),
+          id: this.getCurrentStepExecutionId(),
           stepId: currentNode.stepId,
           stepType: currentNode.stepType,
           path: this.buildCurrentStepPath(),
@@ -256,11 +251,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public async finishStep(): Promise<void> {
     const stepId = this.getCurrentNode().stepId;
-    const stepExecutionId = buildStepExecutionId(
-      this.workflowExecution.id,
-      stepId,
-      this.buildCurrentStepPath()
-    );
+    const stepExecutionId = this.getCurrentStepExecutionId();
     const startedStepExecution = this.workflowExecutionState.getStepExecution(stepExecutionId);
 
     if (startedStepExecution?.error) {
@@ -322,7 +313,7 @@ export class WorkflowExecutionRuntimeManager {
           this.getCurrentStepExecutionId()
         );
         const stepExecutionUpdate = {
-          id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
+          id: this.getCurrentStepExecutionId(),
           stepId,
           path: this.buildCurrentStepPath(),
           status: ExecutionStatus.FAILED,
@@ -363,7 +354,7 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         this.workflowExecutionState.upsertStep({
-          id: buildStepExecutionId(this.workflowExecution.id, stepId, this.buildCurrentStepPath()),
+          id: this.getCurrentStepExecutionId(),
           status: ExecutionStatus.WAITING,
         });
 
@@ -529,7 +520,6 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async resume(): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     await this.workflowExecutionState.load();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
@@ -588,20 +578,22 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private buildCurrentStepPath(): string[] {
-    const currentNode = this.getCurrentNode();
-    const path: string[] = [];
+    let currentStepId: string | undefined;
 
-    // TODO: TO REVISIT IT
-    for (const part of this.workflowExecution.stack) {
-      // If the provided stepId is part of the stack, use read path until its position and stop
-      // if (part === currentNode.stepId) {
-      //   break;
-      // }
+    return this.workflowExecution.stack.flatMap((stackEntry) => {
+      const parts = [];
 
-      path.push(part);
-    }
+      if (currentStepId !== stackEntry.stepId) {
+        parts.push(stackEntry.stepId);
+        currentStepId = stackEntry.stepId;
+      }
 
-    return path;
+      if (stackEntry.subScopeId) {
+        parts.push(stackEntry.subScopeId);
+      }
+
+      return parts;
+    });
   }
 
   private logWorkflowStart(): void {

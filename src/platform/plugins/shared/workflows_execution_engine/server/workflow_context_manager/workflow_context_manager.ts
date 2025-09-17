@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepContext, WorkflowContext } from '@kbn/workflows';
+import type { StackEntry, StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
@@ -137,17 +137,13 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
-    const scopePath: string[] = [];
+    const scopePath: StackEntry[] = [];
 
-    for (const scopeId of this.workflowExecutionState.getWorkflowExecution().stack) {
-      if (!this.workflowExecutionGraph.hasStep(scopeId)) {
-        continue;
-      }
-
+    for (const stackEntry of this.workflowExecutionState.getWorkflowExecution().stack) {
       const stepExecution = this.workflowExecutionState.getStepExecution(
         buildStepExecutionId(
           this.workflowExecutionState.getWorkflowExecution().id,
-          scopeId,
+          stackEntry.stepId,
           scopePath
         )
       );
@@ -162,7 +158,7 @@ export class WorkflowContextManager {
           break;
       }
 
-      scopePath.push(scopeId);
+      scopePath.push(stackEntry);
     }
   }
 

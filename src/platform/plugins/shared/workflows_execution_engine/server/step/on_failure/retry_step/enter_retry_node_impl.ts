@@ -59,14 +59,14 @@ export class EnterRetryNodeImpl implements NodeImplementation, StepErrorCatcher 
   }
 
   private async initializeRetry(): Promise<void> {
-    await this.workflowRuntime.startStep();
     // Enter whole retry step scope
-    this.workflowRuntime.enterScope();
+    await this.workflowRuntime.startStep();
     // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.
-    this.workflowRuntime.enterScope('1-attempt');
     await this.workflowRuntime.setCurrentStepState({
       attempt: 0,
     });
+    // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
+    this.workflowRuntime.enterScope('1-attempt');
     this.workflowRuntime.navigateToNextNode();
   }
 

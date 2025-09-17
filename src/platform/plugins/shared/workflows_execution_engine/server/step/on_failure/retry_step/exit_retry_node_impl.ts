@@ -20,6 +20,7 @@ export class ExitRetryNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
+    // Exit whole retry step scope
     this.workflowRuntime.exitScope();
     await this.workflowRuntime.finishStep();
     const retryState = this.workflowRuntime.getCurrentStepState()!;

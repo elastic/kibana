@@ -34,6 +34,17 @@ export enum ExecutionType {
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
 
+/**
+ * An interface representing the state of a step scope during workflow execution.
+ */
+export interface StackEntry {
+  /** Node id that entered the scope */
+  nodeId: string;
+  stepId: string;
+  /** Custom scope id that each node might additionally enter */
+  subScopeId?: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -44,7 +55,7 @@ export interface EsWorkflowExecution {
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
-  stack: string[];
+  stack: StackEntry[];
   createdAt: string;
   error: string | null;
   createdBy: string;

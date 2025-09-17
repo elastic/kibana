@@ -130,32 +130,25 @@ async function catchError(
   workflowGraph: WorkflowGraph
 ) {
   try {
-    const currentNode = workflowRuntime.getCurrentNode();
-
-    if (!currentNode) {
-      return;
-    }
-
-    const nodeStack = workflowGraph.getNodeStack(currentNode.id);
     while (
       workflowRuntime.getWorkflowExecution().error &&
       workflowRuntime.getWorkflowExecution().stack.length > 0
     ) {
-      const stack = [...workflowRuntime.getWorkflowExecution().stack];
-      const scopeId = stack[stack.length - 1];
+      const stack = workflowRuntime.getWorkflowExecution().stack;
+      const stackEntry = stack[stack.length - 1];
 
-      while (
-        workflowRuntime.getWorkflowExecution().error &&
-        nodeStack.length &&
-        workflowGraph.getNode(nodeStack[nodeStack.length - 1]).stepId === scopeId
-      ) {
-        const nodeId = nodeStack.pop()!;
-        workflowRuntime.navigateToNode(nodeId);
-        const node = workflowGraph.getNode(nodeId);
-        const nodeImplementation = nodesFactory.create(node as any);
+      // exit the whole node scope
+      workflowRuntime.exitScope();
+      workflowRuntime.navigateToNode(stackEntry.nodeId);
 
-        if ((nodeImplementation as unknown as StepErrorCatcher).catchError) {
-          const stepErrorCatcher = nodeImplementation as unknown as StepErrorCatcher;
+      const node = workflowGraph.getNode(stackEntry.nodeId);
+
+      if (node) {
+        workflowRuntime.navigateToNode(node.id);
+        const stepImplementation = nodesFactory.create(node as any);
+
+        if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
+          const stepErrorCatcher = stepImplementation as unknown as StepErrorCatcher;
 
           try {
             await stepErrorCatcher.catchError();
@@ -167,10 +160,6 @@ async function catchError(
         if (workflowRuntime.getWorkflowExecution().error) {
           await workflowRuntime.failStep(workflowRuntime.getWorkflowExecution().error!);
         }
-      }
-
-      if (workflowRuntime.getWorkflowExecution().error) {
-        workflowRuntime.exitScope();
       }
     }
   } catch (error) {
