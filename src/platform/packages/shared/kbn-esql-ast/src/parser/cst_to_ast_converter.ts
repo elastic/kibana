@@ -857,10 +857,17 @@ export class CstToAstConverter {
       command.incomplete = true;
     }
 
-    command.args.push(
-      ...this.toOnOptionFromEnrichCommand(ctx),
-      ...this.toWithOptionFromEnrichCommand(ctx)
-    );
+    const onOption = this.toOnOptionFromEnrichCommand(ctx);
+
+    if (onOption) {
+      command.args.push(onOption);
+    }
+
+    const withOption = this.toWithOptionFromEnrichCommand(ctx);
+
+    if (withOption) {
+      command.args.push(withOption);
+    }
 
     return command;
   }
@@ -960,12 +967,11 @@ export class CstToAstConverter {
     return source;
   }
 
-  /**
-   * @todo Make it return a single ON option.
-   */
-  private toOnOptionFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommandOption[] {
+  private toOnOptionFromEnrichCommand(
+    ctx: cst.EnrichCommandContext
+  ): ast.ESQLCommandOption | undefined {
     if (!ctx._matchField) {
-      return [];
+      return undefined;
     }
 
     const identifier = ctx.qualifiedNamePattern();
@@ -982,24 +988,20 @@ export class CstToAstConverter {
       fn.location.min = ctx.ON()!.symbol.start;
       fn.location.max = max;
 
-      return [fn];
+      return fn;
     }
 
-    return [];
+    return undefined;
   }
 
-  /**
-   * @todo Make it return a single WITH option.
-   */
-  private toWithOptionFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommandOption[] {
-    const options: ast.ESQLCommandOption[] = [];
+  private toWithOptionFromEnrichCommand(
+    ctx: cst.EnrichCommandContext
+  ): ast.ESQLCommandOption | undefined {
     const withCtx = ctx.WITH();
 
     if (withCtx) {
       const option = this.toOption(withCtx.getText().toLowerCase(), ctx);
       const clauses = ctx.enrichWithClause_list();
-
-      options.push(option);
 
       for (const clause of clauses) {
         if (clause._enrichField) {
@@ -1030,9 +1032,11 @@ export class CstToAstConverter {
         location.min = withCtx.symbol.start;
         location.max = lastArg?.location?.max ?? withCtx.symbol.stop;
       }
+
+      return option;
     }
 
-    return options;
+    return undefined;
   }
 
   // ---------------------------------------------------------------- MV_EXPAND
