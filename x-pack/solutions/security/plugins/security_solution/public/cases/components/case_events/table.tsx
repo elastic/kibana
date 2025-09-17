@@ -46,7 +46,7 @@ const emptyObject = {} as const;
 const MAX_ACTION_BUTTON_COUNT = 4;
 const DEFAULT_MODEL: SubsetDataTableModel = structuredClone(tableDefaults);
 
-export const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTableProps> = ({
+const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTableProps> = ({
   dataView,
   events,
 }) => {
