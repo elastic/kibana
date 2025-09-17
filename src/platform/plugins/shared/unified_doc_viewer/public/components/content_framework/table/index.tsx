@@ -37,7 +37,7 @@ export interface TableFieldConfiguration {
   value: unknown;
   description?: string;
   type?: string;
-  valueCellContent?: (params?: { truncate?: boolean }) => React.ReactNode;
+  valueCellContent: (params?: { truncate?: boolean }) => React.ReactNode;
 }
 
 export interface ContentFrameworkTableProps
@@ -174,7 +174,7 @@ export function ContentFrameworkTable({
           </>
         );
       }
-      return fieldConfig.valueCellContent ? fieldConfig.valueCellContent() : null;
+      return fieldConfig.valueCellContent();
     },
     [rows, fields, dataTestSubj, euiTheme.font.weight.bold]
   );
