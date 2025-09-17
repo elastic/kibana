@@ -16,7 +16,6 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
