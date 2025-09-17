@@ -9,8 +9,8 @@ import { type LoghubSystem } from './read_loghub_system_files';
 import type { LoghubParser } from './types';
 import { getParserFilename } from './utils';
 
-export async function getParser(system: LoghubSystem): Promise<LoghubParser> {
+export function getParser(system: LoghubSystem): Promise<LoghubParser> {
   const fileName = getParserFilename(system);
 
-  return (await import(fileName)) as LoghubParser;
+  return import(fileName);
 }

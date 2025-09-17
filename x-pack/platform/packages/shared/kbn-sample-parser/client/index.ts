@@ -26,12 +26,19 @@ export class SampleParserClient {
   async getLogGenerators({
     rpm = 10000,
     distribution = 'uniform',
+    allowedSystems = [],
   }: {
     rpm?: number;
     distribution?: 'relative' | 'uniform';
+    allowedSystems?: string[];
   }): Promise<StreamLogGenerator[]> {
     await ensureLoghubRepo({ log: this.logger });
-    const systems = await readLoghubSystemFiles({ log: this.logger });
+    const allSystems = await readLoghubSystemFiles({ log: this.logger });
+    // Filter systems if allowedSystems is provided to reduce the runtime of the function as parsing and validating parsers and queries is expensive
+    const systems =
+      allowedSystems.length > 0
+        ? allSystems.filter((system) => allowedSystems.includes(system.name))
+        : allSystems;
 
     const results = await Promise.all(
       systems.map(async (system) => {
@@ -40,6 +47,7 @@ export class SampleParserClient {
         });
 
         const [parser, queries] = await Promise.all([getParser(system), getQueries(system)]);
+
         const { rpm: systemRpm } = parseDataset({ system, parser });
 
         return {
