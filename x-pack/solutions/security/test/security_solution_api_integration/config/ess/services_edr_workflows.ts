@@ -10,8 +10,8 @@ import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_int
 import { IngestManagerProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ingest_manager';
 import { UsageAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/usage_api';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { SecuritySolutionApiProvider } from '../../../api_integration/services/security_solution_api.gen';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '../services/security_solution_exceptions_api.gen';
+import { SecuritySolutionApiProvider } from '@kbn/security-test-api-clients/src/security_solution_api.gen';
+import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-test-api-clients/src/security_solution_exceptions_api.gen';
 
 import { EndpointTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint';
 import { EndpointArtifactsTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_artifacts';
