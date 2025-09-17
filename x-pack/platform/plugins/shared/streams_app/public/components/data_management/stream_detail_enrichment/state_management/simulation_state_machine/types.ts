@@ -54,8 +54,6 @@ export type SimulationEvent =
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.reset' }
-  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
-  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] };

@@ -20,8 +20,13 @@ import type {
   StreamlangStepWithUIAttributes,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
-import { ALWAYS_CONDITION, conditionSchema, streamlangProcessorSchema } from '@kbn/streamlang';
-import { isWhereBlock, type StreamlangStep } from '@kbn/streamlang/types/streamlang';
+import {
+  ALWAYS_CONDITION,
+  conditionSchema,
+  convertStepToUIDefinition,
+  streamlangProcessorSchema,
+} from '@kbn/streamlang';
+import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type {
   DissectFormState,
@@ -360,30 +365,8 @@ export const isSetProcessor = createProcessorGuardByType('set');
 
 const createId = htmlIdGenerator();
 
-const stepToUIDefinition = <TStepDefinition extends StreamlangStep>(
-  step: TStepDefinition,
-  options: { parentId: StreamlangStepWithUIAttributes['parentId'] }
-): StreamlangStepWithUIAttributes => {
-  // If this is a where step, remove where.steps.
-  // UI versions of the steps keep a flat array and work off parentId to represent hierarchy.
-  if (isWhereBlock(step) && Array.isArray(step.where.steps)) {
-    const { steps, ...whereWithoutSteps } = step.where;
-    return {
-      customIdentifier: createId(),
-      parentId: options.parentId,
-      ...step,
-      where: whereWithoutSteps,
-    };
-  }
-  return {
-    customIdentifier: createId(),
-    parentId: options.parentId,
-    ...step,
-  };
-};
-
 export const stepConverter = {
-  toUIDefinition: stepToUIDefinition,
+  toUIDefinition: convertStepToUIDefinition,
 };
 
 const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
