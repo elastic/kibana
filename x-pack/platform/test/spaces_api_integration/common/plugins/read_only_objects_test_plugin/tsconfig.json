@@ -7,6 +7,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/core-saved-objects-server"
   ]
 }
