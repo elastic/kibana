@@ -34,10 +34,12 @@ import {
   type PublishesDisabledActionIds,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { PresentationPanelHoverActionsWrapper } from '@kbn/presentation-panel-plugin/public';
 
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
+import type { Action } from '@kbn/ui-actions-plugin/public/actions';
 
 export const ControlPanel = ({
   parentApi,
@@ -144,12 +146,37 @@ export const ControlPanel = ({
         'controlFrameWrapper--large': controlWidth === 'large',
       })}
     >
-      <FloatingActions
-        data-test-subj="control-frame-floating-actions"
-        api={api}
-        viewMode={viewMode}
-        disabledActions={disabledActionIds}
-        isEnabled={true}
+      <PresentationPanelHoverActionsWrapper
+        {...{
+          index,
+          api,
+          getActions: async () => {
+            return [] as Action[];
+          },
+          viewMode,
+          showNotifications: false,
+          showBorder: false,
+          // ...attributes,
+          // ...listeners,
+        }}
+        setDragHandle={(id: string, ref: HTMLElement | null) => {
+          if (!ref) return;
+          console.log({ id, ref });
+          for (const [title, attribute] of Object.entries(attributes)) {
+            ref.setAttribute(title, attribute);
+          }
+          // for (const [title, listener] of Object.entries(listeners)) {
+          //   console.log({ ref, title, listener });
+          //   ref.addEventListener(title, (e) => listener(e));
+          // }
+          console.log(listeners);
+          ref.addEventListener('pointerdown', (e) => {
+            listeners?.onPointerDown?.(e);
+          });
+          ref.addEventListener('keydown', (e) => {
+            listeners?.onKeyDown?.(e);
+          });
+        }}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
@@ -175,15 +202,15 @@ export const ControlPanel = ({
               'controlFrame_formControlAfter--insertAfter': insertAfter,
               type,
             })}
-            // css={css(styles.formControl)}
+            css={css(styles.formControl)}
             prepend={
               <>
-                <DragHandle
+                {/* <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
                   {...attributes}
                   {...listeners}
-                />
+                /> */}
                 {/* {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : */}
@@ -219,7 +246,7 @@ export const ControlPanel = ({
             />
           </EuiFormControlLayout>
         </EuiFormRow>
-      </FloatingActions>
+      </PresentationPanelHoverActionsWrapper>
     </EuiFlexItem>
   );
 };

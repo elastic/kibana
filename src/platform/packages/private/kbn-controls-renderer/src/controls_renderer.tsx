@@ -67,6 +67,7 @@ export const ControlsRenderer = ({
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const onDragEnd = useCallback(
     ({ over, active }: DragEndEvent) => {
+      console.log('HERE 2!!!');
       const oldIndex = active?.data.current?.sortable.index;
       const newIndex = over?.data.current?.sortable.index;
       if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
@@ -98,7 +99,10 @@ export const ControlsRenderer = ({
       >
         <EuiFlexItem>
           <DndContext
-            onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+            onDragStart={({ active }) => {
+              console.log('HERE!!!!', { active });
+              setDraggingId(`${active.id}`);
+            }}
             onDragEnd={onDragEnd}
             onDragCancel={() => setDraggingId(null)}
             sensors={sensors}

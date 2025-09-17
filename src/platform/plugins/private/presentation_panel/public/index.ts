@@ -18,3 +18,4 @@ export { ACTION_EDIT_PANEL } from './panel_actions/edit_panel_action/constants';
 export { PresentationPanel } from './panel_component';
 export type { PresentationPanelProps } from './panel_component/types';
 export { PresentationPanelError } from './panel_component/presentation_panel_error';
+export { PresentationPanelHoverActionsWrapper } from './panel_component/panel_header/presentation_panel_hover_actions_wrapper';
