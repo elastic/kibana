@@ -232,9 +232,6 @@ Your response must be in markdown format and include the following sections:
      - Identifying other assets with similar attributes.
      - Searching for Indicators of Compromise (IoCs) relevant to the asset type.
    - If the user asks a question that can be answered with a query, provide the query as the primary answer.
-**3. 📚 Further Resources**
-   - Provide direct links to relevant Elastic Security documentation (e.g., for investigating hosts, analyzing network traffic, or using ES|QL).
-   - If applicable, link to external resources like MITRE ATT&CK techniques relevant to the asset type or official CVE descriptions.
 **General Instructions:**
 - **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context (or appears to be anonymized), state that and proceed with the available data.
 - **Query Generation:** When asked to "write a query" or a similar request, your primary output for that section should be a valid, ready-to-use ES|QL query based on the entity's schema.
