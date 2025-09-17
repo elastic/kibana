@@ -11,11 +11,17 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
-  getMissingAssistantKibanaPrivilegesError,
+  getMissingAssistantAndScheduleKibanaPrivilegesError,
+  getMissingScheduleKibanaPrivilegesError,
 } from '../../utils/helpers';
 import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
 import { getSimpleAttackDiscoverySchedule } from '../../mocks';
-import { noKibanaPrivileges, secOnlySpace2, secOnlySpacesAll } from '../../../../utils/auth/users';
+import {
+  noKibanaPrivileges,
+  secOnlySpace2,
+  secOnlySpacesAll,
+  secOnlySpacesAllAttackDiscoveryMinimalAll,
+} from '../../../../utils/auth/users';
 import { checkIfScheduleDoesNotExist } from '../../utils/check_schedule_does_not_exist';
 import { checkIfScheduleExists } from '../../utils/check_schedule_exists';
 
@@ -80,7 +86,32 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
+            routeDetails: `DELETE ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}`,
+          })
+        );
+
+        await checkIfScheduleExists({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
+      });
+
+      it('should not be able to delete a schedule without `update schedule` kibana privileges', async () => {
+        const apisNoPrivileges = getAttackDiscoverySchedulesApis({
+          supertest: supertestWithoutAuth,
+          user: secOnlySpacesAllAttackDiscoveryMinimalAll,
+        });
+
+        const result = await apisNoPrivileges.delete({
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
             routeDetails: `DELETE ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}`,
           })
         );
@@ -105,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
             routeDetails: `DELETE ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}`,
           })
         );

@@ -11,11 +11,17 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
-  getMissingAssistantKibanaPrivilegesError,
+  getMissingAssistantAndScheduleKibanaPrivilegesError,
+  getMissingScheduleKibanaPrivilegesError,
 } from '../../utils/helpers';
 import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
 import { getSimpleAttackDiscoverySchedule } from '../../mocks';
-import { noKibanaPrivileges, secOnlySpace2, secOnlySpacesAll } from '../../../../utils/auth/users';
+import {
+  noKibanaPrivileges,
+  secOnlySpace2,
+  secOnlySpacesAll,
+  secOnlySpacesAllAttackDiscoveryMinimalAll,
+} from '../../../../utils/auth/users';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -86,7 +92,33 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
+            routeDetails: `PUT ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}`,
+          })
+        );
+      });
+
+      it('should not be able to update a schedule without `update schedule` kibana privileges', async () => {
+        const apisNoPrivileges = getAttackDiscoverySchedulesApis({
+          supertest: supertestWithoutAuth,
+          user: secOnlySpacesAllAttackDiscoveryMinimalAll,
+        });
+
+        const scheduleToUpdate = {
+          params: createdSchedule.params,
+          schedule: createdSchedule.schedule,
+          actions: createdSchedule.actions,
+          name: 'Updated Schedule',
+        };
+        const result = await apisNoPrivileges.update({
+          id: createdSchedule.id,
+          schedule: scheduleToUpdate,
+          kibanaSpace: kibanaSpace1,
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
             routeDetails: `PUT ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}`,
           })
         );
@@ -112,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
             routeDetails: `PUT ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}`,
           })
         );
