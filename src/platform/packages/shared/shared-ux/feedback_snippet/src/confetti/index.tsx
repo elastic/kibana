@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, lazy } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-const LazyConfetti = lazy(() => import('./confetti'));
+/**
+ * A lazy-loaded component that renders a one-shot confetti animation.
+ */
 
-export const Confetti = () => (
-  <Suspense fallback={null}>
-    <LazyConfetti />
-  </Suspense>
+export const Confetti = dynamic(() =>
+  import('./confetti.component').then((mod) => ({
+    default: mod.ConfettiComponent,
+  }))
 );

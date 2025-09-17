@@ -10,14 +10,14 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
+import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface FeedbackButtonProps {
+interface FeedbackButtonProps extends CommonProps {
   feedbackButtonMessage: React.ReactNode;
   feedbackSnippetId: string;
   handleOpenSurvey: () => void;
-  showTopDivider?: boolean;
 }
 
 const feedbackButtonAriaLabel = i18n.translate(
@@ -36,14 +36,14 @@ export const FeedbackButton = ({
   feedbackButtonMessage,
   feedbackSnippetId,
   handleOpenSurvey,
-  showTopDivider,
+  className,
 }: FeedbackButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <div
+      className={className}
       css={css`
-        ${showTopDivider && `border-top: 1px ${euiTheme.colors.borderBaseSubdued} solid;`}
         padding: ${euiTheme.size.m};
       `}
     >

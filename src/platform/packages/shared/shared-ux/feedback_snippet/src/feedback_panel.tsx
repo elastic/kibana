@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeedbackView } from './feedback_snippet';
-import Confetti from './confetti/confetti';
+import { Confetti } from './confetti';
 
 interface FeedbackPanelProps {
   feedbackSnippetId: string;

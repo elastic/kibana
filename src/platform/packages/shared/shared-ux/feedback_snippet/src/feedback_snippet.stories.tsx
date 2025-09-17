@@ -25,7 +25,6 @@ const meta: Meta<typeof FeedbackSnippet> = {
     promptViewMessage: { control: 'text' },
     surveyUrl: { control: 'text' },
     feedbackSnippetId: { control: 'text' },
-    showFeedbackButtonTopDivider: { control: 'boolean' },
   },
 };
 

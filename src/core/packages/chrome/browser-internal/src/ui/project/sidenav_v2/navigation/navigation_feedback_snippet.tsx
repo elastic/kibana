@@ -11,6 +11,8 @@ import React from 'react';
 import { FeedbackSnippet } from '@kbn/shared-ux-feedback-snippet';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface NavigationFeedbackSnippetProps {
   solutionId: SolutionId;
@@ -41,14 +43,17 @@ const promptViewMessage = (
 
 export const NavigationFeedbackSnippet = ({ solutionId }: NavigationFeedbackSnippetProps) => {
   const feedbackSurveyUrl = feedbackUrls[solutionId];
+  const { euiTheme } = useEuiTheme();
 
   return (
     <FeedbackSnippet
+      css={css`
+        border-top: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
+      `}
       feedbackButtonMessage={feedbackButtonMessage}
       feedbackSnippetId={feedbackSnippetId}
       promptViewMessage={promptViewMessage}
       surveyUrl={feedbackSurveyUrl}
-      showFeedbackButtonTopDivider={true}
     />
   );
 };
