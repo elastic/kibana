@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexTemplate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
@@ -61,7 +61,7 @@ const fetchBenchmarkScoreTemplate = async (esClient: ElasticsearchClient) => {
   return templateResponse.index_templates[0]?.index_template;
 };
 
-const verifyTemplateStructure = (template: any, logger: Logger): boolean => {
+const verifyTemplateStructure = (template: IndicesIndexTemplate, logger: Logger): boolean => {
   if (!template?.template?.mappings?.properties) {
     logger.error(`Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has no mapping properties`);
     return false;

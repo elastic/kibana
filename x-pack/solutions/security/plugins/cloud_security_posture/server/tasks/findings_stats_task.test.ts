@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { validateBenchmarkScoreTemplate } from './findings_stats_task';
 import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
 import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
@@ -21,11 +21,11 @@ const mockCreateBenchmarkScoreIndex = createBenchmarkScoreIndex as jest.MockedFu
 
 describe('validateBenchmarkScoreTemplate', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let logger: ReturnType<typeof loggerMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     esClient = elasticsearchClientMock.createElasticsearchClient();
-    logger = loggerMock.create();
+    logger = loggingSystemMock.createLogger();
     mockCreateBenchmarkScoreIndex.mockClear();
   });
 

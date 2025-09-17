@@ -69,7 +69,6 @@
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/licensing-types",
-    "@kbn/logging-mocks",
   ],
   "exclude": ["target/**/*"]
 }
