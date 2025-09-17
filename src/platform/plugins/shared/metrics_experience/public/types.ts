@@ -12,10 +12,6 @@ import type { MetricsExperienceClient } from './api';
 
 export type { MetricsExperienceClient };
 
-export interface MetricsExperienceService {
-  client: MetricsExperienceClient;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsExperiencePluginSetup {}
 
