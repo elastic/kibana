@@ -29,6 +29,7 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import { processCondition } from './utils';
+import { buildCellActions } from './cell_actions';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -43,7 +44,7 @@ export function PreviewPanel() {
   ) {
     content = <EditingPanel />;
   } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <SamplePreviewPanel />;
+    content = <SamplePreviewPanel enableActions />;
   }
 
   return (
@@ -97,9 +98,9 @@ const EditingPanel = () => (
   />
 );
 
-const SamplePreviewPanel = () => {
+const SamplePreviewPanel = ({ enableActions }: { enableActions?: boolean }) => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
-  const { setDocumentMatchFilter } = useStreamRoutingEvents();
+  const { setDocumentMatchFilter, changeRule } = useStreamRoutingEvents();
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
@@ -113,6 +114,8 @@ const SamplePreviewPanel = () => {
   const condition = processCondition(samplesSnapshot.context.condition);
   const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
+
+  const cellActions = enableActions ? buildCellActions(documents, changeRule) : undefined;
 
   const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
     ? Number.NaN
@@ -171,7 +174,7 @@ const SamplePreviewPanel = () => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <PreviewTable documents={documents} />
+        <PreviewTable documents={documents} cellActions={cellActions} />
       </EuiFlexItem>
     );
   }

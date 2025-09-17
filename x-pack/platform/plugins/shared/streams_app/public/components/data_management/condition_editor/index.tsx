@@ -252,7 +252,7 @@ function FilterForm(props: {
         onChange={handleOperatorChange}
         disabled={disabled}
       />
-      {typeof value === 'string' ? (
+      {typeof value === 'string' || typeof value === 'number' ? (
         <EuiFieldText
           aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
           placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {

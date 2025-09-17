@@ -5,18 +5,19 @@
  * 2.0.
  */
 import type {
+  EuiDataGridColumnCellAction,
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
 } from '@elastic/eui';
 import { EuiDataGrid, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
-import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
+import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 
 const emptyCell = <>&nbsp;</>;
 
@@ -33,6 +34,7 @@ export function PreviewTable({
   columnOrderHint = [],
   selectedRowIndex,
   leadingControlColumns,
+  cellActions,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
@@ -46,6 +48,7 @@ export function PreviewTable({
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
   selectedRowIndex?: number;
   leadingControlColumns?: EuiDataGridControlColumn[];
+  cellActions?: EuiDataGridColumnCellAction[];
 }) {
   const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
@@ -155,8 +158,9 @@ export function PreviewTable({
             }
           : (false as false),
       initialWidth: columnWidths[column],
+      cellActions,
     }));
-  }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
+  }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths, cellActions]);
 
   return (
     <EuiDataGrid
