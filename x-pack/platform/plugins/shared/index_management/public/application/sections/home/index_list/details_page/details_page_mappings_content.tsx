@@ -497,7 +497,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
                     defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
                       (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
-                      available in your relevance tuning and search experience. asdf"
+                      available in your relevance tuning and search experience."
                   />
                 </p>
               </EuiText>
