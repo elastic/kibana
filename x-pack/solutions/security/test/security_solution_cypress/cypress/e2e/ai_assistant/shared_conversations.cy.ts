@@ -55,7 +55,7 @@ const assistantRole: MessageRole = 'assistant';
 describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
   const primaryUser = isServerless ? 'platform_engineer' : 'system_indices_superuser';
-  const secondaryUser = isServerless ? 't1_analyst' : 'elastic';
+  const secondaryUser = isServerless ? 't2_analyst' : 'elastic';
   const mockConvo1 = {
     id: 'spooky',
     title: 'Spooky convo',
@@ -96,7 +96,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   };
   before(() => {
     // Login as secondary user to ensure their profile is created/seeded in the system
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryUser);
     // Visit a page to ensure the user profile is properly initialized
     visitGetStartedPage();
 
@@ -191,8 +191,8 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     // First logout admin user
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user who should have access to shared conversations
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -225,7 +225,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     ]);
     cy.clearCookies();
 
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -249,7 +249,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
 
     cy.clearCookies();
 
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -274,8 +274,8 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
 
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user who should have access to shared conversations
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -317,8 +317,8 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   it('Visiting a URL with the assistant param shows access error when user does not have access to the conversation', () => {
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user who should have access to shared conversations
+    login(secondaryUser);
 
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
@@ -333,6 +333,3 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   });
 });
 
-const loginSecondaryUser = (isServerless: boolean, username: string) => {
-  login(username);
-};
