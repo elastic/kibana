@@ -13,14 +13,14 @@ import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/con
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const DELETE_MIGRATION_SUCCESS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.deleteMigrationSuccess',
+  'xpack.securitySolution.siemMigrations.common.deleteMigrationSuccess',
   {
     defaultMessage: 'Migration deleted',
   }
 );
 
 export const DELETE_MIGRATION_FAILURE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.deleteMigrationFailDescription',
+  'xpack.securitySolution.siemMigrations.common.deleteMigrationFailDescription',
   {
     defaultMessage: 'Failed to delete migration',
   }

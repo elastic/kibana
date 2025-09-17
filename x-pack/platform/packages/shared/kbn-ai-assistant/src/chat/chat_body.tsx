@@ -57,7 +57,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
-import { useConversationContextMenu } from '../hooks';
+import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -167,6 +167,8 @@ export function ChatBody({
     false
   );
 
+  const scopes = useScopes();
+
   const {
     conversation,
     conversationId,
@@ -247,11 +249,15 @@ export function ChatBody({
         conversation: { id, last_updated: lastUpdated },
       };
 
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
+
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
           feedback,
           conversation: conversationWithoutMessagesAndTitle,
+          connector,
+          scopes,
         },
       });
     }

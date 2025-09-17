@@ -41,7 +41,9 @@ export class ServerlessObservabilityPlugin
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
     const { serverless, management, security } = setupDeps;
-    const navigationTree$ = (setupDeps.streams?.status$ || of({ status: 'disabled' })).pipe(
+    const navigationTree$ = (
+      setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' })
+    ).pipe(
       map(({ status }) => {
         return createNavigationTree({
           streamsAvailable: status === 'enabled',

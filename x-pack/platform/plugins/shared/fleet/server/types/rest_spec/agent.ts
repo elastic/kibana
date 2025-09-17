@@ -569,10 +569,11 @@ export const MigrateSingleAgentResponseSchema = schema.object({
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
-    agents: schema.arrayOf(schema.string()),
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     uri: schema.uri(),
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 export const BulkMigrateAgentsResponseSchema = schema.object({

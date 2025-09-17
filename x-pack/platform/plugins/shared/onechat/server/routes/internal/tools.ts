@@ -15,6 +15,7 @@ import type {
   ResolveSearchSourcesResponse,
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
+import { internalApiPath } from '../../../common/constants';
 
 export function registerInternalToolsRoutes({
   router,
@@ -26,7 +27,7 @@ export function registerInternalToolsRoutes({
   // bulk delete tools
   router.post(
     {
-      path: '/internal/chat/tools/_bulk_delete',
+      path: `${internalApiPath}/tools/_bulk_delete`,
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
@@ -71,7 +72,7 @@ export function registerInternalToolsRoutes({
   // resolve search sources (internal)
   router.get(
     {
-      path: '/internal/chat/tools/_resolve_search_sources',
+      path: `${internalApiPath}/tools/_resolve_search_sources`,
       validate: {
         query: schema.object({
           pattern: schema.string(),

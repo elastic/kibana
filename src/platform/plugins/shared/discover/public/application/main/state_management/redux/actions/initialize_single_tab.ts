@@ -222,6 +222,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
         ? copySavedSearch(persistedTabSavedSearch)
         : services.savedSearch.getNew(),
       dataView,
+      initialInternalState: tabInitialInternalState,
       appState: initialAppState,
       globalState: initialGlobalState,
       services,

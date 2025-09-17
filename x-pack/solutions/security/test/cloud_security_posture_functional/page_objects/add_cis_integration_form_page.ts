@@ -330,7 +330,9 @@ export function AddCisIntegrationFormPageProvider({
   const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
     const radioGroup = await testSubjects.find(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
     const radio = await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
-    await radio.click();
+    await radio.click({
+      bottomOffset: 100 /* account for fixed footer to decide if need to scroll down */,
+    });
   };
 
   const getSetupTechnologyRadio = async (setupTechnology: 'agentless' | 'agent-based') => {

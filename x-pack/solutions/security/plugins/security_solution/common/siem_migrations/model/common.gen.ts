@@ -133,6 +133,60 @@ export const MigrationLastExecution = z.object({
 });
 
 /**
+ * The items migration translation stats object.
+ */
+export type MigrationTranslationStats = z.infer<typeof MigrationTranslationStats>;
+export const MigrationTranslationStats = z.object({
+  /**
+   * The migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The items migration translation stats.
+   */
+  items: z.object({
+    /**
+     * The total number of items in the migration.
+     */
+    total: z.number().int(),
+    /**
+     * The number of items that have been successfully translated.
+     */
+    success: z.object({
+      /**
+       * The total number of items that have been successfully translated.
+       */
+      total: z.number().int(),
+      /**
+       * The translation results
+       */
+      result: z.object({
+        /**
+         * The number of items that have been fully translated.
+         */
+        full: z.number().int(),
+        /**
+         * The number of items that have been partially translated.
+         */
+        partial: z.number().int(),
+        /**
+         * The number of items that could not be translated.
+         */
+        untranslatable: z.number().int(),
+      }),
+      /**
+       * The number of items that have been successfully translated and can be installed.
+       */
+      installable: z.number().int(),
+    }),
+    /**
+     * The number of items that have failed translation.
+     */
+    failed: z.number().int(),
+  }),
+});
+
+/**
  * The migration translation result.
  */
 export type MigrationTranslationResult = z.infer<typeof MigrationTranslationResult>;

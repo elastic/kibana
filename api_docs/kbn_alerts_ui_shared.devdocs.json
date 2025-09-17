@@ -5618,7 +5618,7 @@
         "description": [],
         "signature": [
           "Omit<",
-          "OptionsListControlState",
+          "OptionsListDSLControlState",
           ", \"dataViewId\"> & { persist?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
@@ -5887,7 +5887,7 @@
         "description": [],
         "signature": [
           "{ [x: string]: Pick<",
-          "OptionsListControlState",
+          "OptionsListDSLControlState",
           ", \"title\" | \"fieldName\" | \"exclude\" | \"selectedOptions\" | \"existsSelected\">; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",

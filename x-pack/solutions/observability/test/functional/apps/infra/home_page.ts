@@ -71,8 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  // Failing: See https://github.com/elastic/kibana/issues/233920
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     let synthEsClient: InfraSynthtraceEsClient;
 
@@ -168,8 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Persist after refresh
         await browser.refresh();
-        await pageObjects.infraHome.waitForLoading();
-
+        await pageObjects.header.awaitGlobalLoadingIndicatorHidden();
         expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
 
         await retry.tryForTime(5000, async () => {

@@ -664,6 +664,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchStart.isBackgroundSearchEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBackgroundSearchEnabled",
+            "description": [
+              "\nFeature flag value to make it easier to use in different plugins"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchStart.searchSource",
             "type": "Object",
             "tags": [],

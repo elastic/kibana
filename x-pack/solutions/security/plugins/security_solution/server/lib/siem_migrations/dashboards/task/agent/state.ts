@@ -14,12 +14,7 @@ import type {
   OriginalDashboard,
 } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
-import type {
-  FailedPanelTranslations,
-  PanelDescriptions,
-  ParsedOriginalDashboard,
-  TranslatedPanels,
-} from './types';
+import type { PanelDescriptions, ParsedOriginalDashboard, TranslatedPanels } from './types';
 
 export const migrateDashboardState = Annotation.Root({
   id: Annotation<string>(),
@@ -28,10 +23,6 @@ export const migrateDashboardState = Annotation.Root({
   description: Annotation<string>(),
   panel_descriptions: Annotation<PanelDescriptions>(),
   translated_panels: Annotation<TranslatedPanels>({
-    reducer: (current, value) => current.concat(value),
-    default: () => [],
-  }),
-  failed_panel_translations: Annotation<FailedPanelTranslations>({
     reducer: (current, value) => current.concat(value),
     default: () => [],
   }),

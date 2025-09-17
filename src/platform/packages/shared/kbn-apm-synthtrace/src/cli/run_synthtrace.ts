@@ -38,6 +38,10 @@ function options(y: Argv) {
       describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
       string: true,
     })
+    .option('apiKey', {
+      describe: 'Kibana API key',
+      string: true,
+    })
     .option('from', {
       description: 'The start of the time window',
     })

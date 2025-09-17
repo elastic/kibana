@@ -12,12 +12,13 @@ import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import {
+  parseWorkflowYamlToJSON,
+  formatValidationError,
   getCurrentPath,
   getPathFromAncestors,
-  parseWorkflowYamlToJSON,
 } from '../../../../common/lib/yaml_utils';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
@@ -330,8 +331,55 @@ export function useYamlValidation({
 
       const errors: YamlValidationError[] = [];
       for (const marker of markers) {
+        let formattedMessage = marker.message;
+
+        // Apply custom formatting to schema validation errors (from monaco-yaml)
+        if (owner === 'yaml' && marker.message) {
+          // Extract the actual value from the editor at the error position
+          const model = editor.getModel();
+          let receivedValue: string | undefined;
+
+          if (model) {
+            try {
+              // Get the text at the error position
+              const range = {
+                startLineNumber: marker.startLineNumber,
+                startColumn: marker.startColumn,
+                endLineNumber: marker.endLineNumber || marker.startLineNumber,
+                endColumn: marker.endColumn || marker.startColumn + 10, // fallback range
+              };
+
+              const textAtError = model.getValueInRange(range);
+
+              // Try to extract the value (remove quotes if present)
+              const valueMatch = textAtError.match(/^\s*([^:\s]+)/);
+              if (valueMatch) {
+                receivedValue = valueMatch[1].replace(/['"]/g, '');
+              }
+            } catch (e) {
+              // Fallback to parsing the message
+              receivedValue = extractReceivedValue(marker.message);
+            }
+          }
+
+          // Create a mock error object that matches our formatter's expected structure
+          const mockError = {
+            issues: [
+              {
+                code: marker.message.includes('Value must be') ? 'invalid_literal' : 'unknown',
+                message: marker.message,
+                path: ['type'], // Assume it's a type field error for now
+                received: receivedValue,
+              },
+            ],
+          };
+
+          const { message } = formatValidationError(mockError);
+          formattedMessage = message;
+        }
+
         errors.push({
-          message: marker.message,
+          message: formattedMessage,
           severity: getSeverityString(marker.severity as MarkerSeverity),
           lineNumber: marker.startLineNumber,
           column: marker.startColumn,
@@ -347,6 +395,29 @@ export function useYamlValidation({
     },
     [onValidationErrors]
   );
+
+  // Helper function to extract the received value from Monaco's error message
+  function extractReceivedValue(message: string): string | undefined {
+    // Try different patterns to extract the received value
+
+    // Pattern 1: "Value must be one of: ... Received: 'value'"
+    let receivedMatch = message.match(/Received:\s*['"]([^'"]+)['"]/);
+    if (receivedMatch) {
+      return receivedMatch[1];
+    }
+
+    // Pattern 2: "Value must be one of: ... Received: value" (without quotes)
+    receivedMatch = message.match(/Received:\s*([^\s,]+)/);
+    if (receivedMatch) {
+      return receivedMatch[1];
+    }
+
+    // Pattern 3: Look for the actual value in the editor at the error position
+    // This is more complex but might be needed if Monaco doesn't include the value in the message
+
+    // For now, return undefined if we can't extract it
+    return undefined;
+  }
 
   return {
     error,

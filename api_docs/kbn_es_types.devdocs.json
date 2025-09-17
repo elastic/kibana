@@ -256,6 +256,20 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse.documents_found",
+            "type": "number",
+            "tags": [],
+            "label": "documents_found",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchResponse._clusters",
             "type": "Object",
             "tags": [],

@@ -68,6 +68,8 @@ describe('API tests', () => {
 
   describe('fetchConnectorExecuteAction', () => {
     it('calls the non-stream API when assistantStreamingEnabled is false', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
       await fetchConnectorExecuteAction({
         ...fetchConnectorArgs,
         assistantStreamingEnabled: false,
@@ -146,6 +148,8 @@ describe('API tests', () => {
     });
 
     it('calls the api with the expected optional request parameters', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         assistantStreamingEnabled: false,

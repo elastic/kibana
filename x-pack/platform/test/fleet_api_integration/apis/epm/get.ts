@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
 import fs from 'fs';
 import path from 'path';
+import pRetry from 'p-retry';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
@@ -46,6 +47,63 @@ export default function (providerContext: FtrProviderContext) {
       refresh: true,
       ignore_unavailable: true,
     });
+  };
+
+  // Helper function to wait for knowledge base content to be available
+  const waitForKnowledgeBaseContent = async (packageName: string) => {
+    await pRetry(
+      async () => {
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/${packageName}/knowledge_base`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1');
+
+        if (res.status !== 200) {
+          throw new Error(`Knowledge base not ready yet, status: ${res.status}`);
+        }
+
+        // Ensure we have the expected content structure
+        if (!res.body?.items || !Array.isArray(res.body.items) || res.body.items.length === 0) {
+          throw new Error('Knowledge base content not yet available');
+        }
+      },
+      {
+        retries: 12, // 12 retries * 5 seconds = 60 seconds max
+        minTimeout: 5000, // 5 seconds between retries
+        maxTimeout: 5000,
+      }
+    );
+  };
+
+  // Helper function to wait for knowledge base items to appear in package info
+  const waitForKnowledgeBaseInPackageInfo = async (packageName: string, packageVersion: string) => {
+    await pRetry(
+      async () => {
+        const res = await supertest.get(`/api/fleet/epm/packages/${packageName}/${packageVersion}`);
+
+        if (res.status !== 200) {
+          throw new Error(`Package info not ready yet, status: ${res.status}`);
+        }
+
+        const packageInfo = res.body.item;
+        if (!packageInfo?.installationInfo?.installed_es) {
+          throw new Error('Package installation info not yet available');
+        }
+
+        const knowledgeBaseItems = packageInfo.installationInfo.installed_es.filter(
+          (item: any) => item.type === 'knowledge_base'
+        );
+
+        if (knowledgeBaseItems.length === 0) {
+          throw new Error('Knowledge base items not yet available in package info');
+        }
+      },
+      {
+        retries: 12, // 12 retries * 5 seconds = 60 seconds max
+        minTimeout: 5000, // 5 seconds between retries
+        maxTimeout: 5000,
+      }
+    );
   };
 
   const testPkgArchiveZip = path.join(
@@ -333,6 +391,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('returns knowledge base content for an installed package', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        //  Since KB indexing is async, wait for it to be ready before trying to fetch
+        // This is due to the ML model needing to get deployed first which can take a bit
+        await waitForKnowledgeBaseContent(knowledgeBasePkgName);
 
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
@@ -374,6 +435,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('validates knowledge base content structure', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        //  Since KB indexing is async, wait for it to be ready before trying to fetch
+        // This is due to the ML model needing to get deployed first which can take a bit
+        await waitForKnowledgeBaseContent(knowledgeBasePkgName);
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
           .set('kbn-xsrf', 'xxxx')
@@ -401,6 +465,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('includes knowledge base information in package info assets when fetching from the info endpoint', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        //  Since KB indexing is async, wait for knowledge base items to be ready in package info
+        // This is due to the ML model needing to get deployed first which can take a bit
+        await waitForKnowledgeBaseInPackageInfo(knowledgeBasePkgName, knowledgeBasePkgVersion);
         const res = await supertest
           .get(`/api/fleet/epm/packages/${knowledgeBasePkgName}/${knowledgeBasePkgVersion}`)
           .expect(200);

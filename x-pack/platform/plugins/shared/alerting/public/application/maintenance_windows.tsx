@@ -13,7 +13,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MAINTENANCE_WINDOW_PATHS } from '../../common';
@@ -82,7 +81,7 @@ export const renderApp = ({
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <KibanaContextProvider
         services={{
           ...core,
@@ -97,7 +96,7 @@ export const renderApp = ({
           </QueryClientProvider>
         </Router>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
   return () => {

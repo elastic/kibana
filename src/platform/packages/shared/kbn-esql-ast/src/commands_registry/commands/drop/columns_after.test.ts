@@ -7,25 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('DROP', () => {
-  const context = {
-    userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
-    fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword' }],
-      ['count', { name: 'count', type: 'double' }],
-    ]),
-  };
   it('removes the columns defined in the command', () => {
-    const previousColumns = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousColumns: ESQLColumnData[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const result = columnsAfter(synth.cmd`DROP field1`, previousColumns, context);
+    const result = columnsAfter(synth.cmd`DROP field1`, previousColumns);
 
-    expect(result).toEqual([{ name: 'field2', type: 'double' }]);
+    expect(result).toEqual([{ name: 'field2', type: 'double', userDefined: false }]);
   });
 });

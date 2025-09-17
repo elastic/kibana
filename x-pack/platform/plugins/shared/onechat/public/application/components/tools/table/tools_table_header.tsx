@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback } from 'react';
-import { useToolsActions } from '../../../context/tools_table_provider';
+import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
 
 export interface ToolsTableHeaderProps {

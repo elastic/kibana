@@ -4579,7 +4579,7 @@ const notRlikeDefinition: FunctionDefinition = {
   name: 'not rlike',
   description: i18n.translate('kbn-esql-ast.esql.definitions.not_rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
   preview: false,
   alias: undefined,
@@ -5135,7 +5135,7 @@ const rlikeDefinition: FunctionDefinition = {
   name: 'rlike',
   description: i18n.translate('kbn-esql-ast.esql.definitions.rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
   preview: false,
   alias: undefined,

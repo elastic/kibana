@@ -150,6 +150,7 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
     onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.RESOLVE_KIBANA_PROMISE,
     onPostTransition: updateLatestExecutedState,
+    isAsync: true, // Knowledge base indexing runs in background
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,

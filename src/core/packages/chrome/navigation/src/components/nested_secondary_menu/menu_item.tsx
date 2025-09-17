@@ -17,12 +17,13 @@ import { SecondaryMenu } from '../secondary_menu';
 import { useNestedMenu } from './use_nested_menu';
 
 export interface ItemProps
-  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isActive' | 'href'> {
+  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
   children: ReactNode;
   hasSubmenu?: boolean;
   href?: string;
   iconType?: IconType;
-  isActive?: boolean;
+  isHighlighted?: boolean;
+  isCurrent?: boolean;
   onClick?: () => void;
   submenuPanelId?: string;
 }
@@ -32,7 +33,8 @@ export const Item: FC<ItemProps> = ({
   hasSubmenu = false,
   href,
   id,
-  isActive = false,
+  isHighlighted = false,
+  isCurrent,
   onClick,
   submenuPanelId,
   ...props
@@ -50,7 +52,6 @@ export const Item: FC<ItemProps> = ({
   const arrowStyle = css`
     margin-left: ${euiTheme.size.xs};
     opacity: 0.6;
-    pointer-events: none;
   `;
 
   const handleClick = useCallback(() => {
@@ -64,7 +65,8 @@ export const Item: FC<ItemProps> = ({
     <SecondaryMenu.Item
       id={id}
       href={href || ''}
-      isActive={isActive}
+      isHighlighted={isHighlighted}
+      isCurrent={isCurrent}
       onClick={handleClick}
       {...props}
       key={`nested-item-${id}`}

@@ -20,7 +20,7 @@ describe('getCostSavingsMetricLensAttributes', () => {
     backgroundColor: '#00FF00',
   };
 
-  it('includes the correct formula in the countColumn', () => {
+  it('returns correct lens attributes with formula and filter handling', () => {
     const result = getCostSavingsMetricLensAttributes({
       ...defaultParams,
       minutesPerAlert: 10,
@@ -31,32 +31,21 @@ describe('getCostSavingsMetricLensAttributes', () => {
     expect(countColumn?.operationType).toBe('formula');
     // @ts-ignore
     expect(countColumn?.params.formula).toBe('count() * ((10/60)*100)');
-  });
-
-  it('applies filters from extraOptions if provided', () => {
-    const filters = [{ query: { match_all: {} }, meta: {} }];
-    const result = getCostSavingsMetricLensAttributes({
-      ...defaultParams,
-      extraOptions: { filters },
-    });
-    expect(result.state.filters).toBe(filters);
-  });
-
-  it('defaults filters to empty array if extraOptions is not provided', () => {
-    const result = getCostSavingsMetricLensAttributes({
-      ...defaultParams,
-      extraOptions: undefined,
-    });
-    expect(result.state.filters).toEqual([]);
-  });
-
-  it('returns a LensAttributes object with required properties', () => {
-    const result = getCostSavingsMetricLensAttributes({
-      ...defaultParams,
-    });
     expect(result).toHaveProperty('title', 'Cost Savings Metric');
     expect(result).toHaveProperty('visualizationType', 'lnsMetric');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');
+    const filters = [{ query: { match_all: {} }, meta: {} }];
+    const resultWithFilters = getCostSavingsMetricLensAttributes({
+      ...defaultParams,
+      extraOptions: { filters },
+    });
+    expect(resultWithFilters.state.filters).toBe(filters);
+
+    const resultWithoutFilters = getCostSavingsMetricLensAttributes({
+      ...defaultParams,
+      extraOptions: undefined,
+    });
+    expect(resultWithoutFilters.state.filters).toEqual([]);
   });
 });

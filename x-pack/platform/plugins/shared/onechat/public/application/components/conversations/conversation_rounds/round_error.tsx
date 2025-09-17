@@ -47,7 +47,7 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
       buttonContent={
         <FormattedMessage
           id="xpack.onechat.round.error.title"
-          defaultMessage="The model had a brain freeze."
+          defaultMessage="There was an error, expand for detailed information."
         />
       }
       extraAction={

@@ -35,14 +35,13 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
-  | 'abortController'
 >;
 export const useLensProps = ({
   title,
   query,
   seriesType,
   services,
-  timeRange,
+  getTimeRange,
   unit,
   color,
   searchSessionId,
@@ -54,7 +53,7 @@ export const useLensProps = ({
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   color?: string;
   unit?: string;
-  timeRange: TimeRange;
+  getTimeRange: () => TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   abortController?: AbortController;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
@@ -62,7 +61,7 @@ export const useLensProps = ({
     query,
     seriesType,
     services,
-    timeRange,
+    getTimeRange,
     unit,
     color,
     abortController,
@@ -101,8 +100,14 @@ export const useLensProps = ({
 
     const builder = new LensConfigBuilder(services.dataViews);
 
-    attributes$.current.next((await builder.build(lensParams)) as LensAttributes);
-  }, [lensParams, services.dataViews]);
+    attributes$.current.next(
+      (await builder.build(lensParams, {
+        query: {
+          esql: query,
+        },
+      })) as LensAttributes
+    );
+  }, [lensParams, query, services.dataViews]);
 
   const buildLensProps = useCallback(() => {
     if (!attributes$.current.value) {
@@ -111,10 +116,10 @@ export const useLensProps = ({
 
     return getLensProps({
       searchSessionId,
-      timeRange,
+      getTimeRange,
       attributes: attributes$.current.value,
     });
-  }, [searchSessionId, timeRange]);
+  }, [searchSessionId, getTimeRange]);
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
@@ -147,17 +152,16 @@ export const useLensProps = ({
 
 const getLensProps = ({
   searchSessionId,
-  timeRange,
+  getTimeRange,
   attributes,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
-  timeRange: TimeRange;
-  abortController?: AbortController;
+  getTimeRange: () => TimeRange;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
-  timeRange,
+  timeRange: getTimeRange(),
   attributes,
   noPadding: true,
   searchSessionId,

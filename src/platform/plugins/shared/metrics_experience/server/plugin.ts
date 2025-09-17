@@ -15,7 +15,6 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import type { MetricsExperienceConfig } from './config';
 import { routeRepository } from './routes';
 
 export type MetricsExperiencePluginSetup = ReturnType<MetricsExperiencePlugin['setup']>;
@@ -24,11 +23,9 @@ export type MetricsExperiencePluginStart = ReturnType<MetricsExperiencePlugin['s
 export class MetricsExperiencePlugin
   implements Plugin<MetricsExperiencePluginSetup, MetricsExperiencePluginStart>
 {
-  public config: MetricsExperienceConfig;
   public logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config.get<MetricsExperienceConfig>();
     this.logger = initContext.logger.get();
   }
 

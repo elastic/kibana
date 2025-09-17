@@ -26,7 +26,7 @@ import type {
   TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
-import { decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
+import { ScheduleType, decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import {
   throwRetryableError,
   type ConcreteTaskInstance,
@@ -39,6 +39,7 @@ import {
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
 import { ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
@@ -252,6 +253,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
         timeSinceCreation,
         errorCode: docOutput?.error_code ?? 'unknown',
         errorMessage: error?.message ?? 'unknown',
+        scheduleType: report.scheduled_report_id ? ScheduleType.SCHEDULED : ScheduleType.SINGLE,
+        ...(report.scheduled_report_id ? { scheduledTaskId: report.scheduled_report_id } : {}),
       });
 
       return await store.setReportFailed(report, doc);
@@ -405,6 +408,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected async completeJob(
     report: SavedReport,
+    attempts: number,
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
@@ -433,20 +437,27 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const byteSize = docOutput.size;
     const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
 
+    const scheduleType = report.scheduled_report_id ? ScheduleType.SCHEDULED : ScheduleType.SINGLE;
     if (output.metrics?.csv != null) {
       eventTracker?.completeJobCsv({
         byteSize,
         timeSinceCreation,
         csvRows: output.metrics.csv.rows ?? -1,
+        scheduleType,
+        attempt: attempts,
+        ...(report.scheduled_report_id ? { scheduledTaskId: report.scheduled_report_id } : {}),
       });
     } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
       const { width, height } = report.payload.layout?.dimensions ?? {};
       eventTracker?.completeJobScreenshot({
         byteSize,
         timeSinceCreation,
+        scheduleType,
+        attempt: attempts,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
         numPages: output.metrics.pdf?.pages ?? -1,
         screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
+        ...(report.scheduled_report_id ? { scheduledTaskId: report.scheduled_report_id } : {}),
       });
     }
 
@@ -525,11 +536,15 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           );
 
           try {
+            const retries = maxAttempts.maxRetries;
+            let atmpts: number | undefined = retries > 0 ? 0 : undefined;
             await retryOnError({
               logger: this.logger,
-              retries: maxAttempts.maxRetries,
+              retries,
               report,
               operation: async (rep: SavedReport) => {
+                // keep track of the number of times we try within the task
+                atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
                 const jobContentEncoding = this.getJobContentEncoding(jobType);
                 const stream = await getContentStream(
                   this.opts.reporting,
@@ -571,7 +586,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 if (output) {
                   logger.debug(`Job output size: ${byteSize} bytes.`);
                   // Update the job status to "completed"
-                  report = await this.completeJob(rep, { ...output, size: byteSize });
+                  report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
+                    ...output,
+                    size: byteSize,
+                  });
 
                   await this.notify(
                     report,

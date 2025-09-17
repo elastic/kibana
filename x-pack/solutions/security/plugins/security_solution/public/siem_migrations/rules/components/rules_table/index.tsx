@@ -43,7 +43,7 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
-import type { FilterOptions, RuleMigrationStats } from '../../types';
+import type { RulesFilterOptions, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
@@ -107,7 +107,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       close: closeMissingIndexPatternFlyout,
     } = useIsOpenState(false);
     // Filters
-    const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
+    const [filterOptions, setFilterOptions] = useState<RulesFilterOptions | undefined>();
 
     const {
       data: translationStats,

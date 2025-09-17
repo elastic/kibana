@@ -112,9 +112,14 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
       },
     },
   };
-  return render(<MigrationRulesPage {...finalProps} />, {
-    wrapper: args?.wrapper,
-  });
+  return render(
+    <TestProviders>
+      <MigrationRulesPage {...finalProps} />
+    </TestProviders>,
+    {
+      wrapper: args?.wrapper,
+    }
+  );
 }
 
 const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats =

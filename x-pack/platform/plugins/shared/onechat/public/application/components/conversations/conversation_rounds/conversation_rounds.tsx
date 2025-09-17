@@ -38,7 +38,8 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           defaultMessage: 'Conversation messages',
         })}
       >
-        {conversationRounds.map(({ input, response, steps }, index) => {
+        {conversationRounds.map((round, index) => {
+          const { input, response, steps } = round;
           const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
@@ -56,7 +57,12 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
                 isError ? (
                   <RoundError error={error} onRetry={retry} />
                 ) : (
-                  <RoundResponse response={response} steps={steps} isLoading={isLoading} />
+                  <RoundResponse
+                    rawRound={round}
+                    response={response}
+                    steps={steps}
+                    isLoading={isLoading}
+                  />
                 )
               }
             />

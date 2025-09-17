@@ -17,7 +17,7 @@ import { SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingDashboardMigration } from '../util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
   router: SecuritySolutionPluginRouter,
@@ -39,7 +39,7 @@ export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,

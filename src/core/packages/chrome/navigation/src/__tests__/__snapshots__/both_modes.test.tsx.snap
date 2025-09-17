@@ -1,0 +1,296 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Both modes should render the side navigation 1`] = `
+<div>
+  <div
+    class="css-6vezlj-Navigation"
+    data-test-subj="navigation-root"
+  >
+    <div
+      class="side-nav css-1ww1r6i-SideNav"
+    >
+      <div
+        class="css-1aomi1g-wrapperStyles"
+      >
+        <a
+          aria-label="Solution homepage"
+          class="css-z664ou-buttonStyles"
+          data-highlighted="false"
+          data-menu-item="true"
+          data-test-subj="sideNavLogo"
+          href="/"
+        >
+          <div
+            class="iconWrapper"
+          >
+            <span
+              aria-hidden="true"
+              color="currentColor"
+              data-euiicon-type="logoElastic"
+            />
+          </div>
+          <div
+            class="euiText emotion-euiText-xs-euiTextAlign-center-horizontalStyles-content"
+          >
+            Solution
+          </div>
+        </a>
+      </div>
+      <nav
+        aria-label="Main navigation"
+        class="css-8a235g-SideNavPrimaryMenu"
+        id="primary-navigation"
+      >
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <a
+              aria-haspopup="false"
+              class="css-z664ou-buttonStyles"
+              data-highlighted="false"
+              data-menu-item="true"
+              data-test-subj="sideNavPrimaryMenuItem-dashboards"
+              href="/dashboards"
+              label="Dashboards"
+            >
+              <div
+                class="iconWrapper"
+              >
+                <span
+                  aria-hidden="true"
+                  color="currentColor"
+                  data-euiicon-type="dashboardApp"
+                />
+              </div>
+              <div
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+              >
+                Dashboards
+              </div>
+            </a>
+          </div>
+        </div>
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <a
+              aria-haspopup="false"
+              class="css-z664ou-buttonStyles"
+              data-highlighted="false"
+              data-menu-item="true"
+              data-test-subj="sideNavPrimaryMenuItem-discover"
+              href="/discover"
+              label="Discover"
+            >
+              <div
+                class="iconWrapper"
+              >
+                <span
+                  aria-hidden="true"
+                  color="currentColor"
+                  data-euiicon-type="discoverApp"
+                />
+              </div>
+              <div
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+              >
+                Discover
+              </div>
+            </a>
+          </div>
+        </div>
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <a
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="css-z664ou-buttonStyles"
+              data-highlighted="false"
+              data-menu-item="true"
+              data-test-subj="sideNavPrimaryMenuItem-apps_overview"
+              href="/apps_overview"
+              label="Apps"
+            >
+              <div
+                class="iconWrapper"
+              >
+                <span
+                  aria-hidden="true"
+                  color="currentColor"
+                  data-euiicon-type="apps"
+                />
+              </div>
+              <div
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+              >
+                Apps
+              </div>
+            </a>
+          </div>
+        </div>
+      </nav>
+      <footer
+        aria-label="Side navigation footer"
+        class="css-4kpxr2-SideNavFooter"
+      >
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <span
+              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+            >
+              <a
+                aria-haspopup="false"
+                aria-label="Getting started"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                data-highlighted="false"
+                data-test-subj="footerMenuItem-getting_started"
+                href="/getting-started"
+                rel="noreferrer"
+                tabindex="0"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="launch"
+                />
+              </a>
+            </span>
+          </div>
+        </div>
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <span
+              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+            >
+              <a
+                aria-haspopup="false"
+                aria-label="Developer tools"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                data-highlighted="false"
+                data-test-subj="footerMenuItem-developer_tools"
+                href="/developer-tools"
+                rel="noreferrer"
+                tabindex="-1"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="code"
+                />
+              </a>
+            </span>
+          </div>
+        </div>
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <div
+              class="css-1g7fa48-wrapperStyles"
+            >
+              <a
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Settings"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                data-highlighted="false"
+                data-test-subj="footerMenuItem-integrations"
+                href="/integrations"
+                rel="noreferrer"
+                tabindex="-1"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="gear"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <span
+              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+            >
+              <a
+                aria-haspopup="false"
+                aria-label="Fourth item"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                data-highlighted="false"
+                data-test-subj="footerMenuItem-fourth_item"
+                href="/fourth-item"
+                rel="noreferrer"
+                tabindex="-1"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="launch"
+                />
+              </a>
+            </span>
+          </div>
+        </div>
+        <div
+          class="css-mtld32-SideNavPopover"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-block"
+          >
+            <span
+              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+            >
+              <a
+                aria-haspopup="false"
+                aria-label="Fifth item"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                data-highlighted="false"
+                data-test-subj="footerMenuItem-fifth_item"
+                href="/fourth-item"
+                rel="noreferrer"
+                tabindex="-1"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="code"
+                />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
+`;

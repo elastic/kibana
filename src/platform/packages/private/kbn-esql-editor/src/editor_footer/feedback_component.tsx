@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiIconTip, useEuiTheme, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 
@@ -19,25 +19,19 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false}>
-          <EuiLink
-            href={FEEDBACK_LINK}
-            external={false}
-            target="_blank"
-            data-test-subj="ESQLEditor-feedback-link"
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('esqlEditor.query.feedback', {
+              defaultMessage: 'Feedback',
+            })}
           >
-            <EuiIconTip
-              type="editorComment"
-              color="primary"
-              size="m"
-              css={css`
-                margin-right: ${euiTheme.size.s};
-              `}
-              content={i18n.translate('esqlEditor.query.feedback', {
-                defaultMessage: 'Feedback',
-              })}
-              position="top"
+            <EuiButtonIcon
+              href={FEEDBACK_LINK}
+              iconType="editorComment"
+              target="_blank"
+              data-test-subj="ESQLEditor-feedback-link"
             />
-          </EuiLink>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (

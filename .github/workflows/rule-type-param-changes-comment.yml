@@ -1,0 +1,25 @@
+name: rule-type-param-changes-comment
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - 'x-pack/platform/plugins/shared/alerting/server/integration_tests/__snapshots__/serverless_upgrade_and_rollback_checks.test.ts.snap'
+
+jobs:
+  rule-type-param-changes-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: wow-actions/auto-comment@2fc064c21cfb2505de3c5c10e1473b8eb7beca1a # v1.1.2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pullRequestOpened: |
+            @{{ author }}, it looks like you're updating the parameters for a rule type!
+
+            Please review the [guidelines](https://docs.elastic.dev/reops/developer-guide/best-practices-rules#upgrades-and-rollbacks) for making additive changes to rule type parameters and determine if your changes require an intermediate release.
+          pullRequestSynchronize: |
+            @{{ author }}, it looks like you're updating the parameters for a rule type!
+
+            Please review the [guidelines](https://docs.elastic.dev/reops/developer-guide/best-practices-rules#upgrades-and-rollbacks) for making additive changes to rule type parameters and determine if your changes require an intermediate release.

@@ -92,7 +92,6 @@ export interface GlobalDataTag {
   value: string | number;
 }
 
-// SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
@@ -104,6 +103,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   revision: number;
   agents?: number;
   unprivileged_agents?: number;
+  fips_agents?: number;
   is_protected: boolean;
   version?: string;
 }

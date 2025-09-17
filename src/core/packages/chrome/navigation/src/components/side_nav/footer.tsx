@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { useRovingIndex } from '../../hooks/use_roving_index';
 
 export interface SideNavFooterProps {
   children: ReactNode;

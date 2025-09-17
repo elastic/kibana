@@ -11,6 +11,7 @@ import {ParseTreeListener} from "antlr4";
  */
 
 
+import { StatementsContext } from "./esql_parser.js";
 import { SingleStatementContext } from "./esql_parser.js";
 import { CompositeQueryContext } from "./esql_parser.js";
 import { SingleCommandQueryContext } from "./esql_parser.js";
@@ -81,6 +82,8 @@ import { LookupCommandContext } from "./esql_parser.js";
 import { InlinestatsCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
+import { SetCommandContext } from "./esql_parser.js";
+import { SetFieldContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -135,6 +138,16 @@ import { JoinPredicateContext } from "./esql_parser.js";
  * `esql_parser`.
  */
 export default class esql_parserListener extends ParseTreeListener {
+	/**
+	 * Enter a parse tree produced by `esql_parser.statements`.
+	 * @param ctx the parse tree
+	 */
+	enterStatements?: (ctx: StatementsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.statements`.
+	 * @param ctx the parse tree
+	 */
+	exitStatements?: (ctx: StatementsContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.singleStatement`.
 	 * @param ctx the parse tree
@@ -855,6 +868,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFuseCommand?: (ctx: FuseCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.setCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterSetCommand?: (ctx: SetCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.setCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitSetCommand?: (ctx: SetCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.setField`.
+	 * @param ctx the parse tree
+	 */
+	enterSetField?: (ctx: SetFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.setField`.
+	 * @param ctx the parse tree
+	 */
+	exitSetField?: (ctx: SetFieldContext) => void;
 	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.

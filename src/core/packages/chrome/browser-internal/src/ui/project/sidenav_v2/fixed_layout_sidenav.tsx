@@ -71,6 +71,7 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         pushMinBreakpoint="xs"
         hideCloseButton={true}
         onClose={() => {}}
+        className="hide-for-sharing"
       >
         <div css={{ height: '100%', display: 'flex' }}>{children(childrenProps)}</div>
       </EuiFlyout>

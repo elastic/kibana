@@ -4124,6 +4124,36 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.LINKS_SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LINKS_SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"links.span_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.LINKS_TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LINKS_TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"links.trace_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.LOG_LEVEL",
         "type": "string",
         "tags": [],
@@ -4794,6 +4824,21 @@
           "\"processor.name\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE",
+        "type": "string",
+        "tags": [],
+        "label": "RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE",
+        "description": [],
+        "signature": [
+          "\"resource.attributes.telemetry.sdk.language\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

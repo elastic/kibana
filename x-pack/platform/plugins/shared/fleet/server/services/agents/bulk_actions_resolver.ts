@@ -24,6 +24,7 @@ import { RequestDiagnosticsActionRunner } from './request_diagnostics_action_run
 import type { RetryParams } from './retry_helper';
 import { getRetryParams } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
+import { MigrateActionRunner } from './migrate_action_runner';
 
 /**
  * Create and run retry tasks of agent bulk actions
@@ -47,6 +48,7 @@ export class BulkActionsResolver {
         [BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY]: UpdateAgentTagsActionRunner,
         [BulkActionTaskType.UPGRADE_RETRY]: UpgradeActionRunner,
         [BulkActionTaskType.REQUEST_DIAGNOSTICS_RETRY]: RequestDiagnosticsActionRunner,
+        [BulkActionTaskType.MIGRATE_RETRY]: MigrateActionRunner,
       };
 
       return createRetryTask(

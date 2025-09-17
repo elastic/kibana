@@ -75,10 +75,6 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      documentation={{
-        title: i18nMessages.systemReferences.documentation.toolBasicsDocumentationLink,
-        href: '#', // TODO: add documentation link when available
-      }}
     >
       <EuiFormRow
         isDisabled={isToolIdDisabled}

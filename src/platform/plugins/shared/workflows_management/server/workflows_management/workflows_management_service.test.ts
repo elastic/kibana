@@ -219,7 +219,7 @@ describe('WorkflowsService', () => {
 
       mockEsClient.search.mockResolvedValue(mockSearchResponse as any);
 
-      await service.getWorkflows({ limit: 10, page: 1, enabled: true }, 'default');
+      await service.getWorkflows({ limit: 10, page: 1, enabled: [true] }, 'default');
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
         size: 10,
@@ -237,7 +237,7 @@ describe('WorkflowsService', () => {
                   },
                 },
               },
-              { term: { enabled: true } },
+              { terms: { enabled: [true] } },
             ],
           },
         },

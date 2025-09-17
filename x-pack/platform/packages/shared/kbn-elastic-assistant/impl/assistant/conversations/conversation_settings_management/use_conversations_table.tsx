@@ -12,7 +12,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
 import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import { ShareBadge } from '../../share_conversation/share_badge';
 import {
@@ -64,7 +64,7 @@ interface GetColumnsParams {
   totalItemCount: number;
 }
 
-export const useConversationsTable = (isAssistantSharingEnabled: boolean = false) => {
+export const useConversationsTable = (currentUser?: User) => {
   const getActions = useInlineActions<ConversationTableItem>();
 
   const getColumns = useCallback(
@@ -139,7 +139,7 @@ export const useConversationsTable = (isAssistantSharingEnabled: boolean = false
       ];
 
       // Only include sharing column if assistant sharing is enabled
-      if (isAssistantSharingEnabled) {
+      if (currentUser) {
         columns.push({
           name: i18n.CONVERSATIONS_TABLE_COLUMN_SHARING,
           render: (conversation: ConversationTableItem) => {
@@ -201,7 +201,7 @@ export const useConversationsTable = (isAssistantSharingEnabled: boolean = false
 
       return columns;
     },
-    [getActions, isAssistantSharingEnabled]
+    [getActions, currentUser]
   );
   const getConversationsList = useCallback(
     ({

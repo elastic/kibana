@@ -14,12 +14,12 @@ export default function ({ getService }: FtrProviderContext) {
   const searchTool = platformCoreTools.search;
 
   describe('Builtin Tools internal API', () => {
-    describe('POST /internal/chat/tools/_bulk_delete', () => {
+    describe('POST /internal/agent_builder/tools/_bulk_delete', () => {
       it('should return error results when attempting to bulk delete builtin system tools', async () => {
         const toolIds = Object.values(platformCoreTools).slice(0, 3) as string[];
 
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .send({ ids: toolIds })
           .expect(200);
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(customTool)
           .expect(200);
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         const mixedToolIds = [searchTool, 'test-custom-tool'];
 
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .send({ ids: mixedToolIds })
           .expect(200);

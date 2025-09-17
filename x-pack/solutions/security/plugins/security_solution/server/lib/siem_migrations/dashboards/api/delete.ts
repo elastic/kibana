@@ -13,7 +13,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsDeleteRoute = (
   router: SecuritySolutionPluginRouter,
@@ -37,7 +37,7 @@ export const registerSiemDashboardMigrationsDeleteRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(async (context, req, res) => {
+        withExistingMigration(async (context, req, res) => {
           const { migration_id: migrationId } = req.params;
           const dashboardMigrationsAuditLogger = new SiemMigrationAuditLogger(
             context.securitySolution,

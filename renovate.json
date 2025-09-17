@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "enabled": false,
   "extends": [
     "config:recommended",
     "helpers:pinGitHubActionDigests",
@@ -4677,6 +4678,25 @@
         "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "canvas-confetti",
+      "matchDepNames": [
+        "canvas-confetti",
+        "@types/canvas-confetti"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:current-major"
+      ],
       "enabled": true
     }
   ],

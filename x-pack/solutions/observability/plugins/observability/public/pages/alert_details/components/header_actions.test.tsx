@@ -13,6 +13,7 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { createTelemetryClientMock } from '../../../services/telemetry/telemetry_client.mock';
 import { alertWithGroupsAndTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
@@ -53,12 +54,14 @@ const mockKibana = () => {
       cases: mockCases,
       http: mockHttp,
       application: mockNavigateToApp,
+      telemetryClient: createTelemetryClientMock(),
     },
   });
 };
 
 const mockRuleId = '123';
 const mockRuleName = '456';
+const mockRuleTypeId = 'mocked-type-id';
 
 const mockUseFetchRuleWithData = () => {
   useFetchRuleMock.mockReturnValue({
@@ -110,11 +113,12 @@ describe('Header Actions', () => {
           rule={{
             id: mockRuleId,
             name: mockRuleName,
+            ruleTypeId: mockRuleTypeId,
           }}
         />
       );
 
-      fireEvent.click(getByTestId('add-to-case-button'));
+      fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([
         {

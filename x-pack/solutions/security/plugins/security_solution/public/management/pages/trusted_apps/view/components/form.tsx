@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useMemo, useState, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
@@ -98,6 +98,7 @@ import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
+import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -165,6 +166,15 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   }
 
   const os = ((values.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
+
+  if (
+    isAdvancedModeEnabled(values) &&
+    (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
+      (e) => e.value === '' || !e.value.length
+    )
+  ) {
+    isValid = false;
+  }
 
   if (!values.entries.length) {
     isValid = false;
@@ -304,10 +314,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
-    // Use ref to prevent unnecessary re-renders in callbacks
-    const itemRef = useRef(item);
-    itemRef.current = item;
-
     const { http } = useKibana().services;
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -355,12 +361,19 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     // Stabilized processChanged callback with minimal dependencies
     const processChanged = useCallback(
-      (updatedFormValues: ArtifactFormComponentProps['item']) => {
-        const updatedValidationResult: ValidationResult = validateValues(updatedFormValues);
+      (updatedFormValues?: ArtifactFormComponentProps['item']) => {
+        const updatedItem = updatedFormValues
+          ? {
+              ...item,
+              ...updatedFormValues,
+            }
+          : item;
+
+        const updatedValidationResult: ValidationResult = validateValues(updatedItem);
         setValidationResult(updatedValidationResult);
 
         onChange({
-          item: updatedFormValues,
+          item: updatedItem,
           isValid: updatedValidationResult.isValid && conditionsState.areValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
@@ -371,7 +384,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             : undefined,
         });
       },
-      [conditionsState.areValid, onChange]
+      [conditionsState.areValid, item, onChange]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -417,11 +430,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleAdvancedModeChange = useCallback(
       (selectedId: string) => {
         // save current form to relevant state before switching
-        const currentItem = itemRef.current;
         if (selectedId === 'advancedMode') {
-          setLastBasicFormConditions(currentItem.entries);
+          setLastBasicFormConditions(item.entries);
         } else {
-          setLastAdvancedFormConditions(currentItem.entries);
+          setLastAdvancedFormConditions(item.entries);
         }
 
         const nextItem: ArtifactFormComponentProps['item'] = {
@@ -582,7 +594,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           return;
         }
 
-        const currentItem = itemRef.current;
+        const currentItem = item;
         const newEntries = arg.exceptionItems[0]?.entries;
 
         // More robust change detection
@@ -597,8 +609,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               ...prev,
               hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
             }));
+            return;
           }
-          return;
         }
 
         // Batch all condition state updates
@@ -628,13 +640,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 ...currentItem,
                 entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
               };
-
         processChanged(updatedItem);
         if (!hasFormChanged) {
           setHasFormChanged(true);
         }
       },
-      [hasFormChanged, processChanged]
+      [hasFormChanged, processChanged, item]
     );
 
     // Stabilized memoization with minimal dependencies
@@ -662,6 +673,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }),
       [autocompleteSuggestions, getTestId, http, indexPatterns, trustedApp, handleOnBuilderChange]
     );
+
+    useEffect(() => {
+      processChanged();
+    }, [processChanged]);
 
     if (isIndexPatternLoading || !trustedApp) {
       return <Loader size="xl" />;
@@ -757,7 +772,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="warningFilled" size="s" color="warning" />
               </EuiFlexItem>

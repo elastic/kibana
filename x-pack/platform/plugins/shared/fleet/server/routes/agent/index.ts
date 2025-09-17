@@ -963,7 +963,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Change agent privilege level
-  if (experimentalFeatures.enableAgentMigrations) {
+  if (experimentalFeatures.enableAgentPrivilegeLevelChange) {
     router.versioned
       .post({
         path: AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN,

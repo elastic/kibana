@@ -48,7 +48,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         filter: { term: { status: SiemMigrationStatus.COMPLETED } },
         aggs: {
           result: { terms: { field: 'translation_result' } },
-          installable: { filter: { bool: { must: dsl.isInstallable() } } },
+          installable: { filter: dsl.isInstallable() },
           prebuilt: { filter: dsl.isPrebuilt() },
           missing_index: { filter: dsl.isMissingIndex() },
         },
@@ -124,7 +124,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
       filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
     }
     if (filters.installable != null) {
-      filter.push(...(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable()));
+      filter.push(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable());
     }
     if (filters.prebuilt != null) {
       filter.push(filters.prebuilt ? dsl.isPrebuilt() : dsl.isCustom());

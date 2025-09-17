@@ -91,7 +91,12 @@ export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallSte
   return step.type === ConversationRoundStepType.toolCall;
 };
 
-// reasoning step
+export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
+  return {
+    type: ConversationRoundStepType.reasoning,
+    ...reasoningStepWithResult,
+  };
+};
 
 export interface ReasoningStepData {
   /** plain text reasoning content */

@@ -51,7 +51,7 @@ function getAdditionalOptionsForUpdate(
 }
 
 export const updateBasicSoAttributes = async (
-  soId: string,
+  id: string,
   type: string,
   newAttributes: {
     title: string;
@@ -67,7 +67,7 @@ export const updateBasicSoAttributes = async (
     dependencies.http
   );
 
-  const so = await client.get(soId);
+  const so = await client.get(id);
   const extractedReferences = extractReferences({
     attributes: so.item.attributes,
     references: so.item.references,
@@ -89,7 +89,7 @@ export const updateBasicSoAttributes = async (
   }
 
   return await client.update({
-    id: soId,
+    id,
     data: {
       ...attributes,
     },
@@ -98,4 +98,32 @@ export const updateBasicSoAttributes = async (
       ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
     },
   });
+};
+
+export const deleteSOByType = async (
+  id: string,
+  type: string,
+  dependencies: UpdateBasicSoAttributesDependencies
+) => {
+  const client = getClientForType(
+    type,
+    dependencies.typesService,
+    dependencies.contentManagement,
+    dependencies.http
+  );
+
+  const { success } = await client.delete(id);
+
+  if (!success) throw new Error();
+};
+
+export const deleteListItems = async (
+  items: object[], // can be any SO item type from the vis page
+  dependencies: UpdateBasicSoAttributesDependencies
+) => {
+  return Promise.all(
+    items.map(async (item: any) => {
+      await deleteSOByType(item.id, item.savedObjectType, dependencies);
+    })
+  );
 };

@@ -16,10 +16,11 @@ import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
 
 export interface PrimaryMenuItemProps
-  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isActive'> {
+  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isHighlighted'> {
   children: ReactNode;
   hasSubmenu?: boolean;
-  isActive?: boolean;
+  isHighlighted?: boolean;
+  isCurrent?: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
   submenuPanelId?: string;
@@ -28,7 +29,8 @@ export interface PrimaryMenuItemProps
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   children,
   hasSubmenu = false,
-  isActive = false,
+  isHighlighted = false,
+  isCurrent,
   onClick,
   submenuPanelId,
   ...props
@@ -45,7 +47,6 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
 
   const arrowStyle = css`
     opacity: 0.6;
-    pointer-events: none;
     position: absolute;
     right: ${euiTheme.size.s};
     top: 50%;
@@ -60,7 +61,13 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
 
   return (
     <div css={wrapperStyle}>
-      <SideNav.PrimaryMenuItem isHorizontal isActive={isActive} onClick={handleClick} {...props}>
+      <SideNav.PrimaryMenuItem
+        isHorizontal
+        isHighlighted={isHighlighted}
+        isCurrent={isCurrent}
+        onClick={handleClick}
+        {...props}
+      >
         {children}
       </SideNav.PrimaryMenuItem>
       {hasSubmenu && (

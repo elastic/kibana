@@ -85,7 +85,7 @@ export interface VisualizationClient<
 export type BasicVisualizationClient<
   ContentType extends string = string,
   Attr extends SerializableAttributes = SerializableAttributes
-> = Pick<VisualizationClient<ContentType, Attr>, 'get' | 'update'>;
+> = Pick<VisualizationClient<ContentType, Attr>, 'get' | 'update' | 'delete'>;
 
 export interface VisualizationsAppExtension {
   docTypes: string[];

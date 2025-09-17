@@ -150,6 +150,7 @@ describe('schema validation', () => {
       revision: 1,
       agents: 1,
       unprivileged_agents: 1,
+      fips_agents: 1,
       is_protected: true,
       version: '1',
       name: 'name',

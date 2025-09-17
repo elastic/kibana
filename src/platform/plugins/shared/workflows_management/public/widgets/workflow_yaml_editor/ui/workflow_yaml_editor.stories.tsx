@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import type { StoryObj } from '@storybook/react';
 import React, { type ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ExecutionStatus } from '@kbn/workflows';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 

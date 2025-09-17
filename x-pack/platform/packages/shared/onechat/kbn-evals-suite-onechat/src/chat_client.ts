@@ -48,7 +48,7 @@ export class OnechatEvaluationChatClient {
       steps?: any[];
     }> => {
       // Use the non-async OneChat API endpoint
-      const response = await this.fetch('/api/chat/converse', {
+      const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({

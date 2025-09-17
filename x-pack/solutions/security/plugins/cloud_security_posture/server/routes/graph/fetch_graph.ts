@@ -215,6 +215,7 @@ ${
 | EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
 | EVAL docData = CONCAT("{",
     "\\"id\\":\\"", _id, "\\"",
+    CASE (event.id IS NOT NULL AND event.id != "", CONCAT(",\\"event\\":","{","\\"id\\":\\"", event.id, "\\"","}"), ""),
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
     ${

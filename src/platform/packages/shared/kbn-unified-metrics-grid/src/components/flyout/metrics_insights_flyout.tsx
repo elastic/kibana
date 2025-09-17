@@ -20,6 +20,7 @@ import {
   isDOMNode,
   keys,
   EuiTitle,
+  EuiPortal,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -68,57 +69,59 @@ export const MetricInsightsFlyout = ({
   const maxWidth = euiTheme.breakpoint.xl;
 
   return (
-    <EuiFlyoutResizable
-      onClose={onClose}
-      type="push"
-      size={flyoutWidth}
-      onKeyDown={onKeyDown}
-      pushMinBreakpoint="xl"
-      data-test-subj="metricsExperienceFlyout"
-      aria-label={i18n.translate(
-        'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
-        { defaultMessage: 'Metric Insights Flyout' }
-      )}
-      ownFocus
-      minWidth={minWidth}
-      maxWidth={maxWidth}
-      onResize={setFlyoutWidth}
-      css={{
-        maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
-      }}
-      paddingSize="m"
-      {...a11yProps}
-    >
-      {screenReaderDescription}
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle
-              size="xs"
-              data-test-subj="metricsExperienceFlyoutRowDetailsTitle"
-              css={css`
-                white-space: nowrap;
-              `}
-            >
-              <h2>
-                {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
-                  defaultMessage: 'Metric',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <MetricFlyoutBody metric={metric} esqlQuery={esqlQuery} />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={onClose}>
-          {i18n.translate('metricsExperience.metricInsightsFlyout.closeButtonEmptyLabel', {
-            defaultMessage: 'Close',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlyoutFooter>
-    </EuiFlyoutResizable>
+    <EuiPortal>
+      <EuiFlyoutResizable
+        onClose={onClose}
+        type="push"
+        size={flyoutWidth}
+        onKeyDown={onKeyDown}
+        pushMinBreakpoint="xl"
+        data-test-subj="metricsExperienceFlyout"
+        aria-label={i18n.translate(
+          'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
+          { defaultMessage: 'Metric Insights Flyout' }
+        )}
+        ownFocus
+        minWidth={minWidth}
+        maxWidth={maxWidth}
+        onResize={setFlyoutWidth}
+        css={{
+          maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
+        }}
+        paddingSize="m"
+        {...a11yProps}
+      >
+        {screenReaderDescription}
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle
+                size="xs"
+                data-test-subj="metricsExperienceFlyoutRowDetailsTitle"
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
+                <h2>
+                  {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
+                    defaultMessage: 'Metric',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <MetricFlyoutBody metric={metric} esqlQuery={esqlQuery} />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty iconType="cross" onClick={onClose}>
+            {i18n.translate('metricsExperience.metricInsightsFlyout.closeButtonEmptyLabel', {
+              defaultMessage: 'Close',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </EuiFlyoutResizable>
+    </EuiPortal>
   );
 };

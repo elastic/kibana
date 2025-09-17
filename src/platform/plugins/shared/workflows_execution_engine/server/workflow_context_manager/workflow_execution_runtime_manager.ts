@@ -606,18 +606,37 @@ export class WorkflowExecutionRuntimeManager {
   private logStepStart(stepId: string, stepExecutionId: string): void {
     const node = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = node?.name || stepId;
+    const stepType = node?.type || 'unknown';
     this.workflowLogger?.logInfo(`Step '${stepName}' started`, {
       workflow: { step_id: stepId, step_execution_id: stepExecutionId },
       event: { action: 'step-start', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'start'],
+      labels: {
+        step_type: stepType,
+        connector_type: stepType,
+        step_name: stepName,
+        step_id: stepId,
+      },
     });
   }
 
   private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {
     const node = this.workflowExecutionGraph.node(step.stepId as string) as any;
     const stepName = node?.name || step.stepId;
+    const stepType = node?.type || 'unknown';
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
-    this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
+
+    // Include error details in the message if step failed
+    let message = `Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`;
+    if (!isSuccess && step.error) {
+      const errorMsg =
+        typeof step.error === 'string'
+          ? step.error
+          : (step.error as Error)?.message || 'Unknown error';
+      message += `: ${errorMsg}`;
+    }
+
+    this.workflowLogger?.logInfo(message, {
       workflow: { step_id: step.stepId, step_execution_id: step.id },
       event: {
         action: 'step-complete',
@@ -625,17 +644,49 @@ export class WorkflowExecutionRuntimeManager {
         outcome: isSuccess ? 'success' : 'failure',
       },
       tags: ['workflow', 'step', 'complete'],
+      labels: {
+        step_type: stepType,
+        connector_type: stepType,
+        step_name: stepName,
+        step_id: step.stepId,
+        execution_time_ms: step.executionTimeMs,
+      },
+      ...(step.error && {
+        error: {
+          message:
+            typeof step.error === 'string'
+              ? step.error
+              : (step.error as Error)?.message || 'Unknown error',
+          type:
+            typeof step.error === 'string'
+              ? 'WorkflowStepError'
+              : (step.error as Error)?.name || 'Error',
+          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
+        },
+      }),
     });
   }
 
   private logStepFail(stepId: string, stepExecutionId: string, error: Error | string): void {
     const node = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = node?.name || stepId;
+    const stepType = node?.type || 'unknown';
     const _error = typeof error === 'string' ? Error(error) : error;
-    this.workflowLogger?.logError(`Step '${stepName}' failed`, _error, {
+
+    // Include error message in the log message
+    const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
+    const message = `Step '${stepName}' failed: ${errorMsg}`;
+
+    this.workflowLogger?.logError(message, _error, {
       workflow: { step_id: stepId, step_execution_id: stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'fail'],
+      labels: {
+        step_type: stepType,
+        connector_type: stepType,
+        step_name: stepName,
+        step_id: stepId,
+      },
     });
   }
 }

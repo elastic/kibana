@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
-import { useToolsActions } from '../../../context/tools_table_provider';
+import { useToolsActions } from '../../../context/tools_provider';
 
 export interface ToolContextMenuProps {
   tool: ToolDefinitionWithSchema;

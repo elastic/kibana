@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../commands_registry/types';
+import type { ESQLColumnData } from '../commands_registry/types';
 import { Parser } from '../parser';
 import type { ESQLCommand, ESQLMessage } from '../types';
 import { mockContext } from './context_fixtures';
@@ -28,8 +28,7 @@ export const expectErrors = (
     arg0: ESQLCommand,
     arg1: ESQLCommand[],
     arg2: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     }
   ) => any
 ) => {
