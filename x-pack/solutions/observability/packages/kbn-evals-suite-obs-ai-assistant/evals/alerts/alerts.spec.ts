@@ -8,10 +8,13 @@
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { createEvaluateAlerts } from './evaluate_alerts';
-import type { EvaluateAlerts } from './evaluate_alerts';
+import { createEvaluateAlertsDataset } from './evaluate_alerts_dataset';
+import type { EvaluateAlertsDataset } from './evaluate_alerts_dataset';
 import { evaluate as base } from '../../src/evaluate';
-import { apmTransactionRateAIAssistant, customThresholdAIAssistantLogCount } from '../utils/alerts';
+import {
+  apmTransactionRateAIAssistant,
+  customThresholdAIAssistantLogCount,
+} from '../../src/alert_templates/alerts';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -20,12 +23,12 @@ import { apmTransactionRateAIAssistant, customThresholdAIAssistantLogCount } fro
  */
 
 const evaluate = base.extend<{
-  evaluateAlerts: EvaluateAlerts;
+  evaluateAlerts: EvaluateAlertsDataset;
 }>({
   evaluateAlerts: [
     ({ chatClient, evaluators, phoenixClient }, use) => {
       use(
-        createEvaluateAlerts({
+        createEvaluateAlertsDataset({
           chatClient,
           evaluators,
           phoenixClient,
@@ -47,6 +50,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
       body: apmTransactionRateAIAssistant.ruleParams,
     });
     ruleIds.push(responseApmRule.data.id);
+
     log.info('Creating dataview');
     try {
       await kbnClient.request({
@@ -61,6 +65,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
         throw error;
       }
     }
+
     log.info('Creating logs rule');
     const responseLogsRule = await kbnClient.request<RuleResponse>({
       method: 'POST',
@@ -68,6 +73,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
       body: customThresholdAIAssistantLogCount.ruleParams,
     });
     ruleIds.push(responseLogsRule.data.id);
+
     log.debug('Cleaning APM indices');
     await apmSynthtraceEsClient.clean();
 
@@ -95,6 +101,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
             .outcome('success'),
         ])
     );
+
     log.debug('Triggering a rule run');
     await Promise.all(
       ruleIds.map((ruleId) =>
@@ -104,6 +111,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
         })
       )
     );
+
     log.debug('Waiting 2.5s to make sure all indices are refreshed');
     await new Promise((resolve) => setTimeout(resolve, 2500));
   });
@@ -111,7 +119,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
   evaluate('summary of active alerts', async ({ evaluateAlerts }) => {
     await evaluateAlerts({
       dataset: {
-        name: 'alerts_summary_active',
+        name: 'alerts: active alerts',
         description: 'Summarizes currently active alerts over the last 4 hours',
         examples: [
           {
@@ -135,7 +143,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
   evaluate('filtered alerts', async ({ evaluateAlerts }) => {
     await evaluateAlerts({
       dataset: {
-        name: 'alerts_filtered',
+        name: 'alerts: filtered alerts',
         description:
           'Checks threshold alerts and then filters by service.name:"my-service" or within the same prompt',
         examples: [
@@ -168,6 +176,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
       },
       refresh: true,
     });
+
     for (const ruleId of ruleIds) {
       await kbnClient.request({
         method: 'DELETE',

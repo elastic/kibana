@@ -125,31 +125,3 @@ export const apmTransactionRateAIAssistant = {
     },
   },
 };
-
-export const apmErrorCountAIAssistant = {
-  ruleParams: {
-    consumer: 'apm',
-    name: 'apm_error_count_AIAssistant',
-    rule_type_id: 'apm.error_rate',
-    params: {
-      threshold: 5,
-      windowSize: 1,
-      windowUnit: 'h',
-      transactionType: undefined,
-      serviceName: undefined,
-      environment: 'test',
-      searchConfiguration: {
-        query: {
-          query: ``,
-          language: 'kuery',
-        },
-      },
-      groupBy: ['service.name', 'service.environment'],
-      useKqlFilter: true,
-    },
-    actions: [],
-    schedule: {
-      interval: '1m',
-    },
-  },
-};

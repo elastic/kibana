@@ -19,7 +19,7 @@ interface AlertsExample extends Example {
   };
 }
 
-export type EvaluateAlerts = ({
+export type EvaluateAlertsDataset = ({
   dataset: { name, description, examples },
 }: {
   dataset: {
@@ -29,7 +29,7 @@ export type EvaluateAlerts = ({
   };
 }) => Promise<void>;
 
-export function createEvaluateAlerts({
+export function createEvaluateAlertsDataset({
   evaluators,
   phoenixClient,
   chatClient,
@@ -37,7 +37,7 @@ export function createEvaluateAlerts({
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
   chatClient: ObservabilityAIAssistantEvaluationChatClient;
-}): EvaluateAlerts {
+}): EvaluateAlertsDataset {
   return async function evaluateAlertsDataset({
     dataset: { name, description, examples },
   }: {
@@ -72,12 +72,9 @@ export function createEvaluateAlerts({
           name: 'alerts-evaluator',
           kind: 'LLM',
           evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators.criteria([...(expected.criteria ?? [])]).evaluate({
-              input,
-              expected,
-              output,
-              metadata,
-            });
+            const result = await evaluators
+              .criteria(expected.criteria ?? [])
+              .evaluate({ input, expected, output, metadata });
 
             return result;
           },
