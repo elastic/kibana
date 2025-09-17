@@ -83,6 +83,7 @@ tags:
   - name: Elastic Agent status
   - name: Elastic Agents
   - name: Elastic Package Manager (EPM)
+  - name: Fleet cloud connectors
   - name: Fleet enrollment API keys
   - name: Fleet internals
   - name: Fleet outputs
@@ -15568,6 +15569,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -15881,6 +15886,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -16482,6 +16492,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -16795,6 +16809,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -17192,6 +17211,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -17505,6 +17528,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -17881,6 +17909,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -18194,6 +18226,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -18795,6 +18832,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -19108,6 +19149,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -19569,6 +19615,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -19882,6 +19932,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -23780,6 +23835,211 @@ paths:
       summary: Check permissions
       tags:
         - Fleet internals
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/cloud_connectors:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.'
+      operationId: get-fleet-cloud-connectors
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: perPage
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cloudProvider:
+                      type: string
+                    created_at:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                    packagePolicyCount:
+                      type: number
+                    updated_at:
+                      type: string
+                    vars:
+                      additionalProperties: {}
+                      type: object
+                  required:
+                    - id
+                    - name
+                    - cloudProvider
+                    - vars
+                    - packagePolicyCount
+                    - created_at
+                    - updated_at
+                type: array
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connectors
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: post-fleet-cloud-connectors
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                cloudProvider:
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+              required:
+                - name
+                - cloudProvider
+                - vars
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  cloudProvider:
+                    type: string
+                  created_at:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  packagePolicyCount:
+                    type: number
+                  updated_at:
+                    type: string
+                  vars:
+                    additionalProperties: {}
+                    type: object
+                required:
+                  - id
+                  - name
+                  - cloudProvider
+                  - vars
+                  - packagePolicyCount
+                  - created_at
+                  - updated_at
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Create cloud connector
+      tags:
+        - Fleet cloud connectors
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -33631,6 +33891,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -33946,6 +34210,11 @@ paths:
                           description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -34072,6 +34341,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -34289,6 +34562,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -34501,6 +34779,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -34816,6 +35098,11 @@ paths:
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -34976,6 +35263,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -35291,6 +35582,11 @@ paths:
                           description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -35484,6 +35780,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -35799,6 +36099,11 @@ paths:
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -35932,6 +36237,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -36144,6 +36453,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -36354,6 +36668,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -36667,6 +36985,11 @@ paths:
                       supports_agentless:
                         default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -37145,6 +37468,10 @@ paths:
                                 type: array
                               agents:
                                 type: number
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -37460,6 +37787,11 @@ paths:
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
                                 nullable: true
                                 type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
+                                nullable: true
+                                type: boolean
                               updated_at:
                                 type: string
                               updated_by:
@@ -37524,6 +37856,10 @@ paths:
                                   type: string
                                 nullable: true
                                 type: array
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -37780,6 +38116,11 @@ paths:
                               supports_agentless:
                                 default: false
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
                                 nullable: true
                                 type: boolean
                               updated_at:
@@ -47212,9 +47553,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -48912,9 +49286,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -50410,9 +50817,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -51960,9 +52400,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -53796,9 +54269,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             wired:
@@ -55409,9 +55915,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             classic:
