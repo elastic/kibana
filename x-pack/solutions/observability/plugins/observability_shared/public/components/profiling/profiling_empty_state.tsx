@@ -25,7 +25,6 @@ export function ProfilingEmptyState() {
         </h2>
       }
       layout="horizontal"
-      color="plain"
       hasBorder
       hasShadow={false}
       body={

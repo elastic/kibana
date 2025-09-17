@@ -24,7 +24,6 @@ export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
       <EuiFlexItem grow={false}>
         <EuiPageSection color="transparent">
           <EuiEmptyPrompt
-            color="plain"
             iconType="logoBeats"
             title={<h2>{title}</h2>}
             body={children}

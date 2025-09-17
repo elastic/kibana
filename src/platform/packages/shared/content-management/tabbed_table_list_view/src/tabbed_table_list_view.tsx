@@ -65,7 +65,7 @@ export const TabbedTableListView = ({
   }, [activeTabId, tabs, getActiveTab, onFetchSuccess]);
 
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <KibanaPageTemplate data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{title}</span>}
         description={description}

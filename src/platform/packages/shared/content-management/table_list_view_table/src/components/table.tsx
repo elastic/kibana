@@ -378,7 +378,14 @@ export function Table<T extends UserContentCommonSchema>({
           data-test-subj="itemsInMemTable"
           rowHeader="attributes.title"
           tableCaption={tableCaption}
-          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+          css={[
+            cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme),
+            {
+              '& .euiTable': {
+                backgroundColor: 'transparent !important'
+              }
+            }
+          ]}
           childrenBetween={favoritesFilter}
         />
       </TagFilterContextProvider>

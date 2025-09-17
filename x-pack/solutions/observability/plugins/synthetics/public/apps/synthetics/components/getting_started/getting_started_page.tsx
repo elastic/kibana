@@ -93,7 +93,6 @@ export const GettingStartedPage = () => {
         <EuiEmptyPrompt
           title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
           layout="horizontal"
-          color="plain"
           body={
             <>
               <EuiText size="s">
@@ -151,7 +150,6 @@ export const GettingStartedOnPrem = () => {
       <EuiEmptyPrompt
         title={<h2>{GET_STARTED_LABEL}</h2>}
         layout="horizontal"
-        color="plain"
         body={
           <EuiFlexGroup direction="column">
             <EuiFlexItem>

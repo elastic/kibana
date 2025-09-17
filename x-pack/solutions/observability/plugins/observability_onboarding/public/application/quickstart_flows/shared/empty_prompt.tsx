@@ -41,7 +41,6 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
   if (error.response?.status === 403) {
     return (
       <EuiEmptyPrompt
-        color="plain"
         iconType="lock"
         title={
           <h2>

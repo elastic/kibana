@@ -16,7 +16,7 @@ import { OnboardingCardId, OnboardingTopicId } from '../../../onboarding/constan
 
 export const EmptyMigrationRulesPage = () => {
   return (
-    <KibanaPageTemplate.Section color="plain" paddingSize="none">
+    <KibanaPageTemplate.Section paddingSize="none">
       <EuiFlexGroup
         css={css`
           /**

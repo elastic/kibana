@@ -71,7 +71,7 @@ export const Result: React.FC<ResultProps> = ({
   return (
     <>
       <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
-        <EuiSplitPanel.Inner paddingSize="m" color="plain" className="resultHeaderContainer">
+        <EuiSplitPanel.Inner paddingSize="m" color="transparent" className="resultHeaderContainer">
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem>
               {compactCard && (

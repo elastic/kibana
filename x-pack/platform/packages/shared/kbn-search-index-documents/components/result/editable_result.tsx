@@ -58,7 +58,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
   const [index, setIndex] = React.useState(initialIndex);
   return (
     <EuiSplitPanel.Outer hasBorder={true}>
-      <EuiSplitPanel.Inner paddingSize="s" color="plain">
+      <EuiSplitPanel.Inner paddingSize="s" color="transparent">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {leftSideItem && <EuiFlexItem grow={false}>{leftSideItem}</EuiFlexItem>}
           <EuiFlexItem>
@@ -154,7 +154,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
       {!error && fields?.length > 0 && isExpanded && (
         <>
           <EuiHorizontalRule margin="none" />
-          <EuiSplitPanel.Inner paddingSize="s" color="plain">
+          <EuiSplitPanel.Inner paddingSize="s" color="transparent">
             <ResultFields documentId="12345" isExpanded={false} fields={fields} />
           </EuiSplitPanel.Inner>
         </>

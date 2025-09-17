@@ -90,14 +90,15 @@ export const TableListView = <T extends UserContentCommonSchema>({
   }, []);
 
   return (
-    <PageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <PageTemplate data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{title}</span>}
         description={description}
         rightSideItems={additionalRightSideActions?.slice(0, 2)}
         data-test-subj="top-nav"
+        bottomBorder={false}
       />
-      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
+      <KibanaPageTemplate.Section color="transparent" aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
         {/* Any children passed to the component */}
         {children}
 
