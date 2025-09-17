@@ -138,25 +138,69 @@ export class WorkflowExecutionRuntimeManager {
     const currentNode = this.getCurrentNode();
 
     if (
-      this.workflowExecution.stack[this.workflowExecution.stack.length - 1]?.nodeId !==
-      currentNode.id
+      this.workflowExecution.stack.length &&
+      this.workflowExecution.stack[this.workflowExecution.stack.length - 1].stepId ===
+        currentNode.stepId
     ) {
-      const stackEntry: StackEntry = {
-        nodeId: currentNode.id,
-        stepId: currentNode.stepId,
-      };
-      if (subScopeId) {
-        stackEntry.subScopeId = subScopeId;
-      }
+      // Path 1: Extend existing stack entry (correct)
+      const stackEntry = this.workflowExecution.stack[this.workflowExecution.stack.length - 1];
       this.workflowExecutionState.updateWorkflowExecution({
-        stack: this.workflowExecution.stack.concat([stackEntry]),
+        stack: this.workflowExecution.stack.slice(0, -1).concat([
+          {
+            ...stackEntry,
+            scope: [
+              ...stackEntry.scope,
+              {
+                nodeId: currentNode.id,
+                scopeId: subScopeId,
+              },
+            ],
+          },
+        ]),
       });
+      return;
     }
+
+    // Path 2: Create new stack entry (FIXED - removed slice(0, -1))
+    this.workflowExecutionState.updateWorkflowExecution({
+      stack: this.workflowExecution.stack.concat([
+        // ✅ FIXED: Don't remove last entry
+        {
+          stepId: currentNode.stepId,
+          scope: [
+            {
+              nodeId: currentNode.id,
+              scopeId: subScopeId,
+            },
+          ],
+        },
+      ]),
+    });
   }
 
   public exitScope(): void {
+    const currentNode = this.getCurrentNode();
+
+    if (
+      this.workflowExecution.stack.length &&
+      this.workflowExecution.stack.at(-1)!.stepId === currentNode.stepId &&
+      this.workflowExecution.stack.at(-1)!.scope.length > 1
+    ) {
+      const stackEntry = this.workflowExecution.stack.at(-1)!;
+
+      this.workflowExecutionState.updateWorkflowExecution({
+        stack: this.workflowExecution.stack.slice(0, -1).concat([
+          {
+            ...stackEntry,
+            scope: stackEntry.scope.slice(0, -1),
+          },
+        ]),
+      });
+      return;
+    }
+
     this.workflowExecutionState.updateWorkflowExecution({
-      stack: this.workflowExecution.stack.slice(0, -1), // pop last element
+      stack: this.workflowExecution.stack.slice(0, -1),
     });
   }
 
@@ -292,6 +336,11 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async failStep(error: Error | string): Promise<void> {
+    if (String(error).includes('Retry step')) {
+      const stack = this.workflowExecution.stack;
+      console.log('FOO');
+    }
+
     const stepId = this.getCurrentNode().stepId;
     return withSpan(
       {
@@ -574,7 +623,9 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private buildCurrentStepPath(): string[] {
-    return buildStepPath(this.getCurrentNode().stepId, this.workflowExecution.stack);
+    const path = buildStepPath(this.getCurrentNode().stepId, this.workflowExecution.stack);
+
+    return path;
   }
 
   private logWorkflowStart(): void {

@@ -132,16 +132,15 @@ async function catchError(
   try {
     while (
       workflowRuntime.getWorkflowExecution().error &&
-      workflowRuntime.getWorkflowExecution().stack.length > 0
+      workflowRuntime.getWorkflowExecution().stack.length &&
+      workflowRuntime.getWorkflowExecution().stack.at(-1)!.scope.length
     ) {
-      const stack = workflowRuntime.getWorkflowExecution().stack;
-      const stackEntry = stack[stack.length - 1];
-
       // exit the whole node scope
+      const scopeEntry = workflowRuntime.getWorkflowExecution().stack.at(-1)!.scope.at(-1)!;
+      workflowRuntime.navigateToNode(scopeEntry.nodeId);
       workflowRuntime.exitScope();
-      workflowRuntime.navigateToNode(stackEntry.nodeId);
 
-      const node = workflowGraph.getNode(stackEntry.nodeId);
+      const node = workflowGraph.getNode(scopeEntry.nodeId);
 
       if (node) {
         workflowRuntime.navigateToNode(node.id);

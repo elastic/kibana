@@ -8,12 +8,12 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { StepErrorCatcher, NodeImplementation } from '../node_implementation';
+import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
-export class EnterForeachNodeImpl implements NodeImplementation, StepErrorCatcher {
+export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
@@ -27,10 +27,6 @@ export class EnterForeachNodeImpl implements NodeImplementation, StepErrorCatche
     } else {
       await this.advanceIteration();
     }
-  }
-
-  async catchError(): Promise<void> {
-    await this.wfExecutionRuntimeManager.setCurrentStepState(undefined);
   }
 
   private async enterForeach(): Promise<void> {

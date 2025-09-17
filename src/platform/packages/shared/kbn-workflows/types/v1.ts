@@ -39,10 +39,14 @@ export const ExecutionTypeValues = Object.values(ExecutionType);
  */
 export interface StackEntry {
   /** Node id that entered the scope */
-  nodeId: string;
+  // nodeId: string;
   stepId: string;
-  /** Custom scope id that each node might additionally enter */
-  subScopeId?: string;
+  // /** Custom scope id that each node might additionally enter */
+  // subScopeId?: string;
+  scope: {
+    nodeId: string;
+    scopeId?: string;
+  }[];
 }
 
 export interface EsWorkflowExecution {
