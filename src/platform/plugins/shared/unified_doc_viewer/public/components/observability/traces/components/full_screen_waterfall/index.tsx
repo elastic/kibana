@@ -23,9 +23,11 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useRef, useState } from 'react';
 import { ExitFullScreenButton } from './exit_full_screen_button';
-import { LogsFlyout } from './logs_flyout';
-import { SpanFlyout } from './span_flyout';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
+import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
+import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
+import type { logsFlyoutId as logsFlyoutIdType } from './waterfall_flyout/logs_flyout';
+import { LogsFlyout, logsFlyoutId } from './waterfall_flyout/logs_flyout';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -45,8 +47,9 @@ export const FullScreenWaterfall = ({
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
   const [spanId, setSpanId] = useState<string | null>(null);
-  const [isLogsFlyoutVisible, setIsLogsFlyoutVisible] = useState(false);
-  const [isTraceFlyoutVisible, setIsTraceFlyoutVisible] = useState(false);
+  const [activeFlyoutId, setActiveFlyoutId] = useState<
+    typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
+  >(null);
   const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -62,17 +65,17 @@ export const FullScreenWaterfall = ({
           scrollElement: overlayMaskRef.current,
           onErrorClick: (params: { traceId: string; docId: string; errorCount: number }) => {
             if (params.errorCount > 1) {
-              setIsTraceFlyoutVisible(true);
+              setActiveFlyoutId(spanFlyoutId);
               setActiveSection('errors-table');
             } else {
-              setIsLogsFlyoutVisible(true);
+              setActiveFlyoutId(logsFlyoutId);
             }
             setSpanId(params.docId);
           },
           onNodeClick: (nodeSpanId: string) => {
             setActiveSection(undefined);
             setSpanId(nodeSpanId);
-            setIsTraceFlyoutVisible(true);
+            setActiveFlyoutId(spanFlyoutId);
           },
           mode: 'full',
         },
@@ -80,6 +83,12 @@ export const FullScreenWaterfall = ({
     }),
     [traceId, rangeFrom, rangeTo, serviceName]
   );
+
+  function handleCloseFlyout() {
+    setActiveFlyoutId(null);
+    setActiveSection(undefined);
+    setSpanId(null);
+  }
 
   return (
     <>
@@ -141,25 +150,22 @@ export const FullScreenWaterfall = ({
           </EuiPanel>
         </EuiFocusTrap>
       </EuiOverlayMask>
-      {isTraceFlyoutVisible && spanId && (
-        <EuiFocusTrap>
+      {spanId && activeFlyoutId ? (
+        activeFlyoutId === spanFlyoutId ? (
           <SpanFlyout
             spanId={spanId}
             dataView={dataView}
-            onCloseFlyout={() => {
-              setIsTraceFlyoutVisible(false);
-            }}
+            onCloseFlyout={handleCloseFlyout}
             activeSection={activeSection}
           />
-        </EuiFocusTrap>
-      )}
-      {isLogsFlyoutVisible && spanId ? (
-        <LogsFlyout
-          onCloseFlyout={() => setIsLogsFlyoutVisible(false)}
-          traceId={traceId}
-          docId={spanId}
-          dataView={dataView}
-        />
+        ) : (
+          <LogsFlyout
+            onCloseFlyout={handleCloseFlyout}
+            traceId={traceId}
+            docId={spanId}
+            dataView={dataView}
+          />
+        )
       ) : null}
     </>
   );

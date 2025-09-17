@@ -66,7 +66,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     }
 
     return (
-      <ScrollableSectionWrapper ref={ref}>
+      <ScrollableSectionWrapper ref={ref} defaultState="open">
         {({ onToggle, forceState }) => (
           <ContentFrameworkSection
             data-test-subj="unifiedDocViewerErrorsAccordion"
@@ -94,8 +94,6 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
                   ]
                 : undefined
             }
-            initialIsOpen={forceState === 'open'}
-            onToggle={onToggle}
           >
             <EuiSpacer size="s" />
             {error ? (
