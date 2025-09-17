@@ -19,8 +19,6 @@ import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
 import type { FieldDefinition } from '../../fields';
 import { fieldDefinitionSchema } from '../../fields';
-import type { FailureStore } from './failure_store';
-import { failureStoreSchema } from './failure_store';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -54,7 +52,6 @@ export namespace ClassicStream {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
     effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
-    failure_store?: FailureStore;
     effective_settings: IngestStreamSettings;
   }
 
@@ -83,7 +80,6 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
         elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
         data_stream_exists: z.boolean(),
         effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
-        failure_store: z.optional(failureStoreSchema),
         effective_settings: ingestStreamSettingsSchema,
       })
     ),

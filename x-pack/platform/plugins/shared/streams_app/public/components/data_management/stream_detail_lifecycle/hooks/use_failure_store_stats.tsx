@@ -10,7 +10,6 @@ import type { Streams } from '@kbn/streams-schema';
 import type { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 
 export type FailureStoreStats = FailureStoreStatsResponse & {
   bytesPerDay: number;
@@ -23,35 +22,51 @@ export const useFailureStoreStats = ({
   definition: Streams.ingest.all.GetResponse;
 }) => {
   const {
-    core: { http },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
 
   const statsFetch = useStreamsAppFetch(
-    async () => {
-      if (!definition.privileges?.manage_failure_store || !definition.failure_store) {
+    async ({ signal }) => {
+      if (!definition.privileges?.manage_failure_store) {
         return undefined;
       }
 
-      const fsStats = await http.get<FailureStoreStatsResponse>(
-        `/internal/streams/${getFailureStoreIndexName(definition)}/failure_store/stats`
+      const { config, stats } = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/failure_store/stats',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+          },
+        }
       );
 
-      if (!fsStats || !fsStats.creationDate) {
-        return undefined;
+      if (!stats || !stats.creationDate) {
+        return {
+          config,
+          stats: undefined,
+        };
       }
 
       const daysSinceCreation = Math.max(
         1,
-        Math.round(moment().diff(moment(fsStats.creationDate), 'days'))
+        Math.round(moment().diff(moment(stats.creationDate), 'days'))
       );
 
       return {
-        ...fsStats,
-        bytesPerDay: fsStats.size && fsStats.count !== 0 ? fsStats.size / daysSinceCreation : 0,
-        bytesPerDoc: fsStats.count && fsStats.size ? fsStats.size / fsStats.count : 0,
+        config,
+        stats: {
+          ...stats,
+          bytesPerDay: stats.size && stats.count !== 0 ? stats.size / daysSinceCreation : 0,
+          bytesPerDoc: stats.count && stats.size ? stats.size / stats.count : 0,
+        },
       };
     },
-    [http, definition],
+    [definition.privileges?.manage_failure_store, definition.stream.name, streamsRepositoryClient],
     {
       withTimeRange: false,
       withRefresh: true,
@@ -59,7 +74,7 @@ export const useFailureStoreStats = ({
   );
 
   return {
-    stats: statsFetch.value,
+    data: statsFetch.value,
     isLoading: statsFetch.loading,
     refresh: statsFetch.refresh,
     error: statsFetch.error,

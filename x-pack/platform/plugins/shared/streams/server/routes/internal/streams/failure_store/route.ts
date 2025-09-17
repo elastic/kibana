@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { getFailureStoreStats } from '../../../../lib/streams/stream_crud';
+import {
+  getFailureStore,
+  getFailureStoreStats,
+  updateFailureStore,
+} from '../../../../lib/streams/stream_crud';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -39,12 +43,18 @@ export const getFailureStoreStatsRoute = createServerRoute({
 
     const { name } = params.path;
 
+    const failureStore = await getFailureStore({ name, scopedClusterClient });
+
+    if (!failureStore.enabled) {
+      return { config: failureStore, stats: null };
+    }
+
     const stats = await getFailureStoreStats({
       name,
       scopedClusterClient,
     });
 
-    return stats;
+    return { config: failureStore, stats };
   },
 });
 
@@ -69,8 +79,13 @@ export const updateFailureStoreRoute = createServerRoute({
       customRetentionPeriod: z.optional(z.string()),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpdateFailureStoreResponse> => {
-    const { streamsClient } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<UpdateFailureStoreResponse> => {
+    const { streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
 
@@ -83,10 +98,12 @@ export const updateFailureStoreRoute = createServerRoute({
       throw new SecurityError('Insufficient privileges to update failure store configuration');
     }
 
-    await streamsClient.updateFailureStore({
+    await updateFailureStore({
       name,
       enabled: failureStoreEnabled,
       customRetentionPeriod,
+      scopedClusterClient,
+      isServerless: server.isServerless,
     });
 
     return { acknowledged: true };

@@ -15,6 +15,7 @@ import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_stor
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
+import { useFailureStoreStats } from '../hooks/use_failure_store_stats';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({
@@ -36,7 +37,6 @@ export const StreamDetailFailureStore = ({
   } = useKibana();
 
   const {
-    failure_store: failureStore,
     privileges: {
       read_failure_store: readFailureStorePrivilege,
       manage_failure_store: manageFailureStorePrivilege,
@@ -75,23 +75,36 @@ export const StreamDetailFailureStore = ({
     closeModal();
   };
 
+  const {
+    data,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = useFailureStoreStats({ definition });
+
   return (
     <>
-      {readFailureStorePrivilege && failureStore ? (
+      {readFailureStorePrivilege && data?.config ? (
         <>
           {isFailureStoreModalOpen && manageFailureStorePrivilege && (
             <FailureStoreModal
               onCloseModal={closeModal}
               onSaveModal={handleSaveModal}
               failureStoreProps={{
-                failureStoreEnabled: failureStore.enabled,
-                defaultRetentionPeriod: failureStore.retentionPeriod.default,
-                customRetentionPeriod: failureStore.retentionPeriod.custom,
+                failureStoreEnabled: data?.config.enabled,
+                defaultRetentionPeriod: data?.config.retentionPeriod.default,
+                customRetentionPeriod: data?.config.retentionPeriod.custom,
               }}
             />
           )}
-          {failureStore.enabled ? (
-            <FailureStoreInfo openModal={setIsFailureStoreModalOpen} definition={definition} />
+          {data?.config.enabled ? (
+            <FailureStoreInfo
+              openModal={setIsFailureStoreModalOpen}
+              definition={definition}
+              statsError={statsError}
+              isLoadingStats={isLoadingStats}
+              stats={data.stats}
+              config={data.config}
+            />
           ) : (
             <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} />
           )}

@@ -104,12 +104,6 @@ describe('WiredStream', () => {
         },
         effective_settings: {},
         inherited_fields: {},
-        failure_store: {
-          enabled: false,
-          retentionPeriod: {
-            default: '30d',
-          },
-        },
         ...emptyAssets,
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {

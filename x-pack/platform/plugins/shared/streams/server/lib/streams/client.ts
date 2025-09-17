@@ -538,29 +538,6 @@ export class StreamsClient {
   }
 
   /**
-   * Updates the failure store configuration for a stream
-   */
-  async updateFailureStore({
-    name,
-    enabled,
-    customRetentionPeriod,
-  }: {
-    name: string;
-    enabled: boolean;
-    customRetentionPeriod?: string;
-  }): Promise<void> {
-    const { updateFailureStore: updateFailureStoreImpl } = await import('./stream_crud');
-
-    return updateFailureStoreImpl({
-      name,
-      enabled,
-      customRetentionPeriod,
-      scopedClusterClient: this.dependencies.scopedClusterClient,
-      isServerless: this.dependencies.isServerless,
-    });
-  }
-
-  /**
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
    */

@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
+import { formatNumber } from '@elastic/eui';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import type { FailureStoreStats } from '../../hooks/use_failure_store_stats';
@@ -43,7 +44,8 @@ export const StorageSizeCard = ({
             {
               defaultMessage: '{docsCount} documents',
               values: {
-                docsCount: statsError || !stats || !stats.count ? '-' : formatBytes(stats.count),
+                docsCount:
+                  statsError || !stats || !stats.count ? '-' : formatNumber(stats.count, '0,0'),
               },
             }
           )
