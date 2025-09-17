@@ -98,7 +98,7 @@ export function ContentFrameworkSection({
 
   const handleToggle = (isOpen: boolean) => {
     setAccordionState(isOpen ? 'open' : 'closed');
-      onToggle?.(isOpen);
+    onToggle?.(isOpen);
   };
 
   return (
