@@ -233,7 +233,7 @@ class ChatServiceImpl implements ChatService {
                       createConversation$({
                         agentId,
                         conversationClient,
-                        conversationId: conversation.id,
+                        conversationId: conversationId || conversation.id,
                         title$,
                         roundCompletedEvents$,
                       })
