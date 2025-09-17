@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
@@ -109,27 +109,26 @@ export function AddLayerButton({
   const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
   return (
-    <>
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+      `}
+      key="lsnLayerAdd"
+    >
       <EuiPopover
-        display="block"
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
-          <EuiButton
-            fullWidth
+          <EuiButtonIcon
             data-test-subj="lnsLayerAddButton"
             aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
               defaultMessage: 'Add layer',
             })}
-            fill={false}
-            color="primary"
             size="s"
             onClick={() => toggleLayersChoice(!showLayersChoice)}
-            iconType="layers"
-          >
-            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-          </EuiButton>
+            iconType="plus"
+            color="text"
+          />
         }
         isOpen={showLayersChoice}
         closePopover={() => toggleLayersChoice(false)}
@@ -259,7 +258,7 @@ export function AddLayerButton({
           }}
         />
       )}
-    </>
+    </div>
   );
 }
 
