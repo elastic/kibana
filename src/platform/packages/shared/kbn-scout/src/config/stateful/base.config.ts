@@ -17,7 +17,7 @@ import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
-import { packageRegistryDocker, defineDockerServersConfig, dockerRegistryPort } from '@kbn/test';
+import { packageRegistryDocker, defineDockerServersConfig } from '@kbn/test';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
@@ -179,9 +179,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--server.publicBaseUrl=${kbnUrl}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
-      ...(dockerRegistryPort
-        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
-        : []),
     ],
   },
 };

@@ -12,7 +12,6 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   defineDockerServersConfig,
-  dockerRegistryPort,
   getDockerFileMountPath,
   packageRegistryDocker,
 } from '@kbn/test';
@@ -150,9 +149,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
-      ...(dockerRegistryPort
-        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
-        : []),
     ],
   },
 };

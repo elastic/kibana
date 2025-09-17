@@ -101,9 +101,6 @@ export function makeFtrConfigProvider(
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
           '--coreApp.allowDynamicConfigOverrides=true',
-          ...(dockerRegistryPort
-            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
-            : []),
         ],
 
         env: {
