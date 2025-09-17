@@ -83,7 +83,7 @@ streamlangApiTest.describe(
         const docs = [{ message: 'not_an_ip' }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
-        expect(esqlResult.documents[0]['client.ip']).toBeUndefined(); // Never ingested or groked
+        expect(esqlResult.documents[0]['client.ip']).toBeNull(); // grok didn't extract but did map the field
       }
     );
 
@@ -148,7 +148,6 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        // Looping over as FORK may change order of documents
         for (const esqlDoc of esqlResult.documents) {
           if (esqlDoc.expect === null) {
             expect(esqlDoc['client.ip']).toBeNull();
@@ -209,7 +208,6 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Looping over as FORK may change order of documents
       for (const esqlDoc of esqlResult.documents) {
         if (esqlDoc.expect !== undefined) {
           expect(esqlDoc['client.ip']).toEqual(esqlDoc.expect);

@@ -169,7 +169,6 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // ES|QL's FORK command may change the order of documents, so we need to check each document individually
       for (const doc of esqlResult.documents) {
         if (doc['attributes.should_exist'] === 'YES') {
           expect(doc).toEqual(
@@ -188,7 +187,7 @@ streamlangApiTest.describe(
     // e.g. for a document { log: { severity: 3 } }, a DISSECT pattern like [%{log.severity}]
     // will extract log.severity as a string (DISSECT always outputs keyword/string).
     // In this case if the indexed log.severity if of different type e.g. long/integer, ES|QL will fail with:
-    // `verification_exception: Found 1 problem line 1:1: Column [log.severity] has conflicting data types in FORK branches: [LONG] and [KEYWORD]`
+    // `verification_exception: Found 1 problem line 1:1: Column [log.severity] has conflicting data types: [LONG] and [KEYWORD]`
     streamlangApiTest(
       'should handle field type mismatches gracefully',
       async ({ testBed, esql }) => {
@@ -229,7 +228,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, [...docsToDissect, ...docsToSkip]);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        // ES|QL's FORK command may change the order of documents, so we need to check each document individually
+        // check each document individually
         for (const doc of esqlResult.documents) {
           // If a document has a dissected field, confirm the values and types
           if (doc['attributes.should_exist'] === 'YES') {
@@ -254,7 +253,7 @@ streamlangApiTest.describe(
     );
 
     streamlangApiTest(
-      'should dissect only when both ignore_missing and where conditions match (FORK logic)',
+      'should dissect only when both ignore_missing and where conditions match',
       async ({ testBed, esql }) => {
         const indexName = 'stream-e2e-test-dissect-ignore-missing-where';
         const streamlangDSL: StreamlangDSL = {

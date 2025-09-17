@@ -271,7 +271,6 @@ streamlangApiTest.describe(
           await testBed.ingest('esql-dissect-where', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-dissect-where', query);
 
-          // Loop is needed as ES|QL's FORK may return documents in different order
           for (const doc of esqlResult.documents) {
             switch (doc.case) {
               case 'missing':
@@ -291,7 +290,7 @@ streamlangApiTest.describe(
       );
 
       streamlangApiTest(
-        'should handle pattern matching failures differently - ingest throws errors while ES|QL leaves fields undefined',
+        'should handle pattern matching failures differently - ingest throws errors while ES|QL returns null columns for dissected fields',
         async ({ testBed, esql }) => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
@@ -310,13 +309,13 @@ streamlangApiTest.describe(
           const docs = [
             {
               message: '[info] 127.0.0.1', // Missing the third field expected by pattern
-              existing_field: 'should_remain',
+              existing_field: 'should_retain',
             },
           ];
 
           // NOTE: BEHAVIORAL DIFFERENCE - Pattern matching failure handling
-          // Ingest Pipeline: Throws error when pattern doesn't fully match
-          // ES|QL: Since a failure would break the whole pipeline, it retains the document with pattern fields as undefined
+          // Ingest Pipeline: Throws error when pattern doesn't fully match and skips document ingestion (ignore_failure=false)
+          // ES|QL: In case of mismatch, set pre-mapped mismatching fields to null, retains non-pattern fields
           const { errors } = await testBed.ingest('ingest-dissect-partial', docs, processors);
           expect(errors[0].reason).toContain('Unable to find match for dissect pattern');
 
@@ -327,25 +326,26 @@ streamlangApiTest.describe(
 
           // ES|QL: Also fails to extract any fields when pattern doesn't fully match
           const esqlDoc = esqlResult.documentsWithoutKeywords.find(
-            (doc) => doc.existing_field === 'should_remain'
+            (doc) => doc.existing_field === 'should_retain'
           );
 
           expect(esqlDoc).toBeDefined();
 
           expect(esqlDoc!).toMatchObject({
-            existing_field: 'should_remain',
+            existing_field: 'should_retain',
             message: '[info] 127.0.0.1',
           });
 
           // Verify that ES|QL leaves all dissect pattern fields undefined when match fails
-          expect(esqlDoc!['log.level']).toBeUndefined();
-          expect(esqlDoc!['client.ip']).toBeUndefined();
-          expect(esqlDoc!.missing_field).toBeUndefined();
+          // Note that ES|QL's `drop_null_columns` needs to be false for consistent behavior
+          expect(esqlDoc!['log.level']).toBeNull();
+          expect(esqlDoc!['client.ip']).toBeNull();
+          expect(esqlDoc!.missing_field).toBeNull();
         }
       );
 
       streamlangApiTest(
-        'should handle complete pattern mismatches differently - ingest throws errors while ES|QL leaves pattern fields undefined',
+        'should handle complete pattern mismatches differently - ingest throws errors while ES|QL returns null columns for dissected fields',
         async ({ testBed, esql }) => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
@@ -371,8 +371,8 @@ streamlangApiTest.describe(
           ];
 
           // NOTE: BEHAVIORAL DIFFERENCE - Complete pattern mismatch handling
-          // Ingest Pipeline: Throws error when pattern doesn't match at all
-          // ES|QL: Since a failure would break the whole pipeline, it retains the document with pattern fields as undefined
+          // Ingest Pipeline: Throws error when pattern doesn't match at all and skips document ingestion (ignore_failure=false)
+          // ES|QL: In case of mismatch, set pre-mapped mismatching fields to null, retains non-pattern fields
           const { errors } = await testBed.ingest('ingest-dissect-nomatch', docs, processors);
           expect(errors[0].reason).toContain('Unable to find match for dissect pattern');
 
@@ -392,9 +392,10 @@ streamlangApiTest.describe(
           });
 
           // Verify that ES|QL leaves all dissect pattern fields undefined when match fails
-          expect(esqlDoc!['@timestamp']).toBeUndefined();
-          expect(esqlDoc!['log.level']).toBeUndefined();
-          expect(esqlDoc!['client.ip']).toBeUndefined();
+          // Note that ES|QL's `drop_null_columns` needs to be false for consistent behavior
+          expect(esqlDoc!['@timestamp']).toBeNull();
+          expect(esqlDoc!['log.level']).toBeNull();
+          expect(esqlDoc!['client.ip']).toBeNull();
         }
       );
 

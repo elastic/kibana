@@ -69,7 +69,7 @@ streamlangApiTest.describe(
 
           const docs = [
             { case: 'groked', attributes: { should_exist: 'YES' }, message: '55.3.244.1' },
-            { case: 'missing', attributes: { size: 2048 }, message: '127.0.0.1' },
+            { case: 'missing', attributes: { size: 2048 }, message: '127.0.0.1' }, // should be filtered out
           ];
           await testBed.ingest('ingest-grok-where', docs, processors);
           const ingestResult = await testBed.getFlattenedDocs('ingest-grok-where');
@@ -78,20 +78,18 @@ streamlangApiTest.describe(
           await testBed.ingest('esql-grok-where', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-grok-where', query);
 
-          // Loop is needed as ES|QL's FORK may return documents in different order
-          for (const doc of esqlResult.documents) {
-            switch (doc.case) {
-              case 'missing':
-                // NOTE that ES|QL returns null for an ignored but mapped field, whereas ingest simply doesn't add the field
-                expect(ingestResult[1]['client.ip']).toBeUndefined();
-                expect(doc['client.ip']).toBeNull();
-                break;
-              case 'groked':
-                expect(ingestResult[0]['client.ip']).toEqual('55.3.244.1');
-                expect(doc['client.ip']).toEqual('55.3.244.1');
-                break;
-            }
-          }
+          expect(esqlResult.documents).toHaveLength(2); // mapping doc + 1
+
+          // Find the documents by their case identifier
+          const missingDoc = esqlResult.documents.find((doc) => doc.case === 'missing')!;
+          const grokedDoc = esqlResult.documents.find((doc) => doc.case === 'groked')!;
+
+          // Behavioral Difference - Note that ES|QL returns null for an ignored but mapped field, whereas ingest simply doesn't add the field
+          expect(ingestResult[1]['client.ip']).toBeUndefined();
+          expect(missingDoc['client.ip']).toBeNull();
+
+          expect(ingestResult[0]['client.ip']).toEqual('55.3.244.1');
+          expect(grokedDoc['client.ip']).toEqual('55.3.244.1');
         }
       );
 
@@ -202,46 +200,6 @@ streamlangApiTest.describe(
           expect(esqlResult.documentsWithoutKeywords[0]).toEqual(
             expect.objectContaining(expectedExtractDoc)
           );
-        }
-      );
-
-      streamlangApiTest(
-        'should nullify ungroked fields in the doc when only partial groking is possible',
-        async ({ testBed, esql }) => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'grok',
-                from: 'message',
-                patterns: ['%{IP:ip} %{WORD:method} %{NUMBER:size}'],
-              } as GrokProcessor,
-            ],
-          };
-          const { processors } = asIngest(streamlangDSL);
-          const { query } = asEsql(streamlangDSL);
-          const docs = [
-            { message: '1.2.3.4 GET' }, // missing size
-          ];
-
-          // NOTE: For partial GROK matching
-          // Ingest: fails the entire GROK operation if pattern doesn't fully match
-          // ES|QL: since FORKing isn't used, will also leave the fields undefined
-          const { errors } = await testBed.ingest('ingest-grok-partial', docs, processors);
-          await testBed.getFlattenedDocs('ingest-grok-partial');
-
-          await testBed.ingest('esql-grok-partial', docs);
-          const esqlResult = await esql.queryOnIndex('esql-grok-partial', query);
-
-          // Ingest pipeline should fail for partial matches
-          expect(errors.length).toBeGreaterThan(0);
-          expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
-
-          // ES|QL should extract what it can
-          if (esqlResult.documentsWithoutKeywords[0]) {
-            expect(esqlResult.documentsWithoutKeywords[0].ip).toBeUndefined();
-            expect(esqlResult.documentsWithoutKeywords[0].method).toBeUndefined();
-            expect(esqlResult.documentsWithoutKeywords[0].size).toBeUndefined();
-          }
         }
       );
 
@@ -409,42 +367,10 @@ streamlangApiTest.describe(
       );
 
       streamlangApiTest(
-        'should nullify ungroked fields when no groking is possible',
-        async ({ testBed, esql }) => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'grok',
-                from: 'message',
-                patterns: ['%{IP:ip} %{WORD:method}'],
-              } as GrokProcessor,
-            ],
-          };
-          const { processors } = asIngest(streamlangDSL);
-          const { query } = asEsql(streamlangDSL);
-          const docs = [{ message: 'no match here at all' }];
-
-          const { errors } = await testBed.ingest('ingest-grok-nomatch', docs, processors);
-          await testBed.getFlattenedDocs('ingest-grok-nomatch');
-
-          await testBed.ingest('esql-grok-nomatch', docs);
-          const esqlResult = await esql.queryOnIndex('esql-grok-nomatch', query);
-
-          // Ingest pipeline should fail when no GROK patterns match
-          expect(errors.length).toBeGreaterThan(0);
-          expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
-
-          // Since no FORKing is used, ES|QL will also leave the fields undefined
-          expect(esqlResult.documentsWithoutKeywords[0].ip).toBeUndefined();
-          expect(esqlResult.documentsWithoutKeywords[0].method).toBeUndefined();
-          expect(esqlResult.documentsWithoutKeywords[0].message).toEqual('no match here at all');
-        }
-      );
-
-      streamlangApiTest(
         'should maintain order of documents consistently when using where clause with ignore_missing: true',
         async ({ testBed, esql }) => {
-          // This test ensures that the order of FORK branches affects the output as expected
+          // This test ensures that ES|QL preserves document order
+          // as certain ES|QL commands (e.g. FORK) may change output order
           // Simulate with a where clause and ignore_missing
           const streamlangDSL: StreamlangDSL = {
             steps: [
@@ -465,14 +391,13 @@ streamlangApiTest.describe(
             { id: 3, message: '178.75.90.92', flag: 'yes' },
             { id: 4, message: '127.0.0.1' },
           ];
-          await testBed.ingest('ingest-grok-fork', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-fork');
+          await testBed.ingest('ingest-grok-conditional', docs, processors);
+          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-conditional');
 
           const mappingDoc = { ip: '' };
-          await testBed.ingest('esql-grok-fork', [mappingDoc, ...docs]);
-          const esqlResult = await esql.queryOnIndex('esql-grok-fork', query);
+          await testBed.ingest('esql-grok-conditional', [mappingDoc, ...docs]);
+          const esqlResult = await esql.queryOnIndex('esql-grok-conditional', query);
 
-          // When ES|QL doesn't use FORK, the order of documents is preserved
           expect(ingestResult.filter((doc) => doc.id).map(({ id }) => id)).toEqual([1, 2, 3, 4]);
           expect(esqlResult.documents.filter((doc) => doc.id).map(({ id }) => id)).toEqual([
             1, 2, 3, 4,
@@ -511,6 +436,79 @@ streamlangApiTest.describe(
       );
     });
 
-    streamlangApiTest.describe('Incompatible', () => {});
+    streamlangApiTest.describe('Incompatible', () => {
+      streamlangApiTest(
+        'should nullify ungroked fields in the doc when only partial groking is possible',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} %{WORD:method} %{NUMBER:size}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [
+            { message: '1.2.3.4 GET' }, // missing size
+          ];
+
+          // Behavioral Different - Note for partial GROK matching
+          // Ingest: fails the entire GROK operation if pattern doesn't fully match and skips document ingestion (ignore_failure: false)
+          // ES|QL: groked fields are returned as null
+          const { errors } = await testBed.ingest('ingest-grok-partial', docs, processors);
+          await testBed.getFlattenedDocs('ingest-grok-partial');
+
+          await testBed.ingest('esql-grok-partial', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-partial', query);
+
+          // Ingest pipeline should fail for partial matches
+          expect(errors.length).toBeGreaterThan(0);
+          expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
+
+          // ES|QL should extract what it can
+          if (esqlResult.documentsWithoutKeywords[0]) {
+            expect(esqlResult.documentsWithoutKeywords[0].ip).toBeNull();
+            expect(esqlResult.documentsWithoutKeywords[0].method).toBeNull();
+            expect(esqlResult.documentsWithoutKeywords[0].size).toBeNull();
+          }
+        }
+      );
+
+      streamlangApiTest(
+        'should nullify ungroked fields when no groking is possible',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{IP:ip} %{WORD:method}'],
+              } as GrokProcessor,
+            ],
+          };
+          const { processors } = asIngest(streamlangDSL);
+          const { query } = asEsql(streamlangDSL);
+          const docs = [{ message: 'no match here at all' }];
+
+          const { errors } = await testBed.ingest('ingest-grok-nomatch', docs, processors);
+          await testBed.getFlattenedDocs('ingest-grok-nomatch');
+
+          await testBed.ingest('esql-grok-nomatch', docs);
+          const esqlResult = await esql.queryOnIndex('esql-grok-nomatch', query);
+
+          // Ingest pipeline should fail when no GROK patterns match
+          expect(errors.length).toBeGreaterThan(0);
+          expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
+
+          // ES|QL: groked fields are returned as null
+          expect(esqlResult.documentsWithoutKeywords[0].ip).toBeNull();
+          expect(esqlResult.documentsWithoutKeywords[0].method).toBeNull();
+          expect(esqlResult.documentsWithoutKeywords[0].message).toEqual('no match here at all');
+        }
+      );
+    });
   }
 );

@@ -37,7 +37,7 @@ export interface EsqlResponse {
 }
 
 export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>({
-  esqlDropNullColumns: [true, { option: true, scope: 'worker' }],
+  esqlDropNullColumns: [false, { option: true, scope: 'worker' }],
   esql: [
     async ({ esClient, esqlDropNullColumns }, use) => {
       const executeEsqlQuery = async (query: string): Promise<EsqlResponse> => {
@@ -58,14 +58,16 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           return doc;
         });
 
-        const documentsWithoutKeywords = documents.map((doc) => {
-          const docCopy = { ...doc };
-          Object.keys(docCopy).forEach((key) => {
-            if (key.endsWith('.keyword')) {
-              delete docCopy[key];
-            }
+        const nonKeywordColumnIndices = response.columns
+          .map((col, idx) => (!col.name.endsWith('.keyword') ? idx : -1))
+          .filter((idx) => idx !== -1);
+
+        const documentsWithoutKeywords = response.values.map((valueRow: FieldValue[]) => {
+          const doc: Record<string, unknown> = {};
+          nonKeywordColumnIndices.forEach((idx) => {
+            doc[response.columns[idx].name] = valueRow[idx];
           });
-          return docCopy;
+          return doc;
         });
 
         return {
