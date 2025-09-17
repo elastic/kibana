@@ -35,10 +35,11 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { getAstContext } from '../shared/context';
 import { isSourceCommand } from '../shared/helpers';
-import { getColumnsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
+import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
+import { getQueryForFields } from './get_query_for_fields';
 
 type GetColumnMapFn = () => Promise<Map<string, ESQLColumnData>>;
 
@@ -58,7 +59,7 @@ export async function suggest(
   }
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    root,
+    getQueryForFields(correctedQuery, root),
     innerText,
     resourceRetriever
   );
@@ -174,7 +175,7 @@ export function getColumnsByTypeRetriever(
   queryText: string,
   resourceRetriever?: ESQLCallbacks
 ): { getColumnsByType: GetColumnsByTypeFn; getColumnMap: GetColumnMapFn } {
-  const helpers = getColumnsByTypeHelper(query, queryText, resourceRetriever);
+  const helpers = new QueryColumns(query, queryText, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 
@@ -196,7 +197,7 @@ export function getColumnsByTypeRetriever(
         recommendedFields: [],
       };
       const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
-      const columns = await helpers.getColumnsByType(expectedType, ignored);
+      const columns = await helpers.byType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(
         columns,
         recommendedFieldsFromExtensions,
@@ -204,7 +205,7 @@ export function getColumnsByTypeRetriever(
         await getVariables?.()
       );
     },
-    getColumnMap: helpers.getColumnMap,
+    getColumnMap: helpers.asMap.bind(helpers),
   };
 }
 
