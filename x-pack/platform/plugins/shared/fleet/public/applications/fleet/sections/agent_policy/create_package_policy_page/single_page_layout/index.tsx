@@ -146,7 +146,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
   );
 
-  // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
