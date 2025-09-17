@@ -75,6 +75,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'target',
       'workers',
       'kibana',
+      'apiKey',
       'concurrency',
       'versionOverride',
       'clean',

@@ -13,8 +13,8 @@ import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { FileUploadManager } from '../file_upload_manager';
-import { CLASH_ERROR_TYPE, STATUS } from '../file_upload_manager';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import { CLASH_ERROR_TYPE, STATUS, type FileUploadManager } from '../file_upload_manager';
 
 export enum UPLOAD_TYPE {
   NEW = 'new',
