@@ -390,7 +390,7 @@ export function LayerPanel(props: LayerPanelProps) {
           <header
             className="lnsLayerPanel__layerHeader"
             css={css`
-              padding: ${euiTheme.size.base};
+              padding: ${euiTheme.size.base} 0;
               border-bottom: ${euiTheme.border.thin};
             `}
           >
@@ -511,7 +511,7 @@ export function LayerPanel(props: LayerPanelProps) {
               return (
                 <EuiFormRow
                   css={css`
-                    padding: ${euiTheme.size.base};
+                    padding: ${euiTheme.size.base} 0;
                     &:last-child {
                       border-radius: 0 0 ${euiTheme.border.radius.medium}
                         ${euiTheme.border.radius.medium};
@@ -575,8 +575,8 @@ export function LayerPanel(props: LayerPanelProps) {
                       <ReorderProvider
                         dataTestSubj="lnsDragDrop"
                         css={css`
-                          margin: -${euiTheme.size.xs} -${euiTheme.size.base};
-                          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                          margin: -${euiTheme.size.xs} 0;
+                          padding: ${euiTheme.size.xs} 0;
                         `}
                       >
                         {group.accessors.map((accessorConfig, accessorIndex) => {
@@ -847,7 +847,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <>
                   <div
                     css={css`
-                      padding: ${euiTheme.size.base};
+                      padding: ${euiTheme.size.base} 0;
                     `}
                   >
                     <activeVisualization.DimensionEditorComponent
