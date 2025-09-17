@@ -115,12 +115,12 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 14281
+  onechat: 15709
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3058
+  productDocBase: 3074
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -197,4 +197,4 @@ pageLoadAssetSize:
   visualizations: 41000
   watcher: 16031
   workchatApp: 12411
-  workflowsManagement: 6200
+  workflowsManagement: 6555
