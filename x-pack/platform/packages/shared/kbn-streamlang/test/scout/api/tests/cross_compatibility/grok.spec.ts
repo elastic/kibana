@@ -436,6 +436,8 @@ streamlangApiTest.describe(
       );
     });
 
+    // Note that the Incompatible test suite doesn't necessarily mean the features are functionally incompatible,
+    // rather it highlights the nuanced behavioral differences in certain edge cases among transpilers.
     streamlangApiTest.describe('Incompatible', () => {
       streamlangApiTest(
         'should nullify ungroked fields in the doc when only partial groking is possible',

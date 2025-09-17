@@ -144,6 +144,8 @@ streamlangApiTest.describe(
       );
     });
 
+    // Note that the Incompatible test suite doesn't necessarily mean the features are functionally incompatible,
+    // rather it highlights the nuanced behavioral differences in certain edge cases among transpilers.
     streamlangApiTest.describe('Incompatible', () => {
       streamlangApiTest(
         'should add error in ingest, but ES|QL ignores the document when parsing fails',
@@ -164,6 +166,10 @@ streamlangApiTest.describe(
           const docs = [{ log: { time: '01-01-2025' } }];
           const { errors } = await testBed.ingest('ingest-date-fail', docs, processors);
           expect(errors[0].reason).toContain('unable to parse date');
+
+          // Since ignore_failure is not set (false by default), the document should not be ingested
+          const ingestResult = await testBed.getDocs('ingest-date-fail');
+          expect(ingestResult).toHaveLength(0);
 
           await testBed.ingest('esql-date-fail', docs);
           const esqlResult = await esql.queryOnIndex('esql-date-fail', query);
