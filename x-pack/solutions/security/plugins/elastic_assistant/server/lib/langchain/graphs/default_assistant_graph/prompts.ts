@@ -21,6 +21,7 @@ import { INCLUDE_CITATIONS } from '../../../prompt/prompts';
 interface ChatPromptTemplateInputValues {
   systemPrompt: string;
   messages: BaseMessage[];
+  knowledgeHistory: string;
 }
 
 interface Inputs {
@@ -40,7 +41,7 @@ interface Inputs {
 export const DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE = ChatPromptTemplate.fromMessages<{
   systemPrompt: string;
   messages: BaseMessage[];
-}>([['system', '{systemPrompt}'], new MessagesPlaceholder('messages')]);
+}>([['system', '{systemPrompt}\n\n{knowledgeHistory}'], new MessagesPlaceholder('messages')]);
 
 const KNOWLEDGE_HISTORY_PREFIX = 'Knowledge History:';
 const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
@@ -75,7 +76,6 @@ export const chatPromptFactory = async (
   const systemPrompt = await systemPromptTemplate.format({
     citations_prompt: inputs.contentReferencesStore.options?.disabled ? '' : INCLUDE_CITATIONS,
     formattedTime: inputs.formattedTime ?? '',
-    knowledgeHistory: formattedKnowledgeHistory,
   });
 
   const enrichedMessages = await enrichConversation({
@@ -89,6 +89,7 @@ export const chatPromptFactory = async (
   const chatPrompt = await chatPromptTemplate.invoke({
     systemPrompt,
     messages: enrichedMessages,
+    knowledgeHistory: formattedKnowledgeHistory,
   });
 
   return chatPrompt;
