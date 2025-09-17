@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./_on_tab_change'));
     loadTestFile(require.resolve('./_new_tab'));
     loadTestFile(require.resolve('./_no_data'));
-    loadTestFile(require.resolve('./_recently_closed_tabs'));
+    // loadTestFile(require.resolve('./_recently_closed_tabs'));
     loadTestFile(require.resolve('./_restorable_state'));
     loadTestFile(require.resolve('./_save_and_load'));
   });

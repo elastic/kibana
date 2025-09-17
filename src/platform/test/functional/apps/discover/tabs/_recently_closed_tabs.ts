@@ -10,12 +10,12 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover, unifiedTabs, common } = getPageObjects(['discover', 'unifiedTabs', 'common']);
-  const filterBar = getService('filterBar');
-  const queryBar = getService('queryBar');
-  const dataViews = getService('dataViews');
-  const esql = getService('esql');
-  const testSubjects = getService('testSubjects');
+  // const { discover, unifiedTabs, common } = getPageObjects(['discover', 'unifiedTabs', 'common']);
+  // const filterBar = getService('filterBar');
+  // const queryBar = getService('queryBar');
+  // const dataViews = getService('dataViews');
+  // const esql = getService('esql');
+  // const testSubjects = getService('testSubjects');
 
   // TODO: Implement tests
   describe('recently closed tabs', function () {
