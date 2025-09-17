@@ -149,6 +149,13 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     let error: Error | undefined;
     const doc = parseDocument(yamlString);
 
+    if (doc.errors.length > 0) {
+      return {
+        success: false,
+        error: new InvalidYamlSyntaxError(doc.errors.map((err) => err?.message).join(', ')),
+      };
+    }
+
     // Visit all pairs, and check if there're any non-scalar keys
     // TODO: replace with parseDocument(yamlString, { stringKeys: true }) when 'yaml' package updated to 2.6.1
     visit(doc, {

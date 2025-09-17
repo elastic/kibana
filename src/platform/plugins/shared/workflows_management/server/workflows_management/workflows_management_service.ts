@@ -261,6 +261,7 @@ export class WorkflowsService {
 
       const authenticatedUser = getAuthenticatedUser(request, this.security);
       const now = new Date();
+      const validationErrors: string[] = [];
 
       const updatedData: Partial<WorkflowProperties> = {
         lastUpdatedBy: authenticatedUser,
@@ -277,37 +278,41 @@ export class WorkflowsService {
 
       // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
+        // we always update the yaml, even if it's not valid, to allow users to save draft
+        updatedData.yaml = workflow.yaml;
         const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchemaLoose());
         if (!parsedYaml.success) {
           updatedData.definition = undefined;
           updatedData.enabled = false;
           updatedData.valid = false;
+          validationErrors.push(parsedYaml.error.message);
           shouldUpdateScheduler = true;
         } else {
           // Validate step name uniqueness
           const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
           if (!stepValidation.isValid) {
-            const errorMessages = stepValidation.errors.map((error) => error.message);
-            throw new WorkflowValidationError(
-              'Workflow validation failed: Step names must be unique throughout the workflow.',
-              errorMessages
+            updatedData.definition = undefined;
+            updatedData.enabled = false;
+            updatedData.valid = false;
+            validationErrors.push(...stepValidation.errors.map((error) => error.message));
+            shouldUpdateScheduler = true;
+          } else {
+            const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
+              parsedYaml.data as WorkflowYaml
             );
+            // Update all fields from the transformed YAML, not just definition
+            updatedData.definition = workflowDef.definition;
+            updatedData.name = workflowDef.name;
+            // Update all fields from the transformed YAML, not just definition
+            updatedData.definition = workflowDef.definition;
+            updatedData.name = workflowDef.name;
+            updatedData.enabled = workflowDef.enabled;
+            updatedData.description = workflowDef.description;
+            updatedData.tags = workflowDef.tags;
+            updatedData.valid = true;
+            updatedData.yaml = workflow.yaml;
+            shouldUpdateScheduler = true;
           }
-          const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-            parsedYaml.data as WorkflowYaml
-          );
-          // Update all fields from the transformed YAML, not just definition
-          updatedData.definition = workflowDef.definition;
-          updatedData.name = workflowDef.name;
-          // Update all fields from the transformed YAML, not just definition
-          updatedData.definition = workflowDef.definition;
-          updatedData.name = workflowDef.name;
-          updatedData.enabled = workflowDef.enabled;
-          updatedData.description = workflowDef.description;
-          updatedData.tags = workflowDef.tags;
-          updatedData.valid = true;
-          updatedData.yaml = workflow.yaml;
-          shouldUpdateScheduler = true;
         }
       }
 
@@ -409,6 +414,7 @@ export class WorkflowsService {
         id,
         lastUpdatedAt: new Date(finalData.updated_at),
         lastUpdatedBy: finalData.lastUpdatedBy,
+        validationErrors,
         valid: finalData.valid,
       };
     } catch (error) {

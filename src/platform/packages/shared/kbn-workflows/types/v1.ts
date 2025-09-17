@@ -203,6 +203,7 @@ export interface UpdatedWorkflowResponseDto {
   lastUpdatedAt: Date;
   lastUpdatedBy: string | undefined;
   valid: boolean;
+  validationErrors: string[];
 }
 
 export interface WorkflowDetailDto {
