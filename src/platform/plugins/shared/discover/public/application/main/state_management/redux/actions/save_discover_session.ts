@@ -164,6 +164,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         newDataViewSpec = {
           ...dataViewSpec,
           id: uuidv4(),
+          managed: false,
         };
 
         // Clear out the old data view since it's no longer needed
