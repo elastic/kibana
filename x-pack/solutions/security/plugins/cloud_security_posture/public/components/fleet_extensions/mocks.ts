@@ -344,7 +344,7 @@ export const getPackageInfoMock = () => {
     name: 'cloud_security_posture',
     description: 'Identify & remediate configuration risks in your Cloud infrastructure',
     owner: {
-      github: 'elastic/contextual-security',
+      github: 'elastic/cloud-security-posture',
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
     title: 'Security Posture Management',
@@ -425,7 +425,7 @@ export const getAwsPackageInfoMock = () => {
             is_default: true,
             organization: 'security',
             division: 'engineering',
-            team: 'contextual-security',
+            team: 'cloud-security-posture',
           },
         },
       },
