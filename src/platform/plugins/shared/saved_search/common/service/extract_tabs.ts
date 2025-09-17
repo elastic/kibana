@@ -16,7 +16,6 @@ import type {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
   SCHEMA_SEARCH_MODEL_VERSION_7,
-  SCHEMA_SEARCH_MODEL_VERSION_8,
 } from '../../server/saved_objects/schema';
 
 export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
@@ -31,9 +30,7 @@ export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
  * Extract tab attributes into a separate array since multiple tabs are supported
  * @param attributes The previous attributes to be transformed (version 5)
  */
-export const extractTabs = (
-  attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
-): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7> => {
+export function extractTabs<T extends TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>>(attributes: T) {
   const { title, description, ...tabAttrs } = attributes;
   const tabs = [
     {
@@ -45,15 +42,15 @@ export const extractTabs = (
     },
   ];
   return { ...attributes, tabs };
-};
+}
 
 /**
  * Extract tab attributes into a separate array since multiple tabs are supported
  * @param attributes The previous attributes to be transformed (version 5)
  */
-export const removeTopLevelTabAttributes = (
-  attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7>
-): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_8> => {
+export function removeTopLevelTabAttributes<T extends TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7>>(
+  attributes: T
+) {
   const { title, description, tabs } = attributes;
   return { title, description, tabs };
-};
+}
