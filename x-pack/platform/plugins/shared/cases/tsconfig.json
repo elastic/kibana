@@ -97,8 +97,6 @@
     "@kbn/page-attachment-schema",
     "@kbn/cases-ai",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/data-views-plugin",
-    "@kbn/discover-utils",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
