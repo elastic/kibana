@@ -125,8 +125,8 @@ export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   esqlExtensionsRegistry.setRecommendedQueries(
     [
       ...TRACES_ESQL_RECOMMENDED_QUERIES,
-      ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
       ...METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES,
+      ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
     ],
     'oblt'
   );

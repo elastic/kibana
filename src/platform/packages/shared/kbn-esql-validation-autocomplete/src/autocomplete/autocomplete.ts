@@ -103,7 +103,7 @@ export async function suggest(
         const sources = await getSources();
         const visibleSources = sources.filter((source) => !source.hidden);
 
-        // Collect recommendations from all relevant source types
+        // Collect query recommendations from all relevant source types
         const sourceTypes = ['logs', 'metrics', 'traces'];
         const recommendedQueriesSuggestionsFromExtensions: ISuggestionItem[] = [];
 
@@ -128,14 +128,10 @@ export async function suggest(
           }
         }
 
-        // Get static templates for the first available source (fallback behavior)
+        // Get static templates query suggestions for logs or the first available source
         let fromCommand = '';
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
-        } else if (visibleSources.find((source) => source.name.startsWith('metrics'))) {
-          fromCommand = 'FROM metrics*';
-        } else if (visibleSources.find((source) => source.name.startsWith('traces'))) {
-          fromCommand = 'FROM traces*';
         } else if (visibleSources.length) {
           fromCommand = `FROM ${visibleSources[0].name}`;
         }
