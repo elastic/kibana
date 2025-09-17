@@ -11,6 +11,7 @@ import {
   CHANGES_FUNCTION_NAME,
   CONTEXT_FUNCTION_NAME,
   ELASTICSEARCH_FUNCTION_NAME,
+  RETRIEVE_ES_API_DOC_FUNCTION_NAME,
   GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
   GET_APM_DATASET_INFO_FUNCTION_NAME,
   GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME,
@@ -217,6 +218,15 @@ export function getSystemPrompt({
     ) {
       usage.push(
         `**Always use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields and field types available on them instead of using Elasticsearch APIs directly.**`
+      );
+    }
+
+    if (
+      isFunctionAvailable(RETRIEVE_ES_API_DOC_FUNCTION_NAME) &&
+      isFunctionAvailable(ELASTICSEARCH_FUNCTION_NAME)
+    ) {
+      usage.push(
+        `****Prerequisites for the \`${ELASTICSEARCH_FUNCTION_NAME}\` tool:** you **SHOULD ALWAYS** call the \`${RETRIEVE_ES_API_DOC_FUNCTION_NAME}\` tool to retrieve documentation for Elasticsearch API endpoints before calling the \`${ELASTICSEARCH_FUNCTION_NAME}\` tool. This will help you understand how to use the API correctly, including required parameters and request body structure.`
       );
     }
 
