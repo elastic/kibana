@@ -39,9 +39,7 @@ export function registerSetupRoute({
         description: 'Check if Universal Profiling has been set up and configured properly',
         tags: ['Universal Profiling'],
       },
-      validate: {
-        query: schema.object({}, { unknowns: 'allow' }),
-      },
+      validate: false,
     },
     async (context, request, response) => {
       try {
