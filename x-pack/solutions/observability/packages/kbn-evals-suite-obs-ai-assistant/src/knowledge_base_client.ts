@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import pRetry from 'p-retry';
+import type { EsClient } from '@kbn/scout-oblt';
 
 export class KnowledgeBaseClient {
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+
   async ensureInstalled(): Promise<void> {
     this.log.info('Checking whether the knowledge base is installed');
 
@@ -27,6 +29,7 @@ export class KnowledgeBaseClient {
 
     await pRetry(
       async () => {
+        this.log.info('Waiting for knowledge base to be ready...');
         const response = await this.fetch<{}>('/internal/observability_ai_assistant/kb/setup', {
           method: 'POST',
           query: {
@@ -43,5 +46,26 @@ export class KnowledgeBaseClient {
     );
 
     this.log.success('Knowledge base installed');
+  }
+
+  async importEntries({ entries }: { entries: unknown[] }): Promise<void> {
+    await this.fetch<{}>('/internal/observability_ai_assistant/kb/entries/import', {
+      method: 'POST',
+      body: JSON.stringify({ entries }),
+    });
+  }
+
+  async clear(esClient: EsClient) {
+    return pRetry(
+      () => {
+        return esClient.deleteByQuery({
+          index: '.kibana-observability-ai-assistant-kb-*',
+          conflicts: 'proceed',
+          query: { match_all: {} },
+          refresh: true,
+        });
+      },
+      { retries: 5 }
+    );
   }
 }
