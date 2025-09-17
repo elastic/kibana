@@ -254,7 +254,7 @@ export class IndexUpdateService {
       : esql`FROM ${indexName}`;
 
     if (qstr) {
-      query.pipe`WHERE qstr(${`*${qstr}*`})`;
+      query.pipe`WHERE qstr(${`*${qstr}* OR ${qstr}`})`;
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;

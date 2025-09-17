@@ -45,7 +45,7 @@ describe('IndexUpdateService', () => {
       const query = await firstValueFrom(service.esqlQuery$);
 
       expect(query.toLowerCase()).toBe(
-        'from "my-index" metadata _id, _source | where qstr("*200*") | limit 1000 | sort @timestamp desc'
+        'from "my-index" metadata _id, _source | where qstr("*200* or 200") | limit 1000 | sort @timestamp desc'
       );
     });
 
@@ -55,7 +55,7 @@ describe('IndexUpdateService', () => {
 
       const query = await firstValueFrom(service.esqlDiscoverQuery$);
 
-      expect(query).toBe('FROM "logs-*" | WHERE QSTR("*ERROR*") | LIMIT 1000');
+      expect(query).toBe('FROM "logs-*" | WHERE QSTR("*ERROR* OR ERROR") | LIMIT 1000');
     });
   });
 
