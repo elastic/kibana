@@ -32,6 +32,8 @@ const RESOLUTION_MISMATCH = {
   isMatch: false,
 };
 
+const getIndexPatternMetadataMock = jest.fn();
+
 describe('metricsDataSourceProfileProvider', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
@@ -63,10 +65,11 @@ describe('metricsDataSourceProfileProvider', () => {
 
   describe('matches', () => {
     beforeEach(() => {
+      getIndexPatternMetadataMock.mockImplementation(() => ({
+        indexPatternMetadata: { 'metrics-system.cpu': { hasTimeSeriesFields: true } },
+      }));
       provider = createProvider({
-        getIndexPatternMetadata: jest.fn().mockResolvedValue({
-          indexPatternMetadata: { 'metrics-system.cpu': { hasTimeSeriesFields: true } },
-        }),
+        getIndexPatternMetadata: getIndexPatternMetadataMock,
       });
     });
 
@@ -99,6 +102,16 @@ describe('metricsDataSourceProfileProvider', () => {
         expect(result).toEqual(RESOLUTION_MATCH);
       }
     );
+
+    it('should call getIndexPatternMetadata with the correct params', async () => {
+      await provider.resolve(createParams({ query: { esql: 'FROM metrics-*' } }));
+
+      expect(getIndexPatternMetadataMock).toHaveBeenCalledWith({
+        indexPattern: 'metrics-*',
+        from: expect.any(String),
+        to: expect.any(String),
+      });
+    });
   });
 
   describe('does not match', () => {
