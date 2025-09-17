@@ -16,6 +16,46 @@ import type {
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
 
+// Helper function to upsert a single API label into the merged labels array
+const upsertApiLabel = (
+  mergedLabels: Array<{ field?: string; value?: string; source?: string }>,
+  apiLabel: { field?: string; value?: string; source?: string }
+): void => {
+  // Skip labels with missing required fields
+  if (!apiLabel.field || !apiLabel.value) {
+    return;
+  }
+
+  const existingLabelIndex = mergedLabels.findIndex(
+    (label) =>
+      label.field === apiLabel.field &&
+      label.value === apiLabel.value &&
+      label.source === 'api'
+  );
+  
+  if (existingLabelIndex >= 0) {
+    // Update existing API label
+    mergedLabels[existingLabelIndex] = { field: apiLabel.field, value: apiLabel.value, source: 'api' };
+  } else {
+    // Add new API label
+    mergedLabels.push({ field: apiLabel.field, value: apiLabel.value, source: 'api' });
+  }
+};
+
+// Helper function to merge API labels with existing labels
+const mergeApiLabels = (
+  existingLabels: Array<{ field?: string; value?: string; source?: string }> | undefined,
+  apiLabels: Array<{ field?: string; value?: string; source?: string }> | undefined
+): Array<{ field?: string; value?: string; source?: string }> => {
+  const mergedLabels = [...(existingLabels || [])];
+  if (apiLabels) {
+    for (const apiLabel of apiLabels) {
+      upsertApiLabel(mergedLabels, apiLabel);
+    }
+  }
+  return mergedLabels;
+};
+
 export const createPrivilegedUsersCrudService = ({
   deps,
   index,
@@ -48,26 +88,11 @@ export const createPrivilegedUsersCrudService = ({
             : [...existingSources, source];
 
           // Handle API labels if provided
-          const apiLabels = user.entity_analytics_monitoring?.labels || [];
-          const existingLabels = existingUserDoc?.entity_analytics_monitoring?.labels || [];
+          const apiLabels = user.entity_analytics_monitoring?.labels;
+          const existingLabels = existingUserDoc?.entity_analytics_monitoring?.labels;
 
           // Merge API labels with existing labels, avoiding duplicates
-          const mergedLabels = [...existingLabels];
-          for (const apiLabel of apiLabels) {
-            const existingLabelIndex = mergedLabels.findIndex(
-              (label) =>
-                label.field === apiLabel.field &&
-                label.value === apiLabel.value &&
-                label.source === 'api'
-            );
-            if (existingLabelIndex >= 0) {
-              // Update existing API label
-              mergedLabels[existingLabelIndex] = { ...apiLabel, source: 'api' };
-            } else {
-              // Add new API label
-              mergedLabels.push({ ...apiLabel, source: 'api' });
-            }
-          }
+          const mergedLabels = mergeApiLabels(existingLabels, apiLabels);
 
           await esClient.update({
             index,
@@ -157,24 +182,11 @@ export const createPrivilegedUsersCrudService = ({
       throw new Error(`User with id ${id} not found`);
     }
 
-    const existingLabels = existingUser?.entity_analytics_monitoring?.labels || [];
-    const apiLabels = user.entity_analytics_monitoring?.labels || [];
+    const existingLabels = existingUser?.entity_analytics_monitoring?.labels;
+    const apiLabels = user.entity_analytics_monitoring?.labels;
 
     // Merge API labels with existing labels, avoiding duplicates
-    const mergedLabels = [...existingLabels];
-    for (const apiLabel of apiLabels) {
-      const existingLabelIndex = mergedLabels.findIndex(
-        (label) =>
-          label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
-      );
-      if (existingLabelIndex >= 0) {
-        // Update existing API label
-        mergedLabels[existingLabelIndex] = { ...apiLabel, source: 'api' };
-      } else {
-        // Add new API label
-        mergedLabels.push({ ...apiLabel, source: 'api' });
-      }
-    }
+    const mergedLabels = mergeApiLabels(existingLabels, apiLabels);
 
     await esClient.update<MonitoredUserDoc>({
       index,
