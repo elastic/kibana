@@ -44,7 +44,7 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const activeItemRef = useScrollToActive<HTMLLIElement>(isActive);
+  const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
