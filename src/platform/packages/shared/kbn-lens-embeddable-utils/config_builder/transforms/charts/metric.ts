@@ -14,6 +14,8 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
 import {
@@ -34,8 +36,6 @@ import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
-import { SavedObjectReference } from '@kbn/core/types';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -363,7 +363,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
 
   const adHocDataViews = getAdhocDataviews(dataviews);
   const references = buildReferences(
-      Object.fromEntries(Object.entries(adHocDataViews).map(([key, value]) => ["layer_0", value.id]))
+    Object.fromEntries(Object.entries(adHocDataViews).map(([key, value]) => ['layer_0', value.id]))
   );
 
   return {
@@ -395,7 +395,12 @@ export function fromLensStateToAPI(
   const visualizationState = {
     title: config.title,
     description: config.description ?? '',
-    ...reverseBuildVisualizationState(visualization, layer, config.state.adHocDataViews ?? {}, config.references),
+    ...reverseBuildVisualizationState(
+      visualization,
+      layer,
+      config.state.adHocDataViews ?? {},
+      config.references
+    ),
   };
 
   return visualizationState;

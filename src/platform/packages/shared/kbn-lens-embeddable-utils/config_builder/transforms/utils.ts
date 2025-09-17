@@ -20,13 +20,13 @@ import type {
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -83,26 +83,28 @@ function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-const getAdhocDataView = (dataView: {index: string, timeFieldName: string }) => {
+const getAdhocDataView = (dataView: { index: string; timeFieldName: string }) => {
   const id = uuidv4();
   return {
     [id]: {
-          id: id,
-          title: dataView.index,
-          name: dataView.index,
-          timeFieldName: dataView.timeFieldName,
-          sourceFilters: [],
-          fieldFormats: {},
-          runtimeFieldMap: {},
-          fieldAttrs: {},
-          allowNoIndex: false,
-          allowHidden: false
-        }
+      id,
+      title: dataView.index,
+      name: dataView.index,
+      timeFieldName: dataView.timeFieldName,
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      fieldAttrs: {},
+      allowNoIndex: false,
+      allowHidden: false,
+    },
   };
-}
+};
 
-export const getAdhocDataviews = (dataviews: Record<string, { index: string, timeFieldName: string }>) => {
-  let adHocDataViews: Record<string, { id: string, timeFieldName: string }> = {};
+export const getAdhocDataviews = (
+  dataviews: Record<string, { index: string; timeFieldName: string }>
+) => {
+  let adHocDataViews: Record<string, { id: string; timeFieldName: string }> = {};
   [...new Set(Object.values(dataviews))].forEach((d) => {
     adHocDataViews = {
       ...adHocDataViews,
@@ -119,7 +121,12 @@ export const getAdhocDataviews = (dataviews: Record<string, { index: string, tim
  * @param layer Lens State Layer
  * @returns Lens API Dataset configuration
  */
-export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, adHocDataViews: Record<string, DataViewSpec>, references: SavedObjectReference[], layerId: string) => {
+export const buildDatasetState = (
+  layer: FormBasedLayer | TextBasedLayer,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[],
+  layerId: string
+) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
@@ -127,7 +134,9 @@ export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, adHocD
     };
   }
 
-  const reference = (references ?? []).find((ref) => ref.name === `indexpattern-datasource-${layerId}`);
+  const reference = (references ?? []).find(
+    (ref) => ref.name === `indexpattern-datasource-${layerId}`
+  );
   if (reference) {
     if (adHocDataViews?.[reference.id]) {
       return {
@@ -135,7 +144,7 @@ export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, adHocD
         index: adHocDataViews[reference.id].title!,
         time_field: adHocDataViews[reference.id].timeFieldName,
       };
-    } 
+    }
     return {
       type: 'dataView',
       name: reference.id,
@@ -144,8 +153,8 @@ export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, adHocD
 
   return {
     type: 'dataView',
-    name: layer.indexPatternId
-  }
+    name: layer.indexPatternId,
+  };
 };
 
 // builds Lens State references from list of dataviews
