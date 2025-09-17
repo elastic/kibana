@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
     });
 
-    it('should return 404 when feature flag is disabled', async () => {
+    it('should return 404 when the metrics experience feature flag is disabled', async () => {
       await toggleMetricsExperienceFeature(supertest, false);
 
       const { status } = await sendRequest({
