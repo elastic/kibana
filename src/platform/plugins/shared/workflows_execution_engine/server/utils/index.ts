@@ -9,3 +9,4 @@
 
 export { parseDuration } from './parse-duration/parse-duration';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
+export { buildStepPath } from './build_step_path/build_step_path';

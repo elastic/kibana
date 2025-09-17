@@ -15,7 +15,7 @@ import agent from 'elastic-apm-node';
 import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { buildStepExecutionId } from '../utils';
+import { buildStepExecutionId, buildStepPath } from '../utils';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -574,22 +574,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private buildCurrentStepPath(): string[] {
-    let currentStepId: string | undefined;
-
-    return this.workflowExecution.stack.flatMap((stackEntry) => {
-      const parts = [];
-
-      if (currentStepId !== stackEntry.stepId) {
-        parts.push(stackEntry.stepId);
-        currentStepId = stackEntry.stepId;
-      }
-
-      if (stackEntry.subScopeId) {
-        parts.push(stackEntry.subScopeId);
-      }
-
-      return parts;
-    });
+    return buildStepPath(this.getCurrentNode().stepId, this.workflowExecution.stack);
   }
 
   private logWorkflowStart(): void {
