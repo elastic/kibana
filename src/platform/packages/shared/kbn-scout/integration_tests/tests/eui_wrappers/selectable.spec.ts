@@ -9,16 +9,14 @@
 
 import { test, expect } from '../../../src/playwright';
 import { EuiSelectableWrapper } from '../../../src/playwright/eui_components';
-import { getEuiBaseUrlWithVersion } from '../../fixtures/eui_helpers';
+import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
-  const euiBaseUrl = getEuiBaseUrlWithVersion();
   test('selectable with search field', async ({ page }) => {
-    await page.goto(`${euiBaseUrl}/docs/components/forms/selection/selectable/#searchable`);
-
     const selector = {
       locator: 'xpath=//h2[@id="searchable"]/following::div[contains(@class, "euiSelectable")][1]',
     };
+    await navigateToEuiTestPage(page, 'docs/components/forms/selection/selectable/#searchable');
 
     await test.step('read selected options', async () => {
       const selectable = new EuiSelectableWrapper(page, selector);

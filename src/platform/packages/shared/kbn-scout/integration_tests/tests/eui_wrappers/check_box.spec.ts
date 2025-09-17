@@ -9,19 +9,19 @@
 
 import { test, expect } from '../../../src/playwright';
 import { EuiCheckBoxWrapper } from '../../../src/playwright/eui_components';
-import { getEuiBaseUrlWithVersion } from '../../fixtures/eui_helpers';
+import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiCheckBox', { tag: ['@svlSecurity', '@ess'] }, () => {
-  const euiBaseUrl = getEuiBaseUrlWithVersion();
   test('checkbox', async ({ page }) => {
-    await page.goto(
-      `${euiBaseUrl}/docs/components/forms/selection/checkbox-and-checkbox-group/#checkbox`
-    );
-
     const selector = {
       locator:
         'xpath=(//div[contains(@class, "euiCheckbox") and div[contains(@class, "euiCheckbox__square")]])[1]',
     };
+
+    await navigateToEuiTestPage(
+      page,
+      'docs/components/forms/selection/checkbox-and-checkbox-group/#checkbox'
+    );
 
     await test.step('should be checked', async () => {
       const checkBox = new EuiCheckBoxWrapper(page, selector);

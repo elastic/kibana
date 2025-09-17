@@ -10,6 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ScoutPage } from '../../src/playwright';
 
 const getEuiVersion = () => {
   const packageJsonPath = path.join(REPO_ROOT, 'package.json');
@@ -21,4 +22,14 @@ const getEuiVersion = () => {
 export const getEuiBaseUrlWithVersion = () => {
   const currentVersion = getEuiVersion();
   return `https://eui.elastic.co/v${currentVersion}`;
+};
+
+export const navigateToEuiTestPage = async (page: ScoutPage, route: string) => {
+  const euiBaseUrl = getEuiBaseUrlWithVersion();
+  const url = new URL(route, euiBaseUrl).toString();
+  await page.goto(url);
+  const acceptButton = page.getByRole('button', { name: 'Accept' });
+  if (await acceptButton.isVisible({ timeout: 2500 })) {
+    await acceptButton.click();
+  }
 };

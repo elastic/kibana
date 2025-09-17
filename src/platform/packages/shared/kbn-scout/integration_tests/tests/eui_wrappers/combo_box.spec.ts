@@ -9,13 +9,13 @@
 
 import { test, expect } from '../../../src/playwright';
 import { EuiComboBoxWrapper } from '../../../src/playwright/eui_components';
-import { getEuiBaseUrlWithVersion } from '../../fixtures/eui_helpers';
+import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
-  const euiBaseUrl = getEuiBaseUrlWithVersion();
   test('with multiple selections (pills)', async ({ page }) => {
-    await page.goto(`${euiBaseUrl}/docs/components/forms/selection/combo-box/`);
     const dataTestSubj = 'demoComboBox';
+    await navigateToEuiTestPage(page, 'docs/components/forms/selection/combo-box/');
+
     await test.step('read selected options', async () => {
       const comboBox = new EuiComboBoxWrapper(page, dataTestSubj);
       expect(await comboBox.getSelectedMultiOptions()).toEqual(['Mimas', 'Iapetus']);
@@ -58,10 +58,11 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
   });
 
   test('with the single selection', async ({ page }) => {
-    await page.goto(
-      `${euiBaseUrl}/docs/components/forms/selection/combo-box/#single-selection-with-custom-options`
-    );
     const selector = { locator: '[id=":r5:-row"] .euiComboBox' };
+    await navigateToEuiTestPage(
+      page,
+      'docs/components/forms/selection/combo-box/#single-selection-with-custom-options'
+    );
 
     await test.step('should select option from dropdown', async () => {
       const comboBox = new EuiComboBoxWrapper(page, selector);

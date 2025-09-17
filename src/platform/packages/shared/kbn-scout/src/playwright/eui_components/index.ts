@@ -10,5 +10,6 @@
 import { EuiComboBoxWrapper } from './combo_box';
 import { EuiSelectableWrapper } from './selectable';
 import { EuiCheckBoxWrapper } from './check_box';
+import { EuiDataGridWrapper } from './data_grid';
 
-export { EuiComboBoxWrapper, EuiSelectableWrapper, EuiCheckBoxWrapper };
+export { EuiComboBoxWrapper, EuiSelectableWrapper, EuiCheckBoxWrapper, EuiDataGridWrapper };
