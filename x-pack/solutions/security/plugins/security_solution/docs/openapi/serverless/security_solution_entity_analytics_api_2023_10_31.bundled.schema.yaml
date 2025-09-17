@@ -2152,21 +2152,28 @@ components:
       type: object
       properties:
         entity_analytics_monitoring:
+          description: Entity analytics monitoring configuration for the user
           type: object
           properties:
             labels:
+              description: Array of labels associated with the user
               items:
                 type: object
                 properties:
                   field:
+                    description: The field name for the label
                     type: string
                   source:
+                    description: >-
+                      The source where this label was created (api, csv, or
+                      index_sync)
                     enum:
                       - api
                       - csv
                       - index_sync
                     type: string
                   value:
+                    description: The value of the label
                     type: string
               type: array
         user:
