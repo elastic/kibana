@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiProgress,
   EuiLoadingElastic,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -70,7 +71,7 @@ export function PreviewPanel() {
 const EditingPanel = () => (
   <EuiEmptyPrompt
     icon={<AssetImage />}
-    titleSize="s"
+    titleSize="xxs"
     title={
       <h2>
         {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
@@ -80,18 +81,20 @@ const EditingPanel = () => (
     }
     body={
       <>
-        <p>
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
-            defaultMessage:
-              'Once you save your changes, the results of your conditions will appear here.',
-          })}
-        </p>
-        <p>
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
-            defaultMessage:
-              'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
-          })}
-        </p>
+        <EuiText size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
+              defaultMessage:
+                'Once you save your changes, the results of your conditions will appear here.',
+            })}
+          </p>
+          <p>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
+              defaultMessage:
+                'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
+            })}
+          </p>
+        </EuiText>
       </>
     }
   />
@@ -165,7 +168,7 @@ const SamplePreviewPanel = () => {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
-        titleSize="s"
+        titleSize="xxs"
         title={
           <h2>
             {i18n.translate('xpack.streams.streamDetail.preview.empty', {

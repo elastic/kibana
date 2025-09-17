@@ -55,7 +55,7 @@ export function RoutingStreamEntry({
     <EuiPanel
       hasShadow={false}
       hasBorder
-      paddingSize="s"
+      paddingSize={`${isEditing ? 'm' : 's'}`}
       data-test-subj={`routingRule-${routingRule.destination}`}
       className={css`
         overflow: hidden;
@@ -75,21 +75,23 @@ export function RoutingStreamEntry({
         alignItems="center"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            className="streamsDragHandle"
-            color="transparent"
-            paddingSize="s"
-            data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
-            {...draggableProvided.dragHandleProps}
-            aria-label={i18n.translate(
-              'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
-              { defaultMessage: 'Drag Handle' }
-            )}
-          >
-            <EuiIcon type="grabOmnidirectional" />
-          </EuiPanel>
-        </EuiFlexItem>
+        {!isEditing && (
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              className="streamsDragHandle"
+              color="transparent"
+              paddingSize="s"
+              data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
+              {...draggableProvided.dragHandleProps}
+              aria-label={i18n.translate(
+                'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
+                { defaultMessage: 'Drag Handle' }
+              )}
+            >
+              <EuiIcon type="grabOmnidirectional" />
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
         {!isRoutingEnabled(routingRule.status) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
