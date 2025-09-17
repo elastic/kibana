@@ -28,14 +28,24 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
   const testDuration = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
 
   const screenshots = attachments
-    .filter((a) => a.contentType.startsWith('image/'))
+    .filter((a) => a.contentType.startsWith('image/') && a.path)
     .map((s) => {
-      const base64 = fs.readFileSync(s.path!).toString('base64');
-      return `
+      try {
+        if (!fs.existsSync(s.path!)) {
+          return `<div class="screenshotContainer"><p>Screenshot not available: ${s.name}</p></div>`;
+        }
+
+        const base64 = fs.readFileSync(s.path!).toString('base64');
+        const mimeType = s.contentType || 'image/png'; // Use actual contentType
+
+        return `
         <div class="screenshotContainer">
-          <img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" alt="${s.name}"/>
+          <img class="screenshot img-fluid img-thumbnail" src="data:${mimeType};base64,${base64}" alt="${s.name}"/>
         </div>
       `;
+      } catch (fileError) {
+        return `<div class="screenshotContainer"><p>Error loading screenshot: ${s.name}</p></div>`;
+      }
     });
 
   return `
@@ -198,7 +208,7 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
         <div class="section">
           <h5>Attachments</h5>
-          ${screenshots.join('/n')}
+          ${screenshots.join('\n')}
         </div>
       </main>
     </div>
