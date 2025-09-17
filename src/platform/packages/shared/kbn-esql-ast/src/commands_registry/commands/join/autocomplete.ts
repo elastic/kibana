@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { getLookupIndexCreateSuggestion } from '../../../definitions/utils/autocomplete/helpers';
+import {
+  getLookupIndexCreateSuggestion,
+  handleFragment,
+} from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -84,7 +87,19 @@ export async function autocomplete(
       }
 
       if (joinSources?.length) {
-        suggestions.push(...specialIndicesToSuggestions(joinSources));
+        const joinIndexesSuggestions = specialIndicesToSuggestions(joinSources);
+        suggestions.push(
+          ...(await handleFragment(
+            innerText,
+            (fragment) =>
+              specialIndicesToSuggestions(joinSources).some(
+                ({ label }) => label.toLocaleLowerCase() === fragment.toLocaleLowerCase()
+              ),
+            (_fragment, rangeToReplace?: { start: number; end: number }) =>
+              joinIndexesSuggestions.map((suggestion) => ({ ...suggestion, rangeToReplace })),
+            () => []
+          ))
+        );
       }
 
       return suggestions;

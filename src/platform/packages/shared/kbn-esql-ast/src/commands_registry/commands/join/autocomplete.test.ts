@@ -117,6 +117,20 @@ describe('JOIN Autocomplete', () => {
       });
     });
 
+    test('can suggest indeces based on a fragment', async () => {
+      const suggestions = await suggest('FROM index | LOOKUP JOIN join_');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).toEqual([
+        'Create lookup index "join_"',
+        'join_index',
+        'join_index_with_alias',
+        'lookup_index',
+        'join_index_alias_1',
+        'join_index_alias_2',
+      ]);
+    });
+
     test('does not suggest the create index command when the index already exists', async () => {
       const suggestions = await suggest('FROM index | LEFT JOIN join_index');
       const labels = suggestions.map((s) => s.label);
