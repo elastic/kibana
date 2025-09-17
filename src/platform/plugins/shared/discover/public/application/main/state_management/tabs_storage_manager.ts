@@ -249,13 +249,13 @@ export const createTabsStorageManager = ({
     const removedTabs = differenceBy(previousOpenTabs, nextOpenTabs, 'id');
 
     const closedAt = Date.now();
-    const additionalRecentlyClosedTabs: RecentlyClosedTabState[] = removedTabs.map((tab) => ({
+    const newRecentlyClosedTabs: RecentlyClosedTabState[] = removedTabs.map((tab) => ({
       ...tab,
       closedAt,
     }));
 
     const newSortedRecentlyClosedTabs = orderBy(
-      uniqBy([...additionalRecentlyClosedTabs, ...previousRecentlyClosedTabs], 'id'), // prevent duplicates
+      uniqBy([...newRecentlyClosedTabs, ...previousRecentlyClosedTabs], 'id'), // prevent duplicates
       'closedAt',
       'desc'
     );
