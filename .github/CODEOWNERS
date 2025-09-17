@@ -644,7 +644,7 @@ src/platform/packages/shared/shared-ux/chrome/navigation @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/feedback_snippet/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/feedback_snippet @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/context @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_picker/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_upload/impl @elastic/appex-sharedux
@@ -2855,6 +2855,8 @@ x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_secu
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/kibana-cloud-security-posture
 
 # Security Service Integrations
 x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations

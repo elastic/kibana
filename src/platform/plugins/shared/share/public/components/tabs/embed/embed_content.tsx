@@ -275,13 +275,13 @@ export const EmbedContent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            type="question"
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
                 defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
+            type="question"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

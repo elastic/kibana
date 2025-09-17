@@ -172,4 +172,6 @@ export interface DashboardInternalApi {
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
+  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
+  setDashboardContainerRef: (ref: HTMLElement | null) => void;
 }
