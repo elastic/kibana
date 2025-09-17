@@ -95,7 +95,7 @@ export function FieldsTable({
       trailingControlColumns={trailingColumns}
       gridStyle={{
         border: 'none',
-        rowHover: 'none',
+        rowHover: 'highlight',
         header: 'underline',
       }}
       inMemory={{ level: 'sorting' }}

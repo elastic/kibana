@@ -207,6 +207,7 @@ export const AgentsList: React.FC = () => {
             options: labelOptions,
             field: 'labels',
             operator: 'exact',
+            autoSortOptions: false,
           },
         ],
       }}
