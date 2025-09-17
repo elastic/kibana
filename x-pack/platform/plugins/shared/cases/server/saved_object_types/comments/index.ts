@@ -7,9 +7,10 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
-import type { CreateCommentsMigrationsDeps } from './migrations';
-import { createCommentsMigrations } from './migrations';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import type { CreateCommentsMigrationsDeps } from '../migrations';
+import { createCommentsMigrations } from '../migrations';
+import { modelVersion1 } from './model_versions/model_version_1';
 
 /**
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
@@ -166,6 +167,9 @@ export const createCaseCommentSavedObjectType = ({
     },
   },
   migrations: () => createCommentsMigrations(migrationDeps),
+  modelVersions: {
+    1: modelVersion1,
+  },
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
