@@ -269,12 +269,15 @@ export class IndexActionsContextMenu extends Component {
                 />
               </EuiText>
               {!isConvertable && (
-                <EuiText size="xs">
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
-                    defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
-                  />
-                </EuiText>
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
+                      defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
+                    />
+                  </EuiText>
+                </>
               )}
             </>
           ),
