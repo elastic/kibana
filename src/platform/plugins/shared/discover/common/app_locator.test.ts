@@ -239,7 +239,7 @@ describe('Discover url generator', () => {
   test('can specify a tab id', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      tabId: '__test__',
+      tab: { id: '__test__' },
     });
 
     expect(path).toMatchInlineSnapshot(`"#/?_tab=(tabId:__test__)"`);
@@ -248,8 +248,7 @@ describe('Discover url generator', () => {
   test('can specify to open in a new tab', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      tabId: 'new',
-      tabLabel: 'My new tab',
+      tab: { id: 'new', label: 'My new tab' },
       query: {
         esql: 'SELECT * FROM test',
       },

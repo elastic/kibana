@@ -66,17 +66,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   searchSessionId?: string;
 
   /**
-   * Optionally set Discover tab ID.
-   * Use `new` as value to indicate that a new tab should be created.
+   * Optionally set Discover tab state.
+   * Use `new` as value for `id` to indicate that a new tab should be created.
    * Once created, the new tab will have a unique id which can be referenced too if necessary.
    */
-  tabId?: string | typeof NEW_TAB_ID;
-
-  /**
-   * Optional label for the tab, used when `tabId` is `new` to set the initial label of the newly created tab.
-   * If not provided, a default label will be assigned.
-   */
-  tabLabel?: string;
+  tab?: { id: typeof NEW_TAB_ID; label?: string } | { id: string };
 
   /**
    * Columns displayed in the table
