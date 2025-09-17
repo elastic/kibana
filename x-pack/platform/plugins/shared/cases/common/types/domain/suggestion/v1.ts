@@ -4,25 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import * as rt from 'io-ts';
 import type { CaseAttachmentWithoutOwner } from '../attachment/v1';
-import { OWNERS } from '../../../constants/owners';
+import {
+  GENERAL_CASES_OWNER,
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
+} from '../../../constants/owners';
 
-const suggestionOwnerSchema = z.enum(OWNERS);
+const suggestionOwnerSchema = rt.union([
+  rt.literal(GENERAL_CASES_OWNER),
+  rt.literal(SECURITY_SOLUTION_OWNER),
+  rt.literal(OBSERVABILITY_OWNER),
+]);
 
-export const suggestionContextRt = z.object({
-  spaceId: z.string(),
-  'service.name': z.array(z.string()).optional(),
-  timeRange: z
-    .object({
-      from: z.string(),
-      to: z.string(),
-    })
-    .optional(),
-});
+export const suggestionContextRt = rt.intersection([
+  rt.strict({
+    owners: rt.array(suggestionOwnerSchema),
+  }),
+  rt.partial({
+    spaceId: rt.string,
+    'service.name': rt.array(rt.string),
+    timeRange: rt.strict({
+      from: rt.string,
+      to: rt.string,
+    }),
+  }),
+]);
 
-export type SuggestionContext = z.infer<typeof suggestionContextRt>;
-export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
+export type SuggestionContext = rt.TypeOf<typeof suggestionContextRt>;
+export type SuggestionOwner = rt.TypeOf<typeof suggestionOwnerSchema>;
 export type SuggestionOwners = SuggestionOwner[];
 export type GenericSuggestionPayload = object;
 

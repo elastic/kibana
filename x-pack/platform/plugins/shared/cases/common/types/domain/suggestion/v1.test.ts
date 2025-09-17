@@ -19,14 +19,14 @@ describe('Suggestion Schemas and Types', () => {
         },
       };
 
-      expect(() => suggestionContextRt.parse(validContext)).not.toThrow();
+      expect(() => suggestionContextRt.decode(validContext)).not.toThrow();
     });
 
     it('should allow optional fields to be omitted', () => {
       const validContext = {
         spaceId: 'default',
       };
-      expect(() => suggestionContextRt.parse(validContext)).not.toThrow();
+      expect(() => suggestionContextRt.decode(validContext)).not.toThrow();
     });
 
     it('should throw an error for invalid fields', () => {
@@ -39,7 +39,10 @@ describe('Suggestion Schemas and Types', () => {
         },
       };
 
-      expect(() => suggestionContextRt.parse(invalidContext)).toThrow();
+      expect(suggestionContextRt.decode(invalidContext)).toEqual({
+        _tag: 'Left',
+        left: expect.any(Array),
+      });
     });
   });
 });
