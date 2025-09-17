@@ -28,6 +28,10 @@ export const getConnectorModel = (connector: InferenceConnector): string | undef
 };
 
 const OPENAI_MODEL_NAMES = [
+  'gpt-5',
+  'gpt-5-chat',
+  'gpt-5-mini',
+  'gpt-5-nano',
   'gpt-4.1-mini',
   'gpt-4.1-nano',
   'gpt-4.1',

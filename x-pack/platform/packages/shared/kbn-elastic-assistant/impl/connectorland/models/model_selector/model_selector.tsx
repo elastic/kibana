@@ -11,10 +11,11 @@ import { EuiComboBox } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-export const MODEL_GPT_4_TURBO = 'gpt-4-turbo';
-export const MODEL_GPT_4O_MINI = 'gpt-4o-mini';
-export const MODEL_GPT_41 = 'gpt-4.1';
-const DEFAULT_MODELS = [MODEL_GPT_41, MODEL_GPT_4_TURBO, MODEL_GPT_4O_MINI];
+export const MODEL_GPT_5_MINI = 'gpt-5-mini';
+export const MODEL_GPT_5_NANO = 'gpt-4-nano';
+export const MODEL_GPT_5_CHAT = 'gpt-5-chat';
+export const MODEL_GPT_5 = 'gpt-5';
+const DEFAULT_MODELS = [MODEL_GPT_5_CHAT, MODEL_GPT_5, MODEL_GPT_5_MINI, MODEL_GPT_5_NANO];
 
 interface Props {
   onModelSelectionChange?: (model?: string) => void;

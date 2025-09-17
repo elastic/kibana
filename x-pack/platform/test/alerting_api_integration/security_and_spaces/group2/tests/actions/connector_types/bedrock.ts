@@ -25,7 +25,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+  defaultModel: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
 };
 
 export default function bedrockTest({ getService }: FtrProviderContext) {

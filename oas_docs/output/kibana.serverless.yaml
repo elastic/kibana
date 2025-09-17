@@ -76072,7 +76072,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+          default: us.anthropic.claude-sonnet-4-20250514-v1:0
     crowdstrike_config:
       title: Connector request config properties for a Crowdstrike connector
       required:
