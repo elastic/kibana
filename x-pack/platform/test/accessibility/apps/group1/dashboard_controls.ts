@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Controls setting panel', async () => {
-      await dashboardControls.openControlsMenu();
+      await dashboard.openSettingsFlyout();
       await testSubjects.click('controls-settings-button');
       await testSubjects.click('control-group-validate-selections');
       await a11y.testAppSnapshot();
