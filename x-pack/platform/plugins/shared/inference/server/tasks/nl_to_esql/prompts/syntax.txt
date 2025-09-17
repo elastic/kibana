@@ -41,7 +41,6 @@
         - [preview] CHANGE_POINT: detects spikes, dips, and change points in a metric.
     </processing-commands>
 
-
     <grouping-functions>
         BUCKET: Create groups of values out of a datetime or numeric input
         CATEGORIZE: Organize textual data into groups of similar format
