@@ -278,18 +278,18 @@ export function LayerPanels(
     }));
   }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
 
-  const [selectedTabId, setSelectedTabId] = useState(layerIds[0] || '');
+  const [selectedLayerId, setSelectedLayerId] = useState(layerIds[0] || '');
 
   const onSelectedTabChanged = (id: string) => {
-    setSelectedTabId(id);
+    setSelectedLayerId(id);
   };
 
   // if the selected tab is removed, switch back first tab
   useEffect(() => {
-    if (!layerIds.includes(selectedTabId)) {
-      setSelectedTabId(layerIds[0] || '');
+    if (!layerIds.includes(selectedLayerId)) {
+      setSelectedLayerId(layerIds[0] || '');
     }
-  }, [selectedTabId, layerIds]);
+  }, [selectedLayerId, layerIds]);
 
   const renderTabs = useCallback(() => {
     const layerTabs = layerConfigs
@@ -299,7 +299,7 @@ export function LayerPanels(
           <EuiTab
             key={layerIndex}
             onClick={() => onSelectedTabChanged(layerConfig.layerId)}
-            isSelected={layerConfig.layerId === selectedTabId}
+            isSelected={layerConfig.layerId === selectedLayerId}
             disabled={false}
             data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
           >
@@ -367,16 +367,15 @@ export function LayerPanels(
     props.framePublicAPI,
     props?.setIsInlineFlyoutVisible,
     registerLibraryAnnotationGroupFunction,
-    selectedTabId,
+    selectedLayerId,
     visualization.activeId,
     visualization.state,
   ]);
 
-  const layerId = selectedTabId;
-  const layerIndex = layerIds.indexOf(layerId);
+  const layerIndex = layerIds.indexOf(selectedLayerId);
   const layerConfig = useMemo(
-    () => layerConfigs.find((l) => l.layerId === selectedTabId),
-    [layerConfigs, selectedTabId]
+    () => layerConfigs.find((l) => l.layerId === selectedLayerId),
+    [layerConfigs, selectedLayerId]
   );
 
   return (
@@ -396,6 +395,7 @@ export function LayerPanels(
     >
       {/* Render layer tabs only if the chart type supports multiple layers */}
       {!hideAddLayerButton && layerConfigs.length > 1 && <EuiTabs>{renderTabs()}</EuiTabs>}
+
       {/* Render the current layer panel */}
       {layerConfig && (
         <LayerPanel
@@ -405,8 +405,8 @@ export function LayerPanels(
           dimensionGroups={layerConfig.config.groups}
           activeVisualization={activeVisualization}
           registerNewLayerRef={registerNewLayerRef}
-          key={layerId}
-          layerId={layerId}
+          key={selectedLayerId}
+          layerId={selectedLayerId}
           layerIndex={layerIndex}
           visualizationState={visualization.state}
           updateVisualization={setVisualizationState}
@@ -426,7 +426,7 @@ export function LayerPanels(
             getRemoveOperation(
               activeVisualization,
               visualization.state,
-              layerId,
+              selectedLayerId,
               layerIds.length
             ) === 'clear'
           }
@@ -438,7 +438,7 @@ export function LayerPanels(
             ) {
               dispatchLens(
                 setLayerDefaultDimension({
-                  layerId,
+                  layerId: selectedLayerId,
                   columnId,
                   groupId,
                 })
@@ -448,13 +448,13 @@ export function LayerPanels(
           onCloneLayer={() => {
             dispatchLens(
               cloneLayer({
-                layerId,
+                layerId: selectedLayerId,
               })
             );
           }}
           onRemoveLayer={onRemoveLayer}
           onRemoveDimension={(dimensionProps) => {
-            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[selectedLayerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
             dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
           }}
