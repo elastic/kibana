@@ -239,7 +239,7 @@ describe('metric chart transformations', () => {
           "description": "A test metric chart using ESQL",
           "references": Array [
             Object {
-              "id": "test-index",
+              "id": "d47bf278-c85d-47e7-a409-f80dcb7561c4",
               "name": "indexpattern-datasource-layer-layer_0",
               "type": "index-pattern",
             },
@@ -387,18 +387,26 @@ describe('metric chart transformations', () => {
           "description": "A comprehensive metric chart with all features",
           "references": Array [
             Object {
-              "id": "comprehensive-index",
+              "id": "3e72d2ac-b297-4071-8ffc-c730dbdc0b58",
               "name": "indexpattern-datasource-layer-layer_0",
-              "type": "index-pattern",
-            },
-            Object {
-              "id": "comprehensive-index",
-              "name": "indexpattern-datasource-layer-layer_0_trendline",
               "type": "index-pattern",
             },
           ],
           "state": Object {
-            "adHocDataViews": Object {},
+            "adHocDataViews": Object {
+              "3e72d2ac-b297-4071-8ffc-c730dbdc0b58": Object {
+                "allowHidden": false,
+                "allowNoIndex": false,
+                "fieldAttrs": Object {},
+                "fieldFormats": Object {},
+                "id": "3e72d2ac-b297-4071-8ffc-c730dbdc0b58",
+                "name": "comprehensive-index",
+                "runtimeFieldMap": Object {},
+                "sourceFilters": Array [],
+                "timeFieldName": "@timestamp",
+                "title": "comprehensive-index",
+              },
+            },
             "datasourceStates": Object {
               "formBased": Object {
                 "layers": Object {
@@ -591,9 +599,8 @@ describe('metric chart transformations', () => {
             "size": 10,
           },
           "dataset": Object {
-            "index": undefined,
-            "time_field": "@timestamp",
-            "type": "index",
+            "name": undefined,
+            "type": "dataView",
           },
           "description": "A comprehensive metric chart with all features",
           "ignore_global_filters": true,

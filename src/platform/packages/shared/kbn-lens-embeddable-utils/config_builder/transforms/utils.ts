@@ -127,7 +127,7 @@ export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, adHocD
     };
   }
 
-  const reference = references.find((ref) => ref.name === `indexpattern-datasource-${layerId}`);
+  const reference = (references ?? []).find((ref) => ref.name === `indexpattern-datasource-${layerId}`);
   if (reference) {
     if (adHocDataViews?.[reference.id]) {
       return {
