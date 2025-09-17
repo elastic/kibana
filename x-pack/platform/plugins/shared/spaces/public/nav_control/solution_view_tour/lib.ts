@@ -8,6 +8,7 @@
 import { BehaviorSubject, first, firstValueFrom, map } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
+import type { PublicContract } from '@kbn/utility-types';
 
 import {
   DEFAULT_SPACE_ID,
@@ -15,6 +16,8 @@ import {
   SOLUTION_VIEW_CLASSIC,
 } from '../../../common/constants';
 import type { SpacesManager } from '../../spaces_manager';
+
+export type TourManagerContract = PublicContract<TourManager>;
 
 export class TourManager {
   private tourState$ = new BehaviorSubject<'not_started' | 'in_progress' | 'ended'>('not_started');

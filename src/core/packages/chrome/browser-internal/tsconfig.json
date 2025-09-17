@@ -71,7 +71,7 @@
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/core-chrome-layout-feature-flags",
     "@kbn/shared-ux-feedback-snippet",
-    "@kbn/core-chrome-navigation-tour"
+    "@kbn/core-chrome-navigation-tour",
   ],
   "exclude": [
     "target/**/*",

@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type { TourManager } from './nav_control/solution_view_tour';
+import type { TourManagerContract } from './nav_control/solution_view_tour';
 import type { SpacesApiUi } from './ui_api';
 import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
 
@@ -70,7 +70,7 @@ export interface SpacesApi {
   /**
    * Manages the state of the solution view tour.
    */
-  solutionViewTourManager: TourManager;
+  solutionViewTourManager: TourManagerContract;
 }
 
 /**

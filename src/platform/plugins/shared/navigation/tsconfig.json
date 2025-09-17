@@ -28,11 +28,11 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/router-utils",
-    "@kbn/core-chrome-navigation-tour",
     "@kbn/core-user-profile-browser",
     "@kbn/core-application-browser",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout-feature-flags",
+    "@kbn/core-chrome-navigation-tour",
   ],
   "exclude": [
     "target/**/*",
