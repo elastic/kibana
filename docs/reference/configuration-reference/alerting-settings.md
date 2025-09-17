@@ -507,8 +507,8 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   The default model to use for requests, which varies by connector:
 
     * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
-       * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
-        * {applies_to}`stack: ga 9.2` Defaults to `us.anthropic.claude-sonnet-4-20250514-v1:0`.
+       * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-sonnet-4-20250514-v1:0`.
+       * {applies_to}`stack: ga 9.2` Defaults to `us.anthropic.claude-sonnet-4-20250514-v1:0`.
        * {applies_to}`stack: ga 9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
        * {applies_to}`stack: ga 9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
     * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. 

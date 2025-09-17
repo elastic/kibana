@@ -147,7 +147,7 @@ describe('ActionsClientChatOpenAI', () => {
           actionId: connectorId,
           params: {
             subActionParams: {
-              body: '{"temperature":0.2,"model":"gpt-4.1","messages":[{"role":"user","content":"Do you know my name?"}]}',
+              body: `{"temperature":0.2,"model":"${DEFAULT_OPEN_AI_MODEL}","messages":[{"role":"user","content":"Do you know my name?"}]}`,
               signal,
               timeout: 999999,
             },
