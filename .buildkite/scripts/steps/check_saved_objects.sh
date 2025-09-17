@@ -29,7 +29,7 @@ findExistingSnapshotSha() {
       echo "$sha" # Echo the valid SHA to standard output
       return 0    # Return success status
     else
-      if [[ "$http_status" =~ ^[404] ]]; then
+      if [[ "$http_status" == "404"* ]]; then
         echo "Snapshot '$url' NOT FOUND, fetching parent commit snapshot (attempt $attempts of $max_attempts)..." >&2
         # Obtain the parent SHA
         sha=$(git rev-parse $sha^)
