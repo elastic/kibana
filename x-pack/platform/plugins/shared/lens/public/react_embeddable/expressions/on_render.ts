@@ -64,7 +64,7 @@ export function prepareOnRender(
     addLog(`onRender$ ${count}`);
     // for some reason onRender$ is emitting multiple times with the same render count
     // so avoid to repeat the same logic on duplicate calls
-    /*if (count === internalApi.renderCount$.getValue()) {
+    /* if (count === internalApi.renderCount$.getValue()) {
       return;
     }*/
     let datasourceEvents: string[] = [];
