@@ -62,7 +62,7 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  alert = 'alert',
+  alertingRuleTemplate = 'alerting_rule_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -82,7 +82,7 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  alert = 'alert',
+  alertingRuleTemplate = 'alerting_rule_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -247,6 +247,7 @@ export enum RegistryPolicyTemplateKeys {
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
+  fips_compatible = 'fips_compatible',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -257,6 +258,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
+  [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;

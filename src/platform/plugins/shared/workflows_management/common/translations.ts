@@ -42,3 +42,10 @@ export const MANUAL_TRIGGERS_DESCRIPTIONS: Record<string, string> = {
     }
   ),
 };
+
+export const TRIGGERS_LIST_TITLE = i18n.translate(
+  'plugins.workflowsManagement.workflowsList.triggersListTitle',
+  {
+    defaultMessage: 'Triggers',
+  }
+);

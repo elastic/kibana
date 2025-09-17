@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
-import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import { validate } from './validate';
 
 const renameExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'rename', validate);
@@ -20,24 +20,22 @@ describe('RENAME Validation', () => {
   });
 
   test('validates the most basic query', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField + 1', [
-      {
-        name: 'doubleField + 1',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg(doubleField)', [
-      {
-        name: 'avg(doubleField)',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField + 1', {
+      name: 'doubleField + 1',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg(doubleField)', {
+      name: 'avg(doubleField)',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
     const context = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     renameExpectErrors('from a_index | rename textField as', [
       'AS expected 2 arguments, but got 1.',
@@ -65,6 +63,6 @@ describe('RENAME Validation', () => {
     renameExpectErrors('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
       'AS expected 2 arguments, but got 1.',
     ]);
-    renameExpectErrors('from a_index | rename key* as keywords', ['Unknown column "keywords"']);
+    renameExpectErrors('from a_index | rename key* as keywords', []);
   });
 });
