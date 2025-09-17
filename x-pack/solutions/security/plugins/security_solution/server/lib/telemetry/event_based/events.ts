@@ -25,6 +25,81 @@ import type {
   HealthDiagnosticQueryResult,
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
+import type { RuleUpgradeTelemetry } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+
+// Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
+export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
+  eventType: 'detection_rule_upgrade',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
+    ruleName: { type: 'keyword', _meta: { description: 'Rule name' } },
+    hasBaseVersion: {
+      type: 'boolean',
+      _meta: { description: 'True if base version exists for this rule' },
+    },
+    finalResult: {
+      type: 'keyword',
+      _meta: { description: 'Overall outcome: SUCCESS | SKIP | ERROR' },
+    },
+    updatedFieldsSummary: {
+      properties: {
+        count: { type: 'long', _meta: { description: 'Number of updated fields' } },
+        nonSolvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of non-solvable conflicts' },
+        },
+        solvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of solvable conflicts' },
+        },
+        noConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of fields without conflicts' },
+        },
+      },
+    },
+    updatedFieldsTotal: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields that were updated' },
+    },
+    updatedFieldsWithNonSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with non-solvable conflicts' },
+    },
+    updatedFieldsWithSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with solvable conflicts' },
+    },
+    updatedFieldsWithNoConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -1617,6 +1692,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 };
 
 export const events = [
+  DETECTION_RULE_UPGRADE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
