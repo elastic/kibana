@@ -17,6 +17,7 @@ import { render } from '@testing-library/react';
 
 import type { DashboardApi } from '../dashboard_api/types';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
+import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService, navigationService, shareService } from '../services/kibana_services';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
@@ -26,6 +27,21 @@ jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
     return <div>mockDashboardEditingToolbar</div>;
   },
 }));
+
+const renderWithDashboardContext = (
+  component: React.ReactElement,
+  overrides?: { dashboardApi?: DashboardApi }
+) => {
+  const { api: dashboardApi, internalApi: dashboardInternalApi } = buildMockDashboardApi();
+  const finalDashboardApi = overrides?.dashboardApi || dashboardApi;
+
+  return render(
+    <DashboardInternalContext.Provider value={dashboardInternalApi}>
+      <DashboardContext.Provider value={finalDashboardApi}>{component}</DashboardContext.Provider>
+    </DashboardInternalContext.Provider>
+  );
+};
+
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
     if (badges) {
@@ -49,10 +65,8 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should not render the managed badge by default', async () => {
-    const component = render(
-      <DashboardContext.Provider value={buildMockDashboardApi().api}>
-        <InternalDashboardTopNav redirectTo={jest.fn()} />
-      </DashboardContext.Provider>
+    const component = renderWithDashboardContext(
+      <InternalDashboardTopNav redirectTo={jest.fn()} />
     );
 
     expect(component.queryByText('Managed')).toBeNull();
@@ -64,13 +78,12 @@ describe('Internal dashboard top nav', () => {
       ...api,
       isManaged: true,
     };
-    const component = render(
-      <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav redirectTo={jest.fn()} />
-      </DashboardContext.Provider>
+    const component = renderWithDashboardContext(
+      <InternalDashboardTopNav redirectTo={jest.fn()} />,
+      { dashboardApi }
     );
 
-    expect(component.getByText('Managed')).toBeInTheDocument();
+    expect(component.getByText('Managed')).toBeDefined();
   });
 
   describe('embed mode', () => {
@@ -81,18 +94,17 @@ describe('Internal dashboard top nav', () => {
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
 
-      render(
-        <DashboardContext.Provider value={dashboardApi}>
-          <InternalDashboardTopNav
-            redirectTo={jest.fn()}
-            embedSettings={{
-              forceShowDatePicker: false,
-              forceHideFilterBar: false,
-              forceShowQueryInput: false,
-              forceShowTopNavMenu: false,
-            }}
-          />
-        </DashboardContext.Provider>
+      renderWithDashboardContext(
+        <InternalDashboardTopNav
+          redirectTo={jest.fn()}
+          embedSettings={{
+            forceShowDatePicker: false,
+            forceHideFilterBar: false,
+            forceShowQueryInput: false,
+            forceShowTopNavMenu: false,
+          }}
+        />,
+        { dashboardApi }
       );
 
       expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
@@ -115,18 +127,17 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
-      <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceHideFilterBar: true,
-            forceShowDatePicker: false,
-            forceShowQueryInput: false,
-            forceShowTopNavMenu: false,
-          }}
-        />
-      </DashboardContext.Provider>
+    renderWithDashboardContext(
+      <InternalDashboardTopNav
+        redirectTo={jest.fn()}
+        embedSettings={{
+          forceHideFilterBar: true,
+          forceShowDatePicker: false,
+          forceShowQueryInput: false,
+          forceShowTopNavMenu: false,
+        }}
+      />,
+      { dashboardApi }
     );
 
     expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
@@ -148,18 +159,17 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
-      <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceShowDatePicker: true,
-            forceHideFilterBar: false,
-            forceShowQueryInput: false,
-            forceShowTopNavMenu: false,
-          }}
-        />
-      </DashboardContext.Provider>
+    renderWithDashboardContext(
+      <InternalDashboardTopNav
+        redirectTo={jest.fn()}
+        embedSettings={{
+          forceShowDatePicker: true,
+          forceHideFilterBar: false,
+          forceShowQueryInput: false,
+          forceShowTopNavMenu: false,
+        }}
+      />,
+      { dashboardApi }
     );
 
     expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
@@ -181,18 +191,17 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
-      <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceShowDatePicker: false,
-            forceHideFilterBar: false,
-            forceShowQueryInput: true,
-            forceShowTopNavMenu: false,
-          }}
-        />
-      </DashboardContext.Provider>
+    renderWithDashboardContext(
+      <InternalDashboardTopNav
+        redirectTo={jest.fn()}
+        embedSettings={{
+          forceShowDatePicker: false,
+          forceHideFilterBar: false,
+          forceShowQueryInput: true,
+          forceShowTopNavMenu: false,
+        }}
+      />,
+      { dashboardApi }
     );
 
     expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
@@ -214,18 +223,17 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
-      <DashboardContext.Provider value={dashboardApi}>
-        <InternalDashboardTopNav
-          redirectTo={jest.fn()}
-          embedSettings={{
-            forceShowDatePicker: false,
-            forceShowTopNavMenu: true,
-            forceShowQueryInput: false,
-            forceHideFilterBar: false,
-          }}
-        />
-      </DashboardContext.Provider>
+    renderWithDashboardContext(
+      <InternalDashboardTopNav
+        redirectTo={jest.fn()}
+        embedSettings={{
+          forceShowDatePicker: false,
+          forceShowTopNavMenu: true,
+          forceShowQueryInput: false,
+          forceHideFilterBar: false,
+        }}
+      />,
+      { dashboardApi }
     );
 
     expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(

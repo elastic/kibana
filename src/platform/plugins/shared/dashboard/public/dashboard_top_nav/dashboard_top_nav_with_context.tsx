@@ -11,13 +11,17 @@ import React from 'react';
 import type { InternalDashboardTopNavProps } from './internal_dashboard_top_nav';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import type { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
+import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
   dashboardApi: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
 }
 
 export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
-  <DashboardContext.Provider value={props.dashboardApi}>
-    <InternalDashboardTopNav {...props} />
-  </DashboardContext.Provider>
+  <DashboardInternalContext.Provider value={props.dashboardInternalApi}>
+    <DashboardContext.Provider value={props.dashboardApi}>
+      <InternalDashboardTopNav {...props} />
+    </DashboardContext.Provider>
+  </DashboardInternalContext.Provider>
 );
