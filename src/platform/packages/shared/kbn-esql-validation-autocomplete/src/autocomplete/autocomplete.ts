@@ -100,11 +100,42 @@ export async function suggest(
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
-        let fromCommand = '';
         const sources = await getSources();
         const visibleSources = sources.filter((source) => !source.hidden);
+
+        // Collect recommendations from all relevant source types
+        const sourceTypes = ['logs', 'metrics', 'traces'];
+        const recommendedQueriesSuggestionsFromExtensions: ISuggestionItem[] = [];
+
+        for (const sourceType of sourceTypes) {
+          const matchingSource = visibleSources.find((source) =>
+            source.name.startsWith(sourceType)
+          );
+          if (matchingSource) {
+            const fromCommand = `FROM ${sourceType}*`;
+
+            const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(
+              fromCommand
+            )) ?? {
+              recommendedQueries: [],
+            };
+
+            const extensionSuggestions = mapRecommendedQueriesFromExtensions(
+              editorExtensions.recommendedQueries
+            );
+
+            recommendedQueriesSuggestionsFromExtensions.push(...extensionSuggestions);
+          }
+        }
+
+        // Get static templates for the first available source (fallback behavior)
+        let fromCommand = '';
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
+        } else if (visibleSources.find((source) => source.name.startsWith('metrics'))) {
+          fromCommand = 'FROM metrics*';
+        } else if (visibleSources.find((source) => source.name.startsWith('traces'))) {
+          fromCommand = 'FROM traces*';
         } else if (visibleSources.length) {
           fromCommand = `FROM ${visibleSources[0].name}`;
         }
@@ -114,18 +145,13 @@ export async function suggest(
           innerText,
           resourceRetriever
         );
-        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
-          recommendedQueries: [],
-        };
-        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
-          editorExtensions.recommendedQueries
-        );
 
         const recommendedQueriesSuggestionsFromStaticTemplates =
           await getRecommendedQueriesSuggestionsFromStaticTemplates(
             getColumnsByTypeEmptyState,
             fromCommand
           );
+
         recommendedQueriesSuggestions.push(
           ...recommendedQueriesSuggestionsFromExtensions,
           ...recommendedQueriesSuggestionsFromStaticTemplates
