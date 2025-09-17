@@ -51,7 +51,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
                 aria-label={i18n.translate(
                   'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
                   {
-                    defaultMessage: 'See results in Discover',
+                    defaultMessage: 'Explore results in Discover',
                   }
                 )}
                 target="_blank"
