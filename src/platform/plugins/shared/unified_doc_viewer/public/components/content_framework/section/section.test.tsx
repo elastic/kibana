@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { ContentFrameworkSectionProps } from '.';
-import { ContentFrameworkSection } from '.';
 import userEvent from '@testing-library/user-event';
+import type { ContentFrameworkSectionProps } from './section';
+import { ContentFrameworkSection } from '../lazy_content_framework_section';
 
 const defaultProps: ContentFrameworkSectionProps = {
   title: 'Test Section',
