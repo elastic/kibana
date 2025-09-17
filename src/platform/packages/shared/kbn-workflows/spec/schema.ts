@@ -106,6 +106,8 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+export const TriggerTypes = ['alert', 'scheduled', 'manual'];
+
 /* --- Steps --- */
 const StepWithTimeoutSchema = z.object({
   timeout: z.number().optional(),
@@ -403,6 +405,8 @@ const StepSchema = z.lazy(() =>
     BaseConnectorStepSchema,
   ])
 );
+
+export const BuiltInStepTypes = ['foreach', 'if', 'parallel', 'merge', 'wait', 'http'];
 
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({

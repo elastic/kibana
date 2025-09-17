@@ -11,19 +11,19 @@
 import { jsx } from '@emotion/react';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import { BuiltInStepTypes, TriggerTypes, getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
+import YAML, { isPair, isScalar, isMap, visit, type YAMLMap } from 'yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -43,6 +43,13 @@ import {
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
+import { ActionsMenuPopover } from '../../actions_menu_popover';
+import { generateTriggerSnippet } from '../lib/snippets/generate_trigger_snippet';
+import type { ActionOptionData } from '../../actions_menu_popover/types';
+import { getIndentLevelFromLineNumber } from '../lib/get_indent_level';
+import { generateConnectorSnippet } from '../lib/snippets/generate_connector_snippet';
+import { generateBuiltInStepSnippet } from '../lib/snippets/generate_builtin_step_snippet';
+import { prependIndentToLines } from '../lib/prepend_indent_to_lines';
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
@@ -86,10 +93,12 @@ const getTriggerNodes = (
   return triggerNodes;
 };
 
-const getStepNodesWithType = (yamlDocument: YAML.Document): any[] => {
-  const stepNodes: any[] = [];
+const getStepNodesWithType = (yamlDocument: YAML.Document): YAMLMap[] => {
+  const stepNodes: YAMLMap[] = [];
 
-  if (!yamlDocument?.contents) return stepNodes;
+  if (!yamlDocument?.contents) {
+    return stepNodes;
+  }
 
   visit(yamlDocument, {
     Pair(key, pair, ancestors) {
@@ -263,6 +272,7 @@ export const WorkflowYAMLEditor = ({
     services: { http, notifications },
   } = useKibana<CoreStart>();
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const workflowJsonSchema = useWorkflowJsonSchema();
@@ -449,12 +459,161 @@ export const WorkflowYAMLEditor = ({
     [onChange, changeSideEffects]
   );
 
+  const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
+
+  const openActionsPopover = () => {
+    setActionsPopoverOpen(true);
+  };
+  const closeActionsPopover = () => {
+    setActionsPopoverOpen(false);
+  };
+
+  const onActionSelected = (action: ActionOptionData) => {
+    // TODO: add snippet according to the action at current cursor position or at last step position
+    function insertTriggerSnippet(triggerType: string) {
+      const model = editorRef.current?.getModel();
+      if (!yamlDocument || !model) {
+        // TODO: show error
+        return;
+      }
+      const triggerSnippet = generateTriggerSnippet(triggerType, false, true);
+      // find triggers: line number and column number
+      const triggerNodes = getTriggerNodes(yamlDocument);
+      const triggerNode = triggerNodes.find((node) => node.triggerType === triggerType);
+      let prepend = '';
+      let range = new monaco.Range(1, 1, 1, 1);
+      let indentLevel = 0;
+      if (triggerNode) {
+        // do not override existing trigger
+        return;
+      }
+      if (triggerNodes.length > 0) {
+        const lastTriggerRange = getMonacoRangeFromYamlNode(
+          model,
+          triggerNodes[triggerNodes.length - 1].node
+        );
+        if (lastTriggerRange) {
+          range = new monaco.Range(
+            lastTriggerRange.endLineNumber,
+            lastTriggerRange.endColumn,
+            lastTriggerRange.endLineNumber,
+            lastTriggerRange.endColumn
+          );
+          indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
+        }
+      } else {
+        prepend = 'triggers:\n  ';
+      }
+      model.applyEdits([
+        {
+          range,
+          text: prepend + prependIndentToLines(triggerSnippet, indentLevel) + '\n',
+        },
+      ]);
+    }
+    function insertBuiltInStepSnippet(stepType: string) {
+      const model = editorRef.current?.getModel();
+      if (!yamlDocument || !model) {
+        // TODO: show error
+        return;
+      }
+      const builtInStepSnippet = generateBuiltInStepSnippet(stepType, false, true);
+      const stepNodes = getStepNodesWithType(yamlDocument);
+      let prepend = '';
+      let range = new monaco.Range(1, 1, 1, 1);
+      let indentLevel = 0;
+      if (stepNodes.length === 0) {
+        prepend = 'steps:\n  ';
+      } else {
+        const lastStepRange = getMonacoRangeFromYamlNode(model, stepNodes[stepNodes.length - 1]);
+        if (lastStepRange) {
+          range = new monaco.Range(
+            lastStepRange.endLineNumber,
+            lastStepRange.endColumn,
+            lastStepRange.endLineNumber,
+            lastStepRange.endColumn
+          );
+          indentLevel = getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber);
+        }
+      }
+      model.applyEdits([
+        {
+          range,
+          text: prepend + prependIndentToLines(builtInStepSnippet, indentLevel) + '\n',
+        },
+      ]);
+    }
+    function insertConnectorSnippet(connectorType: string) {
+      const model = editorRef.current?.getModel();
+      if (!yamlDocument || !model) {
+        // TODO: show error
+        return;
+      }
+      const connectorSnippet = generateConnectorSnippet(connectorType, false, true);
+      const stepNodes = getStepNodesWithType(yamlDocument);
+      let prepend = '';
+      let range = new monaco.Range(1, 1, 1, 1);
+      let indentLevel = 0;
+      if (stepNodes.length === 0) {
+        prepend = 'steps:\n  ';
+      } else {
+        const lastStepRange = getMonacoRangeFromYamlNode(model, stepNodes[stepNodes.length - 1]);
+        if (lastStepRange) {
+          range = new monaco.Range(
+            lastStepRange.endLineNumber,
+            lastStepRange.endColumn,
+            lastStepRange.endLineNumber,
+            lastStepRange.endColumn
+          );
+          indentLevel = getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber);
+        }
+      }
+      model.applyEdits([
+        {
+          range,
+          text: prepend + prependIndentToLines(connectorSnippet, indentLevel) + '\n',
+        },
+      ]);
+    }
+    if (TriggerTypes.includes(action.id)) {
+      insertTriggerSnippet(action.id);
+    } else if (BuiltInStepTypes.includes(action.id)) {
+      insertBuiltInStepSnippet(action.id);
+    } else {
+      insertConnectorSnippet(action.id);
+    }
+    closeActionsPopover();
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'k' && event.metaKey) {
+        openActionsPopover();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
 
     editor.updateOptions({
       glyphMargin: true,
     });
+
+    // TODO: handle unmounting of the editor
+    // CMD+K shortcut, while focus is on the editor
+    editor.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+      () => {
+        openActionsPopover();
+      },
+      'Open actions popover'
+    );
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
@@ -813,9 +972,11 @@ export const WorkflowYAMLEditor = ({
           return isPair(item) && isScalar(item.key) && item.key.value === 'type';
         });
 
-        if (!typePair?.value?.value) continue;
+        if (!typePair || !isScalar(typePair.value)) {
+          continue;
+        }
 
-        const connectorType = typePair.value.value;
+        const connectorType = typePair.value.value as string;
         // console.log('🎨 Processing connector type:', connectorType);
 
         // Skip decoration for very short connector types to avoid false matches
@@ -1356,7 +1517,17 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <div css={styles.container}>
+    <div css={styles.container} ref={containerRef}>
+      <ActionsMenuPopover
+        anchorPosition="upCenter"
+        offset={32}
+        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+        container={containerRef.current ?? undefined}
+        closePopover={closeActionsPopover}
+        onActionSelected={onActionSelected}
+        isOpen={actionsPopoverOpen}
+        panelProps={{ css: styles.actionsMenuPopoverPanel }}
+      />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       {unifiedProvidersRef.current?.actions && (
@@ -1475,6 +1646,9 @@ export const WorkflowYAMLEditor = ({
 };
 
 const componentStyles = {
+  actionsMenuPopoverPanel: css({
+    minInlineSize: '600px',
+  }),
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
