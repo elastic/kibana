@@ -9,12 +9,14 @@
 
 import type { ProfileProviderServices } from '../profile_provider_services';
 import { createObservabilityLogDocumentProfileProvider } from './log_document_profile';
+import { createObservabilityGenericDocumentProfileProvider } from './observability_document_profile/document_profile';
 import { createObservabilityTracesDocumentProfileProvider } from './traces_document_profile/document_profile';
 
 export const createObservabilityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
   return [
+    createObservabilityGenericDocumentProfileProvider(providerServices),
     createObservabilityLogDocumentProfileProvider(providerServices),
     createObservabilityTracesDocumentProfileProvider(providerServices),
   ];
