@@ -39,11 +39,6 @@ describe('EnterTryBlockNodeImpl', () => {
       expect(workflowRuntime.startStep).toHaveBeenCalledWith();
     });
 
-    it('should enter scope', async () => {
-      await underTest.run();
-      expect(workflowRuntime.enterScope).toHaveBeenCalled();
-    });
-
     it('should go to normal path entry node', async () => {
       await underTest.run();
       expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.enterNormalPathNodeId);
@@ -55,16 +50,13 @@ describe('EnterTryBlockNodeImpl', () => {
         calls.push('startStep');
         return Promise.resolve();
       });
-      workflowRuntime.enterScope = jest.fn().mockImplementation(() => {
-        calls.push('enterScope');
-      });
       workflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
         calls.push('goToStep');
       });
 
       await underTest.run();
 
-      expect(calls).toEqual(['startStep', 'enterScope', 'goToStep']);
+      expect(calls).toEqual(['startStep', 'goToStep']);
     });
   });
 });

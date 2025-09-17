@@ -91,11 +91,6 @@ describe('ExitTryBlockNodeImpl', () => {
         expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
       });
 
-      it('should exit scope', async () => {
-        await underTest.run();
-        expect(workflowRuntime.exitScope).toHaveBeenCalled();
-      });
-
       it('should go to next step', async () => {
         await underTest.run();
         expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
@@ -120,7 +115,6 @@ describe('ExitTryBlockNodeImpl', () => {
       it('should handle null step state gracefully', async () => {
         await underTest.run();
         expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
-        expect(workflowRuntime.exitScope).toHaveBeenCalled();
         expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
       });
     });

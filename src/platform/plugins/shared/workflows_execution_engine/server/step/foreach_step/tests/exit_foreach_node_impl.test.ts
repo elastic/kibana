@@ -110,9 +110,9 @@ describe('ExitForeachNodeImpl', () => {
       );
     });
 
-    it('should exit iteration scope and whole foreach scope', async () => {
+    it('should exit iteration scope', async () => {
       await underTest.run();
-      expect(wfExecutionRuntimeManager.exitScope).toHaveBeenCalledTimes(2);
+      expect(wfExecutionRuntimeManager.exitScope).toHaveBeenCalledTimes(1);
     });
   });
 });

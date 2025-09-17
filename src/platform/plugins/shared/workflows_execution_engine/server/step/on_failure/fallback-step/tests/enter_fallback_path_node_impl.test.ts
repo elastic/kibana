@@ -25,7 +25,7 @@ describe('EnterFallbackPathNodeImpl', () => {
   describe('run', () => {
     it('should enter scope', async () => {
       await underTest.run();
-      expect(workflowRuntime.enterScope).toHaveBeenCalled();
+      expect(workflowRuntime.enterScope).toHaveBeenCalledWith('fallback');
     });
 
     it('should go to next node', async () => {

@@ -22,8 +22,6 @@ export class ExitForeachNodeImpl implements NodeImplementation {
   public async run(): Promise<void> {
     // Exit the scope of the current iteration
     this.wfExecutionRuntimeManager.exitScope();
-    // All items have been processed, exit the foreach scope
-    this.wfExecutionRuntimeManager.exitScope();
     const foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
 
     if (!foreachState) {

@@ -57,28 +57,10 @@ describe('EnterForeachNodeImpl', () => {
       (workflowExecutionRuntimeManager.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
     });
 
-    it('should enter the whole foreach scope', async () => {
-      await underTest.run();
-
-      expect(workflowExecutionRuntimeManager.enterScope as jest.Mock).toHaveBeenCalledWith();
-    });
-
     it('should enter the iteration scope', async () => {
       await underTest.run();
 
       expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
-    });
-
-    it('should enter scopes in correct order', async () => {
-      await underTest.run();
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenNthCalledWith(1);
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenNthCalledWith(2, '0');
-    });
-
-    it('should enter scope twice', async () => {
-      await underTest.run();
-
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledTimes(2);
     });
 
     it('should start step', async () => {
