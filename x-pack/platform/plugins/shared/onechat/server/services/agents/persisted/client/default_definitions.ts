@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/onechat-common';
 import { AgentType, oneChatDefaultAgentId, defaultAgentToolIds } from '@kbn/onechat-common';
+import type { PersistedAgentDefinition } from '../types';
 
-export const createDefaultAgentDefinition = (): AgentDefinition => {
+export const createDefaultAgentDefinition = (): PersistedAgentDefinition => {
   return {
     id: oneChatDefaultAgentId,
     type: AgentType.chat,

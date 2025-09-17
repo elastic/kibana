@@ -16,6 +16,7 @@ import { validateAgentId } from '@kbn/onechat-common/agents';
 import type {
   AgentCreateRequest,
   AgentListOptions,
+  AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type { AgentClient } from './client';
@@ -33,10 +34,10 @@ export type InternalAgentDefinition = AgentDefinition;
 export interface AgentRegistry {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<InternalAgentDefinition>;
-  list(opts: AgentListOptions): Promise<InternalAgentDefinition[]>;
+  list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
-  delete(agentId: string): Promise<boolean>;
+  delete(args: AgentDeleteRequest): Promise<boolean>;
 
   /*
   execute<TParams extends object = Record<string, unknown>>(
@@ -123,7 +124,7 @@ class AgentRegistryImpl implements AgentRegistry {
     throw createAgentNotFoundError({ agentId });
   }
 
-  async delete(agentId: string): Promise<boolean> {
+  async delete({ id: agentId }: AgentDeleteRequest): Promise<boolean> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
         if (isReadonlyProvider(provider)) {

@@ -8,7 +8,6 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BuiltinAgentRegistry } from './registry';
 import type { ReadonlyAgentProvider, AgentProviderFn } from '../agent_source';
-import { InternalAgentDefinition } from '@kbn/onechat-plugin/server/services/agents/agent_registry';
 
 export const createBuiltinProviderFn =
   ({ registry }: { registry: BuiltinAgentRegistry }): AgentProviderFn<true> =>

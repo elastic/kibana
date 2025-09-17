@@ -12,7 +12,7 @@ import {
 } from '@kbn/onechat-common';
 import type { ToolSelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ToolRegistry } from '../../tools';
+import type { ToolRegistry } from '../../../tools';
 
 export const ensureValidId = (id: string) => {
   if (!agentIdRegexp.test(id)) {

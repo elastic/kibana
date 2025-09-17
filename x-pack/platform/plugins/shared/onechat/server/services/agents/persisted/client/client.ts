@@ -12,7 +12,6 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import {
-  type AgentDefinition,
   createAgentNotFoundError,
   createBadRequestError,
   oneChatDefaultAgentId,
@@ -24,8 +23,9 @@ import type {
   AgentDeleteRequest,
   AgentListOptions,
   AgentUpdateRequest,
-} from '../../../../common/agents';
-import type { ToolsServiceStart } from '../../tools';
+} from '../../../../../common/agents';
+import type { ToolsServiceStart } from '../../../tools';
+import type { PersistedAgentDefinition } from '../types';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
@@ -34,10 +34,10 @@ import { createDefaultAgentDefinition } from './default_definitions';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<AgentDefinition>;
-  create(profile: AgentCreateRequest): Promise<AgentDefinition>;
-  update(agentId: string, profile: AgentUpdateRequest): Promise<AgentDefinition>;
-  list(options?: AgentListOptions): Promise<AgentDefinition[]>;
+  get(agentId: string): Promise<PersistedAgentDefinition>;
+  create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
+  update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
+  list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
 }
 
@@ -89,7 +89,7 @@ class AgentClientImpl implements AgentClient {
     this.user = user;
   }
 
-  async get(agentId: string): Promise<AgentDefinition> {
+  async get(agentId: string): Promise<PersistedAgentDefinition> {
     const document = await this._get(agentId);
     if (!document) {
       if (agentId === oneChatDefaultAgentId) {
@@ -116,7 +116,7 @@ class AgentClientImpl implements AgentClient {
     return document !== undefined;
   }
 
-  async list(options: AgentListOptions = {}): Promise<AgentDefinition[]> {
+  async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
@@ -136,7 +136,7 @@ class AgentClientImpl implements AgentClient {
     return agents;
   }
 
-  async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
+  async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
     const now = new Date();
 
     ensureValidId(profile.id);
@@ -159,7 +159,10 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
-  async update(agentId: string, profileUpdate: AgentUpdateRequest): Promise<AgentDefinition> {
+  async update(
+    agentId: string,
+    profileUpdate: AgentUpdateRequest
+  ): Promise<PersistedAgentDefinition> {
     // temporary, until we enable default agent update
     if (agentId === oneChatDefaultAgentId) {
       throw createBadRequestError(`Default agent cannot be updated.`);
