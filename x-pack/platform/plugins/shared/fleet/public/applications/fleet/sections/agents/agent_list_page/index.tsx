@@ -180,20 +180,25 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const updateProtectedAndFleetAgents = (agents: Agent[] | string) => {
-    const protectedAgents = Array.isArray(agents)
-      ? agents.filter((agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected)
-      : [];
-    const fleetAgents = Array.isArray(agents)
-      ? agents.filter((agent) =>
-          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
-            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+  const updateProtectedAndFleetAgents = useMemo(
+    () => (agents: Agent[] | string) => {
+      const protectedAgents = Array.isArray(agents)
+        ? agents.filter(
+            (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
           )
-        )
-      : [];
-    const unallowedAgents = [...protectedAgents, ...fleetAgents];
-    setProtectedAndFleetAgents(unallowedAgents);
-  };
+        : [];
+      const fleetAgents = Array.isArray(agents)
+        ? agents.filter((agent) =>
+            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+              (p) => p.package?.name === FLEET_SERVER_PACKAGE
+            )
+          )
+        : [];
+      const unallowedAgents = [...protectedAgents, ...fleetAgents];
+      setProtectedAndFleetAgents(unallowedAgents);
+    },
+    [agentPoliciesIndexedById]
+  );
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =

@@ -41,8 +41,8 @@ import type {
 import type { Agent } from '../../../../../types';
 
 import {
-  useMigrateSingleAgent,
-  useBulkMigrateAgents,
+  sendMigrateSingleAgent,
+  sendBulkMigrateAgents,
   useStartServices,
 } from '../../../../../hooks';
 
@@ -64,8 +64,8 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
   protectedAndFleetAgents,
 }) => {
   const { notifications } = useStartServices();
-  const migrateAgent = useMigrateSingleAgent;
-  const migrateAgents = useBulkMigrateAgents;
+  const migrateAgent = sendMigrateSingleAgent;
+  const migrateAgents = sendBulkMigrateAgents;
   const [formValid, setFormValid] = React.useState(false);
   const [validClusterURL, setValidClusterURL] = React.useState(false);
   const [formContent, setFormContent] = React.useState<
@@ -86,6 +86,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
         ? agents.filter((agent) => !protectedAndFleetAgents.some((a) => a.id === agent.id))
         : agents,
     [agents, protectedAndFleetAgents]
+  );
+  const filteredAgentCount = useMemo(
+    () => (Array.isArray(filteredAgents) ? filteredAgents.length : agentCount),
+    [agentCount, filteredAgents]
   );
 
   useEffect(() => {
@@ -116,20 +120,20 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
     validateForm();
   }, [formContent, validClusterURL, filteredAgents]);
 
-  const submitForm = () => {
+  const submitForm = async () => {
     try {
       if (Array.isArray(filteredAgents)) {
         if (filteredAgents.length === 1) {
-          migrateAgent({ ...formContent, id: filteredAgents[0].id });
+          await migrateAgent({ ...formContent, id: filteredAgents[0].id });
         } else {
-          migrateAgents({
+          await migrateAgents({
             ...formContent,
             agents: filteredAgents.map((agent) => agent.id),
           });
         }
       } else {
         // agents is a query string
-        migrateAgents({
+        await migrateAgents({
           ...formContent,
           agents: filteredAgents,
         });
@@ -149,7 +153,11 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
     } catch (e) {
       notifications.toasts.addError(e, {
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.errorNotificationTitle', {
-          defaultMessage: 'Failed to migrate agent',
+          // defaultMessage: 'Failed to migrate agents',
+          defaultMessage: 'Failed to migrate {agentCount, plural, one {agent} other {agents}}',
+          values: {
+            agentCount: filteredAgentCount,
+          },
         }),
         toastMessage: i18n.translate(
           'xpack.fleet.agentList.migrateAgentFlyout.errorNotificationDescription',
@@ -175,7 +183,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 id="xpack.fleet.agentList.migrateAgentFlyout.title"
                 defaultMessage="Migrate {agentCount, plural, one {agent} other {agents}}"
                 values={{
-                  agentCount: agents.length,
+                  agentCount: filteredAgentCount,
                 }}
               />
             </h1>
@@ -186,7 +194,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
               id="xpack.fleet.agentList.migrateAgentFlyout.title"
               defaultMessage="Move {agentCount, plural, one {this agent} other {these agents}} to a different Fleet Server by specifying a new cluster URL and enrollment token."
               values={{
-                agentCount: agents.length,
+                agentCount: filteredAgentCount,
               }}
             />
           </EuiText>
@@ -661,7 +669,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 id="xpack.fleet.agentList.migrateAgentFlyout.submitButtonLabel"
                 defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
                 values={{
-                  agentCount: Array.isArray(filteredAgents) ? filteredAgents.length : agentCount,
+                  agentCount: filteredAgentCount,
                 }}
               />
             </EuiButton>
