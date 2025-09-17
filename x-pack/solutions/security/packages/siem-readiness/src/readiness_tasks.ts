@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export type ReadinessTaskId =
+  | 'lets-get-started'
   | 'enable-endpoint-visibility'
   | 'ingest-cloud-audit-logs'
   | 'ingest-asset-inventory'
@@ -43,6 +44,20 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
    *  ### Visibility Pillar Tasks ###
    */
   {
+    // Completion: User selects their infrastructure platforms for tailored recommendations
+    id: 'lets-get-started',
+    title: i18n.translate('xpack.securitySolution.readinessTask.letsGetStarted.title', {
+      defaultMessage: 'Lets get started',
+    }),
+    description: i18n.translate('xpack.securitySolution.readinessTask.letsGetStarted.description', {
+      defaultMessage:
+        'To complete this task, we need a bit more information about your infrastructure. Select the platforms you use (e.g. AWS, Azure, GCP, On-prem). This helps us tailor recommendations and accurately measure your readiness.',
+    }),
+    pillar: 'visibility',
+    order: 1,
+    taskNumber: '1',
+  },
+  {
     // Completion: Elastic Defend agent running (healthy) or 3rd-party endpoint logs successfully ingested
     id: 'enable-endpoint-visibility',
     title: i18n.translate('xpack.securitySolution.readinessTask.enableEndpointVisibility.title', {
@@ -51,13 +66,15 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     description: i18n.translate(
       'xpack.securitySolution.readinessTask.enableEndpointVisibility.description',
       {
-        defaultMessage:
-          'Choose one of the following: (1) Deploy Elastic Defend to gain rich host and process telemetry, or (2) Ingest logs from existing endpoint protection tools (e.g. CrowdStrike, SentinelOne, Microsoft Defender) using supported integrations. This enables foundational endpoint visibility for investigation and detection',
+        defaultMessage: `Choose one of the following:
+  1. Deploy Elastic Defend to gain rich host and process telemetry
+  2. Ingest logs from existing endpoint protection tools (e.g. CrowdStrike, SentinelOne, Microsoft Defender) using supported integrations.
+This enables foundational endpoint visibility for investigation and detection.`,
       }
     ),
     pillar: 'visibility',
-    order: 1,
-    taskNumber: '1',
+    order: 2,
+    taskNumber: '2',
   },
   {
     // Completion: Events successfully ingested from at least one cloud provider (AWS/GCP/Azure/On-Prem)
@@ -73,8 +90,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 2,
-    taskNumber: '2',
+    order: 3,
+    taskNumber: '3',
   },
   {
     // Completion: Cloud asset inventory indexed or visible in Inventory dashboard
@@ -90,8 +107,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 6,
-    taskNumber: '3',
+    order: 7,
+    taskNumber: '4',
   },
   {
     // Completion: Ingested logs from container/k8s integration
@@ -110,8 +127,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 10,
-    taskNumber: '4',
+    order: 11,
+    taskNumber: '5',
   },
   {
     // Completion: Logs + asset data present from AWS, Azure, and GCP (dynamic based on Asset Inventory/Entity store)
@@ -131,8 +148,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 15,
-    taskNumber: '5',
+    order: 16,
+    taskNumber: '6',
   },
 
   /**
@@ -155,7 +172,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 3,
+    order: 4,
     taskNumber: '1',
   },
   {
@@ -172,7 +189,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 4,
+    order: 5,
     taskNumber: '2',
   },
   {
@@ -189,7 +206,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 7,
+    order: 8,
     taskNumber: '3',
   },
   {
@@ -206,7 +223,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 8,
+    order: 9,
     taskNumber: '4',
   },
   {
@@ -223,7 +240,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 11,
+    order: 12,
     taskNumber: '5',
   },
   {
@@ -239,7 +256,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 13,
+    order: 14,
     taskNumber: '6',
   },
   {
@@ -256,8 +273,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 16,
-    taskNumber: '1',
+    order: 17,
+    taskNumber: '7',
   },
 
   /**
@@ -279,8 +296,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 5,
-    taskNumber: '2',
+    order: 6,
+    taskNumber: '1',
   },
   {
     // Completion: Summary generated on Alert - AI assistant workflow
@@ -299,8 +316,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 9,
-    taskNumber: '3',
+    order: 10,
+    taskNumber: '2',
   },
   {
     // Completion: Jira/Slack/ServiceNow/SentinelOne/Crowdstrike connector tested and in use
@@ -315,8 +332,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 12,
-    taskNumber: '4',
+    order: 13,
+    taskNumber: '3',
   },
   {
     // Completion: At least one rule creates a case or sends notification automatically
@@ -335,8 +352,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 14,
-    taskNumber: '5',
+    order: 15,
+    taskNumber: '4',
   },
   {
     // Completion: Multiple alerts triaged and closed via case workflow
@@ -352,8 +369,8 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 17,
-    taskNumber: '6',
+    order: 18,
+    taskNumber: '5',
   },
   {
     // Completion: 3+ cases with automation and alert linkages resolved
@@ -368,7 +385,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 18,
-    taskNumber: '7',
+    order: 19,
+    taskNumber: '6',
   },
 ] as const;
