@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
+import { PLUGIN_TITLE } from '../../../common';
 
 interface RulesetDetailEmptyPromptProps {
   isFilter?: boolean;
