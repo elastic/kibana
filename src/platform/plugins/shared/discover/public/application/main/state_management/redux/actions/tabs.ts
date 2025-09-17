@@ -186,6 +186,12 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           query ?? services.data.query.queryString.getDefaultQuery()
         );
 
+        if (nextTab.dataRequestParams.searchSessionId) {
+          services.data.search.session.continue(nextTab.dataRequestParams.searchSessionId, true);
+        } else {
+          services.data.search.session.start();
+        }
+
         nextTabStateContainer.actions.initializeAndSync();
       } else {
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
