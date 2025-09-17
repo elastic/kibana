@@ -359,7 +359,7 @@ export const foo: SavedObjectsType = {
 
 ### CI is failing for my PR
 
-We have recently put in place a mechanism to automatically perform some validations on _Saved Object_ type definitions.
+CI automatically performs some validations on _Saved Object_ type definitions.
 Whenever a new SO type is added, or a new field is added to an existing type, a CI step will _Check changes in saved objects_.
 
 Please find your error in the list below, to understand what scenario your PR is falling into:
@@ -394,7 +394,7 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 ❌ The '<soType>' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.
 ```
 **Problem:** Whenever we update the mappings for a SO type, we must signal the migration logic that this types' mappings must be updated in the SO index.
-**Solution:** Create a new `modelVersion` that includes the `type: 'mappings_addition', as well as the `schemas.forwardCompatibility` properties.
+**Solution:** Create a new `modelVersion` that includes the `type: 'mappings_addition'`, as well as the `schemas.forwardCompatibility` properties.
 
 ```
 ❌ The SO type '<soType>' is defining two (or more) new model versions.
@@ -404,5 +404,5 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 **Scenario 2:** I have only defined 1 new `modelVersion`. My PR was green before and all of a sudden it started failing :shrug:. The sanity checks on SO changes are performed against 2 baselines:
 * Your PR merge base commit (or one of its ancestors). This should not change, so likely not the culprit.
 * The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, _"from the current serverless standpoint, your PR is not releasable at the moment"_ . This should only happen exceptionally. Please take a look at the `#kibana-mission-control` channel to see if something is going on.
-  * **Scenario 2.1**: Kibana has been rollbacked. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and Kibana gets to a normal release state.
+  * **Scenario 2.1**: Kibana has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and Kibana gets to a normal release state.
   * **Scenario 2.2**: Reach out to `#kibana-core` and we will help you figure out what's going on.
