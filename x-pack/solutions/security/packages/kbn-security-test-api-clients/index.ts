@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SecuritySolutionApiProvider } from './src/security_solution_api.gen';
+export * from './src/security_solution_api.gen';
