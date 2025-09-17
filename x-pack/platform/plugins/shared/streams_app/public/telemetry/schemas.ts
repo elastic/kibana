@@ -14,7 +14,7 @@ import type {
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
-  StreamsSchemaFieldUpdatedProps,
+  StreamsSchemaUpdatedProps,
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
@@ -205,7 +205,7 @@ const streamsChildStreamCreatedSchema: RootSchema<StreamsChildStreamCreatedProps
   },
 };
 
-const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaFieldUpdatedProps> = {
+const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   stream_type: {
     type: 'keyword',
     _meta: {
