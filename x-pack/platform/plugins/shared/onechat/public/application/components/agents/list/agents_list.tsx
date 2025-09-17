@@ -22,12 +22,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
+import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../agent_avatar';
 
@@ -181,7 +183,12 @@ export const AgentsList: React.FC = () => {
 
   const labelOptions = useMemo(() => {
     const labels = agents.flatMap((agent) => agent.labels ?? []);
-    return Array.from(new Set(labels)).map((label) => ({ value: label }));
+    const matchesByLabel = countBy(labels);
+    const uniqueLabels = Object.keys(matchesByLabel);
+    return uniqueLabels.map((label) => ({
+      value: label,
+      view: <FilterOptionWithMatchesBadge name={label} matches={matchesByLabel[label]} />,
+    }));
   }, [agents]);
 
   return (
@@ -200,6 +207,7 @@ export const AgentsList: React.FC = () => {
             options: labelOptions,
             field: 'labels',
             operator: 'exact',
+            autoSortOptions: false,
           },
         ],
       }}
