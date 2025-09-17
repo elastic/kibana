@@ -761,6 +761,169 @@ describe('Package policy secrets', () => {
     });
   });
 
+  describe('cloud connector secrets references', () => {
+    const createCspmPackagePolicy = (supportsCloudConnector?: boolean) => ({
+      inputs: [
+        {
+          type: 'cloudbeat/cis_aws',
+          policy_template: 'cspm',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'log.findings',
+              },
+              vars: {
+                paths: {
+                  value: ['/tmp/test.log'],
+                },
+                'data_stream.dataset': {
+                  value: 'hello',
+                },
+                'aws.credentials.external_id': {
+                  value: { id: 'aws-external-id-secret', isSecretRef: true },
+                  type: 'password',
+                },
+                'aws.role_arn': {
+                  value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ],
+      ...(supportsCloudConnector !== undefined && {
+        supports_cloud_connector: supportsCloudConnector,
+      }),
+    });
+
+    it('should extract cloud connector secret references when supports_cloud_connector is true', () => {
+      const packagePolicy = createCspmPackagePolicy(true);
+      const secretPaths = [
+        { value: { value: { id: 'aws-external-id-secret', isSecretRef: true } } },
+        { value: { value: { id: 'role-arn-secret', isSecretRef: true } } },
+      ];
+
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
+        ? secretPaths
+            .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+            .map((secretPath) => ({
+              id: secretPath.value.value?.id,
+            }))
+        : [];
+
+      expect(cloudConnectorsSecretReferences).toEqual([
+        { id: 'aws-external-id-secret' },
+        { id: 'role-arn-secret' },
+      ]);
+    });
+
+    it('should return empty array when supports_cloud_connector is false', () => {
+      const packagePolicy = createCspmPackagePolicy(false);
+      const secretPaths = [
+        { value: { value: { id: 'aws-external-id-secret', isSecretRef: true } } },
+      ];
+
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
+        ? secretPaths
+            .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+            .map((secretPath) => ({
+              id: secretPath.value.value?.id,
+            }))
+        : [];
+
+      expect(cloudConnectorsSecretReferences).toEqual([]);
+    });
+
+    it('should return empty array when supports_cloud_connector is undefined', () => {
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'cloudbeat/cis_aws',
+            policy_template: 'cspm',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'log.findings',
+                },
+                vars: {
+                  paths: {
+                    value: ['/tmp/test.log'],
+                  },
+                  'data_stream.dataset': {
+                    value: 'hello',
+                  },
+                  'secret-1': {
+                    value: 'secret-1-value',
+                  },
+                  'secret-2': {
+                    value: 'secret-2-value',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+      const secretPaths = [{ value: { value: { id: 'secret-123', isSecretRef: true } } }];
+
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
+        ? secretPaths
+            .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+            .map((secretPath) => ({
+              id: secretPath.value.value?.id,
+            }))
+        : [];
+
+      expect(cloudConnectorsSecretReferences).toEqual([]);
+    });
+
+    it('should filter only cloud connector secret references from mixed secret paths', () => {
+      const packagePolicy = createCspmPackagePolicy(true);
+      const secretPaths = [
+        { value: { value: { id: 'aws-external-id-secret', isSecretRef: true } } },
+        { value: { value: { id: 'not-secret', isSecretRef: false } } },
+        { value: { value: { id: 'aws-role-arn', isSecretRef: false } } },
+      ];
+
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
+        ? secretPaths
+            .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+            .map((secretPath) => ({
+              id: secretPath.value.value?.id,
+            }))
+        : [];
+
+      expect(cloudConnectorsSecretReferences).toEqual([{ id: 'aws-external-id-secret' }]);
+    });
+
+    it('should return empty array when no secret paths exist', () => {
+      const packagePolicy = createCspmPackagePolicy(true);
+      const secretPaths: Array<{ value: { value: { id: string; isSecretRef: boolean } } }> = [];
+
+      const cloudConnectorsSecretReferences = (packagePolicy as unknown as NewPackagePolicy)
+        ?.supports_cloud_connector
+        ? secretPaths
+            .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+            .map((secretPath) => ({
+              id: secretPath.value.value?.id,
+            }))
+        : [];
+
+      expect(cloudConnectorsSecretReferences).toEqual([]);
+    });
+  });
+
   describe('diffSecretPaths', () => {
     it('should return empty array if no secrets', () => {
       expect(diffSecretPaths([], [])).toEqual({

@@ -43,12 +43,27 @@ export async function extractAndWriteSecrets(opts: {
 }): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: SecretReference[] }> {
   const { packagePolicy, packageInfo, esClient } = opts;
   const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
+  const cloudConnectorsSecretReferences =
+    packagePolicy.supports_cloud_connector && packagePolicy.cloud_connector_id
+      ? getCloudConnectorSecretReferences(packagePolicy, secretPaths)
+      : [];
 
   if (!secretPaths.length) {
     return { packagePolicy, secretReferences: [] };
   }
 
-  const secretsToCreate = secretPaths.filter((secretPath) => !!secretPath.value.value);
+  const secretsToCreate = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
+  );
+
+  const hasCloudConnectorSecretReferences =
+    packagePolicy.supports_cloud_connector &&
+    packagePolicy.cloud_connector_id &&
+    cloudConnectorsSecretReferences.length;
+
+  if (hasCloudConnectorSecretReferences) {
+    return { packagePolicy, secretReferences: cloudConnectorsSecretReferences };
+  }
 
   const secrets = await createSecrets({
     esClient,
@@ -63,12 +78,14 @@ export async function extractAndWriteSecrets(opts: {
 
   return {
     packagePolicy: policyWithSecretRefs,
-    secretReferences: secrets.reduce((acc: SecretReference[], secret) => {
-      if (Array.isArray(secret)) {
-        return [...acc, ...secret.map(({ id }) => ({ id }))];
-      }
-      return [...acc, { id: secret.id }];
-    }, []),
+    secretReferences: [
+      ...secrets.reduce((acc: SecretReference[], secret) => {
+        if (Array.isArray(secret)) {
+          return [...acc, ...secret.map(({ id }) => ({ id }))];
+        }
+        return [...acc, { id: secret.id }];
+      }, []),
+    ],
   };
 }
 
@@ -466,4 +483,24 @@ function toVarSecretRef(secret: Secret | Secret[]): VarSecretReference {
     return { ids: secret.map(({ id }) => id), isSecretRef: true };
   }
   return { id: secret.id, isSecretRef: true };
+}
+
+function getCloudConnectorSecretReferences(
+  packagePolicy: NewPackagePolicy,
+  secretPaths: SecretPath[]
+): SecretReference[] {
+  // For cloud connectors, we need to find secret paths that are already secret references
+  if (!packagePolicy?.supports_cloud_connector || !packagePolicy.cloud_connector_id) {
+    return [];
+  }
+  return secretPaths
+    .filter(
+      (secretPath) =>
+        !!secretPath.value?.value &&
+        typeof secretPath.value.value === 'object' &&
+        secretPath.value.value?.id
+    )
+    .map((secretPath) => ({
+      id: secretPath.value.value?.id,
+    }));
 }

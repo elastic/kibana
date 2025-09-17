@@ -132,6 +132,18 @@ export interface DeleteQueriesAction {
   };
 }
 
+export interface UpdateIngestSettingsAction {
+  type: 'update_ingest_settings';
+  request: {
+    name: string;
+    settings: {
+      'index.number_of_replicas'?: number | null;
+      'index.number_of_shards'?: number | null;
+      'index.refresh_interval': string | -1 | null;
+    };
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -149,7 +161,8 @@ export type ElasticsearchAction =
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
-  | DeleteQueriesAction;
+  | DeleteQueriesAction
+  | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -169,4 +182,5 @@ export interface ActionsByType {
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  update_ingest_settings: UpdateIngestSettingsAction[];
 }
