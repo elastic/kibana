@@ -375,7 +375,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const createJsmConnector = async (name: string) => {
       return actions.api.createConnector({
         name,
-        config: {},
+        config: { apiUrl: 'https://test.com' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.jira-service-management',
       });
