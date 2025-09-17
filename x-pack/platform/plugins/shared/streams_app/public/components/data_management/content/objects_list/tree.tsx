@@ -61,8 +61,8 @@ export function StreamTree({
     );
   }, [rows]);
   const hasDepth = React.useMemo(
-    () => sortedRows.some((row) => getSegments(row.name).length > 1),
-    [sortedRows]
+    () => Object.values(rows).some((row) => getSegments(row.name).length > 1),
+    [rows]
   );
 
   const selectedCount = Object.values(rows).filter(({ selected }) => selected).length;

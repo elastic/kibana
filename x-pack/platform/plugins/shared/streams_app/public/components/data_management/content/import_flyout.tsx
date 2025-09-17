@@ -58,8 +58,10 @@ export function ImportContentPackFlyout({
   const modalTitleId = useGeneratedHtmlId();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
+  const [file, setFile] = useState<File | undefined>(undefined);
+  const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[] | undefined>(
+    undefined
+  );
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
     objects: { all: {} },
   });
@@ -123,7 +125,7 @@ export function ImportContentPackFlyout({
                   });
                   setContentPackObjects(contentPackParsed.entries);
                 } catch (err) {
-                  setFile(null);
+                  setFile(undefined);
 
                   notifications.toasts.addError(err, {
                     title: i18n.translate('xpack.streams.failedToPreviewContentError', {
@@ -133,14 +135,14 @@ export function ImportContentPackFlyout({
                   });
                 }
               } else {
-                setFile(null);
+                setFile(undefined);
               }
             }}
             display={'large'}
           />
         )}
 
-        {file && manifest && significantEvents ? (
+        {file && manifest && significantEvents && contentPackObjects ? (
           <>
             <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -155,7 +157,16 @@ export function ImportContentPackFlyout({
                 </EuiFlexGroup>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="cross" color="danger" onClick={() => setFile(null)} />
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="danger"
+                    onClick={() => {
+                      setFile(undefined);
+                      setManifest(undefined);
+                      setContentPackObjects(undefined);
+                      setIncludedObjects({ objects: { all: {} } });
+                    }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -186,7 +197,7 @@ export function ImportContentPackFlyout({
               data-test-subj="streamsAppModalFooterButton"
               isDisabled={
                 !file ||
-                isEmptyContentPack(contentPackObjects) ||
+                isEmptyContentPack(contentPackObjects ?? []) ||
                 !hasSelectedObjects(includedObjects)
               }
               isLoading={isLoading}
@@ -205,8 +216,8 @@ export function ImportContentPackFlyout({
                   });
 
                   setIsLoading(false);
-                  setContentPackObjects([]);
-                  setFile(null);
+                  setContentPackObjects(undefined);
+                  setFile(undefined);
                   notifications.toasts.addSuccess(
                     i18n.translate('xpack.streams.exportContentPackFlyout.importSuccess', {
                       defaultMessage: 'Content imported successfully',

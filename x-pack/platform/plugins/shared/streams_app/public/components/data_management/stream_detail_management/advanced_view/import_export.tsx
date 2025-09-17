@@ -29,7 +29,7 @@ export function ImportExportPanel({
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
             <h3>
-              {i18n.translate('xpack.streams.streamAdvancedView.indexConfiguration', {
+              {i18n.translate('xpack.streams.streamAdvancedView.importExportTitle', {
                 defaultMessage: 'Import & export',
               })}
             </h3>
