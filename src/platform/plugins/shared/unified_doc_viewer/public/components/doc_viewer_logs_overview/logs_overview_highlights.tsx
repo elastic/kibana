@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -18,6 +17,7 @@ import type { FieldConfiguration } from '../content_framework';
 import { ContentFrameworkTable } from '../content_framework';
 import { HighlightField } from '../observability/traces/components/highlight_field';
 import { TraceIdLink } from '../observability/traces/components/trace_id_link';
+import { fieldLabels } from '../observability/constants';
 
 interface LogsOverviewHighlightsProps
   extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
@@ -86,19 +86,13 @@ const fieldNames: Array<keyof LogDocumentOverview> = [
 const fieldConfigurations: Record<string, FieldConfiguration> = {
   // Service & Infrastructure
   [fieldConstants.SERVICE_NAME_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.service', {
-      defaultMessage: 'Service',
-    }),
+    title: fieldLabels.SERVICE_NAME_LABEL,
   },
   [fieldConstants.HOST_NAME_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.hostName', {
-      defaultMessage: 'Host name',
-    }),
+    title: fieldLabels.HOST_NAME_LABEL,
   },
   [fieldConstants.TRACE_ID_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.trace', {
-      defaultMessage: 'Trace',
-    }),
+    title: fieldLabels.TRACE_ID_LABEL,
     formatter: (value: unknown, formattedValue: string) => (
       <HighlightField value={value as string} formattedValue={formattedValue}>
         {({ content }) => (
@@ -112,56 +106,37 @@ const fieldConfigurations: Record<string, FieldConfiguration> = {
     ),
   },
   [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.orchestratorClusterName', {
-      defaultMessage: 'Orchestrator cluster Name',
-    }),
+    title: fieldLabels.ORCHESTRATOR_CLUSTER_NAME_LABEL,
   },
   [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.orchestratorResourceId', {
-      defaultMessage: 'Orchestrator resource ID',
-    }),
+    title: fieldLabels.ORCHESTRATOR_RESOURCE_ID_LABEL,
   },
   // Cloud
   [fieldConstants.CLOUD_PROVIDER_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudProvider', {
-      defaultMessage: 'Cloud provider',
-    }),
+    title: fieldLabels.CLOUD_PROVIDER_LABEL,
   },
   [fieldConstants.CLOUD_REGION_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudRegion', {
-      defaultMessage: 'Cloud region',
-    }),
+    title: fieldLabels.CLOUD_REGION_LABEL,
   },
   [fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudAvailabilityZone', {
-      defaultMessage: 'Cloud availability zone',
-    }),
+    title: fieldLabels.CLOUD_AVAILABILITY_ZONE_LABEL,
   },
   [fieldConstants.CLOUD_PROJECT_ID_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudProjectId', {
-      defaultMessage: 'Cloud project ID',
-    }),
+    title: fieldLabels.CLOUD_PROJECT_ID_LABEL,
   },
   [fieldConstants.CLOUD_INSTANCE_ID_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudInstanceId', {
-      defaultMessage: 'Cloud instance ID',
-    }),
+    title: fieldLabels.CLOUD_INSTANCE_ID_LABEL,
   },
   // Other
   [fieldConstants.LOG_FILE_PATH_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.logPathFile', {
-      defaultMessage: 'Log path file',
-    }),
+    title: fieldLabels.LOG_FILE_PATH_LABEL,
   },
   [fieldConstants.DATASTREAM_DATASET_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.dataset', {
-      defaultMessage: 'Dataset',
-    }),
+    title: fieldLabels.DATASTREAM_DATASET_LABEL,
   },
   [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.namespace', {
-      defaultMessage: 'Namespace',
-    }),
+    title: fieldLabels.DATASTREAM_NAMESPACE_LABEL,
+
     formatter: (value, formattedValue) => (
       <HighlightField value={value as string} formattedValue={formattedValue}>
         {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
@@ -169,8 +144,6 @@ const fieldConfigurations: Record<string, FieldConfiguration> = {
     ),
   },
   [fieldConstants.AGENT_NAME_FIELD]: {
-    title: i18n.translate('unifiedDocViewer.docView.logsOverview.label.shipper', {
-      defaultMessage: 'Shipper',
-    }),
+    title: fieldLabels.AGENT_NAME_LABEL,
   },
 };
