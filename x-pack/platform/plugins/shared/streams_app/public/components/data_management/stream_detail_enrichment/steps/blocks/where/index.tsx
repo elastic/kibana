@@ -115,24 +115,25 @@ export const WhereBlock = ({
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem
-                  grow={false}
-                  css={
-                    hasChildren
-                      ? css`
-                          margin-left: -${euiTheme.size.m};
-                        `
-                      : undefined
-                  }
-                >
-                  {hasChildren ? (
+                {hasChildren ? (
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      margin-left: -${euiTheme.size.m};
+                    `}
+                  >
                     <EuiButtonIcon
                       iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                       onClick={toggle}
                     />
-                  ) : null}
-                </EuiFlexItem>
-                <EuiFlexItem>
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem
+                  // Overflow is here to faciliate text truncation of long conditions in the summary
+                  css={css`
+                    overflow: hidden;
+                  `}
+                >
                   <WhereBlockSummary
                     stepRef={stepRef}
                     stepUnderEdit={stepUnderEdit}

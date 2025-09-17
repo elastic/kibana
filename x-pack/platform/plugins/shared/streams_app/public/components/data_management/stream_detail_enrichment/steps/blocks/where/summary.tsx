@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiBadge,
-  EuiTextTruncate,
-} from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
 import type { Condition, FilterCondition, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -50,18 +43,31 @@ export const WhereBlockSummary = ({
 
   return (
     <EuiFlexGroup
+      gutterSize="s"
       css={css`
         position: relative;
       `}
+      alignItems="center"
     >
       {/* The step under edit is part of the same root level hierarchy,
       and therefore won't be covered by a top level where block overlay */}
       {stepUnderEdit &&
         rootLevelMap.get(stepUnderEdit.customIdentifier) ===
           rootLevelMap.get(step.customIdentifier) && <BlockDisableOverlay />}
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        css={css`
+          // Facilitates text truncation
+          overflow: hidden;
+        `}
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              // Facilitates text truncation for the condition summary
+              flex-shrink: 0;
+            `}
+          >
             <EuiText
               size="s"
               style={{
@@ -78,7 +84,14 @@ export const WhereBlockSummary = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          // Facilitates text truncation for the condition summary
+          flex-shrink: 0;
+        `}
+      >
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
             <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
@@ -115,8 +128,13 @@ const FilterSummary = ({ condition }: { condition: FilterCondition }) => {
 const ComplexSummary = ({ condition }: { condition: Condition }) => {
   const summary = JSON.stringify(condition);
   return (
-    <EuiFlexItem>
-      <EuiTextTruncate text={summary} truncation="end" />
+    <EuiFlexItem
+      css={css`
+        // Facilitates text truncation
+        overflow: hidden;
+      `}
+    >
+      <span className="eui-textTruncate">{summary}</span>
     </EuiFlexItem>
   );
 };
