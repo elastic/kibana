@@ -166,7 +166,7 @@ describe('CasesTableFilters ', () => {
         "searchFields": Array [
           "title",
           "description",
-          "incremental_id.keyword",
+          "incremental_id.text",
         ],
         "severity": Array [],
         "status": Array [],

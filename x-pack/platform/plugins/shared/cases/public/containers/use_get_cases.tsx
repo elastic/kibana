@@ -57,7 +57,7 @@ export const useGetCases = (
     // search only in `incremental_id` since types with `title`
     // and `description` don't overlap
     overrides = {
-      searchFields: ['incremental_id.keyword'],
+      searchFields: ['incremental_id.text'],
       search,
     };
   }
