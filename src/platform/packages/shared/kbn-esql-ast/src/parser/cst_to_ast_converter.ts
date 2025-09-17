@@ -1599,7 +1599,7 @@ export class CstToAstConverter {
     const left = resolveItem(
       this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
     ) as ast.ESQLAstExpression;
-    const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
     const expression = this.createFunction(
       ctx.NOT() ? 'not in' : 'in',
       ctx,
@@ -2612,7 +2612,7 @@ export class CstToAstConverter {
   }
 
   /**
-   * Constructs a tuple list (round parens):
+   * Constructs a *tuple* `list` AST node (round parens):
    *
    * ```
    * (1, 2, 3)
@@ -2623,10 +2623,8 @@ export class CstToAstConverter {
    * ```
    * WHERE x IN (1, 2, 3)
    * ```
-   *
-   * @todo Rename this method.
    */
-  private visitTuple(
+  private toTuple(
     ctxs: cst.ValueExpressionContext[],
     leftParen?: antlr.TerminalNode,
     rightParen?: antlr.TerminalNode
