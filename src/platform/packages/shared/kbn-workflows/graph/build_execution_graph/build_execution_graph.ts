@@ -15,6 +15,8 @@ import type {
   HttpStep,
   IfStep,
   WaitStep,
+  ElasticsearchStep,
+  KibanaStep,
   WorkflowYaml,
   WorkflowRetry,
   StepWithOnFailure,
@@ -34,6 +36,8 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
+  ElasticsearchGraphNode,
+  KibanaGraphNode,
   EnterRetryNode,
   ExitRetryNode,
   EnterContinueNode,
@@ -119,6 +123,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): g
     return visitHttpStep(currentStep as HttpStep, context);
   }
 
+  if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
+    return visitElasticsearchStep(currentStep as ElasticsearchStep, context);
+  }
+
+  if ((currentStep as KibanaStep).type?.startsWith('kibana.')) {
+    return visitKibanaStep(currentStep as KibanaStep, context);
+  }
+
   return visitAtomicStep(currentStep, context);
 }
 
@@ -146,6 +158,37 @@ export function visitHttpStep(currentStep: any, context: GraphBuildContext): gra
     },
   };
   graph.setNode(httpNode.id, httpNode);
+
+  return graph;
+}
+
+export function visitElasticsearchStep(
+  currentStep: any,
+  context: GraphBuildContext
+): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const elasticsearchNode: ElasticsearchGraphNode = {
+    id: getNodeId(currentStep, context),
+    type: currentStep.type, // e.g., 'elasticsearch.search.query'
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(elasticsearchNode.id, elasticsearchNode);
+
+  return graph;
+}
+
+export function visitKibanaStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const kibanaNode: KibanaGraphNode = {
+    id: getNodeId(currentStep, context),
+    type: currentStep.type, // e.g., 'kibana.cases.create'
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(kibanaNode.id, kibanaNode);
 
   return graph;
 }
@@ -188,7 +231,7 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
   };
   const enterThenBranchNode: EnterConditionBranchNode = {
     id: `enterThen(${enterConditionNodeId})`,
-    type: 'enter-condition-branch',
+    type: 'enter-then-branch',
     condition: ifElseStep.condition,
   };
 
@@ -197,7 +240,7 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
 
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
-    type: 'exit-condition-branch',
+    type: 'exit-then-branch',
     startNodeId: enterThenBranchNode.id,
   };
   const thenGraph = createStepsSequence(trueSteps, context);
@@ -208,13 +251,13 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
   if (falseSteps?.length > 0) {
     const enterElseBranchNode: EnterConditionBranchNode = {
       id: `enterElse(${enterConditionNodeId})`,
-      type: 'enter-condition-branch',
+      type: 'enter-else-branch',
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse(${enterConditionNodeId})`,
-      type: 'exit-condition-branch',
+      type: 'exit-else-branch',
       startNodeId: enterElseBranchNode.id,
     };
     const elseGraph = createStepsSequence(falseSteps, context);

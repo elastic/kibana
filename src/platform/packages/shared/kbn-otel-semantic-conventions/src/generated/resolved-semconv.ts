@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 132
- * Metric groups: 402
+ * Registry groups: 134
+ * Metric groups: 404
  * Hardcoded fields: 34
- * Total fields: 1101
+ * Total fields: 1120
  *
  * @internal
  *
- * WARNING: This object contains 1101+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1120+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -202,51 +202,60 @@ export const semconvFlat = {
     description: 'The status code.',
     type: 'keyword',
   },
-  'geo.locality.name': {
-    name: 'geo.locality.name',
+  'otel.status_code': {
+    name: 'otel.status_code',
     description:
-      'Locality name. Represents the name of a city, town, village, or similar populated place.',
-    type: 'keyword',
-    example: 'Montreal',
-  },
-  'geo.continent.code': {
-    name: 'geo.continent.code',
-    description: 'Two-letter code representing continent’s name.',
+      'Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET.',
     type: 'keyword',
   },
-  'geo.country.iso_code': {
-    name: 'geo.country.iso_code',
-    description:
-      'Two-letter ISO Country Code ([ISO 3166-1 alpha2](https://wikipedia.org/wiki/ISO_3166-1#Codes)).',
+  'otel.status_description': {
+    name: 'otel.status_description',
+    description: 'Description of the Status if it has a value, otherwise not set.',
     type: 'keyword',
-    example: 'CA',
+    example: 'resource not found',
   },
-  'geo.location.lon': {
-    name: 'geo.location.lon',
-    description:
-      'Longitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
-    type: 'double',
-    example: '-73.61483',
-  },
-  'geo.location.lat': {
-    name: 'geo.location.lat',
-    description:
-      'Latitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
-    type: 'double',
-    example: '45.505918',
-  },
-  'geo.postal_code': {
-    name: 'geo.postal_code',
-    description:
-      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+  'otel.span.sampling_result': {
+    name: 'otel.span.sampling_result',
+    description: 'The result value of the sampler for this span',
     type: 'keyword',
-    example: '94040',
   },
-  'geo.region.iso_code': {
-    name: 'geo.region.iso_code',
-    description: 'Region ISO code ([ISO 3166-2](https://wikipedia.org/wiki/ISO_3166-2)).',
+  'otel.span.parent.origin': {
+    name: 'otel.span.parent.origin',
+    description:
+      'Determines whether the span has a parent span, and if so, [whether it is a remote parent](https://opentelemetry.io/docs/specs/otel/trace/api/#isremote)',
     type: 'keyword',
-    example: 'CA-QC',
+  },
+  'otel.scope.name': {
+    name: 'otel.scope.name',
+    description: 'The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP).',
+    type: 'keyword',
+    example: 'io.opentelemetry.contrib.mongodb',
+  },
+  'otel.scope.version': {
+    name: 'otel.scope.version',
+    description:
+      'The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP).',
+    type: 'keyword',
+    example: '1.0.0',
+  },
+  'otel.scope.schema_url': {
+    name: 'otel.scope.schema_url',
+    description: 'The schema URL of the instrumentation scope.',
+    type: 'keyword',
+    example: 'https://opentelemetry.io/schemas/1.31.0',
+  },
+  'otel.component.type': {
+    name: 'otel.component.type',
+    description: 'A name identifying the type of the OpenTelemetry component.',
+    type: 'keyword',
+    example: 'otlp_grpc_span_exporter',
+  },
+  'otel.component.name': {
+    name: 'otel.component.name',
+    description:
+      'A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.',
+    type: 'keyword',
+    example: 'otlp_grpc_span_exporter/0',
   },
   'system.device': {
     name: 'system.device',
@@ -308,12 +317,6 @@ export const semconvFlat = {
       'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
     type: 'keyword',
     example: 'running',
-  },
-  'system.cpu.logical_number': {
-    name: 'system.cpu.logical_number',
-    description: 'Deprecated, use `cpu.logical_number` instead.',
-    type: 'long',
-    example: '1',
   },
   'client.address': {
     name: 'client.address',
@@ -413,156 +416,252 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'WildFly Full 21.0.0.Final (WildFly Core 13.0.1.Final) - 2.2.2.Final',
   },
-  'signalr.connection.status': {
-    name: 'signalr.connection.status',
-    description: 'SignalR HTTP connection closure status.',
+  'user.email': {
+    name: 'user.email',
+    description: 'User email address.',
     type: 'keyword',
-    example: 'app_shutdown',
+    example: 'a.einstein@example.com',
   },
-  'signalr.transport': {
-    name: 'signalr.transport',
+  'user.full_name': {
+    name: 'user.full_name',
+    description: "User's full name",
+    type: 'keyword',
+    example: 'Albert Einstein',
+  },
+  'user.hash': {
+    name: 'user.hash',
+    description: 'Unique user hash to correlate information for a user in anonymized form.',
+    type: 'keyword',
+    example: '364fc68eaf4c8acec74a4e52d7d1feaa',
+  },
+  'user.id': {
+    name: 'user.id',
+    description: 'Unique identifier of the user.',
+    type: 'keyword',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
+  },
+  'user.name': {
+    name: 'user.name',
+    description: 'Short name or login/username of the user.',
+    type: 'keyword',
+    example: 'a.einstein',
+  },
+  'user.roles': {
+    name: 'user.roles',
+    description: 'Array of user roles at the time of the event.',
+    type: 'keyword',
+    example: 'admin,reporting_user',
+  },
+  'session.id': {
+    name: 'session.id',
+    description: 'A unique id to identify a session.',
+    type: 'keyword',
+    example: '0',
+  },
+  'session.previous_id': {
+    name: 'session.previous_id',
+    description: 'The previous `session.id` for this user, when known.',
+    type: 'keyword',
+    example: '0',
+  },
+  'artifact.filename': {
+    name: 'artifact.filename',
     description:
-      '[SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)',
+      'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
     type: 'keyword',
-    example: 'web_sockets',
+    example: 'golang-binary-amd64-v0.1.0',
   },
-  'db.collection.name': {
-    name: 'db.collection.name',
-    description: 'The name of a collection (table, container) within the database.',
+  'artifact.version': {
+    name: 'artifact.version',
+    description: 'The version of the artifact.',
     type: 'keyword',
-    example: 'public.users',
+    example: 'v0.1.0',
   },
-  'db.namespace': {
-    name: 'db.namespace',
-    description: 'The name of the database, fully qualified within the server address and port.',
-    type: 'keyword',
-    example: 'customers',
-  },
-  'db.operation.name': {
-    name: 'db.operation.name',
-    description: 'The name of the operation or command being executed.',
-    type: 'keyword',
-    example: 'findAndModify',
-  },
-  'db.query.text': {
-    name: 'db.query.text',
-    description: 'The database query being executed.',
-    type: 'keyword',
-    example: 'SELECT * FROM wuser_table where username = ?',
-  },
-  'db.query.parameter': {
-    name: 'db.query.parameter',
+  'artifact.purl': {
+    name: 'artifact.purl',
     description:
-      'A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+      'The [Package URL](https://github.com/package-url/purl-spec) of the [package artifact](https://slsa.dev/spec/v1.0/terminology#package-model) provides a standard way to identify and locate the packaged artifact.',
     type: 'keyword',
-    example: 'someval',
+    example: 'pkg:github/package-url/purl-spec@1209109710924',
   },
-  'db.query.summary': {
-    name: 'db.query.summary',
-    description: 'Low cardinality summary of a database query.',
-    type: 'keyword',
-    example: 'SELECT wuser_table',
-  },
-  'db.stored_procedure.name': {
-    name: 'db.stored_procedure.name',
-    description: 'The name of a stored procedure within the database.',
-    type: 'keyword',
-    example: 'GetCustomer',
-  },
-  'db.operation.parameter': {
-    name: 'db.operation.parameter',
+  'artifact.hash': {
+    name: 'artifact.hash',
     description:
-      'A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), often found in checksum.txt on a release of the artifact and used to verify package integrity.',
     type: 'keyword',
-    example: 'someval',
+    example: '9ff4c52759e2c4ac70b7d517bc7fcdc1cda631ca0045271ddd1b192544f8a3e9',
   },
-  'db.operation.batch.size': {
-    name: 'db.operation.batch.size',
-    description: 'The number of queries included in a batch operation.',
+  'artifact.attestation.id': {
+    name: 'artifact.attestation.id',
+    description: 'The id of the build [software attestation](https://slsa.dev/attestation-model).',
+    type: 'keyword',
+    example: '123',
+  },
+  'artifact.attestation.filename': {
+    name: 'artifact.attestation.filename',
+    description:
+      'The provenance filename of the built attestation which directly relates to the build artifact filename. This filename SHOULD accompany the artifact at publish time. See the [SLSA Relationship](https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations) specification for more information.',
+    type: 'keyword',
+    example: 'golang-binary-amd64-v0.1.0.attestation',
+  },
+  'artifact.attestation.hash': {
+    name: 'artifact.attestation.hash',
+    description:
+      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), of the built attestation. Some envelopes in the [software attestation space](https://github.com/in-toto/attestation/tree/main/spec) also refer to this as the **digest**.',
+    type: 'keyword',
+    example: '1b31dfcd5b7f9267bf2ff47651df1cfb9147b9e4df1f335accf65b4cda498408',
+  },
+  'destination.address': {
+    name: 'destination.address',
+    description:
+      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'destination.example.com',
+  },
+  'destination.port': {
+    name: 'destination.port',
+    description: 'Destination port number',
     type: 'long',
-    example: '2',
+    example: '3389',
   },
-  'db.response.status_code': {
-    name: 'db.response.status_code',
-    description: 'Database response status code.',
+  'gcp.client.service': {
+    name: 'gcp.client.service',
+    description:
+      'Identifies the Google Cloud service for which the official client library is intended.',
     type: 'keyword',
-    example: '102',
+    example: 'appengine',
   },
-  'db.response.returned_rows': {
-    name: 'db.response.returned_rows',
-    description: 'Number of rows returned by the operation.',
+  'gcp.cloud_run.job.execution': {
+    name: 'gcp.cloud_run.job.execution',
+    description:
+      'The name of the Cloud Run [execution](https://cloud.google.com/run/docs/managing/job-executions) being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
+    type: 'keyword',
+    example: 'job-name-xxxx',
+  },
+  'gcp.cloud_run.job.task_index': {
+    name: 'gcp.cloud_run.job.task_index',
+    description:
+      'The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
     type: 'long',
-    example: '10',
+    example: '0',
   },
-  'db.system.name': {
-    name: 'db.system.name',
+  'gcp.apphub.application.container': {
+    name: 'gcp.apphub.application.container',
+    description: 'The container within GCP where the AppHub application is defined.',
+    type: 'keyword',
+    example: 'projects/my-container-project',
+  },
+  'gcp.apphub.application.location': {
+    name: 'gcp.apphub.application.location',
+    description: 'The GCP zone or region where the application is defined.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'gcp.apphub.application.id': {
+    name: 'gcp.apphub.application.id',
+    description: 'The name of the application as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-application',
+  },
+  'gcp.apphub.service.id': {
+    name: 'gcp.apphub.service.id',
+    description: 'The name of the service as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'gcp.apphub.service.environment_type': {
+    name: 'gcp.apphub.service.environment_type',
+    description: 'Environment of a service is the stage of a software lifecycle.',
+    type: 'keyword',
+  },
+  'gcp.apphub.service.criticality_type': {
+    name: 'gcp.apphub.service.criticality_type',
+    description: 'Criticality of a service indicates its importance to the business.',
+    type: 'keyword',
+  },
+  'gcp.apphub.workload.id': {
+    name: 'gcp.apphub.workload.id',
+    description: 'The name of the workload as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-workload',
+  },
+  'gcp.apphub.workload.environment_type': {
+    name: 'gcp.apphub.workload.environment_type',
+    description: 'Environment of a workload is the stage of a software lifecycle.',
+    type: 'keyword',
+  },
+  'gcp.apphub.workload.criticality_type': {
+    name: 'gcp.apphub.workload.criticality_type',
+    description: 'Criticality of a workload indicates its importance to the business.',
+    type: 'keyword',
+  },
+  'gcp.apphub_destination.application.container': {
+    name: 'gcp.apphub_destination.application.container',
+    description: 'The container within GCP where the AppHub destination application is defined.',
+    type: 'keyword',
+    example: 'projects/my-container-project',
+  },
+  'gcp.apphub_destination.application.location': {
+    name: 'gcp.apphub_destination.application.location',
+    description: 'The GCP zone or region where the destination application is defined.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'gcp.apphub_destination.application.id': {
+    name: 'gcp.apphub_destination.application.id',
+    description: 'The name of the destination application as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-application',
+  },
+  'gcp.apphub_destination.service.id': {
+    name: 'gcp.apphub_destination.service.id',
+    description: 'The name of the destination service as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'gcp.apphub_destination.service.environment_type': {
+    name: 'gcp.apphub_destination.service.environment_type',
     description:
-      'The database management system (DBMS) product as identified by the client instrumentation.',
+      'Software lifecycle stage of a destination service as defined [AppHub environment type](https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type_1)',
     type: 'keyword',
   },
-  'db.client.connection.state': {
-    name: 'db.client.connection.state',
-    description: 'The state of a connection in the pool',
-    type: 'keyword',
-    example: 'idle',
-  },
-  'db.client.connection.pool.name': {
-    name: 'db.client.connection.pool.name',
+  'gcp.apphub_destination.service.criticality_type': {
+    name: 'gcp.apphub_destination.service.criticality_type',
     description:
-      "The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.",
+      'Criticality of a destination workload indicates its importance to the business as specified in [AppHub type enum](https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type)',
     type: 'keyword',
-    example: 'myDataSource',
   },
-  'openai.request.service_tier': {
-    name: 'openai.request.service_tier',
-    description: 'The service tier requested. May be a specific tier, default, or auto.',
+  'gcp.apphub_destination.workload.id': {
+    name: 'gcp.apphub_destination.workload.id',
+    description: 'The name of the destination workload as configured in AppHub.',
     type: 'keyword',
-    example: 'auto',
+    example: 'my-workload',
   },
-  'openai.response.service_tier': {
-    name: 'openai.response.service_tier',
-    description: 'The service tier used for the response.',
-    type: 'keyword',
-    example: 'scale',
-  },
-  'openai.response.system_fingerprint': {
-    name: 'openai.response.system_fingerprint',
-    description: 'A fingerprint to track any eventual change in the Generative AI environment.',
-    type: 'keyword',
-    example: 'fp_44709d6fcb',
-  },
-  'code.function.name': {
-    name: 'code.function.name',
+  'gcp.apphub_destination.workload.environment_type': {
+    name: 'gcp.apphub_destination.workload.environment_type',
     description:
-      "The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+      'Environment of a destination workload is the stage of a software lifecycle as provided in the [AppHub environment type](https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type_1)',
     type: 'keyword',
-    example: 'com.example.MyHttpService.serveRequest',
   },
-  'code.file.path': {
-    name: 'code.file.path',
+  'gcp.apphub_destination.workload.criticality_type': {
+    name: 'gcp.apphub_destination.workload.criticality_type',
     description:
-      "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+      'Criticality of a destination workload indicates its importance to the business as specified in [AppHub type enum](https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type)',
     type: 'keyword',
-    example: '/',
   },
-  'code.line.number': {
-    name: 'code.line.number',
+  'gcp.gce.instance.name': {
+    name: 'gcp.gce.instance.name',
     description:
-      "The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-    type: 'long',
-  },
-  'code.column.number': {
-    name: 'code.column.number',
-    description:
-      "The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-    type: 'long',
-  },
-  'code.stacktrace': {
-    name: 'code.stacktrace',
-    description:
-      "A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`](/docs/exceptions/exceptions-spans.md#stacktrace-representation). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Location'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+      'The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name](https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).',
     type: 'keyword',
-    example: 'a',
+    example: 'instance-1',
+  },
+  'gcp.gce.instance.hostname': {
+    name: 'gcp.gce.instance.hostname',
+    description:
+      'The hostname of a GCE instance. This is the full value of the default or [custom hostname](https://cloud.google.com/compute/docs/instances/custom-hostname-vm).',
+    type: 'keyword',
+    example: 'my-host1234.example.com',
   },
   'jvm.gc.action': {
     name: 'jvm.gc.action',
@@ -610,19 +709,6 @@ export const semconvFlat = {
     description: 'Name of the buffer pool.',
     type: 'keyword',
     example: 'mapped',
-  },
-  'server.address': {
-    name: 'server.address',
-    description:
-      'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-    type: 'keyword',
-    example: 'example.com',
-  },
-  'server.port': {
-    name: 'server.port',
-    description: 'Server port number.',
-    type: 'long',
-    example: '80',
   },
   'host.id': {
     name: 'host.id',
@@ -716,13 +802,6 @@ export const semconvFlat = {
     description: 'The amount of level 2 memory cache available to the processor (in Bytes).',
     type: 'long',
     example: '12288000',
-  },
-  'peer.service': {
-    name: 'peer.service',
-    description:
-      'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
-    type: 'keyword',
-    example: 'A',
   },
   'browser.brands': {
     name: 'browser.brands',
@@ -1012,1949 +1091,6 @@ export const semconvFlat = {
     description: 'Describes the interpreter or compiler of a single frame.',
     type: 'keyword',
     example: 'cpython',
-  },
-  'cassandra.coordinator.dc': {
-    name: 'cassandra.coordinator.dc',
-    description: 'The data center of the coordinating node for a query.',
-    type: 'keyword',
-    example: 'u',
-  },
-  'cassandra.coordinator.id': {
-    name: 'cassandra.coordinator.id',
-    description: 'The ID of the coordinating node for a query.',
-    type: 'keyword',
-    example: 'b',
-  },
-  'cassandra.consistency.level': {
-    name: 'cassandra.consistency.level',
-    description:
-      'The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html).',
-    type: 'keyword',
-  },
-  'cassandra.query.idempotent': {
-    name: 'cassandra.query.idempotent',
-    description: 'Whether or not the query is idempotent.',
-    type: 'boolean',
-  },
-  'cassandra.page.size': {
-    name: 'cassandra.page.size',
-    description: 'The fetch size used for paging, i.e. how many rows will be returned at once.',
-    type: 'long',
-    example: '5000',
-  },
-  'cassandra.speculative_execution.count': {
-    name: 'cassandra.speculative_execution.count',
-    description:
-      'The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively.',
-    type: 'long',
-    example: '0',
-  },
-  'linux.memory.slab.state': {
-    name: 'linux.memory.slab.state',
-    description: 'The Linux Slab memory state',
-    type: 'keyword',
-    example: 'reclaimable',
-  },
-  'user_agent.original': {
-    name: 'user_agent.original',
-    description:
-      'Value of the [HTTP User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#field.user-agent) header sent by the client.',
-    type: 'keyword',
-    example: 'CERN-LineMode/2.15 libwww/2.17b3',
-  },
-  'user_agent.name': {
-    name: 'user_agent.name',
-    description:
-      "Name of the user-agent extracted from original. Usually refers to the browser's name.",
-    type: 'keyword',
-    example: 'Safari',
-  },
-  'user_agent.version': {
-    name: 'user_agent.version',
-    description:
-      "Version of the user-agent extracted from original. Usually refers to the browser's version",
-    type: 'keyword',
-    example: '14.1.2',
-  },
-  'user_agent.os.name': {
-    name: 'user_agent.os.name',
-    description: 'Human readable operating system name.',
-    type: 'keyword',
-    example: 'iOS',
-  },
-  'user_agent.os.version': {
-    name: 'user_agent.os.version',
-    description:
-      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
-    type: 'keyword',
-    example: '14.2.1',
-  },
-  'user_agent.synthetic.type': {
-    name: 'user_agent.synthetic.type',
-    description: 'Specifies the category of synthetic traffic, such as tests or bots.',
-    type: 'keyword',
-  },
-  'os.type': {
-    name: 'os.type',
-    description: 'The operating system type.',
-    type: 'keyword',
-  },
-  'os.description': {
-    name: 'os.description',
-    description:
-      'Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands.',
-    type: 'keyword',
-    example: 'Microsoft Windows [Version 10.0.18363.778]',
-  },
-  'os.name': {
-    name: 'os.name',
-    description: 'Human readable operating system name.',
-    type: 'keyword',
-    example: 'iOS',
-  },
-  'os.version': {
-    name: 'os.version',
-    description:
-      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
-    type: 'keyword',
-    example: '14.2.1',
-  },
-  'os.build_id': {
-    name: 'os.build_id',
-    description: 'Unique identifier for a particular build or compilation of the operating system.',
-    type: 'keyword',
-    example: 'TQ3C.230805.001.B2',
-  },
-  'thread.id': {
-    name: 'thread.id',
-    description: 'Current "managed" thread ID (as opposed to OS thread ID).',
-    type: 'long',
-  },
-  'thread.name': {
-    name: 'thread.name',
-    description: 'Current thread name.',
-    type: 'keyword',
-    example: 'm',
-  },
-  'azure.service.request.id': {
-    name: 'azure.service.request.id',
-    description:
-      "The unique identifier of the service request. It's generated by the Azure service and returned with the response.",
-    type: 'keyword',
-    example: '00000000-0000-0000-0000-000000000000',
-  },
-  'azure.resource_provider.namespace': {
-    name: 'azure.resource_provider.namespace',
-    description:
-      '[Azure Resource Provider Namespace](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) as recognized by the client.',
-    type: 'keyword',
-    example: 'Microsoft.Storage',
-  },
-  'azure.client.id': {
-    name: 'azure.client.id',
-    description: 'The unique identifier of the client instance.',
-    type: 'keyword',
-    example: '3ba4827d-4422-483f-b59f-85b74211c11d',
-  },
-  'azure.cosmosdb.connection.mode': {
-    name: 'azure.cosmosdb.connection.mode',
-    description: 'Cosmos client connection mode.',
-    type: 'keyword',
-  },
-  'azure.cosmosdb.operation.request_charge': {
-    name: 'azure.cosmosdb.operation.request_charge',
-    description: 'The number of request units consumed by the operation.',
-    type: 'double',
-    example: '46.18',
-  },
-  'azure.cosmosdb.request.body.size': {
-    name: 'azure.cosmosdb.request.body.size',
-    description: 'Request payload size in bytes.',
-    type: 'long',
-  },
-  'azure.cosmosdb.operation.contacted_regions': {
-    name: 'azure.cosmosdb.operation.contacted_regions',
-    description:
-      'List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.',
-    type: 'keyword',
-    example: 'North Central US,Australia East,Australia Southeast',
-  },
-  'azure.cosmosdb.response.sub_status_code': {
-    name: 'azure.cosmosdb.response.sub_status_code',
-    description: 'Cosmos DB sub status code.',
-    type: 'long',
-    example: '1000',
-  },
-  'azure.cosmosdb.consistency.level': {
-    name: 'azure.cosmosdb.consistency.level',
-    description:
-      'Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).',
-    type: 'keyword',
-    example: 'Eventual',
-  },
-  'feature_flag.key': {
-    name: 'feature_flag.key',
-    description: 'The lookup key of the feature flag.',
-    type: 'keyword',
-    example: 'logo-color',
-  },
-  'feature_flag.provider.name': {
-    name: 'feature_flag.provider.name',
-    description: 'Identifies the feature flag provider.',
-    type: 'keyword',
-    example: 'Flag Manager',
-  },
-  'feature_flag.result.variant': {
-    name: 'feature_flag.result.variant',
-    description: 'A semantic identifier for an evaluated flag value.',
-    type: 'keyword',
-    example: 'red',
-  },
-  'feature_flag.context.id': {
-    name: 'feature_flag.context.id',
-    description:
-      'The unique identifier for the flag evaluation context. For example, the targeting key.',
-    type: 'keyword',
-    example: '5157782b-2203-4c80-a857-dbbd5e7761db',
-  },
-  'feature_flag.version': {
-    name: 'feature_flag.version',
-    description:
-      'The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset.',
-    type: 'keyword',
-    example: '1',
-  },
-  'feature_flag.set.id': {
-    name: 'feature_flag.set.id',
-    description:
-      'The identifier of the [flag set](https://openfeature.dev/specification/glossary/#flag-set) to which the feature flag belongs.',
-    type: 'keyword',
-    example: 'proj-1',
-  },
-  'feature_flag.result.reason': {
-    name: 'feature_flag.result.reason',
-    description: 'The reason code which shows how a feature flag value was determined.',
-    type: 'keyword',
-    example: 'static',
-  },
-  'feature_flag.result.value': {
-    name: 'feature_flag.result.value',
-    description: 'The evaluated value of the feature flag.',
-    type: 'keyword',
-    example: '#ff0000',
-  },
-  'dns.question.name': {
-    name: 'dns.question.name',
-    description: 'The name being queried.',
-    type: 'keyword',
-    example: 'www.example.com',
-  },
-  'dns.answers': {
-    name: 'dns.answers',
-    description: 'The list of IPv4 or IPv6 addresses resolved during DNS lookup.',
-    type: 'keyword',
-    example: '10.0.0.1,2001:0db8:85a3:0000:0000:8a2e:0370:7334',
-  },
-  'cpu.mode': {
-    name: 'cpu.mode',
-    description: 'The mode of the CPU',
-    type: 'keyword',
-    example: 'user',
-  },
-  'cpu.logical_number': {
-    name: 'cpu.logical_number',
-    description: 'The logical CPU number [0..n-1]',
-    type: 'long',
-    example: '1',
-  },
-  'file.accessed': {
-    name: 'file.accessed',
-    description: 'Time when the file was last accessed, in ISO 8601 format.',
-    type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
-  },
-  'file.attributes': {
-    name: 'file.attributes',
-    description: 'Array of file attributes.',
-    type: 'keyword',
-    example: 'readonly,hidden',
-  },
-  'file.created': {
-    name: 'file.created',
-    description: 'Time when the file was created, in ISO 8601 format.',
-    type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
-  },
-  'file.changed': {
-    name: 'file.changed',
-    description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
-    type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
-  },
-  'file.directory': {
-    name: 'file.directory',
-    description:
-      'Directory where the file is located. It should include the drive letter, when appropriate.',
-    type: 'keyword',
-    example: '/home/user',
-  },
-  'file.extension': {
-    name: 'file.extension',
-    description: 'File extension, excluding the leading dot.',
-    type: 'keyword',
-    example: 'png',
-  },
-  'file.fork_name': {
-    name: 'file.fork_name',
-    description: 'Name of the fork. A fork is additional data associated with a filesystem object.',
-    type: 'keyword',
-    example: 'Zone.Identifier',
-  },
-  'file.group.id': {
-    name: 'file.group.id',
-    description: 'Primary Group ID (GID) of the file.',
-    type: 'keyword',
-    example: '1000',
-  },
-  'file.group.name': {
-    name: 'file.group.name',
-    description: 'Primary group name of the file.',
-    type: 'keyword',
-    example: 'users',
-  },
-  'file.inode': {
-    name: 'file.inode',
-    description: 'Inode representing the file in the filesystem.',
-    type: 'keyword',
-    example: '256383',
-  },
-  'file.mode': {
-    name: 'file.mode',
-    description: 'Mode of the file in octal representation.',
-    type: 'keyword',
-    example: '0640',
-  },
-  'file.modified': {
-    name: 'file.modified',
-    description: 'Time when the file content was last modified, in ISO 8601 format.',
-    type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
-  },
-  'file.name': {
-    name: 'file.name',
-    description: 'Name of the file including the extension, without the directory.',
-    type: 'keyword',
-    example: 'example.png',
-  },
-  'file.owner.id': {
-    name: 'file.owner.id',
-    description: 'The user ID (UID) or security identifier (SID) of the file owner.',
-    type: 'keyword',
-    example: '1000',
-  },
-  'file.owner.name': {
-    name: 'file.owner.name',
-    description: 'Username of the file owner.',
-    type: 'keyword',
-    example: 'root',
-  },
-  'file.path': {
-    name: 'file.path',
-    description:
-      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
-    type: 'keyword',
-    example: '/home/alice/example.png',
-  },
-  'file.size': {
-    name: 'file.size',
-    description: 'File size in bytes.',
-    type: 'long',
-  },
-  'file.symbolic_link.target_path': {
-    name: 'file.symbolic_link.target_path',
-    description: 'Path to the target of a symbolic link.',
-    type: 'keyword',
-    example: '/usr/bin/python3',
-  },
-  'exception.type': {
-    name: 'exception.type',
-    description:
-      'The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.',
-    type: 'keyword',
-    example: 'java.net.ConnectException',
-  },
-  'exception.message': {
-    name: 'exception.message',
-    description: 'The exception message.',
-    type: 'keyword',
-    example: 'Division by zero',
-  },
-  'exception.stacktrace': {
-    name: 'exception.stacktrace',
-    description:
-      'A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.',
-    type: 'keyword',
-    example: 'E',
-  },
-  'url.domain': {
-    name: 'url.domain',
-    description: 'Domain extracted from the `url.full`, such as "opentelemetry.io".',
-    type: 'keyword',
-    example: 'www.foo.bar',
-  },
-  'url.extension': {
-    name: 'url.extension',
-    description: 'The file extension extracted from the `url.full`, excluding the leading dot.',
-    type: 'keyword',
-    example: 'png',
-  },
-  'url.fragment': {
-    name: 'url.fragment',
-    description: 'The [URI fragment](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) component',
-    type: 'keyword',
-    example: 'SemConv',
-  },
-  'url.full': {
-    name: 'url.full',
-    description:
-      'Absolute URL describing a network resource according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986)',
-    type: 'keyword',
-    example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
-  },
-  'url.original': {
-    name: 'url.original',
-    description: 'Unmodified original URL as seen in the event source.',
-    type: 'keyword',
-    example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
-  },
-  'url.path': {
-    name: 'url.path',
-    description: 'The [URI path](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) component',
-    type: 'keyword',
-    example: '/search',
-  },
-  'url.port': {
-    name: 'url.port',
-    description: 'Port extracted from the `url.full`',
-    type: 'long',
-    example: '443',
-  },
-  'url.query': {
-    name: 'url.query',
-    description: 'The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component',
-    type: 'keyword',
-    example: 'q=OpenTelemetry',
-  },
-  'url.registered_domain': {
-    name: 'url.registered_domain',
-    description: 'The highest registered url domain, stripped of the subdomain.',
-    type: 'keyword',
-    example: 'example.com',
-  },
-  'url.scheme': {
-    name: 'url.scheme',
-    description:
-      'The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.',
-    type: 'keyword',
-    example: 'http',
-  },
-  'url.subdomain': {
-    name: 'url.subdomain',
-    description:
-      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
-    type: 'keyword',
-    example: 'east',
-  },
-  'url.template': {
-    name: 'url.template',
-    description:
-      'The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).',
-    type: 'keyword',
-    example: '/users/{id}',
-  },
-  'url.top_level_domain': {
-    name: 'url.top_level_domain',
-    description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.',
-    type: 'keyword',
-    example: 'com',
-  },
-  'device.id': {
-    name: 'device.id',
-    description: 'A unique identifier representing the device',
-    type: 'keyword',
-    example: '123456789012345',
-  },
-  'device.manufacturer': {
-    name: 'device.manufacturer',
-    description: 'The name of the device manufacturer',
-    type: 'keyword',
-    example: 'Apple',
-  },
-  'device.model.identifier': {
-    name: 'device.model.identifier',
-    description: 'The model identifier for the device',
-    type: 'keyword',
-    example: 'iPhone3,4',
-  },
-  'device.model.name': {
-    name: 'device.model.name',
-    description: 'The marketing name for the device model',
-    type: 'keyword',
-    example: 'iPhone 6s Plus',
-  },
-  'cloudevents.event_id': {
-    name: 'cloudevents.event_id',
-    description:
-      'The [event_id](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id) uniquely identifies the event.',
-    type: 'keyword',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  },
-  'cloudevents.event_source': {
-    name: 'cloudevents.event_source',
-    description:
-      'The [source](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1) identifies the context in which an event happened.',
-    type: 'keyword',
-    example: 'https://github.com/cloudevents',
-  },
-  'cloudevents.event_spec_version': {
-    name: 'cloudevents.event_spec_version',
-    description:
-      'The [version of the CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion) which the event uses.',
-    type: 'keyword',
-    example: '1',
-  },
-  'cloudevents.event_type': {
-    name: 'cloudevents.event_type',
-    description:
-      'The [event_type](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type) contains a value describing the type of event related to the originating occurrence.',
-    type: 'keyword',
-    example: 'com.github.pull_request.opened',
-  },
-  'cloudevents.event_subject': {
-    name: 'cloudevents.event_subject',
-    description:
-      'The [subject](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject) of the event in the context of the event producer (identified by source).',
-    type: 'keyword',
-    example: 'm',
-  },
-  'android.os.api_level': {
-    name: 'android.os.api_level',
-    description:
-      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
-    type: 'keyword',
-    example: '33',
-  },
-  'android.app.state': {
-    name: 'android.app.state',
-    description: 'This attribute represents the state of the application.',
-    type: 'keyword',
-    example: 'created',
-  },
-  'cicd.pipeline.name': {
-    name: 'cicd.pipeline.name',
-    description: 'The human readable name of the pipeline within a CI/CD system.',
-    type: 'keyword',
-    example: 'Build and Test',
-  },
-  'cicd.pipeline.run.id': {
-    name: 'cicd.pipeline.run.id',
-    description: 'The unique identifier of a pipeline run within a CI/CD system.',
-    type: 'keyword',
-    example: '120912',
-  },
-  'cicd.pipeline.run.url.full': {
-    name: 'cicd.pipeline.run.url.full',
-    description:
-      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline run, providing the complete address in order to locate and identify the pipeline run.',
-    type: 'keyword',
-    example:
-      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075',
-  },
-  'cicd.pipeline.run.state': {
-    name: 'cicd.pipeline.run.state',
-    description: 'The pipeline run goes through these states during its lifecycle.',
-    type: 'keyword',
-    example: 'pending',
-  },
-  'cicd.pipeline.task.name': {
-    name: 'cicd.pipeline.task.name',
-    description:
-      'The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process](https://wikipedia.org/wiki/Pipeline_(computing)) in a pipeline. Other terms for tasks include commands, steps, and procedures.',
-    type: 'keyword',
-    example: 'Run GoLang Linter',
-  },
-  'cicd.pipeline.task.run.id': {
-    name: 'cicd.pipeline.task.run.id',
-    description: 'The unique identifier of a task run within a pipeline.',
-    type: 'keyword',
-    example: '12097',
-  },
-  'cicd.pipeline.task.run.url.full': {
-    name: 'cicd.pipeline.task.run.url.full',
-    description:
-      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run.',
-    type: 'keyword',
-    example:
-      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075',
-  },
-  'cicd.pipeline.task.run.result': {
-    name: 'cicd.pipeline.task.run.result',
-    description: 'The result of a task run.',
-    type: 'keyword',
-    example: 'success',
-  },
-  'cicd.pipeline.task.type': {
-    name: 'cicd.pipeline.task.type',
-    description: 'The type of the task within a pipeline.',
-    type: 'keyword',
-    example: 'build',
-  },
-  'cicd.pipeline.result': {
-    name: 'cicd.pipeline.result',
-    description: 'The result of a pipeline run.',
-    type: 'keyword',
-    example: 'success',
-  },
-  'cicd.pipeline.action.name': {
-    name: 'cicd.pipeline.action.name',
-    description: 'The kind of action a pipeline run is performing.',
-    type: 'keyword',
-    example: 'BUILD',
-  },
-  'cicd.worker.id': {
-    name: 'cicd.worker.id',
-    description: 'The unique identifier of a worker within a CICD system.',
-    type: 'keyword',
-    example: 'abc123',
-  },
-  'cicd.worker.name': {
-    name: 'cicd.worker.name',
-    description: 'The name of a worker within a CICD system.',
-    type: 'keyword',
-    example: 'agent-abc',
-  },
-  'cicd.worker.url.full': {
-    name: 'cicd.worker.url.full',
-    description:
-      'The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.',
-    type: 'keyword',
-    example: 'https://cicd.example.org/worker/abc123',
-  },
-  'cicd.worker.state': {
-    name: 'cicd.worker.state',
-    description: 'The state of a CICD worker / agent.',
-    type: 'keyword',
-    example: 'idle',
-  },
-  'cicd.system.component': {
-    name: 'cicd.system.component',
-    description: 'The name of a component of the CICD system.',
-    type: 'keyword',
-    example: 'controller',
-  },
-  'cloud.provider': {
-    name: 'cloud.provider',
-    description: 'Name of the cloud provider.',
-    type: 'keyword',
-  },
-  'cloud.account.id': {
-    name: 'cloud.account.id',
-    description: 'The cloud account ID the resource is assigned to.',
-    type: 'keyword',
-    example: '111111111111',
-  },
-  'cloud.region': {
-    name: 'cloud.region',
-    description:
-      'The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.',
-    type: 'keyword',
-    example: 'us-central1',
-  },
-  'cloud.resource_id': {
-    name: 'cloud.resource_id',
-    description:
-      'Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) on AWS, a [fully qualified resource ID](https://learn.microsoft.com/rest/api/resources/resources/get-by-id) on Azure, a [full resource name](https://google.aip.dev/122#full-resource-names) on GCP)',
-    type: 'keyword',
-    example: 'arn:aws:lambda:REGION:ACCOUNT_ID:function:my-function',
-  },
-  'cloud.availability_zone': {
-    name: 'cloud.availability_zone',
-    description:
-      'Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.',
-    type: 'keyword',
-    example: 'us-east-1c',
-  },
-  'cloud.platform': {
-    name: 'cloud.platform',
-    description: 'The cloud platform in use.',
-    type: 'keyword',
-  },
-  'otel.status_code': {
-    name: 'otel.status_code',
-    description:
-      'Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET.',
-    type: 'keyword',
-  },
-  'otel.status_description': {
-    name: 'otel.status_description',
-    description: 'Description of the Status if it has a value, otherwise not set.',
-    type: 'keyword',
-    example: 'resource not found',
-  },
-  'otel.span.sampling_result': {
-    name: 'otel.span.sampling_result',
-    description: 'The result value of the sampler for this span',
-    type: 'keyword',
-  },
-  'otel.span.parent.origin': {
-    name: 'otel.span.parent.origin',
-    description:
-      'Determines whether the span has a parent span, and if so, [whether it is a remote parent](https://opentelemetry.io/docs/specs/otel/trace/api/#isremote)',
-    type: 'keyword',
-  },
-  'otel.scope.name': {
-    name: 'otel.scope.name',
-    description: 'The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP).',
-    type: 'keyword',
-    example: 'io.opentelemetry.contrib.mongodb',
-  },
-  'otel.scope.version': {
-    name: 'otel.scope.version',
-    description:
-      'The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP).',
-    type: 'keyword',
-    example: '1.0.0',
-  },
-  'otel.scope.schema_url': {
-    name: 'otel.scope.schema_url',
-    description: 'The schema URL of the instrumentation scope.',
-    type: 'keyword',
-    example: 'https://opentelemetry.io/schemas/1.31.0',
-  },
-  'otel.component.type': {
-    name: 'otel.component.type',
-    description: 'A name identifying the type of the OpenTelemetry component.',
-    type: 'keyword',
-    example: 'otlp_grpc_span_exporter',
-  },
-  'otel.component.name': {
-    name: 'otel.component.name',
-    description:
-      'A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.',
-    type: 'keyword',
-    example: 'otlp_grpc_span_exporter/0',
-  },
-  'hw.id': {
-    name: 'hw.id',
-    description: 'An identifier for the hardware component, unique within the monitored host',
-    type: 'keyword',
-    example: 'win32battery_battery_testsysa33_1',
-  },
-  'hw.name': {
-    name: 'hw.name',
-    description: 'An easily-recognizable name for the hardware component',
-    type: 'keyword',
-    example: 'eth0',
-  },
-  'hw.parent': {
-    name: 'hw.parent',
-    description:
-      'Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)',
-    type: 'keyword',
-    example: 'dellStorage_perc_0',
-  },
-  'hw.type': {
-    name: 'hw.type',
-    description: 'Type of the component',
-    type: 'keyword',
-  },
-  'hw.state': {
-    name: 'hw.state',
-    description: 'The current state of the component',
-    type: 'keyword',
-  },
-  'hw.battery.state': {
-    name: 'hw.battery.state',
-    description: 'The current state of the battery',
-    type: 'keyword',
-  },
-  'hw.limit_type': {
-    name: 'hw.limit_type',
-    description: 'Type of limit for hardware components',
-    type: 'keyword',
-    example: 'max',
-  },
-  'hw.bios_version': {
-    name: 'hw.bios_version',
-    description: 'BIOS version of the hardware component',
-    type: 'keyword',
-    example: '1.2.3',
-  },
-  'hw.driver_version': {
-    name: 'hw.driver_version',
-    description: 'Driver version for the hardware component',
-    type: 'keyword',
-    example: '10.2.1-3',
-  },
-  'hw.firmware_version': {
-    name: 'hw.firmware_version',
-    description: 'Firmware version of the hardware component',
-    type: 'keyword',
-    example: '2.0.1',
-  },
-  'hw.model': {
-    name: 'hw.model',
-    description: 'Descriptive model name of the hardware component',
-    type: 'keyword',
-    example: 'PERC H740P',
-  },
-  'hw.serial_number': {
-    name: 'hw.serial_number',
-    description: 'Serial number of the hardware component',
-    type: 'keyword',
-    example: 'CNFCP0123456789',
-  },
-  'hw.vendor': {
-    name: 'hw.vendor',
-    description: 'Vendor name of the hardware component',
-    type: 'keyword',
-    example: 'Dell',
-  },
-  'hw.sensor_location': {
-    name: 'hw.sensor_location',
-    description: 'Location of the sensor',
-    type: 'keyword',
-    example: 'cpu0',
-  },
-  'hw.battery.chemistry': {
-    name: 'hw.battery.chemistry',
-    description:
-      'Battery [chemistry](https://schemas.dmtf.org/wbem/cim-html/2.31.0/CIM_Battery.html), e.g. Lithium-Ion, Nickel-Cadmium, etc.',
-    type: 'keyword',
-    example: 'Li-ion',
-  },
-  'hw.battery.capacity': {
-    name: 'hw.battery.capacity',
-    description: 'Design capacity in Watts-hours or Amper-hours',
-    type: 'keyword',
-    example: '9.3Ah',
-  },
-  'hw.enclosure.type': {
-    name: 'hw.enclosure.type',
-    description: 'Type of the enclosure (useful for modular systems)',
-    type: 'keyword',
-    example: 'Computer',
-  },
-  'hw.gpu.task': {
-    name: 'hw.gpu.task',
-    description: 'Type of task the GPU is performing',
-    type: 'keyword',
-    example: 'decoder',
-  },
-  'hw.logical_disk.raid_level': {
-    name: 'hw.logical_disk.raid_level',
-    description: 'RAID Level of the logical disk',
-    type: 'keyword',
-    example: 'RAID0+1',
-  },
-  'hw.logical_disk.state': {
-    name: 'hw.logical_disk.state',
-    description: 'State of the logical disk space usage',
-    type: 'keyword',
-    example: 'used',
-  },
-  'hw.memory.type': {
-    name: 'hw.memory.type',
-    description: 'Type of the memory module',
-    type: 'keyword',
-    example: 'DDR4',
-  },
-  'hw.network.logical_addresses': {
-    name: 'hw.network.logical_addresses',
-    description: 'Logical addresses of the adapter (e.g. IP address, or WWPN)',
-    type: 'keyword',
-    example: '172.16.8.21,57.11.193.42',
-  },
-  'hw.network.physical_address': {
-    name: 'hw.network.physical_address',
-    description: 'Physical address of the adapter (e.g. MAC address, or WWNN)',
-    type: 'keyword',
-    example: '00-90-F5-E9-7B-36',
-  },
-  'hw.physical_disk.type': {
-    name: 'hw.physical_disk.type',
-    description: 'Type of the physical disk',
-    type: 'keyword',
-    example: 'HDD',
-  },
-  'hw.physical_disk.state': {
-    name: 'hw.physical_disk.state',
-    description: 'State of the physical disk endurance utilization',
-    type: 'keyword',
-    example: 'remaining',
-  },
-  'hw.physical_disk.smart_attribute': {
-    name: 'hw.physical_disk.smart_attribute',
-    description:
-      '[S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute of the physical disk',
-    type: 'keyword',
-    example: 'Spin Retry Count',
-  },
-  'hw.tape_drive.operation_type': {
-    name: 'hw.tape_drive.operation_type',
-    description: 'Type of tape drive operation',
-    type: 'keyword',
-    example: 'mount',
-  },
-  'zos.smf.id': {
-    name: 'zos.smf.id',
-    description:
-      'The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.',
-    type: 'keyword',
-    example: 'SYS1',
-  },
-  'zos.sysplex.name': {
-    name: 'zos.sysplex.name',
-    description: 'The name of the SYSPLEX to which the z/OS system belongs too.',
-    type: 'keyword',
-    example: 'SYSPLEX1',
-  },
-  'app.installation.id': {
-    name: 'app.installation.id',
-    description:
-      'A unique identifier representing the installation of an application on a specific device',
-    type: 'keyword',
-    example: '2ab2916d-a51f-4ac8-80ee-45ac31a28092',
-  },
-  'app.jank.frame_count': {
-    name: 'app.jank.frame_count',
-    description: 'A number of frame renders that experienced jank.',
-    type: 'long',
-    example: '9',
-  },
-  'app.jank.threshold': {
-    name: 'app.jank.threshold',
-    description: 'The minimum rendering threshold for this jank, in seconds.',
-    type: 'double',
-    example: '0.016',
-  },
-  'app.jank.period': {
-    name: 'app.jank.period',
-    description: 'The time period, in seconds, for which this jank is being reported.',
-    type: 'double',
-    example: '1',
-  },
-  'app.screen.coordinate.x': {
-    name: 'app.screen.coordinate.x',
-    description: 'The x (horizontal) coordinate of a screen coordinate, in screen pixels.',
-    type: 'long',
-    example: '0',
-  },
-  'app.screen.coordinate.y': {
-    name: 'app.screen.coordinate.y',
-    description: 'The y (vertical) component of a screen coordinate, in screen pixels.',
-    type: 'long',
-    example: '12',
-  },
-  'app.widget.id': {
-    name: 'app.widget.id',
-    description:
-      'An identifier that uniquely differentiates this widget from other widgets in the same application.',
-    type: 'keyword',
-    example: 'f9bc787d-ff05-48ad-90e1-fca1d46130b3',
-  },
-  'app.widget.name': {
-    name: 'app.widget.name',
-    description: 'The name of an application widget.',
-    type: 'keyword',
-    example: 'submit',
-  },
-  'app.build_id': {
-    name: 'app.build_id',
-    description: 'Unique identifier for a particular build or compilation of the application.',
-    type: 'keyword',
-    example: '6cff0a7e-cefc-4668-96f5-1273d8b334d0',
-  },
-  'faas.name': {
-    name: 'faas.name',
-    description: 'The name of the single function that this runtime instance executes.',
-    type: 'keyword',
-    example: 'my-function',
-  },
-  'faas.version': {
-    name: 'faas.version',
-    description: 'The immutable version of the function being executed.',
-    type: 'keyword',
-    example: '26',
-  },
-  'faas.instance': {
-    name: 'faas.instance',
-    description:
-      'The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.',
-    type: 'keyword',
-    example: '2021/06/28/[$LATEST]2f399eb14537447da05ab2a2e39309de',
-  },
-  'faas.max_memory': {
-    name: 'faas.max_memory',
-    description: 'The amount of memory available to the serverless function converted to Bytes.',
-    type: 'long',
-  },
-  'faas.trigger': {
-    name: 'faas.trigger',
-    description: 'Type of the trigger which caused this function invocation.',
-    type: 'keyword',
-  },
-  'faas.invoked_name': {
-    name: 'faas.invoked_name',
-    description: 'The name of the invoked function.',
-    type: 'keyword',
-    example: 'm',
-  },
-  'faas.invoked_provider': {
-    name: 'faas.invoked_provider',
-    description: 'The cloud provider of the invoked function.',
-    type: 'keyword',
-  },
-  'faas.invoked_region': {
-    name: 'faas.invoked_region',
-    description: 'The cloud region of the invoked function.',
-    type: 'keyword',
-    example: 'e',
-  },
-  'faas.invocation_id': {
-    name: 'faas.invocation_id',
-    description: 'The invocation ID of the current function invocation.',
-    type: 'keyword',
-    example: 'a',
-  },
-  'faas.time': {
-    name: 'faas.time',
-    description:
-      'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
-    type: 'keyword',
-  },
-  'faas.cron': {
-    name: 'faas.cron',
-    description:
-      'A string containing the schedule period as [Cron Expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm).',
-    type: 'keyword',
-    example: '0',
-  },
-  'faas.coldstart': {
-    name: 'faas.coldstart',
-    description:
-      'A boolean that is true if the serverless function is executed for the first time (aka cold-start).',
-    type: 'boolean',
-  },
-  'faas.document.collection': {
-    name: 'faas.document.collection',
-    description:
-      'The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name.',
-    type: 'keyword',
-    example: 'myBucketName',
-  },
-  'faas.document.operation': {
-    name: 'faas.document.operation',
-    description: 'Describes the type of the operation that was performed on the data.',
-    type: 'keyword',
-  },
-  'faas.document.time': {
-    name: 'faas.document.time',
-    description:
-      'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
-    type: 'keyword',
-  },
-  'faas.document.name': {
-    name: 'faas.document.name',
-    description:
-      'The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name.',
-    type: 'keyword',
-    example: 'myFile.txt',
-  },
-  'process.pid': {
-    name: 'process.pid',
-    description: 'Process identifier (PID).',
-    type: 'long',
-    example: '1234',
-  },
-  'process.parent_pid': {
-    name: 'process.parent_pid',
-    description: 'Parent Process identifier (PPID).',
-    type: 'long',
-    example: '111',
-  },
-  'process.vpid': {
-    name: 'process.vpid',
-    description: 'Virtual process identifier.',
-    type: 'long',
-    example: '12',
-  },
-  'process.session_leader.pid': {
-    name: 'process.session_leader.pid',
-    description:
-      "The PID of the process's session leader. This is also the session ID (SID) of the process.",
-    type: 'long',
-    example: '14',
-  },
-  'process.group_leader.pid': {
-    name: 'process.group_leader.pid',
-    description:
-      "The PID of the process's group leader. This is also the process group ID (PGID) of the process.",
-    type: 'long',
-    example: '23',
-  },
-  'process.executable.build_id.gnu': {
-    name: 'process.executable.build_id.gnu',
-    description: 'The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string).',
-    type: 'keyword',
-    example: 'c89b11207f6479603b0d49bf291c092c2b719293',
-  },
-  'process.executable.build_id.go': {
-    name: 'process.executable.build_id.go',
-    description: 'The Go build ID as retrieved by `go tool buildid <go executable>`.',
-    type: 'keyword',
-    example: 'foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY',
-  },
-  'process.executable.build_id.htlhash': {
-    name: 'process.executable.build_id.htlhash',
-    description:
-      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
-    type: 'keyword',
-    example: '600DCAFE4A110000F2BF38C493F5FB92',
-  },
-  'process.executable.name': {
-    name: 'process.executable.name',
-    description:
-      'The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.',
-    type: 'keyword',
-    example: 'otelcol',
-  },
-  'process.executable.path': {
-    name: 'process.executable.path',
-    description:
-      'The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.',
-    type: 'keyword',
-    example: '/usr/bin/cmd/otelcol',
-  },
-  'process.command': {
-    name: 'process.command',
-    description:
-      'The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.',
-    type: 'keyword',
-    example: 'cmd/otelcol',
-  },
-  'process.command_line': {
-    name: 'process.command_line',
-    description:
-      'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
-    type: 'keyword',
-    example: 'C:\\cmd\\otecol --config="my directory\\config.yaml"',
-  },
-  'process.command_args': {
-    name: 'process.command_args',
-    description:
-      'All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
-    type: 'keyword',
-    example: 'cmd/otecol,--config=config.yaml',
-  },
-  'process.args_count': {
-    name: 'process.args_count',
-    description: 'Length of the process.command_args array',
-    type: 'long',
-    example: '4',
-  },
-  'process.owner': {
-    name: 'process.owner',
-    description: 'The username of the user that owns the process.',
-    type: 'keyword',
-    example: 'root',
-  },
-  'process.user.id': {
-    name: 'process.user.id',
-    description: 'The effective user ID (EUID) of the process.',
-    type: 'long',
-    example: '1001',
-  },
-  'process.user.name': {
-    name: 'process.user.name',
-    description: 'The username of the effective user of the process.',
-    type: 'keyword',
-    example: 'root',
-  },
-  'process.real_user.id': {
-    name: 'process.real_user.id',
-    description: 'The real user ID (RUID) of the process.',
-    type: 'long',
-    example: '1000',
-  },
-  'process.real_user.name': {
-    name: 'process.real_user.name',
-    description: 'The username of the real user of the process.',
-    type: 'keyword',
-    example: 'operator',
-  },
-  'process.saved_user.id': {
-    name: 'process.saved_user.id',
-    description: 'The saved user ID (SUID) of the process.',
-    type: 'long',
-    example: '1002',
-  },
-  'process.saved_user.name': {
-    name: 'process.saved_user.name',
-    description: 'The username of the saved user.',
-    type: 'keyword',
-    example: 'operator',
-  },
-  'process.runtime.name': {
-    name: 'process.runtime.name',
-    description: 'The name of the runtime of this process.',
-    type: 'keyword',
-    example: 'OpenJDK Runtime Environment',
-  },
-  'process.runtime.version': {
-    name: 'process.runtime.version',
-    description:
-      'The version of the runtime of this process, as returned by the runtime without modification.',
-    type: 'keyword',
-    example: '1',
-  },
-  'process.runtime.description': {
-    name: 'process.runtime.description',
-    description:
-      'An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.',
-    type: 'keyword',
-    example: 'E',
-  },
-  'process.title': {
-    name: 'process.title',
-    description: 'Process title (proctitle)',
-    type: 'keyword',
-    example: 'cat /etc/hostname',
-  },
-  'process.creation.time': {
-    name: 'process.creation.time',
-    description: 'The date and time the process was created, in ISO 8601 format.',
-    type: 'keyword',
-    example: 'Tue Nov 21 2023 10:25:34 GMT+0100 (Central European Standard Time)',
-  },
-  'process.exit.time': {
-    name: 'process.exit.time',
-    description: 'The date and time the process exited, in ISO 8601 format.',
-    type: 'keyword',
-    example: 'Tue Nov 21 2023 10:26:12 GMT+0100 (Central European Standard Time)',
-  },
-  'process.exit.code': {
-    name: 'process.exit.code',
-    description: 'The exit code of the process.',
-    type: 'long',
-    example: '127',
-  },
-  'process.interactive': {
-    name: 'process.interactive',
-    description: 'Whether the process is connected to an interactive shell.',
-    type: 'boolean',
-  },
-  'process.working_directory': {
-    name: 'process.working_directory',
-    description: 'The working directory of the process.',
-    type: 'keyword',
-    example: '/root',
-  },
-  'process.context_switch_type': {
-    name: 'process.context_switch_type',
-    description:
-      'Specifies whether the context switches for this data point were voluntary or involuntary.',
-    type: 'keyword',
-  },
-  'process.paging.fault_type': {
-    name: 'process.paging.fault_type',
-    description:
-      'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
-    type: 'keyword',
-  },
-  'process.environment_variable': {
-    name: 'process.environment_variable',
-    description:
-      'Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.',
-    type: 'keyword',
-    example: 'ubuntu',
-  },
-  'process.linux.cgroup': {
-    name: 'process.linux.cgroup',
-    description: 'The control group associated with the process.',
-    type: 'keyword',
-    example: '1:name=systemd:/user.slice/user-1000.slice/session-3.scope',
-  },
-  'user.email': {
-    name: 'user.email',
-    description: 'User email address.',
-    type: 'keyword',
-    example: 'a.einstein@example.com',
-  },
-  'user.full_name': {
-    name: 'user.full_name',
-    description: "User's full name",
-    type: 'keyword',
-    example: 'Albert Einstein',
-  },
-  'user.hash': {
-    name: 'user.hash',
-    description: 'Unique user hash to correlate information for a user in anonymized form.',
-    type: 'keyword',
-    example: '364fc68eaf4c8acec74a4e52d7d1feaa',
-  },
-  'user.id': {
-    name: 'user.id',
-    description: 'Unique identifier of the user.',
-    type: 'keyword',
-    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
-  },
-  'user.name': {
-    name: 'user.name',
-    description: 'Short name or login/username of the user.',
-    type: 'keyword',
-    example: 'a.einstein',
-  },
-  'user.roles': {
-    name: 'user.roles',
-    description: 'Array of user roles at the time of the event.',
-    type: 'keyword',
-    example: 'admin,reporting_user',
-  },
-  'session.id': {
-    name: 'session.id',
-    description: 'A unique id to identify a session.',
-    type: 'keyword',
-    example: '0',
-  },
-  'session.previous_id': {
-    name: 'session.previous_id',
-    description: 'The previous `session.id` for this user, when known.',
-    type: 'keyword',
-    example: '0',
-  },
-  'artifact.filename': {
-    name: 'artifact.filename',
-    description:
-      'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
-    type: 'keyword',
-    example: 'golang-binary-amd64-v0.1.0',
-  },
-  'artifact.version': {
-    name: 'artifact.version',
-    description: 'The version of the artifact.',
-    type: 'keyword',
-    example: 'v0.1.0',
-  },
-  'artifact.purl': {
-    name: 'artifact.purl',
-    description:
-      'The [Package URL](https://github.com/package-url/purl-spec) of the [package artifact](https://slsa.dev/spec/v1.0/terminology#package-model) provides a standard way to identify and locate the packaged artifact.',
-    type: 'keyword',
-    example: 'pkg:github/package-url/purl-spec@1209109710924',
-  },
-  'artifact.hash': {
-    name: 'artifact.hash',
-    description:
-      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), often found in checksum.txt on a release of the artifact and used to verify package integrity.',
-    type: 'keyword',
-    example: '9ff4c52759e2c4ac70b7d517bc7fcdc1cda631ca0045271ddd1b192544f8a3e9',
-  },
-  'artifact.attestation.id': {
-    name: 'artifact.attestation.id',
-    description: 'The id of the build [software attestation](https://slsa.dev/attestation-model).',
-    type: 'keyword',
-    example: '123',
-  },
-  'artifact.attestation.filename': {
-    name: 'artifact.attestation.filename',
-    description:
-      'The provenance filename of the built attestation which directly relates to the build artifact filename. This filename SHOULD accompany the artifact at publish time. See the [SLSA Relationship](https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations) specification for more information.',
-    type: 'keyword',
-    example: 'golang-binary-amd64-v0.1.0.attestation',
-  },
-  'artifact.attestation.hash': {
-    name: 'artifact.attestation.hash',
-    description:
-      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), of the built attestation. Some envelopes in the [software attestation space](https://github.com/in-toto/attestation/tree/main/spec) also refer to this as the **digest**.',
-    type: 'keyword',
-    example: '1b31dfcd5b7f9267bf2ff47651df1cfb9147b9e4df1f335accf65b4cda498408',
-  },
-  'destination.address': {
-    name: 'destination.address',
-    description:
-      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-    type: 'keyword',
-    example: 'destination.example.com',
-  },
-  'destination.port': {
-    name: 'destination.port',
-    description: 'Destination port number',
-    type: 'long',
-    example: '3389',
-  },
-  'gcp.client.service': {
-    name: 'gcp.client.service',
-    description:
-      'Identifies the Google Cloud service for which the official client library is intended.',
-    type: 'keyword',
-    example: 'appengine',
-  },
-  'gcp.cloud_run.job.execution': {
-    name: 'gcp.cloud_run.job.execution',
-    description:
-      'The name of the Cloud Run [execution](https://cloud.google.com/run/docs/managing/job-executions) being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
-    type: 'keyword',
-    example: 'job-name-xxxx',
-  },
-  'gcp.cloud_run.job.task_index': {
-    name: 'gcp.cloud_run.job.task_index',
-    description:
-      'The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
-    type: 'long',
-    example: '0',
-  },
-  'gcp.apphub.application.container': {
-    name: 'gcp.apphub.application.container',
-    description: 'The container within GCP where the AppHub application is defined.',
-    type: 'keyword',
-    example: 'projects/my-container-project',
-  },
-  'gcp.apphub.application.location': {
-    name: 'gcp.apphub.application.location',
-    description: 'The GCP zone or region where the application is defined.',
-    type: 'keyword',
-    example: 'us-central1',
-  },
-  'gcp.apphub.application.id': {
-    name: 'gcp.apphub.application.id',
-    description: 'The name of the application as configured in AppHub.',
-    type: 'keyword',
-    example: 'my-application',
-  },
-  'gcp.apphub.service.id': {
-    name: 'gcp.apphub.service.id',
-    description: 'The name of the service as configured in AppHub.',
-    type: 'keyword',
-    example: 'my-service',
-  },
-  'gcp.apphub.service.environment_type': {
-    name: 'gcp.apphub.service.environment_type',
-    description: 'Environment of a service is the stage of a software lifecycle.',
-    type: 'keyword',
-  },
-  'gcp.apphub.service.criticality_type': {
-    name: 'gcp.apphub.service.criticality_type',
-    description: 'Criticality of a service indicates its importance to the business.',
-    type: 'keyword',
-  },
-  'gcp.apphub.workload.id': {
-    name: 'gcp.apphub.workload.id',
-    description: 'The name of the workload as configured in AppHub.',
-    type: 'keyword',
-    example: 'my-workload',
-  },
-  'gcp.apphub.workload.environment_type': {
-    name: 'gcp.apphub.workload.environment_type',
-    description: 'Environment of a workload is the stage of a software lifecycle.',
-    type: 'keyword',
-  },
-  'gcp.apphub.workload.criticality_type': {
-    name: 'gcp.apphub.workload.criticality_type',
-    description: 'Criticality of a workload indicates its importance to the business.',
-    type: 'keyword',
-  },
-  'gcp.gce.instance.name': {
-    name: 'gcp.gce.instance.name',
-    description:
-      'The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name](https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).',
-    type: 'keyword',
-    example: 'instance-1',
-  },
-  'gcp.gce.instance.hostname': {
-    name: 'gcp.gce.instance.hostname',
-    description:
-      'The hostname of a GCE instance. This is the full value of the default or [custom hostname](https://cloud.google.com/compute/docs/instances/custom-hostname-vm).',
-    type: 'keyword',
-    example: 'my-host1234.example.com',
-  },
-  'gen_ai.provider.name': {
-    name: 'gen_ai.provider.name',
-    description:
-      'The Generative AI provider as identified by the client or server instrumentation.',
-    type: 'keyword',
-  },
-  'gen_ai.request.model': {
-    name: 'gen_ai.request.model',
-    description: 'The name of the GenAI model a request is being made to.',
-    type: 'keyword',
-    example: 'g',
-  },
-  'gen_ai.request.max_tokens': {
-    name: 'gen_ai.request.max_tokens',
-    description: 'The maximum number of tokens the model generates for a request.',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.request.choice.count': {
-    name: 'gen_ai.request.choice.count',
-    description: 'The target number of candidate completions to return.',
-    type: 'long',
-    example: '3',
-  },
-  'gen_ai.request.temperature': {
-    name: 'gen_ai.request.temperature',
-    description: 'The temperature setting for the GenAI request.',
-    type: 'double',
-    example: '0',
-  },
-  'gen_ai.request.top_p': {
-    name: 'gen_ai.request.top_p',
-    description: 'The top_p sampling setting for the GenAI request.',
-    type: 'double',
-    example: '1',
-  },
-  'gen_ai.request.top_k': {
-    name: 'gen_ai.request.top_k',
-    description: 'The top_k sampling setting for the GenAI request.',
-    type: 'double',
-    example: '1',
-  },
-  'gen_ai.request.stop_sequences': {
-    name: 'gen_ai.request.stop_sequences',
-    description: 'List of sequences that the model will use to stop generating further tokens.',
-    type: 'keyword',
-    example: 'forest,lived',
-  },
-  'gen_ai.request.frequency_penalty': {
-    name: 'gen_ai.request.frequency_penalty',
-    description: 'The frequency penalty setting for the GenAI request.',
-    type: 'double',
-    example: '0.1',
-  },
-  'gen_ai.request.presence_penalty': {
-    name: 'gen_ai.request.presence_penalty',
-    description: 'The presence penalty setting for the GenAI request.',
-    type: 'double',
-    example: '0.1',
-  },
-  'gen_ai.request.encoding_formats': {
-    name: 'gen_ai.request.encoding_formats',
-    description: 'The encoding formats requested in an embeddings operation, if specified.',
-    type: 'keyword',
-    example: 'base64',
-  },
-  'gen_ai.request.seed': {
-    name: 'gen_ai.request.seed',
-    description: 'Requests with same seed value more likely to return same result.',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.response.id': {
-    name: 'gen_ai.response.id',
-    description: 'The unique identifier for the completion.',
-    type: 'keyword',
-    example: 'chatcmpl-123',
-  },
-  'gen_ai.response.model': {
-    name: 'gen_ai.response.model',
-    description: 'The name of the model that generated the response.',
-    type: 'keyword',
-    example: 'gpt-4-0613',
-  },
-  'gen_ai.response.finish_reasons': {
-    name: 'gen_ai.response.finish_reasons',
-    description:
-      'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
-    type: 'keyword',
-    example: 'stop',
-  },
-  'gen_ai.usage.input_tokens': {
-    name: 'gen_ai.usage.input_tokens',
-    description: 'The number of tokens used in the GenAI input (prompt).',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.usage.output_tokens': {
-    name: 'gen_ai.usage.output_tokens',
-    description: 'The number of tokens used in the GenAI response (completion).',
-    type: 'long',
-    example: '180',
-  },
-  'gen_ai.token.type': {
-    name: 'gen_ai.token.type',
-    description: 'The type of token being counted.',
-    type: 'keyword',
-    example: 'input',
-  },
-  'gen_ai.conversation.id': {
-    name: 'gen_ai.conversation.id',
-    description:
-      'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
-    type: 'keyword',
-    example: 'conv_5j66UpCpwteGg4YSxUnt7lPY',
-  },
-  'gen_ai.agent.id': {
-    name: 'gen_ai.agent.id',
-    description: 'The unique identifier of the GenAI agent.',
-    type: 'keyword',
-    example: 'asst_5j66UpCpwteGg4YSxUnt7lPY',
-  },
-  'gen_ai.agent.name': {
-    name: 'gen_ai.agent.name',
-    description: 'Human-readable name of the GenAI agent provided by the application.',
-    type: 'keyword',
-    example: 'Math Tutor',
-  },
-  'gen_ai.agent.description': {
-    name: 'gen_ai.agent.description',
-    description: 'Free-form description of the GenAI agent provided by the application.',
-    type: 'keyword',
-    example: 'Helps with math problems',
-  },
-  'gen_ai.tool.name': {
-    name: 'gen_ai.tool.name',
-    description: 'Name of the tool utilized by the agent.',
-    type: 'keyword',
-    example: 'Flights',
-  },
-  'gen_ai.tool.call.id': {
-    name: 'gen_ai.tool.call.id',
-    description: 'The tool call identifier.',
-    type: 'keyword',
-    example: 'call_mszuSIzqtI65i1wAUOE8w5H4',
-  },
-  'gen_ai.tool.description': {
-    name: 'gen_ai.tool.description',
-    description: 'The tool description.',
-    type: 'keyword',
-    example: 'Multiply two numbers',
-  },
-  'gen_ai.tool.type': {
-    name: 'gen_ai.tool.type',
-    description: 'Type of the tool utilized by the agent',
-    type: 'keyword',
-    example: 'function',
-  },
-  'gen_ai.data_source.id': {
-    name: 'gen_ai.data_source.id',
-    description: 'The data source identifier.',
-    type: 'keyword',
-    example: 'H7STPQYOND',
-  },
-  'gen_ai.operation.name': {
-    name: 'gen_ai.operation.name',
-    description: 'The name of the operation being performed.',
-    type: 'keyword',
-  },
-  'gen_ai.output.type': {
-    name: 'gen_ai.output.type',
-    description: 'Represents the content type requested by the client.',
-    type: 'keyword',
-  },
-  'gen_ai.embeddings.dimension.count': {
-    name: 'gen_ai.embeddings.dimension.count',
-    description: 'The number of dimensions the resulting output embeddings should have.',
-    type: 'long',
-    example: '512',
-  },
-  'gen_ai.system_instructions': {
-    name: 'gen_ai.system_instructions',
-    description:
-      'The system message or instructions provided to the GenAI model separately from the chat history.',
-    type: 'keyword',
-    example:
-      '[{"type":"text","content":"You are an Agent that greet users, always use greetings tool to respond"}]',
-  },
-  'gen_ai.input.messages': {
-    name: 'gen_ai.input.messages',
-    description: 'The chat history provided to the model as an input.',
-    type: 'keyword',
-    example:
-      '[{"role":"user","parts":[{"type":"text","content":"Weather in Paris?"}]},{"role":"assistant","parts":[{"type":"tool_call","id":"call_VSPygqKTWdrhaFErNvMV18Yl","name":"get_weather","arguments":{"location":"Paris"}}]},{"role":"tool","parts":[{"type":"tool_call_response","id":" call_VSPygqKTWdrhaFErNvMV18Yl","result":"rainy, 57°F"}]}]',
-  },
-  'gen_ai.output.messages': {
-    name: 'gen_ai.output.messages',
-    description:
-      'Messages returned by the model where each message represents a specific model response (choice, candidate).',
-    type: 'keyword',
-    example:
-      '[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]',
-  },
-  'gen_ai.evaluation.name': {
-    name: 'gen_ai.evaluation.name',
-    description: 'The name of the evaluation metric used for the GenAI response.',
-    type: 'keyword',
-    example: 'Relevance',
-  },
-  'gen_ai.evaluation.score.value': {
-    name: 'gen_ai.evaluation.score.value',
-    description: 'The evaluation score returned by the evaluator.',
-    type: 'double',
-    example: '4',
-  },
-  'gen_ai.evaluation.score.label': {
-    name: 'gen_ai.evaluation.score.label',
-    description: 'Human readable label for evaluation.',
-    type: 'keyword',
-    example: 'relevant',
-  },
-  'gen_ai.evaluation.explanation': {
-    name: 'gen_ai.evaluation.explanation',
-    description: 'A free-form explanation for the assigned score provided by the evaluator.',
-    type: 'keyword',
-    example:
-      'The response is factually accurate but lacks sufficient detail to fully address the question.',
-  },
-  'opentracing.ref_type': {
-    name: 'opentracing.ref_type',
-    description: 'Parent-child Reference type',
-    type: 'keyword',
-  },
-  'dotnet.gc.heap.generation': {
-    name: 'dotnet.gc.heap.generation',
-    description: 'Name of the garbage collector managed heap generation.',
-    type: 'keyword',
-    example: 'gen0',
-  },
-  'graphql.operation.name': {
-    name: 'graphql.operation.name',
-    description: 'The name of the operation being executed.',
-    type: 'keyword',
-    example: 'f',
-  },
-  'graphql.operation.type': {
-    name: 'graphql.operation.type',
-    description: 'The type of the operation being executed.',
-    type: 'keyword',
-    example: 'query',
-  },
-  'graphql.document': {
-    name: 'graphql.document',
-    description: 'The GraphQL document being executed.',
-    type: 'keyword',
-    example: 'q',
-  },
-  'v8js.gc.type': {
-    name: 'v8js.gc.type',
-    description: 'The type of garbage collection.',
-    type: 'keyword',
-  },
-  'v8js.heap.space.name': {
-    name: 'v8js.heap.space.name',
-    description: 'The name of the space type of heap memory.',
-    type: 'keyword',
-  },
-  'oci.manifest.digest': {
-    name: 'oci.manifest.digest',
-    description:
-      'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
-    type: 'keyword',
-    example: 'sha256:e4ca62c0d62f3e886e684806dfe9d4e0cda60d54986898173c1083856cfda0f4',
-  },
-  'vcs.repository.url.full': {
-    name: 'vcs.repository.url.full',
-    description:
-      'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
-    type: 'keyword',
-    example: 'https://github.com/opentelemetry/open-telemetry-collector-contrib',
-  },
-  'vcs.repository.name': {
-    name: 'vcs.repository.name',
-    description:
-      'The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.',
-    type: 'keyword',
-    example: 'semantic-conventions',
-  },
-  'vcs.ref.base.name': {
-    name: 'vcs.ref.base.name',
-    description:
-      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
-    type: 'keyword',
-    example: 'my-feature-branch',
-  },
-  'vcs.ref.base.type': {
-    name: 'vcs.ref.base.type',
-    description:
-      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
-    type: 'keyword',
-    example: 'branch',
-  },
-  'vcs.ref.base.revision': {
-    name: 'vcs.ref.base.revision',
-    description:
-      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
-    type: 'keyword',
-    example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
-  },
-  'vcs.ref.head.name': {
-    name: 'vcs.ref.head.name',
-    description:
-      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
-    type: 'keyword',
-    example: 'my-feature-branch',
-  },
-  'vcs.ref.head.type': {
-    name: 'vcs.ref.head.type',
-    description:
-      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
-    type: 'keyword',
-    example: 'branch',
-  },
-  'vcs.ref.head.revision': {
-    name: 'vcs.ref.head.revision',
-    description:
-      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
-    type: 'keyword',
-    example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
-  },
-  'vcs.ref.type': {
-    name: 'vcs.ref.type',
-    description:
-      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
-    type: 'keyword',
-    example: 'branch',
-  },
-  'vcs.revision_delta.direction': {
-    name: 'vcs.revision_delta.direction',
-    description: 'The type of revision comparison.',
-    type: 'keyword',
-    example: 'ahead',
-  },
-  'vcs.line_change.type': {
-    name: 'vcs.line_change.type',
-    description: 'The type of line change being measured on a branch or change.',
-    type: 'keyword',
-    example: 'added',
-  },
-  'vcs.change.title': {
-    name: 'vcs.change.title',
-    description:
-      'The human readable title of the change (pull request/merge request/changelist). This title is often a brief summary of the change and may get merged in to a ref as the commit summary.',
-    type: 'keyword',
-    example: 'Fixes broken thing',
-  },
-  'vcs.change.id': {
-    name: 'vcs.change.id',
-    description:
-      'The ID of the change (pull request/merge request/changelist) if applicable. This is usually a unique (within repository) identifier generated by the VCS system.',
-    type: 'keyword',
-    example: '123',
-  },
-  'vcs.change.state': {
-    name: 'vcs.change.state',
-    description: 'The state of the change (pull request/merge request/changelist).',
-    type: 'keyword',
-    example: 'open',
-  },
-  'vcs.owner.name': {
-    name: 'vcs.owner.name',
-    description: 'The group owner within the version control system.',
-    type: 'keyword',
-    example: 'my-org',
-  },
-  'vcs.provider.name': {
-    name: 'vcs.provider.name',
-    description: 'The name of the version control system provider.',
-    type: 'keyword',
-    example: 'github',
-  },
-  'source.address': {
-    name: 'source.address',
-    description:
-      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-    type: 'keyword',
-    example: 'source.example.com',
-  },
-  'source.port': {
-    name: 'source.port',
-    description: 'Source port number',
-    type: 'long',
-    example: '3389',
-  },
-  'cpython.gc.generation': {
-    name: 'cpython.gc.generation',
-    description: 'Value of the garbage collector collection generation.',
-    type: 'keyword',
-    example: '0',
-  },
-  'mainframe.lpar.name': {
-    name: 'mainframe.lpar.name',
-    description:
-      'Name of the logical partition that hosts a systems with a mainframe operating system.',
-    type: 'keyword',
-    example: 'LPAR01',
-  },
-  'log.iostream': {
-    name: 'log.iostream',
-    description: 'The stream associated with the log. See below for a list of well-known values.',
-    type: 'keyword',
-  },
-  'log.file.name': {
-    name: 'log.file.name',
-    description: 'The basename of the file.',
-    type: 'keyword',
-    example: 'audit.log',
-  },
-  'log.file.path': {
-    name: 'log.file.path',
-    description: 'The full path to the file.',
-    type: 'keyword',
-    example: '/var/log/mysql/audit.log',
-  },
-  'log.file.name_resolved': {
-    name: 'log.file.name_resolved',
-    description: 'The basename of the file, with symlinks resolved.',
-    type: 'keyword',
-    example: 'uuid.log',
-  },
-  'log.file.path_resolved': {
-    name: 'log.file.path_resolved',
-    description: 'The full path to the file, with symlinks resolved.',
-    type: 'keyword',
-    example: '/var/lib/docker/uuid.log',
-  },
-  'log.record.uid': {
-    name: 'log.record.uid',
-    description: 'A unique identifier for the Log Record.',
-    type: 'keyword',
-    example: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
-  },
-  'log.record.original': {
-    name: 'log.record.original',
-    description: 'The complete original Log Record.',
-    type: 'keyword',
-    example: '77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened',
-  },
-  'telemetry.sdk.name': {
-    name: 'telemetry.sdk.name',
-    description: 'The name of the telemetry SDK as defined above.',
-    type: 'keyword',
-    example: 'opentelemetry',
-  },
-  'telemetry.sdk.language': {
-    name: 'telemetry.sdk.language',
-    description: 'The language of the telemetry SDK.',
-    type: 'keyword',
-  },
-  'telemetry.sdk.version': {
-    name: 'telemetry.sdk.version',
-    description: 'The version string of the telemetry SDK.',
-    type: 'keyword',
-    example: '1.2.3',
-  },
-  'telemetry.distro.name': {
-    name: 'telemetry.distro.name',
-    description: 'The name of the auto instrumentation agent or distribution, if used.',
-    type: 'keyword',
-    example: 'parts-unlimited-java',
-  },
-  'telemetry.distro.version': {
-    name: 'telemetry.distro.version',
-    description: 'The version string of the auto instrumentation agent or distribution, if used.',
-    type: 'keyword',
-    example: '1.2.3',
   },
   'aws.request_id': {
     name: 'aws.request_id',
@@ -3316,6 +1452,62 @@ export const semconvFlat = {
     description: 'The status of the actual test case result from test execution.',
     type: 'keyword',
     example: 'pass',
+  },
+  'azure.service.request.id': {
+    name: 'azure.service.request.id',
+    description:
+      "The unique identifier of the service request. It's generated by the Azure service and returned with the response.",
+    type: 'keyword',
+    example: '00000000-0000-0000-0000-000000000000',
+  },
+  'azure.resource_provider.namespace': {
+    name: 'azure.resource_provider.namespace',
+    description:
+      '[Azure Resource Provider Namespace](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) as recognized by the client.',
+    type: 'keyword',
+    example: 'Microsoft.Storage',
+  },
+  'azure.client.id': {
+    name: 'azure.client.id',
+    description: 'The unique identifier of the client instance.',
+    type: 'keyword',
+    example: '3ba4827d-4422-483f-b59f-85b74211c11d',
+  },
+  'azure.cosmosdb.connection.mode': {
+    name: 'azure.cosmosdb.connection.mode',
+    description: 'Cosmos client connection mode.',
+    type: 'keyword',
+  },
+  'azure.cosmosdb.operation.request_charge': {
+    name: 'azure.cosmosdb.operation.request_charge',
+    description: 'The number of request units consumed by the operation.',
+    type: 'double',
+    example: '46.18',
+  },
+  'azure.cosmosdb.request.body.size': {
+    name: 'azure.cosmosdb.request.body.size',
+    description: 'Request payload size in bytes.',
+    type: 'long',
+  },
+  'azure.cosmosdb.operation.contacted_regions': {
+    name: 'azure.cosmosdb.operation.contacted_regions',
+    description:
+      'List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.',
+    type: 'keyword',
+    example: 'North Central US,Australia East,Australia Southeast',
+  },
+  'azure.cosmosdb.response.sub_status_code': {
+    name: 'azure.cosmosdb.response.sub_status_code',
+    description: 'Cosmos DB sub status code.',
+    type: 'long',
+    example: '1000',
+  },
+  'azure.cosmosdb.consistency.level': {
+    name: 'azure.cosmosdb.consistency.level',
+    description:
+      'Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).',
+    type: 'keyword',
+    example: 'Eventual',
   },
   'k8s.cluster.name': {
     name: 'k8s.cluster.name',
@@ -3711,6 +1903,32 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'Unexpected input type: string',
   },
+  'pprof.mapping.has_functions': {
+    name: 'pprof.mapping.has_functions',
+    description: 'Indicates that there are functions related to this mapping.',
+    type: 'boolean',
+  },
+  'pprof.mapping.has_filenames': {
+    name: 'pprof.mapping.has_filenames',
+    description: 'Indicates that there are filenames related to this mapping.',
+    type: 'boolean',
+  },
+  'pprof.mapping.has_line_numbers': {
+    name: 'pprof.mapping.has_line_numbers',
+    description: 'Indicates that there are line numbers related to this mapping.',
+    type: 'boolean',
+  },
+  'pprof.mapping.has_inline_frames': {
+    name: 'pprof.mapping.has_inline_frames',
+    description: 'Indicates that there are inline frames related to this mapping.',
+    type: 'boolean',
+  },
+  'pprof.location.is_folded': {
+    name: 'pprof.location.is_folded',
+    description:
+      "Provides an indication that multiple symbols map to this location's address, for example due to identical code folding by the linker. In that case the line information represents one of the multiple symbols. This field must be recomputed when the symbolization state of the profile changes.",
+    type: 'boolean',
+  },
   'service.name': {
     name: 'service.name',
     description: 'Logical name of the service.',
@@ -3849,6 +2067,19 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'close_wait',
   },
+  'cpu.mode': {
+    name: 'cpu.mode',
+    description:
+      "The CPU mode for this data point. A container's CPU metric SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.",
+    type: 'keyword',
+    example: 'user',
+  },
+  'cpu.logical_number': {
+    name: 'cpu.logical_number',
+    description: 'The logical CPU number [0..n-1]',
+    type: 'long',
+    example: '1',
+  },
   'ios.app.state': {
     name: 'ios.app.state',
     description: 'This attribute represents the state of the application.',
@@ -3864,7 +2095,7 @@ export const semconvFlat = {
     name: 'heroku.release.creation_timestamp',
     description: 'Time and date the release was created',
     type: 'keyword',
-    example: 'Sun Oct 23 2022 20:00:42 GMT+0200 (Central European Summer Time)',
+    example: 'Sun Oct 23 2022 18:00:42 GMT+0000 (Coordinated Universal Time)',
   },
   'heroku.release.commit': {
     name: 'heroku.release.commit',
@@ -3944,13 +2175,13 @@ export const semconvFlat = {
     name: 'tls.client.not_after',
     description: 'Date/Time indicating when client certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.client.not_before': {
     name: 'tls.client.not_before',
     description: 'Date/Time indicating when client certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.client.subject': {
     name: 'tls.client.subject',
@@ -4056,13 +2287,13 @@ export const semconvFlat = {
     name: 'tls.server.not_after',
     description: 'Date/Time indicating when server certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.server.not_before': {
     name: 'tls.server.not_before',
     description: 'Date/Time indicating when server certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.server.subject': {
     name: 'tls.server.subject',
@@ -4287,81 +2518,6 @@ export const semconvFlat = {
       'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
     type: 'long',
   },
-  'http.request.body.size': {
-    name: 'http.request.body.size',
-    description:
-      'The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
-    type: 'long',
-  },
-  'http.request.header': {
-    name: 'http.request.header',
-    description:
-      'HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
-    type: 'keyword',
-    example: 'application/json',
-  },
-  'http.request.method': {
-    name: 'http.request.method',
-    description: 'HTTP request method.',
-    type: 'keyword',
-    example: 'GET',
-  },
-  'http.request.method_original': {
-    name: 'http.request.method_original',
-    description: 'Original HTTP method sent by the client in the request line.',
-    type: 'keyword',
-    example: 'GeT',
-  },
-  'http.request.resend_count': {
-    name: 'http.request.resend_count',
-    description:
-      'The ordinal number of request resending attempt (for any reason, including redirects).',
-    type: 'long',
-  },
-  'http.request.size': {
-    name: 'http.request.size',
-    description:
-      'The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.',
-    type: 'long',
-  },
-  'http.response.body.size': {
-    name: 'http.response.body.size',
-    description:
-      'The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
-    type: 'long',
-  },
-  'http.response.header': {
-    name: 'http.response.header',
-    description:
-      'HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
-    type: 'keyword',
-    example: 'application/json',
-  },
-  'http.response.size': {
-    name: 'http.response.size',
-    description:
-      'The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.',
-    type: 'long',
-  },
-  'http.response.status_code': {
-    name: 'http.response.status_code',
-    description: '[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).',
-    type: 'long',
-    example: '200',
-  },
-  'http.route': {
-    name: 'http.route',
-    description:
-      'The matched route, that is, the path template in the format used by the respective server framework.',
-    type: 'keyword',
-    example: '/users/:userID?',
-  },
-  'http.connection.state': {
-    name: 'http.connection.state',
-    description: 'State of the HTTP connection in the HTTP connection pool.',
-    type: 'keyword',
-    example: 'active',
-  },
   'container.name': {
     name: 'container.name',
     description: 'Container name used by container runtime.',
@@ -4514,6 +2670,1951 @@ export const semconvFlat = {
     type: 'keyword',
     example: '1.0.0',
   },
+  'cloud.provider': {
+    name: 'cloud.provider',
+    description: 'Name of the cloud provider.',
+    type: 'keyword',
+  },
+  'cloud.account.id': {
+    name: 'cloud.account.id',
+    description: 'The cloud account ID the resource is assigned to.',
+    type: 'keyword',
+    example: '111111111111',
+  },
+  'cloud.region': {
+    name: 'cloud.region',
+    description:
+      'The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'cloud.resource_id': {
+    name: 'cloud.resource_id',
+    description:
+      'Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) on AWS, a [fully qualified resource ID](https://learn.microsoft.com/rest/api/resources/resources/get-by-id) on Azure, a [full resource name](https://google.aip.dev/122#full-resource-names) on GCP)',
+    type: 'keyword',
+    example: 'arn:aws:lambda:REGION:ACCOUNT_ID:function:my-function',
+  },
+  'cloud.availability_zone': {
+    name: 'cloud.availability_zone',
+    description:
+      'Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.',
+    type: 'keyword',
+    example: 'us-east-1c',
+  },
+  'cloud.platform': {
+    name: 'cloud.platform',
+    description: 'The cloud platform in use.',
+    type: 'keyword',
+  },
+  'hw.id': {
+    name: 'hw.id',
+    description: 'An identifier for the hardware component, unique within the monitored host',
+    type: 'keyword',
+    example: 'win32battery_battery_testsysa33_1',
+  },
+  'hw.name': {
+    name: 'hw.name',
+    description: 'An easily-recognizable name for the hardware component',
+    type: 'keyword',
+    example: 'eth0',
+  },
+  'hw.parent': {
+    name: 'hw.parent',
+    description:
+      'Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)',
+    type: 'keyword',
+    example: 'dellStorage_perc_0',
+  },
+  'hw.type': {
+    name: 'hw.type',
+    description: 'Type of the component',
+    type: 'keyword',
+  },
+  'hw.state': {
+    name: 'hw.state',
+    description: 'The current state of the component',
+    type: 'keyword',
+  },
+  'hw.battery.state': {
+    name: 'hw.battery.state',
+    description: 'The current state of the battery',
+    type: 'keyword',
+  },
+  'hw.limit_type': {
+    name: 'hw.limit_type',
+    description: 'Type of limit for hardware components',
+    type: 'keyword',
+    example: 'low.critical',
+  },
+  'hw.bios_version': {
+    name: 'hw.bios_version',
+    description: 'BIOS version of the hardware component',
+    type: 'keyword',
+    example: '1.2.3',
+  },
+  'hw.driver_version': {
+    name: 'hw.driver_version',
+    description: 'Driver version for the hardware component',
+    type: 'keyword',
+    example: '10.2.1-3',
+  },
+  'hw.firmware_version': {
+    name: 'hw.firmware_version',
+    description: 'Firmware version of the hardware component',
+    type: 'keyword',
+    example: '2.0.1',
+  },
+  'hw.model': {
+    name: 'hw.model',
+    description: 'Descriptive model name of the hardware component',
+    type: 'keyword',
+    example: 'PERC H740P',
+  },
+  'hw.serial_number': {
+    name: 'hw.serial_number',
+    description: 'Serial number of the hardware component',
+    type: 'keyword',
+    example: 'CNFCP0123456789',
+  },
+  'hw.vendor': {
+    name: 'hw.vendor',
+    description: 'Vendor name of the hardware component',
+    type: 'keyword',
+    example: 'Dell',
+  },
+  'hw.sensor_location': {
+    name: 'hw.sensor_location',
+    description: 'Location of the sensor',
+    type: 'keyword',
+    example: 'cpu0',
+  },
+  'hw.battery.chemistry': {
+    name: 'hw.battery.chemistry',
+    description:
+      'Battery [chemistry](https://schemas.dmtf.org/wbem/cim-html/2.31.0/CIM_Battery.html), e.g. Lithium-Ion, Nickel-Cadmium, etc.',
+    type: 'keyword',
+    example: 'Li-ion',
+  },
+  'hw.battery.capacity': {
+    name: 'hw.battery.capacity',
+    description: 'Design capacity in Watts-hours or Amper-hours',
+    type: 'keyword',
+    example: '9.3Ah',
+  },
+  'hw.enclosure.type': {
+    name: 'hw.enclosure.type',
+    description: 'Type of the enclosure (useful for modular systems)',
+    type: 'keyword',
+    example: 'Computer',
+  },
+  'hw.gpu.task': {
+    name: 'hw.gpu.task',
+    description: 'Type of task the GPU is performing',
+    type: 'keyword',
+    example: 'decoder',
+  },
+  'hw.logical_disk.raid_level': {
+    name: 'hw.logical_disk.raid_level',
+    description: 'RAID Level of the logical disk',
+    type: 'keyword',
+    example: 'RAID0+1',
+  },
+  'hw.logical_disk.state': {
+    name: 'hw.logical_disk.state',
+    description: 'State of the logical disk space usage',
+    type: 'keyword',
+    example: 'used',
+  },
+  'hw.memory.type': {
+    name: 'hw.memory.type',
+    description: 'Type of the memory module',
+    type: 'keyword',
+    example: 'DDR4',
+  },
+  'hw.network.logical_addresses': {
+    name: 'hw.network.logical_addresses',
+    description: 'Logical addresses of the adapter (e.g. IP address, or WWPN)',
+    type: 'keyword',
+    example: '172.16.8.21,57.11.193.42',
+  },
+  'hw.network.physical_address': {
+    name: 'hw.network.physical_address',
+    description: 'Physical address of the adapter (e.g. MAC address, or WWNN)',
+    type: 'keyword',
+    example: '00-90-F5-E9-7B-36',
+  },
+  'hw.physical_disk.type': {
+    name: 'hw.physical_disk.type',
+    description: 'Type of the physical disk',
+    type: 'keyword',
+    example: 'HDD',
+  },
+  'hw.physical_disk.state': {
+    name: 'hw.physical_disk.state',
+    description: 'State of the physical disk endurance utilization',
+    type: 'keyword',
+    example: 'remaining',
+  },
+  'hw.physical_disk.smart_attribute': {
+    name: 'hw.physical_disk.smart_attribute',
+    description:
+      '[S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute of the physical disk',
+    type: 'keyword',
+    example: 'Spin Retry Count',
+  },
+  'hw.tape_drive.operation_type': {
+    name: 'hw.tape_drive.operation_type',
+    description: 'Type of tape drive operation',
+    type: 'keyword',
+    example: 'mount',
+  },
+  'zos.smf.id': {
+    name: 'zos.smf.id',
+    description:
+      'The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.',
+    type: 'keyword',
+    example: 'SYS1',
+  },
+  'zos.sysplex.name': {
+    name: 'zos.sysplex.name',
+    description: 'The name of the SYSPLEX to which the z/OS system belongs too.',
+    type: 'keyword',
+    example: 'SYSPLEX1',
+  },
+  'geo.locality.name': {
+    name: 'geo.locality.name',
+    description:
+      'Locality name. Represents the name of a city, town, village, or similar populated place.',
+    type: 'keyword',
+    example: 'Montreal',
+  },
+  'geo.continent.code': {
+    name: 'geo.continent.code',
+    description: 'Two-letter code representing continent’s name.',
+    type: 'keyword',
+  },
+  'geo.country.iso_code': {
+    name: 'geo.country.iso_code',
+    description:
+      'Two-letter ISO Country Code ([ISO 3166-1 alpha2](https://wikipedia.org/wiki/ISO_3166-1#Codes)).',
+    type: 'keyword',
+    example: 'CA',
+  },
+  'geo.location.lon': {
+    name: 'geo.location.lon',
+    description:
+      'Longitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
+    type: 'double',
+    example: '-73.61483',
+  },
+  'geo.location.lat': {
+    name: 'geo.location.lat',
+    description:
+      'Latitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
+    type: 'double',
+    example: '45.505918',
+  },
+  'geo.postal_code': {
+    name: 'geo.postal_code',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    type: 'keyword',
+    example: '94040',
+  },
+  'geo.region.iso_code': {
+    name: 'geo.region.iso_code',
+    description: 'Region ISO code ([ISO 3166-2](https://wikipedia.org/wiki/ISO_3166-2)).',
+    type: 'keyword',
+    example: 'CA-QC',
+  },
+  'app.installation.id': {
+    name: 'app.installation.id',
+    description:
+      'A unique identifier representing the installation of an application on a specific device',
+    type: 'keyword',
+    example: '2ab2916d-a51f-4ac8-80ee-45ac31a28092',
+  },
+  'app.jank.frame_count': {
+    name: 'app.jank.frame_count',
+    description: 'A number of frame renders that experienced jank.',
+    type: 'long',
+    example: '9',
+  },
+  'app.jank.threshold': {
+    name: 'app.jank.threshold',
+    description: 'The minimum rendering threshold for this jank, in seconds.',
+    type: 'double',
+    example: '0.016',
+  },
+  'app.jank.period': {
+    name: 'app.jank.period',
+    description: 'The time period, in seconds, for which this jank is being reported.',
+    type: 'double',
+    example: '1',
+  },
+  'app.screen.coordinate.x': {
+    name: 'app.screen.coordinate.x',
+    description: 'The x (horizontal) coordinate of a screen coordinate, in screen pixels.',
+    type: 'long',
+    example: '0',
+  },
+  'app.screen.coordinate.y': {
+    name: 'app.screen.coordinate.y',
+    description: 'The y (vertical) component of a screen coordinate, in screen pixels.',
+    type: 'long',
+    example: '12',
+  },
+  'app.widget.id': {
+    name: 'app.widget.id',
+    description:
+      'An identifier that uniquely differentiates this widget from other widgets in the same application.',
+    type: 'keyword',
+    example: 'f9bc787d-ff05-48ad-90e1-fca1d46130b3',
+  },
+  'app.widget.name': {
+    name: 'app.widget.name',
+    description: 'The name of an application widget.',
+    type: 'keyword',
+    example: 'submit',
+  },
+  'app.build_id': {
+    name: 'app.build_id',
+    description: 'Unique identifier for a particular build or compilation of the application.',
+    type: 'keyword',
+    example: '6cff0a7e-cefc-4668-96f5-1273d8b334d0',
+  },
+  'faas.name': {
+    name: 'faas.name',
+    description: 'The name of the single function that this runtime instance executes.',
+    type: 'keyword',
+    example: 'my-function',
+  },
+  'faas.version': {
+    name: 'faas.version',
+    description: 'The immutable version of the function being executed.',
+    type: 'keyword',
+    example: '26',
+  },
+  'faas.instance': {
+    name: 'faas.instance',
+    description:
+      'The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.',
+    type: 'keyword',
+    example: '2021/06/28/[$LATEST]2f399eb14537447da05ab2a2e39309de',
+  },
+  'faas.max_memory': {
+    name: 'faas.max_memory',
+    description: 'The amount of memory available to the serverless function converted to Bytes.',
+    type: 'long',
+  },
+  'faas.trigger': {
+    name: 'faas.trigger',
+    description: 'Type of the trigger which caused this function invocation.',
+    type: 'keyword',
+  },
+  'faas.invoked_name': {
+    name: 'faas.invoked_name',
+    description: 'The name of the invoked function.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'faas.invoked_provider': {
+    name: 'faas.invoked_provider',
+    description: 'The cloud provider of the invoked function.',
+    type: 'keyword',
+  },
+  'faas.invoked_region': {
+    name: 'faas.invoked_region',
+    description: 'The cloud region of the invoked function.',
+    type: 'keyword',
+    example: 'e',
+  },
+  'faas.invocation_id': {
+    name: 'faas.invocation_id',
+    description: 'The invocation ID of the current function invocation.',
+    type: 'keyword',
+    example: 'a',
+  },
+  'faas.time': {
+    name: 'faas.time',
+    description:
+      'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
+    type: 'keyword',
+  },
+  'faas.cron': {
+    name: 'faas.cron',
+    description:
+      'A string containing the schedule period as [Cron Expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm).',
+    type: 'keyword',
+    example: '0',
+  },
+  'faas.coldstart': {
+    name: 'faas.coldstart',
+    description:
+      'A boolean that is true if the serverless function is executed for the first time (aka cold-start).',
+    type: 'boolean',
+  },
+  'faas.document.collection': {
+    name: 'faas.document.collection',
+    description:
+      'The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name.',
+    type: 'keyword',
+    example: 'myBucketName',
+  },
+  'faas.document.operation': {
+    name: 'faas.document.operation',
+    description: 'Describes the type of the operation that was performed on the data.',
+    type: 'keyword',
+  },
+  'faas.document.time': {
+    name: 'faas.document.time',
+    description:
+      'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
+    type: 'keyword',
+  },
+  'faas.document.name': {
+    name: 'faas.document.name',
+    description:
+      'The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name.',
+    type: 'keyword',
+    example: 'myFile.txt',
+  },
+  'process.pid': {
+    name: 'process.pid',
+    description: 'Process identifier (PID).',
+    type: 'long',
+    example: '1234',
+  },
+  'process.parent_pid': {
+    name: 'process.parent_pid',
+    description: 'Parent Process identifier (PPID).',
+    type: 'long',
+    example: '111',
+  },
+  'process.vpid': {
+    name: 'process.vpid',
+    description: 'Virtual process identifier.',
+    type: 'long',
+    example: '12',
+  },
+  'process.session_leader.pid': {
+    name: 'process.session_leader.pid',
+    description:
+      "The PID of the process's session leader. This is also the session ID (SID) of the process.",
+    type: 'long',
+    example: '14',
+  },
+  'process.group_leader.pid': {
+    name: 'process.group_leader.pid',
+    description:
+      "The PID of the process's group leader. This is also the process group ID (PGID) of the process.",
+    type: 'long',
+    example: '23',
+  },
+  'process.executable.build_id.gnu': {
+    name: 'process.executable.build_id.gnu',
+    description: 'The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string).',
+    type: 'keyword',
+    example: 'c89b11207f6479603b0d49bf291c092c2b719293',
+  },
+  'process.executable.build_id.go': {
+    name: 'process.executable.build_id.go',
+    description: 'The Go build ID as retrieved by `go tool buildid <go executable>`.',
+    type: 'keyword',
+    example: 'foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY',
+  },
+  'process.executable.build_id.htlhash': {
+    name: 'process.executable.build_id.htlhash',
+    description:
+      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
+    type: 'keyword',
+    example: '600DCAFE4A110000F2BF38C493F5FB92',
+  },
+  'process.executable.name': {
+    name: 'process.executable.name',
+    description:
+      'The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.',
+    type: 'keyword',
+    example: 'otelcol',
+  },
+  'process.executable.path': {
+    name: 'process.executable.path',
+    description:
+      'The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.',
+    type: 'keyword',
+    example: '/usr/bin/cmd/otelcol',
+  },
+  'process.command': {
+    name: 'process.command',
+    description:
+      'The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.',
+    type: 'keyword',
+    example: 'cmd/otelcol',
+  },
+  'process.command_line': {
+    name: 'process.command_line',
+    description:
+      'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
+    type: 'keyword',
+    example: 'C:\\cmd\\otecol --config="my directory\\config.yaml"',
+  },
+  'process.command_args': {
+    name: 'process.command_args',
+    description:
+      'All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
+    type: 'keyword',
+    example: 'cmd/otecol,--config=config.yaml',
+  },
+  'process.args_count': {
+    name: 'process.args_count',
+    description: 'Length of the process.command_args array',
+    type: 'long',
+    example: '4',
+  },
+  'process.owner': {
+    name: 'process.owner',
+    description: 'The username of the user that owns the process.',
+    type: 'keyword',
+    example: 'root',
+  },
+  'process.user.id': {
+    name: 'process.user.id',
+    description: 'The effective user ID (EUID) of the process.',
+    type: 'long',
+    example: '1001',
+  },
+  'process.user.name': {
+    name: 'process.user.name',
+    description: 'The username of the effective user of the process.',
+    type: 'keyword',
+    example: 'root',
+  },
+  'process.real_user.id': {
+    name: 'process.real_user.id',
+    description: 'The real user ID (RUID) of the process.',
+    type: 'long',
+    example: '1000',
+  },
+  'process.real_user.name': {
+    name: 'process.real_user.name',
+    description: 'The username of the real user of the process.',
+    type: 'keyword',
+    example: 'operator',
+  },
+  'process.saved_user.id': {
+    name: 'process.saved_user.id',
+    description: 'The saved user ID (SUID) of the process.',
+    type: 'long',
+    example: '1002',
+  },
+  'process.saved_user.name': {
+    name: 'process.saved_user.name',
+    description: 'The username of the saved user.',
+    type: 'keyword',
+    example: 'operator',
+  },
+  'process.runtime.name': {
+    name: 'process.runtime.name',
+    description: 'The name of the runtime of this process.',
+    type: 'keyword',
+    example: 'OpenJDK Runtime Environment',
+  },
+  'process.runtime.version': {
+    name: 'process.runtime.version',
+    description:
+      'The version of the runtime of this process, as returned by the runtime without modification.',
+    type: 'keyword',
+    example: '1',
+  },
+  'process.runtime.description': {
+    name: 'process.runtime.description',
+    description:
+      'An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.',
+    type: 'keyword',
+    example: 'E',
+  },
+  'process.title': {
+    name: 'process.title',
+    description: 'Process title (proctitle)',
+    type: 'keyword',
+    example: 'cat /etc/hostname',
+  },
+  'process.creation.time': {
+    name: 'process.creation.time',
+    description: 'The date and time the process was created, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Tue Nov 21 2023 09:25:34 GMT+0000 (Coordinated Universal Time)',
+  },
+  'process.exit.time': {
+    name: 'process.exit.time',
+    description: 'The date and time the process exited, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Tue Nov 21 2023 09:26:12 GMT+0000 (Coordinated Universal Time)',
+  },
+  'process.exit.code': {
+    name: 'process.exit.code',
+    description: 'The exit code of the process.',
+    type: 'long',
+    example: '127',
+  },
+  'process.interactive': {
+    name: 'process.interactive',
+    description: 'Whether the process is connected to an interactive shell.',
+    type: 'boolean',
+  },
+  'process.working_directory': {
+    name: 'process.working_directory',
+    description: 'The working directory of the process.',
+    type: 'keyword',
+    example: '/root',
+  },
+  'process.context_switch_type': {
+    name: 'process.context_switch_type',
+    description:
+      'Specifies whether the context switches for this data point were voluntary or involuntary.',
+    type: 'keyword',
+  },
+  'process.paging.fault_type': {
+    name: 'process.paging.fault_type',
+    description:
+      'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
+    type: 'keyword',
+  },
+  'process.environment_variable': {
+    name: 'process.environment_variable',
+    description:
+      'Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.',
+    type: 'keyword',
+    example: 'ubuntu',
+  },
+  'process.linux.cgroup': {
+    name: 'process.linux.cgroup',
+    description: 'The control group associated with the process.',
+    type: 'keyword',
+    example: '1:name=systemd:/user.slice/user-1000.slice/session-3.scope',
+  },
+  'signalr.connection.status': {
+    name: 'signalr.connection.status',
+    description: 'SignalR HTTP connection closure status.',
+    type: 'keyword',
+    example: 'app_shutdown',
+  },
+  'signalr.transport': {
+    name: 'signalr.transport',
+    description:
+      '[SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)',
+    type: 'keyword',
+    example: 'web_sockets',
+  },
+  'db.collection.name': {
+    name: 'db.collection.name',
+    description: 'Cosmos DB container name.',
+    type: 'keyword',
+    example: 'public.users',
+  },
+  'db.namespace': {
+    name: 'db.namespace',
+    description: 'The name of the database, fully qualified within the server address and port.',
+    type: 'keyword',
+    example: 'customers',
+  },
+  'db.operation.name': {
+    name: 'db.operation.name',
+    description: 'The name of the operation or command being executed.',
+    type: 'keyword',
+    example: 'findAndModify',
+  },
+  'db.query.text': {
+    name: 'db.query.text',
+    description: 'The database query being executed.',
+    type: 'keyword',
+    example: 'SELECT * FROM wuser_table where username = ?',
+  },
+  'db.query.parameter': {
+    name: 'db.query.parameter',
+    description:
+      'A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+    type: 'keyword',
+    example: 'someval',
+  },
+  'db.query.summary': {
+    name: 'db.query.summary',
+    description: 'Low cardinality summary of a database query.',
+    type: 'keyword',
+    example: 'SELECT wuser_table',
+  },
+  'db.stored_procedure.name': {
+    name: 'db.stored_procedure.name',
+    description: 'The name of a stored procedure within the database.',
+    type: 'keyword',
+    example: 'GetCustomer',
+  },
+  'db.operation.parameter': {
+    name: 'db.operation.parameter',
+    description:
+      'A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+    type: 'keyword',
+    example: 'someval',
+  },
+  'db.operation.batch.size': {
+    name: 'db.operation.batch.size',
+    description: 'The number of queries included in a batch operation.',
+    type: 'long',
+    example: '2',
+  },
+  'db.response.status_code': {
+    name: 'db.response.status_code',
+    description: 'Database response status code.',
+    type: 'keyword',
+    example: '102',
+  },
+  'db.response.returned_rows': {
+    name: 'db.response.returned_rows',
+    description: 'Number of rows returned by the operation.',
+    type: 'long',
+    example: '10',
+  },
+  'db.system.name': {
+    name: 'db.system.name',
+    description:
+      'The database management system (DBMS) product as identified by the client instrumentation.',
+    type: 'keyword',
+  },
+  'db.client.connection.state': {
+    name: 'db.client.connection.state',
+    description: 'The state of a connection in the pool',
+    type: 'keyword',
+    example: 'idle',
+  },
+  'db.client.connection.pool.name': {
+    name: 'db.client.connection.pool.name',
+    description:
+      "The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.",
+    type: 'keyword',
+    example: 'myDataSource',
+  },
+  'openai.request.service_tier': {
+    name: 'openai.request.service_tier',
+    description: 'The service tier requested. May be a specific tier, default, or auto.',
+    type: 'keyword',
+    example: 'auto',
+  },
+  'openai.response.service_tier': {
+    name: 'openai.response.service_tier',
+    description: 'The service tier used for the response.',
+    type: 'keyword',
+    example: 'scale',
+  },
+  'openai.response.system_fingerprint': {
+    name: 'openai.response.system_fingerprint',
+    description: 'A fingerprint to track any eventual change in the Generative AI environment.',
+    type: 'keyword',
+    example: 'fp_44709d6fcb',
+  },
+  'code.function.name': {
+    name: 'code.function.name',
+    description:
+      "The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'keyword',
+    example: 'com.example.MyHttpService.serveRequest',
+  },
+  'code.file.path': {
+    name: 'code.file.path',
+    description:
+      "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'keyword',
+    example: '/',
+  },
+  'code.line.number': {
+    name: 'code.line.number',
+    description:
+      "The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'long',
+  },
+  'code.column.number': {
+    name: 'code.column.number',
+    description:
+      "The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'long',
+  },
+  'code.stacktrace': {
+    name: 'code.stacktrace',
+    description:
+      "A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`](/docs/exceptions/exceptions-spans.md#stacktrace-representation). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Location'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'keyword',
+    example: 'a',
+  },
+  'gen_ai.provider.name': {
+    name: 'gen_ai.provider.name',
+    description:
+      'The Generative AI provider as identified by the client or server instrumentation.',
+    type: 'keyword',
+  },
+  'gen_ai.request.model': {
+    name: 'gen_ai.request.model',
+    description: 'The name of the GenAI model a request is being made to.',
+    type: 'keyword',
+    example: 'g',
+  },
+  'gen_ai.request.max_tokens': {
+    name: 'gen_ai.request.max_tokens',
+    description: 'The maximum number of tokens the model generates for a request.',
+    type: 'long',
+    example: '100',
+  },
+  'gen_ai.request.choice.count': {
+    name: 'gen_ai.request.choice.count',
+    description: 'The target number of candidate completions to return.',
+    type: 'long',
+    example: '3',
+  },
+  'gen_ai.request.temperature': {
+    name: 'gen_ai.request.temperature',
+    description: 'The temperature setting for the GenAI request.',
+    type: 'double',
+    example: '0',
+  },
+  'gen_ai.request.top_p': {
+    name: 'gen_ai.request.top_p',
+    description: 'The top_p sampling setting for the GenAI request.',
+    type: 'double',
+    example: '1',
+  },
+  'gen_ai.request.top_k': {
+    name: 'gen_ai.request.top_k',
+    description: 'The top_k sampling setting for the GenAI request.',
+    type: 'double',
+    example: '1',
+  },
+  'gen_ai.request.stop_sequences': {
+    name: 'gen_ai.request.stop_sequences',
+    description: 'List of sequences that the model will use to stop generating further tokens.',
+    type: 'keyword',
+    example: 'forest,lived',
+  },
+  'gen_ai.request.frequency_penalty': {
+    name: 'gen_ai.request.frequency_penalty',
+    description: 'The frequency penalty setting for the GenAI request.',
+    type: 'double',
+    example: '0.1',
+  },
+  'gen_ai.request.presence_penalty': {
+    name: 'gen_ai.request.presence_penalty',
+    description: 'The presence penalty setting for the GenAI request.',
+    type: 'double',
+    example: '0.1',
+  },
+  'gen_ai.request.encoding_formats': {
+    name: 'gen_ai.request.encoding_formats',
+    description: 'The encoding formats requested in an embeddings operation, if specified.',
+    type: 'keyword',
+    example: 'base64',
+  },
+  'gen_ai.request.seed': {
+    name: 'gen_ai.request.seed',
+    description: 'Requests with same seed value more likely to return same result.',
+    type: 'long',
+    example: '100',
+  },
+  'gen_ai.response.id': {
+    name: 'gen_ai.response.id',
+    description: 'The unique identifier for the completion.',
+    type: 'keyword',
+    example: 'chatcmpl-123',
+  },
+  'gen_ai.response.model': {
+    name: 'gen_ai.response.model',
+    description: 'The name of the model that generated the response.',
+    type: 'keyword',
+    example: 'gpt-4-0613',
+  },
+  'gen_ai.response.finish_reasons': {
+    name: 'gen_ai.response.finish_reasons',
+    description:
+      'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
+    type: 'keyword',
+    example: 'stop',
+  },
+  'gen_ai.usage.input_tokens': {
+    name: 'gen_ai.usage.input_tokens',
+    description: 'The number of tokens used in the GenAI input (prompt).',
+    type: 'long',
+    example: '100',
+  },
+  'gen_ai.usage.output_tokens': {
+    name: 'gen_ai.usage.output_tokens',
+    description: 'The number of tokens used in the GenAI response (completion).',
+    type: 'long',
+    example: '180',
+  },
+  'gen_ai.token.type': {
+    name: 'gen_ai.token.type',
+    description: 'The type of token being counted.',
+    type: 'keyword',
+    example: 'input',
+  },
+  'gen_ai.conversation.id': {
+    name: 'gen_ai.conversation.id',
+    description:
+      'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
+    type: 'keyword',
+    example: 'conv_5j66UpCpwteGg4YSxUnt7lPY',
+  },
+  'gen_ai.agent.id': {
+    name: 'gen_ai.agent.id',
+    description: 'The unique identifier of the GenAI agent.',
+    type: 'keyword',
+    example: 'asst_5j66UpCpwteGg4YSxUnt7lPY',
+  },
+  'gen_ai.agent.name': {
+    name: 'gen_ai.agent.name',
+    description: 'Human-readable name of the GenAI agent provided by the application.',
+    type: 'keyword',
+    example: 'Math Tutor',
+  },
+  'gen_ai.agent.description': {
+    name: 'gen_ai.agent.description',
+    description: 'Free-form description of the GenAI agent provided by the application.',
+    type: 'keyword',
+    example: 'Helps with math problems',
+  },
+  'gen_ai.tool.name': {
+    name: 'gen_ai.tool.name',
+    description: 'Name of the tool utilized by the agent.',
+    type: 'keyword',
+    example: 'Flights',
+  },
+  'gen_ai.tool.call.id': {
+    name: 'gen_ai.tool.call.id',
+    description: 'The tool call identifier.',
+    type: 'keyword',
+    example: 'call_mszuSIzqtI65i1wAUOE8w5H4',
+  },
+  'gen_ai.tool.description': {
+    name: 'gen_ai.tool.description',
+    description: 'The tool description.',
+    type: 'keyword',
+    example: 'Multiply two numbers',
+  },
+  'gen_ai.tool.type': {
+    name: 'gen_ai.tool.type',
+    description: 'Type of the tool utilized by the agent',
+    type: 'keyword',
+    example: 'function',
+  },
+  'gen_ai.tool.call.arguments': {
+    name: 'gen_ai.tool.call.arguments',
+    description: 'Parameters passed to the tool call.',
+    type: 'keyword',
+    example: '{"location":"San Francisco?","date":"2025-10-01"}',
+  },
+  'gen_ai.tool.call.result': {
+    name: 'gen_ai.tool.call.result',
+    description: 'The result returned by the tool call (if any and if execution was successful).',
+    type: 'keyword',
+    example: '{"temperature_range":{"high":75,"low":60},"conditions":"sunny"}',
+  },
+  'gen_ai.tool.definitions': {
+    name: 'gen_ai.tool.definitions',
+    description:
+      'The list of source system tool definitions available to the GenAI agent or model.',
+    type: 'keyword',
+    example:
+      '[{"type":"function","name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location","unit"]}}]',
+  },
+  'gen_ai.data_source.id': {
+    name: 'gen_ai.data_source.id',
+    description: 'The data source identifier.',
+    type: 'keyword',
+    example: 'H7STPQYOND',
+  },
+  'gen_ai.operation.name': {
+    name: 'gen_ai.operation.name',
+    description: 'The name of the operation being performed.',
+    type: 'keyword',
+  },
+  'gen_ai.output.type': {
+    name: 'gen_ai.output.type',
+    description: 'Represents the content type requested by the client.',
+    type: 'keyword',
+  },
+  'gen_ai.embeddings.dimension.count': {
+    name: 'gen_ai.embeddings.dimension.count',
+    description: 'The number of dimensions the resulting output embeddings should have.',
+    type: 'long',
+    example: '512',
+  },
+  'gen_ai.system_instructions': {
+    name: 'gen_ai.system_instructions',
+    description:
+      'The system message or instructions provided to the GenAI model separately from the chat history.',
+    type: 'keyword',
+    example:
+      '[{"type":"text","content":"You are an Agent that greet users, always use greetings tool to respond"}]',
+  },
+  'gen_ai.input.messages': {
+    name: 'gen_ai.input.messages',
+    description: 'The chat history provided to the model as an input.',
+    type: 'keyword',
+    example:
+      '[{"role":"user","parts":[{"type":"text","content":"Weather in Paris?"}]},{"role":"assistant","parts":[{"type":"tool_call","id":"call_VSPygqKTWdrhaFErNvMV18Yl","name":"get_weather","arguments":{"location":"Paris"}}]},{"role":"tool","parts":[{"type":"tool_call_response","id":" call_VSPygqKTWdrhaFErNvMV18Yl","result":"rainy, 57°F"}]}]',
+  },
+  'gen_ai.output.messages': {
+    name: 'gen_ai.output.messages',
+    description:
+      'Messages returned by the model where each message represents a specific model response (choice, candidate).',
+    type: 'keyword',
+    example:
+      '[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]',
+  },
+  'gen_ai.evaluation.name': {
+    name: 'gen_ai.evaluation.name',
+    description: 'The name of the evaluation metric used for the GenAI response.',
+    type: 'keyword',
+    example: 'Relevance',
+  },
+  'gen_ai.evaluation.score.value': {
+    name: 'gen_ai.evaluation.score.value',
+    description: 'The evaluation score returned by the evaluator.',
+    type: 'double',
+    example: '4',
+  },
+  'gen_ai.evaluation.score.label': {
+    name: 'gen_ai.evaluation.score.label',
+    description: 'Human readable label for evaluation.',
+    type: 'keyword',
+    example: 'relevant',
+  },
+  'gen_ai.evaluation.explanation': {
+    name: 'gen_ai.evaluation.explanation',
+    description: 'A free-form explanation for the assigned score provided by the evaluator.',
+    type: 'keyword',
+    example:
+      'The response is factually accurate but lacks sufficient detail to fully address the question.',
+  },
+  'server.address': {
+    name: 'server.address',
+    description:
+      'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'server.port': {
+    name: 'server.port',
+    description: 'Server port number.',
+    type: 'long',
+    example: '80',
+  },
+  'opentracing.ref_type': {
+    name: 'opentracing.ref_type',
+    description: 'Parent-child Reference type',
+    type: 'keyword',
+  },
+  'dotnet.gc.heap.generation': {
+    name: 'dotnet.gc.heap.generation',
+    description: 'Name of the garbage collector managed heap generation.',
+    type: 'keyword',
+    example: 'gen0',
+  },
+  'peer.service': {
+    name: 'peer.service',
+    description:
+      'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
+    type: 'keyword',
+    example: 'A',
+  },
+  'graphql.operation.name': {
+    name: 'graphql.operation.name',
+    description: 'The name of the operation being executed.',
+    type: 'keyword',
+    example: 'f',
+  },
+  'graphql.operation.type': {
+    name: 'graphql.operation.type',
+    description: 'The type of the operation being executed.',
+    type: 'keyword',
+    example: 'query',
+  },
+  'graphql.document': {
+    name: 'graphql.document',
+    description: 'The GraphQL document being executed.',
+    type: 'keyword',
+    example: 'q',
+  },
+  'v8js.gc.type': {
+    name: 'v8js.gc.type',
+    description: 'The type of garbage collection.',
+    type: 'keyword',
+  },
+  'v8js.heap.space.name': {
+    name: 'v8js.heap.space.name',
+    description: 'The name of the space type of heap memory.',
+    type: 'keyword',
+  },
+  'oci.manifest.digest': {
+    name: 'oci.manifest.digest',
+    description:
+      'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
+    type: 'keyword',
+    example: 'sha256:e4ca62c0d62f3e886e684806dfe9d4e0cda60d54986898173c1083856cfda0f4',
+  },
+  'vcs.repository.url.full': {
+    name: 'vcs.repository.url.full',
+    description:
+      'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
+    type: 'keyword',
+    example: 'https://github.com/opentelemetry/open-telemetry-collector-contrib',
+  },
+  'vcs.repository.name': {
+    name: 'vcs.repository.name',
+    description:
+      'The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.',
+    type: 'keyword',
+    example: 'semantic-conventions',
+  },
+  'vcs.ref.base.name': {
+    name: 'vcs.ref.base.name',
+    description:
+      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
+    type: 'keyword',
+    example: 'my-feature-branch',
+  },
+  'vcs.ref.base.type': {
+    name: 'vcs.ref.base.type',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    type: 'keyword',
+    example: 'branch',
+  },
+  'vcs.ref.base.revision': {
+    name: 'vcs.ref.base.revision',
+    description:
+      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
+    type: 'keyword',
+    example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
+  },
+  'vcs.ref.head.name': {
+    name: 'vcs.ref.head.name',
+    description:
+      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
+    type: 'keyword',
+    example: 'my-feature-branch',
+  },
+  'vcs.ref.head.type': {
+    name: 'vcs.ref.head.type',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    type: 'keyword',
+    example: 'branch',
+  },
+  'vcs.ref.head.revision': {
+    name: 'vcs.ref.head.revision',
+    description:
+      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
+    type: 'keyword',
+    example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
+  },
+  'vcs.ref.type': {
+    name: 'vcs.ref.type',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    type: 'keyword',
+    example: 'branch',
+  },
+  'vcs.revision_delta.direction': {
+    name: 'vcs.revision_delta.direction',
+    description: 'The type of revision comparison.',
+    type: 'keyword',
+    example: 'ahead',
+  },
+  'vcs.line_change.type': {
+    name: 'vcs.line_change.type',
+    description: 'The type of line change being measured on a branch or change.',
+    type: 'keyword',
+    example: 'added',
+  },
+  'vcs.change.title': {
+    name: 'vcs.change.title',
+    description:
+      'The human readable title of the change (pull request/merge request/changelist). This title is often a brief summary of the change and may get merged in to a ref as the commit summary.',
+    type: 'keyword',
+    example: 'Fixes broken thing',
+  },
+  'vcs.change.id': {
+    name: 'vcs.change.id',
+    description:
+      'The ID of the change (pull request/merge request/changelist) if applicable. This is usually a unique (within repository) identifier generated by the VCS system.',
+    type: 'keyword',
+    example: '123',
+  },
+  'vcs.change.state': {
+    name: 'vcs.change.state',
+    description: 'The state of the change (pull request/merge request/changelist).',
+    type: 'keyword',
+    example: 'open',
+  },
+  'vcs.owner.name': {
+    name: 'vcs.owner.name',
+    description: 'The group owner within the version control system.',
+    type: 'keyword',
+    example: 'my-org',
+  },
+  'vcs.provider.name': {
+    name: 'vcs.provider.name',
+    description: 'The name of the version control system provider.',
+    type: 'keyword',
+    example: 'github',
+  },
+  'source.address': {
+    name: 'source.address',
+    description:
+      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'source.example.com',
+  },
+  'source.port': {
+    name: 'source.port',
+    description: 'Source port number',
+    type: 'long',
+    example: '3389',
+  },
+  'event.name': {
+    name: 'event.name',
+    description: 'Identifies the class / type of event.',
+    type: 'keyword',
+    example: 'browser.mouse.click',
+  },
+  'cpython.gc.generation': {
+    name: 'cpython.gc.generation',
+    description: 'Value of the garbage collector collection generation.',
+    type: 'keyword',
+    example: '0',
+  },
+  'mainframe.lpar.name': {
+    name: 'mainframe.lpar.name',
+    description:
+      'Name of the logical partition that hosts a systems with a mainframe operating system.',
+    type: 'keyword',
+    example: 'LPAR01',
+  },
+  'log.iostream': {
+    name: 'log.iostream',
+    description: 'The stream associated with the log. See below for a list of well-known values.',
+    type: 'keyword',
+  },
+  'log.file.name': {
+    name: 'log.file.name',
+    description: 'The basename of the file.',
+    type: 'keyword',
+    example: 'audit.log',
+  },
+  'log.file.path': {
+    name: 'log.file.path',
+    description: 'The full path to the file.',
+    type: 'keyword',
+    example: '/var/log/mysql/audit.log',
+  },
+  'log.file.name_resolved': {
+    name: 'log.file.name_resolved',
+    description: 'The basename of the file, with symlinks resolved.',
+    type: 'keyword',
+    example: 'uuid.log',
+  },
+  'log.file.path_resolved': {
+    name: 'log.file.path_resolved',
+    description: 'The full path to the file, with symlinks resolved.',
+    type: 'keyword',
+    example: '/var/lib/docker/uuid.log',
+  },
+  'log.record.uid': {
+    name: 'log.record.uid',
+    description: 'A unique identifier for the Log Record.',
+    type: 'keyword',
+    example: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+  },
+  'log.record.original': {
+    name: 'log.record.original',
+    description: 'The complete original Log Record.',
+    type: 'keyword',
+    example: '77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened',
+  },
+  'telemetry.sdk.name': {
+    name: 'telemetry.sdk.name',
+    description: 'The name of the telemetry SDK as defined above.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'telemetry.sdk.language': {
+    name: 'telemetry.sdk.language',
+    description: 'The language of the telemetry SDK.',
+    type: 'keyword',
+  },
+  'telemetry.sdk.version': {
+    name: 'telemetry.sdk.version',
+    description: 'The version string of the telemetry SDK.',
+    type: 'keyword',
+    example: '1.2.3',
+  },
+  'telemetry.distro.name': {
+    name: 'telemetry.distro.name',
+    description: 'The name of the auto instrumentation agent or distribution, if used.',
+    type: 'keyword',
+    example: 'parts-unlimited-java',
+  },
+  'telemetry.distro.version': {
+    name: 'telemetry.distro.version',
+    description: 'The version string of the auto instrumentation agent or distribution, if used.',
+    type: 'keyword',
+    example: '1.2.3',
+  },
+  'cassandra.coordinator.dc': {
+    name: 'cassandra.coordinator.dc',
+    description: 'The data center of the coordinating node for a query.',
+    type: 'keyword',
+    example: 'u',
+  },
+  'cassandra.coordinator.id': {
+    name: 'cassandra.coordinator.id',
+    description: 'The ID of the coordinating node for a query.',
+    type: 'keyword',
+    example: 'b',
+  },
+  'cassandra.consistency.level': {
+    name: 'cassandra.consistency.level',
+    description:
+      'The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html).',
+    type: 'keyword',
+  },
+  'cassandra.query.idempotent': {
+    name: 'cassandra.query.idempotent',
+    description: 'Whether or not the query is idempotent.',
+    type: 'boolean',
+  },
+  'cassandra.page.size': {
+    name: 'cassandra.page.size',
+    description: 'The fetch size used for paging, i.e. how many rows will be returned at once.',
+    type: 'long',
+    example: '5000',
+  },
+  'cassandra.speculative_execution.count': {
+    name: 'cassandra.speculative_execution.count',
+    description:
+      'The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively.',
+    type: 'long',
+    example: '0',
+  },
+  'linux.memory.slab.state': {
+    name: 'linux.memory.slab.state',
+    description: 'The Linux Slab memory state',
+    type: 'keyword',
+    example: 'reclaimable',
+  },
+  'user_agent.original': {
+    name: 'user_agent.original',
+    description:
+      'Value of the [HTTP User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#field.user-agent) header sent by the client.',
+    type: 'keyword',
+    example: 'CERN-LineMode/2.15 libwww/2.17b3',
+  },
+  'user_agent.name': {
+    name: 'user_agent.name',
+    description:
+      "Name of the user-agent extracted from original. Usually refers to the browser's name.",
+    type: 'keyword',
+    example: 'Safari',
+  },
+  'user_agent.version': {
+    name: 'user_agent.version',
+    description:
+      "Version of the user-agent extracted from original. Usually refers to the browser's version",
+    type: 'keyword',
+    example: '14.1.2',
+  },
+  'user_agent.os.name': {
+    name: 'user_agent.os.name',
+    description: 'Human readable operating system name.',
+    type: 'keyword',
+    example: 'iOS',
+  },
+  'user_agent.os.version': {
+    name: 'user_agent.os.version',
+    description:
+      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    type: 'keyword',
+    example: '14.2.1',
+  },
+  'user_agent.synthetic.type': {
+    name: 'user_agent.synthetic.type',
+    description: 'Specifies the category of synthetic traffic, such as tests or bots.',
+    type: 'keyword',
+  },
+  'os.type': {
+    name: 'os.type',
+    description: 'The operating system type.',
+    type: 'keyword',
+  },
+  'os.description': {
+    name: 'os.description',
+    description:
+      'Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands.',
+    type: 'keyword',
+    example: 'Microsoft Windows [Version 10.0.18363.778]',
+  },
+  'os.name': {
+    name: 'os.name',
+    description: 'Human readable operating system name.',
+    type: 'keyword',
+    example: 'iOS',
+  },
+  'os.version': {
+    name: 'os.version',
+    description:
+      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    type: 'keyword',
+    example: '14.2.1',
+  },
+  'os.build_id': {
+    name: 'os.build_id',
+    description: 'Unique identifier for a particular build or compilation of the operating system.',
+    type: 'keyword',
+    example: 'TQ3C.230805.001.B2',
+  },
+  'thread.id': {
+    name: 'thread.id',
+    description: 'Current "managed" thread ID (as opposed to OS thread ID).',
+    type: 'long',
+  },
+  'thread.name': {
+    name: 'thread.name',
+    description: 'Current thread name.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'feature_flag.key': {
+    name: 'feature_flag.key',
+    description: 'The lookup key of the feature flag.',
+    type: 'keyword',
+    example: 'logo-color',
+  },
+  'feature_flag.provider.name': {
+    name: 'feature_flag.provider.name',
+    description: 'Identifies the feature flag provider.',
+    type: 'keyword',
+    example: 'Flag Manager',
+  },
+  'feature_flag.result.variant': {
+    name: 'feature_flag.result.variant',
+    description: 'A semantic identifier for an evaluated flag value.',
+    type: 'keyword',
+    example: 'red',
+  },
+  'feature_flag.context.id': {
+    name: 'feature_flag.context.id',
+    description:
+      'The unique identifier for the flag evaluation context. For example, the targeting key.',
+    type: 'keyword',
+    example: '5157782b-2203-4c80-a857-dbbd5e7761db',
+  },
+  'feature_flag.version': {
+    name: 'feature_flag.version',
+    description:
+      'The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset.',
+    type: 'keyword',
+    example: '1',
+  },
+  'feature_flag.set.id': {
+    name: 'feature_flag.set.id',
+    description:
+      'The identifier of the [flag set](https://openfeature.dev/specification/glossary/#flag-set) to which the feature flag belongs.',
+    type: 'keyword',
+    example: 'proj-1',
+  },
+  'feature_flag.result.reason': {
+    name: 'feature_flag.result.reason',
+    description: 'The reason code which shows how a feature flag value was determined.',
+    type: 'keyword',
+    example: 'static',
+  },
+  'feature_flag.result.value': {
+    name: 'feature_flag.result.value',
+    description: 'The evaluated value of the feature flag.',
+    type: 'keyword',
+    example: '#ff0000',
+  },
+  'dns.question.name': {
+    name: 'dns.question.name',
+    description: 'The name being queried.',
+    type: 'keyword',
+    example: 'www.example.com',
+  },
+  'dns.answers': {
+    name: 'dns.answers',
+    description: 'The list of IPv4 or IPv6 addresses resolved during DNS lookup.',
+    type: 'keyword',
+    example: '10.0.0.1,2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+  },
+  'file.accessed': {
+    name: 'file.accessed',
+    description: 'Time when the file was last accessed, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+  },
+  'file.attributes': {
+    name: 'file.attributes',
+    description: 'Array of file attributes.',
+    type: 'keyword',
+    example: 'readonly,hidden',
+  },
+  'file.created': {
+    name: 'file.created',
+    description: 'Time when the file was created, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+  },
+  'file.changed': {
+    name: 'file.changed',
+    description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+  },
+  'file.directory': {
+    name: 'file.directory',
+    description:
+      'Directory where the file is located. It should include the drive letter, when appropriate.',
+    type: 'keyword',
+    example: '/home/user',
+  },
+  'file.extension': {
+    name: 'file.extension',
+    description: 'File extension, excluding the leading dot.',
+    type: 'keyword',
+    example: 'png',
+  },
+  'file.fork_name': {
+    name: 'file.fork_name',
+    description: 'Name of the fork. A fork is additional data associated with a filesystem object.',
+    type: 'keyword',
+    example: 'Zone.Identifier',
+  },
+  'file.group.id': {
+    name: 'file.group.id',
+    description: 'Primary Group ID (GID) of the file.',
+    type: 'keyword',
+    example: '1000',
+  },
+  'file.group.name': {
+    name: 'file.group.name',
+    description: 'Primary group name of the file.',
+    type: 'keyword',
+    example: 'users',
+  },
+  'file.inode': {
+    name: 'file.inode',
+    description: 'Inode representing the file in the filesystem.',
+    type: 'keyword',
+    example: '256383',
+  },
+  'file.mode': {
+    name: 'file.mode',
+    description: 'Mode of the file in octal representation.',
+    type: 'keyword',
+    example: '0640',
+  },
+  'file.modified': {
+    name: 'file.modified',
+    description: 'Time when the file content was last modified, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+  },
+  'file.name': {
+    name: 'file.name',
+    description: 'Name of the file including the extension, without the directory.',
+    type: 'keyword',
+    example: 'example.png',
+  },
+  'file.owner.id': {
+    name: 'file.owner.id',
+    description: 'The user ID (UID) or security identifier (SID) of the file owner.',
+    type: 'keyword',
+    example: '1000',
+  },
+  'file.owner.name': {
+    name: 'file.owner.name',
+    description: 'Username of the file owner.',
+    type: 'keyword',
+    example: 'root',
+  },
+  'file.path': {
+    name: 'file.path',
+    description:
+      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+    type: 'keyword',
+    example: '/home/alice/example.png',
+  },
+  'file.size': {
+    name: 'file.size',
+    description: 'File size in bytes.',
+    type: 'long',
+  },
+  'file.symbolic_link.target_path': {
+    name: 'file.symbolic_link.target_path',
+    description: 'Path to the target of a symbolic link.',
+    type: 'keyword',
+    example: '/usr/bin/python3',
+  },
+  'exception.type': {
+    name: 'exception.type',
+    description:
+      'The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.',
+    type: 'keyword',
+    example: 'java.net.ConnectException',
+  },
+  'exception.message': {
+    name: 'exception.message',
+    description: 'The exception message.',
+    type: 'keyword',
+    example: 'Division by zero',
+  },
+  'exception.stacktrace': {
+    name: 'exception.stacktrace',
+    description:
+      'A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.',
+    type: 'keyword',
+    example: 'E',
+  },
+  'url.domain': {
+    name: 'url.domain',
+    description: 'Domain extracted from the `url.full`, such as "opentelemetry.io".',
+    type: 'keyword',
+    example: 'www.foo.bar',
+  },
+  'url.extension': {
+    name: 'url.extension',
+    description: 'The file extension extracted from the `url.full`, excluding the leading dot.',
+    type: 'keyword',
+    example: 'png',
+  },
+  'url.fragment': {
+    name: 'url.fragment',
+    description: 'The [URI fragment](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) component',
+    type: 'keyword',
+    example: 'SemConv',
+  },
+  'url.full': {
+    name: 'url.full',
+    description:
+      'Absolute URL describing a network resource according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986)',
+    type: 'keyword',
+    example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
+  },
+  'url.original': {
+    name: 'url.original',
+    description: 'Unmodified original URL as seen in the event source.',
+    type: 'keyword',
+    example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
+  },
+  'url.path': {
+    name: 'url.path',
+    description: 'The [URI path](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) component',
+    type: 'keyword',
+    example: '/search',
+  },
+  'url.port': {
+    name: 'url.port',
+    description: 'Port extracted from the `url.full`',
+    type: 'long',
+    example: '443',
+  },
+  'url.query': {
+    name: 'url.query',
+    description: 'The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component',
+    type: 'keyword',
+    example: 'q=OpenTelemetry',
+  },
+  'url.registered_domain': {
+    name: 'url.registered_domain',
+    description: 'The highest registered url domain, stripped of the subdomain.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'url.scheme': {
+    name: 'url.scheme',
+    description:
+      'The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.',
+    type: 'keyword',
+    example: 'http',
+  },
+  'url.subdomain': {
+    name: 'url.subdomain',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
+    type: 'keyword',
+    example: 'east',
+  },
+  'url.template': {
+    name: 'url.template',
+    description:
+      'The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).',
+    type: 'keyword',
+    example: '/users/{id}',
+  },
+  'url.top_level_domain': {
+    name: 'url.top_level_domain',
+    description:
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.',
+    type: 'keyword',
+    example: 'com',
+  },
+  'http.request.body.size': {
+    name: 'http.request.body.size',
+    description:
+      'The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
+    type: 'long',
+  },
+  'http.request.header': {
+    name: 'http.request.header',
+    description:
+      'HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
+    type: 'keyword',
+    example: 'application/json',
+  },
+  'http.request.method': {
+    name: 'http.request.method',
+    description: 'HTTP request method.',
+    type: 'keyword',
+    example: 'GET',
+  },
+  'http.request.method_original': {
+    name: 'http.request.method_original',
+    description: 'Original HTTP method sent by the client in the request line.',
+    type: 'keyword',
+    example: 'GeT',
+  },
+  'http.request.resend_count': {
+    name: 'http.request.resend_count',
+    description:
+      'The ordinal number of request resending attempt (for any reason, including redirects).',
+    type: 'long',
+  },
+  'http.request.size': {
+    name: 'http.request.size',
+    description:
+      'The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.',
+    type: 'long',
+  },
+  'http.response.body.size': {
+    name: 'http.response.body.size',
+    description:
+      'The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
+    type: 'long',
+  },
+  'http.response.header': {
+    name: 'http.response.header',
+    description:
+      'HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
+    type: 'keyword',
+    example: 'application/json',
+  },
+  'http.response.size': {
+    name: 'http.response.size',
+    description:
+      'The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.',
+    type: 'long',
+  },
+  'http.response.status_code': {
+    name: 'http.response.status_code',
+    description: '[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).',
+    type: 'long',
+    example: '200',
+  },
+  'http.route': {
+    name: 'http.route',
+    description:
+      'The matched route, that is, the path template in the format used by the respective server framework.',
+    type: 'keyword',
+    example: '/users/:userID?',
+  },
+  'http.connection.state': {
+    name: 'http.connection.state',
+    description: 'State of the HTTP connection in the HTTP connection pool.',
+    type: 'keyword',
+    example: 'active',
+  },
+  'device.id': {
+    name: 'device.id',
+    description: 'A unique identifier representing the device',
+    type: 'keyword',
+    example: '123456789012345',
+  },
+  'device.manufacturer': {
+    name: 'device.manufacturer',
+    description: 'The name of the device manufacturer',
+    type: 'keyword',
+    example: 'Apple',
+  },
+  'device.model.identifier': {
+    name: 'device.model.identifier',
+    description: 'The model identifier for the device',
+    type: 'keyword',
+    example: 'iPhone3,4',
+  },
+  'device.model.name': {
+    name: 'device.model.name',
+    description: 'The marketing name for the device model',
+    type: 'keyword',
+    example: 'iPhone 6s Plus',
+  },
+  'cloudevents.event_id': {
+    name: 'cloudevents.event_id',
+    description:
+      'The [event_id](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id) uniquely identifies the event.',
+    type: 'keyword',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  'cloudevents.event_source': {
+    name: 'cloudevents.event_source',
+    description:
+      'The [source](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1) identifies the context in which an event happened.',
+    type: 'keyword',
+    example: 'https://github.com/cloudevents',
+  },
+  'cloudevents.event_spec_version': {
+    name: 'cloudevents.event_spec_version',
+    description:
+      'The [version of the CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion) which the event uses.',
+    type: 'keyword',
+    example: '1',
+  },
+  'cloudevents.event_type': {
+    name: 'cloudevents.event_type',
+    description:
+      'The [event_type](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type) contains a value describing the type of event related to the originating occurrence.',
+    type: 'keyword',
+    example: 'com.github.pull_request.opened',
+  },
+  'cloudevents.event_subject': {
+    name: 'cloudevents.event_subject',
+    description:
+      'The [subject](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject) of the event in the context of the event producer (identified by source).',
+    type: 'keyword',
+    example: 'm',
+  },
+  'android.os.api_level': {
+    name: 'android.os.api_level',
+    description:
+      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
+    type: 'keyword',
+    example: '33',
+  },
+  'android.app.state': {
+    name: 'android.app.state',
+    description: 'This attribute represents the state of the application.',
+    type: 'keyword',
+    example: 'created',
+  },
+  'cicd.pipeline.name': {
+    name: 'cicd.pipeline.name',
+    description: 'The human readable name of the pipeline within a CI/CD system.',
+    type: 'keyword',
+    example: 'Build and Test',
+  },
+  'cicd.pipeline.run.id': {
+    name: 'cicd.pipeline.run.id',
+    description: 'The unique identifier of a pipeline run within a CI/CD system.',
+    type: 'keyword',
+    example: '120912',
+  },
+  'cicd.pipeline.run.url.full': {
+    name: 'cicd.pipeline.run.url.full',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline run, providing the complete address in order to locate and identify the pipeline run.',
+    type: 'keyword',
+    example:
+      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075',
+  },
+  'cicd.pipeline.run.state': {
+    name: 'cicd.pipeline.run.state',
+    description: 'The pipeline run goes through these states during its lifecycle.',
+    type: 'keyword',
+    example: 'pending',
+  },
+  'cicd.pipeline.task.name': {
+    name: 'cicd.pipeline.task.name',
+    description:
+      'The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process](https://wikipedia.org/wiki/Pipeline_(computing)) in a pipeline. Other terms for tasks include commands, steps, and procedures.',
+    type: 'keyword',
+    example: 'Run GoLang Linter',
+  },
+  'cicd.pipeline.task.run.id': {
+    name: 'cicd.pipeline.task.run.id',
+    description: 'The unique identifier of a task run within a pipeline.',
+    type: 'keyword',
+    example: '12097',
+  },
+  'cicd.pipeline.task.run.url.full': {
+    name: 'cicd.pipeline.task.run.url.full',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run.',
+    type: 'keyword',
+    example:
+      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075',
+  },
+  'cicd.pipeline.task.run.result': {
+    name: 'cicd.pipeline.task.run.result',
+    description: 'The result of a task run.',
+    type: 'keyword',
+    example: 'success',
+  },
+  'cicd.pipeline.task.type': {
+    name: 'cicd.pipeline.task.type',
+    description: 'The type of the task within a pipeline.',
+    type: 'keyword',
+    example: 'build',
+  },
+  'cicd.pipeline.result': {
+    name: 'cicd.pipeline.result',
+    description: 'The result of a pipeline run.',
+    type: 'keyword',
+    example: 'success',
+  },
+  'cicd.pipeline.action.name': {
+    name: 'cicd.pipeline.action.name',
+    description: 'The kind of action a pipeline run is performing.',
+    type: 'keyword',
+    example: 'BUILD',
+  },
+  'cicd.worker.id': {
+    name: 'cicd.worker.id',
+    description: 'The unique identifier of a worker within a CICD system.',
+    type: 'keyword',
+    example: 'abc123',
+  },
+  'cicd.worker.name': {
+    name: 'cicd.worker.name',
+    description: 'The name of a worker within a CICD system.',
+    type: 'keyword',
+    example: 'agent-abc',
+  },
+  'cicd.worker.url.full': {
+    name: 'cicd.worker.url.full',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.',
+    type: 'keyword',
+    example: 'https://cicd.example.org/worker/abc123',
+  },
+  'cicd.worker.state': {
+    name: 'cicd.worker.state',
+    description: 'The state of a CICD worker / agent.',
+    type: 'keyword',
+    example: 'idle',
+  },
+  'cicd.system.component': {
+    name: 'cicd.system.component',
+    description: 'The name of a component of the CICD system.',
+    type: 'keyword',
+    example: 'controller',
+  },
   'nodejs.eventloop.state': {
     name: 'nodejs.eventloop.state',
     description: 'The state of event loop time.',
@@ -4543,116 +4644,29 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'staging',
   },
-  'metrics.otel.sdk.span.live': {
-    name: 'metrics.otel.sdk.span.live',
-    description:
-      'The number of created spans with `recording=true` for which the end operation has not been called yet.',
+  'metrics.hw.network.bandwidth.limit': {
+    name: 'metrics.hw.network.bandwidth.limit',
+    description: 'Link speed.',
     type: 'double',
   },
-  'metrics.otel.sdk.span.started': {
-    name: 'metrics.otel.sdk.span.started',
-    description: 'The number of created spans.',
+  'metrics.hw.network.bandwidth.utilization': {
+    name: 'metrics.hw.network.bandwidth.utilization',
+    description: 'Utilization of the network bandwidth as a fraction.',
     type: 'double',
   },
-  'metrics.otel.sdk.processor.span.queue.size': {
-    name: 'metrics.otel.sdk.processor.span.queue.size',
-    description: 'The number of spans in the queue of a given instance of an SDK span processor.',
+  'metrics.hw.network.io': {
+    name: 'metrics.hw.network.io',
+    description: 'Received and transmitted network traffic in bytes.',
     type: 'double',
   },
-  'metrics.otel.sdk.processor.span.queue.capacity': {
-    name: 'metrics.otel.sdk.processor.span.queue.capacity',
-    description:
-      'The maximum number of spans the queue of a given instance of an SDK span processor can hold.',
+  'metrics.hw.network.packets': {
+    name: 'metrics.hw.network.packets',
+    description: 'Received and transmitted network traffic in packets (or frames).',
     type: 'double',
   },
-  'metrics.otel.sdk.processor.span.processed': {
-    name: 'metrics.otel.sdk.processor.span.processed',
-    description:
-      'The number of spans for which the processing has finished, either successful or failed.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.span.inflight': {
-    name: 'metrics.otel.sdk.exporter.span.inflight',
-    description:
-      'The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.span.exported': {
-    name: 'metrics.otel.sdk.exporter.span.exported',
-    description:
-      'The number of spans for which the export has finished, either successful or failed.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.log.created': {
-    name: 'metrics.otel.sdk.log.created',
-    description: 'The number of logs submitted to enabled SDK Loggers.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.processor.log.queue.size': {
-    name: 'metrics.otel.sdk.processor.log.queue.size',
-    description:
-      'The number of log records in the queue of a given instance of an SDK log processor.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.processor.log.queue.capacity': {
-    name: 'metrics.otel.sdk.processor.log.queue.capacity',
-    description:
-      'The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.processor.log.processed': {
-    name: 'metrics.otel.sdk.processor.log.processed',
-    description:
-      'The number of log records for which the processing has finished, either successful or failed.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.log.inflight': {
-    name: 'metrics.otel.sdk.exporter.log.inflight',
-    description:
-      'The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.log.exported': {
-    name: 'metrics.otel.sdk.exporter.log.exported',
-    description:
-      'The number of log records for which the export has finished, either successful or failed.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.metric_data_point.inflight': {
-    name: 'metrics.otel.sdk.exporter.metric_data_point.inflight',
-    description:
-      'The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.metric_data_point.exported': {
-    name: 'metrics.otel.sdk.exporter.metric_data_point.exported',
-    description:
-      'The number of metric data points for which the export has finished, either successful or failed.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.metric_reader.collection.duration': {
-    name: 'metrics.otel.sdk.metric_reader.collection.duration',
-    description: 'The duration of the collect operation of the metric reader.',
-    type: 'double',
-  },
-  'metrics.otel.sdk.exporter.operation.duration': {
-    name: 'metrics.otel.sdk.exporter.operation.duration',
-    description: 'The duration of exporting a batch of telemetry records.',
-    type: 'double',
-  },
-  'metrics.hw.logical_disk.limit': {
-    name: 'metrics.hw.logical_disk.limit',
-    description: 'Size of the logical disk.',
-    type: 'double',
-  },
-  'metrics.hw.logical_disk.usage': {
-    name: 'metrics.hw.logical_disk.usage',
-    description: 'Logical disk space usage.',
-    type: 'double',
-  },
-  'metrics.hw.logical_disk.utilization': {
-    name: 'metrics.hw.logical_disk.utilization',
-    description: 'Logical disk space utilization as a fraction.',
+  'metrics.hw.network.up': {
+    name: 'metrics.hw.network.up',
+    description: 'Link status: `1` (up) or `0` (down).',
     type: 'double',
   },
   'metrics.hw.memory.size': {
@@ -4738,44 +4752,39 @@ export const semconvFlat = {
     description: 'Operations performed by the tape drive.',
     type: 'double',
   },
-  'metrics.hw.voltage': {
-    name: 'metrics.hw.voltage',
-    description: 'Voltage measured by the sensor.',
+  'metrics.hw.energy': {
+    name: 'metrics.hw.energy',
+    description: 'Energy consumed by the component.',
     type: 'double',
   },
-  'metrics.hw.voltage.limit': {
-    name: 'metrics.hw.voltage.limit',
-    description: 'Voltage limit in Volts.',
+  'metrics.hw.errors': {
+    name: 'metrics.hw.errors',
+    description: 'Number of errors encountered by the component.',
     type: 'double',
   },
-  'metrics.hw.voltage.nominal': {
-    name: 'metrics.hw.voltage.nominal',
-    description: 'Nominal (expected) voltage.',
+  'metrics.hw.power': {
+    name: 'metrics.hw.power',
+    description: 'Instantaneous power consumed by the component.',
     type: 'double',
   },
-  'metrics.hw.gpu.io': {
-    name: 'metrics.hw.gpu.io',
-    description: 'Received and transmitted bytes by the GPU.',
+  'metrics.hw.status': {
+    name: 'metrics.hw.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
-  'metrics.hw.gpu.memory.limit': {
-    name: 'metrics.hw.gpu.memory.limit',
-    description: 'Size of the GPU memory.',
+  'metrics.hw.power_supply.limit': {
+    name: 'metrics.hw.power_supply.limit',
+    description: 'Maximum power output of the power supply.',
     type: 'double',
   },
-  'metrics.hw.gpu.memory.utilization': {
-    name: 'metrics.hw.gpu.memory.utilization',
-    description: 'Fraction of GPU memory used.',
+  'metrics.hw.power_supply.utilization': {
+    name: 'metrics.hw.power_supply.utilization',
+    description: 'Utilization of the power supply as a fraction of its maximum output.',
     type: 'double',
   },
-  'metrics.hw.gpu.memory.usage': {
-    name: 'metrics.hw.gpu.memory.usage',
-    description: 'GPU memory used.',
-    type: 'double',
-  },
-  'metrics.hw.gpu.utilization': {
-    name: 'metrics.hw.gpu.utilization',
-    description: 'Fraction of time spent in a specific task.',
+  'metrics.hw.power_supply.usage': {
+    name: 'metrics.hw.power_supply.usage',
+    description: 'Current power output of the power supply.',
     type: 'double',
   },
   'metrics.hw.battery.charge': {
@@ -4892,6 +4901,73 @@ export const semconvFlat = {
   'metrics.process.uptime': {
     name: 'metrics.process.uptime',
     description: 'The time the process has been running.',
+    type: 'double',
+  },
+  'metrics.signalr.server.connection.duration': {
+    name: 'metrics.signalr.server.connection.duration',
+    description: 'The duration of connections on the server.',
+    type: 'double',
+  },
+  'metrics.signalr.server.active_connections': {
+    name: 'metrics.signalr.server.active_connections',
+    description: 'Number of connections that are currently active on the server.',
+    type: 'double',
+  },
+  'metrics.db.client.operation.duration': {
+    name: 'metrics.db.client.operation.duration',
+    description: 'Duration of database client operations.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.count': {
+    name: 'metrics.db.client.connection.count',
+    description:
+      'The number of connections that are currently in state described by the `state` attribute.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.idle.max': {
+    name: 'metrics.db.client.connection.idle.max',
+    description: 'The maximum number of idle open connections allowed.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.idle.min': {
+    name: 'metrics.db.client.connection.idle.min',
+    description: 'The minimum number of idle open connections allowed.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.max': {
+    name: 'metrics.db.client.connection.max',
+    description: 'The maximum number of open connections allowed.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.pending_requests': {
+    name: 'metrics.db.client.connection.pending_requests',
+    description: 'The number of current pending requests for an open connection.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.timeouts': {
+    name: 'metrics.db.client.connection.timeouts',
+    description:
+      'The number of connection timeouts that have occurred trying to obtain a connection from the pool.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.create_time': {
+    name: 'metrics.db.client.connection.create_time',
+    description: 'The time it took to create a new connection.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.wait_time': {
+    name: 'metrics.db.client.connection.wait_time',
+    description: 'The time it took to obtain an open connection from the pool.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.use_time': {
+    name: 'metrics.db.client.connection.use_time',
+    description: 'The time between borrowing a connection and returning it to the pool.',
+    type: 'double',
+  },
+  'metrics.db.client.response.returned_rows': {
+    name: 'metrics.db.client.response.returned_rows',
+    description: 'The actual number of records returned by the database operation.',
     type: 'double',
   },
   'metrics.gen_ai.client.token.usage': {
@@ -5093,6 +5169,808 @@ export const semconvFlat = {
     name: 'metrics.cpython.gc.uncollectable_objects',
     description:
       'The total number of objects which were found to be uncollectable inside a generation since interpreter start.',
+    type: 'double',
+  },
+  'metrics.go.memory.used': {
+    name: 'metrics.go.memory.used',
+    description: 'Memory used by the Go runtime.',
+    type: 'double',
+  },
+  'metrics.go.memory.limit': {
+    name: 'metrics.go.memory.limit',
+    description: 'Go runtime memory limit configured by the user, if a limit exists.',
+    type: 'double',
+  },
+  'metrics.go.memory.allocated': {
+    name: 'metrics.go.memory.allocated',
+    description: 'Memory allocated to the heap by the application.',
+    type: 'double',
+  },
+  'metrics.go.memory.allocations': {
+    name: 'metrics.go.memory.allocations',
+    description: 'Count of allocations to the heap by the application.',
+    type: 'double',
+  },
+  'metrics.go.memory.gc.goal': {
+    name: 'metrics.go.memory.gc.goal',
+    description: 'Heap size target for the end of the GC cycle.',
+    type: 'double',
+  },
+  'metrics.go.goroutine.count': {
+    name: 'metrics.go.goroutine.count',
+    description: 'Count of live goroutines.',
+    type: 'double',
+  },
+  'metrics.go.processor.limit': {
+    name: 'metrics.go.processor.limit',
+    description: 'The number of OS threads that can execute user-level Go code simultaneously.',
+    type: 'double',
+  },
+  'metrics.go.schedule.duration': {
+    name: 'metrics.go.schedule.duration',
+    description:
+      'The time goroutines have spent in the scheduler in a runnable state before actually running.',
+    type: 'double',
+  },
+  'metrics.go.config.gogc': {
+    name: 'metrics.go.config.gogc',
+    description: 'Heap size target percentage configured by the user, otherwise 100.',
+    type: 'double',
+  },
+  'metrics.cicd.pipeline.run.duration': {
+    name: 'metrics.cicd.pipeline.run.duration',
+    description: 'Duration of a pipeline run grouped by pipeline, state and result.',
+    type: 'double',
+  },
+  'metrics.cicd.pipeline.run.active': {
+    name: 'metrics.cicd.pipeline.run.active',
+    description: 'The number of pipeline runs currently active in the system by state.',
+    type: 'double',
+  },
+  'metrics.cicd.worker.count': {
+    name: 'metrics.cicd.worker.count',
+    description: 'The number of workers on the CICD system by state.',
+    type: 'double',
+  },
+  'metrics.cicd.pipeline.run.errors': {
+    name: 'metrics.cicd.pipeline.run.errors',
+    description: 'The number of errors encountered in pipeline runs (eg. compile, test failures).',
+    type: 'double',
+  },
+  'metrics.cicd.system.errors': {
+    name: 'metrics.cicd.system.errors',
+    description:
+      'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.min': {
+    name: 'metrics.nodejs.eventloop.delay.min',
+    description: 'Event loop minimum delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.max': {
+    name: 'metrics.nodejs.eventloop.delay.max',
+    description: 'Event loop maximum delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.mean': {
+    name: 'metrics.nodejs.eventloop.delay.mean',
+    description: 'Event loop mean delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.stddev': {
+    name: 'metrics.nodejs.eventloop.delay.stddev',
+    description: 'Event loop standard deviation delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.p50': {
+    name: 'metrics.nodejs.eventloop.delay.p50',
+    description: 'Event loop 50 percentile delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.p90': {
+    name: 'metrics.nodejs.eventloop.delay.p90',
+    description: 'Event loop 90 percentile delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.p99': {
+    name: 'metrics.nodejs.eventloop.delay.p99',
+    description: 'Event loop 99 percentile delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.utilization': {
+    name: 'metrics.nodejs.eventloop.utilization',
+    description: 'Event loop utilization.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.time': {
+    name: 'metrics.nodejs.eventloop.time',
+    description: 'Cumulative duration of time the event loop has been in each state.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.span.live': {
+    name: 'metrics.otel.sdk.span.live',
+    description:
+      'The number of created spans with `recording=true` for which the end operation has not been called yet.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.span.started': {
+    name: 'metrics.otel.sdk.span.started',
+    description: 'The number of created spans.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.span.queue.size': {
+    name: 'metrics.otel.sdk.processor.span.queue.size',
+    description: 'The number of spans in the queue of a given instance of an SDK span processor.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.span.queue.capacity': {
+    name: 'metrics.otel.sdk.processor.span.queue.capacity',
+    description:
+      'The maximum number of spans the queue of a given instance of an SDK span processor can hold.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.span.processed': {
+    name: 'metrics.otel.sdk.processor.span.processed',
+    description:
+      'The number of spans for which the processing has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.span.inflight': {
+    name: 'metrics.otel.sdk.exporter.span.inflight',
+    description:
+      'The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.span.exported': {
+    name: 'metrics.otel.sdk.exporter.span.exported',
+    description:
+      'The number of spans for which the export has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.log.created': {
+    name: 'metrics.otel.sdk.log.created',
+    description: 'The number of logs submitted to enabled SDK Loggers.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.log.queue.size': {
+    name: 'metrics.otel.sdk.processor.log.queue.size',
+    description:
+      'The number of log records in the queue of a given instance of an SDK log processor.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.log.queue.capacity': {
+    name: 'metrics.otel.sdk.processor.log.queue.capacity',
+    description:
+      'The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.log.processed': {
+    name: 'metrics.otel.sdk.processor.log.processed',
+    description:
+      'The number of log records for which the processing has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.log.inflight': {
+    name: 'metrics.otel.sdk.exporter.log.inflight',
+    description:
+      'The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.log.exported': {
+    name: 'metrics.otel.sdk.exporter.log.exported',
+    description:
+      'The number of log records for which the export has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.metric_data_point.inflight': {
+    name: 'metrics.otel.sdk.exporter.metric_data_point.inflight',
+    description:
+      'The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.metric_data_point.exported': {
+    name: 'metrics.otel.sdk.exporter.metric_data_point.exported',
+    description:
+      'The number of metric data points for which the export has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.metric_reader.collection.duration': {
+    name: 'metrics.otel.sdk.metric_reader.collection.duration',
+    description: 'The duration of the collect operation of the metric reader.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.operation.duration': {
+    name: 'metrics.otel.sdk.exporter.operation.duration',
+    description: 'The duration of exporting a batch of telemetry records.',
+    type: 'double',
+  },
+  'metrics.hw.logical_disk.limit': {
+    name: 'metrics.hw.logical_disk.limit',
+    description: 'Size of the logical disk.',
+    type: 'double',
+  },
+  'metrics.hw.logical_disk.usage': {
+    name: 'metrics.hw.logical_disk.usage',
+    description: 'Logical disk space usage.',
+    type: 'double',
+  },
+  'metrics.hw.logical_disk.utilization': {
+    name: 'metrics.hw.logical_disk.utilization',
+    description: 'Logical disk space utilization as a fraction.',
+    type: 'double',
+  },
+  'metrics.hw.voltage': {
+    name: 'metrics.hw.voltage',
+    description: 'Voltage measured by the sensor.',
+    type: 'double',
+  },
+  'metrics.hw.voltage.limit': {
+    name: 'metrics.hw.voltage.limit',
+    description: 'Voltage limit in Volts.',
+    type: 'double',
+  },
+  'metrics.hw.voltage.nominal': {
+    name: 'metrics.hw.voltage.nominal',
+    description: 'Nominal (expected) voltage.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.io': {
+    name: 'metrics.hw.gpu.io',
+    description: 'Received and transmitted bytes by the GPU.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.memory.limit': {
+    name: 'metrics.hw.gpu.memory.limit',
+    description: 'Size of the GPU memory.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.memory.utilization': {
+    name: 'metrics.hw.gpu.memory.utilization',
+    description: 'Fraction of GPU memory used.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.memory.usage': {
+    name: 'metrics.hw.gpu.memory.usage',
+    description: 'GPU memory used.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.utilization': {
+    name: 'metrics.hw.gpu.utilization',
+    description: 'Fraction of time spent in a specific task.',
+    type: 'double',
+  },
+  'metrics.system.uptime': {
+    name: 'metrics.system.uptime',
+    description: 'The time the system has been running.',
+    type: 'double',
+  },
+  'metrics.system.cpu.physical.count': {
+    name: 'metrics.system.cpu.physical.count',
+    description: 'Reports the number of actual physical processor cores on the hardware.',
+    type: 'double',
+  },
+  'metrics.system.cpu.logical.count': {
+    name: 'metrics.system.cpu.logical.count',
+    description:
+      'Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking.',
+    type: 'double',
+  },
+  'metrics.system.cpu.time': {
+    name: 'metrics.system.cpu.time',
+    description: 'Seconds each logical CPU spent on each mode.',
+    type: 'double',
+  },
+  'metrics.system.cpu.utilization': {
+    name: 'metrics.system.cpu.utilization',
+    description:
+      'For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.',
+    type: 'double',
+  },
+  'metrics.system.cpu.frequency': {
+    name: 'metrics.system.cpu.frequency',
+    description: 'Operating frequency of the logical CPU in Hertz.',
+    type: 'double',
+  },
+  'metrics.system.memory.usage': {
+    name: 'metrics.system.memory.usage',
+    description: 'Reports memory in use by state.',
+    type: 'double',
+  },
+  'metrics.system.memory.limit': {
+    name: 'metrics.system.memory.limit',
+    description: 'Total virtual memory available in the system.',
+    type: 'double',
+  },
+  'metrics.system.memory.shared': {
+    name: 'metrics.system.memory.shared',
+    description: 'Shared memory used (mostly by tmpfs).',
+    type: 'double',
+  },
+  'metrics.system.memory.utilization': {
+    name: 'metrics.system.memory.utilization',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.paging.usage': {
+    name: 'metrics.system.paging.usage',
+    description: 'Unix swap or windows pagefile usage.',
+    type: 'double',
+  },
+  'metrics.system.paging.utilization': {
+    name: 'metrics.system.paging.utilization',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.paging.faults': {
+    name: 'metrics.system.paging.faults',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.paging.operations': {
+    name: 'metrics.system.paging.operations',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.io': {
+    name: 'metrics.system.disk.io',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.operations': {
+    name: 'metrics.system.disk.operations',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.io_time': {
+    name: 'metrics.system.disk.io_time',
+    description: 'Time disk spent activated.',
+    type: 'double',
+  },
+  'metrics.system.disk.operation_time': {
+    name: 'metrics.system.disk.operation_time',
+    description: 'Sum of the time each operation took to complete.',
+    type: 'double',
+  },
+  'metrics.system.disk.merged': {
+    name: 'metrics.system.disk.merged',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.limit': {
+    name: 'metrics.system.disk.limit',
+    description: 'The total storage capacity of the disk.',
+    type: 'double',
+  },
+  'metrics.system.filesystem.usage': {
+    name: 'metrics.system.filesystem.usage',
+    description: "Reports a filesystem's space usage across different states.",
+    type: 'double',
+  },
+  'metrics.system.filesystem.utilization': {
+    name: 'metrics.system.filesystem.utilization',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.filesystem.limit': {
+    name: 'metrics.system.filesystem.limit',
+    description: 'The total storage capacity of the filesystem.',
+    type: 'double',
+  },
+  'metrics.system.network.packet.dropped': {
+    name: 'metrics.system.network.packet.dropped',
+    description: 'Count of packets that are dropped or discarded even though there was no error.',
+    type: 'double',
+  },
+  'metrics.system.network.packet.count': {
+    name: 'metrics.system.network.packet.count',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.network.errors': {
+    name: 'metrics.system.network.errors',
+    description: 'Count of network errors detected.',
+    type: 'double',
+  },
+  'metrics.system.network.io': {
+    name: 'metrics.system.network.io',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.network.connection.count': {
+    name: 'metrics.system.network.connection.count',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.process.count': {
+    name: 'metrics.system.process.count',
+    description: 'Total number of processes in each state.',
+    type: 'double',
+  },
+  'metrics.system.process.created': {
+    name: 'metrics.system.process.created',
+    description: 'Total number of processes created over uptime of the host.',
+    type: 'double',
+  },
+  'metrics.system.linux.memory.available': {
+    name: 'metrics.system.linux.memory.available',
+    description:
+      'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    type: 'double',
+  },
+  'metrics.system.linux.memory.slab.usage': {
+    name: 'metrics.system.linux.memory.slab.usage',
+    description:
+      'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.used': {
+    name: 'metrics.jvm.memory.used',
+    description: 'Measure of memory used.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.committed': {
+    name: 'metrics.jvm.memory.committed',
+    description: 'Measure of memory committed.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.limit': {
+    name: 'metrics.jvm.memory.limit',
+    description: 'Measure of max obtainable memory.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.used_after_last_gc': {
+    name: 'metrics.jvm.memory.used_after_last_gc',
+    description:
+      'Measure of memory used, as measured after the most recent garbage collection event on this pool.',
+    type: 'double',
+  },
+  'metrics.jvm.gc.duration': {
+    name: 'metrics.jvm.gc.duration',
+    description: 'Duration of JVM garbage collection actions.',
+    type: 'double',
+  },
+  'metrics.jvm.thread.count': {
+    name: 'metrics.jvm.thread.count',
+    description: 'Number of executing platform threads.',
+    type: 'double',
+  },
+  'metrics.jvm.class.loaded': {
+    name: 'metrics.jvm.class.loaded',
+    description: 'Number of classes loaded since JVM start.',
+    type: 'double',
+  },
+  'metrics.jvm.class.unloaded': {
+    name: 'metrics.jvm.class.unloaded',
+    description: 'Number of classes unloaded since JVM start.',
+    type: 'double',
+  },
+  'metrics.jvm.class.count': {
+    name: 'metrics.jvm.class.count',
+    description: 'Number of classes currently loaded.',
+    type: 'double',
+  },
+  'metrics.jvm.cpu.count': {
+    name: 'metrics.jvm.cpu.count',
+    description: 'Number of processors available to the Java virtual machine.',
+    type: 'double',
+  },
+  'metrics.jvm.cpu.time': {
+    name: 'metrics.jvm.cpu.time',
+    description: 'CPU time used by the process as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.jvm.cpu.recent_utilization': {
+    name: 'metrics.jvm.cpu.recent_utilization',
+    description: 'Recent CPU utilization for the process as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.dotnet.process.cpu.count': {
+    name: 'metrics.dotnet.process.cpu.count',
+    description: 'The number of processors available to the process.',
+    type: 'double',
+  },
+  'metrics.dotnet.process.cpu.time': {
+    name: 'metrics.dotnet.process.cpu.time',
+    description: 'CPU time used by the process.',
+    type: 'double',
+  },
+  'metrics.dotnet.process.memory.working_set': {
+    name: 'metrics.dotnet.process.memory.working_set',
+    description: 'The number of bytes of physical memory mapped to the process context.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.collections': {
+    name: 'metrics.dotnet.gc.collections',
+    description:
+      'The number of garbage collections that have occurred since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.heap.total_allocated': {
+    name: 'metrics.dotnet.gc.heap.total_allocated',
+    description:
+      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.last_collection.memory.committed_size': {
+    name: 'metrics.dotnet.gc.last_collection.memory.committed_size',
+    description:
+      'The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.last_collection.heap.size': {
+    name: 'metrics.dotnet.gc.last_collection.heap.size',
+    description:
+      'The managed GC heap size (including fragmentation), as observed during the latest garbage collection.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
+    name: 'metrics.dotnet.gc.last_collection.heap.fragmentation.size',
+    description: 'The heap fragmentation, as observed during the latest garbage collection.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.pause.time': {
+    name: 'metrics.dotnet.gc.pause.time',
+    description: 'The total amount of time paused in GC since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.jit.compiled_il.size': {
+    name: 'metrics.dotnet.jit.compiled_il.size',
+    description:
+      'Count of bytes of intermediate language that have been compiled since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.jit.compiled_methods': {
+    name: 'metrics.dotnet.jit.compiled_methods',
+    description:
+      'The number of times the JIT compiler (re)compiled methods since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.jit.compilation.time': {
+    name: 'metrics.dotnet.jit.compilation.time',
+    description:
+      'The amount of time the JIT compiler has spent compiling methods since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.monitor.lock_contentions': {
+    name: 'metrics.dotnet.monitor.lock_contentions',
+    description:
+      'The number of times there was contention when trying to acquire a monitor lock since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.thread_pool.thread.count': {
+    name: 'metrics.dotnet.thread_pool.thread.count',
+    description: 'The number of thread pool threads that currently exist.',
+    type: 'double',
+  },
+  'metrics.dotnet.thread_pool.work_item.count': {
+    name: 'metrics.dotnet.thread_pool.work_item.count',
+    description:
+      'The number of work items that the thread pool has completed since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.thread_pool.queue.length': {
+    name: 'metrics.dotnet.thread_pool.queue.length',
+    description:
+      'The number of work items that are currently queued to be processed by the thread pool.',
+    type: 'double',
+  },
+  'metrics.dotnet.timer.count': {
+    name: 'metrics.dotnet.timer.count',
+    description: 'The number of timer instances that are currently active.',
+    type: 'double',
+  },
+  'metrics.dotnet.assembly.count': {
+    name: 'metrics.dotnet.assembly.count',
+    description: 'The number of .NET assemblies that are currently loaded.',
+    type: 'double',
+  },
+  'metrics.dotnet.exceptions': {
+    name: 'metrics.dotnet.exceptions',
+    description: 'The number of exceptions that have been thrown in managed code.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.routing.match_attempts': {
+    name: 'metrics.aspnetcore.routing.match_attempts',
+    description: 'Number of requests that were attempted to be matched to an endpoint.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.diagnostics.exceptions': {
+    name: 'metrics.aspnetcore.diagnostics.exceptions',
+    description: 'Number of exceptions caught by exception handling middleware.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.active_request_leases': {
+    name: 'metrics.aspnetcore.rate_limiting.active_request_leases',
+    description:
+      'Number of requests that are currently active on the server that hold a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.request_lease.duration': {
+    name: 'metrics.aspnetcore.rate_limiting.request_lease.duration',
+    description: 'The duration of rate limiting lease held by requests on the server.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.request.time_in_queue': {
+    name: 'metrics.aspnetcore.rate_limiting.request.time_in_queue',
+    description: 'The time the request spent in a queue waiting to acquire a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.queued_requests': {
+    name: 'metrics.aspnetcore.rate_limiting.queued_requests',
+    description:
+      'Number of requests that are currently queued, waiting to acquire a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.requests': {
+    name: 'metrics.aspnetcore.rate_limiting.requests',
+    description: 'Number of requests that tried to acquire a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.memory_pool.pooled': {
+    name: 'metrics.aspnetcore.memory_pool.pooled',
+    description: 'Number of bytes currently pooled and available for reuse.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.memory_pool.allocated': {
+    name: 'metrics.aspnetcore.memory_pool.allocated',
+    description:
+      'Total number of bytes allocated by the memory pool. Allocation occurs when a memory rental request exceeds the available pooled memory.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.memory_pool.evicted': {
+    name: 'metrics.aspnetcore.memory_pool.evicted',
+    description:
+      'Total number of bytes evicted from the memory pool. Eviction occurs when idle pooled memory is reclaimed.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.memory_pool.rented': {
+    name: 'metrics.aspnetcore.memory_pool.rented',
+    description: 'Total number of bytes rented from the memory pool.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.authentication.authenticate.duration': {
+    name: 'metrics.aspnetcore.authentication.authenticate.duration',
+    description: 'The authentication duration for a request.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.authentication.challenges': {
+    name: 'metrics.aspnetcore.authentication.challenges',
+    description: 'The total number of times a scheme is challenged.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.authentication.forbids': {
+    name: 'metrics.aspnetcore.authentication.forbids',
+    description:
+      'The total number of times an authenticated user attempts to access a resource they are not permitted to access.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.authentication.sign_ins': {
+    name: 'metrics.aspnetcore.authentication.sign_ins',
+    description: 'The total number of times a principal is signed in with a scheme.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.authentication.sign_outs': {
+    name: 'metrics.aspnetcore.authentication.sign_outs',
+    description: 'The total number of times a principal is signed out with a scheme.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.authorization.attempts': {
+    name: 'metrics.aspnetcore.authorization.attempts',
+    description: 'The total number of authorization attempts.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.user.create.duration': {
+    name: 'metrics.aspnetcore.identity.user.create.duration',
+    description: 'The duration of user creation operations.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.user.update.duration': {
+    name: 'metrics.aspnetcore.identity.user.update.duration',
+    description: 'The duration of user update operations.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.user.delete.duration': {
+    name: 'metrics.aspnetcore.identity.user.delete.duration',
+    description: 'The duration of user deletion operations.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.user.check_password_attempts': {
+    name: 'metrics.aspnetcore.identity.user.check_password_attempts',
+    description:
+      'The number of check password attempts. Only checks whether the password is valid and not whether the user account is in a state that can log in.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.user.verify_token_attempts': {
+    name: 'metrics.aspnetcore.identity.user.verify_token_attempts',
+    description: 'The total number of token verification attempts.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.user.generated_tokens': {
+    name: 'metrics.aspnetcore.identity.user.generated_tokens',
+    description: 'The total number of token generations.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.sign_in.authenticate.duration': {
+    name: 'metrics.aspnetcore.identity.sign_in.authenticate.duration',
+    description:
+      'The duration of authenticate attempts. The authenticate metrics is recorded by sign in methods such as PasswordSignInAsync and TwoFactorSignInAsync.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.sign_in.two_factor_clients_remembered': {
+    name: 'metrics.aspnetcore.identity.sign_in.two_factor_clients_remembered',
+    description: 'The total number of two factor clients remembered.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.sign_in.two_factor_clients_forgotten': {
+    name: 'metrics.aspnetcore.identity.sign_in.two_factor_clients_forgotten',
+    description: 'The total number of two factor clients forgotten.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.sign_in.check_password_attempts': {
+    name: 'metrics.aspnetcore.identity.sign_in.check_password_attempts',
+    description:
+      'The total number of check password attempts. Checks that the account is in a state that can log in and that the password is valid using the UserManager.CheckPasswordAsync method.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.sign_in.sign_ins': {
+    name: 'metrics.aspnetcore.identity.sign_in.sign_ins',
+    description: 'The total number of calls to sign in user principals.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.identity.sign_in.sign_outs': {
+    name: 'metrics.aspnetcore.identity.sign_in.sign_outs',
+    description: 'The total number of calls to sign out user principals.',
+    type: 'double',
+  },
+  'metrics.rpc.server.duration': {
+    name: 'metrics.rpc.server.duration',
+    description: 'Measures the duration of inbound RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.server.request.size': {
+    name: 'metrics.rpc.server.request.size',
+    description: 'Measures the size of RPC request messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.server.response.size': {
+    name: 'metrics.rpc.server.response.size',
+    description: 'Measures the size of RPC response messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.server.requests_per_rpc': {
+    name: 'metrics.rpc.server.requests_per_rpc',
+    description: 'Measures the number of messages received per RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.server.responses_per_rpc': {
+    name: 'metrics.rpc.server.responses_per_rpc',
+    description: 'Measures the number of messages sent per RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.client.duration': {
+    name: 'metrics.rpc.client.duration',
+    description: 'Measures the duration of outbound RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.client.request.size': {
+    name: 'metrics.rpc.client.request.size',
+    description: 'Measures the size of RPC request messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.client.response.size': {
+    name: 'metrics.rpc.client.response.size',
+    description: 'Measures the size of RPC response messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.client.requests_per_rpc': {
+    name: 'metrics.rpc.client.requests_per_rpc',
+    description: 'Measures the number of messages received per RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.client.responses_per_rpc': {
+    name: 'metrics.rpc.client.responses_per_rpc',
+    description: 'Measures the number of messages sent per RPC.',
     type: 'double',
   },
   'metrics.azure.cosmosdb.client.operation.request_charge': {
@@ -5474,6 +6352,16 @@ export const semconvFlat = {
       'Indicates whether the container is currently marked as ready to accept traffic, based on its readiness probe (1 = ready, 0 = not ready).',
     type: 'double',
   },
+  'metrics.k8s.container.cpu.limit_utilization': {
+    name: 'metrics.k8s.container.cpu.limit_utilization',
+    description: 'The ratio of container CPU usage to its CPU limit.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request_utilization': {
+    name: 'metrics.k8s.container.cpu.request_utilization',
+    description: 'The ratio of container CPU usage to its CPU request.',
+    type: 'double',
+  },
   'metrics.k8s.resourcequota.cpu.limit.hard': {
     name: 'metrics.k8s.resourcequota.cpu.limit.hard',
     description:
@@ -5624,803 +6512,6 @@ export const semconvFlat = {
     description: 'Number of messages that were delivered to the application.',
     type: 'double',
   },
-  'metrics.container.uptime': {
-    name: 'metrics.container.uptime',
-    description: 'The time the container has been running.',
-    type: 'double',
-  },
-  'metrics.container.cpu.time': {
-    name: 'metrics.container.cpu.time',
-    description: 'Total CPU time consumed.',
-    type: 'double',
-  },
-  'metrics.container.cpu.usage': {
-    name: 'metrics.container.cpu.usage',
-    description:
-      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
-    type: 'double',
-  },
-  'metrics.container.memory.usage': {
-    name: 'metrics.container.memory.usage',
-    description: 'Memory usage of the container.',
-    type: 'double',
-  },
-  'metrics.container.disk.io': {
-    name: 'metrics.container.disk.io',
-    description: 'Disk bytes for the container.',
-    type: 'double',
-  },
-  'metrics.container.network.io': {
-    name: 'metrics.container.network.io',
-    description: 'Network bytes for the container.',
-    type: 'double',
-  },
-  'metrics.container.filesystem.available': {
-    name: 'metrics.container.filesystem.available',
-    description: 'Container filesystem available bytes.',
-    type: 'double',
-  },
-  'metrics.container.filesystem.capacity': {
-    name: 'metrics.container.filesystem.capacity',
-    description: 'Container filesystem capacity.',
-    type: 'double',
-  },
-  'metrics.container.filesystem.usage': {
-    name: 'metrics.container.filesystem.usage',
-    description: 'Container filesystem usage.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.min': {
-    name: 'metrics.nodejs.eventloop.delay.min',
-    description: 'Event loop minimum delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.max': {
-    name: 'metrics.nodejs.eventloop.delay.max',
-    description: 'Event loop maximum delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.mean': {
-    name: 'metrics.nodejs.eventloop.delay.mean',
-    description: 'Event loop mean delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.stddev': {
-    name: 'metrics.nodejs.eventloop.delay.stddev',
-    description: 'Event loop standard deviation delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.p50': {
-    name: 'metrics.nodejs.eventloop.delay.p50',
-    description: 'Event loop 50 percentile delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.p90': {
-    name: 'metrics.nodejs.eventloop.delay.p90',
-    description: 'Event loop 90 percentile delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.delay.p99': {
-    name: 'metrics.nodejs.eventloop.delay.p99',
-    description: 'Event loop 99 percentile delay.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.utilization': {
-    name: 'metrics.nodejs.eventloop.utilization',
-    description: 'Event loop utilization.',
-    type: 'double',
-  },
-  'metrics.nodejs.eventloop.time': {
-    name: 'metrics.nodejs.eventloop.time',
-    description: 'Cumulative duration of time the event loop has been in each state.',
-    type: 'double',
-  },
-  'metrics.hw.network.bandwidth.limit': {
-    name: 'metrics.hw.network.bandwidth.limit',
-    description: 'Link speed.',
-    type: 'double',
-  },
-  'metrics.hw.network.bandwidth.utilization': {
-    name: 'metrics.hw.network.bandwidth.utilization',
-    description: 'Utilization of the network bandwidth as a fraction.',
-    type: 'double',
-  },
-  'metrics.hw.network.io': {
-    name: 'metrics.hw.network.io',
-    description: 'Received and transmitted network traffic in bytes.',
-    type: 'double',
-  },
-  'metrics.hw.network.packets': {
-    name: 'metrics.hw.network.packets',
-    description: 'Received and transmitted network traffic in packets (or frames).',
-    type: 'double',
-  },
-  'metrics.hw.network.up': {
-    name: 'metrics.hw.network.up',
-    description: 'Link status: `1` (up) or `0` (down).',
-    type: 'double',
-  },
-  'metrics.hw.energy': {
-    name: 'metrics.hw.energy',
-    description: 'Energy consumed by the component.',
-    type: 'double',
-  },
-  'metrics.hw.errors': {
-    name: 'metrics.hw.errors',
-    description: 'Number of errors encountered by the component.',
-    type: 'double',
-  },
-  'metrics.hw.power': {
-    name: 'metrics.hw.power',
-    description: 'Instantaneous power consumed by the component.',
-    type: 'double',
-  },
-  'metrics.hw.status': {
-    name: 'metrics.hw.status',
-    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
-    type: 'double',
-  },
-  'metrics.hw.power_supply.limit': {
-    name: 'metrics.hw.power_supply.limit',
-    description: 'Maximum power output of the power supply.',
-    type: 'double',
-  },
-  'metrics.hw.power_supply.utilization': {
-    name: 'metrics.hw.power_supply.utilization',
-    description: 'Utilization of the power supply as a fraction of its maximum output.',
-    type: 'double',
-  },
-  'metrics.hw.power_supply.usage': {
-    name: 'metrics.hw.power_supply.usage',
-    description: 'Current power output of the power supply.',
-    type: 'double',
-  },
-  'metrics.system.uptime': {
-    name: 'metrics.system.uptime',
-    description: 'The time the system has been running.',
-    type: 'double',
-  },
-  'metrics.system.cpu.physical.count': {
-    name: 'metrics.system.cpu.physical.count',
-    description: 'Reports the number of actual physical processor cores on the hardware.',
-    type: 'double',
-  },
-  'metrics.system.cpu.logical.count': {
-    name: 'metrics.system.cpu.logical.count',
-    description:
-      'Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking.',
-    type: 'double',
-  },
-  'metrics.system.cpu.time': {
-    name: 'metrics.system.cpu.time',
-    description: 'Seconds each logical CPU spent on each mode.',
-    type: 'double',
-  },
-  'metrics.system.cpu.utilization': {
-    name: 'metrics.system.cpu.utilization',
-    description:
-      'For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.',
-    type: 'double',
-  },
-  'metrics.system.cpu.frequency': {
-    name: 'metrics.system.cpu.frequency',
-    description: 'Operating frequency of the logical CPU in Hertz.',
-    type: 'double',
-  },
-  'metrics.system.memory.usage': {
-    name: 'metrics.system.memory.usage',
-    description: 'Reports memory in use by state.',
-    type: 'double',
-  },
-  'metrics.system.memory.limit': {
-    name: 'metrics.system.memory.limit',
-    description: 'Total virtual memory available in the system.',
-    type: 'double',
-  },
-  'metrics.system.memory.shared': {
-    name: 'metrics.system.memory.shared',
-    description: 'Shared memory used (mostly by tmpfs).',
-    type: 'double',
-  },
-  'metrics.system.memory.utilization': {
-    name: 'metrics.system.memory.utilization',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.paging.usage': {
-    name: 'metrics.system.paging.usage',
-    description: 'Unix swap or windows pagefile usage.',
-    type: 'double',
-  },
-  'metrics.system.paging.utilization': {
-    name: 'metrics.system.paging.utilization',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.paging.faults': {
-    name: 'metrics.system.paging.faults',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.paging.operations': {
-    name: 'metrics.system.paging.operations',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.disk.io': {
-    name: 'metrics.system.disk.io',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.disk.operations': {
-    name: 'metrics.system.disk.operations',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.disk.io_time': {
-    name: 'metrics.system.disk.io_time',
-    description: 'Time disk spent activated.',
-    type: 'double',
-  },
-  'metrics.system.disk.operation_time': {
-    name: 'metrics.system.disk.operation_time',
-    description: 'Sum of the time each operation took to complete.',
-    type: 'double',
-  },
-  'metrics.system.disk.merged': {
-    name: 'metrics.system.disk.merged',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.disk.limit': {
-    name: 'metrics.system.disk.limit',
-    description: 'The total storage capacity of the disk.',
-    type: 'double',
-  },
-  'metrics.system.filesystem.usage': {
-    name: 'metrics.system.filesystem.usage',
-    description: "Reports a filesystem's space usage across different states.",
-    type: 'double',
-  },
-  'metrics.system.filesystem.utilization': {
-    name: 'metrics.system.filesystem.utilization',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.filesystem.limit': {
-    name: 'metrics.system.filesystem.limit',
-    description: 'The total storage capacity of the filesystem.',
-    type: 'double',
-  },
-  'metrics.system.network.packet.dropped': {
-    name: 'metrics.system.network.packet.dropped',
-    description: 'Count of packets that are dropped or discarded even though there was no error.',
-    type: 'double',
-  },
-  'metrics.system.network.packet.count': {
-    name: 'metrics.system.network.packet.count',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.network.errors': {
-    name: 'metrics.system.network.errors',
-    description: 'Count of network errors detected.',
-    type: 'double',
-  },
-  'metrics.system.network.io': {
-    name: 'metrics.system.network.io',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.network.connection.count': {
-    name: 'metrics.system.network.connection.count',
-    description: 'TODO.',
-    type: 'double',
-  },
-  'metrics.system.process.count': {
-    name: 'metrics.system.process.count',
-    description: 'Total number of processes in each state.',
-    type: 'double',
-  },
-  'metrics.system.process.created': {
-    name: 'metrics.system.process.created',
-    description: 'Total number of processes created over uptime of the host.',
-    type: 'double',
-  },
-  'metrics.system.linux.memory.available': {
-    name: 'metrics.system.linux.memory.available',
-    description:
-      'An estimate of how much memory is available for starting new applications, without causing swapping.',
-    type: 'double',
-  },
-  'metrics.system.linux.memory.slab.usage': {
-    name: 'metrics.system.linux.memory.slab.usage',
-    description:
-      'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
-    type: 'double',
-  },
-  'metrics.signalr.server.connection.duration': {
-    name: 'metrics.signalr.server.connection.duration',
-    description: 'The duration of connections on the server.',
-    type: 'double',
-  },
-  'metrics.signalr.server.active_connections': {
-    name: 'metrics.signalr.server.active_connections',
-    description: 'Number of connections that are currently active on the server.',
-    type: 'double',
-  },
-  'metrics.db.client.operation.duration': {
-    name: 'metrics.db.client.operation.duration',
-    description: 'Duration of database client operations.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.count': {
-    name: 'metrics.db.client.connection.count',
-    description:
-      'The number of connections that are currently in state described by the `state` attribute.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.idle.max': {
-    name: 'metrics.db.client.connection.idle.max',
-    description: 'The maximum number of idle open connections allowed.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.idle.min': {
-    name: 'metrics.db.client.connection.idle.min',
-    description: 'The minimum number of idle open connections allowed.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.max': {
-    name: 'metrics.db.client.connection.max',
-    description: 'The maximum number of open connections allowed.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.pending_requests': {
-    name: 'metrics.db.client.connection.pending_requests',
-    description: 'The number of current pending requests for an open connection.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.timeouts': {
-    name: 'metrics.db.client.connection.timeouts',
-    description:
-      'The number of connection timeouts that have occurred trying to obtain a connection from the pool.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.create_time': {
-    name: 'metrics.db.client.connection.create_time',
-    description: 'The time it took to create a new connection.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.wait_time': {
-    name: 'metrics.db.client.connection.wait_time',
-    description: 'The time it took to obtain an open connection from the pool.',
-    type: 'double',
-  },
-  'metrics.db.client.connection.use_time': {
-    name: 'metrics.db.client.connection.use_time',
-    description: 'The time between borrowing a connection and returning it to the pool.',
-    type: 'double',
-  },
-  'metrics.db.client.response.returned_rows': {
-    name: 'metrics.db.client.response.returned_rows',
-    description: 'The actual number of records returned by the database operation.',
-    type: 'double',
-  },
-  'metrics.jvm.memory.used': {
-    name: 'metrics.jvm.memory.used',
-    description: 'Measure of memory used.',
-    type: 'double',
-  },
-  'metrics.jvm.memory.committed': {
-    name: 'metrics.jvm.memory.committed',
-    description: 'Measure of memory committed.',
-    type: 'double',
-  },
-  'metrics.jvm.memory.limit': {
-    name: 'metrics.jvm.memory.limit',
-    description: 'Measure of max obtainable memory.',
-    type: 'double',
-  },
-  'metrics.jvm.memory.used_after_last_gc': {
-    name: 'metrics.jvm.memory.used_after_last_gc',
-    description:
-      'Measure of memory used, as measured after the most recent garbage collection event on this pool.',
-    type: 'double',
-  },
-  'metrics.jvm.gc.duration': {
-    name: 'metrics.jvm.gc.duration',
-    description: 'Duration of JVM garbage collection actions.',
-    type: 'double',
-  },
-  'metrics.jvm.thread.count': {
-    name: 'metrics.jvm.thread.count',
-    description: 'Number of executing platform threads.',
-    type: 'double',
-  },
-  'metrics.jvm.class.loaded': {
-    name: 'metrics.jvm.class.loaded',
-    description: 'Number of classes loaded since JVM start.',
-    type: 'double',
-  },
-  'metrics.jvm.class.unloaded': {
-    name: 'metrics.jvm.class.unloaded',
-    description: 'Number of classes unloaded since JVM start.',
-    type: 'double',
-  },
-  'metrics.jvm.class.count': {
-    name: 'metrics.jvm.class.count',
-    description: 'Number of classes currently loaded.',
-    type: 'double',
-  },
-  'metrics.jvm.cpu.count': {
-    name: 'metrics.jvm.cpu.count',
-    description: 'Number of processors available to the Java virtual machine.',
-    type: 'double',
-  },
-  'metrics.jvm.cpu.time': {
-    name: 'metrics.jvm.cpu.time',
-    description: 'CPU time used by the process as reported by the JVM.',
-    type: 'double',
-  },
-  'metrics.jvm.cpu.recent_utilization': {
-    name: 'metrics.jvm.cpu.recent_utilization',
-    description: 'Recent CPU utilization for the process as reported by the JVM.',
-    type: 'double',
-  },
-  'metrics.dotnet.process.cpu.count': {
-    name: 'metrics.dotnet.process.cpu.count',
-    description: 'The number of processors available to the process.',
-    type: 'double',
-  },
-  'metrics.dotnet.process.cpu.time': {
-    name: 'metrics.dotnet.process.cpu.time',
-    description: 'CPU time used by the process.',
-    type: 'double',
-  },
-  'metrics.dotnet.process.memory.working_set': {
-    name: 'metrics.dotnet.process.memory.working_set',
-    description: 'The number of bytes of physical memory mapped to the process context.',
-    type: 'double',
-  },
-  'metrics.dotnet.gc.collections': {
-    name: 'metrics.dotnet.gc.collections',
-    description:
-      'The number of garbage collections that have occurred since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.gc.heap.total_allocated': {
-    name: 'metrics.dotnet.gc.heap.total_allocated',
-    description:
-      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
-    type: 'double',
-  },
-  'metrics.dotnet.gc.last_collection.memory.committed_size': {
-    name: 'metrics.dotnet.gc.last_collection.memory.committed_size',
-    description:
-      'The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.',
-    type: 'double',
-  },
-  'metrics.dotnet.gc.last_collection.heap.size': {
-    name: 'metrics.dotnet.gc.last_collection.heap.size',
-    description:
-      'The managed GC heap size (including fragmentation), as observed during the latest garbage collection.',
-    type: 'double',
-  },
-  'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
-    name: 'metrics.dotnet.gc.last_collection.heap.fragmentation.size',
-    description: 'The heap fragmentation, as observed during the latest garbage collection.',
-    type: 'double',
-  },
-  'metrics.dotnet.gc.pause.time': {
-    name: 'metrics.dotnet.gc.pause.time',
-    description: 'The total amount of time paused in GC since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.jit.compiled_il.size': {
-    name: 'metrics.dotnet.jit.compiled_il.size',
-    description:
-      'Count of bytes of intermediate language that have been compiled since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.jit.compiled_methods': {
-    name: 'metrics.dotnet.jit.compiled_methods',
-    description:
-      'The number of times the JIT compiler (re)compiled methods since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.jit.compilation.time': {
-    name: 'metrics.dotnet.jit.compilation.time',
-    description:
-      'The amount of time the JIT compiler has spent compiling methods since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.monitor.lock_contentions': {
-    name: 'metrics.dotnet.monitor.lock_contentions',
-    description:
-      'The number of times there was contention when trying to acquire a monitor lock since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.thread_pool.thread.count': {
-    name: 'metrics.dotnet.thread_pool.thread.count',
-    description: 'The number of thread pool threads that currently exist.',
-    type: 'double',
-  },
-  'metrics.dotnet.thread_pool.work_item.count': {
-    name: 'metrics.dotnet.thread_pool.work_item.count',
-    description:
-      'The number of work items that the thread pool has completed since the process has started.',
-    type: 'double',
-  },
-  'metrics.dotnet.thread_pool.queue.length': {
-    name: 'metrics.dotnet.thread_pool.queue.length',
-    description:
-      'The number of work items that are currently queued to be processed by the thread pool.',
-    type: 'double',
-  },
-  'metrics.dotnet.timer.count': {
-    name: 'metrics.dotnet.timer.count',
-    description: 'The number of timer instances that are currently active.',
-    type: 'double',
-  },
-  'metrics.dotnet.assembly.count': {
-    name: 'metrics.dotnet.assembly.count',
-    description: 'The number of .NET assemblies that are currently loaded.',
-    type: 'double',
-  },
-  'metrics.dotnet.exceptions': {
-    name: 'metrics.dotnet.exceptions',
-    description: 'The number of exceptions that have been thrown in managed code.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.routing.match_attempts': {
-    name: 'metrics.aspnetcore.routing.match_attempts',
-    description: 'Number of requests that were attempted to be matched to an endpoint.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.diagnostics.exceptions': {
-    name: 'metrics.aspnetcore.diagnostics.exceptions',
-    description: 'Number of exceptions caught by exception handling middleware.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.rate_limiting.active_request_leases': {
-    name: 'metrics.aspnetcore.rate_limiting.active_request_leases',
-    description:
-      'Number of requests that are currently active on the server that hold a rate limiting lease.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.rate_limiting.request_lease.duration': {
-    name: 'metrics.aspnetcore.rate_limiting.request_lease.duration',
-    description: 'The duration of rate limiting lease held by requests on the server.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.rate_limiting.request.time_in_queue': {
-    name: 'metrics.aspnetcore.rate_limiting.request.time_in_queue',
-    description: 'The time the request spent in a queue waiting to acquire a rate limiting lease.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.rate_limiting.queued_requests': {
-    name: 'metrics.aspnetcore.rate_limiting.queued_requests',
-    description:
-      'Number of requests that are currently queued, waiting to acquire a rate limiting lease.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.rate_limiting.requests': {
-    name: 'metrics.aspnetcore.rate_limiting.requests',
-    description: 'Number of requests that tried to acquire a rate limiting lease.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.memory_pool.pooled': {
-    name: 'metrics.aspnetcore.memory_pool.pooled',
-    description: 'Number of bytes currently pooled and available for reuse.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.memory_pool.allocated': {
-    name: 'metrics.aspnetcore.memory_pool.allocated',
-    description:
-      'Total number of bytes allocated by the memory pool. Allocation occurs when a memory rental request exceeds the available pooled memory.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.memory_pool.evicted': {
-    name: 'metrics.aspnetcore.memory_pool.evicted',
-    description:
-      'Total number of bytes evicted from the memory pool. Eviction occurs when idle pooled memory is reclaimed.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.memory_pool.rented': {
-    name: 'metrics.aspnetcore.memory_pool.rented',
-    description: 'Total number of bytes rented from the memory pool.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.authentication.authenticate.duration': {
-    name: 'metrics.aspnetcore.authentication.authenticate.duration',
-    description: 'The authentication duration for a request.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.authentication.challenges': {
-    name: 'metrics.aspnetcore.authentication.challenges',
-    description: 'The total number of times a scheme is challenged.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.authentication.forbids': {
-    name: 'metrics.aspnetcore.authentication.forbids',
-    description:
-      'The total number of times an authenticated user attempts to access a resource they are not permitted to access.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.authentication.sign_ins': {
-    name: 'metrics.aspnetcore.authentication.sign_ins',
-    description: 'The total number of times a principal is signed in with a scheme.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.authentication.sign_outs': {
-    name: 'metrics.aspnetcore.authentication.sign_outs',
-    description: 'The total number of times a principal is signed out with a scheme.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.authorization.attempts': {
-    name: 'metrics.aspnetcore.authorization.attempts',
-    description: 'The total number of authorization attempts.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.user.create.duration': {
-    name: 'metrics.aspnetcore.identity.user.create.duration',
-    description: 'The duration of user creation operations.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.user.update.duration': {
-    name: 'metrics.aspnetcore.identity.user.update.duration',
-    description: 'The duration of user update operations.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.user.delete.duration': {
-    name: 'metrics.aspnetcore.identity.user.delete.duration',
-    description: 'The duration of user deletion operations.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.user.check_password_attempts': {
-    name: 'metrics.aspnetcore.identity.user.check_password_attempts',
-    description:
-      'The number of check password attempts. Only checks whether the password is valid and not whether the user account is in a state that can log in.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.user.verify_token_attempts': {
-    name: 'metrics.aspnetcore.identity.user.verify_token_attempts',
-    description: 'The total number of token verification attempts.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.user.generated_tokens': {
-    name: 'metrics.aspnetcore.identity.user.generated_tokens',
-    description: 'The total number of token generations.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.sign_in.authenticate.duration': {
-    name: 'metrics.aspnetcore.identity.sign_in.authenticate.duration',
-    description:
-      'The duration of authenticate attempts. The authenticate metrics is recorded by sign in methods such as PasswordSignInAsync and TwoFactorSignInAsync.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.sign_in.two_factor_clients_remembered': {
-    name: 'metrics.aspnetcore.identity.sign_in.two_factor_clients_remembered',
-    description: 'The total number of two factor clients remembered.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.sign_in.two_factor_clients_forgotten': {
-    name: 'metrics.aspnetcore.identity.sign_in.two_factor_clients_forgotten',
-    description: 'The total number of two factor clients forgotten.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.sign_in.check_password_attempts': {
-    name: 'metrics.aspnetcore.identity.sign_in.check_password_attempts',
-    description:
-      'The total number of check password attempts. Checks that the account is in a state that can log in and that the password is valid using the UserManager.CheckPasswordAsync method.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.sign_in.sign_ins': {
-    name: 'metrics.aspnetcore.identity.sign_in.sign_ins',
-    description: 'The total number of calls to sign in user principals.',
-    type: 'double',
-  },
-  'metrics.aspnetcore.identity.sign_in.sign_outs': {
-    name: 'metrics.aspnetcore.identity.sign_in.sign_outs',
-    description: 'The total number of calls to sign out user principals.',
-    type: 'double',
-  },
-  'metrics.rpc.server.duration': {
-    name: 'metrics.rpc.server.duration',
-    description: 'Measures the duration of inbound RPC.',
-    type: 'double',
-  },
-  'metrics.rpc.server.request.size': {
-    name: 'metrics.rpc.server.request.size',
-    description: 'Measures the size of RPC request messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.server.response.size': {
-    name: 'metrics.rpc.server.response.size',
-    description: 'Measures the size of RPC response messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.server.requests_per_rpc': {
-    name: 'metrics.rpc.server.requests_per_rpc',
-    description: 'Measures the number of messages received per RPC.',
-    type: 'double',
-  },
-  'metrics.rpc.server.responses_per_rpc': {
-    name: 'metrics.rpc.server.responses_per_rpc',
-    description: 'Measures the number of messages sent per RPC.',
-    type: 'double',
-  },
-  'metrics.rpc.client.duration': {
-    name: 'metrics.rpc.client.duration',
-    description: 'Measures the duration of outbound RPC.',
-    type: 'double',
-  },
-  'metrics.rpc.client.request.size': {
-    name: 'metrics.rpc.client.request.size',
-    description: 'Measures the size of RPC request messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.client.response.size': {
-    name: 'metrics.rpc.client.response.size',
-    description: 'Measures the size of RPC response messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.client.requests_per_rpc': {
-    name: 'metrics.rpc.client.requests_per_rpc',
-    description: 'Measures the number of messages received per RPC.',
-    type: 'double',
-  },
-  'metrics.rpc.client.responses_per_rpc': {
-    name: 'metrics.rpc.client.responses_per_rpc',
-    description: 'Measures the number of messages sent per RPC.',
-    type: 'double',
-  },
-  'metrics.go.memory.used': {
-    name: 'metrics.go.memory.used',
-    description: 'Memory used by the Go runtime.',
-    type: 'double',
-  },
-  'metrics.go.memory.limit': {
-    name: 'metrics.go.memory.limit',
-    description: 'Go runtime memory limit configured by the user, if a limit exists.',
-    type: 'double',
-  },
-  'metrics.go.memory.allocated': {
-    name: 'metrics.go.memory.allocated',
-    description: 'Memory allocated to the heap by the application.',
-    type: 'double',
-  },
-  'metrics.go.memory.allocations': {
-    name: 'metrics.go.memory.allocations',
-    description: 'Count of allocations to the heap by the application.',
-    type: 'double',
-  },
-  'metrics.go.memory.gc.goal': {
-    name: 'metrics.go.memory.gc.goal',
-    description: 'Heap size target for the end of the GC cycle.',
-    type: 'double',
-  },
-  'metrics.go.goroutine.count': {
-    name: 'metrics.go.goroutine.count',
-    description: 'Count of live goroutines.',
-    type: 'double',
-  },
-  'metrics.go.processor.limit': {
-    name: 'metrics.go.processor.limit',
-    description: 'The number of OS threads that can execute user-level Go code simultaneously.',
-    type: 'double',
-  },
-  'metrics.go.schedule.duration': {
-    name: 'metrics.go.schedule.duration',
-    description:
-      'The time goroutines have spent in the scheduler in a runnable state before actually running.',
-    type: 'double',
-  },
-  'metrics.go.config.gogc': {
-    name: 'metrics.go.config.gogc',
-    description: 'Heap size target percentage configured by the user, otherwise 100.',
-    type: 'double',
-  },
   'metrics.http.server.request.duration': {
     name: 'metrics.http.server.request.duration',
     description: 'Duration of HTTP server requests.',
@@ -6472,30 +6563,50 @@ export const semconvFlat = {
     description: 'Number of active HTTP requests.',
     type: 'double',
   },
-  'metrics.cicd.pipeline.run.duration': {
-    name: 'metrics.cicd.pipeline.run.duration',
-    description: 'Duration of a pipeline run grouped by pipeline, state and result.',
+  'metrics.container.uptime': {
+    name: 'metrics.container.uptime',
+    description: 'The time the container has been running.',
     type: 'double',
   },
-  'metrics.cicd.pipeline.run.active': {
-    name: 'metrics.cicd.pipeline.run.active',
-    description: 'The number of pipeline runs currently active in the system by state.',
+  'metrics.container.cpu.time': {
+    name: 'metrics.container.cpu.time',
+    description: 'Total CPU time consumed.',
     type: 'double',
   },
-  'metrics.cicd.worker.count': {
-    name: 'metrics.cicd.worker.count',
-    description: 'The number of workers on the CICD system by state.',
-    type: 'double',
-  },
-  'metrics.cicd.pipeline.run.errors': {
-    name: 'metrics.cicd.pipeline.run.errors',
-    description: 'The number of errors encountered in pipeline runs (eg. compile, test failures).',
-    type: 'double',
-  },
-  'metrics.cicd.system.errors': {
-    name: 'metrics.cicd.system.errors',
+  'metrics.container.cpu.usage': {
+    name: 'metrics.container.cpu.usage',
     description:
-      'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
+      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+    type: 'double',
+  },
+  'metrics.container.memory.usage': {
+    name: 'metrics.container.memory.usage',
+    description: 'Memory usage of the container.',
+    type: 'double',
+  },
+  'metrics.container.disk.io': {
+    name: 'metrics.container.disk.io',
+    description: 'Disk bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.network.io': {
+    name: 'metrics.container.network.io',
+    description: 'Network bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.filesystem.available': {
+    name: 'metrics.container.filesystem.available',
+    description: 'Container filesystem available bytes.',
+    type: 'double',
+  },
+  'metrics.container.filesystem.capacity': {
+    name: 'metrics.container.filesystem.capacity',
+    description: 'Container filesystem capacity.',
+    type: 'double',
+  },
+  'metrics.container.filesystem.usage': {
+    name: 'metrics.container.filesystem.usage',
+    description: 'Container filesystem usage.',
     type: 'double',
   },
 } as const;
