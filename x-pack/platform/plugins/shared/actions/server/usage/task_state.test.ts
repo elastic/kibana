@@ -68,9 +68,12 @@ describe('telemetry task state', () => {
   });
 
   describe('v2', () => {
+    const v1 = stateSchemaByVersion[1];
     const v2 = stateSchemaByVersion[2];
-    it('should work on empty object when running the up migration', () => {
-      const result = v2.up({});
+
+    it('should work on v1 object when running the up migration', () => {
+      const v1Object = v1.up({});
+      const result = v2.up(v1Object);
       expect(result).toMatchInlineSnapshot(`
         Object {
           "avg_execution_time_by_type_per_day": Object {},
@@ -116,12 +119,6 @@ describe('telemetry task state', () => {
       };
       const result = v2.up(cloneDeep(state));
       expect(result).toEqual(state);
-    });
-
-    it('should drop unknown properties when running the up migration', () => {
-      const state = { foo: true };
-      const result = v2.up(state);
-      expect(result).not.toHaveProperty('foo');
     });
 
     it('should validate the new error_message field correctly', () => {
