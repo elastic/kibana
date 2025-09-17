@@ -129,6 +129,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     {(provided, snapshot) => (
                       <NestedView
                         last={pos === routing.length - 1}
+                        first={pos === 0}
                         isBeingDragged={snapshot.isDragging}
                       >
                         {routingRule.isNew ? (

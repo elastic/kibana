@@ -44,7 +44,7 @@ export function RoutingStreamEntry({
   onEditIconClick: (id: string) => void;
   routingRule: RoutingDefinitionWithUIAttributes;
 }) {
-  const theme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
 
   const childrenCount = availableStreams.filter((stream) =>
@@ -60,9 +60,9 @@ export function RoutingStreamEntry({
       className={css`
         overflow: hidden;
         .streamsDragHandle {
-          transition: margin-left ${theme.euiTheme.animation.normal};
-          padding: ${theme.euiTheme.size.s} 0;
-          margin-left: -${theme.euiTheme.size.l};
+          transition: margin-left ${euiTheme.animation.normal};
+          padding: ${euiTheme.size.s} 0;
+          margin-left: -${euiTheme.size.l};
         }
         &:hover .streamsDragHandle {
           margin-left: 0;
@@ -97,50 +97,70 @@ export function RoutingStreamEntry({
             })}
           </EuiBadge>
         )}
-        <EuiLink
-          href={router.link('/{key}/management/{tab}', {
-            path: { key: routingRule.destination, tab: 'partitioning' },
-          })}
-          data-test-subj="streamsAppRoutingStreamEntryButton"
-        >
+        {isEditing ? (
           <EuiText size="s">{routingRule.destination}</EuiText>
-        </EuiLink>
-        <EuiFlexItem
-          className={css`
-            overflow: hidden;
-          `}
-        >
-          <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
-            <ConditionMessage condition={routingRule.where} />
-          </EuiText>
-        </EuiFlexItem>
-        {childrenCount > 0 && (
-          <EuiBadge color="hollow">
-            {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
-              defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
-              values: { childrenCount },
+        ) : (
+          <EuiLink
+            href={router.link('/{key}/management/{tab}', {
+              path: { key: routingRule.destination, tab: 'partitioning' },
             })}
-          </EuiBadge>
+            data-test-subj="streamsAppRoutingStreamEntryButton"
+          >
+            <EuiText size="s">{routingRule.destination}</EuiText>
+          </EuiLink>
         )}
-        <EuiButtonIcon
-          data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
-          iconType="pencil"
-          disabled={!isEditingEnabled}
-          onClick={() => onEditIconClick(routingRule.id)}
-          aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
-            defaultMessage: 'Edit',
-          })}
-        />
+        {!isEditing && (
+          <EuiFlexItem
+            className={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
+              <ConditionMessage condition={routingRule.where} />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+        >
+          {childrenCount > 0 && (
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
+                defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
+                values: { childrenCount },
+              })}
+            </EuiBadge>
+          )}
+          <EuiButtonIcon
+            data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
+            iconType="pencil"
+            disabled={!isEditingEnabled}
+            onClick={() => onEditIconClick(routingRule.id)}
+            aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+              defaultMessage: 'Edit',
+            })}
+          />
+        </EuiFlexGroup>
       </EuiFlexGroup>
       {isEditing && (
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <RoutingConditionEditor
             condition={routingRule.where}
             status={routingRule.status}
             onConditionChange={(cond) => onChange({ where: cond })}
             onStatusChange={(status) => onChange({ status })}
           />
-          <EditRoutingRuleControls routingRule={routingRule} />
+          <EuiFlexItem
+            className={css`
+              padding: 0px;
+              padding-top: ${euiTheme.size.l}; //24px
+            `}
+          >
+            <EditRoutingRuleControls routingRule={routingRule} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>

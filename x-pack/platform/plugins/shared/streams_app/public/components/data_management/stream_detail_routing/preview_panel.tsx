@@ -10,9 +10,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingLogo,
   EuiProgress,
-  EuiSpacer,
+  EuiLoadingElastic,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -51,8 +50,8 @@ export function PreviewPanel() {
   return (
     <>
       <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
-          <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" wrap>
+          <EuiFlexGroup component="span" gutterSize="s">
             <EuiIcon type="inspect" />
             <strong>
               {i18n.translate('xpack.streams.streamDetail.preview.header', {
@@ -63,7 +62,6 @@ export function PreviewPanel() {
           <StreamsAppSearchBar showDatePicker />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiSpacer size="s" />
       <EuiFlexItem grow>{content}</EuiFlexItem>
     </>
   );
@@ -143,21 +141,9 @@ const SamplePreviewPanel = () => {
 
   if (isLoadingDocuments && !hasDocuments) {
     content = (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewTitle', {
-              defaultMessage: 'Loading routing preview',
-            })}
-          </h2>
-        }
-        body={i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewBody', {
-          defaultMessage:
-            'This may take a few moments depending on the complexity of the conditions and the amount of data',
-        })}
-      />
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiLoadingElastic size="xl" />
+      </EuiFlexGroup>
     );
   } else if (documentsError) {
     content = (

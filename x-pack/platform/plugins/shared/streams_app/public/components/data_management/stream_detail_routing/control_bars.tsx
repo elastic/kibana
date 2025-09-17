@@ -88,7 +88,7 @@ const RemoveButton = ({
 
   return (
     <>
-      <EuiButtonEmpty
+      <EuiButton
         color="danger"
         size="s"
         data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
@@ -98,7 +98,7 @@ const RemoveButton = ({
         {i18n.translate('xpack.streams.streamDetailRouting.remove', {
           defaultMessage: 'Remove',
         })}
-      </EuiButtonEmpty>
+      </EuiButton>
       {isDeleteModalOpen && (
         <StreamDeleteModal
           onClose={closeDeleteModal}
@@ -112,7 +112,7 @@ const RemoveButton = ({
 };
 
 const SaveButton = (props: EuiButtonPropsForButton) => (
-  <EuiButton data-test-subj="streamsAppStreamDetailRoutingSaveButton" {...props}>
+  <EuiButton data-test-subj="streamsAppStreamDetailRoutingSaveButton" size="s" {...props}>
     {i18n.translate('xpack.streams.streamDetailRouting.add', {
       defaultMessage: 'Save',
     })}
@@ -120,7 +120,7 @@ const SaveButton = (props: EuiButtonPropsForButton) => (
 );
 
 const UpdateButton = (props: EuiButtonPropsForButton) => (
-  <EuiButton data-test-subj="streamsAppStreamDetailRoutingUpdateButton" {...props}>
+  <EuiButton data-test-subj="streamsAppStreamDetailRoutingUpdateButton" size="s" fill {...props}>
     {i18n.translate('xpack.streams.streamDetailRouting.change', {
       defaultMessage: 'Change routing',
     })}

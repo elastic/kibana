@@ -132,7 +132,7 @@ export function StreamDetailEnrichmentContentImpl() {
   };
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer grow hasShadow={false}>
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`
@@ -147,17 +147,17 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
                 <ProcessorsEditor />
               </EuiResizablePanel>
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+              <EuiResizableButton indicator="border" />
               <EuiResizablePanel
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="s"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
                 <MemoSimulationPlayground />
@@ -166,7 +166,7 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
+      {hasChanges && (
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={detectedFields.length > 0 ? openConfirmationModal : saveChanges}
@@ -174,7 +174,7 @@ export function StreamDetailEnrichmentContentImpl() {
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
         />
-      </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 }
@@ -232,7 +232,7 @@ const ProcessorsEditor = React.memo(() => {
 
   return (
     <>
-      <EuiPanel paddingSize="m" hasShadow={false} borderRadius="none" grow={false}>
+      <EuiPanel paddingSize="xs" hasShadow={false} borderRadius="none" grow={false}>
         <EuiFlexGroup alignItems="center" wrap>
           <EuiFlexItem>
             <EuiTitle size="xxs">

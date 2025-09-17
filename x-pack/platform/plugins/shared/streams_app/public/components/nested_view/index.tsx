@@ -12,10 +12,12 @@ import { useEuiTheme } from '@elastic/eui';
 export function NestedView({
   children,
   last,
+  first,
   isBeingDragged,
 }: {
   children: React.ReactNode;
   last?: boolean;
+  first?: boolean;
   isBeingDragged?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -29,7 +31,7 @@ export function NestedView({
         margin-left: ${euiTheme.size.s}; //11px
         border-left: ${last ? 'none' : euiTheme.border.thin};
         margin-top: -${euiTheme.size.xs}; //-4px
-        padding-top: ${euiTheme.size.xs}; //4px
+        padding-top: ${first ? '16px' : euiTheme.size.s}; //8px
         position: relative;
 
         &::before {
