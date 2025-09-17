@@ -33,11 +33,7 @@ import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
-import type {
-  SessionMeta,
-  SessionStateContainer,
-  SessionStateInternal,
-} from './search_session_state';
+import type { SessionMeta, SessionStateContainer } from './search_session_state';
 import {
   createSessionStateContainer,
   SearchSessionState,
@@ -115,7 +111,7 @@ interface TrackSearchHandler {
 /**
  * Represents a search session state in {@link SessionService} in any given moment of time
  */
-export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor, TrackSearchMeta>;
+export type SessionSnapshot = SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -349,6 +345,8 @@ export class SessionService {
    * @returns {@link TrackSearchHandler}
    */
   public trackSearch(searchDescriptor: TrackSearchDescriptor): TrackSearchHandler {
+    const sessionId = this.getSessionId();
+
     this.state.transitions.trackSearch(searchDescriptor, {
       lastPollingTime: new Date(),
       isStored: false,
@@ -356,12 +354,17 @@ export class SessionService {
 
     return {
       complete: () => {
-        this.state.transitions.completeSearch(searchDescriptor);
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+        if (!state) return;
+
+        state.transitions.completeSearch(searchDescriptor);
 
         // when search completes and session has just been saved,
         // trigger polling once again to save search into a session and extend its keep_alive
         if (this.isStored()) {
-          const search = this.state.selectors.getSearch(searchDescriptor);
+          const search = state.selectors.getSearch(searchDescriptor);
           if (search && !search.searchMeta.isStored) {
             search.searchDescriptor.poll().catch((e) => {
               // eslint-disable-next-line no-console
@@ -371,18 +374,27 @@ export class SessionService {
         }
       },
       error: () => {
-        this.state.transitions.errorSearch(searchDescriptor);
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+        if (!state) return;
+
+        state.transitions.errorSearch(searchDescriptor);
       },
       beforePoll: () => {
-        const search = this.state.selectors.getSearch(searchDescriptor);
-        this.state.transitions.updateSearchMeta(searchDescriptor, {
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+
+        const search = state?.selectors.getSearch(searchDescriptor);
+        state?.transitions.updateSearchMeta(searchDescriptor, {
           lastPollingTime: new Date(),
         });
 
         return [
           { isSearchStored: search?.searchMeta?.isStored ?? false },
           ({ isSearchStored }) => {
-            this.state.transitions.updateSearchMeta(searchDescriptor, {
+            state?.transitions.updateSearchMeta(searchDescriptor, {
               isStored: isSearchStored,
             });
           },
@@ -470,13 +482,13 @@ export class SessionService {
     if (sessionSnapshot) {
       this.storeSessionSnapshot();
       this.state.set({
-        ...sessionSnapshot,
+        ...sessionSnapshot.get(),
         // have to change a name, so that current app can cancel a session that it continues
         appName: this.currentApp,
         // also have to drop all pending searches which are used to derive client side state of search session indicator,
         // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
         // possible solution to this problem is to refactor session service to support multiple sessions
-        trackedSearches: keepSearches ? sessionSnapshot.trackedSearches : [],
+        trackedSearches: keepSearches ? sessionSnapshot.get().trackedSearches : [],
         isContinued: true,
       });
       this.sessionSnapshots.delete(sessionId);
@@ -488,7 +500,9 @@ export class SessionService {
 
   private storeSessionSnapshot() {
     if (!this.getSessionId()) return;
-    this.sessionSnapshots.set(this.getSessionId()!, this.state.get());
+    const currentState = createSessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>();
+    currentState.stateContainer.set(this.state.get());
+    this.sessionSnapshots.set(this.getSessionId()!, currentState.stateContainer);
   }
 
   /**
