@@ -20,10 +20,9 @@ const suggestionOwnerSchema = rt.union([
 
 export const suggestionContextRt = rt.intersection([
   rt.strict({
-    owners: rt.array(suggestionOwnerSchema),
+    spaceId: rt.string,
   }),
   rt.partial({
-    spaceId: rt.string,
     'service.name': rt.array(rt.string),
     timeRange: rt.strict({
       from: rt.string,
