@@ -32,14 +32,15 @@ import * as i18n from './translations';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 
-export interface MigrationPanelTitleProps<T extends MigrationTaskStats> {
-  migrationStats: T;
+export interface MigrationPanelTitleProps {
+  migrationStats: MigrationTaskStats;
   migrationType: MigrationType;
 }
 
-export const MigrationPanelTitle = React.memo(function MigrationPanelTitle<
-  T extends MigrationTaskStats
->({ migrationStats, migrationType }: MigrationPanelTitleProps<T>) {
+export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
+  migrationStats,
+  migrationType,
+}: MigrationPanelTitleProps) {
   const { euiTheme } = useEuiTheme();
   const [name, setName] = useState(migrationStats.name);
   const [isEditing, setIsEditing] = useState(false);

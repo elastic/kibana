@@ -34,8 +34,8 @@ import {
   MIGRATION_STOPPING_BUTTON,
 } from './translations';
 
-export interface MigrationProgressPanelProps<T extends MigrationTaskStats> {
-  migrationStats: T;
+export interface MigrationProgressPanelProps {
+  migrationStats: MigrationTaskStats;
   migrationType: MigrationType;
 }
 
