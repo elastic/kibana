@@ -8,7 +8,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { capitalize } from 'lodash';
@@ -44,13 +44,13 @@ export const appIdColumn: EuiBasicTableColumn<UISession> = {
   render: (appId: UISession['appId'], { id }) => {
     const app = `${appToIcon(appId)}`;
     return (
-      <EuiToolTip content={appToTooltip(appId) ?? capitalize(app)}>
-        <EuiIcon
-          data-test-subj="sessionManagementAppIcon"
-          data-test-app-id={app}
-          type={`${app}App`}
-        />
-      </EuiToolTip>
+      <EuiIconTip
+        content={appToTooltip(appId) ?? capitalize(app)}
+        type={`${app}App`}
+        iconProps={{
+          'data-test-subj': 'sessionManagementAppIcon',
+        }}
+      />
     );
   },
 };
