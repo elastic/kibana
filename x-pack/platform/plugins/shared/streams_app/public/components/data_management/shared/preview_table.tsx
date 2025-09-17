@@ -10,15 +10,30 @@ import type {
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import { EuiDataGrid, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
-import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
+import type {
+  SampleDocumentWithUIAttributes,
+  SimulationContext,
+} from '../stream_detail_enrichment/state_management/simulation_state_machine';
+import { DATA_SOURCES_I18N } from '../stream_detail_enrichment/data_sources_flyout/translations';
+import { useDataSourceSelectorById } from '../stream_detail_enrichment/state_management/data_source_state_machine';
+import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enrichment/types';
 
 const emptyCell = <>&nbsp;</>;
+
+export const MemoPreviewTable = React.memo(PreviewTable);
 
 export function PreviewTable({
   documents,
@@ -32,7 +47,9 @@ export function PreviewTable({
   setVisibleColumns,
   columnOrderHint = [],
   selectedRowIndex,
-  leadingControlColumns,
+  showRowSourceAvatars = false,
+  originalSamples,
+  onRowSelected,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
@@ -45,7 +62,9 @@ export function PreviewTable({
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
   selectedRowIndex?: number;
-  leadingControlColumns?: EuiDataGridControlColumn[];
+  showRowSourceAvatars?: boolean;
+  originalSamples?: SampleDocumentWithUIAttributes[];
+  onRowSelected?: (rowIndex: number) => void;
 }) {
   const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
@@ -116,6 +135,43 @@ export function PreviewTable({
   }, [setSorting, sorting]);
 
   const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
+
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
+    () => [
+      {
+        id: 'selection',
+        width: showRowSourceAvatars ? 72 : 36,
+        headerCellRender: () => null,
+        rowCellRender: ({ rowIndex }) => {
+          const originalSample = originalSamples?.[rowIndex];
+          return (
+            <EuiFlexGroup gutterSize="s">
+              <EuiButtonIcon
+                onClick={() => {
+                  if (onRowSelected) {
+                    onRowSelected(rowIndex);
+                  }
+                }}
+                aria-label={i18n.translate(
+                  'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+                  {
+                    defaultMessage: 'Select row {rowIndex}',
+                    values: { rowIndex: rowIndex + 1 },
+                  }
+                )}
+                iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+                color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
+              />
+              {showRowSourceAvatars && originalSample && (
+                <RowSourceAvatar originalSample={originalSample} />
+              )}
+            </EuiFlexGroup>
+          );
+        },
+      },
+    ],
+    [onRowSelected, showRowSourceAvatars, selectedRowIndex, originalSamples]
+  );
 
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
@@ -211,5 +267,38 @@ export function PreviewTable({
         return String(value) || emptyCell;
       }}
     />
+  );
+}
+
+function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
+  switch (type) {
+    case 'random-samples':
+      return 'randomSamples';
+    case 'kql-samples':
+      return 'kqlDataSource';
+    case 'custom-samples':
+      return 'customSamples';
+  }
+}
+
+function RowSourceAvatar({ originalSample }: { originalSample: SampleDocumentWithUIAttributes }) {
+  const dataSourceContext = useDataSourceSelectorById(
+    originalSample.dataSourceId,
+    (snapshot) => snapshot?.context
+  );
+  if (!dataSourceContext) {
+    // If the data source context is not available, we cannot render the avatar
+    return null;
+  }
+  const {
+    uiAttributes: { color },
+    dataSource: { type: dataSourceType, name: rawDataSourceName },
+  } = dataSourceContext;
+  const name =
+    rawDataSourceName || DATA_SOURCES_I18N[dataSourceTypeToI18nKey(dataSourceType)].placeholderName;
+  return (
+    <EuiToolTip content={name}>
+      <EuiAvatar size="s" color={color} initialsLength={1} name={name} />
+    </EuiToolTip>
   );
 }
