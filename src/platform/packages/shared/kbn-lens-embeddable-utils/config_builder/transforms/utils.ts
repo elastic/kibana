@@ -26,6 +26,7 @@ import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -118,7 +119,7 @@ export const getAdhocDataviews = (dataviews: Record<string, { index: string, tim
  * @param layer Lens State Layer
  * @returns Lens API Dataset configuration
  */
-export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, config: LensAttributes, layerId: string) => {
+export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, adHocDataViews: Record<string, DataViewSpec>, references: SavedObjectReference[], layerId: string) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
@@ -126,13 +127,13 @@ export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, config
     };
   }
 
-  const reference = config.references.find((ref) => ref.name === `indexpattern-datasource-${layerId}`);
+  const reference = references.find((ref) => ref.name === `indexpattern-datasource-${layerId}`);
   if (reference) {
-    if (config.state.adHocDataViews?.[reference.id]) {
+    if (adHocDataViews?.[reference.id]) {
       return {
         type: 'index',
-        index: config.state.adHocDataViews[reference.id].title!,
-        time_field: config.state.adHocDataViews[reference.id].timeFieldName,
+        index: adHocDataViews[reference.id].title!,
+        time_field: adHocDataViews[reference.id].timeFieldName,
       };
     } 
     return {

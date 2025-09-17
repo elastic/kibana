@@ -34,6 +34,8 @@ import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
+import { SavedObjectReference } from '@kbn/core/types';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -119,13 +121,14 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
   layer: FormBasedLayer | TextBasedLayer,
-  config: LensAttributes
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[]
 ): MetricState {
   if (visualization.metricAccessor === undefined) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, config, 'layer_0');
+  const dataset = buildDatasetState(layer, adHocDataViews, references, 'layer_0');
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 
@@ -392,7 +395,7 @@ export function fromLensStateToAPI(
   const visualizationState = {
     title: config.title,
     description: config.description ?? '',
-    ...reverseBuildVisualizationState(visualization, layer, config),
+    ...reverseBuildVisualizationState(visualization, layer, config.state.adHocDataViews ?? {}, config.references),
   };
 
   return visualizationState;

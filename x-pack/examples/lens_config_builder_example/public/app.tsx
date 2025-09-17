@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import {
   EuiPage,
   EuiPageBody,
@@ -48,95 +49,54 @@ export const App = (props: {
   );
 
   const [lensConfig, setLensConfig] = useState<LensApiState>({
-        type: 'metric',
-        title: 'Test Metric',
-        description: 'A test metric chart',
-        dataset: {
-          type: 'index',
-          index: 'kibana_sample_data_ecommerce',
-          time_field: '@timestamp',
-        },
-        metric: {
-          operation: 'count',
-          label: 'Count of documents',
-          alignments: {
-            labels: 'left',
-            value: 'left',
-          },
-          fit: false,
-          empty_as_null: false,
-        },
-        sampling: 1,
-        ignore_global_filters: false,
-      });
+    type: 'metric',
+    title: 'Total Sales',
+    dataset: {
+      type: 'esql',
+      query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
+    },
+    metric: {
+      operation: 'value',
+      column: 'totalBytes',
+      label: 'Total Bytes Value',
+      fit: false,
+      alignments: {
+        value: 'left',
+        labels: 'left',
+      },
+    },
+    ignore_global_filters: true,
+    sampling: 1,
+  });
   const [lensConfigString, setLensConfigString] = useState(JSON.stringify(lensConfig));
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
-  const [attributes, setAttributes] = useState<{
-    value?: TypedLensByValueInput['attributes'];
-    error?: Error;
-    loading: boolean;
-  }>({ loading: true });
+  const attributes = useAsync(async () => {
+    try {
+      const configBuilder = new LensConfigBuilder(props.dataViews, props.formula);
+      // eslint-disable-next-line no-console
+      console.log('lensConfig', lensConfig);
+      const validatedConfig = lensApiStateSchema.validate(lensConfig);
+      // eslint-disable-next-line no-console
+      console.log('validatedConfig', validatedConfig);
+      const lensState = configBuilder.fromAPIFormat(validatedConfig);
+      // eslint-disable-next-line no-console
+      console.log('lensState', lensState);
+      const apiFormat = configBuilder.toAPIFormat(lensState);
+      // eslint-disable-next-line no-console
+      console.log('apiFormat', apiFormat);
+      const finalLensState = configBuilder.fromAPIFormat(apiFormat);
+      // eslint-disable-next-line no-console
+      console.log('finalLensState', finalLensState);
+      return finalLensState as TypedLensByValueInput['attributes'];
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+  }, [lensConfig]);
 
-  useEffect(() => {
-    const buildAttributes = async () => {
-      try {
-        setAttributes({ loading: true });
-        const configBuilder = new LensConfigBuilder(props.dataViews, props.formula);
-        // eslint-disable-next-line no-console
-        console.log('lensConfig', lensConfig);
-        const validatedConfig = lensApiStateSchema.validate(lensConfig);
-        // eslint-disable-next-line no-console
-        console.log('validatedConfig', validatedConfig);
-        const lensState = configBuilder.fromAPIFormat(validatedConfig);
-        // eslint-disable-next-line no-console
-        console.log('lensState', lensState);
-        const apiFormat = configBuilder.toAPIFormat(lensState);
-        // eslint-disable-next-line no-console
-        console.log('apiFormat', apiFormat);
-        const finalLensState = configBuilder.fromAPIFormat(apiFormat);
-        // eslint-disable-next-line no-console
-        console.log('finalLensState', finalLensState);
-        setAttributes({
-          value: finalLensState as TypedLensByValueInput['attributes'],
-          loading: false,
-        });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-        setAttributes({
-          error: e as Error,
-          loading: false,
-        });
-        setLensConfig({
-          type: 'metric',
-          title: 'ERROR IN CONFIG',
-          dataset: {
-            type: 'esql',
-            query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
-          },
-          metric: {
-            operation: 'value',
-            column: 'totalBytes',
-            label: 'ERROR IN CONFIG',
-            fit: false,
-            alignments: {
-              value: 'left',
-              labels: 'left',
-            },
-          },
-          ignore_global_filters: true,
-          sampling: 1,
-        });
-      }
-    };
-
-    buildAttributes();
-  }, [lensConfig, props.dataViews, props.formula]);
-
-  if (!attributes.value && !attributes.error && !error && attributes.loading) return <div>Loading...</div>;
   if (!attributes.value && !attributes.error && !error) return null;
 
   return (
@@ -164,33 +124,12 @@ export const App = (props: {
                 data-test-subj="lns-example-refresh"
                 onClick={() => {
                   try {
-                    // Helper function to parse JavaScript-like object syntax
-                    const parseFlexibleJSON = (str: string) => {
-                      try {
-                        // First try standard JSON.parse
-                        return JSON.parse(str);
-                      } catch {
-                        // If that fails, try to make it more JSON-compliant
-                        let sanitized = str
-                          // Replace single quotes with double quotes (but not inside double-quoted strings)
-                          .replace(/'/g, '"')
-                          // Remove trailing commas before closing brackets/braces
-                          .replace(/,(\s*[}\]])/g, '$1')
-                          // Add quotes around unquoted property names
-                          .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":');
-                        
-                        return JSON.parse(sanitized);
-                      }
-                    };
-
-                    const newConfig = parseFlexibleJSON(lensConfigString);
+                    const newConfig = JSON.parse(lensConfigString);
                     setLensConfig(newConfig);
                     setSearchSession(props.plugins.data.search.session.start());
                     setError(null);
                   } catch (e) {
-                    console.error(e);
-                    
-                    //setError(e.message);
+                    setError(e.message);
                   }
                 }}
               >
@@ -214,7 +153,6 @@ export const App = (props: {
                   to: new Date(range[1]).toISOString(),
                 });
               }}
-              
               onFilter={(_data) => {
                 // call back event for on filter event
               }}
