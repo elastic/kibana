@@ -26,6 +26,7 @@ import { getFunctionDefinition } from './functions';
 import { isArrayType } from './operators';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
+import { TIME_SYSTEM_PARAMS } from './literals';
 
 // #region type detection
 
@@ -48,6 +49,9 @@ export function getExpressionType(
   }
 
   if (isLiteral(root)) {
+    if (root.literalType === 'param' && TIME_SYSTEM_PARAMS.includes(root.text)) {
+      return 'date';
+    }
     return root.literalType;
   }
 
@@ -164,8 +168,8 @@ export function getExpressionType(
 
 // #region signature matching
 
-// THESE types are types that now do not need implicit casting to string
-// ToDo: Check where it is being used and fix the usage to remove the need for this
+// ES implicitly casts string literal arguments to these types when passed to functions that expect these types
+// e.g. EXPECTS_DATE('2020-01-01') is valid because the string literal is implicitly cast to a date
 export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
   'date',
   'date_nanos',

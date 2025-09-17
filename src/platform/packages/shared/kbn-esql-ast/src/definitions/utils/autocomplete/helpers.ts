@@ -19,12 +19,7 @@ import type {
   ICommandContext,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
-import {
-  getDateLiterals,
-  getCompatibleLiterals,
-  buildConstantsDefinitions,
-  isLiteralDateItem,
-} from '../literals';
+import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
 import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
@@ -615,16 +610,15 @@ export function getValidSignaturesAndTypesToSuggestNext(
   fullText: string,
   offset: number
 ) {
-  const enrichedArgs = node.args.map((nodeArg) => {
-    let dataType = getExpressionType(nodeArg, context?.columns);
-
-    // For named system time parameters ?start and ?end, make sure it's compatiable
-    if (isLiteralDateItem(nodeArg)) {
-      dataType = 'date';
+  const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
+  const enrichedArgs = node.args.map((arg, idx) => ({
+    ...arg,
+    dataType: argTypes[idx],
+  })) as Array<
+    ESQLAstItem & {
+      dataType: string;
     }
-
-    return { ...nodeArg, dataType } as ESQLAstItem & { dataType: string };
-  });
+  >;
 
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
