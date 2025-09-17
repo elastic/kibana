@@ -33,6 +33,7 @@ export interface ReadinessTaskConfig {
   description: string;
   pillar: 'visibility' | 'detection' | 'response';
   order: number;
+  taskNumber: string;
   meta?: Record<string, unknown>;
 }
 
@@ -56,6 +57,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'visibility',
     order: 1,
+    taskNumber: '1',
   },
   {
     // Completion: Events successfully ingested from at least one cloud provider (AWS/GCP/Azure/On-Prem)
@@ -72,6 +74,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'visibility',
     order: 2,
+    taskNumber: '2',
   },
   {
     // Completion: Cloud asset inventory indexed or visible in Inventory dashboard
@@ -88,6 +91,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'visibility',
     order: 6,
+    taskNumber: '3',
   },
   {
     // Completion: Ingested logs from container/k8s integration
@@ -107,6 +111,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'visibility',
     order: 10,
+    taskNumber: '4',
   },
   {
     // Completion: Logs + asset data present from AWS, Azure, and GCP (dynamic based on Asset Inventory/Entity store)
@@ -127,6 +132,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'visibility',
     order: 15,
+    taskNumber: '5',
   },
 
   /**
@@ -150,6 +156,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 3,
+    taskNumber: '1',
   },
   {
     // Completion: Coverage page visited
@@ -166,6 +173,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 4,
+    taskNumber: '2',
   },
   {
     // Completion: Threat feed events ingested and alerts enriched
@@ -182,6 +190,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 7,
+    taskNumber: '3',
   },
   {
     // Completion: A new or edited rule has been enabled
@@ -198,6 +207,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 8,
+    taskNumber: '4',
   },
   {
     // Completion: Activity like running Attack Discovery multiple times or scheduling action on the Attack Discovery page
@@ -214,6 +224,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 11,
+    taskNumber: '5',
   },
   {
     // Completion: >90% of relevant MITRE techniques covered by tuned rules
@@ -229,6 +240,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 13,
+    taskNumber: '6',
   },
   {
     // Completion: CSPM enabled for AWS, Azure, and GCP, findings/dashboard pages visited (dynamic based on CSP footprint)
@@ -245,6 +257,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'detection',
     order: 16,
+    taskNumber: '1',
   },
 
   /**
@@ -267,6 +280,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'response',
     order: 5,
+    taskNumber: '2',
   },
   {
     // Completion: Summary generated on Alert - AI assistant workflow
@@ -286,6 +300,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'response',
     order: 9,
+    taskNumber: '3',
   },
   {
     // Completion: Jira/Slack/ServiceNow/SentinelOne/Crowdstrike connector tested and in use
@@ -301,6 +316,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'response',
     order: 12,
+    taskNumber: '4',
   },
   {
     // Completion: At least one rule creates a case or sends notification automatically
@@ -320,6 +336,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'response',
     order: 14,
+    taskNumber: '5',
   },
   {
     // Completion: Multiple alerts triaged and closed via case workflow
@@ -336,6 +353,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'response',
     order: 17,
+    taskNumber: '6',
   },
   {
     // Completion: 3+ cases with automation and alert linkages resolved
@@ -351,5 +369,6 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     ),
     pillar: 'response',
     order: 18,
+    taskNumber: '7',
   },
 ] as const;

@@ -17,6 +17,7 @@ import {
   EuiBadge,
   EuiSplitPanel,
   useEuiTheme,
+  EuiIcon,
 } from '@elastic/eui';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
 import { useReadinessTasks, READINESS_TASKS } from '@kbn/siem-readiness';
@@ -184,7 +185,31 @@ export const ReadinessTasksTable: React.FC = () => {
               borders="all"
               key={task.id}
               id={task.id}
-              buttonContent={task.title}
+              arrowDisplay="right"
+              buttonContent={
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+                  <EuiFlexItem>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ marginRight: euiTheme.size.s, fontWeight: 600 }}>
+                        {'Category:'}
+                      </span>
+                      {taskPillar?.icon && (
+                        <EuiIcon
+                          type={taskPillar.icon}
+                          size="m"
+                          color={taskPillar.color}
+                          style={{ marginRight: euiTheme.size.s }}
+                        />
+                      )}
+                      <span style={{ marginRight: euiTheme.size.m }}>
+                        {taskPillar?.displayName}
+                      </span>
+                      <span style={{ fontWeight: 600, marginRight: 4 }}>{`Task:`}</span>
+                      <span>{`${task.taskNumber}. ${task.title}`}</span>
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               paddingSize="l"
               initialIsOpen={false}
               buttonProps={{
@@ -195,7 +220,6 @@ export const ReadinessTasksTable: React.FC = () => {
               }}
               extraAction={
                 <div style={{ paddingRight: euiTheme.size.base }}>
-                  <EuiBadge color={taskPillar?.color}>{taskPillar?.displayName}</EuiBadge>
                   <EuiBadge color={taskData?.status === 'completed' ? 'success' : 'warning'}>
                     {taskData?.status || 'incomplete'}
                   </EuiBadge>

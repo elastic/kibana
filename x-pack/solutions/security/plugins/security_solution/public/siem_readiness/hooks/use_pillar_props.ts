@@ -17,6 +17,7 @@ export interface PillarProps {
     displayName: string;
     color: string;
     description: string;
+    icon: string;
   };
 }
 
@@ -32,6 +33,7 @@ export const usePillarProps = () => {
       color: euiTheme.colors.vis.euiColorVisBehindText2,
       description:
         'Your visibility score is how well your systems are monitored through logs, agents, and cloud telemetry.',
+      icon: 'eye',
     },
     detection: {
       value: 'detection',
@@ -39,6 +41,7 @@ export const usePillarProps = () => {
       color: euiTheme.colors.vis.euiColorVisBehindText4,
       description:
         'Detections measure how well your system identifies threats through tuned, active detection rules.',
+      icon: 'securitySignal',
     },
     response: {
       value: 'response',
@@ -46,6 +49,7 @@ export const usePillarProps = () => {
       color: euiTheme.colors.vis.euiColorVisBehindText0,
       description:
         'Response shows how quickly and effectively your team investigates and acts on detected threats.',
+      icon: 'magnifyWithExclamation',
     },
   };
 
