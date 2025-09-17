@@ -35,15 +35,7 @@
             "section": "def-public.ESQLEditorRestorableState",
             "text": "ESQLEditorRestorableState"
           },
-          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderApi",
-            "text": "RestorableStateProviderApi"
-          },
-          ">>"
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
         "deprecated": false,
@@ -411,15 +403,7 @@
             "section": "def-public.ESQLEditorRestorableState",
             "text": "ESQLEditorRestorableState"
           },
-          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderApi",
-            "text": "RestorableStateProviderApi"
-          },
-          ">"
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
         "deprecated": false,
