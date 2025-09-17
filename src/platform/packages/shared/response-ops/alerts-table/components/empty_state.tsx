@@ -67,7 +67,11 @@ export const EmptyState: React.FC<
       {onResetToPreviousState ? (
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onResetToPreviousState} size="m">
+            <EuiButton
+              onClick={onResetToPreviousState}
+              size="m"
+              data-test-subj="resetToPreviousStateButton"
+            >
               <FormattedMessage
                 id="xpack.triggersActionsUI.empty.resetButton"
                 defaultMessage={'Go back'}

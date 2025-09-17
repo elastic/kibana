@@ -13,7 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { render, waitFor, screen, act } from '@testing-library/react';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -66,6 +71,10 @@ const columns = [
   {
     id: ALERT_MAINTENANCE_WINDOW_IDS,
     displayAsText: 'Maintenance Windows',
+  },
+  {
+    id: ALERT_TIME_RANGE,
+    displayAsText: 'Time Range',
   },
 ];
 const alerts: Alert[] = [
@@ -908,6 +917,98 @@ describe('AlertsTable', () => {
 
     describe('when persistent controls are set', () => {
       testPersistentControls();
+    });
+  });
+
+  describe('error state', () => {
+    beforeEach(() => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('An error occurred'),
+      });
+    });
+
+    it('should show error if sorted by column which is not supported', async () => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
+      });
+
+      const props: BaseAlertsTableProps = {
+        ...tableProps,
+        initialSort: [
+          {
+            [ALERT_TIME_RANGE]: { order: 'asc' },
+          },
+        ],
+      };
+      render(<TestComponent {...props} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [
+            {
+              'kibana.alert.time_range': { order: 'asc' },
+            },
+          ],
+        })
+      );
+
+      expect(await screen.findByTestId('alertsTableEmptyState')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Sorting by range field [kibana.alert.time_range] is not supported')
+      ).toBeInTheDocument();
+    });
+
+    it('should go back to previous state when reset button is clicked', async () => {
+      const storageSetSpy = jest.spyOn(Storage.prototype, 'setItem');
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
+      });
+
+      const props: BaseAlertsTableProps = {
+        ...tableProps,
+        initialSort: [
+          {
+            [ALERT_TIME_RANGE]: { order: 'asc' },
+          },
+        ],
+      };
+
+      render(<TestComponent {...props} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [
+            {
+              'kibana.alert.time_range': { order: 'asc' },
+            },
+          ],
+        })
+      );
+
+      const resetButton = await screen.findByTestId('resetToPreviousStateButton');
+      expect(resetButton).toBeInTheDocument();
+
+      await userEvent.click(resetButton);
+
+      expect(storageSetSpy).toHaveBeenCalledWith(
+        'test-alerts-table',
+        expect.stringContaining('"sort":[]')
+      );
     });
   });
 

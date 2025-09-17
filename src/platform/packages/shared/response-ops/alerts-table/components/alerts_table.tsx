@@ -451,6 +451,7 @@ const AlertsTableContent = typedForwardRef(
           ...storageAlertsTable.current,
           sort: newSort,
         };
+
         storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       }
