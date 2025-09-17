@@ -12,11 +12,10 @@ import { loadRuleTemplate } from '../lib/rule_template_api/get_rule_template';
 
 export interface UseRuleTemplateProps {
   templateId?: string;
-  enabled: boolean;
 }
 
 export function useRuleTemplate(props: UseRuleTemplateProps) {
-  const { enabled, templateId } = props;
+  const { templateId } = props;
   const { http } = useKibana().services;
 
   const queryFn = () => {
@@ -25,9 +24,9 @@ export function useRuleTemplate(props: UseRuleTemplateProps) {
     }
     return loadRuleTemplate({ http, templateId });
   };
-
+  const enabled = !!templateId && templateId !== 'undefined';
   const { data, error, isFetching, isError, isLoadingError, isLoading } = useQuery({
-    queryKey: ['getQueryDelaySettings'],
+    queryKey: ['getRuleTemplate', templateId],
     queryFn,
     enabled,
     refetchOnWindowFocus: false,

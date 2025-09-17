@@ -79,7 +79,6 @@ export const RuleFormRoute = () => {
     isError: isErrorRuleTemplate,
   } = useRuleTemplate({
     templateId,
-    enabled: !!templateId,
   });
 
   useEffect(() => {
