@@ -7,6 +7,7 @@
 
 import type {
   ClusterPutComponentTemplateRequest,
+  IndicesDataStreamFailureStore,
   IndicesPutIndexTemplateRequest,
   IngestProcessorContainer,
   IngestPutPipelineRequest,
@@ -125,6 +126,14 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
+export interface SetFailureStoreAction {
+  type: 'set_failure_store';
+  request: {
+    name: string;
+    failure_store?: IndicesDataStreamFailureStore;
+  };
+}
+
 export interface DeleteQueriesAction {
   type: 'delete_queries';
   request: {
@@ -162,6 +171,7 @@ export type ElasticsearchAction =
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
   | DeleteQueriesAction
+  | SetFailureStoreAction
   | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
@@ -182,5 +192,6 @@ export interface ActionsByType {
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  set_failure_store: SetFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
 }

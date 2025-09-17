@@ -21,7 +21,7 @@ export const RetentionCard = ({
   const { href } = useFailureStoreRedirectLink({ definition });
 
   const {
-    failure_store: failureStore,
+    effective_failure_store: failureStore,
     privileges: { manage_failure_store: manageFailureStorePrivilege },
   } = definition;
   if (!failureStore || !failureStore.retentionPeriod) {

@@ -17,7 +17,8 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
-import { failureStoreSchema, type FailureStore } from './failure_store';
+import type { WiredIngestStreamEffectiveFailureStore } from './failure_store';
+import { wiredIngestStreamEffectiveFailureStoreSchema } from './failure_store';
 import type { WiredIngestStreamEffectiveSettings } from './settings';
 import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 
@@ -61,7 +62,7 @@ export namespace WiredStream {
   export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
-    failure_store?: FailureStore;
+    effective_failure_store?: WiredIngestStreamEffectiveFailureStore;
     effective_settings: WiredIngestStreamEffectiveSettings;
   }
 
@@ -83,7 +84,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
       z.object({
         inherited_fields: inheritedFieldDefinitionSchema,
         effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
-        failure_store: z.optional(failureStoreSchema),
+        effective_failure_store: z.optional(wiredIngestStreamEffectiveFailureStoreSchema),
         effective_settings: wiredIngestStreamEffectiveSettingsSchema,
       })
     ),

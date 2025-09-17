@@ -25,6 +25,9 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
+import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { isInheritFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -62,6 +65,7 @@ interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
   routing: boolean;
   processing: boolean;
+  failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
 }
@@ -72,6 +76,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     routing: false,
     processing: false,
     lifecycle: false,
+    failure_store: false,
     settings: false,
   };
 
@@ -128,6 +133,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       !_.isEqual(
         this._definition.ingest.wired.routing,
         startingStateStreamDefinition.ingest.wired.routing
+      );
+
+    this._changes.failure_store =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.failure_store,
+        startingStateStreamDefinition.ingest.failure_store
       );
 
     this._changes.processing =
@@ -527,6 +539,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
     const settings = getInheritedSettings(ancestors);
+    const failureStore = findInheritedFailureStore(this._definition, ancestors);
 
     return [
       {
@@ -583,6 +596,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
+        type: 'set_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: failureStore,
+        },
+      },
+      {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
@@ -597,12 +617,20 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return this._changes.lifecycle;
   }
 
+  public hasChangedFailureStore(): boolean {
+    return this._changes.failure_store;
+  }
+
   public hasChangedSettings(): boolean {
     return this._changes.settings;
   }
 
   public getLifecycle(): IngestStreamLifecycle {
     return this._definition.ingest.lifecycle;
+  }
+
+  public getFailureStore(): FailureStore | undefined {
+    return this._definition.ingest.failure_store;
   }
 
   protected async doDetermineUpdateActions(
@@ -669,6 +697,27 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             request: {
               name: this._definition.name,
               lifecycle: ancestorStream.getLifecycle(),
+            },
+          });
+        }
+        break;
+      }
+    }
+
+    let hasAncestorWithChangedFailureStore = false;
+    for (const ancestor of ancestorsAndSelf) {
+      const ancestorStream = desiredState.get(ancestor)! as WiredStream;
+      if (ancestorStream.hasChangedFailureStore()) {
+        hasAncestorWithChangedFailureStore = true;
+      }
+      const ancestorFailureStore = ancestorStream.getFailureStore();
+      if (!isInheritFailureStore(ancestorFailureStore)) {
+        if (hasAncestorWithChangedFailureStore) {
+          actions.push({
+            type: 'set_failure_store',
+            request: {
+              name: this._definition.name,
+              failure_store: ancestorFailureStore,
             },
           });
         }

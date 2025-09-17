@@ -83,6 +83,7 @@ describe('WiredStream', () => {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
             settings: {},
+            failure_store: { inherit: {} },
             wired: {
               fields: {},
               routing: [],
@@ -104,11 +105,12 @@ describe('WiredStream', () => {
         },
         effective_settings: {},
         inherited_fields: {},
-        failure_store: {
+        effective_failure_store: {
           enabled: false,
           retentionPeriod: {
             default: '30d',
           },
+          from: 'logs',
         },
         ...emptyAssets,
       },

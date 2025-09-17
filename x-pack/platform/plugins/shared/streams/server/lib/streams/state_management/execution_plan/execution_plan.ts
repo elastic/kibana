@@ -7,7 +7,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
-import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamFailureStore,
+  SecurityHasPrivilegesRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
   upsertComponent,
@@ -51,6 +54,7 @@ import type {
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
   UpdateIngestSettingsAction,
+  SetFailureStoreAction,
 } from './types';
 
 /**
@@ -73,6 +77,7 @@ export class ExecutionPlan {
       delete_index_template: [],
       upsert_ingest_pipeline: [],
       delete_ingest_pipeline: [],
+      set_failure_store: [],
       append_processor_to_ingest_pipeline: [],
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
@@ -171,6 +176,7 @@ export class ExecutionPlan {
         upsert_dot_streams_document,
         delete_dot_streams_document,
         update_data_stream_mappings,
+        set_failure_store,
         delete_queries,
         update_ingest_settings,
         ...rest
@@ -199,6 +205,7 @@ export class ExecutionPlan {
         this.updateLifecycle(update_lifecycle),
         this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
+        this.setFailureStore(set_failure_store),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -358,6 +365,43 @@ export class ExecutionPlan {
           name: action.request.name,
         })
       )
+    );
+  }
+
+  private async setFailureStore(actions: SetFailureStoreAction[]) {
+    return Promise.all(
+      actions.map(async (action) => {
+        let failure_store: IndicesDataStreamFailureStore;
+        if (action.request.failure_store) {
+          failure_store = {
+            enabled: action.request.failure_store.enabled,
+            lifecycle: {
+              data_retention: action.request.failure_store.lifecycle?.data_retention,
+              ...(this.dependencies.isServerless
+                ? {}
+                : { enabled: action.request.failure_store.enabled }),
+            },
+          };
+        } else {
+          // figure out default settings for the failure store
+          const response =
+            await this.dependencies.scopedClusterClient.asCurrentUser.indices.simulateIndexTemplate(
+              {
+                name: action.request.name,
+              },
+              { meta: true }
+            );
+          // @ts-expect-error index simulate response is not well typed
+          failure_store = response.body.template.data_stream_options.failure_store;
+        }
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices.putDataStreamOptions(
+          {
+            name: action.request.name,
+            failure_store,
+          },
+          { meta: true }
+        );
+      })
     );
   }
 

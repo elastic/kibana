@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { IndicesFailureStoreLifecycle } from '@elastic/elasticsearch/lib/api/types';
 import type { Streams } from '../models/streams';
 import type { WiredIngestStreamEffectiveLifecycle } from '../models/ingest/lifecycle';
 import { isInheritLifecycle } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
+import { isInheritFailureStore } from '../models/ingest/failure_store';
 
 export function findInheritedLifecycle(
   definition: Streams.WiredStream.Definition,
@@ -27,6 +29,28 @@ export function findInheritedLifecycle(
   }
 
   return { ...originDefinition.ingest.lifecycle, from: originDefinition.name };
+}
+
+export function findInheritedFailureStore(
+  definition: Streams.WiredStream.Definition,
+  ancestors: Streams.WiredStream.Definition[]
+): IndicesFailureStoreLifecycle & { from: string } {
+  const originDefinition = [...ancestors, definition]
+    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
+    .findLast(({ ingest }) => !isInheritFailureStore(ingest.failure_store));
+
+  if (!originDefinition) {
+    throw new Error('Unable to find inherited failure store configuration');
+  }
+
+  if (
+    !originDefinition.ingest.failure_store ||
+    isInheritFailureStore(originDefinition.ingest.failure_store)
+  ) {
+    throw new Error('Wired streams can only inherit a defined failure store');
+  }
+
+  return { ...originDefinition.ingest.failure_store, from: originDefinition.name };
 }
 
 export function findInheritingStreams(

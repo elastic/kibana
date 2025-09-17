@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
-  FailureStore,
+  EffectiveFailureStore,
   FailureStoreStatsResponse,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type {
@@ -306,7 +306,7 @@ export async function getFailureStore({
 }: {
   name: string;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<FailureStore> {
+}): Promise<EffectiveFailureStore> {
   const dataStream = await getDataStream({ name, scopedClusterClient });
   const defaultRetentionPeriod = await getDefaultRetentionValue({ scopedClusterClient });
 

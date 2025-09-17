@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { IndicesDataStreamFailureStore } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 
-export interface FailureStore {
+export interface EffectiveFailureStore {
   enabled: boolean;
   retentionPeriod: {
     default: string;
@@ -22,7 +23,7 @@ export interface FailureStoreStatsResponse {
   creationDate?: number;
 }
 
-export const failureStoreSchema: z.Schema<FailureStore> = z.object({
+export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.object({
   enabled: z.boolean(),
   retentionPeriod: z.object({
     default: NonEmptyString,
@@ -30,8 +31,41 @@ export const failureStoreSchema: z.Schema<FailureStore> = z.object({
   }),
 });
 
+export type FailureStore = IndicesDataStreamFailureStore | { inherit: {} };
+
+export const failureStoreSchema: z.Schema<FailureStore> = z.union([
+  z.object({
+    enabled: z.boolean(),
+    lifecycle: z.object({
+      enabled: z.boolean(),
+      data_retention: z.optional(NonEmptyString),
+    }),
+  }),
+  z.object({ inherit: z.object({}) }),
+]);
+
 export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
   size: z.number().min(0).optional(),
   count: z.number().min(0).optional(),
   creationDate: z.number().min(0).optional(),
 });
+
+export interface WiredIngestStreamEffectiveFailureStore extends EffectiveFailureStore {
+  from: string;
+}
+
+export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
+  z.object({
+    enabled: z.boolean(),
+    retentionPeriod: z.object({
+      default: z.string(),
+      custom: z.optional(NonEmptyString),
+    }),
+    from: z.string(),
+  });
+
+export function isInheritFailureStore(
+  input: FailureStore | undefined
+): input is { inherit: {} } | undefined {
+  return !input || 'inherit' in input;
+}

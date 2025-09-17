@@ -30,13 +30,13 @@ export const StreamDetailFailureStore = ({
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
   const { refresh } = useStreamDetail();
-  const { updateFailureStore } = useUpdateFailureStore();
+  const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const {
     core: { notifications },
   } = useKibana();
 
   const {
-    failure_store: failureStore,
+    effective_failure_store: failureStore,
     privileges: {
       read_failure_store: readFailureStorePrivilege,
       manage_failure_store: manageFailureStorePrivilege,

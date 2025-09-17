@@ -13,6 +13,7 @@ import {
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
@@ -114,7 +115,7 @@ export async function readStream({
       dashboards,
       rules,
       queries,
-      failure_store: failureStore,
+      effective_failure_store: failureStore,
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
@@ -122,6 +123,8 @@ export async function readStream({
     streamDefinition,
     getInheritedFieldsFromAncestors(ancestors)
   );
+
+  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
 
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
@@ -132,7 +135,12 @@ export async function readStream({
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
-    failure_store: failureStore,
+    effective_failure_store: failureStore
+      ? {
+          ...failureStore,
+          from: inheritedFailureStore.from,
+        }
+      : undefined,
   };
 
   return body;
