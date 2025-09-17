@@ -86,13 +86,6 @@ export function getSavedSearchObjectType(
         },
       },
       6: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_8,
-        },
-      },
-      7: {
         changes: [
           {
             type: 'data_backfill',
@@ -104,11 +97,18 @@ export function getSavedSearchObjectType(
           create: SCHEMA_SEARCH_MODEL_VERSION_6,
         },
       },
-      8: {
+      7: {
         changes: [],
         schemas: {
           forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_7.extends({}, { unknowns: 'ignore' }),
           create: SCHEMA_SEARCH_MODEL_VERSION_7,
+        },
+      },
+      8: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_8,
         },
       },
     },
