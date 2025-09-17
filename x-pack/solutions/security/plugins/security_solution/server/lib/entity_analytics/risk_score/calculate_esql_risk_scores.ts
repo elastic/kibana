@@ -90,9 +90,13 @@ export const calculateScoresWithESQL = async (
           params.alertSampleSizePerShard || 10000,
           params.pageSize
         );
+
         return esClient.esql
-          .query({ query })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType)))
+          .query({
+            query,
+            filter: { bool: { filter } },
+          })
+          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
 
           .then((riskScoreBuckets) => {
             return processScores({
@@ -144,21 +148,22 @@ export const calculateScoresWithESQL = async (
 
 const getFilters = (options: CalculateScoresParams) => {
   const { excludeAlertStatuses = [], excludeAlertTags = [], range, filter: userFilter } = options;
-  const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
+  const filters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
   if (excludeAlertStatuses.length > 0) {
-    filter.push({
+    filters.push({
       bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
     });
   }
   if (!isEmpty(userFilter)) {
-    filter.push(userFilter as QueryDslQueryContainer);
+    filters.push(userFilter as QueryDslQueryContainer);
   }
   if (excludeAlertTags.length > 0) {
-    filter.push({
+    filters.push({
       bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
     });
   }
-  return filter;
+
+  return filters;
 };
 
 export const getCompositeQuery = (
@@ -230,7 +235,7 @@ export const getESQL = (
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              @timestamp as time
-    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "timestamp": """", time::keyword, """", "description": """", rule_name, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL input = CONCAT(""" {"risk_score": """", score::keyword, """", "time": """", time::keyword, """", "rule_name": """", rule_name, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
@@ -244,7 +249,7 @@ export const getESQL = (
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType) =>
+  (entityType: EntityType, index: string) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [
       number,
@@ -254,13 +259,14 @@ export const buildRiskScoreBucket =
     ];
 
     const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
-      const parsed = JSON.parse(input);
-      const value = parseFloat(parsed.risk_score);
+      const parsedRiskInputData = JSON.parse(input);
+      const value = parseFloat(parsedRiskInputData.score);
       const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
       return {
-        ...parsed,
-        risk_score: value,
+        ...parsedRiskInputData,
+        score: value,
         contribution: currentScore / RIEMANN_ZETA_VALUE,
+        index,
       };
     });
 
