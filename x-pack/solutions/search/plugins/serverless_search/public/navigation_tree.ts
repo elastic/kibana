@@ -294,6 +294,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:transform' },
                   { link: 'management:rollup_jobs' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
+                  { link: 'management:data_usage' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
                   defaultMessage: 'Indices, data streams and roll ups',
@@ -306,12 +307,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {
                   defaultMessage: 'Ingest',
-                }),
-              },
-              {
-                children: [{ link: 'management:dataViews' }, { link: 'management:data_usage' }],
-                title: i18n.translate('xpack.serverlessSearch.nav.ingest.dataViews.title', {
-                  defaultMessage: 'Data views and usage',
                 }),
               },
               {
@@ -410,6 +405,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     title: CONTENT_TITLE,
                     breadcrumbStatus: 'hidden',
                     children: [
+                      { link: 'management:dataViews' },
                       { link: 'management:spaces', breadcrumbStatus: 'hidden' },
                       { link: 'management:objects', breadcrumbStatus: 'hidden' },
                       { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
@@ -447,8 +443,18 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             sideNavVersion: 'v2',
             children: [
               {
-                id: 'cloud_links',
-                title: '',
+                id: 'settings_access',
+                title: ACCESS_TITLE,
+                children: [
+                  { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+                  { link: 'management:roles', breadcrumbStatus: 'hidden' },
+                ],
+              },
+              {
+                id: 'organization',
+                title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.org.title', {
+                  defaultMessage: 'Organization',
+                }),
                 children: [
                   {
                     id: 'cloudLinkBilling',
@@ -459,14 +465,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     cloudLink: 'deployment',
                     title: PERFORMANCE_TITLE,
                   },
-                ],
-              },
-              {
-                id: 'settings_access',
-                title: ACCESS_TITLE,
-                children: [
-                  { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
-                  { link: 'management:roles', breadcrumbStatus: 'hidden' },
                   {
                     cloudLink: 'userAndRoles',
                     title: MANAGE_ORG_MEMBERS_TITLE,

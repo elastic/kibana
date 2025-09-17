@@ -59,7 +59,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Stack Monitoring' });
 
       if (isV2) {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
@@ -222,7 +221,6 @@ export default function searchSolutionNavigation({
             'machine_learning',
             'dev_tools',
             'ingest_and_data',
-            'monitoring',
             'stack_management',
             // more:
             'maps',
@@ -254,7 +252,6 @@ export default function searchSolutionNavigation({
           'searchInferenceEndpoints:inferenceEndpoints',
           'search_project_nav_footer',
           'dev_tools',
-          'monitoring',
           'project_settings_project_nav',
           'management:trained_models',
           'stack_management',
