@@ -25,7 +25,7 @@ export const registerFeatures = (plugins: WorkflowsManagementPluginServerDepende
     name: i18n.translate(
       'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
       {
-        defaultMessage: 'Workflows Management',
+        defaultMessage: 'Workflows',
       }
     ),
     order: FEATURE_ORDER,
