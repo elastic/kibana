@@ -23,26 +23,37 @@ export function generateBuiltInStepSnippet(
   }
 
   // Generate appropriate snippets based on step type
+  let parameters = '';
   switch (stepType) {
     case 'foreach':
-      return `${prepend}${quotedType}\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
+      parameters = `\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
 
     case 'if':
-      return `${prepend}${quotedType}\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
+      parameters = `\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
 
     case 'parallel':
-      return `${prepend}${quotedType}\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
+      parameters = `\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
 
     case 'merge':
-      return `${prepend}${quotedType}\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
+      parameters = `\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
 
     case 'http':
-      return `${prepend}${quotedType}\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
+      parameters = `\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
 
     case 'wait':
-      return `${prepend}${quotedType}\nwith:\n  duration: "5s"`;
+      parameters = `\nwith:\n  duration: "5s"`;
 
     default:
-      return `${prepend}${quotedType}\nwith:\n  # Add parameters here`;
+      parameters = `\nwith:\n  # Add parameters here`;
   }
+
+  return `${prepend}${quotedType}${
+    full
+      ? // if full, indent the parameters
+        parameters
+          .split('\n')
+          .map((line) => `  ${line}`)
+          .join('\n')
+      : parameters
+  }`;
 }
