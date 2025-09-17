@@ -26,13 +26,28 @@ export const UserName = z.object({
       name: z.string().optional(),
     })
     .optional(),
+  /**
+   * Entity analytics monitoring configuration for the user
+   */
   entity_analytics_monitoring: z
     .object({
+      /**
+       * Array of labels associated with the user
+       */
       labels: z
         .array(
           z.object({
+            /**
+             * The field name for the label
+             */
             field: z.string().optional(),
+            /**
+             * The value of the label
+             */
             value: z.string().optional(),
+            /**
+             * The source where this label was created (api, csv, or index_sync)
+             */
             source: z.enum(['api', 'csv', 'index_sync']).optional(),
           })
         )
