@@ -25,7 +25,7 @@ import {
 import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
 import React, { useMemo, useEffect, useContext, type FC, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import { ThemeContext } from 'styled-components';
 import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { RowAction } from '../../../common/components/control_columns/row_action';
