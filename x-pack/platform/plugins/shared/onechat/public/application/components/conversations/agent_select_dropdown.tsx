@@ -7,6 +7,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiPopover,
@@ -18,17 +19,13 @@ import {
   EuiFlexItem,
   EuiPopoverFooter,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../hooks/agents/use_agents';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { labels } from '../../utils/i18n';
-
-const POPOVER_WIDTH = 280;
-const popoverContentStyle = {
-  width: POPOVER_WIDTH,
-};
 
 interface AgentSelectButtonProps {
   selectedAgentName?: string;
@@ -61,8 +58,9 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   selectedAgentId = oneChatDefaultAgentId,
   onAgentChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { agents, isLoading } = useOnechatAgents();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { createOnechatUrl } = useNavigation();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -92,18 +90,15 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     [onAgentChange]
   );
 
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen]);
-
   return (
     <EuiPopover
+      panelStyle={{ inlineSize: `calc(${euiTheme.size.xxl} * 7)` }}
       panelPaddingSize="none"
       button={
         <AgentSelectButton
           selectedAgentName={selectedAgent?.name}
           isLoading={isLoading}
-          onClick={togglePopover}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }
       isOpen={isPopoverOpen}
@@ -111,7 +106,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiSelectable
-        aria-label={labels.agents.selectAgentAriaLabel}
+        aria-label={labels.conversations.selectAgentAriaLabel}
         searchable={false}
         options={options}
         onChange={handleAgentChange}
@@ -119,18 +114,23 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         isLoading={isLoading}
       >
         {(list) => (
-          <div style={popoverContentStyle}>
+          <>
             <EuiPopoverTitle paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <strong>{labels.agents.title}</strong>
+                  <EuiText
+                    css={css`
+                      font-weight: bold;
+                    `}
+                    size="xs"
+                  >
+                    {labels.conversations.title}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
-                    <EuiLink onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
-                      {labels.agents.manageAgents}
+                    <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
+                      {labels.conversations.manageAgents}
                     </EuiLink>
                   </EuiText>
                 </EuiFlexItem>
@@ -143,12 +143,12 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
                 iconType="plus"
                 size="s"
                 fullWidth
-                onClick={() => navigateToOnechatUrl(appPaths.agents.new)}
+                href={createOnechatUrl(appPaths.agents.new)}
               >
-                {labels.agents.createAnAgent}
+                {labels.conversations.createAnAgent}
               </EuiButton>
             </EuiPopoverFooter>
-          </div>
+          </>
         )}
       </EuiSelectable>
     </EuiPopover>

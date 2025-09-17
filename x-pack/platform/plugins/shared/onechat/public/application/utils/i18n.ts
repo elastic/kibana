@@ -10,6 +10,15 @@ import { i18n } from '@kbn/i18n';
 export const labels = {
   conversations: {
     title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
+    manageAgents: i18n.translate('xpack.onechat.agents.manageAgents', {
+      defaultMessage: 'Manage agents',
+    }),
+    createAnAgent: i18n.translate('xpack.onechat.agents.createAnAgent', {
+      defaultMessage: 'Create an agent',
+    }),
+    selectAgentAriaLabel: i18n.translate('xpack.onechat.agents.selectAgentAriaLabel', {
+      defaultMessage: 'Select an agent',
+    }),
   },
   tools: {
     // Landing page
@@ -223,15 +232,6 @@ export const labels = {
   },
   agents: {
     title: i18n.translate('xpack.onechat.agents.list.title', { defaultMessage: 'Agents' }),
-    manageAgents: i18n.translate('xpack.onechat.agents.manageAgents', {
-      defaultMessage: 'Manage agents',
-    }),
-    createAnAgent: i18n.translate('xpack.onechat.agents.createAnAgent', {
-      defaultMessage: 'Create an agent',
-    }),
-    selectAgentAriaLabel: i18n.translate('xpack.onechat.agents.selectAgentAriaLabel', {
-      defaultMessage: 'Select an agent',
-    }),
     newAgent: i18n.translate('xpack.onechat.agents.new.title', { defaultMessage: 'New Agent' }),
     editAgent: i18n.translate('xpack.onechat.agents.edit.title', { defaultMessage: 'Edit Agent' }),
     createAgent: i18n.translate('xpack.onechat.agents.create.title', {
