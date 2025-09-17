@@ -85,6 +85,7 @@ export interface NewPackagePolicy {
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
+  cloud_connector_id?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
@@ -96,6 +97,7 @@ export interface NewPackagePolicy {
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
   supports_agentless?: boolean | null;
+  supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
 }
 
