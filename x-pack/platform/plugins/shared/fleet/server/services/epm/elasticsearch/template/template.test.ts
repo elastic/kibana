@@ -64,7 +64,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
@@ -110,7 +109,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
@@ -132,7 +130,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: true,
     });
     expect(template.composed_of).toStrictEqual([
@@ -158,7 +155,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
@@ -185,7 +181,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
@@ -207,7 +202,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
@@ -229,7 +223,6 @@ describe('EPM template', () => {
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(templateWithHidden.data_stream.hidden).toEqual(true);
@@ -240,7 +233,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
@@ -256,7 +248,6 @@ describe('EPM template', () => {
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: false,
-      mappings: { properties: [] },
       registryElasticsearch: {
         'index_template.data_stream': {
           hidden: true,
@@ -272,7 +263,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
-      mappings: { properties: [] },
       registryElasticsearch: {
         'index_template.data_stream': {
           hidden: true,
@@ -289,7 +279,6 @@ describe('EPM template', () => {
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
@@ -301,7 +290,6 @@ describe('EPM template', () => {
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
-      mappings: { properties: [] },
       registryElasticsearch: {
         'index_template.data_stream': {
           hidden: false,
@@ -317,7 +305,6 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
-      mappings: { properties: [] },
       isIndexModeTimeSeries: false,
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
