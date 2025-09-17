@@ -19,6 +19,7 @@ import {
   JsonEditorField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { TEMPLATES } from './templates';
 
 const HTTP_VERBS = ['get', 'put', 'post', 'delete', 'patch'];
 const CONTENT_TYPES: Record<string, string> = {
@@ -37,55 +38,6 @@ const CONTENT_TYPES: Record<string, string> = {
   custom: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.custom', {
     defaultMessage: 'Custom',
   }),
-};
-
-const TEMPLATES: Record<string, { name: string; templateValues: Record<string, any>}> = {
-  '': {
-    name: '',
-    templateValues: {},
-  },
-  'jira-create-incident': {
-    name: 'Jira - Create Incident',
-    templateValues: {
-      method: 'post',
-      url: 'jira.com',
-      contentType: 'json',
-      paramFields: [
-        {
-          "name": "summary",
-          "label": "Summary",
-          "type": "text",
-          "required": true,
-          "placeholder": "Enter a short summary"
-        },
-        {
-          "name": "description",
-          "label": "Description",
-          "type": "textarea",
-          "required": false,
-          "placeholder": "Enter detailed description"
-        },
-        {
-          "name": "priority",
-          "label": "Priority",
-          "type": "select",
-          "required": true,
-          "options": [
-            { "value": "high", "text": "High" },
-            { "value": "medium", "text": "Medium" },
-            { "value": "low", "text": "Low" }
-          ]
-        },
-        {
-          "name": "assignee",
-          "label": "Assignee",
-          "type": "text",
-          "required": false,
-          "placeholder": "Assign to user"
-        }
-      ]
-    },
-  },
 };
 
 const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({

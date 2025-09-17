@@ -13,11 +13,22 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-interface HttpRequestConfig {
+export interface HttpRequestConfig {
   url: string;
   method: 'get' | 'put' | 'post' | 'delete' | 'patch';
   contentType: 'json' | 'xml' | 'form' | 'data' | 'custom';
   customContentType?: string;
+  paramFields: Array<{
+    name: string;
+    label: string;
+    type: 'text' | 'select' | 'textarea';
+    required: boolean;
+    placeholder?: string;
+    options?: Array<{
+      text: string;
+      value: string;
+    }>;
+  }>;
 }
 
 type HttpRequestSecrets = void;
