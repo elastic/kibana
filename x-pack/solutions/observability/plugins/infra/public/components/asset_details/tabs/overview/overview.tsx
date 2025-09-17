@@ -37,7 +37,7 @@ export const Overview = () => {
   const {
     services: { application },
   } = useKibanaContextForPlugin();
-  const hasApmPermissions = application.capabilities.apm?.show ?? false;
+  const hasApmPermissions = Boolean(application.capabilities.apm?.show);
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList
