@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { ContentPackStream } from '@kbn/content-packs-schema';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
 import {
   getAncestors,
   getAncestorsAndSelf,
@@ -26,12 +26,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-type StreamRow = {
+interface StreamRow {
   name: string;
   expanded: boolean;
   selected: boolean;
   parent: boolean;
-};
+}
 
 export function StreamTree({
   streams,

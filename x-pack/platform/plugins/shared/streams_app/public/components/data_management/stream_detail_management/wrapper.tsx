@@ -20,7 +20,6 @@ import type { ReactNode } from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
 import { GroupStreamControls } from './group_stream_controls';

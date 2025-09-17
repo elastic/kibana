@@ -12,6 +12,8 @@ import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
+import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import type { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
@@ -25,8 +27,6 @@ import {
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 import { asTree } from '../../lib/content/stream/tree';
-import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
-import { RequestHandlerContext } from '@kbn/core/server';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 

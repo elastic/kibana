@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { Row } from './row';
 import { ImportContentPackFlyout } from '../../content/import_flyout';
