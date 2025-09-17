@@ -31,7 +31,7 @@ export interface APMTransactionsPerService {
 }
 
 // Use the common type for backward compatibility
-type ProfilingSetupStatus = ProfilingSetupStatusResponse;
+export type ProfilingSetupStatus = ProfilingSetupStatusResponse;
 
 export interface Services {
   fetchTopN: (params: {
