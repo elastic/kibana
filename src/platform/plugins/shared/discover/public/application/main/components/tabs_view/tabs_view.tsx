@@ -8,7 +8,7 @@
  */
 
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -32,6 +32,13 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+
+  useEffect(() => {
+    return () => {
+      // clear session when navigating away from discover main
+      services.data.search.session.clear();
+    };
+  }, [services.data.search.session]);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
