@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { type BuiltinAgentRegistry, createBuiltinAgentRegistry } from './registry';
-export { createBuiltinProviderFn } from './provider';
+export { createPersistedProviderFn } from './provider';

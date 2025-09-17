@@ -69,6 +69,9 @@ export class OnechatPlugin
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
+      agents: {
+        register: serviceSetups.agents.register.bind(serviceSetups.agents),
+      },
     };
   }
 

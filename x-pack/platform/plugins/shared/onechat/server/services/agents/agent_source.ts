@@ -17,21 +17,23 @@ import type { InternalAgentDefinition } from './agent_registry';
 export interface ReadonlyAgentProvider {
   id: string;
   readonly: true;
-  has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<InternalAgentDefinition>;
-  list(opts: AgentListOptions): Promise<InternalAgentDefinition[]>;
+  has(agentId: string): MaybePromise<boolean>;
+  get(agentId: string): MaybePromise<InternalAgentDefinition>;
+  list(opts: AgentListOptions): MaybePromise<InternalAgentDefinition[]>;
 }
 
 export interface WritableAgentProvider extends Omit<ReadonlyAgentProvider, 'readonly'> {
   readonly: false;
-  create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
-  update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
-  delete(agentId: string): Promise<boolean>;
+  create(createRequest: AgentCreateRequest): MaybePromise<InternalAgentDefinition>;
+  update(agentId: string, update: AgentUpdateRequest): MaybePromise<InternalAgentDefinition>;
+  delete(agentId: string): MaybePromise<boolean>;
 }
 
 export type AgentProvider = ReadonlyAgentProvider | WritableAgentProvider;
 
-export type AgentProviderFn = (opts: { request: KibanaRequest }) => MaybePromise<AgentProvider>;
+export type AgentProviderFn<ReadOnly extends boolean> = (opts: {
+  request: KibanaRequest;
+}) => MaybePromise<ReadOnly extends true ? ReadonlyAgentProvider : WritableAgentProvider>;
 
 export const isWritableProvider = (provider: AgentProvider): provider is WritableAgentProvider => {
   return !provider.readonly;

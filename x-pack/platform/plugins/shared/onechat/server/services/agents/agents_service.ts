@@ -6,11 +6,21 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/server';
+import type {
+  SecurityServiceStart,
+  ElasticsearchServiceStart,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
-import { createClient } from './client';
+import {
+  createBuiltinAgentRegistry,
+  createBuiltinProviderFn,
+  type BuiltinAgentRegistry,
+} from './builtin';
+import { createPersistedProviderFn } from './persisted';
+import { createAgentRegistry } from './agent_registry';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -24,11 +34,19 @@ export interface AgentsServiceStartDeps {
 }
 
 export class AgentsService {
+  private builtinRegistry: BuiltinAgentRegistry;
+
   private setupDeps?: AgentsServiceSetupDeps;
+
+  constructor() {
+    this.builtinRegistry = createBuiltinAgentRegistry();
+  }
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
-    return {};
+    return {
+      register: (agent) => this.builtinRegistry.register(agent),
+    };
   }
 
   start(startDeps: AgentsServiceStartDeps): AgentsServiceStart {
@@ -39,18 +57,24 @@ export class AgentsService {
     const { logger } = this.setupDeps;
     const { getRunner, security, elasticsearch, toolsService } = startDeps;
 
-    const getScopedClient: AgentsServiceStart['getScopedClient'] = ({ request }) => {
-      return createClient({
+    const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
+    const persistedProviderFn = createPersistedProviderFn({
+      elasticsearch,
+      security,
+      toolsService,
+      logger,
+    });
+
+    const getRegistry = async ({ request }: { request: KibanaRequest }) => {
+      return createAgentRegistry({
         request,
-        toolsService,
-        logger,
-        security,
-        elasticsearch,
+        builtinProvider: await builtinProviderFn({ request }),
+        persistedProvider: await persistedProviderFn({ request }),
       });
     };
 
     return {
-      getScopedClient,
+      getRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
