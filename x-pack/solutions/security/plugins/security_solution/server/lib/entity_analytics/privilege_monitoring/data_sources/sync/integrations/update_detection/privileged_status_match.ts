@@ -56,9 +56,16 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonIntegrationsUser[]> => {
-    // quick exits / setup
+    /**
+     * Empty matchers policy: SAFE DEFAULT
+     * If no matchers are configured, we *cannot* infer privileged users.
+     * Return none and log a warning so UI can prompt configuration.
+     */
     if (!source.matchers?.length) {
-      dataClient.log('info', `No matchers for source id=${source.id ?? '(unknown)'}`);
+      dataClient.log(
+        'info',
+        `No matchers for source id=${source.id ?? '(unknown)'}. Returning 0 privileged users`
+      );
       return [];
     }
 
