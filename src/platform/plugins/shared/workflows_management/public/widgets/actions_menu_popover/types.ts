@@ -14,5 +14,4 @@ export interface ActionOptionData {
   iconType: string;
   iconColor?: string;
   options?: ActionOptionData[];
-  isGroupLabel: false;
 }

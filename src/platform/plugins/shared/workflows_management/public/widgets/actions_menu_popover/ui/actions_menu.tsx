@@ -59,7 +59,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
     description: i18n.translate('workflows.actionsMenu.triggersDescription', {
       defaultMessage: 'Choose which event starts a workflow',
     }),
-    isGroupLabel: false,
     options: [
       {
         id: 'manual',
@@ -71,7 +70,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         }),
         iconType: 'play',
         iconColor: 'success',
-        isGroupLabel: false,
       },
       {
         id: 'alert',
@@ -83,7 +81,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         }),
         iconType: 'bell',
         iconColor: euiTheme.colors.vis.euiColorVis6,
-        isGroupLabel: false,
       },
       {
         id: 'scheduled',
@@ -95,7 +92,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         }),
         iconType: 'clock',
         iconColor: euiTheme.colors.textParagraph,
-        isGroupLabel: false,
       },
     ],
   };
@@ -108,7 +104,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
     description: i18n.translate('workflows.actionsMenu.kibanaDescription', {
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
-    isGroupLabel: false,
   };
   const externalGroup: ActionOptionData = {
     iconType: 'globe',
@@ -120,7 +115,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
     description: i18n.translate('workflows.actionsMenu.externalDescription', {
       defaultMessage: 'Automate actions in external systems and apps.',
     }),
-    isGroupLabel: false,
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
@@ -132,7 +126,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
     description: i18n.translate('workflows.actionsMenu.flowControlDescription', {
       defaultMessage: 'Control your workflow with logic, delays, looping, and more',
     }),
-    isGroupLabel: false,
     options: [
       {
         id: 'if',
@@ -144,7 +137,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         }),
         iconType: 'branch',
         iconColor: euiTheme.colors.vis.euiColorVis0,
-        isGroupLabel: false,
       },
       {
         id: 'loop',
@@ -156,7 +148,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         }),
         iconType: 'refresh',
         iconColor: euiTheme.colors.vis.euiColorVis0,
-        isGroupLabel: false,
       },
       {
         id: 'wait',
@@ -168,7 +159,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         }),
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
-        isGroupLabel: false,
       },
     ],
   };
@@ -181,7 +171,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
     description: i18n.translate('workflows.actionsMenu.elasticsearchDescription', {
       defaultMessage: 'Work with Elastic data and features directly from your workflow',
     }),
-    isGroupLabel: false,
   };
 
   for (const connector of connectors) {
@@ -194,7 +183,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         label: connector.description || connector.type,
         description: connector.type,
         iconType: 'logoElasticsearch',
-        isGroupLabel: false,
       });
     } else if (connector.type.startsWith('kibana.')) {
       if (!kibanaGroup.options) {
@@ -205,7 +193,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         label: connector.description || connector.type,
         description: connector.type,
         iconType: 'logoKibana',
-        isGroupLabel: false,
       });
     } else {
       if (!externalGroup.options) {
@@ -221,7 +208,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
             id: baseType,
             label: baseType,
             iconType: getConnectorIconType(baseType),
-            isGroupLabel: false,
             options: [],
           };
           externalGroup.options.push(connectorGroup);
@@ -234,7 +220,6 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         label: connector.description || connector.type,
         description: connector.type,
         iconType,
-        isGroupLabel: false,
       });
     }
   }
@@ -251,12 +236,9 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     [defaultOptions]
   );
 
-  const [options, setOptions] = useState<EuiSelectableOption<ActionOptionData>[]>(defaultOptions);
+  const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
-  const renderActionOption = (
-    option: EuiSelectableOption<ActionOptionData>,
-    searchValue: string
-  ) => {
+  const renderActionOption = (option: ActionOptionData, searchValue: string) => {
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
@@ -286,9 +268,9 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   };
 
   const handleChange = (
-    opts: Array<EuiSelectableOption<ActionOptionData>>,
+    opts: Array<ActionOptionData>,
     event: any,
-    selectedOption: EuiSelectableOption<ActionOptionData>
+    selectedOption: ActionOptionData
   ) => {
     if (selectedOption?.options) {
       setCurrentPath([...currentPath, selectedOption.id]);
@@ -308,10 +290,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     setOptions(nextOptions);
   };
 
-  const handleSearchChange = (
-    searchValue: string,
-    matchingOptions: Array<EuiSelectableOption<ActionOptionData>>
-  ) => {
+  const handleSearchChange = (searchValue: string, matchingOptions: Array<ActionOptionData>) => {
     if (searchValue.length > 0) {
       setOptions(
         flatOptions.filter((option) =>
@@ -324,10 +303,10 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   };
 
   return (
-    <EuiSelectable<ActionOptionData>
+    <EuiSelectable
       aria-label="Selectable example with custom list items"
       searchable
-      options={options}
+      options={options as EuiSelectableOption<ActionOptionData>[]}
       onChange={handleChange}
       searchProps={{
         id: 'actions-menu-search',
