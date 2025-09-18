@@ -621,6 +621,11 @@
         }
       },
       "incremental_id": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
         "type": "unsigned_long"
       },
       "observables": {
@@ -1800,6 +1805,32 @@
       }
     }
   },
+  "fleet-cloud-connector": {
+    "dynamic": false,
+    "properties": {
+      "cloudProvider": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "namespace": {
+        "type": "keyword"
+      },
+      "packagePolicyCount": {
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "vars": {
+        "type": "flattened"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "dynamic": false,
     "properties": {
@@ -1834,6 +1865,9 @@
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
+      },
+      "cloud_connector_id": {
+        "type": "keyword"
       },
       "created_at": {
         "type": "date"
@@ -1907,6 +1941,9 @@
         }
       },
       "supports_agentless": {
+        "type": "boolean"
+      },
+      "supports_cloud_connector": {
         "type": "boolean"
       },
       "updated_at": {
@@ -2426,6 +2463,9 @@
       "bump_agent_policy_revision": {
         "type": "boolean"
       },
+      "cloud_connector_id": {
+        "type": "keyword"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2498,6 +2538,9 @@
         }
       },
       "supports_agentless": {
+        "type": "boolean"
+      },
+      "supports_cloud_connector": {
         "type": "boolean"
       },
       "updated_at": {
@@ -2845,27 +2888,6 @@
         "type": "object"
       },
       "type": {
-        "type": "keyword"
-      }
-    }
-  },
-  "onechat_workflow": {
-    "dynamic": false,
-    "properties": {
-      "access_control": {
-        "properties": {
-          "public": {
-            "type": "boolean"
-          }
-        }
-      },
-      "categories": {
-        "type": "keyword"
-      },
-      "user_id": {
-        "type": "keyword"
-      },
-      "workflow_id": {
         "type": "keyword"
       }
     }
@@ -4168,108 +4190,6 @@
       }
     }
   },
-  "workchat_agent": {
-    "dynamic": false,
-    "properties": {
-      "access_control": {
-        "properties": {
-          "public": {
-            "type": "boolean"
-          }
-        }
-      },
-      "agent_id": {
-        "type": "keyword"
-      },
-      "agent_name": {
-        "type": "text"
-      },
-      "configuration": {
-        "dynamic": false,
-        "properties": {},
-        "type": "object"
-      },
-      "description": {
-        "type": "text"
-      },
-      "last_updated": {
-        "type": "date"
-      },
-      "user_id": {
-        "type": "keyword"
-      },
-      "user_name": {
-        "type": "keyword"
-      }
-    }
-  },
-  "workchat_conversation": {
-    "dynamic": "strict",
-    "properties": {
-      "access_control": {
-        "properties": {
-          "public": {
-            "type": "boolean"
-          }
-        }
-      },
-      "agent_id": {
-        "type": "keyword"
-      },
-      "conversation_id": {
-        "type": "keyword"
-      },
-      "events": {
-        "dynamic": false,
-        "properties": {},
-        "type": "object"
-      },
-      "last_updated": {
-        "type": "date"
-      },
-      "title": {
-        "type": "text"
-      },
-      "user_id": {
-        "type": "keyword"
-      },
-      "user_name": {
-        "type": "keyword"
-      }
-    }
-  },
-  "workchat_integration": {
-    "dynamic": "strict",
-    "properties": {
-      "configuration": {
-        "dynamic": false,
-        "properties": {},
-        "type": "object"
-      },
-      "created_at": {
-        "type": "date"
-      },
-      "created_by": {
-        "type": "keyword"
-      },
-      "description": {
-        "type": "text"
-      },
-      "integration_id": {
-        "type": "keyword"
-      },
-      "name": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "updated_at": {
-        "type": "date"
-      }
-    }
-  },
-
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
