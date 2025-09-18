@@ -7,6 +7,7 @@
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { orderBy } from 'lodash';
+import type { AsyncState } from 'react-use/lib/useAsync';
 
 interface Timeseries<T extends string> {
   id: string;
@@ -19,7 +20,7 @@ export function esqlResultToTimeseries<T extends string>({
   result,
   metricNames,
 }: {
-  result: AbortableAsyncState<UnparsedEsqlResponse>;
+  result: AsyncState<UnparsedEsqlResponse> | AbortableAsyncState<UnparsedEsqlResponse>;
   metricNames: T[];
 }): Array<Timeseries<T>> {
   const columns = result.value?.columns;

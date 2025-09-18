@@ -8,25 +8,39 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
+interface UseWorkflowExecutionsParams {
+  workflowId: string | null;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+}
+
 export function useWorkflowExecutions(
-  workflowId: string | null,
+  params: UseWorkflowExecutionsParams,
   options: Omit<UseQueryOptions<WorkflowExecutionListDto>, 'queryKey' | 'queryFn'> = {}
 ) {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionListDto>({
     networkMode: 'always',
-    queryKey: ['workflows', workflowId, 'executions'],
+    queryKey: [
+      'workflows',
+      params.workflowId,
+      'executions',
+      params.statuses,
+      params.executionTypes,
+    ],
     queryFn: () =>
       http!.get(`/api/workflowExecutions`, {
         query: {
-          workflowId,
+          workflowId: params.workflowId,
+          statuses: params.statuses,
+          executionTypes: params.executionTypes,
         },
       }),
-    enabled: workflowId !== null,
+    enabled: params.workflowId !== null,
     ...options,
   });
 }

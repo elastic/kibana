@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   FormBasedLayer,
@@ -20,6 +20,7 @@ import type {
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -82,24 +83,77 @@ function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
+const getAdhocDataView = (dataView: { index: string; timeFieldName: string }) => {
+  const id = uuidv4();
+  return {
+    [id]: {
+      id,
+      title: dataView.index,
+      name: dataView.index,
+      timeFieldName: dataView.timeFieldName,
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      fieldAttrs: {},
+      allowNoIndex: false,
+      allowHidden: false,
+    },
+  };
+};
+
+export const getAdhocDataviews = (
+  dataviews: Record<string, { index: string; timeFieldName: string }>
+) => {
+  let adHocDataViews: Record<string, { id: string; timeFieldName: string }> = {};
+  [...new Set(Object.values(dataviews))].forEach((d) => {
+    adHocDataViews = {
+      ...adHocDataViews,
+      ...getAdhocDataView(d),
+    };
+  });
+
+  return adHocDataViews;
+};
+
 /**
  * Builds dataset state from the layer configuration
  *
- * @param layer
- * @returns
+ * @param layer Lens State Layer
+ * @returns Lens API Dataset configuration
  */
-export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
+export const buildDatasetState = (
+  layer: FormBasedLayer | TextBasedLayer,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[],
+  layerId: string
+) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
-      index: layer.index,
-      query: layer.query,
+      query: layer.query?.esql ?? '',
     };
   }
+
+  const reference = (references ?? []).find(
+    (ref) => ref.name === `indexpattern-datasource-${layerId}`
+  );
+  if (reference) {
+    if (adHocDataViews?.[reference.id]) {
+      return {
+        type: 'index',
+        index: adHocDataViews[reference.id].title!,
+        time_field: adHocDataViews[reference.id].timeFieldName,
+      };
+    }
+    return {
+      type: 'dataView',
+      name: reference.id,
+    };
+  }
+
   return {
-    type: 'index',
-    index: layer.indexPatternId,
-    time_field: '@timestamp',
+    type: 'dataView',
+    name: layer.indexPatternId,
   };
 };
 
@@ -193,15 +247,12 @@ function buildDatasourceStatesLayer(
   ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(config, i);
 
-    const newLayer = {
+    return {
       index: index.index,
       query: { esql: ds.query },
       timeField: '@timestamp',
       columns,
-      allColumns: columns,
     };
-
-    return newLayer;
   }
 
   if (dataset.type === 'esql') {
@@ -223,7 +274,7 @@ function buildDatasourceStatesLayer(
  * @returns lens datasource states
  *
  */
-export const buildDatasourceStates = async (
+export const buildDatasourceStates = (
   config: LensApiState,
   dataviews: Record<string, { index: string; timeFieldName: string }>,
   buildFormulaLayers: (
@@ -330,10 +381,36 @@ export const generateLayer = (
   };
 };
 
-export type DeepMutable<T> = {
-  -readonly [P in keyof T]: T[P] extends object
-    ? T[P] extends (...args: any[]) => any
-      ? T[P] // don't mutate functions
-      : DeepMutable<T[P]>
-    : T[P];
+export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBasedLayer) => {
+  if (!('columnOrder' in options)) {
+    return {
+      sampling: 1,
+      ignore_global_filters: true,
+    };
+  }
+
+  return {
+    sampling: options.sampling,
+    ignore_global_filters: options.ignoreGlobalFilters,
+  };
 };
+
+export type DeepMutable<T> = T extends (...args: never[]) => unknown
+  ? T // don't mutate functions
+  : T extends ReadonlyArray<infer U>
+  ? DeepMutable<U>[] // handle readonly arrays
+  : T extends object
+  ? {
+      -readonly [P in keyof T]: DeepMutable<T[P]>;
+    }
+  : T;
+
+export type DeepPartial<T> = T extends (...args: never[]) => unknown
+  ? T // don't mutate functions
+  : T extends ReadonlyArray<infer U>
+  ? DeepPartial<U>[] // handle readonly arrays
+  : T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
