@@ -113,21 +113,30 @@ const PillarsMiniSummaryTable: React.FC = () => {
   const columns = [
     {
       field: 'pillarName',
-      name: 'Readiness Section',
+      name: i18n.translate('xpack.securitySolution.siemReadiness.readinessSectionColumnName', {
+        defaultMessage: 'Readiness Section',
+      }),
       render: (pillarName: string, record: PillarData) => (
         <EuiHealth color={record.pillarColor}>{pillarName}</EuiHealth>
       ),
     },
     {
       field: 'score',
-      name: 'Task Score',
+      name: i18n.translate('xpack.securitySolution.siemReadiness.taskScoreColumnName', {
+        defaultMessage: 'Task Score',
+      }),
       render: (_: unknown, record: PillarData) => `${record.completed}/${record.total}`,
     },
   ];
 
   return (
     <EuiBasicTable
-      tableCaption="Pillar Task Completion Summary"
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.siemReadiness.pillarTaskCompletionSummaryCaption',
+        {
+          defaultMessage: 'Pillar Task Completion Summary',
+        }
+      )}
       items={readinessTasksStats.pillarsData}
       columns={columns}
       compressed

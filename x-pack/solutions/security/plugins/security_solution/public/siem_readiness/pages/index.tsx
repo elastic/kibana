@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ReadinessPillarCards } from './readiness_pillar_cards';
 import { ReadinessTasksTable } from './readiness_tasks_table';
 import { ReadinessSummary } from './readiness_summary';
@@ -14,7 +15,12 @@ import { ReadinessSummary } from './readiness_summary';
 const SiemReadinessDashboard = () => {
   return (
     <div>
-      <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
+      <EuiPageHeader
+        pageTitle={i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+          defaultMessage: 'SIEM Readiness',
+        })}
+        bottomBorder={true}
+      />
       <EuiPageSection>
         <ReadinessSummary />
       </EuiPageSection>

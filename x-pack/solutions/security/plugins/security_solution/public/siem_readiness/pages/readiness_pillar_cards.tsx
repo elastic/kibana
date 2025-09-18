@@ -17,9 +17,16 @@ import {
   EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
 import { usePillarProps } from '../hooks/use_pillar_props';
 import type { PillarProps } from '../hooks/use_pillar_props';
+
+// Color constants
+const BRONZE_COLOR = '#966B03';
+const SILVER_COLOR = '#5A6D8C';
+const GOLD_COLOR = '#F5BC00';
+const DEFAULT_SHIELD_COLOR = '#966B03';
 
 interface PillarCardProps {
   pillarProps: PillarProps;
@@ -74,7 +81,11 @@ const PillarDetails: React.FC<PillarDetailsProps> = ({ pillarProps, pillarData }
                 <span style={{ fontWeight: 'bold' }}>{`${completed}/${total}`}</span>
               </EuiTitle>
               <EuiTitle size="xs">
-                <span style={{ fontWeight: 'bold' }}>{'Tasks completed'}</span>
+                <span style={{ fontWeight: 'bold' }}>
+                  {i18n.translate('xpack.securitySolution.siemReadiness.tasksCompletedLabel', {
+                    defaultMessage: 'Tasks completed',
+                  })}
+                </span>
               </EuiTitle>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -127,9 +138,9 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
   const levelUnreachedColor = euiTheme.colors.severity.unknown;
 
   const levelColors = {
-    bronze: bronzeReached ? '#966B03' : levelUnreachedColor,
-    silver: silverReached ? '#5A6D8C' : levelUnreachedColor,
-    gold: goldReached ? '#F5BC00' : levelUnreachedColor,
+    bronze: bronzeReached ? BRONZE_COLOR : levelUnreachedColor,
+    silver: silverReached ? SILVER_COLOR : levelUnreachedColor,
+    gold: goldReached ? GOLD_COLOR : levelUnreachedColor,
   };
 
   return (
@@ -138,7 +149,11 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
         <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
-              <h4>{'Your current level'}</h4>
+              <h4>
+                {i18n.translate('xpack.securitySolution.siemReadiness.yourCurrentLevelLabel', {
+                  defaultMessage: 'Your current level',
+                })}
+              </h4>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -148,11 +163,16 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
                 color={euiTheme.colors.backgroundTransparentPlain}
                 style={{ color: euiTheme.colors.primary }}
               >
-                {`${tasksToNextLevel} tasks to next level`}
+                {i18n.translate('xpack.securitySolution.siemReadiness.tasksToNextLevelBadge', {
+                  defaultMessage: '{count} tasks to next level',
+                  values: { count: tasksToNextLevel },
+                })}
               </EuiBadge>
             ) : (
               <EuiBadge iconType="check" color="hollow">
-                {'All tasks complete'}
+                {i18n.translate('xpack.securitySolution.siemReadiness.allTasksCompleteBadge', {
+                  defaultMessage: 'All tasks complete',
+                })}
               </EuiBadge>
             )}
           </EuiFlexItem>
@@ -177,7 +197,9 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
           >
             <ShieldIcon color={levelColors.bronze} />
             <EuiText size="xs" style={{ marginTop: '2px', fontWeight: 'bold' }}>
-              {'Bronze'}
+              {i18n.translate('xpack.securitySolution.siemReadiness.bronzeLevelLabel', {
+                defaultMessage: 'Bronze',
+              })}
             </EuiText>
           </div>
 
@@ -194,7 +216,9 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
           >
             <ShieldIcon color={levelColors.silver} />
             <EuiText size="xs" style={{ marginTop: '2px', fontWeight: 'bold' }}>
-              {'Silver'}
+              {i18n.translate('xpack.securitySolution.siemReadiness.silverLevelLabel', {
+                defaultMessage: 'Silver',
+              })}
             </EuiText>
           </div>
 
@@ -212,7 +236,9 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
           >
             <ShieldIcon color={levelColors.gold} />
             <EuiText size="xs" style={{ marginTop: '2px', fontWeight: 'bold' }}>
-              {'Gold'}
+              {i18n.translate('xpack.securitySolution.siemReadiness.goldLevelLabel', {
+                defaultMessage: 'Gold',
+              })}
             </EuiText>
           </div>
         </div>
@@ -265,7 +291,7 @@ export const ReadinessPillarCards: React.FC = () => {
   );
 };
 
-const ShieldIcon = ({ color = '#966B03', width = 16, height = 16 }) => (
+const ShieldIcon = ({ color = DEFAULT_SHIELD_COLOR, width = 16, height = 16 }) => (
   <svg
     width={width}
     height={height}

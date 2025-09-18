@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   EuiIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
 import { useReadinessTasks, READINESS_TASKS } from '@kbn/siem-readiness';
 import { usePillarProps } from '../hooks/use_pillar_props';
@@ -44,6 +45,10 @@ import illustration_projects_folder from '../assets/illustration_projects_folder
 import illustration_right_arrows from '../assets/illustration_right_arrows.svg';
 import illustration_organize_folders from '../assets/illustration_organize_folders.svg';
 
+// Color constants
+const INCOMPLETE_BADGE_COLOR = '#FDE9B5';
+const COMPLETED_BADGE_COLOR = '#4DD2CA';
+
 const PANEL_HEIGHT = 600; // px, adjust as needed
 
 export const ReadinessTasksTable: React.FC = () => {
@@ -62,7 +67,12 @@ export const ReadinessTasksTable: React.FC = () => {
 
   const selectOptions = useMemo(
     () => [
-      { value: '', inputDisplay: 'All Categories' },
+      {
+        value: '',
+        inputDisplay: i18n.translate('xpack.securitySolution.siemReadiness.allCategoriesOption', {
+          defaultMessage: 'All Categories',
+        }),
+      },
       ...Object.values(pillars).map((pillar) => ({
         value: pillar.value,
         inputDisplay: pillar.displayName,
@@ -199,7 +209,11 @@ export const ReadinessTasksTable: React.FC = () => {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h3>{'Tasks'}</h3>
+              <h3>
+                {i18n.translate('xpack.securitySolution.siemReadiness.tasksTitle', {
+                  defaultMessage: 'Tasks',
+                })}
+              </h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -207,7 +221,12 @@ export const ReadinessTasksTable: React.FC = () => {
               options={selectOptions}
               valueOfSelected={selectedPillar}
               onChange={(value) => setSelectedPillar(value)}
-              placeholder="Categories"
+              placeholder={i18n.translate(
+                'xpack.securitySolution.siemReadiness.categoriesPlaceholder',
+                {
+                  defaultMessage: 'Categories',
+                }
+              )}
               compressed
             />
           </EuiFlexItem>
@@ -237,7 +256,9 @@ export const ReadinessTasksTable: React.FC = () => {
                   <EuiFlexItem>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={{ marginRight: euiTheme.size.s, fontWeight: 600 }}>
-                        {'Category:'}
+                        {i18n.translate('xpack.securitySolution.siemReadiness.categoryLabel', {
+                          defaultMessage: 'Category:',
+                        })}
                       </span>
                       {taskPillar?.icon && (
                         <EuiIcon
@@ -250,7 +271,11 @@ export const ReadinessTasksTable: React.FC = () => {
                       <span style={{ marginRight: euiTheme.size.m }}>
                         {taskPillar?.displayName}
                       </span>
-                      <span style={{ fontWeight: 600, marginRight: 4 }}>{`Task:`}</span>
+                      <span style={{ fontWeight: 600, marginRight: 4 }}>
+                        {i18n.translate('xpack.securitySolution.siemReadiness.taskLabel', {
+                          defaultMessage: 'Task:',
+                        })}
+                      </span>
                       <span>{`${task.taskNumber}. ${task.title}`}</span>
                     </div>
                   </EuiFlexItem>
@@ -266,8 +291,20 @@ export const ReadinessTasksTable: React.FC = () => {
               }}
               extraAction={
                 <div style={{ paddingRight: euiTheme.size.base }}>
-                  <EuiBadge color={taskData?.status === 'completed' ? '#4DD2CA' : '#FDE9B5'}>
-                    {taskData?.status || 'Incomplete'}
+                  <EuiBadge
+                    color={
+                      taskData?.status === 'completed'
+                        ? COMPLETED_BADGE_COLOR
+                        : INCOMPLETE_BADGE_COLOR
+                    }
+                  >
+                    {taskData?.status === 'completed'
+                      ? i18n.translate('xpack.securitySolution.siemReadiness.completedStatus', {
+                          defaultMessage: 'Completed',
+                        })
+                      : i18n.translate('xpack.securitySolution.siemReadiness.incompleteStatus', {
+                          defaultMessage: 'Incomplete',
+                        })}
                   </EuiBadge>
                 </div>
               }
@@ -302,11 +339,11 @@ export const ReadinessTasksTable: React.FC = () => {
                         <EuiButtonEmpty
                           iconType="popout"
                           size="s"
-                          fill
-                          onClick={() => taskAddOn.action?.()}
-                          disabled={taskData?.status === 'completed'}
+                          onClick={() => window.open(taskAddOn.learnMoreLink, '_blank')}
                         >
-                          {'Learn More'}
+                          {i18n.translate('xpack.securitySolution.siemReadiness.learnMoreButton', {
+                            defaultMessage: 'Learn More',
+                          })}
                         </EuiButtonEmpty>
                       )}
                     </EuiFlexItem>
