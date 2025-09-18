@@ -66,17 +66,6 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
         },
         signal,
       }),
-
-    postData: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/data'>['params']['body'],
-      signal?: AbortSignal | null
-    ) =>
-      request('POST /internal/metrics_experience/data', {
-        params: {
-          body: params,
-        },
-        signal,
-      }),
     getIndexPatternMetadata(
       {
         indexPattern,
