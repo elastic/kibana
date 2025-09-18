@@ -28,7 +28,7 @@ export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
 /**
  * The id value used to indicate that a link should open in a new Discover tab.
- * It will be used in the `_tabs` URL param to indicate that a new tab should be created.
+ * It will be used in the `_tab` URL param to indicate that a new tab should be created.
  * Once created, the new tab will have a unique id.
  */
 export const NEW_TAB_ID = 'new' as const;
@@ -38,7 +38,7 @@ export const NEW_TAB_ID = 'new' as const;
  */
 export const APP_STATE_URL_KEY = '_a';
 export const GLOBAL_STATE_URL_KEY = '_g';
-export const TABS_STATE_URL_KEY = '_tabs'; // `_t` is already used by Kibana for time, so we use `_tabs` here
+export const TAB_STATE_URL_KEY = '_tab'; // `_t` is already used by Kibana for time, so we use `_tab` here
 
 /**
  * Product feature IDs

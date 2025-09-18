@@ -331,10 +331,10 @@ export function getDiscoverStateContainer({
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const currentSavedSearch = savedSearchContainer.getState();
-    if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+    const { persistedDiscoverSession } = internalState.getState();
+    if (persistedDiscoverSession?.id === newSavedSearchId) {
       addLog('[discoverState] undo changes since saved search did not change');
-      await undoSavedSearchChanges();
+      await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
       services.locator.navigate({
@@ -509,6 +509,17 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
+  const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
+    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const scopedEbtManager = scopedEbtManager$.getValue();
+    const { fieldsMetadata } = services;
+
+    scopedEbtManager.trackSubmittingQuery({
+      query,
+      fieldsMetadata,
+    });
+  };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -516,6 +527,8 @@ export function getDiscoverStateContainer({
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
+    trackQueryFields(payload.query);
+
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });

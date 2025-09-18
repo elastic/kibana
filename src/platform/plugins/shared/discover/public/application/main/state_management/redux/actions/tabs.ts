@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import type { TabState } from '../types';
+import { type TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -117,16 +117,15 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       };
 
       if (!existingTab) {
+        // the following assignments for initialAppState, globalState, and dataRequestParams are for supporting `openInNewTab` action
         tab.initialAppState =
           'initialAppState' in item
             ? cloneDeep(item.initialAppState as TabState['initialAppState'])
             : tab.initialAppState;
-
         tab.globalState =
           'globalState' in item
             ? cloneDeep(item.globalState as TabState['globalState'])
             : tab.globalState;
-
         tab.dataRequestParams =
           'dataRequestParams' in item
             ? (item.dataRequestParams as TabState['dataRequestParams'])
@@ -207,6 +206,11 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         services.data.search.session.start();
 
         nextTabStateContainer.actions.initializeAndSync();
+
+        if (nextTab.forceFetchOnSelect) {
+          nextTabStateContainer.dataState.reset();
+          nextTabStateContainer.actions.fetchData();
+        }
       } else {
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
         await urlStateStorage.set(APP_STATE_URL_KEY, null);

@@ -57,6 +57,7 @@ export type TabsBarProps = Pick<
   items: TabItem[];
   selectedItem: TabItem | null;
   recentlyClosedItems: TabItem[];
+  unsavedItemIds?: Set<string>;
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
@@ -74,6 +75,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       items,
       selectedItem,
       recentlyClosedItems,
+      unsavedItemIds,
       maxItemsCount,
       tabContentId,
       getTabMenuItems,
@@ -110,7 +112,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     );
 
     const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
-      defaultMessage: 'New session',
+      defaultMessage: 'New tab',
     });
 
     const { tabsSizeConfig, scrollRightButton, scrollLeftButton, tabsContainerCss } =
@@ -241,6 +243,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                               key={item.id}
                               item={item}
                               isSelected={selectedItem?.id === item.id}
+                              isUnsaved={unsavedItemIds?.has(item.id)}
                               isDragging={isDragging}
                               dragHandleProps={dragHandleProps}
                               tabContentId={tabContentId}

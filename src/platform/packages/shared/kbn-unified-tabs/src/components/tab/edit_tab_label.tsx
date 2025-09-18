@@ -9,7 +9,7 @@
 
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFieldText, keys, useEuiTheme } from '@elastic/eui';
+import { EuiFieldText, keys, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TabItem } from '../../types';
 import { MAX_TAB_LABEL_LENGTH } from '../../constants';
@@ -41,7 +41,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
 
   const onSubmit = useCallback(
     async (newLabel: string) => {
-      if (!newLabel) {
+      if (!newLabel || newLabel.length > MAX_TAB_LABEL_LENGTH) {
         return;
       }
 
@@ -86,14 +86,16 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       inputRef={setInputNode}
       data-test-subj={`unifiedTabs_editTabLabelInput_${item.id}`}
       css={css`
-        block-size: 28px;
+        block-size: ${mathWithUnits([euiTheme.size.xl, euiTheme.size.xs], (xl, xs) => xl - xs)};
         margin-top: ${euiTheme.size.xxs};
       `}
       compressed
       value={value}
       maxLength={MAX_TAB_LABEL_LENGTH}
       isLoading={submitState === SubmitState.submitting}
-      isInvalid={submitState === SubmitState.error || !value.trim()}
+      isInvalid={
+        submitState === SubmitState.error || !value.trim() || value.length > MAX_TAB_LABEL_LENGTH
+      }
       onChange={onChange}
       onKeyDown={onKeyDown}
       onBlur={submitState !== SubmitState.submitting ? onExit : undefined}

@@ -13,7 +13,12 @@ import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-uti
 import type { DiscoverAppLocatorGetLocation, MainHistoryLocationState } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TABS_STATE_URL_KEY } from './constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+  TAB_STATE_URL_KEY,
+} from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -45,8 +50,7 @@ export const appLocatorGetLocationCommon = async (
     hideAggregatedPreview,
     breakdownField,
     isAlertResults,
-    tabId,
-    tabLabel,
+    tab,
   } = params;
   const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
   const appState: Partial<DiscoverAppState> = {};
@@ -93,8 +97,13 @@ export const appLocatorGetLocationCommon = async (
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
   }
 
-  if (tabId) {
-    path = setStateToKbnUrl(TABS_STATE_URL_KEY, { tabId, tabLabel }, { useHash }, path);
+  if (tab?.id) {
+    path = setStateToKbnUrl(
+      TAB_STATE_URL_KEY,
+      { tabId: tab.id, tabLabel: tab.id === NEW_TAB_ID && 'label' in tab ? tab.label : undefined },
+      { useHash },
+      path
+    );
   }
 
   return {
