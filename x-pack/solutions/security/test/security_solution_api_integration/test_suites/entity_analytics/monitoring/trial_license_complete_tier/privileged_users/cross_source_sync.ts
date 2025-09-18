@@ -8,17 +8,17 @@
 import expect from 'expect';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { PrivMonUtils } from './utils';
+import { PrivMonUtils, PlainIndexSyncUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
-  const es = getService('es');
   const privMonUtils = PrivMonUtils(getService);
 
-  describe('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs Cross Source Sync', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
     const index1 = 'privmon_index1';
+    const indexSyncUtils = PlainIndexSyncUtils(getService, index1);
     const user1 = { name: 'user_1' };
 
     before(async () => {
@@ -31,17 +31,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await privMonUtils.createSourceIndex(index1);
-
-      await es.index({
-        index: index1,
-        body: { user: user1 },
-        refresh: 'wait_for',
-      });
+      await indexSyncUtils.createIndex();
+      await indexSyncUtils.addUsersToIndex([user1.name]);
     });
 
     afterEach(async () => {
-      await es.indices.delete({ index: index1 });
+      await indexSyncUtils.deleteIndex();
     });
 
     it('should merge sources when the same user is added through different methods (API, CSV, index)', async () => {

@@ -17,20 +17,35 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  UtilityBar,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../../common/components/utility_bar';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { SiemMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useMigrationDashboardsTableColumns } from '../../hooks/use_migration_dashboards_table_columns';
 import { useGetMigrationDashboards } from '../../logic/use_get_migration_dashboards';
 import {
   MigrationTranslationResult,
+  SiemMigrationRetryFilter,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import type { DashboardMigrationStats } from '../../types';
 import { MigrationDashboardsFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
-import { EmptyMigration, SearchField } from '../../../common/components';
-import type { FilterOptionsBase } from '../../../common/types';
+import { EmptyMigration, SearchField, StartMigrationModal } from '../../../common/components';
+import type { FilterOptionsBase, MigrationSettingsBase } from '../../../common/types';
+import * as logicI18n from '../../logic/translations';
+import { BulkActions } from './bulk_actions';
+import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
+import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -54,6 +69,7 @@ export interface MigrationDashboardsTableProps {
 export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> = React.memo(
   ({ refetchData, migrationStats }) => {
     const migrationId = migrationStats.id;
+    const { addError } = useAppToasts();
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -69,6 +85,9 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       () => ({ searchTerm, ...convertFilterOptions(filterOptions) }),
       [searchTerm, filterOptions]
     );
+
+    const { data: translationStats, isLoading: isStatsLoading } =
+      useGetMigrationTranslationStats(migrationId);
 
     const {
       data: { migrationDashboards, total } = { migrationDashboards: [], total: 0 },
@@ -144,12 +163,74 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       setSearchTerm(value.trim());
     }, []);
 
+    const { mutateAsync: installMigrationDashboards } = useInstallMigrationDashboards(migrationId);
+    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
+
+    const [isTableLoading, setTableLoading] = useState(false);
+
+    const isDashboardsLoading = isDataLoading || isTableLoading || isRetryLoading;
+
+    const installSelectedDashboards = useCallback(async () => {
+      setTableLoading(true);
+      try {
+        await installMigrationDashboards({
+          ids: selectedMigrationDashboards.map((dashboard) => dashboard.id),
+        });
+      } catch (error) {
+        addError(error, { title: logicI18n.INSTALL_MIGRATION_DASHBOARDS_FAILURE });
+      } finally {
+        setTableLoading(false);
+        setSelectedMigrationDashboards([]);
+      }
+    }, [addError, installMigrationDashboards, selectedMigrationDashboards]);
+
+    const installTranslatedDashboards = useCallback(async () => {
+      setTableLoading(true);
+      try {
+        await installMigrationDashboards({});
+      } catch (error) {
+        addError(error, { title: logicI18n.INSTALL_MIGRATION_DASHBOARDS_FAILURE });
+      } finally {
+        setTableLoading(false);
+      }
+    }, [addError, installMigrationDashboards]);
+
+    const defaultSettingsForModal = useMemo(
+      () => ({
+        connectorId: migrationStats?.last_execution?.connector_id,
+      }),
+      [migrationStats.last_execution]
+    );
+
+    const reprocessFailedDashboardsWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+      },
+      [migrationId, startMigration]
+    );
+
+    const {
+      isOpen: isReprocessFailedDashboardsModalVisible,
+      open: showReprocessFailedDashboardsModal,
+      close: closeReprocessFailedDashboardsModal,
+    } = useIsOpenState(false);
+
     const dashboardsColumns = useMigrationDashboardsTableColumns();
 
     return (
       <>
+        {isReprocessFailedDashboardsModalVisible && (
+          <StartMigrationModal
+            title={i18n.REPROCESS_DASHBOARDS_DIALOG_TITLE(translationStats?.dashboards.failed ?? 0)}
+            description={i18n.REPROCESS_DASHBOARDS_DIALOG_DESCRIPTION}
+            defaultSettings={defaultSettingsForModal}
+            onStartMigrationWithSettings={reprocessFailedDashboardsWithSettings}
+            onClose={closeReprocessFailedDashboardsModal}
+          />
+        )}
+
         <EuiSkeletonLoading
-          isLoading={isDataLoading}
+          isLoading={isStatsLoading}
           loadingContent={
             <>
               <EuiSkeletonTitle />
@@ -157,7 +238,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
             </>
           }
           loadedContent={
-            !total ? (
+            !translationStats?.dashboards.total ? (
               <EmptyMigration />
             ) : (
               <>
@@ -175,6 +256,40 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                       filterOptions={filterOptions}
                       onFilterOptionsChanged={setFilterOptions}
                     />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <BulkActions
+                      isTableLoading={isDashboardsLoading}
+                      translationStats={translationStats}
+                      selectedDashboards={selectedMigrationDashboards}
+                      installTranslatedDashboards={installTranslatedDashboards}
+                      installSelectedDashboards={installSelectedDashboards}
+                      reprocessFailedDashboards={showReprocessFailedDashboardsModal}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <UtilityBar>
+                      <UtilityBarSection>
+                        <UtilityBarGroup>
+                          <UtilityBarText>
+                            <FormattedMessage
+                              id="xpack.securitySolution.siemMigrations.dashboards.table.showingPageOfTotalLabel"
+                              defaultMessage="Showing {pageIndex} - {pageSize} of {total, plural, one {# dashboard} other {# dashboards}} {pipe} Selected {selectedDashboardsAmount, plural, one {# dashboard} other {# dashboards}}"
+                              values={{
+                                pageIndex: pagination.pageIndex * (pagination.pageSize ?? 0) + 1,
+                                pageSize: (pagination.pageIndex + 1) * (pagination.pageSize ?? 0),
+                                total: pagination.totalItemCount,
+                                selectedDashboardsAmount: selectedMigrationDashboards.length || 0,
+                                pipe: '\u2000|\u2000',
+                              }}
+                            />
+                          </UtilityBarText>
+                        </UtilityBarGroup>
+                      </UtilityBarSection>
+                    </UtilityBar>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />

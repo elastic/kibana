@@ -88,7 +88,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneRunScriptEnabled: false,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
    * Space awareness for Elastic Defend management.
@@ -256,11 +256,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
-
-  /**
-   * Enables the Defend Insights feature
-   */
-  defendInsights: true,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature

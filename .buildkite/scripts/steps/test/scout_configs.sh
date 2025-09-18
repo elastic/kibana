@@ -7,44 +7,51 @@ source .buildkite/scripts/steps/functional/common.sh
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 SCOUT_CONFIG_GROUP_KEY=${SCOUT_CONFIG_GROUP_KEY:-}
 SCOUT_CONFIG_GROUP_TYPE=${SCOUT_CONFIG_GROUP_TYPE:-}
+SCOUT_CONFIG=${SCOUT_CONFIG:-}
 
-if [ "$SCOUT_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
-  echo "Missing SCOUT_CONFIG_GROUP_KEY env var"
-  exit 1
-fi
+EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
+test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
+
+configs=""
 
 if [ "$SCOUT_CONFIG_GROUP_TYPE" == "" ]; then
   echo "Missing SCOUT_CONFIG_GROUP_TYPE env var"
   exit 1
 fi
 
-EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
-test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
-
-export JOB="$SCOUT_CONFIG_GROUP_KEY"
-
-FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
-
-configs=""
 group=$SCOUT_CONFIG_GROUP_TYPE
+
+if [ "$SCOUT_CONFIG" != "" ]; then
+  configs="$SCOUT_CONFIG"
+  export JOB="$SCOUT_CONFIG"
+  FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG}"
+elif [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
+  export JOB="$SCOUT_CONFIG_GROUP_KEY"
+  FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
+else
+  if [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
+    echo "Missing SCOUT_CONFIG_GROUP_KEY or SCOUT_CONFIG env var"
+    exit 1
+  fi
+fi
 
 # The first retry should only run the configs that failed in the previous attempt
 # Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
-if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
+if [[ -z "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
-  if [[ "$configs" ]]; then
+  if [[ -n "$configs" ]]; then
     echo "--- Retrying only failed configs"
     echo "$configs"
   fi
 fi
 
-if [ "$configs" == "" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
+if [ -z "$configs" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading scout test configuration"
   download_artifact scout_playwright_configs.json .
   configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_playwright_configs.json)
 fi
 
-if [ "$configs" == "" ]; then
+if [ -z "$configs" ]; then
   echo "unable to determine configs to run"
   exit 1
 fi
@@ -52,7 +59,7 @@ fi
 # Define run modes based on group
 declare -A RUN_MODES
 RUN_MODES["platform"]="--stateful --serverless=es --serverless=oblt --serverless=security"
-RUN_MODES["observability"]="--stateful --serverless=oblt"
+RUN_MODES["observability"]="--stateful --serverless=oblt --serverless=oblt-logs-essentials"
 RUN_MODES["search"]="--stateful --serverless=es"
 RUN_MODES["security"]="--stateful --serverless=security"
 
