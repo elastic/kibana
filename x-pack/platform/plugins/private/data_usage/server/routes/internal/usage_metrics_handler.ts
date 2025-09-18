@@ -77,7 +77,7 @@ export const getUsageMetricsHandler = (
         return errorHandler(
           logger,
           response,
-          new CustomHttpRequestError('Failed to retrieve data streams', 400)
+          new CustomHttpRequestError('Failed to retrieve data streams', 400, error)
         );
       }
 
