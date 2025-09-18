@@ -37,8 +37,8 @@ export function isParentName(parent: string, descendant: string) {
   return parent !== descendant && descendant.startsWith(parent + '.');
 }
 
-export function shouldComposeTree(sortField: SortableField, query: string) {
-  // Always allow tree mode for nameSortKey, even with a query
+export function shouldComposeTree(sortField: SortableField) {
+  // Always allow tree mode for nameSortKey
   return !sortField || sortField === 'nameSortKey';
 }
 

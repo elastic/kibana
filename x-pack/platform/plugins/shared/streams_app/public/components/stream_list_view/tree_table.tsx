@@ -75,13 +75,10 @@ export function StreamsTreeTable({
   );
 
   const enrichedStreams = React.useMemo(() => {
-    const streamList = shouldComposeTree(sortField, searchQuery)
-      ? asTrees(filteredStreams)
-      : filteredStreams;
+    const streamList = shouldComposeTree(sortField) ? asTrees(filteredStreams) : filteredStreams;
     return streamList.map(enrichStream);
-  }, [sortField, searchQuery, filteredStreams]);
+  }, [sortField, filteredStreams]);
 
-  // Helper: flatten tree, skipping children of collapsed nodes
   const flattenTreeWithCollapse = React.useCallback(
     (rows: TableRow[]) => filterCollapsedStreamRows(rows, collapsed, sortField, searchQuery),
     [collapsed, sortField, searchQuery]
@@ -94,8 +91,8 @@ export function StreamsTreeTable({
 
   // Only pass filtered rows if tree mode is active
   const items = React.useMemo(
-    () => (shouldComposeTree(sortField, searchQuery) ? flattenTreeWithCollapse(allRows) : allRows),
-    [allRows, flattenTreeWithCollapse, sortField, searchQuery]
+    () => (shouldComposeTree(sortField) ? flattenTreeWithCollapse(allRows) : allRows),
+    [allRows, flattenTreeWithCollapse, sortField]
   );
 
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
@@ -170,27 +167,27 @@ export function StreamsTreeTable({
   }, [streams, searchQuery, sortField, sortDirection]);
 
   // Expand/Collapse all button for the name column header
-  const expandCollapseAllButton =
-    shouldComposeTree(sortField, searchQuery) && hasExpandable ? (
-      <EuiButtonIcon
-        size="xs"
-        iconType={allExpanded ? 'fold' : 'unfold'}
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          handleExpandCollapseAll();
-        }}
-        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
-        aria-label={
-          allExpanded
-            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
-                defaultMessage: 'Collapse all',
-              })
-            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
-                defaultMessage: 'Expand all',
-              })
-        }
-      />
-    ) : null;
+  const expandCollapseAllButton = (
+    <EuiButtonIcon
+      size="xs"
+      iconType={allExpanded ? 'fold' : 'unfold'}
+      color="text"
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        handleExpandCollapseAll();
+      }}
+      data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+      aria-label={
+        allExpanded
+          ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+              defaultMessage: 'Collapse all',
+            })
+          : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+              defaultMessage: 'Expand all',
+            })
+      }
+    />
+  );
 
   return (
     <EuiInMemoryTable<TableRow>
@@ -201,7 +198,9 @@ export function StreamsTreeTable({
           field: 'nameSortKey',
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
+              {shouldComposeTree(sortField) && hasExpandable && (
+                <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
+              )}
               <EuiFlexItem>{NAME_COLUMN_HEADER}</EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -209,7 +208,7 @@ export function StreamsTreeTable({
           dataType: 'string',
           render: (_: unknown, item: TableRow) => {
             // Only show expand/collapse if tree mode is active and has children
-            const treeMode = shouldComposeTree(sortField, searchQuery);
+            const treeMode = shouldComposeTree(sortField);
             const hasChildren = !!item.children && item.children.length > 0;
             const isCollapsed = collapsed.has(item.stream.name);
             return (
