@@ -192,10 +192,42 @@ describe('AuthConfig renders', () => {
     expect(await screen.findByTestId('sslCertFields')).toBeInTheDocument();
   });
 
+  it('renders secret headers and merges them with config headers', async () => {
+    const testFormData = {
+      config: {
+        hasAuth: true,
+        authType: AuthType.SSL,
+        certType: SSLCertType.PFX,
+        headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+      },
+      secrets: {
+        crt: Buffer.from('some binary string').toString('base64'),
+        key: Buffer.from('some binary string').toString('base64'),
+        secretHeaders: { 'secret-key': 'secret-value' },
+      },
+      __internal__: {
+        hasHeaders: true,
+        hasCA: false,
+        headers: [
+          { key: 'content-type', value: 'text', type: 'config' },
+          { key: 'secret-key', value: 'secret-value', type: 'secret' },
+        ],
+      },
+    };
+    render(
+      <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+        <AuthConfig readOnly={false} />
+      </AuthFormTestProvider>
+    );
+
+    expect(screen.getByTestId('webhookHeadersSecretValueInput')).toBeInTheDocument();
+    expect(screen.getByTestId('webhookHeadersValueInput')).toBeInTheDocument();
+  });
+
   describe('Validation', () => {
     const defaultTestFormData = {
       config: {
-        headers: [{ key: 'content-type', value: 'text' }],
+        headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         hasAuth: true,
       },
       secrets: {
@@ -211,12 +243,16 @@ describe('AuthConfig renders', () => {
     it('succeeds with hasAuth=True', async () => {
       const testFormData = {
         config: {
-          headers: [{ key: 'content-type', value: 'text' }],
           hasAuth: true,
         },
         secrets: {
           user: 'user',
           password: 'pass',
+        },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
       render(
@@ -231,7 +267,6 @@ describe('AuthConfig renders', () => {
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
             config: {
-              headers: [{ key: 'content-type', value: 'text' }],
               hasAuth: true,
               authType: AuthType.Basic,
             },
@@ -242,6 +277,7 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -255,6 +291,11 @@ describe('AuthConfig renders', () => {
           ...defaultTestFormData.config,
           hasAuth: false,
         },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
       };
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
@@ -268,13 +309,13 @@ describe('AuthConfig renders', () => {
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
             config: {
-              headers: [{ key: 'content-type', value: 'text' }],
               hasAuth: false,
               authType: null,
             },
             __internal__: {
               hasHeaders: true,
               hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -331,6 +372,11 @@ describe('AuthConfig renders', () => {
           ca: Buffer.from('some binary string').toString('base64'),
           verificationMode: 'full',
         },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: true,
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
       };
 
       render(
@@ -349,7 +395,6 @@ describe('AuthConfig renders', () => {
               authType: AuthType.Basic,
               ca: Buffer.from('some binary string').toString('base64'),
               verificationMode: 'full',
-              headers: [{ key: 'content-type', value: 'text' }],
             },
             secrets: {
               user: 'user',
@@ -358,6 +403,7 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -405,6 +451,11 @@ describe('AuthConfig renders', () => {
           crt: Buffer.from('some binary string').toString('base64'),
           key: Buffer.from('some binary string').toString('base64'),
         },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
       };
 
       render(
@@ -422,7 +473,6 @@ describe('AuthConfig renders', () => {
               hasAuth: true,
               authType: AuthType.SSL,
               certType: SSLCertType.CRT,
-              headers: [{ key: 'content-type', value: 'text' }],
             },
             secrets: {
               crt: Buffer.from('some binary string').toString('base64'),
@@ -431,6 +481,7 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -447,6 +498,11 @@ describe('AuthConfig renders', () => {
         },
         secrets: {
           pfx: Buffer.from('some binary string').toString('base64'),
+        },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
 
@@ -465,7 +521,6 @@ describe('AuthConfig renders', () => {
               hasAuth: true,
               authType: AuthType.SSL,
               certType: SSLCertType.PFX,
-              headers: [{ key: 'content-type', value: 'text' }],
             },
             secrets: {
               pfx: Buffer.from('some binary string').toString('base64'),
@@ -473,9 +528,137 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
+        });
+      });
+    });
+    it('succeeds with secret headers', async () => {
+      const testConfig = {
+        config: {
+          ...defaultTestFormData.config,
+          authType: AuthType.SSL,
+          certType: SSLCertType.PFX,
+        },
+        secrets: {
+          pfx: Buffer.from('some binary string').toString('base64'),
+          secretHeaders: { 'secret-key': 'secret-value' },
+        },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [
+            { key: 'content-type', value: 'text', type: 'config' },
+            { key: 'secret-key', value: 'secret-value', type: 'secret' },
+          ],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testConfig} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            config: {
+              hasAuth: true,
+              authType: AuthType.SSL,
+              certType: SSLCertType.PFX,
+            },
+            secrets: {
+              pfx: Buffer.from('some binary string').toString('base64'),
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [
+                { key: 'content-type', value: 'text', type: 'config' },
+                { key: 'secret-key', value: 'secret-value', type: 'secret' },
+              ],
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+
+    it('fails if the secret header value is empty', async () => {
+      const testConfig = {
+        config: {
+          ...defaultTestFormData.config,
+          authType: AuthType.SSL,
+          certType: SSLCertType.PFX,
+        },
+        secrets: {
+          pfx: Buffer.from('some binary string').toString('base64'),
+          secretHeaders: { 'secret-key': '' },
+        },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [
+            { key: 'content-type', value: 'text', type: 'config' },
+            { key: 'secret-key', value: '', type: 'secret' },
+          ],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testConfig} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+    });
+
+    it('fails if there are 2 headers with the same key', async () => {
+      const testConfig = {
+        config: {
+          ...defaultTestFormData.config,
+          authType: AuthType.SSL,
+          certType: SSLCertType.PFX,
+        },
+        secrets: {
+          pfx: Buffer.from('some binary string').toString('base64'),
+          secretHeaders: { 'content-type': 'secret-value' },
+        },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [
+            { key: 'content-type', value: 'text', type: 'config' },
+            { key: 'content-type', value: 'secret-value', type: 'secret' },
+          ],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testConfig} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
         });
       });
     });
