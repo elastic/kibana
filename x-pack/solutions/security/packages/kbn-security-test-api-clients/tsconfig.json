@@ -21,6 +21,8 @@
     "@kbn/spaces-plugin",
     "@kbn/ftr-common-functional-services",
     "@kbn/securitysolution-endpoint-exceptions-common",
-    "@kbn/securitysolution-exceptions-common"
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/osquery-plugin"
   ]
 }
