@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { fieldToName } from '../../lib/field_to_display_name';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
 import type { ToolbarProps } from './types';
@@ -33,9 +32,12 @@ export const ToolbarWrapper = (props: Props) => {
     region,
     legend,
     sort,
+    preferredSchema,
     customMetrics,
     changeCustomMetrics,
+    changePreferredSchema,
   } = useWaffleOptionsContext();
+
   return (
     <EuiFlexGroup responsive={false} wrap gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -59,12 +61,9 @@ export const ToolbarWrapper = (props: Props) => {
         legend,
         customMetrics,
         changeCustomMetrics,
+        changePreferredSchema,
+        preferredSchema,
       })}
     </EuiFlexGroup>
   );
 };
-
-export const toGroupByOpt = (field: string) => ({
-  text: fieldToName(field),
-  field,
-});

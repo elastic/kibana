@@ -10,10 +10,14 @@
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
+import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
-  defaultTabState,
   internalStateSlice,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
@@ -22,12 +26,19 @@ import {
   createTabRuntimeState,
   selectTabRuntimeState,
   selectTabRuntimeAppState,
-  selectTabRuntimeGlobalState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectInitialUnifiedHistogramLayoutPropsMap,
+  selectTabRuntimeInternalState,
 } from '../runtime_state';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+} from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
-import { createTabItem } from '../utils';
+import { createInternalStateAsyncThunk, createTabItem } from '../utils';
+import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
+import { DEFAULT_TAB_STATE } from '../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -53,11 +64,8 @@ export const setTabs: InternalStateThunkActionCreator<
         profilesManager,
         ebtManager,
         initialValues: {
-          unifiedHistogramLayoutProps: tab.duplicatedFromId
-            ? selectRestorableTabRuntimeHistogramLayoutProps(
-                runtimeStateManager,
-                tab.duplicatedFromId
-              )
+          unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
+            ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
             : undefined,
         },
       });
@@ -89,40 +97,84 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
+    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
+
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
 
       const tab: TabState = {
-        ...defaultTabState,
+        ...DEFAULT_TAB_STATE,
+        ...{
+          globalState: {
+            timeRange: services.timefilter.getTime(),
+            refreshInterval: services.timefilter.getRefreshInterval(),
+            filters: services.filterManager.getGlobalFilters(),
+          },
+        },
         ...existingTab,
         ...pick(item, 'id', 'label', 'duplicatedFromId'),
       };
 
-      if (item.duplicatedFromId && !existingTab) {
-        const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
-
-        if (!existingTabToDuplicateFrom) {
-          return tab;
-        }
-
+      if (!existingTab) {
+        // the following assignments for initialAppState, globalState, and dataRequestParams are for supporting `openInNewTab` action
         tab.initialAppState =
-          selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
-          cloneDeep(existingTabToDuplicateFrom.initialAppState);
-        tab.initialGlobalState = cloneDeep({
-          ...existingTabToDuplicateFrom.initialGlobalState,
-          ...existingTabToDuplicateFrom.lastPersistedGlobalState,
-        });
-        tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+          'initialAppState' in item
+            ? cloneDeep(item.initialAppState as TabState['initialAppState'])
+            : tab.initialAppState;
+        tab.globalState =
+          'globalState' in item
+            ? cloneDeep(item.globalState as TabState['globalState'])
+            : tab.globalState;
+        tab.dataRequestParams =
+          'dataRequestParams' in item
+            ? (item.dataRequestParams as TabState['dataRequestParams'])
+            : tab.dataRequestParams;
+
+        if (item.duplicatedFromId) {
+          // the new tab was created by duplicating an existing tab
+          const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
+
+          if (!existingTabToDuplicateFrom) {
+            return tab;
+          }
+
+          tab.initialInternalState =
+            selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId) ??
+            cloneDeep(existingTabToDuplicateFrom.initialInternalState);
+          tab.initialAppState =
+            selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
+            cloneDeep(existingTabToDuplicateFrom.initialAppState);
+          tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
+          tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+        } else {
+          // the new tab is a fresh one
+          const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTab.id)?.query;
+          const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+
+          if (!currentQuery || !currentDataView) {
+            return tab;
+          }
+
+          const isCurrentModeESQL = isOfAggregateQueryType(currentQuery);
+
+          tab.initialAppState = {
+            query: isCurrentModeESQL
+              ? { esql: getInitialESQLQuery(currentDataView, true) }
+              : undefined,
+            dataSource: createDataSource({
+              dataView: currentDataView,
+              query: currentQuery,
+            }),
+          };
+        }
       }
 
       return tab;
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
-      const previousTabStateContainer = previousTabRuntimeState.stateContainer$.getValue();
-
-      previousTabStateContainer?.actions.stopSyncing();
+      currentTabStateContainer?.actions.stopSyncing();
 
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
       const nextTabRuntimeState = selectedItem
@@ -131,11 +183,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
 
       if (nextTab && nextTabStateContainer) {
-        const {
-          timeRange,
-          refreshInterval,
-          filters: globalFilters,
-        } = nextTab.lastPersistedGlobalState;
+        const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const appState = nextTabStateContainer.appState.getState();
         const { filters: appFilters, query } = appState;
 
@@ -161,6 +209,8 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
         await urlStateStorage.set(APP_STATE_URL_KEY, null);
       }
+
+      dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
     }
 
     dispatch(
@@ -172,35 +222,79 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
     );
   };
 
-export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
-  ({ tabId }) =>
-  (dispatch, _, { runtimeStateManager }) => {
-    dispatch(
-      internalStateSlice.actions.setTabAppStateAndGlobalState({
-        tabId,
-        appState: selectTabRuntimeAppState(runtimeStateManager, tabId),
-        globalState: selectTabRuntimeGlobalState(runtimeStateManager, tabId),
-      })
+export const initializeTabs = createInternalStateAsyncThunk(
+  'internalState/initializeTabs',
+  async (
+    {
+      discoverSessionId,
+      shouldClearAllTabs,
+    }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
+    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+  ) => {
+    const tabsEnabled = services.core.featureFlags.getBooleanValue(
+      TABS_ENABLED_FEATURE_FLAG_KEY,
+      false
     );
-  };
 
-export const initializeTabs: InternalStateThunkActionCreator<
-  [{ userId: string; spaceId: string }]
-> =
-  ({ userId, spaceId }) =>
-  (dispatch, _, { tabsStorageManager }) => {
+    if (tabsEnabled && shouldClearAllTabs) {
+      dispatch(clearAllTabs());
+    }
+
+    const { userId: existingUserId, spaceId: existingSpaceId } = getState();
+
+    const getUserId = async () => {
+      try {
+        return (await services.core.security?.authc.getCurrentUser()).profile_uid ?? '';
+      } catch {
+        // ignore as user id might be unavailable for some deployments
+        return '';
+      }
+    };
+
+    const getSpaceId = async () => {
+      try {
+        return (await services.spaces?.getActiveSpace())?.id ?? '';
+      } catch {
+        // ignore
+        return '';
+      }
+    };
+
+    const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
+      existingUserId === undefined ? getUserId() : existingUserId,
+      existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
+      discoverSessionId ? services.savedSearch.getDiscoverSession(discoverSessionId) : undefined,
+    ]);
+
+    if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
+      services.chrome.recentlyAccessed.add(
+        getSavedSearchFullPathUrl(persistedDiscoverSession.id),
+        persistedDiscoverSession.title ??
+          i18n.translate('discover.defaultDiscoverSessionTitle', {
+            defaultMessage: 'Untitled Discover session',
+          }),
+        persistedDiscoverSession.id
+      );
+
+      setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
+    }
+
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
-      defaultTabState,
+      persistedDiscoverSession,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     dispatch(setTabs(initialTabsState));
-  };
+
+    return { userId, spaceId, persistedDiscoverSession };
+  }
+);
 
 export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
   const defaultTab: TabState = {
-    ...defaultTabState,
+    ...DEFAULT_TAB_STATE,
     ...createTabItem([]),
   };
 
@@ -212,7 +306,9 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
   (dispatch, getState) => {
     const currentState = getState();
 
-    if (restoreTabId === currentState.tabs.unsafeCurrentId) {
+    // Restoring the 'new' tab ID is a no-op because it represents a placeholder for creating new tabs,
+    // not an actual tab that can be restored.
+    if (restoreTabId === currentState.tabs.unsafeCurrentId || restoreTabId === NEW_TAB_ID) {
       return;
     }
 
@@ -239,6 +335,46 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
         items,
         selectedItem: selectedItem || currentTab,
       })
+    );
+  };
+
+export const openInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      tabLabel?: string;
+      appState?: TabState['initialAppState'];
+      globalState?: TabState['globalState'];
+      searchSessionId?: string;
+    }
+  ]
+> =
+  ({ tabLabel, appState, globalState, searchSessionId }) =>
+  (dispatch, getState) => {
+    const initialAppState = appState ? cloneDeep(appState) : undefined;
+    const initialGlobalState = globalState ? cloneDeep(globalState) : {};
+    const currentState = getState();
+    const currentTabs = selectAllTabs(currentState);
+
+    const newDefaultTab: TabState = {
+      ...DEFAULT_TAB_STATE,
+      ...createTabItem(currentTabs),
+      initialAppState,
+      globalState: initialGlobalState,
+    };
+
+    if (tabLabel) {
+      newDefaultTab.label = tabLabel;
+    }
+
+    if (searchSessionId) {
+      newDefaultTab.dataRequestParams = {
+        ...newDefaultTab.dataRequestParams,
+        searchSessionId,
+      };
+    }
+
+    return dispatch(
+      updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
     );
   };
 

@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,10 +17,10 @@ import { MonitorStatusCol } from '../components/monitor_status_col';
 import { selectOverviewState } from '../../../../../../state';
 import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
-import { FlyoutParamProps } from '../../types';
+import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import {
   STATUS,
@@ -34,7 +35,7 @@ import {
 } from '../labels';
 import { MonitorsDuration } from '../components/monitors_duration';
 import { useKibanaSpace } from '../../../../../../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../../../plugin';
 
 export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,

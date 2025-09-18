@@ -10,11 +10,11 @@
 import Fs from 'fs';
 import Path from 'path';
 import expect from '@kbn/expect';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { hasStartEndParams } from '@kbn/esql-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { groupBy, mapValues, uniqBy } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function getConfigPath() {
   return Path.resolve(

@@ -11,9 +11,10 @@ import React, { Fragment, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiDataGrid } from '@elastic/eui';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { USER_TRIGGER, PHONE_TRIGGER, COUNTRY_TRIGGER, User } from './actions/actions';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { User } from './actions/actions';
+import { USER_TRIGGER, PHONE_TRIGGER, COUNTRY_TRIGGER } from './actions/actions';
 
 export interface Props {
   uiActionsApi: UiActionsStart;

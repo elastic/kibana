@@ -9,12 +9,12 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
 import type { ControlGroupApi } from '../../control_group/types';
-import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
+import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
 
 export type MockedControlGroupApi = ControlGroupApi & {
   setLastSavedStateForChild: (uuid: string, state: object) => void;

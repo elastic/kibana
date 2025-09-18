@@ -9,10 +9,10 @@
 
 import { getSeries } from './_get_series';
 import { setFormatService } from '../../../services';
-import { Chart, Aspect } from './point_series';
-import { Table, Column } from '../../types';
-import { Serie } from './_add_to_siri';
-import { Point } from './_get_point';
+import type { Chart, Aspect } from './point_series';
+import type { Table, Column } from '../../types';
+import type { Serie } from './_add_to_siri';
+import type { Point } from './_get_point';
 
 describe('getSeries', function () {
   beforeAll(() => {

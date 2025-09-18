@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../common/screenshot/journey_step_screenshot_container';
 import { StepMetaInfo } from './components/step_info';
 

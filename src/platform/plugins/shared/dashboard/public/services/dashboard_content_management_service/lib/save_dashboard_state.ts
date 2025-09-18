@@ -18,7 +18,7 @@ import type {
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
-import { SaveDashboardProps, SaveDashboardReturn } from '../types';
+import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
 
 export const saveDashboardState = async ({

@@ -8,13 +8,13 @@
 import React from 'react';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import {
   shouldRegisterScheduledReportShareIntegration,
   createScheduledReportShareIntegration,
 } from './scheduled_report_share_integration';
 import { queryClient } from '../../query_client';
-import { ExportShareConfig } from '@kbn/share-plugin/public/types';
+import type { ExportShareConfig } from '@kbn/share-plugin/public/types';
 
 jest.mock('../hooks/use_get_reporting_health_query', () => ({
   getKey: jest.fn(() => 'reportingHealthKey'),
@@ -71,11 +71,10 @@ describe('createScheduledReportShareIntegration', () => {
   const services = {} as any;
   const integration = createScheduledReportShareIntegration({ apiClient, services });
 
-  it('should return correct id, groupId, and shareType', () => {
+  it('should return correct id, groupId', () => {
     expect(integration).toMatchObject({
       id: 'scheduledReports',
       groupId: 'exportDerivatives',
-      shareType: 'integration',
     });
   });
 
@@ -117,13 +116,13 @@ describe('createScheduledReportShareIntegration', () => {
   });
 
   describe('config.shouldRender', () => {
-    const config = integration.config!({
+    const config = integration.getShareIntegrationConfig!({
       sharingData: { exportType: 'pngV2' },
-    } as unknown as Parameters<typeof integration.config>[0]);
+    } as unknown as Parameters<typeof integration.getShareIntegrationConfig>[0]);
 
-    it('should return true when at least one supported export type is available', () => {
+    it('should return true when at least one supported export type is available', async () => {
       expect(
-        config.shouldRender!({
+        (await config).shouldRender!({
           availableExportItems: [
             { config: { exportType: 'pngV2' } },
             { config: { exportType: 'printablePdfV2' } },
@@ -132,9 +131,9 @@ describe('createScheduledReportShareIntegration', () => {
       ).toBeTruthy();
     });
 
-    it('should return false when no supported export type is available', () => {
+    it('should return false when no supported export type is available', async () => {
       expect(
-        config.shouldRender!({
+        (await config).shouldRender!({
           availableExportItems: [
             { config: { exportType: 'lens_csv' } },
           ] as unknown as ExportShareConfig[],

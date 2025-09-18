@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RenameFieldsAndRemoveAction } from '../utils';
-import {
+import type { RenameFieldsAndRemoveAction } from '../utils';
+import type {
   GrokProcessor,
   DissectProcessor,
   DateProcessor,

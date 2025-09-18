@@ -15,11 +15,7 @@ import {
   EuiTableBody,
   EuiTableHeaderCell,
   EuiTableRowCell,
-  EuiEmptyPrompt,
   useEuiTheme,
-  EuiText,
-  EuiLink,
-  EuiButton,
   SortableProperties,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -31,15 +27,28 @@ import { css } from '@emotion/react';
 import { EuiTableRow } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { FORMATTERS } from '../../../../../common/formatters';
 import type { SortBy } from '../../hooks/use_process_list';
 import type { Process } from './types';
 import { ProcessRow } from './process_row';
+import { ProcessesEmptyMessage } from './processes_empty_message';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
+
+interface ProcessColumn {
+  field: keyof Process;
+  name: string;
+  sortable: boolean;
+  render?: Function;
+  width?: string | number;
+  textOnly?: boolean;
+  truncateText?: boolean;
+  align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
+}
 
 interface TableProps {
   processList: ProcessListAPIResponse['processList'];
@@ -49,6 +58,7 @@ interface TableProps {
   error?: string;
   setSortBy: (s: SortBy) => void;
   clearSearchBar: () => void;
+  schema: DataSchemaFormat | null;
 }
 
 function useSortableProperties<T>(
@@ -83,6 +93,7 @@ export const ProcessesTable = ({
   error,
   setSortBy,
   clearSearchBar,
+  schema,
 }: TableProps) => {
   const { updateSortableProperties } = useSortableProperties<Process>(
     [
@@ -114,60 +125,20 @@ export const ProcessesTable = ({
     [processList]
   );
 
+  const hideStateColumn = schema === 'semconv';
+  const visibleColumns = useMemo(
+    () => (hideStateColumn ? columns.filter((col) => col.field !== 'state') : columns),
+    [hideStateColumn]
+  );
+
   if (!isLoading && currentItems.length === 0)
-    return (
-      <EuiEmptyPrompt
-        iconType="search"
-        titleSize="s"
-        title={
-          <strong>
-            <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcesses"
-              defaultMessage="No processes found"
-            />
-          </strong>
-        }
-        body={
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcessesBody"
-              defaultMessage="Try modifying your filter. Only processes that are within the configured {metricbeatDocsLink} will display here."
-              values={{
-                metricbeatDocsLink: (
-                  <EuiLink
-                    data-test-subj="infraProcessesTableTopNByCpuOrMemoryLink"
-                    href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.infra.metrics.nodeDetails.noProcessesBody.metricbeatDocsLinkText"
-                      defaultMessage="top N by CPU or Memory"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        }
-        actions={
-          <EuiButton
-            data-test-subj="infraProcessesTableClearFiltersButton"
-            onClick={clearSearchBar}
-          >
-            <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcessesClearFilters"
-              defaultMessage="Clear filters"
-            />
-          </EuiButton>
-        }
-      />
-    );
+    return <ProcessesEmptyMessage schema={schema} clearSearchBar={clearSearchBar} />;
 
   return (
     <EuiTable data-test-subj="infraAssetDetailsProcessesTable" responsiveBreakpoint={false}>
       <EuiTableHeader>
         <EuiTableHeaderCell width={24} />
-        {columns.map((column) => (
+        {visibleColumns.map((column) => (
           <EuiTableHeaderCell
             key={`${String(column.field)}-header`}
             align={column.align ?? LEFT_ALIGNMENT}
@@ -199,7 +170,7 @@ export const ProcessesTable = ({
           </EuiTableRow>
         )}
         {isLoading && currentItems.length === 0 && !error && (
-          <ProcessesTableMessage>
+          <ProcessesTableMessage visibleColumnsCount={visibleColumns.length}>
             <FormattedMessage
               id="xpack.infra.assetDetails.processes.loading"
               defaultMessage="Loading..."
@@ -208,11 +179,15 @@ export const ProcessesTable = ({
         )}
 
         {error ? (
-          <ProcessesTableMessage>
+          <ProcessesTableMessage visibleColumnsCount={visibleColumns.length}>
             <EuiIcon type="minusInCircle" color="danger" /> {error}
           </ProcessesTableMessage>
         ) : (
-          <ProcessesTableBody items={currentItems} currentTime={currentTime} />
+          <ProcessesTableBody
+            items={currentItems}
+            currentTime={currentTime}
+            visibleColumns={visibleColumns}
+          />
         )}
       </EuiTableBody>
     </EuiTable>
@@ -221,9 +196,10 @@ export const ProcessesTable = ({
 
 interface ProcessesTableMessageProps {
   children: React.ReactNode;
+  visibleColumnsCount: number;
 }
 
-const ProcessesTableMessage = ({ children }: ProcessesTableMessageProps) => {
+const ProcessesTableMessage = ({ children, visibleColumnsCount }: ProcessesTableMessageProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -235,7 +211,7 @@ const ProcessesTableMessage = ({ children }: ProcessesTableMessageProps) => {
           paddingBottom: `${euiTheme.size.s}`,
         }}
         align="center"
-        colSpan={columns.length + 1}
+        colSpan={visibleColumnsCount + 1}
         mobileOptions={{ width: '100%' }}
         textOnly={true}
       >
@@ -248,12 +224,13 @@ const ProcessesTableMessage = ({ children }: ProcessesTableMessageProps) => {
 interface TableBodyProps {
   items: Process[];
   currentTime: number;
+  visibleColumns: ProcessColumn[];
 }
 
-const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
+const ProcessesTableBody = ({ items, currentTime, visibleColumns }: TableBodyProps) => (
   <>
     {items.map((item, i) => {
-      const cells = columns.map((column) => (
+      const cells = visibleColumns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
           mobileOptions={{ header: column.name }}
@@ -264,7 +241,15 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
       ));
-      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportAIAssistant={true} />;
+      return (
+        <ProcessRow
+          cells={cells}
+          item={item}
+          key={`row-${i}`}
+          supportAIAssistant={true}
+          visibleColumnsCount={visibleColumns.length}
+        />
+      );
     })}
   </>
 );
@@ -292,16 +277,7 @@ const columnLabelCPU = i18n.translate('xpack.infra.metrics.nodeDetails.processes
   defaultMessage: 'CPU',
 });
 
-const columns: Array<{
-  field: keyof Process;
-  name: string;
-  sortable: boolean;
-  render?: Function;
-  width?: string | number;
-  textOnly?: boolean;
-  truncateText?: boolean;
-  align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
-}> = [
+const columns: ProcessColumn[] = [
   {
     field: 'state',
     name: i18n.translate('xpack.infra.metrics.nodeDetails.processes.columnLabelState', {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CreateManagementItemArgs, Mount } from '../types';
+import type { CreateManagementItemArgs, Mount } from '../types';
 import { ManagementItem } from './management_item';
 
 export interface RegisterManagementAppArgs extends CreateManagementItemArgs {

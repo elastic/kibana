@@ -11,7 +11,7 @@ import { type Observable, timer, takeUntil } from 'rxjs';
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import { ROLL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import { rollUsageCountersIndices } from './rollups';
-import { IUsageCounter } from '../usage_counter';
+import type { IUsageCounter } from '../usage_counter';
 
 export function registerUsageCountersRollups({
   logger,

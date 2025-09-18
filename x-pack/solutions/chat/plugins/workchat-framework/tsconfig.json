@@ -17,7 +17,6 @@
     "@kbn/inference-plugin",
     "@kbn/actions-plugin",
     "@kbn/features-plugin",
-    "@kbn/wc-genai-utils",
     "@kbn/wc-framework-types-server",
     "@kbn/wc-framework-types-common",
     "@kbn/logging-mocks",

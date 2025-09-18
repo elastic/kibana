@@ -16,12 +16,8 @@ import { getExpressionType, isExpressionComplete } from '../../../definitions/ut
 import type { ESQLCommand } from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import {
-  ICommandCallbacks,
-  Location,
-  type ICommandContext,
-  type ISuggestionItem,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {
   getNullsPrefixRange,
   getSortPos,
@@ -64,9 +60,10 @@ export async function autocomplete(
         getColumnsByType: callbacks?.getByType,
         expressionRoot: undefined,
         location: Location.SORT,
-        context,
-        advanceCursorAfterInitialField: false,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
+        context,
+        advanceCursorAfterInitialColumn: false,
       });
     }
 
@@ -81,12 +78,7 @@ export async function autocomplete(
 
       const columnExists = (name: string) => _columnExists(name, context);
 
-      if (
-        isExpressionComplete(
-          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-          innerText
-        )
-      ) {
+      if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
         suggestions.push(
           ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
         );
@@ -100,6 +92,7 @@ export async function autocomplete(
           location: Location.SORT,
           context,
           hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+          activeProduct: context?.activeProduct,
         });
         suggestions.push(...expressionSuggestions);
       }

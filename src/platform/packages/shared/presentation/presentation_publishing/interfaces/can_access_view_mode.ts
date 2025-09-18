@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiHasParentApi, HasParentApi } from './has_parent_api';
-import { apiPublishesViewMode, PublishesViewMode } from './publishes_view_mode';
+import type { HasParentApi } from './has_parent_api';
+import { apiHasParentApi } from './has_parent_api';
+import type { PublishesViewMode } from './publishes_view_mode';
+import { apiPublishesViewMode } from './publishes_view_mode';
 
 /**
  * This API can access a view mode, either its own or from its parent API.

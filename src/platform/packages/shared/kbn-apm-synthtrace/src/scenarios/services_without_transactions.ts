@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+/**
+ * Generates services that only produce errors or metrics, but no transactions.
+ */
+
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

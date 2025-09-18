@@ -8,15 +8,11 @@
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { BasicMetricValueRT } from '@kbn/metrics-data-access-plugin/server';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { InfraEntityMetadataType } from '../../../../../common/http_api';
-import { METADATA_AGGREGATION_NAME } from '../constants';
 import type { GetHostParameters } from '../types';
-import {
-  getFilterForEntityType,
-  getInventoryModelAggregations,
-  getDocumentsFilter,
-} from '../helpers/query';
+import { getInventoryModelAggregations, getDocumentsFilter } from '../helpers/query';
 
 export const getAllHosts = async ({
   infraMetricsClient,
@@ -27,7 +23,7 @@ export const getAllHosts = async ({
   metrics,
   hostNames,
   apmDataAccessServices,
-  schema,
+  schema = 'ecs',
 }: Pick<
   GetHostParameters,
   'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics' | 'schema'
@@ -35,6 +31,8 @@ export const getAllHosts = async ({
   hostNames: string[];
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
+  const inventoryModel = findInventoryModel('host');
+
   const metricAggregations = await getInventoryModelAggregations(
     'host',
     metrics.map((metric) => metric),
@@ -63,7 +61,7 @@ export const getAllHosts = async ({
     aggs: {
       // find hosts with metrics that are monitored by the system integration.
       monitoredHosts: {
-        filter: getFilterForEntityType('host'),
+        filter: { bool: { filter: [...(inventoryModel.nodeFilter?.({ schema }) ?? [])] } },
         aggs: {
           names: {
             terms: {
@@ -86,22 +84,69 @@ export const getAllHosts = async ({
         },
         aggs: {
           ...metricAggregations,
-          [METADATA_AGGREGATION_NAME]: {
-            top_metrics: {
-              metrics: [
-                {
-                  field: 'host.os.name',
+          hostOsName: {
+            filter: {
+              exists: {
+                field: 'host.os.name',
+              },
+            },
+            aggs: {
+              latest: {
+                top_metrics: {
+                  metrics: [
+                    {
+                      field: 'host.os.name',
+                    },
+                  ],
+                  size: 1,
+                  sort: {
+                    '@timestamp': 'desc',
+                  },
                 },
-                {
-                  field: 'cloud.provider',
+              },
+            },
+          },
+          cloudProvider: {
+            filter: {
+              exists: {
+                field: 'cloud.provider',
+              },
+            },
+            aggs: {
+              latest: {
+                top_metrics: {
+                  metrics: [
+                    {
+                      field: 'cloud.provider',
+                    },
+                  ],
+                  size: 1,
+                  sort: {
+                    '@timestamp': 'desc',
+                  },
                 },
-                {
-                  field: 'host.ip',
+              },
+            },
+          },
+          hostIp: {
+            filter: {
+              exists: {
+                field: 'host.ip',
+              },
+            },
+            aggs: {
+              latest: {
+                top_metrics: {
+                  metrics: [
+                    {
+                      field: 'host.ip',
+                    },
+                  ],
+                  size: 1,
+                  sort: {
+                    '@timestamp': 'desc',
+                  },
                 },
-              ],
-              size: 1,
-              sort: {
-                '@timestamp': 'desc',
               },
             },
           },
@@ -130,12 +175,33 @@ export const getAllHosts = async ({
     })
     .map((bucket) => {
       const hostName = bucket.key as string;
-      const metadata = (bucket?.metadata.top ?? [])
-        .flatMap((top) => Object.entries(top.metrics))
-        .map(([key, value]) => ({
-          name: key as InfraEntityMetadataType,
-          value: typeof value === 'string' && value.trim().length === 0 ? null : value,
-        }));
+
+      const hostOsNameValue = bucket?.hostOsName?.latest?.top?.[0]?.metrics?.['host.os.name'];
+      const hostOsNameMetadata = [
+        {
+          name: 'host.os.name' as InfraEntityMetadataType,
+          value: hostOsNameValue ?? null,
+        },
+      ];
+
+      const cloudProviderValue =
+        bucket?.cloudProvider?.latest?.top?.[0]?.metrics?.['cloud.provider'];
+      const cloudProviderMetadata = [
+        {
+          name: 'cloud.provider' as InfraEntityMetadataType,
+          value: cloudProviderValue ?? null,
+        },
+      ];
+
+      const hostIpValue = bucket?.hostIp?.latest?.top?.[0]?.metrics?.['host.ip'];
+      const hostIpMetadata = [
+        {
+          name: 'host.ip' as InfraEntityMetadataType,
+          value: hostIpValue ?? null,
+        },
+      ];
+
+      const metadata = [...hostOsNameMetadata, ...cloudProviderMetadata, ...hostIpMetadata];
 
       return {
         name: hostName,

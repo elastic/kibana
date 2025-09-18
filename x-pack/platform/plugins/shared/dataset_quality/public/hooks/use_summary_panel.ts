@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { countBy } from 'lodash';
 import { useDatasetQualityTable } from '.';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicators } from '../../common/types';
+import type { QualityIndicators } from '../../common/types';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
 
@@ -18,7 +18,7 @@ const useSummaryPanel = () => {
   const { service } = useDatasetQualityContext();
   const {
     filteredItems,
-    canUserMonitorDataset,
+    canUserMonitorAnyDataset,
     canUserMonitorAnyDataStream,
     loading: isTableLoading,
   } = useDatasetQualityTable();
@@ -35,7 +35,7 @@ const useSummaryPanel = () => {
   >;
 
   const isDegradedDocsLoading = useSelector(service, (state) =>
-    state.matches('stats.degradedDocs.fetching')
+    state.matches('main.stats.degradedDocs.fetching')
   );
   const isDatasetsQualityLoading = isDegradedDocsLoading || isTableLoading;
 
@@ -47,7 +47,9 @@ const useSummaryPanel = () => {
   );
 
   const isUserAuthorizedForDataset = !isTableLoading
-    ? canUserMonitorDataset && canUserMonitorAnyDataStream && canUserMonitorAllFilteredDataStreams
+    ? canUserMonitorAnyDataset &&
+      canUserMonitorAnyDataStream &&
+      canUserMonitorAllFilteredDataStreams
     : true;
 
   /*
@@ -62,7 +64,7 @@ const useSummaryPanel = () => {
   };
 
   const isDatasetsActivityLoading = useSelector(service, (state) =>
-    state.matches('stats.datasets.fetching')
+    state.matches('main.stats.datasets.fetching')
   );
 
   /*
@@ -76,7 +78,8 @@ const useSummaryPanel = () => {
   const isEstimatedDataLoading = useSelector(
     service,
     (state) =>
-      state.matches('stats.datasets.fetching') || state.matches('stats.degradedDocs.fetching')
+      state.matches('main.stats.datasets.fetching') ||
+      state.matches('main.stats.degradedDocs.fetching')
   );
 
   return {

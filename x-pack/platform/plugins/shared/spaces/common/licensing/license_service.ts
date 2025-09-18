@@ -7,7 +7,7 @@
 
 import type { Observable, Subscription } from 'rxjs';
 
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 
 export interface SpacesLicense {
   isEnabled(): boolean;

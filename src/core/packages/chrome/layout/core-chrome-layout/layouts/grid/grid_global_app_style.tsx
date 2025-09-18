@@ -13,13 +13,9 @@ import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import {
   APP_FIXED_VIEWPORT_ID,
   APP_MAIN_SCROLL_CONTAINER_ID,
+  layoutVar,
 } from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
-import {
-  useHackSyncPushFlyout,
-  hackEuiPushFlyoutPaddingInlineEnd,
-  hackEuiPushFlyoutPaddingInlineStart,
-} from './hack_use_sync_push_flyout';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   :root {
@@ -30,17 +26,16 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --euiFixedHeadersOffset: 0px;
 
     // height of the header banner
-    --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
+    --kbnHeaderBannerHeight: ${layoutVar('banner.height', '0px')};
 
     // the current total height of all app-area headers, this variable can be used for sticky headers offset relative to the top of the application area
-    --kbnAppHeadersOffset: var(--kbn-application--top-bar-height, 0px);
-    --kbn-application--sticky-headers-offset: var(
-      --kbn-application--top-bar-height,
-      0px
-    ); // better name alias to --kbnAppHeadersOffset
+    --kbnAppHeadersOffset: ${layoutVar('application.topBar.height', '0px')};
+
+    // backward compatible way to position sticky sub-headers
+    --kbn-application--sticky-headers-offset: ${layoutVar('application.topBar.height', '0px')};
 
     // height of the project header app action menu which is part of the application area
-    --kbnProjectHeaderAppActionMenuHeight: var(--kbn-application--top-bar-height, 0px);
+    --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
   }
 
   #kibana-body {
@@ -56,10 +51,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     pointer-events: none;
     visibility: hidden;
     position: fixed;
-    top: var(--kbn-application--content-top, 0px);
-    right: var(--kbn-application--content-right, 0px);
-    bottom: var(--kbn-application--content-bottom, 0px);
-    left: var(--kbn-application--content-left, 0px);
+    top: ${layoutVar('application.content.top', '0px')};
+    right: ${layoutVar('application.content.right', '0px')};
+    bottom: ${layoutVar('application.content.bottom', '0px')};
+    left: ${layoutVar('application.content.left', '0px')};
   }
 
   .kbnAppWrapper {
@@ -83,32 +78,32 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   // adjust position of the classic/project side-navigation
   .kbnBody .euiFlyout.euiCollapsibleNav {
-    ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
-    ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
-    ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+    ${logicalCSS('top', layoutVar('application.top', '0px'))};
+    ${logicalCSS('left', layoutVar('application.left', '0px'))};
+    ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
   }
 
   .kbnBody {
     // adjust position of all the right flyouts relative to the application area, except the ones that are "above the header"
     .euiFlyout[class*='right']:not(.euiOverlayMask[class*='aboveHeader'] .euiFlyout) {
-      ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
-      ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
-      ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
+      ${logicalCSS('top', layoutVar('application.top', '0px'))};
+      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+      ${logicalCSS('right', layoutVar('application.right', '0px'))};
     }
 
     // overlay mask "belowHeader" should only cover the application area
     .euiOverlayMask[class*='belowHeader'] {
-      ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
-      ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
-      ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
-      ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+      ${logicalCSS('top', layoutVar('application.top', '0px'))};
+      ${logicalCSS('left', layoutVar('application.left', '0px'))};
+      ${logicalCSS('right', layoutVar('application.right', '0px'))};
+      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
     }
   }
 
   // push flyout should be pushing the application area, instead of body
   #${APP_MAIN_SCROLL_CONTAINER_ID} {
-    ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
-    ${logicalCSS('padding-left', `var(${hackEuiPushFlyoutPaddingInlineStart}, 0px)`)};
+    ${logicalCSS('padding-right', `var(--euiPushFlyoutOffsetInlineEnd, 0px)`)};
+    ${logicalCSS('padding-left', `var(--euiPushFlyoutOffsetInlineStart, 0px)`)};
   }
   // this is a temporary hack to override EUI's body padding with push flyout
   .kbnBody {
@@ -119,7 +114,6 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
 export const GridLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
-  useHackSyncPushFlyout();
   return (
     <>
       <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme)]} />

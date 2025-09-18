@@ -17,6 +17,7 @@ import {
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { PolicyConfig } from '../endpoint/types';
 import { ProtectionModes } from '../endpoint/types';
 
 describe('policy_config and licenses', () => {
@@ -25,9 +26,17 @@ describe('policy_config and licenses', () => {
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
 
+  const disableEnterpriseFeatures = (policy: PolicyConfig) => {
+    if (policy.windows.device_control) policy.windows.device_control.enabled = false;
+    if (policy.mac.device_control) policy.mac.device_control.enabled = false;
+    if (policy.windows.popup.device_control) policy.windows.popup.device_control.enabled = false;
+    if (policy.mac.popup.device_control) policy.mac.popup.device_control.enabled = false;
+  };
+
   describe('isEndpointPolicyValidForLicense', () => {
     it('allows malware notification to be disabled with a Platinum license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.popup.malware.enabled = false; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
@@ -54,6 +63,7 @@ describe('policy_config and licenses', () => {
 
     it('allows malware notification message changes with a Platinum license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.popup.malware.message = 'BOOM'; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
@@ -126,6 +136,7 @@ describe('policy_config and licenses', () => {
 
     it('allows advanced rollback option when Platinum', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
@@ -143,6 +154,7 @@ describe('policy_config and licenses', () => {
 
     it('allows credential hardening option when Platinum', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
@@ -197,6 +209,7 @@ describe('policy_config and licenses', () => {
 
       it('allows ransomware notification message changes with a Platinum license', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.ransomware.message = 'BOOM';
         const valid = isEndpointPolicyValidForLicense(policy, Platinum);
         expect(valid).toBeTruthy();
@@ -240,6 +253,7 @@ describe('policy_config and licenses', () => {
 
       it('allows memory_protection notification message changes with a Platinum license', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.memory_protection.message = 'BOOM';
         policy.mac.popup.memory_protection.message = 'BOOM';
         policy.linux.popup.memory_protection.message = 'BOOM';
@@ -287,6 +301,7 @@ describe('policy_config and licenses', () => {
 
       it('allows behavior_protection notification message changes with a Platinum license', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.behavior_protection.message = 'BOOM';
         policy.mac.popup.behavior_protection.message = 'BOOM';
         policy.linux.popup.behavior_protection.message = 'BOOM';
@@ -675,6 +690,180 @@ describe('policy_config and licenses', () => {
       policy.windows.events.file = false;
       const retPolicy = policyFactoryWithoutPaidFeatures(policy);
       expect(retPolicy.windows.events.file).toBeFalsy();
+    });
+  });
+
+  describe('isEndpointDeviceControlPolicyValidForLicense', () => {
+    it('allows any device control configuration with Enterprise license', () => {
+      const policy = policyFactory();
+      // Enable all device control features
+      if (policy.windows.device_control) {
+        policy.windows.device_control.enabled = true;
+      }
+      if (policy.mac.device_control) {
+        policy.mac.device_control.enabled = true;
+      }
+      if (policy.windows.popup.device_control) {
+        policy.windows.popup.device_control.enabled = true;
+        policy.windows.popup.device_control.message = 'Custom message';
+      }
+      if (policy.mac.popup.device_control) {
+        policy.mac.popup.device_control.enabled = true;
+        policy.mac.popup.device_control.message = 'Custom message';
+      }
+
+      const valid = isEndpointPolicyValidForLicense(policy, Enterprise);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks Windows device control when enabled with non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.windows.device_control) {
+        policy.windows.device_control.enabled = true;
+      }
+
+      let valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('blocks Mac device control when enabled with non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.mac.device_control) {
+        policy.mac.device_control.enabled = true;
+      }
+
+      let valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('blocks Windows popup device control when enabled with non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.windows.popup.device_control) {
+        policy.windows.popup.device_control.enabled = true;
+      }
+
+      let valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('blocks Mac popup device control when enabled with non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.mac.popup.device_control) {
+        policy.mac.popup.device_control.enabled = true;
+      }
+
+      let valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('blocks Windows popup device control custom message with non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.windows.popup.device_control) {
+        policy.windows.popup.device_control.enabled = false;
+        policy.windows.popup.device_control.message = 'Custom message';
+      }
+
+      let valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('blocks Mac popup device control custom message with non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.mac.popup.device_control) {
+        policy.mac.popup.device_control.enabled = false;
+        policy.mac.popup.device_control.message = 'Custom message';
+      }
+
+      let valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('allows Mac and Windows popup device control with empty message and disabled state for non-Enterprise license', () => {
+      const policy = policyFactory();
+      if (policy.windows.device_control) {
+        policy.windows.device_control.enabled = false;
+      }
+      if (policy.windows.popup.device_control) {
+        policy.windows.popup.device_control.enabled = false;
+        policy.windows.popup.device_control.message = '';
+      }
+
+      if (policy.mac.device_control) {
+        policy.mac.device_control.enabled = false;
+      }
+      if (policy.mac.popup.device_control) {
+        policy.mac.popup.device_control.enabled = false;
+        policy.mac.popup.device_control.message = '';
+      }
+
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+
+    it('allows Mac and Windows popup device control with default message and disabled state for non-Enterprise license', () => {
+      const policy = policyFactory();
+
+      if (policy.windows.device_control) policy.windows.device_control.enabled = false;
+      if (policy.windows.popup.device_control) {
+        policy.windows.popup.device_control.enabled = false;
+        policy.windows.popup.device_control.message = DefaultPolicyRuleNotificationMessage;
+      }
+      if (policy.mac.device_control) {
+        policy.mac.device_control.enabled = false;
+      }
+      if (policy.mac.popup.device_control) {
+        policy.mac.popup.device_control.enabled = false;
+        policy.mac.popup.device_control.message = DefaultPolicyRuleNotificationMessage;
+      }
+
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks device control with null license when features are enabled', () => {
+      const policy = policyFactory();
+      if (policy.windows.device_control) {
+        policy.windows.device_control.enabled = true;
+      }
+
+      const valid = isEndpointPolicyValidForLicense(policy, null);
+      expect(valid).toBeFalsy();
     });
   });
 });

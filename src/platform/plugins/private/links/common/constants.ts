@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 export const LATEST_VERSION = 1;
 
 export const CONTENT_ID = 'links';
+export const LINKS_EMBEDDABLE_TYPE = 'links';
+export const LINKS_SAVED_OBJECT_TYPE = 'links';
 
 export const APP_ICON = 'link';
 

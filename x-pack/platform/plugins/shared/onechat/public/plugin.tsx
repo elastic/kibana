@@ -12,14 +12,11 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { registerApp } from './register';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  OnechatInternalService,
-  ToolsService,
-} from './services';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import type { OnechatInternalService } from './services';
+import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -27,7 +24,9 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ONECHAT_UI_SETTING_ID } from '../common/constants';
+import { createPublicToolContract } from './services/tools';
+
+import { registerLocators } from './locator/register_locators';
 
 export class OnechatPlugin
   implements
@@ -44,8 +43,14 @@ export class OnechatPlugin
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
-    const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
+  setup(
+    core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
+    deps: OnechatSetupDependencies
+  ): OnechatPluginSetup {
+    const isOnechatUiEnabled = core.uiSettings.get<boolean>(
+      AGENT_BUILDER_ENABLED_SETTING_ID,
+      false
+    );
 
     if (isOnechatUiEnabled) {
       registerApp({
@@ -57,11 +62,26 @@ export class OnechatPlugin
           return this.internalServices;
         },
       });
+
+      registerAnalytics({ analytics: core.analytics });
+      registerLocators(deps.share);
     }
+
+    try {
+      core.getStartServices().then(([coreStart]) => {
+        const { capabilities } = coreStart.application;
+        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
+          registerManagementSection({ core, management: deps.management });
+        }
+      });
+    } catch (error) {
+      this.logger.error('Error registering Agent Builder management section', error);
+    }
+
     return {};
   }
 
-  start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+  start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
@@ -72,8 +92,11 @@ export class OnechatPlugin
       chatService,
       conversationsService,
       toolsService,
+      startDependencies,
     };
 
-    return {};
+    return {
+      tools: createPublicToolContract({ toolsService }),
+    };
   }
 }

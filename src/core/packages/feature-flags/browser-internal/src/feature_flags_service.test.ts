@@ -8,7 +8,8 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { Transaction, apm } from '@elastic/apm-rum';
+import type { Transaction } from '@elastic/apm-rum';
+import { apm } from '@elastic/apm-rum';
 import { type Client, OpenFeature, type Provider } from '@openfeature/web-sdk';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-browser';

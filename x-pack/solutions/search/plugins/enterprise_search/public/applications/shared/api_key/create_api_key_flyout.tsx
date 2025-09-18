@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiAccordion,
@@ -29,7 +30,6 @@ import {
   EuiStep,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -134,6 +134,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
       try {
         parsedRoleDescriptors =
           roleDescriptors.length > 0 ? JSON.parse(roleDescriptors) : undefined;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         setRoleDescriptorsError(INVALID_JSON_ERROR);
         return;
@@ -144,6 +145,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
     if (metadataEnabled) {
       try {
         parsedMetadata = metadata.length > 0 ? JSON.parse(metadata) : undefined;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         setMetadataError(INVALID_JSON_ERROR);
         return;

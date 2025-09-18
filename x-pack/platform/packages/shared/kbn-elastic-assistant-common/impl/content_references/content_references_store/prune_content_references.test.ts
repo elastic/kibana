@@ -8,7 +8,7 @@
 import { pruneContentReferences } from './prune_content_references';
 import { securityAlertsPageReference } from '../references';
 import { contentReferenceBlock } from '../references/utils';
-import { ContentReferencesStore } from '../types';
+import type { ContentReferencesStore } from '../types';
 import { newContentReferencesStore } from './content_references_store';
 
 describe('pruneContentReferences', () => {

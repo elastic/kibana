@@ -14,9 +14,11 @@ import Path from 'path';
 import crypto from 'crypto';
 
 import execa from 'execa';
-import Axios, { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
+import Axios from 'axios';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
-import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
+import type { Config, CiStatsMetadata } from '@kbn/ci-stats-core';
+import { parseConfig } from '@kbn/ci-stats-core';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';

@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server } from 'http';
+import type { Server } from 'http';
 import supertest from 'supertest';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Router } from '@kbn/core-http-router-server-internal';
-import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
+import type { HttpConfig } from '@kbn/core-http-server-internal';
+import { HttpServer } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';

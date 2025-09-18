@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InfraDocument, infra, generateShortId } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates infrastructure metrics for a number of Kubernetes containers.
+ */
 
-import { Scenario } from '../cli/scenario';
+import type { InfraDocument } from '@kbn/apm-synthtrace-client';
+import { infra, generateShortId } from '@kbn/apm-synthtrace-client';
+
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<InfraDocument> = async (runOptions) => {

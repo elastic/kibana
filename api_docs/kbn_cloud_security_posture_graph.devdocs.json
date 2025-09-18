@@ -54,6 +54,55 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.getSingleDocumentData",
+        "type": "Function",
+        "tags": [],
+        "label": "getSingleDocumentData",
+        "description": [
+          "\nReturns the single document data for a node if it is in single-* mode.\nIf the node is not in one of these modes, or if it has no documentsData, it returns undefined."
+        ],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.NodeViewModel",
+            "text": "NodeViewModel"
+          },
+          ") => Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }> | undefined"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.getSingleDocumentData.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-graph",
+                "scope": "public",
+                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                "section": "def-public.NodeViewModel",
+                "text": "NodeViewModel"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.Graph",
         "type": "Function",
         "tags": [
@@ -189,7 +238,15 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ") => boolean"
+          ") => node is ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.NodeViewModel",
+            "text": "NodeViewModel"
+          },
+          " & { documentsData: [Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }>, ...Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[]]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
         "deprecated": false,
@@ -236,7 +293,14 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ") => boolean"
+          ") => node is ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.EntityNodeViewModel",
+            "text": "EntityNodeViewModel"
+          }
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
         "deprecated": false,
@@ -381,7 +445,7 @@
             "section": "def-public.EntityNodeViewModel",
             "text": "EntityNodeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; tag?: string | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[] | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
+          " extends Record<string, unknown>,Readonly<{ count?: number | undefined; label?: string | undefined; icon?: string | undefined; tag?: string | undefined; ips?: string[] | undefined; countryCodes?: string[] | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[] | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
@@ -519,6 +583,22 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphProps.showMinimap",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showMinimap",
+            "description": [
+              "\nDetermines whether the minimap is visible or not in interactive graphs"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
             "id": "def-public.GraphProps.children",
             "type": "CompoundType",
             "tags": [],
@@ -532,6 +612,55 @@
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphProps.onCenterGraphAfterRefresh",
+            "type": "Function",
+            "tags": [],
+            "label": "onCenterGraphAfterRefresh",
+            "description": [
+              "\nCallback invoked when the graph is updated with new nodes.\nReceives one argument with the list of newly added nodes.\nWhen callback is undefined, graph will center on new nodes (default behavior).\nBased on the return value of this callback:\n- Returning undefined will center the graph on new nodes (default behavior)\n- Returning \"fit-view\" will fit entire graph into view\n- Returning empty array or list of non-existent node ids will keep the graph with its current position\n- Returning list of existent node ids will center the graph on those nodes"
+            ],
+            "signature": [
+              "((newNodes: ",
+              {
+                "pluginId": "@kbn/cloud-security-posture-graph",
+                "scope": "public",
+                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                "section": "def-public.NodeViewModel",
+                "text": "NodeViewModel"
+              },
+              "[]) => void | string[] | \"fit-view\") | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-graph",
+                "id": "def-public.GraphProps.onCenterGraphAfterRefresh.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "newNodes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/cloud-security-posture-graph",
+                    "scope": "public",
+                    "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                    "section": "def-public.NodeViewModel",
+                    "text": "NodeViewModel"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -574,12 +703,40 @@
             "section": "def-public.LabelNodeViewModel",
             "text": "LabelNodeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[] | undefined; parentId?: string | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
+          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; ips?: string[] | undefined; countryCodes?: string[] | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[] | undefined; parentId?: string | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.eventsCount",
+            "type": "number",
+            "tags": [],
+            "label": "eventsCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.alertsCount",
+            "type": "number",
+            "tags": [],
+            "label": "alertsCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
             "id": "def-public.LabelNodeViewModel.expandButtonClick",

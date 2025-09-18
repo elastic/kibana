@@ -6,8 +6,8 @@
  */
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { QueryContext } from './query_context';
-import { MonitorSummary, Ping } from '../../../../../common/runtime_types';
+import type { QueryContext } from './query_context';
+import type { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.

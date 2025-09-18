@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformSecurityCommon, USER } from './security_common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { TransformSecurityCommon } from './security_common';
+import { USER } from './security_common';
 
 export function TransformSecurityUIProvider(
   { getPageObjects }: FtrProviderContext,

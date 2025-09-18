@@ -7,8 +7,9 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FieldErrors } from 'react-hook-form';
-import { PlaygroundForm, PlaygroundFormFields } from '../../../types';
+import type { FieldErrors } from 'react-hook-form';
+import type { PlaygroundForm } from '../../../types';
+import { PlaygroundFormFields } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';

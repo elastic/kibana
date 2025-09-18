@@ -11,7 +11,7 @@ import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {

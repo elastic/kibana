@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCommandOption } from '@kbn/esql-ast';
 import {
-  ESQLCommandOption,
   Walker,
   isIdentifier,
   isOptionNode,
@@ -23,8 +23,8 @@ import {
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
-import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { within } from './helpers';
+import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
+import type { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(

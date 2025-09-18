@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type {
   SectionRegistrySetup,
   SectionRegistryStart,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '../types';
+import type { DataTableRecord } from '../types';
 
 export const getFieldValue = <TRecord extends DataTableRecord, TField extends string>(
   record: TRecord,

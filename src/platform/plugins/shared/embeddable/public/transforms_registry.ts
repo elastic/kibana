@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableTransforms } from '../common';
+import type { EmbeddableTransforms } from '../common';
 
 const registry: { [key: string]: () => Promise<EmbeddableTransforms<any, any> | undefined> } = {};
 

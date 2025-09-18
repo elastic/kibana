@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type {
+  ESQLSingleAstItem,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLLiteral,
+  ESQLLocation,
+} from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
-  ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
@@ -22,16 +30,10 @@ import {
   getCompatibleLiterals,
   buildConstantsDefinitions,
   isLiteralDateItem,
-  compareTypesWithLiterals,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
-import {
-  type SupportedDataType,
-  isParameterType,
-  FunctionDefinition,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '../../types';
+import type { FunctionDefinition, FunctionReturnType } from '../../types';
+import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
 import { getColumnForASTNode, getOverlapRange } from '../shared';
 import { getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';
@@ -43,14 +45,11 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import {
-  isColumn,
-  isFunctionExpression,
-  isIdentifier,
-  isLiteral,
-  isTimeInterval,
-} from '../../../ast/is';
+import { isColumn, isFunctionExpression, isIdentifier, isLiteral } from '../../../ast/is';
 import { Walker } from '../../../walker';
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 export const shouldBeQuotedText = (
   text: string,
@@ -169,14 +168,12 @@ export async function getFieldsOrFunctionsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   {
     functions,
-    fields,
-    userDefinedColumns,
+    columns: fields,
     values = false,
     literals = false,
   }: {
     functions: boolean;
-    fields: boolean;
-    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
+    columns: boolean;
     literals?: boolean;
     values?: boolean;
   },
@@ -187,7 +184,8 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  activeProduct?: PricingProduct
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -200,34 +198,6 @@ export async function getFieldsOrFunctionsSuggestions(
     functions
   );
 
-  const filteredColumnByType: string[] = [];
-  if (userDefinedColumns) {
-    for (const userDefinedColumn of userDefinedColumns.values()) {
-      if (
-        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
-        !ignoreColumns.includes(userDefinedColumn[0].name)
-      ) {
-        filteredColumnByType.push(userDefinedColumn[0].name);
-      }
-    }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
-    // avg( numberField ) => avg_numberField_
-    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-    if (
-      filteredColumnByType.length &&
-      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
-    ) {
-      for (const userDefinedColumn of filteredColumnByType) {
-        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
-        const index = filteredFieldsByType.findIndex(
-          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
-        );
-        if (index >= 0) {
-          filteredFieldsByType.splice(index);
-        }
-      }
-    }
-  }
   // could also be in stats (bucket) but our autocomplete is not great yet
   const displayDateSuggestions =
     types.includes('date') && [Location.WHERE, Location.EVAL].includes(location);
@@ -241,11 +211,9 @@ export async function getFieldsOrFunctionsSuggestions(
             returnTypes: types,
             ignored: ignoreFn,
           },
-          hasMinimumLicenseRequired
+          hasMinimumLicenseRequired,
+          activeProduct
         )
-      : [],
-    userDefinedColumns
-      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
     literals ? getCompatibleLiterals(types) : []
   );
@@ -324,7 +292,7 @@ export const getExpressionPosition = (
       return 'after_operator';
     }
 
-    if (isLiteral(expressionRoot) || isTimeInterval(expressionRoot)) {
+    if (isLiteral(expressionRoot)) {
       return 'after_literal';
     }
   }
@@ -344,23 +312,30 @@ export const getExpressionPosition = (
 export async function suggestForExpression({
   expressionRoot,
   innerText,
-  getColumnsByType,
+  getColumnsByType: _getColumnsByType,
   location,
   preferredExpressionType,
   context,
-  advanceCursorAfterInitialField = true,
+  advanceCursorAfterInitialColumn = true,
   hasMinimumLicenseRequired,
+  activeProduct,
+  ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
   preferredExpressionType?: SupportedDataType;
   innerText: string;
-  getColumnsByType: GetColumnsByTypeFn;
+  getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
-  advanceCursorAfterInitialField?: boolean;
+  activeProduct?: PricingProduct;
+  advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
+  // a set of columns not to suggest when the expression is empty
+  ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
+  const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
+
   const suggestions: ISuggestionItem[] = [];
 
   const position = getExpressionPosition(innerText, expressionRoot);
@@ -371,24 +346,24 @@ export async function suggestForExpression({
     case 'after_literal':
     case 'after_column':
     case 'after_function':
-      const expressionType = getExpressionType(
-        expressionRoot,
-        context?.fields,
-        context?.userDefinedColumns
-      );
+      const expressionType = getExpressionType(expressionRoot, context?.columns);
 
       if (!isParameterType(expressionType)) {
         break;
       }
 
       suggestions.push(
-        ...getOperatorSuggestions({
-          location,
-          // In case of a param literal, we don't know the type of the left operand
-          // so we can only suggest operators that accept any type as a left operand
-          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
-          ignored: ['='],
-        })
+        ...getOperatorSuggestions(
+          {
+            location,
+            // In case of a param literal, we don't know the type of the left operand
+            // so we can only suggest operators that accept any type as a left operand
+            leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
+            ignored: ['='],
+          },
+          hasMinimumLicenseRequired,
+          activeProduct
+        )
       );
 
       break;
@@ -409,9 +384,13 @@ export async function suggestForExpression({
         suggestions.push(
           ...getFunctionSuggestions(
             { location, returnTypes: ['boolean'] },
-            hasMinimumLicenseRequired
+            hasMinimumLicenseRequired,
+            activeProduct
           ),
-          ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
+          ...(await getColumnsByType('boolean', [], {
+            advanceCursor: true,
+            openSuggestions: true,
+          }))
         );
       } else {
         suggestions.push(...getOperatorsSuggestionsAfterNot());
@@ -455,23 +434,27 @@ export async function suggestForExpression({
           location,
           rootOperator: rightmostOperator,
           preferredExpressionType,
-          getExpressionType: (expression) =>
-            getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+          getExpressionType: (expression) => getExpressionType(expression, context?.columns),
           getColumnsByType,
           hasMinimumLicenseRequired,
+          activeProduct,
         }))
       );
 
       break;
 
     case 'empty_expression':
-      const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
-        advanceCursor: advanceCursorAfterInitialField,
-        openSuggestions: true,
-      });
+      const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
+        'any',
+        ignoredColumnsForEmptyExpression,
+        {
+          advanceCursor: advanceCursorAfterInitialColumn,
+          openSuggestions: true,
+        }
+      );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
+        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired, activeProduct)
       );
 
       break;
@@ -571,7 +554,6 @@ export function extractTypeFromASTArg(
   | ESQLLiteral['literalType']
   | SupportedDataType
   | FunctionReturnType
-  | 'timeInterval'
   | string // @TODO remove this
   | undefined {
   if (Array.isArray(arg)) {
@@ -585,9 +567,6 @@ export function extractTypeFromASTArg(
     if (hit) {
       return hit.type;
     }
-  }
-  if (isTimeInterval(arg)) {
-    return arg.type;
   }
   if (isFunctionExpression(arg)) {
     const fnDef = getFunctionDefinition(arg.name);
@@ -615,10 +594,7 @@ function getValidFunctionSignaturesForPreviousArgs(
     (s) =>
       s.params?.length >= argIndex &&
       s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-        return (
-          dataType === enrichedArgs[idx].dataType ||
-          compareTypesWithLiterals(dataType, enrichedArgs[idx].dataType)
-        );
+        return dataType === enrichedArgs[idx].dataType;
       })
   );
   return relevantFuncSignatures;

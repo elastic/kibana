@@ -781,7 +781,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     const oneLineQuery = removeMultilines(query);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ast: Record<string, any> | undefined;
 
     try {
@@ -848,7 +847,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               data?.map,
               (mapValue: {
                 type: string;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 source: { type: string; variant: string; name: any | string; alias: any };
               }) => {
                 if (mapValue?.type === 'join') {

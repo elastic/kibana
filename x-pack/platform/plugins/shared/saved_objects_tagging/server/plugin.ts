@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import type {

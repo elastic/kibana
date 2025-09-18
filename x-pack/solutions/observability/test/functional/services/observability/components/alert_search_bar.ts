@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const FROM_SELECTOR = 'superDatePickerstartDatePopoverButton';
 const TO_SELECTOR = 'superDatePickerendDatePopoverButton';

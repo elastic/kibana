@@ -9,9 +9,9 @@
 
 import { getStateColumnActions } from './columns';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { Capabilities } from '@kbn/core/types';
+import type { Capabilities } from '@kbn/core/types';
 import { dataViewsMock } from '../../../__mocks__/data_views';
-import { UnifiedDataTableSettings } from '../../types';
+import type { UnifiedDataTableSettings } from '../../types';
 
 function getStateColumnAction(
   state: { columns?: string[]; sort?: string[][]; settings?: UnifiedDataTableSettings },

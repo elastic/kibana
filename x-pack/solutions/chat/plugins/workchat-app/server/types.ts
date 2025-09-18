@@ -9,10 +9,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkchatIntegrationDefinition } from '@kbn/wci-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import {
+import type {
   WorkChatFrameworkPluginSetup,
   WorkChatFrameworkPluginStart,
 } from '@kbn/workchat-framework-plugin/server';
+import type { ChatDataRegistryPluginSetup } from '@kbn/chat-data-registry-plugin/server';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
@@ -25,6 +26,7 @@ export interface WorkChatAppPluginStart {}
 export interface WorkChatAppPluginSetupDependencies {
   workchatFramework: WorkChatFrameworkPluginSetup;
   features: FeaturesPluginSetup;
+  chatDataRegistry: ChatDataRegistryPluginSetup;
 }
 
 export interface WorkChatAppPluginStartDependencies {

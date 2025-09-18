@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { WorkChatAppPlugin } from './plugin';
 
 export { config } from './config';

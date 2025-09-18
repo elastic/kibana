@@ -28,6 +28,7 @@ import type {
   DocInstallOptions,
   DocUninstallOptions,
   DocUpdateOptions,
+  DocUpdateAllOptions,
 } from './types';
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 
@@ -139,6 +140,18 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
   }
+  async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
+    const { inferenceIds } = options ?? {};
+    const idsToUpdate: string[] =
+      inferenceIds ?? (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+    this.logger.info(
+      `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
+    );
+    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId })));
+    return {
+      inferenceIds: idsToUpdate,
+    };
+  }
 
   async uninstall(options: DocUninstallOptions): Promise<void> {
     const { request, wait = false, inferenceId } = options;
@@ -211,7 +224,13 @@ const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknow
 };
 
 const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
-  const statusOrder: InstallationStatus[] = ['error', 'installing', 'uninstalled', 'installed'];
+  const statusOrder: InstallationStatus[] = [
+    'error',
+    'installing',
+    'uninstalling',
+    'uninstalled',
+    'installed',
+  ];
   for (const status of statusOrder) {
     if (statuses.includes(status)) {
       return status;

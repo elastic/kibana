@@ -18,7 +18,7 @@ export const awsRDS = createInventoryModel('awsRDS', {
       defaultMessage: 'RDS Database',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,

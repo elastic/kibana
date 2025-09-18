@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -13,17 +14,18 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
-  EuiDataGridRowHeightsOptions,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import type { GrokProcessor } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
+import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
+import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { getPercentageFormatter } from '../../../util/formatters';
-import { useKibana } from '../../../hooks/use_kibana';
+import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
-  PreviewDocsFilterOption,
   getSourceField,
   getTableColumns,
   getUniqueDetectedFields,
@@ -39,18 +41,15 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { isProcessorUnderEdit } from './state_management/processor_state_machine';
+import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import { WithUIAttributes } from './types';
-import { isGrokProcessor } from './utils';
-import { docViewJson } from './doc_viewer_json';
-import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
-import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
-import { MemoProcessingPreviewTable } from './processing_preview_table';
+import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
+import { PreviewFlyout, MemoPreviewTable } from '../shared';
+import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -104,6 +103,7 @@ const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
   const simulationFailedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
   );
@@ -120,6 +120,7 @@ const PreviewDocumentsGroupBy = () => {
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
     isSelected: previewDocsFilter === filter,
+    disabled: !hasMetrics,
     hasActiveFilters: previewDocsFilter === filter,
     onClick: () => changePreviewDocsFilter(filter),
   });
@@ -172,6 +173,7 @@ const PreviewDocumentsGroupBy = () => {
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
+  const streamName = useSimulatorSelector((state) => state.context.streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -194,27 +196,21 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     (state) => state.context.dataSourcesRefs.length >= 2
   );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
-      isProcessorUnderEdit(processorRef.getSnapshot())
+    const currentProcessorRef = state.context.stepRefs.find(
+      (stepRef) =>
+        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
     );
 
     if (!currentProcessorRef) return undefined;
 
-    return getSourceField(currentProcessorRef.getSnapshot().context.processor);
+    const step = currentProcessorRef.getSnapshot().context.step;
+
+    if (!isActionBlock(step)) return undefined;
+
+    return getSourceField(step);
   });
 
-  const { dependencies } = useKibana();
-  const { unifiedDocViewer } = dependencies.start;
-
-  const docViewsRegistry = useMemo(() => {
-    const docViewers = unifiedDocViewer.registry.getAll();
-    const myRegistry = new DocViewsRegistry([
-      docViewers.find((docView) => docView.id === 'doc_view_table')!,
-      docViewDiff,
-      docViewJson,
-    ]);
-    return myRegistry;
-  }, [unifiedDocViewer.registry]);
+  const docViewsRegistry = useDocViewerSetup(true);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -231,9 +227,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         fields.add(key);
       });
     });
-    // Keep the detected fields as first columns on the table
+    // Keep the detected fields as first columns on the table and sort the rest alphabetically
     const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
-    return Array.from(fields).sort((curr) => (uniqDetectedFields.includes(curr) ? -1 : 1));
+    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
+
+    return [...uniqDetectedFields, ...otherFields.sort()];
   }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
@@ -246,20 +244,19 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const grokMode =
     draftProcessor?.processor &&
-    isGrokProcessor(draftProcessor.processor) &&
-    !isEmpty(draftProcessor.processor.grok.field) &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'grok' &&
+    !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
     !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
-      const fieldName = draftProcessor.processor?.grok.field;
+      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
+      const fieldName = draftProcessor.processor?.from;
       return Array.from(grokExpression.getFields().values()).some(
         (field) => field.name === fieldName
       );
     });
 
-  const grokField = grokMode
-    ? (draftProcessor.processor as WithUIAttributes<GrokProcessorDefinition>).grok.field
-    : undefined;
+  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
   const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
 
   const validCurrentProcessorSourceField =
@@ -356,7 +353,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
                 />
               );
             } else {
-              return undefined;
+              return <>&nbsp;</>;
             }
           }
         : undefined,
@@ -364,46 +361,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   const hits = useMemo(() => {
-    return previewDocuments.map((doc, index) =>
-      // make sure the ID is unique when remapping a new batch of preview documents so the document flyout will refresh properly
-      ({
-        raw: doc,
-        flattened: doc,
-        index,
-        id: `${index}-${Date.now()}`,
-      })
-    );
+    return toDataTableRecordWithIndex(previewDocuments);
   }, [previewDocuments]);
 
-  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    if (currentDoc) {
-      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
-      const hit = hits.find((h) => h.index === currentDoc.index);
-      if (hit && hit !== currentDoc) {
-        setExpandedDoc(hit);
-      } else if (!hit && currentDoc) {
-        // if the current doc is not found in the hits, reset it
-        setExpandedDoc(undefined);
-      }
-    }
-  }, [currentDoc, hits]);
-
-  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
-  currentDocRef.current = currentDoc;
-  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
-  hitsRef.current = hits;
-  const onRowSelected = useCallback((rowIndex: number) => {
-    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
-      // If the same row is clicked, we collapse the flyout
-      setExpandedDoc(undefined);
-      return;
-    }
-    setExpandedDoc(hitsRef.current[rowIndex]);
-  }, []);
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
 
   const docViewerContext = useMemo(
     () => ({
@@ -424,12 +386,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   return (
     <>
-      <MemoProcessingPreviewTable
+      <MemoPreviewTable
         documents={previewDocuments}
         originalSamples={originalSamples}
         showRowSourceAvatars={shouldShowRowSourceAvatars}
         onRowSelected={onRowSelected}
-        selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
+        selectedRowIndex={selectedRowIndex}
         displayColumns={previewColumns}
         rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
         toolbarVisibility
@@ -445,6 +407,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           hits={hits}
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
         />
       </DocViewerContext.Provider>
     </>

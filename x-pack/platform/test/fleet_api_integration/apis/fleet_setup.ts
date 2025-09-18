@@ -10,7 +10,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
 import { SpaceTestApiClient } from './space_awareness/api_helper';
 

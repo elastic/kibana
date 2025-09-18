@@ -17,7 +17,6 @@ import { useSavedSearchInitial } from '../../state_management/discover_state_pro
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
@@ -32,7 +31,8 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED } from '../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -61,6 +61,10 @@ export const DiscoverTopNav = ({
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
+  );
+  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
   );
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
@@ -147,8 +151,7 @@ export const DiscoverTopNav = ({
         return;
       }
       if (needsSave) {
-        onSaveSearch({
-          savedSearch: stateContainer.savedSearchState.getState(),
+        onSaveDiscoverSession({
           services,
           state: stateContainer,
           onClose: () =>
@@ -279,7 +282,7 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
-        onDraftChange={TABS_ENABLED ? onSearchDraftChange : undefined}
+        onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
       />

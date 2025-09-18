@@ -1,0 +1,6 @@
+{
+  "name": "@kbn/upgrade-assistant-pkg-common",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

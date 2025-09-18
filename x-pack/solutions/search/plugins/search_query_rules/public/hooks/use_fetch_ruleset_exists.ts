@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { QUERY_RULES_QUERY_RULESET_EXISTS_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 

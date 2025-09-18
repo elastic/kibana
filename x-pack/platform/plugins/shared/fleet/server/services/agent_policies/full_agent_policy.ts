@@ -40,7 +40,9 @@ import {
   dataTypes,
   DEFAULT_OUTPUT,
   kafkaCompressionType,
+  OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
@@ -60,6 +62,7 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { generateOtelcolConfig } from './otel_collector';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -78,6 +81,8 @@ export async function getFullAgentPolicy(
   options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
+
+  const experimentalFeature = appContextService.getExperimentalFeatures();
 
   logger.debug(
     `Getting full policy for agent policy [${id}] using so scoped to [${soClient.getCurrentNamespace()}]`
@@ -146,34 +151,43 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
-  const inputs = (
-    await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput),
-      agentPolicy.namespace,
-      agentPolicy.global_data_tags
-    )
-  ).map((input) => {
-    // fix output id for default output
-    const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
-    if (output) {
-      input.use_output = getOutputIdForAgentPolicy(output);
-    }
-    if (input.type === 'fleet-server' && fleetServerHost) {
-      const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-      if (sslInputConfig) {
-        input = {
-          ...input,
-          ...sslInputConfig,
-          ...(bootstrapOutputConfig
-            ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-            : {}),
-        };
+  const agentInputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
+  );
+
+  let otelcolConfig;
+  if (experimentalFeature.enableOtelIntegrations) {
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
+  }
+
+  const inputs = agentInputs
+    // filter out the otelcol inputs, they will be added at the root of the policy
+    .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
+    .map((input) => {
+      // fix output id for default output
+      const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
+      if (output) {
+        input.use_output = getOutputIdForAgentPolicy(output);
       }
-    }
-    return input;
-  });
+      if (input.type === 'fleet-server' && fleetServerHost) {
+        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
+        if (sslInputConfig) {
+          input = {
+            ...input,
+            ...sslInputConfig,
+            ...(bootstrapOutputConfig
+              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
+              : {}),
+          };
+        }
+      }
+      return input;
+    });
+
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -204,6 +218,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
+    ...(otelcolConfig ? otelcolConfig : {}),
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
@@ -304,6 +319,22 @@ export async function getFullAgentPolicy(
         packagePoliciesByOutputId[outputId].length > 0
       ) {
         Object.assign(permissions, dataPermissionsByOutputId[outputId]);
+      }
+
+      // Add logs-* permissions for outputs with write_to_streams enabled
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+      if (originalOutput?.write_to_logs_streams) {
+        const streamsPermissions = {
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        };
+        Object.assign(permissions, streamsPermissions);
       }
 
       outputPermissions[outputId] = permissions;
@@ -606,10 +637,10 @@ export function transformOutputToFullPolicyOutput(
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
     ...(secrets ? { secrets } : {}),
   };
-  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+  if (ssl) {
     newOutput.ssl = {
-      ...newOutput.ssl,
-      ...ssl,
+      ...ssl, // ssl coming from preconfig
+      ...newOutput.ssl, // ssl coming from config_yaml
     };
   }
 

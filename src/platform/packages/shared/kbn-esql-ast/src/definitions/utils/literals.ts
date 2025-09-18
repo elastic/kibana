@@ -8,12 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLAstItem, ESQLLiteral } from '../../types';
-import { FunctionParameterType } from '../types';
-import { ISuggestionItem } from '../../commands_registry/types';
+import type { ESQLAstItem } from '../../types';
+import type { ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { getControlSuggestion } from './autocomplete/helpers';
-import { timeUnits, timeUnitsToSuggest } from '../constants';
+import { timeUnitsToSuggest } from '../constants';
 import { isLiteral } from '../../ast/is';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
@@ -25,7 +24,8 @@ export const buildConstantsDefinitions = (
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
+  documentationValue?: string
 ): ISuggestionItem[] =>
   userConstants.map((label) => ({
     label,
@@ -39,6 +39,7 @@ export const buildConstantsDefinitions = (
       i18n.translate('kbn-esql-ast.esql.autocomplete.constantDefinition', {
         defaultMessage: `Constant`,
       }),
+    ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
     sortText: sortText ?? 'A',
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
@@ -51,10 +52,14 @@ export function getDateLiterals(options?: {
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
       i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
-        defaultMessage: 'Named parameter',
+        defaultMessage: 'Bind to time filter',
       }),
       '1A',
-      options
+      options,
+      // appears when the user opens the second level popover
+      i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
+        defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
+      })
     ),
     {
       label: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePickerLabel', {
@@ -108,6 +113,7 @@ export function getCompatibleLiterals(
 ) {
   const suggestions: ISuggestionItem[] = [];
   if (types.includes('time_duration')) {
+    // TODO distinction between date_period and time durations!
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
@@ -136,75 +142,6 @@ export function getCompatibleLiterals(
     ); // i.e. year, month, ...
   }
   return suggestions;
-}
-
-export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
-  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
-}
-
-/**
- * Compares two types, taking into account literal types
- * @TODO strengthen typing here (remove `string`)
- * @TODO — clean up time duration and date period
- */
-export const compareTypesWithLiterals = (
-  a: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string,
-  b: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string
-) => {
-  if (a === b) {
-    return true;
-  }
-  // In Elasticsearch function definitions, time_duration and date_period are used
-  // time_duration is seconds/min/hour interval
-  // date_period is day/week/month/year interval
-  // So they are equivalent AST's 'timeInterval' (a date unit constant: e.g. 1 year, 15 month)
-  if (a === 'time_duration' || a === 'date_period') return b === 'timeInterval';
-  if (b === 'time_duration' || b === 'date_period') return a === 'timeInterval';
-
-  return false;
-};
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
-export function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
-  if (item.literalType === argType) {
-    return true;
-  }
-
-  if (bothStringTypes(argType, item.literalType)) {
-    // all functions accept keyword literals for text parameters
-    return true;
-  }
-
-  if (item.literalType === 'null') {
-    // all parameters accept null, but this is not yet reflected
-    // in our function definitions so we let it through here
-    return true;
-  }
-
-  // some parameters accept string literals because of ES auto-casting
-  if (
-    item.literalType === 'keyword' &&
-    (argType === 'date' ||
-      argType === 'date_period' ||
-      argType === 'version' ||
-      argType === 'ip' ||
-      argType === 'boolean')
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 function isValidDateString(dateString: unknown): boolean {

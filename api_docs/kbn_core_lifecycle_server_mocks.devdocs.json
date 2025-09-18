@@ -108,6 +108,10 @@
               "UserProfileServiceSetup",
               ">; pricing: jest.Mocked<",
               "PricingServiceSetup",
+              ">; injection: jest.MockedObjectDeep<",
+              "InternalCoreDiServiceSetup",
+              ">; dataStreams: jest.Mocked<",
+              "DataStreamsSetup",
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
@@ -152,6 +156,10 @@
               "InternalUserProfileServiceStart",
               ">; pricing: jest.Mocked<",
               "PricingServiceStart",
+              ">; injection: jest.MockedObjectDeep<",
+              "InternalCoreDiServiceStart",
+              ">; dataStreams: jest.Mocked<",
+              "DataStreamsStart",
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",

@@ -15,7 +15,7 @@ import {
   buildQueryFilter,
   FilterStateStore,
 } from '..';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {

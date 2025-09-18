@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { ObservabilityLogsExplorerConfig } from '../common';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { ObservabilityLogsExplorerConfig } from '../common';
 import { ObservabilityLogsExplorerPlugin } from './plugin';
 
 export function plugin(context: PluginInitializerContext<ObservabilityLogsExplorerConfig>) {

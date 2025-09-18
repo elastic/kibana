@@ -15,8 +15,6 @@ import type {
 export const createLogsOverviewMock = () => {
   const LogsOverviewMock = jest.fn(LogsOverviewMockImpl) as unknown as ILogsOverviewMock;
 
-  LogsOverviewMock.useIsEnabled = jest.fn(() => true);
-
   LogsOverviewMock.ErrorContent = jest.fn(() => <div />);
 
   LogsOverviewMock.LoadingContent = jest.fn(() => <div />);

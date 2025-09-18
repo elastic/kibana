@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLColumn, ESQLIdentifier } from '../../types';
+import type { ESQLColumn, ESQLIdentifier } from '../../types';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
@@ -126,10 +126,10 @@ export function unescapeColumnName(columnName: string) {
  */
 export function getColumnByName(
   columnName: string,
-  { fields, userDefinedColumns }: ICommandContext
+  { columns }: ICommandContext
 ): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const unescaped = unescapeColumnName(columnName);
-  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
+  return columns.get(unescaped);
 }
 
 /**
@@ -137,10 +137,10 @@ export function getColumnByName(
  */
 export function getColumnForASTNode(
   node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: ICommandContext
+  { columns }: ICommandContext
 ): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
-  return getColumnByName(formatted, { fields, userDefinedColumns });
+  return getColumnByName(formatted, { columns });
 }
 
 function hasWildcard(name: string) {

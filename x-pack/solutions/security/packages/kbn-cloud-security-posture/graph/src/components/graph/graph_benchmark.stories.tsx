@@ -14,7 +14,7 @@ import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { GraphPopover } from './graph_popover';
-import { ExpandButtonClickCallback } from '../types';
+import type { ExpandButtonClickCallback } from '../types';
 import { useGraphPopover } from './use_graph_popover';
 import { ExpandPopoverListItem } from '../styles';
 import largeGraph700n from '../mock/large_graph_700n_900e.json';

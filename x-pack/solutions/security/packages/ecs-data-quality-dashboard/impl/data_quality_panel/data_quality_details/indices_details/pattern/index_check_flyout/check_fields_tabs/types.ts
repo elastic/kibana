@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
   ALL_TAB_ID,

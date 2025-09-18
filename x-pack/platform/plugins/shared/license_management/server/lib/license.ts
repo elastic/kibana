@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LicenseLicense } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicenseLicense } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface PutLicenseArg {
   acknowledge: boolean;

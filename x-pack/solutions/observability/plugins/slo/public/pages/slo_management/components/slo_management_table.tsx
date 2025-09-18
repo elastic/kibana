@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import {
+import type {
   Criteria,
   DefaultItemAction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+} from '@elastic/eui';
+import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiTableSelectionType,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { sloPaths } from '../../../../common';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';

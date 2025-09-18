@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 
 interface Props {

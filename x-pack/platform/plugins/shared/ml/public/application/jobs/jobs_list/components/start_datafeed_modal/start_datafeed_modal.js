@@ -29,6 +29,8 @@ import { isManagedJob } from '../../../jobs_utils';
 import { forceStartDatafeeds } from '../utils';
 
 import { TimeRangeSelector } from './time_range_selector';
+import { i18n } from '@kbn/i18n';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 
 export class StartDatafeedModal extends Component {
   static contextType = context;
@@ -83,6 +85,12 @@ export class StartDatafeedModal extends Component {
 
   closeModal = () => {
     this.setState({ isModalVisible: false });
+
+    // Manually return focus to the start datafeed action button
+    // This is a workaround to fix the issue where the focus is not returned to the action button when the modal is closed
+    if (this.state.jobs.length === 1) {
+      createJobActionFocusRestoration(this.state.jobs[0].id)();
+    }
   };
 
   setTimeRangeValid = (timeRangeValid) => {
@@ -151,6 +159,9 @@ export class StartDatafeedModal extends Component {
           style={{ minWidth: '850px' }}
           maxWidth={false}
           data-test-subj="mlStartDatafeedModal"
+          aria-label={i18n.translate('xpack.ml.jobsList.startDatafeedModal.ariaLabel', {
+            defaultMessage: 'Start datafeed modal',
+          })}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>

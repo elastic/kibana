@@ -8,28 +8,18 @@
  */
 
 import { castArray } from 'lodash';
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceEsClientImpl,
-} from '../../lib/apm/client/apm_synthtrace_es_client';
-import {
-  InfraSynthtraceEsClient,
-  InfraSynthtraceEsClientImpl,
-} from '../../lib/infra/infra_synthtrace_es_client';
-import {
-  LogsSynthtraceEsClient,
-  LogsSynthtraceEsClientImpl,
-} from '../../lib/logs/logs_synthtrace_es_client';
-import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
-import {
-  SyntheticsSynthtraceEsClient,
-  SyntheticsSynthtraceEsClientImpl,
-} from '../../lib/synthetics/synthetics_synthtrace_es_client';
-import {
-  StreamsSynthtraceClientImpl,
-  StreamsSynthtraceClient,
-} from '../../lib/streams/streams_synthtrace_client';
-import { PackageManagement } from '../../lib/shared/types';
+import type { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { ApmSynthtraceEsClientImpl } from '../../lib/apm/client/apm_synthtrace_es_client';
+import type { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
+import { InfraSynthtraceEsClientImpl } from '../../lib/infra/infra_synthtrace_es_client';
+import type { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
+import { LogsSynthtraceEsClientImpl } from '../../lib/logs/logs_synthtrace_es_client';
+import type { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
+import type { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
+import { SyntheticsSynthtraceEsClientImpl } from '../../lib/synthetics/synthetics_synthtrace_es_client';
+import type { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
+import { StreamsSynthtraceClientImpl } from '../../lib/streams/streams_synthtrace_client';
+import type { PackageManagement } from '../../lib/shared/types';
 
 export interface PipelineOptions {
   includePipelineSerialization?: boolean;

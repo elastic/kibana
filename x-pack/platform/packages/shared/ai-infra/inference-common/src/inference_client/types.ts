@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BoundChatCompleteAPI, ChatCompleteAPI } from '../chat_complete';
-import { InferenceConnector } from '../connectors';
-import { BoundOutputAPI, OutputAPI } from '../output';
-import { BoundPromptAPI, PromptAPI } from '../prompt';
-import { BoundOptions } from '../bind';
+import type { BoundChatCompleteAPI, ChatCompleteAPI } from '../chat_complete';
+import type { InferenceConnector } from '../connectors';
+import type { BoundOutputAPI, OutputAPI } from '../output';
+import type { BoundPromptAPI, PromptAPI } from '../prompt';
+import type { BoundOptions } from '../bind';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.

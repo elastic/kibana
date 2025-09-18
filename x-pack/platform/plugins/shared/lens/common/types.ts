@@ -8,12 +8,12 @@
 import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { Position } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
-import { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize, PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
-import { layerTypes } from './layer_types';
-import { CollapseFunction } from './expressions';
+import type { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+import type { layerTypes } from './layer_types';
+import type { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/defs/map_to_columns';
 export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
@@ -103,4 +103,16 @@ export interface LegacyMetricState {
 export enum RowHeightMode {
   auto = 'auto',
   custom = 'custom',
+}
+
+export interface ValueFormatConfig {
+  id: string;
+  params?: {
+    decimals: number;
+    suffix?: string;
+    compact?: boolean;
+    pattern?: string;
+    fromUnit?: string;
+    toUnit?: string;
+  };
 }

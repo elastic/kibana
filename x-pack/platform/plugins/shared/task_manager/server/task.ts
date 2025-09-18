@@ -63,6 +63,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+  abortController: AbortController;
 }
 
 /**
@@ -78,6 +79,7 @@ export type SuccessfulRunResult = {
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {

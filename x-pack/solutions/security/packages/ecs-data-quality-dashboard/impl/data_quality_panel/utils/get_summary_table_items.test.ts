@@ -8,7 +8,7 @@
 import { defaultSort } from '../constants';
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
 import { mockStats } from '../mock/stats/mock_stats';
-import { DataQualityCheckResult } from '../types';
+import type { DataQualityCheckResult } from '../types';
 import { getSummaryTableItems } from './get_summary_table_items';
 
 describe('getSummaryTableItems', () => {

@@ -7,15 +7,11 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import {
-  APIRoutes,
-  ROUTE_VERSIONS,
-  SearchPlaygroundMutationKeys,
-  PlaygroundSavedObject,
-} from '../../common';
+import type { PlaygroundSavedObject } from '../../common';
+import { APIRoutes, ROUTE_VERSIONS, SearchPlaygroundMutationKeys } from '../../common';
 
 import { useKibana } from './use_kibana';
-import { PlaygroundResponse } from '../types';
+import type { PlaygroundResponse } from '../types';
 
 export const useSavePlayground = () => {
   const { http } = useKibana().services;

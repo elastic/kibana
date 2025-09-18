@@ -9,29 +9,31 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
-import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardItem,
-  DashboardCreateOut,
   DashboardCreateOptions,
-  DashboardGetOut,
-  DashboardSearchOut,
   DashboardUpdateOptions,
-  DashboardUpdateOut,
   DashboardSearchOptions,
+  DashboardItem,
+  DashboardGetOut,
 } from './latest';
+import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -186,7 +188,7 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = await savedObjectToItem(savedObject, false, {
+    const { item, error: itemError } = savedObjectToItem(savedObject, false, {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
@@ -210,6 +212,7 @@ export class DashboardStorage {
       DashboardGetOut,
       DashboardGetOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -279,11 +282,11 @@ export class DashboardStorage {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
+
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-
-    const validationError = transforms.create.out.result.validate({ item });
+    const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
@@ -296,6 +299,7 @@ export class DashboardStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<DashboardItem>
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -380,6 +384,7 @@ export class DashboardStorage {
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -425,20 +430,18 @@ export class DashboardStorage {
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
-    const hits = await Promise.all(
-      soResponse.saved_objects
-        .map(async (so) => {
-          const { item } = savedObjectToItem(so, false, {
-            allowedAttributes: soQuery.fields,
-            allowedReferences: optionsToLatest?.includeReferences,
-            getTagNamesFromReferences: (references: SavedObjectReference[]) =>
-              this.getTagNamesFromReferences(references, allTags),
-          });
-          return item;
-        })
-        // Ignore any saved objects that failed to convert to items.
-        .filter((item) => item !== null)
-    );
+    const hits = soResponse.saved_objects
+      .map((so) => {
+        const { item } = savedObjectToItem(so, false, {
+          allowedAttributes: soQuery.fields,
+          allowedReferences: optionsToLatest?.includeReferences,
+          getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+            this.getTagNamesFromReferences(references, allTags),
+        });
+        return item;
+      })
+      // Ignore any saved objects that failed to convert to items.
+      .filter((item) => item !== null);
     const response = {
       hits,
       pagination: {
@@ -460,6 +463,7 @@ export class DashboardStorage {
       DashboardSearchOut,
       DashboardSearchOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above

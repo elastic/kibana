@@ -1766,6 +1766,34 @@
           },
           {
             "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.target",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "{ type: string; mode: string; }"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.fully_parallel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fully_parallel",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
             "id": "def-common.ScoutTestRunInfo.config",
             "type": "Object",
             "tags": [],

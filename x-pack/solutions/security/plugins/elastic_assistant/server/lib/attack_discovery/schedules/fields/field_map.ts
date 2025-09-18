@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,

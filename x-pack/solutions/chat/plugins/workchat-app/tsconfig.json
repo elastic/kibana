@@ -35,9 +35,9 @@
     "@kbn/actions-plugin",
     "@kbn/wci-browser",
     "@kbn/features-plugin",
-    "@kbn/wc-genai-utils",
     "@kbn/workchat-framework-plugin",
     "@kbn/logging",
+    "@kbn/chat-data-registry-plugin",
   ],
   "exclude": [
     "target/**/*",

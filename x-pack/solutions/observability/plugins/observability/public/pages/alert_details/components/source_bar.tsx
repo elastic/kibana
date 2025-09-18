@@ -10,9 +10,9 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiTitle, EuiPanel, EuiFlexItem, EuiText } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { ALERT_START, ALERT_END } from '@kbn/rule-data-utils';
-import { TimeRange } from '@kbn/es-query';
-import { AlertDetailsSource } from '../types';
-import { TopAlert } from '../../..';
+import type { TimeRange } from '@kbn/es-query';
+import type { AlertDetailsSource } from '../types';
+import type { TopAlert } from '../../..';
 import { Groups } from '../../../components/alert_sources/groups';
 import { getSources } from '../../../components/alert_sources/get_sources';
 

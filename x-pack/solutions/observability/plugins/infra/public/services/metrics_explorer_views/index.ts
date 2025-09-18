@@ -6,4 +6,4 @@
  */
 
 export * from './metrics_explorer_views_service';
-export * from './types';
+export type * from './types';

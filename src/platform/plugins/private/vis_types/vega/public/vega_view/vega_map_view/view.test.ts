@@ -10,7 +10,7 @@
 import 'jest-canvas-mock';
 
 import { VegaMapView } from './view';
-import { VegaViewParams } from '../vega_base_view';
+import type { VegaViewParams } from '../vega_base_view';
 import { VegaParser } from '../../data_model/vega_parser';
 import { TimeCache } from '../../data_model/time_cache';
 import { SearchAPI } from '../../data_model/search_api';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './all';
+export type * from './all';
 export * from './common';
-export * from './observed_details';
+export type * from './observed_details';
 export * from './authentications';
 
 export { UsersQueries } from '../../../api/search_strategy';

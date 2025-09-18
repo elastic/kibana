@@ -8,37 +8,37 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { css } from '@emotion/react';
+import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Chart,
-  Metric,
+import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
+import type {
   MetricSpec,
   MetricWProgress,
-  isMetricElementEvent,
   RenderChangeListener,
-  Settings,
   MetricWTrend,
   MetricWNumber,
-  SettingsProps,
   MetricWText,
+  SettingsProps,
+  SecondaryMetricProps,
 } from '@elastic/charts';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { css } from '@emotion/react';
-import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
+import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric, TrendConfig } from './secondary_metric';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
+import type { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -71,6 +71,24 @@ export interface MetricVisComponentProps {
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
+function buildTrendConfig(
+  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  value: number | string
+): TrendConfig | undefined {
+  if (!palette) return undefined;
+
+  return {
+    showIcon: visuals !== 'value',
+    showValue: visuals !== 'icon',
+    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    palette,
+    borderColor: undefined,
+    compareToPrimary: baseline === 'primary',
+  };
+}
+
+const DEFAULT_TILE_SIDE_LENGTH = 310;
+
 export const MetricVis = ({
   data,
   config,
@@ -95,7 +113,8 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength = grid.current.length * grid.current[0]?.length > 1 ? 200 : 300;
+    const maxTileSideLength =
+      grid.current.length * grid.current[0]?.length > 1 ? 200 : DEFAULT_TILE_SIDE_LENGTH;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
@@ -139,6 +158,7 @@ export const MetricVis = ({
     data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
   ).slice(0, 1);
 
+  // TODO: optimize this so it doesn't run many times
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
@@ -149,7 +169,6 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    const hasDynamicColoring = config.metric.palette?.params && value != null;
     const tileColor =
       config.metric.palette?.params && typeof value === 'number'
         ? getColor(
@@ -165,39 +184,35 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    const trendConfig: TrendConfig | undefined = config.metric.secondaryTrend.palette
-      ? {
-          icon: config.metric.secondaryTrend.visuals !== 'value',
-          value: config.metric.secondaryTrend.visuals !== 'icon',
-          baselineValue:
-            config.metric.secondaryTrend.baseline === 'primary' && typeof value === 'number'
-              ? value
-              : Number(config.metric.secondaryTrend.baseline),
-          palette: config.metric.secondaryTrend.palette,
-          borderColor: undefined,
-          compareToPrimary: config.metric.secondaryTrend.baseline === 'primary',
-        }
-      : undefined;
+    let secondaryMetricProps: SecondaryMetricProps | undefined;
+    const { secondaryMetric } = config.dimensions;
+    if (secondaryMetric) {
+      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
+      const secondaryMetricInfo = getSecondaryMetricInfo({
+        row,
+        columns: data.columns,
+        secondaryMetric,
+        secondaryLabel: config.metric.secondaryLabel,
+        trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
+        staticColor: config.metric.secondaryColor,
+      });
+
+      secondaryMetricProps = {
+        value: secondaryMetricInfo.value,
+        label: secondaryMetricInfo.label,
+        badgeColor: secondaryMetricInfo.badgeColor,
+        ariaDescription: secondaryMetricInfo.description,
+        icon: secondaryMetricInfo.icon,
+        labelPosition: config.metric.secondaryLabelPosition,
+      };
+    }
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: ({ color }) => (
-          <SecondaryMetric
-            row={row}
-            config={config}
-            columns={data.columns}
-            getMetricFormatter={getMetricFormatter}
-            color={config.metric.secondaryColor}
-            trendConfig={
-              hasDynamicColoring && trendConfig
-                ? { ...trendConfig, borderColor: color }
-                : trendConfig
-            }
-          />
-        ),
+        extra: secondaryMetricProps,
         color: config.metric.color ?? defaultColor,
       };
       return Array.isArray(value)
@@ -211,18 +226,7 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: ({ color }) => (
-        <SecondaryMetric
-          row={row}
-          config={config}
-          columns={data.columns}
-          getMetricFormatter={getMetricFormatter}
-          color={config.metric.secondaryColor}
-          trendConfig={
-            hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
-          }
-        />
-      ),
+      extra: secondaryMetricProps,
       color: tileColor,
     };
 
@@ -256,7 +260,14 @@ export const MetricVis = ({
       return metricWProgress;
     }
 
-    return baseMetric;
+    // Metric with number, without trend line and without progress bar
+    return {
+      ...baseMetric,
+      // Override the background and main value color when the color is applied to the value
+      ...(config.metric.applyColorTo === 'value'
+        ? { color: defaultColor, valueColor: tileColor }
+        : { color: tileColor, valueColor: undefined }),
+    };
   });
 
   if (config.metric.minTiles) {
@@ -321,13 +332,16 @@ export const MetricVis = ({
               {
                 background: { color: defaultColor },
                 metric: {
-                  barBackground: colors.lightShade,
+                  barBackground: colors.lightestShade,
                   emptyBackground: colors.emptyShade,
                   blendingBackground: colors.emptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
-                  valuesTextAlign: config.metric.valuesTextAlign,
+                  valueTextAlign: config.metric.primaryAlign,
+                  extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
+                  valuePosition: config.metric.primaryPosition,
+                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

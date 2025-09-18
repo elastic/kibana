@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { NotebookDefinition } from '@kbn/ipynb';
+import type { NotebookDefinition } from '@kbn/ipynb';
 
 export interface NotebookInformation {
   id: string;

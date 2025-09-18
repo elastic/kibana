@@ -6,13 +6,17 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AlertSummaryCreateProps,
   AlertSummaryResponse,
   AlertSummaryUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import { CreateAlertSummarySchema, EsAlertSummarySchema, UpdateAlertSummarySchema } from './types';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
+  CreateAlertSummarySchema,
+  EsAlertSummarySchema,
+  UpdateAlertSummarySchema,
+} from './types';
 
 export const transformESToAlertSummary = (
   response: EsAlertSummarySchema[]

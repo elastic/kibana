@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { getLookupIndexCreateSuggestion } from '../../../definitions/utils/functions';
 import type { ESQLCommand } from '../../../types';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
@@ -53,6 +55,7 @@ export async function autocomplete(
           ({
             label: mnemonic,
             text: mnemonic + ' $0',
+            asSnippet: true,
             detail: description,
             kind: 'Keyword',
             sortText: `${i}-MNEMONIC`,
@@ -63,13 +66,25 @@ export async function autocomplete(
 
     case 'after_mnemonic':
     case 'index': {
+      const indexNameInput = commandText.split(' ').pop() ?? '';
       const joinSources = context?.joinSources;
+      const suggestions: ISuggestionItem[] = [];
 
-      if (!joinSources || !joinSources.length) {
-        return [];
+      const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+
+      const indexAlreadyExists = joinSources?.some(
+        (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
+      );
+      if (canCreate && !indexAlreadyExists) {
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
+        suggestions.push(createIndexCommandSuggestion);
       }
 
-      return specialIndicesToSuggestions(joinSources);
+      if (joinSources?.length) {
+        suggestions.push(...specialIndicesToSuggestions(joinSources));
+      }
+
+      return suggestions;
     }
 
     case 'after_index': {

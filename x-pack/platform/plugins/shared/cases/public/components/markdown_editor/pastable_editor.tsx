@@ -44,7 +44,12 @@ const PastableMarkdownEditorComponent = forwardRef<MarkdownEditorRef, PastableMa
 
     return (
       <>
-        {isUploading && <EuiProgress size="m" />}
+        <EuiProgress
+          css={{
+            visibility: isUploading ? 'visible' : 'hidden',
+          }}
+          size="m"
+        />
         <MarkdownEditor
           ref={ref}
           ariaLabel={ariaLabel}

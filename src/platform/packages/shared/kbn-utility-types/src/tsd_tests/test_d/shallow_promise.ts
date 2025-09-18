@@ -8,7 +8,7 @@
  */
 
 import { expectType } from 'tsd';
-import { ShallowPromise } from '../../..';
+import type { ShallowPromise } from '../../..';
 
 type P1 = ShallowPromise<string>;
 type P2 = ShallowPromise<ShallowPromise<string>>;

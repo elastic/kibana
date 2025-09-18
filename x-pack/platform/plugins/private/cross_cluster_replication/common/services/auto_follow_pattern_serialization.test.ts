@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AutoFollowPattern, AutoFollowPatternFromEs } from '../types';
+import type { AutoFollowPattern, AutoFollowPatternFromEs } from '../types';
 
 import {
   deserializeAutoFollowPattern,

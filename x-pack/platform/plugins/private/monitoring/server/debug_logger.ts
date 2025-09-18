@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RouteMethod } from '@kbn/core/server';
+import type { RouteMethod } from '@kbn/core/server';
 import fs from 'fs';
-import { MonitoringConfig } from './config';
-import { LegacyRequest, MonitoringCore, MonitoringRouteConfig, RouteDependencies } from './types';
+import type { MonitoringConfig } from './config';
+import type {
+  LegacyRequest,
+  MonitoringCore,
+  MonitoringRouteConfig,
+  RouteDependencies,
+} from './types';
 
 export function decorateDebugServer(
   server: MonitoringCore,

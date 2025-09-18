@@ -5,16 +5,30 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_PIPELINE_NAME = 'test_pipeline';
+const TREE_PIPELINE_NAME = 'tree_pipeline';
 
 const PIPELINE = {
   name: TEST_PIPELINE_NAME,
   description: 'My pipeline description.',
   version: 1,
+};
+
+const TREE_PIPELINE = {
+  name: TREE_PIPELINE_NAME,
+  description: 'Pipeline that has Pipeline processors.',
+  version: 1,
+  processors: [
+    {
+      pipeline: {
+        name: TEST_PIPELINE_NAME,
+      },
+    },
+  ],
 };
 
 const PIPELINE_CSV = {
@@ -50,16 +64,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Pipelines list', () => {
       before(async () => {
-        // Create a test pipeline
+        // Create test pipelines
         await es.ingest.putPipeline({
           id: TEST_PIPELINE_NAME,
           processors: [],
+        } as IngestPutPipelineRequest);
+
+        await es.ingest.putPipeline({
+          id: TREE_PIPELINE_NAME,
+          processors: TREE_PIPELINE.processors,
         } as IngestPutPipelineRequest);
       });
 
       after(async () => {
         // Delete the test pipeline
         await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        await es.ingest.deletePipeline({ id: TREE_PIPELINE_NAME });
       });
 
       it('adds pipeline query param when flyout is opened, and removes it when closed', async () => {
@@ -71,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(url).to.contain(`pipeline=${pipelinesList[0]}`);
 
-        await testSubjects.click('closeDetailsFlyout');
+        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
 
         url = await browser.getCurrentUrl();
         expect(url).not.to.contain(`pipeline=${pipelinesList[0]}`);
@@ -128,7 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain('queryText=test');
 
         // Close the flyout
-        await testSubjects.click('closeDetailsFlyout');
+        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
 
         // Url should now only have the query param for the search input
         url = await browser.getCurrentUrl();
@@ -148,6 +168,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.ingestPipelines.clickPipelineLink(0);
         const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
         expect(flyoutExists).to.be(true);
+      });
+
+      it('Opens the details flyout through the url', async () => {
+        const baseUrl = await browser.getCurrentUrl();
+        await browser.navigateTo(baseUrl + '?pipeline=' + TEST_PIPELINE_NAME);
+
+        const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
+        expect(flyoutExists).to.be(true);
+      });
+
+      describe('Pipelines tree', () => {
+        it('Displays the structure tree in the details flyout if the pipeline has Pipeline processors', async () => {
+          const baseUrl = await browser.getCurrentUrl();
+          await browser.navigateTo(baseUrl + '?pipeline=' + TREE_PIPELINE_NAME);
+
+          const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
+          expect(flyoutExists).to.be(true);
+
+          const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
+          expect(treeExists).to.be(true);
+        });
+
+        it("Doesn't display the structure tree in the details flyout if the pipeline has no Pipeline processors", async () => {
+          const baseUrl = await browser.getCurrentUrl();
+          await browser.navigateTo(baseUrl + '?pipeline=' + TEST_PIPELINE_NAME);
+
+          const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
+          expect(flyoutExists).to.be(true);
+
+          const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
+          expect(treeExists).to.be(false);
+
+          const pipelineTreeNodesExist = await pageObjects.ingestPipelines.pipelineTreeNodesExist([
+            TREE_PIPELINE_NAME,
+            TEST_PIPELINE_NAME,
+          ]);
+          expect(pipelineTreeNodesExist).to.be(false);
+        });
+
+        it('Clicking on tree nodes open details panel for selected pipeline', async () => {
+          const baseUrl = await browser.getCurrentUrl();
+          await browser.navigateTo(baseUrl + '?pipeline=' + TREE_PIPELINE_NAME);
+
+          const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
+          expect(treeExists).to.be(true);
+
+          let detailsPanelTitle = await pageObjects.ingestPipelines.getDetailsFlyoutTitle();
+          expect(detailsPanelTitle).to.be(TREE_PIPELINE_NAME);
+
+          await pageObjects.ingestPipelines.clickTreeNode(TEST_PIPELINE_NAME);
+
+          // The details panel should have changed
+          detailsPanelTitle = await pageObjects.ingestPipelines.getDetailsFlyoutTitle();
+          expect(detailsPanelTitle).to.be(TEST_PIPELINE_NAME);
+        });
       });
     });
 

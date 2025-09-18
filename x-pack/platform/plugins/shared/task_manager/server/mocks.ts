@@ -24,6 +24,7 @@ const createStartMock = () => {
   const mock: jest.Mocked<TaskManagerStartContract> = {
     fetch: jest.fn(),
     get: jest.fn(),
+    bulkGet: jest.fn(),
     aggregate: jest.fn(),
     remove: jest.fn(),
     bulkRemove: jest.fn(),

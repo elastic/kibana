@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml } from '../spec/schema';
-import { EsWorkflow, WorkflowStatus } from './v1';
+import type { WorkflowYaml } from '../spec/schema';
+import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
-): Omit<EsWorkflow, 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'> {
+): Omit<
+  EsWorkflow,
+  'spaceId' | 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'
+> {
   // TODO: handle merge, if, foreach, etc.
 
   return {
-    name: workflowDefinition.workflow.name,
-    description: workflowDefinition.workflow.description,
-    tags: workflowDefinition.workflow.tags ?? [],
-    status: workflowDefinition.workflow.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
+    name: workflowDefinition.name,
+    description: workflowDefinition.description,
+    tags: workflowDefinition.tags ?? [],
+    enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
+    deleted_at: null,
+    valid: true,
   };
+}
+
+export function isDangerousStatus(status: ExecutionStatus) {
+  return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }

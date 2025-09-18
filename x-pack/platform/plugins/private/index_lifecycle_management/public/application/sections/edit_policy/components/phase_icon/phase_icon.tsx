@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { Phases } from '../../../../../../common/types';
+import type { Phases } from '../../../../../../common/types';
 import './phase_icon.scss';
 interface Props {
   enabled: boolean;

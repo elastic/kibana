@@ -8,10 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { Props } from '..';
+import type { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 import { documentationService, uiMetricService } from '../../../services';
 

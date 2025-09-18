@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 
 import { useActions } from 'kea';
 
-import { TelemetryLogic, SendTelemetryHelper } from './telemetry_logic';
+import type { SendTelemetryHelper } from './telemetry_logic';
+import { TelemetryLogic } from './telemetry_logic';
 
 /**
  * React component helpers - useful for on-page-load/views

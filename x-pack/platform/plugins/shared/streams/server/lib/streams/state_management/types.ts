@@ -6,11 +6,13 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { Streams } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
+import type { Streams } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
 import type { AssetClient } from '../assets/asset_client';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../service';
+import type { QueryClient } from '../assets/query/query_client';
+import type { SystemClient } from '../system/system_client';
 
 interface StreamUpsertChange {
   type: 'upsert';
@@ -31,6 +33,8 @@ export interface StateDependencies {
   storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;
   assetClient: AssetClient;
+  systemClient: SystemClient;
+  queryClient: QueryClient;
   isServerless: boolean;
   isDev: boolean;
 }

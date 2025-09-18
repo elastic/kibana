@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesStatusResponse } from '@kbn/search-indices/common';
+import type { IndicesStatusResponse } from '@kbn/search-indices/common';
 
 import { createApiLogic } from '../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../shared/http';

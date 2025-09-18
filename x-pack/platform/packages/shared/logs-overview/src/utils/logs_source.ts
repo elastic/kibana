@@ -6,7 +6,8 @@
  */
 
 import { type DataViewsContract, type DataView } from '@kbn/data-views-plugin/common';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { fromPromise } from 'xstate5';
 
 export type LogsSourceConfiguration =
   | SharedSettingLogsSourceConfiguration
@@ -36,6 +37,27 @@ export type ResolvedIndexNameLogsSourceConfiguration = IndexNameLogsSourceConfig
   dataView: DataView;
 };
 
+export const resolveLogsSourceActor = ({
+  logsDataAccess,
+  dataViewsService,
+}: {
+  logsDataAccess: LogsDataAccessPluginStart;
+  dataViewsService: DataViewsContract;
+}) =>
+  fromPromise<
+    ResolvedIndexNameLogsSourceConfiguration,
+    {
+      logsSource: LogsSourceConfiguration;
+    }
+  >(async ({ input: { logsSource } }) => {
+    const normalizedLogsSource = await normalizeLogsSource({
+      logsDataAccess,
+      dataViewsService,
+    })(logsSource);
+
+    return normalizedLogsSource;
+  });
+
 export const normalizeLogsSource =
   ({
     logsDataAccess,
@@ -55,12 +77,10 @@ export const normalizeLogsSource =
         };
       case 'shared_setting':
         const logSourcesFromSharedSettings =
-          await logsDataAccess.services.logSourcesService.getLogSources();
+          await logsDataAccess.services.logSourcesService.getFlattenedLogSources();
         const sharedSettingLogsSource = {
           type: 'index_name' as const,
-          indexName: logSourcesFromSharedSettings
-            .map((logSource) => logSource.indexPattern)
-            .join(','),
+          indexName: logSourcesFromSharedSettings,
           timestampField: logsSource.timestampField ?? '@timestamp',
           messageField: logsSource.messageField ?? 'message',
         };

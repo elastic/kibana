@@ -6,13 +6,12 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import {
-  FieldDefinition,
-  InheritedFieldDefinition,
-  Streams,
-  namespacePrefixes,
-} from '@kbn/streams-schema';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
+import { namespacePrefixes } from '@kbn/streams-schema';
+import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 
 // This map is used to find the ECS equivalent field for a given OpenTelemetry attribute.
 export const otelEquivalentLookupMap = Object.fromEntries(
@@ -59,25 +58,7 @@ export const baseFields: FieldDefinition = {
   'stream.name': {
     type: 'system',
   },
-  'scope.dropped_attributes_count': {
-    type: 'long',
-  },
-  dropped_attributes_count: {
-    type: 'long',
-  },
-  'resource.dropped_attributes_count': {
-    type: 'long',
-  },
-  'resource.schema_url': {
-    type: 'keyword',
-  },
   'scope.name': {
-    type: 'keyword',
-  },
-  'scope.schema_url': {
-    type: 'keyword',
-  },
-  'scope.version': {
     type: 'keyword',
   },
   trace_id: {
@@ -106,7 +87,7 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-export const baseMappings: Record<string, MappingProperty> = {
+export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
     properties: {
@@ -123,13 +104,6 @@ export const baseMappings: Record<string, MappingProperty> = {
   resource: {
     type: 'object',
     properties: {
-      dropped_attributes_count: {
-        type: 'long',
-      },
-      schema_url: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
       attributes: {
         type: 'object',
         subobjects: false,

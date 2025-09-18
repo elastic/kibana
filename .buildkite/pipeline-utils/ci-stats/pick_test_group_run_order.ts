@@ -14,8 +14,10 @@ import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
-import { CiStatsClient, TestGroupRunOrderResponse } from './client';
+import type { BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
+import type { TestGroupRunOrderResponse } from './client';
+import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
@@ -118,14 +120,18 @@ interface FtrConfigsManifest {
   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
 }
 
-function getEnabledFtrConfigs(patterns?: string[]) {
+function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
   const configs: {
     enabled: Array<string | { [configPath: string]: { queue: string } }>;
     defaultQueue: string | undefined;
   } = { enabled: [], defaultQueue: undefined };
   const uniqueQueues = new Set<string>();
 
+  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+    if (mappedSolutions && !mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`))) {
+      continue;
+    }
     try {
       const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
       if (!isObj(ymlData)) {
@@ -234,6 +240,17 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : ['unit', 'integration', 'functional'];
 
+  const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
+    ? process.env.LIMIT_SOLUTIONS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+  if (LIMIT_SOLUTIONS) {
+    const validSolutions = ['chat', 'observability', 'search', 'security'];
+    const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
+    if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
+  }
+
   const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
     ? process.env.FTR_CONFIG_PATTERNS.split(',')
         .map((t) => t.trim())
@@ -277,14 +294,27 @@ export async function pickTestGroupRunOrder() {
     : {};
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
+  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
+    FTR_CONFIG_PATTERNS,
+    LIMIT_SOLUTIONS
+  );
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
+  const getJestConfigGlobs = (patterns: string[]) => {
+    if (!LIMIT_SOLUTIONS) {
+      return patterns;
+    }
+
+    return LIMIT_SOLUTIONS.flatMap((solution: string) =>
+      patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+    );
+  };
+
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -292,7 +322,7 @@ export async function pickTestGroupRunOrder() {
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -463,6 +493,9 @@ export async function pickTestGroupRunOrder() {
               ...expandAgentQueue('n2-4-spot'),
               diskSizeGb: 85,
             },
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
+            },
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -481,6 +514,9 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot'),
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
+            },
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -516,6 +552,7 @@ export async function pickTestGroupRunOrder() {
                   timeout_in_minutes: 90,
                   agents: expandAgentQueue(queue),
                   env: {
+                    SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
                     ...envFromlabels,
@@ -564,7 +601,8 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     [
       {
         group: 'Scout Configs',
-        depends_on: ['build'],
+        key: 'scout-configs',
+        depends_on: ['build_scout_tests'],
         steps: scoutGroups.map(
           ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
             label: `Scout: [ ${group} / ${title} ] plugin`,

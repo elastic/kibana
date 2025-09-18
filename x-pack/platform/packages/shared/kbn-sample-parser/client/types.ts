@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LoghubQuery } from '../src/validate_queries';
+import type { LoghubQuery } from '../src/validate_queries';
 
 export interface StreamLogDocument {
   [x: string]: unknown;

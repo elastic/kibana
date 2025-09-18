@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
@@ -25,7 +26,7 @@ import { MetricsContent } from './metrics/metrics';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
-  const { entity, renderMode } = useAssetDetailsRenderPropsContext();
+  const { entity, renderMode, schema } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -33,14 +34,24 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+  const hasApmPermissions = Boolean(application.capabilities.apm?.show);
 
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} loading={metadataLoading} entityType={entity.type} />
+    <MetadataSummaryList
+      metadata={metadata}
+      loading={metadataLoading}
+      entityType={entity.type}
+      schema={schema}
+    />
   ) : (
     <MetadataSummaryListCompact
       metadata={metadata}
       loading={metadataLoading}
       entityType={entity.type}
+      schema={schema}
     />
   );
 
@@ -69,7 +80,7 @@ export const Overview = () => {
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      {entity.type === 'host' ? (
+      {entity.type === 'host' && hasApmPermissions ? (
         <EuiFlexItem grow={false}>
           <ServicesContent hostName={entity.id} dateRange={dateRange} />
           <SectionSeparator />

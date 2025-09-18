@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';

@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
 import { DefaultCell } from './default_cell';
-import { CellComponentProps } from '../types';
+import type { CellComponentProps } from '../types';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { createPartialObjectMock } from '../utils/test';

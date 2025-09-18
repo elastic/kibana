@@ -8,7 +8,8 @@
  */
 
 import { Transform } from 'stream';
-import { ApmOtelFields, dedot } from '@kbn/apm-synthtrace-client';
+import type { ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { dedot } from '@kbn/apm-synthtrace-client';
 
 function extractAttributes(obj: Record<string, any>, attribute: string) {
   return Object.entries(obj)

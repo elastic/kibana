@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 

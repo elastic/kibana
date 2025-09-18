@@ -24,8 +24,12 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  combineHeadersWithBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from '@kbn/actions-plugin/server/lib';
 
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
@@ -152,6 +156,7 @@ export async function executor(
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
+
   const { basicAuth, sslOverrides } = buildConnectorAuth({
     hasAuth,
     authType,
@@ -162,10 +167,12 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    headers: mergedHeaders,
   });
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
@@ -220,6 +227,11 @@ export async function executor(
           getOrElse(() => retryResult(actionId, message))
         );
       }
+
+      if (status === 404) {
+        return errorResultInvalid(actionId, message, TaskErrorSource.USER);
+      }
+
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
@@ -243,7 +255,8 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
@@ -253,6 +266,7 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

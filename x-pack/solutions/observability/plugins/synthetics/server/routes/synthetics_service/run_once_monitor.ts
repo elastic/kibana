@@ -6,10 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { MonitorFields } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
 

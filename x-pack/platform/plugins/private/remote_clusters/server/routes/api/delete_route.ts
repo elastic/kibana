@@ -6,11 +6,12 @@
  */
 
 import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { serializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { doesClusterExist } from '../../lib/does_cluster_exist';

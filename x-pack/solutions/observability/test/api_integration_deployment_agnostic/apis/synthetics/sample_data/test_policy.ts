@@ -6,7 +6,7 @@
  */
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
 import { commonVars } from './test_project_monitor_policy';
 
@@ -430,6 +430,7 @@ export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
 
   policy.inputs.forEach((input) => {
+    input.id = '';
     input.streams = sortBy(input.streams, 'data_stream.dataset');
     input.streams.forEach((stream) => {
       stream.id = '';

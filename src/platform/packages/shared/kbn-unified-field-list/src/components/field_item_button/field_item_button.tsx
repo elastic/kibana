@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiHighlight,
   EuiIcon,
   EuiToolTip,

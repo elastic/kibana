@@ -27,6 +27,7 @@
     "@kbn/chart-expressions-common",
     "@kbn/react-kibana-context-render",
     "@kbn/ebt-tools",
+    "@kbn/chart-test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

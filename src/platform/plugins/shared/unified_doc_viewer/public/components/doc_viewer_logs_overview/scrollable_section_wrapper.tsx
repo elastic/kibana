@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
-import { ReactElement, forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
 export interface ScrollableSectionWrapperApi {
   openAndScrollToSection: () => void;

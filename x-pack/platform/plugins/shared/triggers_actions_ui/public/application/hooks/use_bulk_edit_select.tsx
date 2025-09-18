@@ -7,7 +7,7 @@
 import { useReducer, useMemo, useCallback } from 'react';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
-import { RuleTableItem, RulesListFilters } from '../../types';
+import type { RuleTableItem, RulesListFilters } from '../../types';
 
 interface BulkEditSelectionState {
   selectedIds: Set<string>;

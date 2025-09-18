@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 export const createPoint = ({
   field,

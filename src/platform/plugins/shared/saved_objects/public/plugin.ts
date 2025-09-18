@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { setStartServices } from './kibana_services';
 
 export interface SavedObjectsStartDeps {

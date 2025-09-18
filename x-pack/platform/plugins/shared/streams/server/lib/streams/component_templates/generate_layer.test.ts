@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { generateLayer } from './generate_layer';
 
 describe('generateLayer', () => {
@@ -13,7 +13,7 @@ describe('generateLayer', () => {
     name: 'logs.abc',
     description: '',
     ingest: {
-      processing: [],
+      processing: { steps: [] },
       wired: {
         routing: [],
         fields: {
@@ -26,6 +26,7 @@ describe('generateLayer', () => {
         // simulate DSL lifecycle
         dsl: { data_retention: '30d' },
       },
+      settings: {},
     },
   };
 
@@ -116,13 +117,6 @@ describe('generateLayer', () => {
                   "attributes": Object {
                     "subobjects": false,
                     "type": "object",
-                  },
-                  "dropped_attributes_count": Object {
-                    "type": "long",
-                  },
-                  "schema_url": Object {
-                    "ignore_above": 1024,
-                    "type": "keyword",
                   },
                 },
                 "type": "object",

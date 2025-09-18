@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ICommandCallbacks, Location } from '../../types';
-import type { ESQLCommand, ESQLCommandOption, ESQLColumn, ESQLFunction } from '../../../types';
+import { Walker } from '../../../walker';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { isAssignment, isColumn } from '../../../ast/is';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
+import type {
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLColumn,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLSingleAstItem,
+} from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { getFunctionSuggestions } from '../../../definitions/utils/functions';
 import {
   pipeCompleteItem,
   byCompleteItem,
@@ -20,16 +30,14 @@ import {
   getDateHistogramCompletionItem,
 } from '../../complete_items';
 import {
-  pushItUpInTheList,
-  columnExists,
-  handleFragment,
+  columnExists as _columnExists,
   getControlSuggestionIfSupported,
   suggestForExpression,
+  within,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
-import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
-import { getPosition } from './utils';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { ESQL_VARIABLES_PREFIX } from '../../constants';
+import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 
 function alreadyUsedColumns(command: ESQLCommand) {
@@ -44,45 +52,6 @@ function alreadyUsedColumns(command: ESQLCommand) {
   return columnNodes.map((node) => node.parts.join('.'));
 }
 
-function suggestColumns(
-  columnSuggestions: ISuggestionItem[],
-  otherSuggestions: ISuggestionItem[],
-  innerText: string,
-  context?: ICommandContext
-) {
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context),
-    async (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // fie<suggest>
-      return [
-        ...columnSuggestions.map((suggestion) => {
-          return {
-            ...suggestion,
-            text: suggestion.text,
-            rangeToReplace,
-          };
-        }),
-        ...otherSuggestions,
-      ];
-    },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // field<suggest>
-      const finalSuggestions = [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-      ];
-      return finalSuggestions.map<ISuggestionItem>((s) => ({
-        ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
-    }
-  );
-}
-
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
@@ -93,8 +62,12 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+  const isInlineStats = command.name === 'inlinestats';
+
+  const columnExists = (name: string) => _columnExists(name, context);
+
   const innerText = query.substring(0, cursorPosition);
-  const pos = getPosition(innerText, command);
+  const pos = getPosition(command, innerText);
 
   const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
@@ -110,40 +83,92 @@ export async function autocomplete(
     callbacks,
     context
   );
-  if (functionsSpecificSuggestions) {
+  if (
+    functionsSpecificSuggestions &&
+    cursorPosition &&
+    Walker.findFunction(command, (fn) => within(cursorPosition, fn.location))
+  ) {
     return functionsSpecificSuggestions;
   }
 
   switch (pos) {
-    case 'expression_without_assignment':
-      return [
-        ...controlSuggestions,
-        ...getFunctionSuggestions(
-          { location: Location.STATS },
-          callbacks?.hasMinimumLicenseRequired
-        ),
-        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-      ];
+    case 'expression_without_assignment': {
+      const isNewMultipleExpression = /,\s*$/.test(innerText);
 
-    case 'expression_after_assignment':
-      return [
-        ...controlSuggestions,
-        ...getFunctionSuggestions(
-          { location: Location.STATS },
-          callbacks?.hasMinimumLicenseRequired
-        ),
-      ];
+      const expressionRoot = isNewMultipleExpression
+        ? undefined // we're in a new expression, but there isn't an AST node for it yet
+        : command.args[command.args.length - 1];
 
-    case 'expression_complete':
-      return [
-        whereCompleteItem,
-        byCompleteItem,
-        pipeCompleteItem,
-        { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
-      ];
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const expressionSuggestions = await getExpressionSuggestions({
+        innerText,
+        expressionRoot,
+        location: Location.STATS,
+        context,
+        callbacks,
+        emptySuggestions: [
+          ...(!isNewMultipleExpression && !isInlineStats
+            ? [
+                {
+                  ...byCompleteItem,
+                  sortText: 'D',
+                },
+              ]
+            : []),
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+        ],
+        afterCompleteSuggestions: [
+          whereCompleteItem,
+          byCompleteItem,
+          ...getCommaAndPipe(innerText, expressionRoot, columnExists),
+        ],
+        suggestColumns: false,
+      });
+
+      return [...expressionSuggestions, ...controlSuggestions];
+    }
+
+    case 'expression_after_assignment': {
+      // Find expression root
+      const assignment = command.args[command.args.length - 1];
+      const rightHandAssignment = isAssignment(assignment)
+        ? assignment.args[assignment.args.length - 1]
+        : undefined;
+      let expressionRoot = Array.isArray(rightHandAssignment) ? rightHandAssignment[0] : undefined;
+
+      // @TODO the marker shouldn't be leaking through here
+      if (isMarkerNode(expressionRoot)) {
+        expressionRoot = undefined;
+      }
+
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const expressionSuggestions = await getExpressionSuggestions({
+        innerText,
+        expressionRoot,
+        location: Location.STATS,
+        context,
+        callbacks,
+        emptySuggestions: [],
+        afterCompleteSuggestions: [
+          whereCompleteItem,
+          byCompleteItem,
+          ...getCommaAndPipe(innerText, expressionRoot, columnExists),
+        ],
+        suggestColumns: false,
+      });
+
+      return [...expressionSuggestions, ...controlSuggestions];
+    }
 
     case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
+      // TODO do we still need this check?
       const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
 
       if (expressionRoot && !!Array.isArray(expressionRoot)) {
@@ -158,15 +183,12 @@ export async function autocomplete(
         preferredExpressionType: 'boolean',
         context,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
       });
 
       // Is this a complete boolean expression?
       // If so, we can call it done and suggest a pipe
-      const expressionType = getExpressionType(
-        expressionRoot,
-        context?.fields,
-        context?.userDefinedColumns
-      );
+      const expressionType = getExpressionType(expressionRoot, context?.columns);
       if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
         suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
       }
@@ -175,64 +197,126 @@ export async function autocomplete(
     }
 
     case 'grouping_expression_after_assignment': {
-      const histogramBarTarget = context?.histogramBarTarget ?? 0;
+      // Find expression root
+      const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
+      const assignment = byNode.args[byNode.args.length - 1];
+      const rightHandAssignment = isAssignment(assignment)
+        ? assignment.args[assignment.args.length - 1]
+        : undefined;
+      let expressionRoot = Array.isArray(rightHandAssignment) ? rightHandAssignment[0] : undefined;
 
-      const columnSuggestions = pushItUpInTheList(
-        await callbacks?.getByType('any', [], { openSuggestions: true }),
-        true
-      );
+      // @TODO the marker shouldn't be leaking through here
+      if (isMarkerNode(expressionRoot)) {
+        expressionRoot = undefined;
+      }
 
-      return suggestColumns(
-        columnSuggestions,
-        [
-          ...getFunctionSuggestions(
-            { location: Location.STATS_BY },
-            callbacks?.hasMinimumLicenseRequired
-          ),
-          getDateHistogramCompletionItem(histogramBarTarget),
-        ],
+      // guaranteed by the getPosition function, but we check it here for type safety
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const ignoredColumns = alreadyUsedColumns(command);
+
+      return getExpressionSuggestions({
         innerText,
-        context
-      );
+        expressionRoot,
+        location: Location.STATS_BY,
+        context,
+        callbacks,
+        emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
+        afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
+        advanceCursorAfterInitialColumn: false,
+        ignoredColumns,
+      });
     }
 
     case 'grouping_expression_without_assignment': {
-      const histogramBarTarget = context?.histogramBarTarget;
+      let expressionRoot: ESQLAstItem | undefined;
+      if (!/,\s*$/.test(innerText)) {
+        const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
 
-      const ignored = alreadyUsedColumns(command);
+        expressionRoot = byNode.args[byNode.args.length - 1];
+      }
+      // guaranteed by the getPosition function, but we check it here for type safety
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
 
-      const columnSuggestions = pushItUpInTheList(
-        await callbacks.getByType('any', ignored, { openSuggestions: true }),
-        true
-      );
+      const ignoredColumns = alreadyUsedColumns(command);
 
-      const suggestions = await suggestColumns(
-        columnSuggestions,
-        [
-          ...getFunctionSuggestions(
-            { location: Location.STATS_BY },
-            callbacks?.hasMinimumLicenseRequired
-          ),
-          getDateHistogramCompletionItem(histogramBarTarget),
-        ],
+      return getExpressionSuggestions({
         innerText,
-        context
-      );
-
-      suggestions.push(
-        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
-      );
-
-      return suggestions;
+        expressionRoot,
+        location: Location.STATS_BY,
+        context,
+        callbacks,
+        emptySuggestions: [
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+        ],
+        afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
+        advanceCursorAfterInitialColumn: false,
+        ignoredColumns,
+      });
     }
-
-    case 'grouping_expression_complete':
-      return [
-        pipeCompleteItem,
-        { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
-      ];
 
     default:
       return [];
   }
+}
+
+async function getExpressionSuggestions({
+  innerText,
+  expressionRoot,
+  location,
+  context,
+  callbacks,
+  emptySuggestions = [],
+  afterCompleteSuggestions = [],
+  advanceCursorAfterInitialColumn,
+  suggestColumns = true,
+  ignoredColumns = [],
+}: {
+  innerText: string;
+  expressionRoot: ESQLSingleAstItem | undefined;
+  location: Location;
+  context?: ICommandContext;
+  callbacks?: ICommandCallbacks;
+  emptySuggestions?: ISuggestionItem[];
+  afterCompleteSuggestions?: ISuggestionItem[];
+  advanceCursorAfterInitialColumn?: boolean;
+  suggestColumns?: boolean;
+  ignoredColumns?: string[];
+}): Promise<ISuggestionItem[]> {
+  const suggestions: ISuggestionItem[] = [];
+
+  if (!rightAfterColumn(innerText, expressionRoot, (name) => _columnExists(name, context))) {
+    suggestions.push(
+      ...(await suggestForExpression({
+        innerText,
+        expressionRoot,
+        location,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
+        context,
+        getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
+        advanceCursorAfterInitialColumn,
+        ignoredColumnsForEmptyExpression: ignoredColumns,
+      }))
+    );
+  }
+
+  if (
+    (!expressionRoot ||
+      (isColumn(expressionRoot) && !_columnExists(expressionRoot.parts.join('.'), context))) &&
+    !/not\s+$/i.test(innerText)
+  ) {
+    suggestions.push(...emptySuggestions);
+  }
+
+  if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
+    suggestions.push(...afterCompleteSuggestions);
+  }
+
+  return suggestions;
 }

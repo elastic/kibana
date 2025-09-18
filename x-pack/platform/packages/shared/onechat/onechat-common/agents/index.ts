@@ -7,9 +7,9 @@
 
 export {
   AgentType,
-  AgentMode,
   oneChatDefaultAgentId,
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
 } from './definition';
+export { agentIdRegexp } from './agent_ids';

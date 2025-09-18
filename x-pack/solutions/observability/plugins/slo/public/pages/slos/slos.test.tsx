@@ -29,6 +29,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
+import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -419,7 +420,7 @@ describe('SLOs Page', () => {
           const slo = sloList.results.at(0);
           expect(mockNavigate).toBeCalledWith(
             paths.sloCreateWithEncodedForm(
-              encode({ ...slo, name: `[Copy] ${slo!.name}`, id: undefined })
+              encodeURIComponent(encode(transformSloToCloneState(slo!)))
             )
           );
         });

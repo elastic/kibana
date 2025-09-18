@@ -11,13 +11,19 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import type {
+  GeometryValue,
+  XYChartSeriesIdentifier,
+  PointStyle,
+  AreaSeriesStyle,
+  LineSeriesStyle,
+} from '@elastic/charts';
 import {
   AreaSeries,
   Axis,
   BarSeries,
   ColorVariant,
   Fit,
-  GeometryValue,
   GroupBy,
   HorizontalAlignment,
   LayoutDirection,
@@ -26,24 +32,19 @@ import {
   Position,
   RectAnnotation,
   ScaleType,
-  SeriesNameFn,
   Settings,
   SmallMultiples,
   VerticalAlignment,
-  XYChartSeriesIdentifier,
   Tooltip,
   LegendValue,
-  PointStyle,
-  AreaSeriesStyle,
-  LineSeriesStyle,
 } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { DataLayerConfig } from '../../common';
+import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
@@ -53,16 +54,17 @@ import {
   dateHistogramLayer,
   paletteService,
   sampleArgsWithReferenceLine,
-} from '../__mocks__';
+} from '../test_utils';
 import {
   mockPaletteOutput,
   sampleArgs,
   createArgsWithLayers,
   createSampleDatatableWithRows,
   sampleLayer,
-} from '../../common/__mocks__';
-import { XYChart, XYChartRenderProps } from './xy_chart';
-import {
+} from '../../common/test_utils';
+import type { XYChartRenderProps } from './xy_chart';
+import { XYChart } from './xy_chart';
+import type {
   ExtendedDataLayerConfig,
   XYProps,
   AnnotationLayerConfigResult,
@@ -903,13 +905,13 @@ describe('XYChart component', () => {
       expect(linePointStyle.visible).toBe('always');
     });
 
-    test(`should be 'auto' when pointVisibility is undefined and showPoints is 'false'`, () => {
+    test(`should be 'never' when pointVisibility is undefined and showPoints is 'false'`, () => {
       const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
         showPoints: false,
       });
 
-      expect(areaPointStyle.visible).toBe('auto');
-      expect(linePointStyle.visible).toBe('auto');
+      expect(areaPointStyle.visible).toBe('never');
+      expect(linePointStyle.visible).toBe('never');
     });
   });
 
@@ -2064,280 +2066,6 @@ describe('XYChart component', () => {
           splitAccessors: new Map(),
         })
       ).toEqual('blue');
-    });
-  });
-
-  describe('provides correct series naming', () => {
-    const nameFnArgs = {
-      seriesKeys: [],
-      key: '',
-      specId: 'a',
-      xAccessor: '',
-      yAccessor: '',
-      splitAccessors: new Map(),
-    };
-
-    test('simplest xy chart without human-readable name', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a'],
-            splitAccessor: undefined,
-            columnToLabel: '',
-            table: dataWithoutFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-      const nameFn = component
-        .find(DataLayers)
-        .dive()
-        .find(LineSeries)
-        .prop('name') as SeriesNameFn;
-
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('a');
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
-    });
-
-    test('simplest xy chart with empty name', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a'],
-            splitAccessor: undefined,
-            columnToLabel: '{"a":""}',
-            table: dataWithoutFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-      const nameFn = component
-        .find(DataLayers)
-        .dive()
-        .find(LineSeries)
-        .prop('name') as SeriesNameFn;
-
-      // In this case, the ID is used as the name. This shouldn't happen in practice
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
-    });
-
-    test('simplest xy chart with human-readable name', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a'],
-            splitAccessor: undefined,
-            columnToLabel: '{"a":"Column A"}',
-            table: dataWithoutFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-      const nameFn = component
-        .find(DataLayers)
-        .dive()
-        .find(LineSeries)
-        .prop('name') as SeriesNameFn;
-
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Column A');
-    });
-
-    test('multiple y accessors', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a', 'b'],
-            splitAccessor: undefined,
-            columnToLabel: '{"a": "Label A"}',
-            table: dataWithoutFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-
-      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
-      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
-
-      // This accessor has a human-readable name
-      expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
-      // This accessor does not
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('b');
-      expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
-    });
-
-    test('split series without formatting and single y accessor', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a'],
-            splitAccessors: ['d'],
-            columnToLabel: '{"a": "Label A"}',
-            table: dataWithoutFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-      const nameFn = component
-        .find(DataLayers)
-        .dive()
-        .find(LineSeries)
-        .prop('name') as SeriesNameFn;
-
-      expect(
-        nameFn(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'a'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('split1');
-    });
-
-    test('split series with formatting and single y accessor', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a'],
-            splitAccessors: ['d'],
-            columnToLabel: '{"a": "Label A"}',
-            table: dataWithFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-      const nameFn = component
-        .find(DataLayers)
-        .dive()
-        .find(LineSeries)
-        .prop('name') as SeriesNameFn;
-
-      convertSpy.mockReturnValueOnce('formatted');
-      expect(
-        nameFn(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'a'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('formatted');
-      expect(getFormatSpy).toHaveBeenCalledWith({ id: 'custom' });
-    });
-
-    test('split series without formatting with multiple y accessors', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a', 'b'],
-            splitAccessors: ['d'],
-            columnToLabel: '{"a": "Label A","b": "Label B"}',
-            table: dataWithoutFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-
-      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
-      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = lineSeries.at(0).prop('name') as SeriesNameFn;
-
-      expect(
-        nameFn1(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'a'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('split1 - Label A');
-      expect(
-        nameFn2(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'b'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('split1 - Label B');
-    });
-
-    test('split series with formatting with multiple y accessors', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a', 'b'],
-            splitAccessors: ['d'],
-            columnToLabel: '{"a": "Label A","b": "Label B"}',
-            table: dataWithFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-
-      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
-      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
-
-      convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
-      expect(
-        nameFn1(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'a'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('formatted1 - Label A');
-      expect(
-        nameFn2(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'b'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('formatted2 - Label B');
     });
   });
 

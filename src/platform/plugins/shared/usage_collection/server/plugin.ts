@@ -45,6 +45,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       logger: this.logger.get('usage-collection', 'collector-set'),
       executionContext: core.executionContext,
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
+      maxCollectorConcurrency: config.maxCollectorConcurrency,
     });
 
     this.usageCountersService = new UsageCountersService({

@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Paginate as Component, PaginateProps, PaginateChildProps } from './paginate';
+import type { PaginateProps, PaginateChildProps } from './paginate';
+import { Paginate as Component } from './paginate';
 
 export type { PaginateProps, PaginateChildProps };
 export interface InPaginateProps {

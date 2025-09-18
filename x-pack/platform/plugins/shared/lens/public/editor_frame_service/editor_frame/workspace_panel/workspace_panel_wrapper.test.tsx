@@ -6,17 +6,18 @@
  */
 
 import React from 'react';
-import { Visualization } from '../../../types';
+import type { Visualization } from '../../../types';
+import type { FrameMock } from '../../../mocks';
 import {
   createMockVisualization,
   createMockFramePublicAPI,
-  FrameMock,
   renderWithReduxStore,
 } from '../../../mocks';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import { updateVisualizationState, LensAppState } from '../../../state_management';
+import type { LensAppState } from '../../../state_management';
+import { updateVisualizationState } from '../../../state_management';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import { LensInspector } from '../../../lens_inspector_service';
+import type { LensInspector } from '../../../lens_inspector_service';
 import { act, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';

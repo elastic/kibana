@@ -11,7 +11,6 @@ import type { AIConnector } from '@kbn/elastic-assistant';
 import {
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
-  DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
   HISTORY_QUERY_LOCAL_STORAGE_KEY,
   useAssistantContext,
 } from '@kbn/elastic-assistant';
@@ -34,7 +33,6 @@ import { useDismissAttackDiscoveryGeneration } from '../../use_dismiss_attack_di
 import { useIdsFromUrl } from './use_ids_from_url';
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
 import { useGetAttackDiscoveryGenerations } from '../../use_get_attack_discovery_generations';
-import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 const DEFAULT_PER_PAGE = 10;
 const GET_ATTACK_DISCOVERY_GENERATIONS_SIZE = 50; // fetch up to 50 generations, with no filter by status
@@ -62,7 +60,6 @@ const HistoryComponent: React.FC<Props> = ({
   onToggleShowAnonymized,
   showAnonymized,
 }) => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const { assistantAvailability, http } = useAssistantContext();
 
   const { ids: filterByAlertIds, setIdsUrl: setFilterByAlertIds } = useIdsFromUrl();
@@ -170,10 +167,6 @@ const HistoryComponent: React.FC<Props> = ({
 
   const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();
   const onRefresh = useCallback(async () => {
-    if (!attackDiscoveryAlertsEnabled) {
-      return;
-    }
-
     refetchFindAttackDiscoveries();
 
     // Dismiss all successful generations
@@ -182,7 +175,7 @@ const HistoryComponent: React.FC<Props> = ({
       const dismissPromises = generationsData.generations
         .filter(({ status }) => status === 'succeeded')
         .map(({ execution_uuid: executionUuid }) =>
-          dismissAttackDiscoveryGeneration({ attackDiscoveryAlertsEnabled, executionUuid })
+          dismissAttackDiscoveryGeneration({ executionUuid })
         );
 
       await Promise.all(dismissPromises);
@@ -190,14 +183,13 @@ const HistoryComponent: React.FC<Props> = ({
 
     setSelectedAttackDiscoveries({});
   }, [
-    attackDiscoveryAlertsEnabled,
     dismissAttackDiscoveryGeneration,
     generationsData?.generations,
     refetchFindAttackDiscoveries,
   ]);
 
   return (
-    <>
+    <div data-test-subj="history">
       <SearchAndFilter
         aiConnectors={aiConnectors}
         connectorNames={connectorNames}
@@ -249,9 +241,6 @@ const HistoryComponent: React.FC<Props> = ({
       {data != null && data.data.length === 0 && (
         <EmptyPrompt
           aiConnectorsCount={aiConnectors?.length ?? null}
-          alertsCount={Number(
-            localStorageAttackDiscoveryMaxAlerts ?? DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS
-          )}
           attackDiscoveriesCount={data?.total ?? 0}
           isDisabled={!aiConnectors?.length}
           isLoading={isLoading}
@@ -290,7 +279,7 @@ const HistoryComponent: React.FC<Props> = ({
           />
         </>
       )}
-    </>
+    </div>
   );
 };
 
