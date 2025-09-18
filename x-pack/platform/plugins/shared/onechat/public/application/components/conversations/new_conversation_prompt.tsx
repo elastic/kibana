@@ -206,11 +206,12 @@ const QuickNavigationCards: React.FC<{}> = () => {
     border-radius: ${euiTheme.border.radius.medium};
   `;
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup data-test-subj="newConversationPromptLinks" gutterSize="s" component="ul">
       {cards.map(({ key, title, description, iconType, link }) => {
         return (
-          <EuiFlexItem key={key}>
+          <EuiFlexItem key={key} component="li">
             <EuiCard
+              data-test-subj="newConversationPromptLinkItem"
               hasBorder
               textAlign="left"
               title={<span css={titleStyles}>{title}</span>}
