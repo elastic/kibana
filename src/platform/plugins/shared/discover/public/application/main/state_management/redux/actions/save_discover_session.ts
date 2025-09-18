@@ -203,7 +203,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
-      await dispatch(resetDiscoverSession({ discoverSession })).unwrap();
+      await dispatch(resetDiscoverSession({ updatedDiscoverSession: discoverSession })).unwrap();
     }
 
     return { discoverSession };
