@@ -35,7 +35,6 @@ export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) 
   const meter = metrics.getMeter('kibana.process');
   meter
     // Not calling it 'nodejs.eventloop.utilization.history' to avoid potential issues with the existing metric `nodejs.eventloop.utilization`.
-    // Q: Should we call it `nodejs.eventloop.utilization` and let the attributes differentiate between the immediate metric and the history?
     .createObservableGauge('nodejs.eventloop.history.utilization', {
       description:
         'The event loop utilization averaged over a set of sample buckets: short (3 samples), medium (6), long (12). Use `nodejs.eventloop.history.window` to select the correct window.',
