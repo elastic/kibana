@@ -31,10 +31,11 @@ export class ProductDocInstallClient {
       perPage: 100,
     };
     const response = await this.soClient.find<TypeAttributes>(query);
+    const savedObjects = response?.saved_objects.filter(
+      (so) => so.attributes?.installation_status === 'installed'
+    );
     const inferenceIds = new Set(
-      response?.saved_objects.map(
-        (so) => so.attributes?.inference_id ?? defaultInferenceEndpoints.ELSER
-      )
+      savedObjects.map((so) => so.attributes?.inference_id ?? defaultInferenceEndpoints.ELSER)
     );
     return Array.from(inferenceIds);
   }
