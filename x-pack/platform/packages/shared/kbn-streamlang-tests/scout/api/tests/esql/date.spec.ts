@@ -140,7 +140,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
         expect(esqlResult.documents[0]['log.time']).toEqual('01-01-2025');
-        expect(esqlResult.columnNames).not.toContain('@timestamp');
+        expect(esqlResult.documents[0]['@timestamp']).toBeNull();
       }
     );
 
