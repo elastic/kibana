@@ -88,7 +88,7 @@ export function APMEmbeddableRoot({
     <EmbeddableRenderer
       type={embeddableId}
       getParentApi={() => ({ getSerializedStateForChild: () => ({ rawState: input }) })}
-      hidePanelChrome={true}
+      panelProps={{ hidePanelChrome: true }}
     />
   );
 }

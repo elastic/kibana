@@ -114,8 +114,11 @@ export const DashboardViewport = () => {
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
           <EmbeddableRenderer<object, ControlGroupApi>
             key={dashboardApi.uuid}
-            hidePanelChrome={true}
-            panelProps={{ hideLoader: true }}
+            panelProps={{
+              disableReportingAttributes: true,
+              hideLoader: true,
+              hidePanelChrome: true
+            }}
             type={CONTROLS_GROUP_TYPE}
             maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
             getParentApi={() => {

@@ -30,6 +30,7 @@ export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   ComponentPropsType extends {} = {}
 >({
+  disableReportingAttributes,
   index,
   hideHeader,
   hidePanelChrome,
@@ -109,57 +110,48 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  const panelContent = useMemo(
-    () => (
-      <>
-        {blockingError && api && (
-          <EuiFlexGroup
-            alignItems="center"
-            css={panelErrorCss}
-            className="eui-fullHeight"
-            data-test-subj="embeddableError"
-            justifyContent="center"
-          >
-            <PresentationPanelErrorInternal api={api} error={blockingError} />
-          </EuiFlexGroup>
-        )}
-        {!initialLoadComplete && <PanelLoader />}
-        <div
-          {...(!hidePanelChrome
-            ? {
-                className: blockingError ? 'embPanel__content--hidden' : 'embPanel__content',
-                css: styles.embPanelContent,
-              }
-            : {})}
-          {...(api &&
-          ['image', 'lens', 'links', 'visualization'].includes((api as unknown as HasType).type)
-            ? reportingAttributes
-            : {})}
-          ref={(ref) => (reportingRef.current = ref as HTMLElement)}
-        >
-          <EuiErrorBoundary>
-            <Component
-              {...(componentProps as React.ComponentProps<typeof Component>)}
-              ref={(newApi) => {
-                if (newApi && !api) setApi(newApi);
-              }}
-            />
-          </EuiErrorBoundary>
-        </div>
-      </>
-    ),
-    [
-      api,
-      blockingError,
-      Component,
-      componentProps,
-      hidePanelChrome,
-      initialLoadComplete,
-      panelErrorCss,
-      reportingAttributes,
-      reportingRef,
-    ]
-  );
+  const panelContent = useMemo(() => {
+    const componentWithErrorBoundary = (
+      <EuiErrorBoundary>
+        <Component
+          {...(componentProps as React.ComponentProps<typeof Component>)}
+          ref={(newApi) => {
+            if (newApi && !api) setApi(newApi);
+          }}
+        />
+      </EuiErrorBoundary>
+    );
+
+    return disableReportingAttributes && hidePanelChrome ? (
+      componentWithErrorBoundary
+    ) : (
+      <div
+        {...(!hidePanelChrome
+          ? {
+              className: blockingError ? 'embPanel__content--hidden' : 'embPanel__content',
+              css: styles.embPanelContent,
+            }
+          : {})}
+        {...(!disableReportingAttributes &&
+        api &&
+        ['image', 'lens', 'links', 'visualization'].includes((api as unknown as HasType).type)
+          ? reportingAttributes
+          : {})}
+        ref={(ref) => (reportingRef.current = ref as HTMLElement)}
+      >
+        {componentWithErrorBoundary}
+      </div>
+    );
+  }, [
+    Component,
+    api,
+    blockingError,
+    componentProps,
+    disableReportingAttributes,
+    hidePanelChrome,
+    reportingAttributes,
+    reportingRef,
+  ]);
 
   return hidePanelChrome ? (
     panelContent
@@ -202,6 +194,18 @@ export const PresentationPanelInternal = <
             panelDescription={panelDescription ?? defaultPanelDescription}
           />
         )}
+        {blockingError && api && (
+          <EuiFlexGroup
+            alignItems="center"
+            css={panelErrorCss}
+            className="eui-fullHeight"
+            data-test-subj="embeddableError"
+            justifyContent="center"
+          >
+            <PresentationPanelErrorInternal api={api} error={blockingError} />
+          </EuiFlexGroup>
+        )}
+        {!initialLoadComplete && <PanelLoader />}
         {panelContent}
       </EuiPanel>
     </PresentationPanelHoverActionsWrapper>

@@ -31,7 +31,6 @@ export const EmbeddableRenderer = <
   getParentApi,
   panelProps,
   onApiAvailable,
-  hidePanelChrome,
 }: {
   type: string;
   maybeId?: string;
@@ -46,10 +45,11 @@ export const EmbeddableRenderer = <
     | 'hideLoader'
     | 'hideHeader'
     | 'hideInspector'
+    | 'hidePanelChrome'
     | 'setDragHandles'
     | 'getActions'
+    | 'disableReportingAttributes'
   >;
-  hidePanelChrome?: boolean;
 }) => {
   const phaseTracker = useRef(new PhaseTracker());
 
@@ -137,7 +137,6 @@ export const EmbeddableRenderer = <
 
   return (
     <PresentationPanel<Api, {}>
-      hidePanelChrome={hidePanelChrome}
       {...panelProps}
       Component={componentPromise}
     />

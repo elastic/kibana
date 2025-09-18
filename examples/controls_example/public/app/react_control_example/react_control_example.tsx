@@ -409,9 +409,12 @@ export const ReactControlExample = ({
         onApiAvailable={(api) => {
           setControlGroupApi(api as ControlGroupApi);
         }}
-        hidePanelChrome={true}
         getParentApi={() => parentApi}
-        panelProps={{ hideLoader: true }}
+        panelProps={{
+          disableReportingAttributes: true,
+          hideLoader: true,
+          hidePanelChrome: true
+        }}
       />
       <EuiSpacer size="l" />
       {isControlGroupInitialized && (
@@ -419,7 +422,6 @@ export const ReactControlExample = ({
           <EmbeddableRenderer
             type={'search_embeddable'}
             getParentApi={() => parentApi}
-            hidePanelChrome={false}
           />
         </div>
       )}

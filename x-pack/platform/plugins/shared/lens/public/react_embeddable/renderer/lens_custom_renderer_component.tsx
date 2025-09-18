@@ -122,6 +122,7 @@ export function LensRenderer({
 
   const panelProps: PanelProps = useMemo(() => {
     return {
+      hidePanelChrome: !showPanelChrome,
       hideInspector: !showInspector,
       showNotifications: false,
       showShadow: false,
@@ -164,7 +165,6 @@ export function LensRenderer({
         reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}
       onApiAvailable={setLensApi}
-      hidePanelChrome={!showPanelChrome}
       panelProps={panelProps}
     />
   );

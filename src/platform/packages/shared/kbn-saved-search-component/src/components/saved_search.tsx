@@ -226,7 +226,9 @@ const SavedSearchComponentTable: React.FC<
       onApiAvailable={(api) => {
         embeddableApi.current = api;
       }}
-      hidePanelChrome
+      panelProps={{
+        hidePanelChrome: true
+      }}
     />
   );
 };

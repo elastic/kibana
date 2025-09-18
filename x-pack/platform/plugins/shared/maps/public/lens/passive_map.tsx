@@ -95,7 +95,10 @@ export function PassiveMap(props: Props) {
             });
           }
         }}
-        hidePanelChrome={true}
+        panelProps={{
+          disableReportingAttributes: true,
+          hidePanelChrome: true
+        }}
       />
     </div>
   );
