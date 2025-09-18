@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { useConvertIndexToLookup } from './use_convert_index_to_lookup';
 import { getReindexStatus, startReindex } from '../../services';
 
