@@ -30,7 +30,6 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
-import { setBreadcrumbs } from '@kbn/remote-clusters-plugin/public/application/services/breadcrumb';
 import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
@@ -56,7 +55,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { ViewModeToggle } from './view_mode_toggle';
+import { ExitEditButton } from './exit_edit_button';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -399,10 +398,9 @@ export function InternalDashboardTopNav({
       <MountPointPortal setMountPoint={setMountPoint(0)}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
       </MountPointPortal>
-      {showWriteControls && !dashboardApi.isManaged && (
+      {showWriteControls && !dashboardApi.isManaged && viewMode === 'edit' && (
         <MountPointPortal setMountPoint={setMountPoint(1)}>
-          <ViewModeToggle
-            viewMode={viewMode}
+          <ExitEditButton
             dashboardApi={dashboardApi}
             hasUnsavedChanges={hasUnsavedChanges}
             isResetting={isResetting}

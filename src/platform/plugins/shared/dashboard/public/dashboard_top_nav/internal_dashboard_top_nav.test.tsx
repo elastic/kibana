@@ -85,7 +85,7 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(component.getByTestId('dashboardEnterEditMode')).toBeInTheDocument();
+    expect(component.queryByTestId('dashboardViewOnlyMode')).toBeFalsy();
   });
 
   it('should show the exit edit button when the dashboard is in edit mode', async () => {

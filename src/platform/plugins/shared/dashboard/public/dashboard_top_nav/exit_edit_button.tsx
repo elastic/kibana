@@ -8,21 +8,19 @@
  */
 
 import React, { useCallback } from 'react';
-import type { ViewMode } from '@kbn/presentation-publishing';
 import { EuiButton, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
+import { i18n } from '@kbn/i18n';
 import type { DashboardApi } from '../dashboard_api/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { confirmDiscardOrSaveUnsavedChanges } from '../dashboard_listing/confirm_overlays';
 
-export const ViewModeToggle = ({
-  viewMode,
+export const ExitEditButton = ({
   dashboardApi,
   hasUnsavedChanges,
   isResetting,
   setIsResetting,
 }: {
-  viewMode: ViewMode;
   dashboardApi: DashboardApi;
   hasUnsavedChanges: boolean;
   isResetting: boolean;
@@ -30,12 +28,6 @@ export const ViewModeToggle = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isMounted = useMountedState();
-
-  const switchToEditMode = useCallback(() => {
-    getDashboardBackupService().storeViewMode('edit');
-    dashboardApi.setViewMode('edit');
-    dashboardApi.clearOverlays();
-  }, [dashboardApi]);
 
   const switchToViewMode = useCallback(() => {
     dashboardApi.clearOverlays();
@@ -70,38 +62,21 @@ export const ViewModeToggle = ({
     });
   }, [dashboardApi, hasUnsavedChanges, isMounted, setIsResetting]);
 
-  const buttonProps: {
-    [key: string]: {
-      label: string;
-      iconType?: string;
-      onClick: () => void;
-      'data-test-subj': string;
-    };
-  } = {
-    view: {
-      label: 'Edit',
-      iconType: 'pencil',
-      onClick: switchToEditMode,
-      'data-test-subj': 'dashboardEnterEditMode',
-    },
-    edit: {
-      label: 'Exit edit',
-      onClick: switchToViewMode,
-      'data-test-subj': 'dashboardViewOnlyMode',
-    },
-  };
-
   return (
     <EuiButton
       size="s"
       color="text"
+      iconType="pencil"
+      onClick={switchToViewMode}
       isDisabled={isResetting}
       css={{
         marginLeft: euiTheme.size.s,
       }}
-      {...buttonProps[viewMode]}
+      data-test-subj="dashboardViewOnlyMode"
     >
-      {buttonProps[viewMode].label}
+      {i18n.translate('dashboard.topNave.exitEditButtonLabel', {
+        defaultMessage: 'Exit edit',
+      })}
     </EuiButton>
   );
 };
