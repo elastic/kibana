@@ -50,29 +50,6 @@ import {
 import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
-// Utility function to count layers by type for proper numbering
-function getLayerCountByType(
-  layerConfigs: Array<{ layerType: string | undefined; layerId: string }>,
-  currentLayerId: string
-): number {
-  const currentLayerType = layerConfigs.find(
-    (config) => config.layerId === currentLayerId
-  )?.layerType;
-  if (!currentLayerType) return 1;
-
-  // Count how many layers of the same type come before this one
-  let count = 0;
-  for (const config of layerConfigs) {
-    if (config.layerType === currentLayerType) {
-      count++;
-      if (config.layerId === currentLayerId) {
-        break;
-      }
-    }
-  }
-  return count;
-}
-
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();
   const visualization = useLensSelector(selectVisualization);
@@ -298,6 +275,17 @@ export function LayerPanels(
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
+  const onSelectedTabChanged = (id: string) => {
+    setSelectedLayerId(id);
+  };
+
+  // if the selected tab got removed, switch back first tab
+  useEffect(() => {
+    if (!layerIds.includes(selectedLayerId)) {
+      setSelectedLayerId(layerIds[0] || '');
+    }
+  }, [selectedLayerId, layerIds]);
+
   const layerConfigs = useMemo(() => {
     return layerIds.map((layerId) => ({
       layerId,
@@ -310,24 +298,38 @@ export function LayerPanels(
     }));
   }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
 
-  const onSelectedTabChanged = (id: string) => {
-    setSelectedLayerId(id);
-  };
+  // Create layer labels for the tabs
+  const layerLabels = useMemo(() => {
+    const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
+    const countsByLayerId = new Map<string, number>();
+    const typeCounters = new Map<string, number>();
+    const layerTabDisplayNames = new Map<string, string>();
 
-  // if the selected tab is removed, switch back first tab
-  useEffect(() => {
-    if (!layerIds.includes(selectedLayerId)) {
-      setSelectedLayerId(layerIds[0] || '');
+    for (const config of visibleLayerConfigs) {
+      const layerType = config.layerType || '';
+      const currentCount = (typeCounters.get(layerType) || 0) + 1;
+      typeCounters.set(layerType, currentCount);
+      countsByLayerId.set(config.layerId, currentCount);
     }
-  }, [selectedLayerId, layerIds]);
+
+    for (const config of visibleLayerConfigs) {
+      const layerType = config.layerType || '';
+      const typeCount = typeCounters.get(layerType) || 0;
+      const formattedLayerType = getLensLayerTypeDisplayName(config.layerType);
+      const layerCountForId = countsByLayerId.get(config.layerId) || 1;
+      const displayName =
+        typeCount > 1 ? `${formattedLayerType} ${layerCountForId}` : formattedLayerType;
+
+      layerTabDisplayNames.set(config.layerId, displayName);
+    }
+
+    return layerTabDisplayNames;
+  }, [layerConfigs]);
 
   const renderTabs = useCallback(() => {
     const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
 
     const layerTabs = visibleLayerConfigs.map((layerConfig, layerIndex) => {
-      const formattedLayerType = getLensLayerTypeDisplayName(layerConfig.layerType);
-      const layerCountByType = getLayerCountByType(visibleLayerConfigs, layerConfig.layerId);
-
       return (
         <EuiTab
           key={layerIndex}
@@ -336,7 +338,7 @@ export function LayerPanels(
           disabled={false}
           data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
         >
-          {formattedLayerType} {layerCountByType}
+          {layerLabels.get(layerConfig.layerId)}
         </EuiTab>
       );
     });
@@ -396,6 +398,7 @@ export function LayerPanels(
     hideAddLayerButton,
     indexPatternService,
     layerConfigs,
+    layerLabels,
     props.dataViews,
     props.framePublicAPI,
     props?.setIsInlineFlyoutVisible,
