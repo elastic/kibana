@@ -76,6 +76,7 @@ import type {
   PolicySecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  PreconfiguredInputs,
   CloudProvider,
   CloudConnectorResponse,
   CloudConnectorVars,
@@ -1179,7 +1180,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1458,10 +1464,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           isEndpointPolicy &&
           ((assignedInOldPolicy && !assignedInNewPolicy) ||
             (!assignedInOldPolicy && assignedInNewPolicy));
-        return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        });
+        if (options?.bumpRevision !== false) {
+          return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+            removeProtection,
+          });
+        }
       },
       { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
     );
@@ -3603,7 +3611,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 

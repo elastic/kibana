@@ -13,7 +13,6 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import apm from 'elastic-apm-node';
 
 import type {
-  NewPackagePolicy,
   AgentPolicy,
   Installation,
   Output,
@@ -22,6 +21,8 @@ import type {
   PreconfiguredPackage,
   PackagePolicy,
   PackageInfo,
+  PreconfiguredPackagePolicy,
+  PreconfiguredInputs,
 } from '../../common/types';
 import type { PreconfigurationError } from '../../common/constants';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
@@ -39,10 +40,14 @@ import { getInstallation, getPackageInfo } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
-import { type InputsOverride, packagePolicyService } from './package_policy';
+import { packagePolicyService } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import {
+  packagePolicyHasFrozenVariablesUpdate,
+  updateFrozenInputs,
+} from './preconfiguration/package_policy_frozen_variables';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -273,14 +278,62 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         })
       );
 
-      const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
-        return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
-          (packagePolicy) =>
-            (packagePolicy.id !== undefined &&
-              packagePolicy.id === installablePackagePolicy.packagePolicy.id) ||
-            packagePolicy.name === installablePackagePolicy.packagePolicy.name
-        );
-      });
+      const [packagePoliciesToAdd, packagePoliciesUpdates] = installedPackagePolicies.reduce(
+        (acc, installablePackagePolicy) => {
+          const isAdd = !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
+            (packagePolicy) =>
+              (packagePolicy.id !== undefined &&
+                packagePolicy.id === installablePackagePolicy.packagePolicy.id) ||
+              packagePolicy.name === installablePackagePolicy.packagePolicy.name
+          );
+
+          if (isAdd) {
+            acc[0].push(installablePackagePolicy);
+            return acc;
+          }
+
+          if (!agentPolicyWithPackagePolicies) {
+            return acc;
+          }
+
+          const existingPackagePolicy = agentPolicyWithPackagePolicies.package_policies?.find(
+            (packagePolicy) =>
+              packagePolicy.id === installablePackagePolicy.packagePolicy.id ||
+              packagePolicy.name === installablePackagePolicy.packagePolicy.name
+          );
+
+          if (!existingPackagePolicy) {
+            return acc;
+          }
+
+          const updatePackagePolicy = { ...existingPackagePolicy };
+          if (Array.isArray(installablePackagePolicy.packagePolicy.inputs)) {
+            if (
+              packagePolicyHasFrozenVariablesUpdate(
+                updatePackagePolicy,
+                installablePackagePolicy.packagePolicy.inputs
+              )
+            ) {
+              acc[1].push({
+                namespacedSoClient: installablePackagePolicy.namespacedSoClient,
+                packagePolicy: updatePackagePolicy,
+                inputs: installablePackagePolicy.packagePolicy.inputs,
+              });
+            }
+          }
+
+          return acc;
+        },
+        [
+          [] as Array<(typeof installedPackagePolicies)[0]>,
+          [] as Array<{
+            namespacedSoClient: SavedObjectsClientContract;
+            packagePolicy: PackagePolicy;
+            inputs: PreconfiguredInputs[];
+          }>,
+        ]
+      );
+
       logger.debug(
         () =>
           `Adding preconfigured package policies ${JSON.stringify(
@@ -293,6 +346,33 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(esClient, policy!, packagePoliciesToAdd!, defaultOutput);
       s?.end();
+
+      logger.debug(
+        () =>
+          `Updating preconfigured package policies ${JSON.stringify(
+            packagePoliciesUpdates.map((pol) => ({
+              name: pol.packagePolicy.name,
+              package: pol.packagePolicy.package?.name,
+            }))
+          )}`
+      );
+      const s2 = apm.startSpan('Update preconfigured package policies', 'preconfiguration');
+      for (const packagePolicyUpdate of packagePoliciesUpdates!) {
+        try {
+          await updateFrozenInputs(
+            esClient,
+            packagePolicyUpdate.namespacedSoClient,
+            packagePolicyUpdate.packagePolicy,
+            packagePolicyUpdate.inputs
+          );
+        } catch (error) {
+          logger.error(
+            `Error updating preconfigured variables for package policy ${packagePolicyUpdate.packagePolicy.name}: ${error.message}`,
+            { error }
+          );
+        }
+      }
+      s2?.end();
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
@@ -308,7 +388,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       }
 
-      if (packagePoliciesToAdd.length > 0 || shouldAddIsManagedFlag) {
+      if (
+        packagePoliciesToAdd.length > 0 ||
+        packagePoliciesUpdates.length > 0 ||
+        shouldAddIsManagedFlag
+      ) {
         await agentPolicyService.bumpRevision(namespacedSoClient, esClient, policy!.id);
       }
     }
@@ -362,13 +446,7 @@ async function addPreconfiguredPolicyPackages(
   installedPackagePolicies: Array<{
     installedPackage: Installation;
     namespacedSoClient: SavedObjectsClientContract;
-    packagePolicy:
-      | (Partial<Omit<NewPackagePolicy, 'inputs'>> & {
-          id?: string | number;
-          name: string;
-          inputs?: InputsOverride[];
-        })
-      | (Omit<SimplifiedPackagePolicy, 'package' | 'policy_id'> & { id: string });
+    packagePolicy: Omit<PreconfiguredPackagePolicy, 'package'>;
   }>,
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
