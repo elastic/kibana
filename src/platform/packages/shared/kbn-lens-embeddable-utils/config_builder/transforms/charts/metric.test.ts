@@ -233,13 +233,17 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('metric');
       expect(convertedConfig).toHaveProperty('dataset');
       expect(convertedConfig).toHaveProperty('title');
+      expect(lensState).toHaveProperty('references');
+      expect(lensState.references).toHaveLength(1);
+
+      const referenceId = lensState.references[0].id;
 
       expect(lensState).toMatchInlineSnapshot(`
         Object {
           "description": "A test metric chart using ESQL",
           "references": Array [
             Object {
-              "id": "d47bf278-c85d-47e7-a409-f80dcb7561c4",
+              "id": "${referenceId}",
               "name": "indexpattern-datasource-layer-layer_0",
               "type": "index-pattern",
             },
@@ -382,24 +386,29 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('dataset');
       expect(convertedConfig).toHaveProperty('title');
 
+      expect(lensState).toHaveProperty('references');
+      expect(lensState.references).toHaveLength(1);
+
+      const referenceId = lensState.references[0].id;
+
       expect(lensState).toMatchInlineSnapshot(`
         Object {
           "description": "A comprehensive metric chart with all features",
           "references": Array [
             Object {
-              "id": "3e72d2ac-b297-4071-8ffc-c730dbdc0b58",
+              "id": "${referenceId}",
               "name": "indexpattern-datasource-layer-layer_0",
               "type": "index-pattern",
             },
           ],
           "state": Object {
             "adHocDataViews": Object {
-              "3e72d2ac-b297-4071-8ffc-c730dbdc0b58": Object {
+              "${referenceId}": Object {
                 "allowHidden": false,
                 "allowNoIndex": false,
                 "fieldAttrs": Object {},
                 "fieldFormats": Object {},
-                "id": "3e72d2ac-b297-4071-8ffc-c730dbdc0b58",
+                "id": "${referenceId}",
                 "name": "comprehensive-index",
                 "runtimeFieldMap": Object {},
                 "sourceFilters": Array [],
