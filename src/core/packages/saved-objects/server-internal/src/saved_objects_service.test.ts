@@ -730,6 +730,13 @@ describe('SavedObjectsService', () => {
         });
       });
 
+      describe('#isAccessControlEnabled', () => {
+        it('returns true by default', async () => {
+          const { getDefaultIndex } = await soService.start(createStartDeps());
+          expect(getDefaultIndex()).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+      });
+
       describe('#getIndexForType', () => {
         it('return the correct index for type specifying its indexPattern', async () => {
           const { getIndexForType } = await soService.start(createStartDeps());

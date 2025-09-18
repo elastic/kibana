@@ -23,8 +23,28 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
 
+  private accessControlEnabled: boolean = true;
+
   constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
     this.legacyTypesMap = new Set(legacyTypes);
+  }
+
+  /**
+   * Sets whether access control is enabled
+   *
+   * @internal
+   */
+  public setAccessControlEnabled(enabled: boolean) {
+    this.accessControlEnabled = enabled;
+  }
+
+  /**
+   * Gets whether access control is enabled
+   *
+   * @internal
+   */
+  public isAccessControlEnabled() {
+    return this.accessControlEnabled;
   }
 
   /**
@@ -42,7 +62,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
-    validateType(type);
+    validateType(type, this.accessControlEnabled);
     this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
   }
 
@@ -127,7 +147,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 }
 
-const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
+const validateType = (
+  { name, management, hidden, hiddenFromHttpApis, supportsAccessControl }: SavedObjectsType,
+  accessControlEnabled: boolean
+) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -144,6 +167,12 @@ const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObj
   if (hidden === true && hiddenFromHttpApis === false) {
     throw new Error(
       `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
+    );
+  }
+
+  if (supportsAccessControl === true && accessControlEnabled === false) {
+    throw new Error(
+      `Type ${name}: 'supportsAccessControl' cannot be 'true' when 'enableAccessControl' is disabled in configuration`
     );
   }
 };
