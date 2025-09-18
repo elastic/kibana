@@ -17,7 +17,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import * as i18n from './translations';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 
 const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
@@ -30,8 +29,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
-  const isOAuth2Enabled = getIsExperimentalFeatureEnabled('isWebhookAuth2ClientCredentialsOn');
-
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -81,7 +78,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         <LazyLoadedAuthConfig
           readOnly={readOnly}
           isPfxEnabled={isPfxEnabled}
-          isOAuth2Enabled={isOAuth2Enabled}
+          isOAuth2Enabled={false} // intermediate release: temporarily disabled, will be enabled in a follow-up PR
         />
       </React.Suspense>
     </>
