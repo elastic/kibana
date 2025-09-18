@@ -27,8 +27,7 @@ const upsertApiLabel = (
   }
 
   const existingLabelIndex = mergedLabels.findIndex(
-    (label) =>
-      label.field === apiLabel.field && label.value === apiLabel.value && label.source === 'api'
+    (label) => label.field === apiLabel.field && label.source === 'api'
   );
 
   if (existingLabelIndex >= 0) {

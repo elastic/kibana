@@ -229,6 +229,9 @@ describe('createPrivilegedUsersCrudService', () => {
           ...mockUserInput,
           user: { ...mockUserInput.user, is_privileged: true },
           labels: { sources: ['csv', 'api'] },
+          entity_analytics_monitoring: {
+            labels: [],
+          },
         },
       });
 
@@ -463,7 +466,12 @@ describe('createPrivilegedUsersCrudService', () => {
         index: TEST_INDEX,
         refresh: 'wait_for',
         id: 'test-id',
-        doc: updateData,
+        doc: {
+          ...updateData,
+          entity_analytics_monitoring: {
+            labels: [],
+          },
+        },
       });
       expect(result).toEqual({
         id: 'test-id',
@@ -569,6 +577,21 @@ describe('createPrivilegedUsersCrudService', () => {
 
   describe('delete', () => {
     it('should delete user by id', async () => {
+      // Mock get to return a user so delete can proceed
+      mockEsClient.asCurrentUser.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: TEST_INDEX,
+        _source: {
+          id: 'test-id',
+          user: { name: 'test-user', is_privileged: true },
+          labels: { sources: ['api'] },
+          entity_analytics_monitoring: { labels: [] },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        },
+        found: true,
+        _version: 1,
+      });
+
       const mockDeleteResponse = {
         _id: 'test-id',
         _index: TEST_INDEX,
@@ -1041,6 +1064,21 @@ describe('createPrivilegedUsersCrudService', () => {
     });
 
     it('should propagate elasticsearch errors on update', async () => {
+      // Mock get to return a user so we can test the update error
+      mockEsClient.asCurrentUser.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: TEST_INDEX,
+        _source: {
+          id: 'test-id',
+          user: { name: 'test-user', is_privileged: true },
+          labels: { sources: ['api'] },
+          entity_analytics_monitoring: { labels: [] },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        },
+        found: true,
+        _version: 1,
+      });
+
       const esError = new Error('Update failed');
       mockEsClient.asCurrentUser.update.mockRejectedValue(esError);
 
@@ -1057,6 +1095,21 @@ describe('createPrivilegedUsersCrudService', () => {
     });
 
     it('should propagate elasticsearch errors on delete', async () => {
+      // Mock get to return a user so we can test the delete error
+      mockEsClient.asCurrentUser.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: TEST_INDEX,
+        _source: {
+          id: 'test-id',
+          user: { name: 'test-user', is_privileged: true },
+          labels: { sources: ['api'] },
+          entity_analytics_monitoring: { labels: [] },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        },
+        found: true,
+        _version: 1,
+      });
+
       const esError = new Error('Delete failed');
       mockEsClient.asCurrentUser.delete.mockRejectedValue(esError);
 
