@@ -299,12 +299,18 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: internalStateSlice.actions.setTabs,
     effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
       (action, listenerApi) => {
+        const { persistedDiscoverSession } = listenerApi.getState();
         const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
         const getTabInternalState = (tabId: string) =>
           selectTabRuntimeInternalState(runtimeStateManager, tabId);
-        void tabsStorageManager.persistLocally(action.payload, getTabAppState, getTabInternalState);
+        void tabsStorageManager.persistLocally(
+          action.payload,
+          getTabAppState,
+          getTabInternalState,
+          persistedDiscoverSession?.id
+        );
       },
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
@@ -327,19 +333,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
     ),
-  });
-
-  startListening({
-    predicate: (_, currentState, previousState) => {
-      return (
-        currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
-      );
-    },
-    effect: (_, listenerApi) => {
-      const { tabsStorageManager } = listenerApi.extra;
-      const { persistedDiscoverSession } = listenerApi.getState();
-      tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
-    },
   });
 
   startListening({

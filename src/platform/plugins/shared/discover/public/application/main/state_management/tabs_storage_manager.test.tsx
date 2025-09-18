@@ -150,7 +150,12 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(props, mockGetAppState, mockGetInternalState);
+    await tabsStorageManager.persistLocally(
+      props,
+      mockGetAppState,
+      mockGetInternalState,
+      'testDiscoverSessionId'
+    );
 
     expect(urlStateStorage.set).toHaveBeenCalledWith(
       TAB_STATE_URL_KEY,
@@ -162,6 +167,7 @@ describe('TabsStorageManager', () => {
       spaceId: mockSpaceId,
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      discoverSessionId: 'testDiscoverSessionId',
     });
   });
 
@@ -537,60 +543,6 @@ describe('TabsStorageManager', () => {
       ...closedTabsGroup1,
       ...newClosedTabs.map((tab) => ({ ...tab, closedAt: newClosedAt })),
     ]);
-  });
-
-  it('should update discover session id in local storage', () => {
-    const {
-      tabsStorageManager,
-      services: { storage },
-    } = create();
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, {
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
-      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
-      discoverSessionId: undefined,
-    });
-
-    jest.spyOn(storage, 'set');
-
-    const newDiscoverSessionId = 'session-123';
-    tabsStorageManager.updateDiscoverSessionIdLocally(newDiscoverSessionId);
-
-    expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      discoverSessionId: newDiscoverSessionId,
-      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
-      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
-    });
-  });
-
-  it('should not update discover session id when disabled', () => {
-    const urlStateStorage = createKbnUrlStateStorage();
-    const services = createDiscoverServicesMock();
-    services.storage = new Storage(localStorage);
-    const storage = services.storage;
-
-    const tabsStorageManager = createTabsStorageManager({
-      urlStateStorage,
-      storage,
-      enabled: false,
-    });
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, {
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      openTabs: [],
-      closedTabs: [],
-    });
-
-    jest.spyOn(storage, 'set');
-
-    tabsStorageManager.updateDiscoverSessionIdLocally('session-123');
-
-    expect(storage.set).not.toHaveBeenCalled();
   });
 
   it('should load open tabs from storage when persisted discover session id matches stored session id', () => {

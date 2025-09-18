@@ -58,6 +58,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
     const state = getState();
+    const tadIdReplacementMap: Record<string, string> = {};
+    let nextSelectedTabId = state.tabs.unsafeCurrentId;
     const currentTabs = selectAllTabs(state);
     const adHocDataViews = new Map<
       string,
@@ -95,6 +97,16 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
               services,
             })
           );
+        }
+
+        if (newCopyOnSave) {
+          // to avoid id conflicts, we need to assign a new id to the tab if we're creating a new discover session
+          const newTabId = uuidv4();
+          if (tab.id === nextSelectedTabId) {
+            nextSelectedTabId = newTabId;
+          }
+          updatedTab.id = newTabId;
+          tadIdReplacementMap[tab.id] = newTabId;
         }
 
         if (overriddenVisContextAfterInvalidation) {
@@ -211,7 +223,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
           const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-          const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
+          const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
 
           if (!tabStateContainer) {
             return;
@@ -237,14 +249,14 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       const allTabs = discoverSession.tabs.map((tab) =>
         fromSavedObjectTabToTabState({
           tab,
-          existingTab: selectTab(state, tab.id),
+          existingTab: selectTab(state, tadIdReplacementMap[tab.id] ?? tab.id),
         })
       );
 
       dispatch(
         setTabs({
           allTabs,
-          selectedTabId: state.tabs.unsafeCurrentId,
+          selectedTabId: nextSelectedTabId,
           recentlyClosedTabs: selectRecentlyClosedTabs(state),
         })
       );

@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
@@ -91,6 +91,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelect = useCallback(
     async (item: TabItem) => {
+      tabsBarApi.current?.moveFocusToNextSelectedItem(item);
       changeState((prevState) => selectTab(prevState, item));
     },
     [changeState]
@@ -98,9 +99,12 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelectRecentlyClosed = useCallback(
     async (item: TabItem) => {
-      changeState((prevState) => selectRecentlyClosedTab(prevState, item));
+      const newItem = createItem();
+      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id };
+      tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
+      changeState((prevState) => selectRecentlyClosedTab(prevState, restoredItem));
     },
-    [changeState]
+    [changeState, createItem]
   );
 
   const onClose = useCallback(
