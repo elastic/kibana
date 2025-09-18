@@ -274,16 +274,17 @@ export class Walker {
   public static readonly replace = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
-    newValue: types.ESQLProperNode
+    newValue: types.ESQLProperNode | ((node: types.ESQLProperNode) => types.ESQLProperNode)
   ): types.ESQLProperNode | undefined => {
     const node =
       typeof matcher === 'function' ? Walker.find(tree, matcher) : Walker.match(tree, matcher);
     if (!node) return;
+    const replacement = typeof newValue === 'function' ? newValue(node) : newValue;
     for (const key in node) {
       if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
         delete (node as any)[key];
     }
-    Object.assign(node, newValue);
+    Object.assign(node, replacement);
     return node;
   };
 
@@ -299,7 +300,7 @@ export class Walker {
   public static readonly replaceAll = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
-    newValue: types.ESQLProperNode
+    newValue: types.ESQLProperNode | ((node: types.ESQLProperNode) => types.ESQLProperNode)
   ): types.ESQLProperNode[] => {
     const nodes =
       typeof matcher === 'function'
@@ -307,11 +308,12 @@ export class Walker {
         : Walker.matchAll(tree, matcher);
     if (nodes.length === 0) return [];
     for (const node of nodes) {
+      const replacement = typeof newValue === 'function' ? newValue(node) : newValue;
       for (const key in node) {
         if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
           delete (node as any)[key];
       }
-      Object.assign(node, newValue);
+      Object.assign(node, replacement);
     }
     return nodes;
   };
