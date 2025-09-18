@@ -166,9 +166,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
           />
         </LabelNodeContainer>
       </EuiToolTip>
-      {ips && ips?.length > 0 && countryCodes && countryCodes.length > 0 && (
-        <LabelNodeDetails ips={ips} countryCodes={countryCodes} />
-      )}
+      <LabelNodeDetails ips={ips} countryCodes={countryCodes} />
     </>
   );
 });
