@@ -21,6 +21,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     const createdResponse = await apiServices.cases.create({
       ...createCasePayload,
       owner: caseOwner,
+      category: 'test',
     });
     expect(createdResponse.status).toBe(200);
     expect(createdResponse.data.owner).toBe(caseOwner);
@@ -29,7 +30,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
-    await apiServices.cases.delete([caseId]);
+    await apiServices.cases.cleanup.deleteAllCases();
     const fetchedResponse = await apiServices.cases.get(caseId);
     expect(fetchedResponse.status).toBe(404);
     caseId = '';
@@ -60,18 +61,13 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   );
 
   apiTest('should add a new connector to a case', async ({ apiServices }) => {
-    const createdResponse = await apiServices.cases.create({
-      ...createCasePayload,
-      owner: caseOwner,
-    });
-    caseId = createdResponse.data.id;
-    expect(createdResponse.status).toBe(200);
+    const currentCase = await apiServices.cases.get(caseId);
 
     // patch the case with a new connector
     const updatedResponse = await apiServices.cases.update([
       {
         id: caseId,
-        version: createdResponse.data.version,
+        version: currentCase.data.version,
         connector: {
           id: 'jira',
           name: 'Jira',
@@ -123,23 +119,15 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
 
     const fetchedResponse1 = await apiServices.cases.get(createdResponse1.data.id);
     const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
-    caseId = createdResponse2.data.id;
 
     // this case should have been deleted because it was assigned "tag1"
     expect(fetchedResponse1.status).toBe(404);
 
-    // this case shouldn't been deleted because it was assigned "tag2"
+    // this case shouldn't have been deleted because it was assigned "tag2"
     expect(fetchedResponse2.status).toBe(200);
   });
 
-  apiTest('should post a comment', async ({ apiServices }) => {
-    const createdResponse = await apiServices.cases.create({
-      ...createCasePayload,
-      owner: caseOwner,
-    });
-    caseId = createdResponse.data.id;
-    expect(createdResponse.status).toBe(200);
-
+  apiTest('should post and find a comment', async ({ apiServices }) => {
     const createdComment = await apiServices.cases.comments.create(caseId, {
       type: 'user',
       comment: 'This is a test comment',
@@ -157,13 +145,6 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   });
 
   apiTest('should post an alert', async ({ apiServices }) => {
-    const createdResponse = await apiServices.cases.create({
-      ...createCasePayload,
-      owner: caseOwner,
-    });
-    caseId = createdResponse.data.id;
-    expect(createdResponse.status).toBe(200);
-
     const createdAlert = await apiServices.cases.comments.create(caseId, {
       type: 'alert',
       owner: caseOwner,
@@ -177,14 +158,6 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   });
 
   apiTest('should search for a case by category', async ({ apiServices }) => {
-    const createdResponse = await apiServices.cases.create({
-      ...createCasePayload,
-      owner: caseOwner,
-      category: 'test',
-    });
-    caseId = createdResponse.data.id;
-    expect(createdResponse.status).toBe(200);
-
     const fetchedResponse = await apiServices.cases.find({ category: 'test' });
     expect(fetchedResponse.status).toBe(200);
     expect(fetchedResponse.data.total).toBe(1);
