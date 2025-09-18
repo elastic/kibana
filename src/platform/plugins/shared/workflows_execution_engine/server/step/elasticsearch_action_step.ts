@@ -110,6 +110,14 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         path,
         body,
       });
+    } else if (stepType === 'elasticsearch.request') {
+      // Special case: elasticsearch.request type uses raw API format at top level
+      const { method = 'GET', path, body } = params;
+      return await esClient.transport.request({
+        method,
+        path,
+        body,
+      });
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
