@@ -906,16 +906,12 @@ export const findInternalCaseUserActions = async ({
 };
 
 export const deleteAllCaseAnalyticsItems = async (es: Client) => {
-  try {
-    await Promise.all([
-      deleteCasesAnalytics(es),
-      deleteAttachmentsAnalytics(es),
-      deleteCommentsAnalytics(es),
-      deleteActivityAnalytics(es),
-    ]);
-  } catch (error) {
-    // Handle error
-  }
+  await Promise.all([
+    deleteCasesAnalytics(es),
+    deleteAttachmentsAnalytics(es),
+    deleteCommentsAnalytics(es),
+    deleteActivityAnalytics(es),
+  ]);
 };
 
 export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
