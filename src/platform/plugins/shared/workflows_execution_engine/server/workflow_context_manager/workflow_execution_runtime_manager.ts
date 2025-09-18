@@ -246,7 +246,7 @@ export class WorkflowExecutionRuntimeManager {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(stepExecutionId);
 
     if (startedStepExecution?.error) {
-      this.failStep(startedStepExecution.error);
+      await this.failStep(startedStepExecution.error);
       return;
     }
 
