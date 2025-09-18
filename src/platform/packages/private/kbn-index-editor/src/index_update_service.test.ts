@@ -14,20 +14,35 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ROW_PLACEHOLDER_PREFIX } from './constants';
 import { IndexUpdateService } from './index_update_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import {
+  analyticsServiceMock,
+  httpServiceMock,
+  notificationServiceMock,
+} from '@kbn/core/public/mocks';
+import { IndexEditorTelemetryService } from './telemetry/telemetry_service';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
 
 describe('IndexUpdateService', () => {
   let http: HttpStart;
   let data: DataPublicPluginStart;
   let service: IndexUpdateService;
   let notifications: NotificationsStart;
+  let analytics: AnalyticsServiceStart;
+  let indexEditorTelemetryService: IndexEditorTelemetryService;
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
     data = dataPluginMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
+    indexEditorTelemetryService = new IndexEditorTelemetryService(
+      analytics,
+      true,
+      true,
+      'esql_hover'
+    );
 
-    service = new IndexUpdateService(http, data, notifications, true);
+    service = new IndexUpdateService(http, data, notifications, indexEditorTelemetryService, true);
   });
 
   afterEach(() => {
