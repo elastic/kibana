@@ -20,6 +20,7 @@ import type {
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -27,7 +28,7 @@ import { getAll, getAllSystemConnectors } from '../application/connector/methods
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
-import { execute } from '../application/connector/methods/execute';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import type {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
@@ -96,6 +97,7 @@ export interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface ActionsClientContext {
@@ -113,6 +115,7 @@ export interface ActionsClientContext {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  taskManager: TaskManagerStartContract;
 }
 
 export class ActionsClient {
@@ -133,6 +136,7 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
+    taskManager,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -149,6 +153,7 @@ export class ActionsClient {
       usageCounter,
       connectorTokenClient,
       getEventLogClient,
+      taskManager,
     };
   }
 
@@ -485,7 +490,32 @@ export class ActionsClient {
   public async execute(
     connectorExecuteParams: ConnectorExecuteParams
   ): Promise<ActionTypeExecutorResult<unknown>> {
-    return execute(this.context, connectorExecuteParams);
+    const action = await this.get({ id: connectorExecuteParams.actionId });
+    const actionTaskParams = await this.context.unsecuredSavedObjectsClient.create(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      {
+        actionId: connectorExecuteParams.actionId,
+        params: connectorExecuteParams.params,
+        // TODO: API key
+        apiKey: '123',
+        executionId: connectorExecuteParams.executionId,
+        consumer: connectorExecuteParams.consumer,
+        // TODO: Related SOs
+        relatedSavedObjects: [],
+        // TODO: API key
+        apiKeyId: '123',
+        // TODO: Source
+        // source: connectorExecuteParams.source,
+      }
+    );
+    return await this.context.taskManager.runAdHoc({
+      taskType: `actions:${action.actionTypeId}`,
+      params: {
+        // TODO: Space
+        spaceId: 'default',
+        actionTaskParamsId: actionTaskParams.id,
+      },
+    });
   }
 
   public async bulkEnqueueExecution(

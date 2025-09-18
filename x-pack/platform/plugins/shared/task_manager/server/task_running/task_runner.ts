@@ -69,6 +69,7 @@ import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
+import type { TaskStore } from '../task_store';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -127,6 +128,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  originalStore: TaskStore;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -181,6 +183,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private originalStore: TaskStore;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -208,6 +211,7 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    originalStore,
   }: Opts) {
     this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
@@ -229,6 +233,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.originalStore = originalStore;
   }
 
   /**
@@ -836,10 +841,19 @@ export class TaskManagerRunner implements TaskRunner {
           const processedResult = {
             task,
             persistence: taskPersistence,
-            result: await (runAt || schedule || task.schedule
+            result: await ((runAt || schedule || task.schedule) && !task.storeResult
               ? this.processResultForRecurringTask(result)
               : this.processResultWhenDone()),
           };
+
+          // TODO: Make error path work
+          if (task.storeResult === true) {
+            if (isOk(result)) {
+              await this.originalStore.storeTaskRunResult(task.id, true, result.value.data);
+            } else {
+              await this.originalStore.storeTaskRunResult(task.id, false, result.error);
+            }
+          }
 
           // Alerting task runner returns SuccessfulRunResult with taskRunError
           // when the alerting task fails, so we check for this condition in order

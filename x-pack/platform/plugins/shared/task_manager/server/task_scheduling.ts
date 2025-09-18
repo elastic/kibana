@@ -106,6 +106,46 @@ export class TaskScheduling {
     );
   }
 
+  public async runAdHoc<Result>(
+    taskInstance: Pick<TaskInstanceWithDeprecatedFields, 'taskType' | 'params'>,
+    options?: ScheduleOptions
+  ): Promise<Result> {
+    const traceparent =
+      agent.currentTransaction && agent.currentTransaction.type !== 'request'
+        ? agent.currentTraceparent
+        : '';
+
+    const task = await this.store.schedule(
+      {
+        ...taskInstance,
+        traceparent: traceparent || '',
+        enabled: true,
+        state: {},
+        storeResult: true,
+      },
+      {
+        refresh: true,
+        ...(options?.request ? { request: options?.request } : {}),
+      }
+    );
+    await this.store.requestPoll(task.id);
+
+    const resp = await this.store.awaitTaskRunResult<Result>(task.id);
+
+    // Don't wait for task to be deleted before resolving the promise
+    (async () => {
+      try {
+        await this.store.deleteTaskRunResult(resp.id);
+      } catch (e) {
+        this.logger.error(`Failed to clean up task run result document: ${e.message}`, {
+          error: { stack_trace: e.stack },
+        });
+      }
+    })();
+
+    return resp.result;
+  }
+
   /**
    * Bulk schedules a task.
    *

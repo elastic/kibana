@@ -231,6 +231,13 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       work: this.pollForWork,
     });
 
+    (async (poller) => {
+      while (true) {
+        await taskStore.awaitTaskPollRequest();
+        poller.claimAdHoc();
+      }
+    })(this.poller);
+
     this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
@@ -255,6 +262,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
+      originalStore: this.store,
       basePathService: this.basePathService,
       logger: this.logger,
       instance,

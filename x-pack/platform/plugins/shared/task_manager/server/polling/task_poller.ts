@@ -33,6 +33,7 @@ interface Opts<H> {
 export interface TaskPoller<T, H> {
   start: () => void;
   stop: () => void;
+  claimAdHoc: () => void;
   events$: Observable<Result<H, PollingError<T>>>;
 }
 
@@ -62,10 +63,17 @@ export function createTaskPoller<T, H>({
   let pollInterval = initialPollInterval;
   let pollIntervalDelay = 0;
   const subject = new Subject<Result<H, PollingError<T>>>();
+  let claiming: boolean = false;
+  let claimAfter: boolean = false;
 
   async function runCycle() {
     timeoutId = null;
     const start = Date.now();
+    if (claiming === true || running === false) {
+      claimAfter = true;
+      return;
+    }
+    claiming = true;
     try {
       if (hasCapacity()) {
         const result = await work();
@@ -84,13 +92,17 @@ export function createTaskPoller<T, H>({
           runCycle().catch((e) => {
             subject.next(asPollingError(e, PollingErrorType.PollerError));
           }),
-        Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
+        claimAfter
+          ? 0
+          : Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
       );
+      claimAfter = false;
       // Reset delay, it's designed to shuffle only once
       pollIntervalDelay = 0;
     } else {
       logger.info('Task poller finished running its last cycle');
     }
+    claiming = false;
   }
 
   function subscribe() {
@@ -123,6 +135,11 @@ export function createTaskPoller<T, H>({
 
   return {
     events$: subject,
+    claimAdHoc: () => {
+      runCycle().catch((e) => {
+        subject.next(asPollingError(e, PollingErrorType.PollerError));
+      });
+    },
     start: () => {
       if (!running) {
         logger.info('Starting the task poller');
