@@ -25,12 +25,12 @@ interface StorageSchemaProperties {
   [x: string]: StorageMappingProperty;
 }
 
-export interface StorageSchema {
+export interface StorageMappings {
   properties: StorageSchemaProperties;
 }
 
 interface StorageSettingsBase {
-  schema: StorageSchema;
+  mappings: StorageMappings;
 }
 
 export interface IndexStorageSettings extends StorageSettingsBase {
@@ -153,7 +153,7 @@ export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> 
 export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partial<
   StorageFieldTypeOf<{
     type: 'object';
-    properties: TStorageSettings['schema']['properties'];
+    properties: TStorageSettings['mappings']['properties'];
   }>
 >;
 

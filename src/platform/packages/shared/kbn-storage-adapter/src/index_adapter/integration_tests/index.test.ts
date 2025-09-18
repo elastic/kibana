@@ -50,7 +50,7 @@ describe('StorageIndexAdapter', () => {
 
   const storageSettings = {
     name: TEST_INDEX_NAME,
-    schema: {
+    mappings: {
       properties: {
         foo: {
           type: 'keyword',

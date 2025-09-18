@@ -96,7 +96,8 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
    * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
    * This should be used as rarely as possible - in most cases, new properties should be added as optional.
    */
-  migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+  deserialize?: (document: Record<string, unknown>) => TApplicationType;
+  serialize?: (document: TApplicationType) => Record<string, unknown>;
 }
 
 /**
@@ -139,7 +140,7 @@ export class StorageIndexAdapter<
         },
         dynamic: 'strict',
         properties: {
-          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+          ...mapValues(this.storage.mappings.properties, toElasticsearchMappingProperty),
         },
       },
       aliases: {
@@ -258,8 +259,8 @@ export class StorageIndexAdapter<
    * Validates whether:
    * - an index template exists
    * - the index template has the right version (if not, update it)
-   * - a write index exists (if it doesn't, create it)
-   * - the write index has the right version (if not, update it)
+   * - the index exists (if it doesn't, create it)
+   * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
@@ -267,10 +268,10 @@ export class StorageIndexAdapter<
 
     const writeIndex = await this.getCurrentWriteIndex();
     if (!writeIndex) {
-      this.logger.info(`Creating first backing index`);
+      this.logger.debug(`Creating index`);
       await this.createIndex();
     } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.info(`Updating mappings of existing write index due to schema version mismatch`);
+      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
       await this.updateMappingsOfExistingIndex({
         name: writeIndex.name,
       });
@@ -294,7 +295,7 @@ export class StorageIndexAdapter<
               ...response.hits,
               hits: response.hits.hits.map((hit) => ({
                 ...hit,
-                _source: this.maybeMigrateSource(hit._source),
+                _source: this.deserializeSource(hit._source),
               })),
             },
           };
@@ -509,7 +510,7 @@ export class StorageIndexAdapter<
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: this.maybeMigrateSource(hit._source),
+      _source: this.deserializeSource(hit._source),
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -519,13 +520,13 @@ export class StorageIndexAdapter<
     };
   };
 
-  private maybeMigrateSource = (_source: unknown): TApplicationType => {
+  private deserializeSource = (_source: unknown): TApplicationType => {
     // check whether source is an object, if not fail
     if (typeof _source !== 'object' || _source === null) {
       throw new Error(`Source must be an object, got ${typeof _source}`);
     }
-    if (this.options.migrateSource) {
-      return this.options.migrateSource(_source as Record<string, unknown>);
+    if (this.options.deserialize) {
+      return this.options.deserialize(_source as Record<string, unknown>);
     }
     return _source as TApplicationType;
   };
