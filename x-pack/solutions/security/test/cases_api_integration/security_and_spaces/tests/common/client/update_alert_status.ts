@@ -43,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseReq,
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
       });
 
@@ -62,6 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseReq,
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
       });
 

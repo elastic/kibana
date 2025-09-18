@@ -25,13 +25,16 @@ import { generateCaseViewPath } from './navigation';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
+  CASE_ALERT_SUCCESS_OBSERVABLES_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
-import { OWNER_INFO } from '../../common/constants';
+import { OWNER_INFO, MAX_OBSERVABLES_PER_CASE } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 import { TruncatedText } from '../components/truncated_text';
+import type { ObservablePost } from '../../common/types/api';
+import { OBSERVABLE_MAX_REACHED } from '../containers/translations';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -74,22 +77,40 @@ function getToastContent({
   theCase,
   content,
   attachments,
+  observables,
 }: {
   theCase: CaseUI;
   content?: string;
   attachments?: CaseAttachmentsWithoutOwner;
+  observables?: ObservablePost[];
 }): string | undefined {
   if (content !== undefined) {
     return content;
   }
+
+  let toastContent;
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === AttachmentType.alert && theCase.settings.syncAlerts) {
-        return CASE_ALERT_SUCCESS_SYNC_TEXT;
+      if (attachment.type === AttachmentType.alert) {
+        if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
+          toastContent = `${CASE_ALERT_SUCCESS_SYNC_TEXT} ${CASE_ALERT_SUCCESS_OBSERVABLES_TEXT}`;
+        } else if (theCase.settings.syncAlerts) {
+          toastContent = CASE_ALERT_SUCCESS_SYNC_TEXT;
+        } else if (theCase.settings.extractObservables) {
+          toastContent = CASE_ALERT_SUCCESS_OBSERVABLES_TEXT;
+        }
       }
     }
   }
-  return undefined;
+
+  if (
+    observables !== undefined &&
+    observables.length > 0 &&
+    theCase.observables.length === MAX_OBSERVABLES_PER_CASE
+  ) {
+    toastContent = toastContent + OBSERVABLE_MAX_REACHED(MAX_OBSERVABLES_PER_CASE);
+  }
+  return toastContent;
 }
 
 const isServerError = (error: Error | ServerError): error is ServerError =>
@@ -123,11 +144,13 @@ export const useCasesToast = () => {
       showSuccessAttach: ({
         theCase,
         attachments,
+        observables,
         title,
         content,
       }: {
         theCase: CaseUI;
         attachments?: CaseAttachmentsWithoutOwner;
+        observables?: ObservablePost[];
         title?: string;
         content?: string;
       }) => {
@@ -150,7 +173,7 @@ export const useCasesToast = () => {
         };
 
         const renderTitle = getToastTitle({ theCase, title, attachments });
-        const renderContent = getToastContent({ theCase, content, attachments });
+        const renderContent = getToastContent({ theCase, content, attachments, observables });
 
         return toasts.addSuccess({
           color: 'success',

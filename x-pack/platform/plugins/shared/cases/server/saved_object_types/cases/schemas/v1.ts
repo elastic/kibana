@@ -31,7 +31,10 @@ const ExternalServiceSchema = schema.object({
   pushed_by: UserSchema,
 });
 
-const SettingsSchema = schema.object({ syncAlerts: schema.boolean() });
+const SettingsSchema = schema.object({
+  syncAlerts: schema.boolean(),
+  extractObservables: schema.boolean(),
+});
 
 const CustomFieldsSchema = schema.arrayOf(
   schema.object({

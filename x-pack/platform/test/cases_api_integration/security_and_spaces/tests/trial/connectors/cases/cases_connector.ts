@@ -340,6 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'low',
             status: 'open',
@@ -453,6 +454,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'high',
             status: 'open',
@@ -824,6 +826,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -872,6 +875,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1339,6 +1343,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1387,6 +1392,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1435,6 +1441,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',

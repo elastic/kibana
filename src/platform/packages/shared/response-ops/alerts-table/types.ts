@@ -28,6 +28,7 @@ import type {
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -63,6 +64,12 @@ export interface Consumer {
   name: string;
 }
 
+interface ObservablePost {
+  typeKey: string;
+  value: string;
+  description: string | null;
+}
+
 export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts' | 'streams'>;
 
 export type CellComponent = NonNullable<AlertsTableProps['renderCellValue']>;
@@ -78,7 +85,7 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: ({ attachments, observables }: { attachments: any[]; observables: any[] }) => void;
   close: () => void;
 };
 
@@ -87,8 +94,10 @@ type UseCasesAddToExistingCaseModal = (
 ) => {
   open: ({
     getAttachments,
+    getObservables,
   }: {
     getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
+    getObservables: ({ theCase }: { theCase?: { id: string } }) => any[];
   }) => void;
 };
 
@@ -138,6 +147,7 @@ export interface CasesService {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
+    getObservablesFromEcs: (ecs: EcsSecurityExtension) => ObservablePost[];
   };
 }
 
@@ -469,6 +479,7 @@ export interface PublicAlertsDataGridProps
     owner: Parameters<CasesService['helpers']['canUseCases']>[0];
     appId?: string;
     syncAlerts?: boolean;
+    extractObservables?: boolean;
   };
   /**
    * If true, hides the bulk actions controls

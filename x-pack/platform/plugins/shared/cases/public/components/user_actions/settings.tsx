@@ -11,14 +11,29 @@ import type { SettingsUserAction } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 
 import { createCommonUpdateUserActionBuilder } from './common';
-import { DISABLED_SETTING, ENABLED_SETTING, SYNC_ALERTS_LC } from './translations';
+import {
+  DISABLED_SETTING,
+  ENABLED_SETTING,
+  SYNC_ALERTS_LC,
+  EXTRACT_OBSERVABLES_LC,
+} from './translations';
 
+// TODO: Separate into 2 user actions, https://github.com/elastic/security-team/issues/13709
 function getSettingsLabel(userAction: SnakeToCamelCase<SettingsUserAction>): ReactNode {
+  let label = '';
+
   if (userAction.payload.settings.syncAlerts) {
-    return `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
+    label = `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
   } else {
-    return `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`;
+    label = `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`;
   }
+
+  if (userAction.payload.settings.extractObservables) {
+    label = `${label} and ${ENABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`;
+  } else {
+    label = `${label} and ${DISABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`;
+  }
+  return label;
 }
 
 export const createSettingsUserActionBuilder: UserActionBuilder = ({
@@ -28,7 +43,8 @@ export const createSettingsUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const action = userAction as SnakeToCamelCase<SettingsUserAction>;
-    if (action?.payload?.settings?.syncAlerts !== undefined) {
+    const { syncAlerts, extractObservables } = action?.payload?.settings;
+    if (syncAlerts !== undefined || extractObservables !== undefined) {
       const commonBuilder = createCommonUpdateUserActionBuilder({
         userProfiles,
         userAction,

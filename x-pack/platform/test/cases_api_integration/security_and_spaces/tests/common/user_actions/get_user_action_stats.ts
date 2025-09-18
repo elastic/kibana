@@ -48,6 +48,7 @@ const getCaseUpdateData = (id: string, version: string) => ({
   description: 'new desc',
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   tags: ['one', 'two'],
   connector: {

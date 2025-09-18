@@ -20,6 +20,7 @@ import {
 import type { Alert } from '@kbn/alerting-types';
 import useObservable from 'react-use/lib/useObservable';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { unflattenObject } from '@kbn/object-utils';
 import type { BulkActionsPanelConfig, RowSelection, TimelineItem } from '../types';
 import { BulkActionsVerbs } from '../types';
 import * as i18n from '../translations';
@@ -57,10 +58,7 @@ const selectedIdsToTimelineItemMapper = (
           value: (alert[ALERT_WORKFLOW_ASSIGNEE_IDS] ?? []) as string[],
         },
       ],
-      ecs: {
-        _id: alert._id,
-        _index: alert._index,
-      },
+      ecs: unflattenObject(alert),
     };
   });
 };
