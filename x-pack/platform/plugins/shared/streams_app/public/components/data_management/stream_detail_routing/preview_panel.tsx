@@ -206,12 +206,14 @@ const SamplePreviewPanel = () => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        <DocumentMatchFilterControls
-          initialFilter={samplesSnapshot.context.documentMatchFilter}
-          onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
-          isDisabled={!!documentsError || !condition}
-        />
+        {!isNaN(matchedDocumentPercentage) && (
+          <DocumentMatchFilterControls
+            initialFilter={samplesSnapshot.context.documentMatchFilter}
+            onFilterChange={setDocumentMatchFilter}
+            matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
+            isDisabled={!!documentsError || !condition}
+          />
+        )}
         {content}
       </EuiFlexGroup>
     </>
