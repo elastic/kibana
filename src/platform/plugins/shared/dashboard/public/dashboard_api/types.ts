@@ -156,6 +156,8 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+    accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
+    changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
     user?: DashboardUser;
   };

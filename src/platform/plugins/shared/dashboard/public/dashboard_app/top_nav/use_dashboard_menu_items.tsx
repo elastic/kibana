@@ -23,7 +23,6 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -41,7 +40,6 @@ export const useDashboardMenuItems = ({
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
-  const dashboardInternalApi = useDashboardInternalApi();
 
   const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
@@ -50,7 +48,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
       dashboardApi.viewMode$,
-      dashboardInternalApi.accessControl$
+      dashboardApi.accessControl$
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
@@ -155,7 +153,7 @@ export const useDashboardMenuItems = ({
         createdBy: dashboardApi.createdBy,
         accessControlClient,
         saveDashboard: saveFromShareModal,
-        changeAccessMode: dashboardInternalApi.changeAccessMode,
+        changeAccessMode: dashboardApi.changeAccessMode,
       });
     },
     [
@@ -166,7 +164,7 @@ export const useDashboardMenuItems = ({
       canManageAccessControl,
       accessControl,
       saveFromShareModal,
-      dashboardInternalApi.changeAccessMode,
+      dashboardApi.changeAccessMode,
       dashboardApi.createdBy,
       accessControlClient,
     ]

@@ -228,6 +228,8 @@ export function getDashboardApi({
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
     createdBy: savedObjectResult?.createdBy,
     user,
+    accessControl$: accessControlManager.internalApi.accessControl$,
+    changeAccessMode: accessControlManager.internalApi.changeAccessMode,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

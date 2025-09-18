@@ -19,7 +19,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardState } from '../../common/types';
 import type { DashboardApi, DashboardCreationOptions } from '..';
-import type { DashboardInternalApi } from '../dashboard_api/types';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
@@ -98,9 +97,6 @@ export function DashboardApp({
     };
   }, [incomingEmbeddable]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
-  const [dashboardInternalApi, setDashboardInternalApi] = useState<
-    DashboardInternalApi | undefined
-  >(undefined);
 
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
 
@@ -244,14 +240,13 @@ export function DashboardApp({
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
     <>
-      {dashboardApi && dashboardInternalApi && (
+      {dashboardApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
           <DashboardTopNav
             redirectTo={redirectTo}
             embedSettings={embedSettings}
             dashboardApi={dashboardApi}
-            dashboardInternalApi={dashboardInternalApi}
           />
         </>
       )}
@@ -260,10 +255,9 @@ export function DashboardApp({
       <DashboardRenderer
         key={regenerateId}
         locator={locator}
-        onApiAvailable={(dashboard, internalApi) => {
-          if (dashboard && !dashboardApi && internalApi && !dashboardInternalApi) {
+        onApiAvailable={(dashboard) => {
+          if (dashboard && !dashboardApi) {
             setDashboardApi(dashboard);
-            setDashboardInternalApi(internalApi);
             if (expandedPanelId) {
               dashboard?.expandPanel(expandedPanelId);
             }
