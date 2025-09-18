@@ -51,7 +51,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
-      await pageObjects.common.sleep(10000);
+      await pageObjects.common.sleep(1000);
       expect(await find.existsByCssSelector('[data-rendering-count="2"]')).toBe(true);
     });
 
