@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { AgentType, oneChatDefaultAgentId, defaultAgentToolIds } from '@kbn/onechat-common';
-import type { PersistedAgentDefinition } from '../types';
+import { oneChatDefaultAgentId, defaultAgentToolIds } from '@kbn/onechat-common';
+import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 
-export const createDefaultAgentDefinition = (): PersistedAgentDefinition => {
+export const createDefaultAgentDefinition = (): BuiltInAgentDefinition => {
   return {
     id: oneChatDefaultAgentId,
-    type: AgentType.chat,
     name: 'Elastic AI Agent',
     description: 'Elastic AI Agent',
     configuration: {

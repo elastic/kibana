@@ -14,7 +14,6 @@ import type {
 import {
   createAgentNotFoundError,
   createBadRequestError,
-  oneChatDefaultAgentId,
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/onechat-common';
@@ -30,7 +29,6 @@ import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { ensureValidId, validateToolSelection } from './utils';
-import { createDefaultAgentDefinition } from './default_definitions';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -92,11 +90,7 @@ class AgentClientImpl implements AgentClient {
   async get(agentId: string): Promise<PersistedAgentDefinition> {
     const document = await this._get(agentId);
     if (!document) {
-      if (agentId === oneChatDefaultAgentId) {
-        return createDefaultAgentDefinition();
-      } else {
-        throw createAgentNotFoundError({ agentId });
-      }
+      throw createAgentNotFoundError({ agentId });
     }
 
     if (!hasAccess({ document, user: this.user })) {
@@ -107,11 +101,6 @@ class AgentClientImpl implements AgentClient {
   }
 
   async has(agentId: string): Promise<boolean> {
-    // default agent is always present
-    if (agentId === oneChatDefaultAgentId) {
-      return true;
-    }
-
     const document = await this._get(agentId);
     return document !== undefined;
   }
@@ -127,11 +116,6 @@ class AgentClientImpl implements AgentClient {
     });
 
     const agents = response.hits.hits.map((hit) => fromEs(hit as Document));
-
-    // if default agent not in the list, we add the definition
-    if (!agents.find((a) => a.id === oneChatDefaultAgentId)) {
-      agents.unshift(createDefaultAgentDefinition());
-    }
 
     return agents;
   }
@@ -163,11 +147,6 @@ class AgentClientImpl implements AgentClient {
     agentId: string,
     profileUpdate: AgentUpdateRequest
   ): Promise<PersistedAgentDefinition> {
-    // temporary, until we enable default agent update
-    if (agentId === oneChatDefaultAgentId) {
-      throw createBadRequestError(`Default agent cannot be updated.`);
-    }
-
     const document = await this._get(agentId);
     if (!document) {
       throw createAgentNotFoundError({
@@ -201,10 +180,6 @@ class AgentClientImpl implements AgentClient {
   async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
 
-    if (id === oneChatDefaultAgentId) {
-      throw createBadRequestError(`Default agent cannot be deleted.`);
-    }
-
     const document = await this._get(id);
     if (!document) {
       throw createAgentNotFoundError({ agentId: id });
@@ -233,9 +208,6 @@ class AgentClientImpl implements AgentClient {
   }
 
   private async exists(agentId: string): Promise<boolean> {
-    if (agentId === oneChatDefaultAgentId) {
-      return true;
-    }
     const document = await this._get(agentId);
     return !!document;
   }

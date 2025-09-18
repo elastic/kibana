@@ -17,6 +17,7 @@ import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
   createBuiltinProviderFn,
+  registerBuiltinAgents,
   type BuiltinAgentRegistry,
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
@@ -44,6 +45,9 @@ export class AgentsService {
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
+
+    registerBuiltinAgents({ registry: this.builtinRegistry });
+
     return {
       register: (agent) => this.builtinRegistry.register(agent),
     };

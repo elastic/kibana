@@ -6,11 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  createAgentNotFoundError,
-  createBadRequestError,
-  createInternalError,
-} from '@kbn/onechat-common';
+import { createAgentNotFoundError, createBadRequestError } from '@kbn/onechat-common';
 import type { AgentDefinition } from '@kbn/onechat-common/agents';
 import { validateAgentId } from '@kbn/onechat-common/agents';
 import type {
@@ -19,14 +15,8 @@ import type {
   AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
-import type { AgentClient } from './client';
-import type { BuiltinAgentRegistry } from './builtin';
-import {
-  WritableAgentProvider,
-  ReadonlyAgentProvider,
-  AgentProvider,
-  isReadonlyProvider,
-} from './agent_source';
+import type { WritableAgentProvider, ReadonlyAgentProvider } from './agent_source';
+import { isReadonlyProvider } from './agent_source';
 
 // for now it's the same
 export type InternalAgentDefinition = AgentDefinition;
