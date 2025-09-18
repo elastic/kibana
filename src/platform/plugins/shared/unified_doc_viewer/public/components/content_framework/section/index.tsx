@@ -40,6 +40,7 @@ export interface ContentFrameworkSectionProps {
   actions?: Action[];
   children: React.ReactNode;
   'data-test-subj'?: string;
+  initialIsOpen?: boolean;
 }
 
 export function ContentFrameworkSection({
@@ -49,8 +50,9 @@ export function ContentFrameworkSection({
   actions,
   children,
   'data-test-subj': accordionDataTestSubj,
+  initialIsOpen = true,
 }: ContentFrameworkSectionProps) {
-  const [isAccordionExpanded, setIsAccordionExpanded] = useState(true);
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(initialIsOpen);
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
@@ -89,7 +91,7 @@ export function ContentFrameworkSection({
       <EuiAccordion
         data-test-subj={accordionDataTestSubj}
         id={`sectionAccordion-${id}`}
-        initialIsOpen
+        initialIsOpen={isAccordionExpanded}
         onToggle={setIsAccordionExpanded}
         buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="s">
