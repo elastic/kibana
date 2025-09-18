@@ -19,11 +19,60 @@ export const TemplatingOptionsSchema = z.object({
   engine: z.enum(['mustache', 'nunjucks']),
 });
 
+export const WorkflowRetrySchema = z.object({
+  'max-attempts': z.number().min(1),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+});
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
+
+// Base step schema, with recursive steps property
+export const BaseStepSchema = z.object({
+  name: z.string().min(1),
+  type: z.string(),
+});
+export type BaseStep = z.infer<typeof BaseStepSchema>;
+
+export const WorkflowOnFailureSchema = z.object({
+  retry: WorkflowRetrySchema.optional(),
+  fallback: z.array(BaseStepSchema).min(1).optional(),
+  continue: z.boolean().optional(),
+});
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowOnFailureSchema.extend({
+    fallback: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
+
 export const WorkflowSettingsSchema = z.object({
-  retry: RetryPolicySchema.optional(),
+  'on-failure': WorkflowOnFailureSchema.optional(),
   templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
+export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
+
+export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowSettingsSchema.extend({
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({
@@ -58,15 +107,6 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 /* --- Steps --- */
-export const WorkflowRetrySchema = z.object({
-  'max-attempts': z.number().min(1),
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
-});
-export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
-
 const StepWithTimeoutSchema = z.object({
   timeout: z.number().optional(),
 });
@@ -83,20 +123,6 @@ const StepWithIfConditionSchema = z.object({
   if: z.string().optional(),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
-
-// Base step schema, with recursive steps property
-export const BaseStepSchema = z.object({
-  name: z.string().min(1),
-  type: z.string(),
-});
-export type BaseStep = z.infer<typeof BaseStepSchema>;
-
-export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema.optional(),
-  fallback: z.array(BaseStepSchema).min(1).optional(),
-  continue: z.boolean().optional(),
-});
-export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 export const StepWithOnFailureSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
@@ -140,18 +166,78 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 
-export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
-  const schema = WorkflowOnFailureSchema.extend({
-    fallback: z.array(stepSchema).optional(),
-  });
+// Generic Elasticsearch step schema for backend validation
+export const ElasticsearchStepSchema = BaseStepSchema.extend({
+  type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
+    message: 'Elasticsearch step type must start with "elasticsearch."',
+  }),
+  with: z.union([
+    // Raw API format - like Dev Console
+    z.object({
+      request: z.object({
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+        path: z.string().min(1),
+        body: z.any().optional(),
+      }),
+    }),
+    // Sugar syntax for common operations
+    z
+      .object({
+        index: z.string().optional(),
+        id: z.string().optional(),
+        query: z.record(z.string(), z.any()).optional(),
+        body: z.record(z.string(), z.any()).optional(),
+        size: z.number().optional(),
+        from: z.number().optional(),
+        sort: z.array(z.any()).optional(),
+        _source: z.union([z.boolean(), z.array(z.string()), z.string()]).optional(),
+        aggs: z.record(z.string(), z.any()).optional(),
+        aggregations: z.record(z.string(), z.any()).optional(),
+      })
+      .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+  ]),
+});
+export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial();
-  }
-
-  return schema;
-}
+// Generic Kibana step schema for backend validation
+export const KibanaStepSchema = BaseStepSchema.extend({
+  type: z.string().refine((val) => val.startsWith('kibana.'), {
+    message: 'Kibana step type must start with "kibana."',
+  }),
+  with: z.union([
+    // Raw API format - direct HTTP API calls
+    z.object({
+      request: z.object({
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+        path: z.string().min(1),
+        body: z.any().optional(),
+        headers: z.record(z.string(), z.string()).optional(),
+      }),
+    }),
+    // Sugar syntax for common Kibana operations
+    z
+      .object({
+        // Cases API
+        title: z.string().optional(),
+        description: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+        assignees: z.array(z.string()).optional(),
+        owner: z.string().optional(),
+        connector: z.record(z.string(), z.any()).optional(),
+        settings: z.record(z.string(), z.any()).optional(),
+        // Generic parameters
+        id: z.string().optional(),
+        case_id: z.string().optional(),
+        space_id: z.string().optional(),
+        page: z.number().optional(),
+        perPage: z.number().optional(),
+        status: z.string().optional(),
+      })
+      .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+  ]),
+});
+export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
 export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = HttpStepSchema.extend({
@@ -310,6 +396,8 @@ const StepSchema = z.lazy(() =>
     IfStepSchema,
     WaitStepSchema,
     HttpStepSchema,
+    ElasticsearchStepSchema,
+    KibanaStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,

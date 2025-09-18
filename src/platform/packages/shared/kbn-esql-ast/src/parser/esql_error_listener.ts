@@ -9,7 +9,7 @@
 
 import type { Recognizer, RecognitionException } from 'antlr4';
 import { ErrorListener } from 'antlr4';
-import { getPosition } from './helpers';
+import { getPosition } from './tokens';
 import type { EditorError } from '../types';
 
 // These will need to be manually updated whenever the relevant grammar changes.
@@ -53,6 +53,7 @@ export class ESQLErrorListener extends ErrorListener<any> {
       endColumn,
       message: textMessage,
       severity: 'error',
+      code: 'syntaxError',
     });
   }
 

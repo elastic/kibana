@@ -43,6 +43,7 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { SystemService } from './lib/streams/system/system_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -95,6 +96,7 @@ export class StreamsPlugin
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const systemService = new SystemService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
 
@@ -157,6 +159,7 @@ export class StreamsPlugin
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
+        systems: systemService,
         server: this.server,
         telemetry: this.telemetryService.getClient(),
         getScopedClients: async ({
@@ -164,37 +167,47 @@ export class StreamsPlugin
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient, contentClient] = await Promise.all([
-            core.getStartServices(),
-            assetService.getClientWithRequest({ request }),
-            contentService.getClient(),
-          ]);
+          const [[coreStart, pluginsStart], assetClient, systemClient, contentClient] =
+            await Promise.all([
+              core.getStartServices(),
+              assetService.getClientWithRequest({ request }),
+              systemService.getClientWithRequest({ request }),
+              contentService.getClient(),
+            ]);
 
-          const queryClient = await queryService.getClientWithRequest({
-            request,
-            assetClient,
-          });
+          const [queryClient, uiSettingsClient] = await Promise.all([
+            queryService.getClientWithRequest({
+              request,
+              assetClient,
+            }),
+            coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
+          ]);
 
           const streamsClient = await streamsService.getClientWithRequest({
             request,
             assetClient,
             queryClient,
+            systemClient,
           });
 
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
           const licensing = pluginsStart.licensing;
+          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
           return {
             scopedClusterClient,
             soClient,
             assetClient,
             streamsClient,
+            systemClient,
             inferenceClient,
             contentClient,
             queryClient,
+            fieldsMetadataClient,
             licensing,
+            uiSettingsClient,
           };
         },
       },
@@ -203,7 +216,7 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
-    registerFeatureFlags(core, plugins, this.logger);
+    registerFeatureFlags(core, this.logger);
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(

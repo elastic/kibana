@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
+import {
+  LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+  LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+  LENS_PERCENTILE_DEFAULT_VALUE,
+  LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+} from './constants';
 import {
   metricOperationDefinitionSchema,
   staticOperationDefinitionSchema,
@@ -21,9 +28,22 @@ import {
   movingAverageOperationSchema,
   cumulativeSumOperationSchema,
   counterRateOperationSchema,
+  esqlColumnSchema,
 } from './metric_ops';
 
 describe('Metric Operations Schemas', () => {
+  describe('columnValueOperationSchema', () => {
+    it('validates a valid metric operation configuration', () => {
+      const input = {
+        operation: 'value',
+        column: 'sum' as const,
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+  });
+
   describe('staticOperationDefinition', () => {
     it('validates a valid static value configuration', () => {
       const input = {
@@ -34,14 +54,6 @@ describe('Metric Operations Schemas', () => {
 
       const validated = staticOperationDefinitionSchema.validate(input);
       expect(validated).toEqual(input);
-    });
-
-    it('throws on missing value', () => {
-      const input = {
-        operation: 'static_value' as const,
-      };
-
-      expect(() => staticOperationDefinitionSchema.validate(input)).toThrow();
     });
   });
 
@@ -95,7 +107,7 @@ describe('Metric Operations Schemas', () => {
     });
 
     it('validates basic metric operations', () => {
-      const operations = ['min', 'max', 'sum', 'avg', 'median'] as const;
+      const operations = ['min', 'max', 'average', 'median', 'standard_deviation'] as const;
 
       operations.forEach((op) => {
         const input = {
@@ -122,15 +134,57 @@ describe('Metric Operations Schemas', () => {
       expect(validated).toEqual(input);
     });
 
+    it('validates percentile operation with default value', () => {
+      const input = {
+        operation: 'percentile' as const,
+        field: 'response_time',
+        percentile: undefined,
+      };
+
+      const validated = percentileOperationSchema.validate(input);
+      expect(validated).toEqual({ ...input, percentile: LENS_PERCENTILE_DEFAULT_VALUE });
+    });
+
+    it('validates percentile operation without percentile', () => {
+      const input = {
+        operation: 'percentile' as const,
+        field: 'response_time',
+      };
+
+      const validated = percentileOperationSchema.validate(input);
+      expect(validated).toEqual({ ...input, percentile: LENS_PERCENTILE_DEFAULT_VALUE });
+    });
+
     it('validates percentile ranks operation', () => {
       const input = {
-        operation: 'percentile_ranks' as const,
+        operation: 'percentile_rank' as const,
         field: 'response_time',
-        ranks: [50, 75, 90, 95],
+        rank: 50,
       };
 
       const validated = percentileRanksOperationSchema.validate(input);
       expect(validated).toEqual(input);
+    });
+
+    it('should use percentile rank without rank', () => {
+      const input = {
+        operation: 'percentile_rank' as const,
+        field: 'response_time',
+      };
+
+      const validated = percentileRanksOperationSchema.validate(input);
+      expect(validated).toEqual({ ...input, rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE });
+    });
+
+    it('should use percentile rank pass ', () => {
+      const input = {
+        operation: 'percentile_rank' as const,
+        field: 'response_time',
+        rank: undefined,
+      };
+
+      const validated = percentileRanksOperationSchema.validate(input);
+      expect(validated).toEqual({ ...input, rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE });
     });
 
     it('validates differences operation', () => {
@@ -139,6 +193,7 @@ describe('Metric Operations Schemas', () => {
         of: {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       };
 
@@ -152,12 +207,42 @@ describe('Metric Operations Schemas', () => {
         of: {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         window: 7,
       };
 
       const validated = movingAverageOperationSchema.validate(input);
       expect(validated).toEqual(input);
+    });
+
+    it('validates moving average operation without window param', () => {
+      const input = {
+        operation: 'moving_average' as const,
+        of: {
+          operation: 'sum' as const,
+          field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+      };
+
+      const validated = movingAverageOperationSchema.validate(input);
+      expect(validated).toEqual({ ...input, window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW });
+    });
+
+    it('validates moving average operation with undefined window param', () => {
+      const input = {
+        operation: 'moving_average' as const,
+        of: {
+          operation: 'sum' as const,
+          field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        window: undefined,
+      };
+
+      const validated = movingAverageOperationSchema.validate(input);
+      expect(validated).toEqual({ ...input, window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW });
     });
   });
 
@@ -186,10 +271,29 @@ describe('Metric Operations Schemas', () => {
       const input = {
         operation: 'last_value' as const,
         field: 'status',
+        sort_by: 'timestamp',
       };
 
       const validated = lastValueOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({
+        ...input,
+        show_array_values: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+      });
+    });
+
+    it('validates last value operation with undefined show_array_values value', () => {
+      const input = {
+        operation: 'last_value' as const,
+        field: 'status',
+        sort_by: 'timestamp',
+        show_array_values: undefined,
+      };
+
+      const validated = lastValueOperationSchema.validate(input);
+      expect(validated).toEqual({
+        ...input,
+        show_array_values: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+      });
     });
   });
 
@@ -207,10 +311,12 @@ describe('Metric Operations Schemas', () => {
         {
           operation: 'count' as const,
           field: 'my_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         {
           operation: 'sum' as const,
           field: 'value',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         {
           operation: 'percentile' as const,

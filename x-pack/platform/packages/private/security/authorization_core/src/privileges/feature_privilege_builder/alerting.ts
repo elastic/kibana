@@ -30,6 +30,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getBackfill',
     'findBackfill',
     'findGaps',
+    'bulkEditParams',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
