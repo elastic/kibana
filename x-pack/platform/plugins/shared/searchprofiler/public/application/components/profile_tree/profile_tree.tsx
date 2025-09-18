@@ -6,7 +6,8 @@
  */
 
 import React, { memo, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { IndexDetails } from './index_details';
 import { ShardDetails } from './shard_details';
@@ -22,7 +23,28 @@ export interface Props {
   onDataInitError: (error: Error) => void;
 }
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    // Main profile tree container
+    container: css`
+      height: 100%;
+      overflow-y: auto;
+      flex-grow: 1;
+    `,
+
+    // Index panel container
+    indexPanel: css`
+      width: 100%;
+      padding: ${euiTheme.size.base} ${euiTheme.size.s};
+      border-bottom: ${euiTheme.border.thin};
+    `,
+  };
+};
+
 export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }: Props) => {
+  const styles = useStyles();
   let content = null;
 
   if (data && data.length) {
@@ -30,15 +52,11 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
       const sortedIndices: Index[] = initDataFor(target)(data);
       content = (
         <HighlightContextProvider onHighlight={onHighlight}>
-          <EuiFlexGroup
-            className="prfDevTool__profileTree__container"
-            gutterSize="none"
-            direction="column"
-          >
+          <EuiFlexGroup gutterSize="none" direction="column">
             {sortedIndices.map((index) => (
               <EuiFlexItem key={index.name} grow={false}>
                 <EuiFlexGroup
-                  className="prfDevTool__profileTree__panel prfDevTool__profileTree__index"
+                  css={styles.indexPanel}
                   gutterSize="none"
                   key={index.name}
                   direction="column"
@@ -67,7 +85,7 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
   }
 
   return (
-    <div data-test-subj="profileTree" className="prfDevTool__main__profiletree">
+    <div data-test-subj="profileTree" css={styles.container}>
       {content}
     </div>
   );

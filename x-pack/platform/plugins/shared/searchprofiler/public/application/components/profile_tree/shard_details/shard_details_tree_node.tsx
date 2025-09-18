@@ -16,6 +16,7 @@ import { msToPretty } from '../../../lib';
 import { PercentageBadge } from '../../percentage_badge';
 
 import type { Index, Operation, Shard } from '../../../types';
+import { useStyles } from './shard_details_tree_node.styles';
 
 export interface Props {
   index: Index;
@@ -34,13 +35,14 @@ const limitString = (string: string, limit: number) =>
 export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
   const [childrenVisible, setChildrenVisible] = useState(hasVisibleChild(operation));
   const { highlight, isHighlighted, id } = useHighlightTreeNode();
+  const styles = useStyles();
 
   const renderTimeRow = (op: Operation) => (
-    <div className="prfDevTool__profileTree__tvRow">
-      <div className="prfDevTool__profileTree__cell euiTextAlign--left">
+    <div css={styles.tvRow}>
+      <div css={styles.cell} className="euiTextAlign--left">
         {op.hasChildren ? (
           <EuiLink
-            className="prfDevTool__profileTree__shardDetails"
+            css={styles.shardDetails}
             disabled={!op.hasChildren}
             onClick={() => setChildrenVisible(!childrenVisible)}
           >
@@ -56,25 +58,19 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
         )}
       </div>
       {/* Self Time Badge */}
-      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__time euiTextAlign--center">
-        <EuiBadge
-          className="prfDevTool__profileTree__badge euiTextAlign--center"
-          color={op.absoluteColor}
-        >
+      <div css={[styles.cell, styles.time]} className="euiTextAlign--center">
+        <EuiBadge css={styles.badge} color={op.absoluteColor}>
           {msToPretty(op.selfTime || 0, 1)}
         </EuiBadge>
       </div>
       {/* Total Time Badge */}
-      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__totalTime">
-        <EuiBadge
-          className="prfDevTool__profileTree__badge euiTextAlign--center"
-          color={op.absoluteColor}
-        >
+      <div css={[styles.cell, styles.totalTime]} className="euiTextAlign--center">
+        <EuiBadge css={styles.badge} color={op.absoluteColor}>
           {msToPretty(op.time, 1)}
         </EuiBadge>
       </div>
       {/* Time percentage Badge */}
-      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__percentage">
+      <div css={[styles.cell, styles.percentage]}>
         <PercentageBadge timePercentage={op.timePercentage} label={op.timePercentage + '%'} />
       </div>
     </div>
@@ -84,12 +80,12 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
     <>
       <div
         key={id}
-        className={isHighlighted() ? 'prfDevTool__tvRow--last' : ''}
+        css={isHighlighted() ? styles.tvRowLast : undefined}
         style={{ paddingLeft: operation.depth! * TAB_WIDTH_PX + 'px' }}
       >
         {renderTimeRow(operation)}
-        <div className="prfDevTool__profileTree__tvRow">
-          <span className="prfDevTool__detail">
+        <div css={styles.tvRow}>
+          <span css={styles.detail}>
             <EuiCodeBlock paddingSize="none">
               {limitString(operation.lucene || '', 120)}
             </EuiCodeBlock>
