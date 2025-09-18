@@ -64,6 +64,9 @@ export interface FleetApiService {
     ) => Promise<any>;
     delete: (id: string) => Promise<void>;
   };
+  agent: {
+    setup: () => Promise<any>;
+  };
 }
 
 export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): FleetApiService => {
@@ -310,6 +313,19 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             });
           }
         );
+      },
+    },
+    agent: {
+      setup: async () => {
+        return await measurePerformanceAsync(log, `fleetApi.agent.setup`, async () => {
+          return await kbnClient.request({
+            method: 'POST',
+            path: `/api/fleet/agents/setup`,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        });
       },
     },
   };
