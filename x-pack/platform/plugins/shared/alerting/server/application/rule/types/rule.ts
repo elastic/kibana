@@ -86,7 +86,6 @@ export interface Rule<Params extends RuleParams = never> {
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
   artifacts?: RuleSchemaType['artifacts'];
-  lastGapAutoFill?: RuleSchemaType['lastGapAutoFill'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -127,5 +126,4 @@ export interface RuleDomain<Params extends RuleParams = never> {
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
   artifacts?: RuleDomainSchemaType['artifacts'];
-  lastGapAutoFill?: RuleDomainSchemaType['lastGapAutoFill'];
 }

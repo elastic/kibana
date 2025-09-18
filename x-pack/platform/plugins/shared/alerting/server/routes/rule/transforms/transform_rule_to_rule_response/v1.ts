@@ -156,17 +156,4 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
   ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
-  ...(rule.lastGapAutoFill !== undefined
-    ? {
-        last_gap_auto_fill: rule.lastGapAutoFill
-          ? {
-              check_time: rule.lastGapAutoFill.checkTime,
-              status: rule.lastGapAutoFill.status,
-              ...(rule.lastGapAutoFill.errorMessage
-                ? { error_message: rule.lastGapAutoFill.errorMessage }
-                : {}),
-            }
-          : null,
-      }
-    : {}),
 });

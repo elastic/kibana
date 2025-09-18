@@ -55,7 +55,6 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     legacyId: ruleDomain.legacyId,
     flapping: ruleDomain.flapping,
     artifacts: ruleDomain.artifacts,
-    lastGapAutoFill: ruleDomain.lastGapAutoFill,
   };
 
   if (isPublic) {

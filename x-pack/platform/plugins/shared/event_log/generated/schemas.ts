@@ -151,11 +151,11 @@ export const EventSchema = schema.maybe(
                 config: schema.maybe(
                   schema.object({
                     name: ecsString(),
-                    maxAmountOfGapsToProcessPerRun: ecsStringOrNumber(),
-                    maxAmountOfRulesToProcessPerRun: ecsStringOrNumber(),
-                    amountOfRetries: ecsStringOrNumber(),
-                    rulesFilter: ecsString(),
-                    gapFillRange: ecsString(),
+                    max_amount_of_gaps_to_process_per_run: ecsStringOrNumber(),
+                    max_amount_of_rules_to_process_per_run: ecsStringOrNumber(),
+                    amount_of_retries: ecsStringOrNumber(),
+                    rules_filter: ecsString(),
+                    gap_fill_range: ecsString(),
                     schedule: schema.maybe(
                       schema.object({
                         interval: ecsString(),
@@ -166,8 +166,8 @@ export const EventSchema = schema.maybe(
                 results: schema.maybe(
                   schema.arrayOf(
                     schema.object({
-                      ruleId: ecsString(),
-                      processedGaps: ecsStringOrNumber(),
+                      rule_id: ecsString(),
+                      processed_gaps: ecsStringOrNumber(),
                       status: ecsString(),
                       error: ecsString(),
                     })
@@ -175,10 +175,10 @@ export const EventSchema = schema.maybe(
                 ),
                 summary: schema.maybe(
                   schema.object({
-                    totalRules: ecsStringOrNumber(),
-                    successfulRules: ecsStringOrNumber(),
-                    failedRules: ecsStringOrNumber(),
-                    totalGapsProcessed: ecsStringOrNumber(),
+                    total_rules: ecsStringOrNumber(),
+                    successful_rules: ecsStringOrNumber(),
+                    failed_rules: ecsStringOrNumber(),
+                    total_gaps_processed: ecsStringOrNumber(),
                   })
                 ),
               })

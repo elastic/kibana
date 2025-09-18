@@ -78,32 +78,36 @@ export const processGapsBatchFromRules = async (
   if (schedulingPayloads.length === 0) {
     return { results: [] };
   }
+  try {
+    // Schedule all backfills in a single bulk operation
+    const scheduleResults = await scheduleBackfill(context, schedulingPayloads, gaps, gapsByRuleId);
+    console.log('scheduleResults', JSON.stringify(scheduleResults));
+    for (let i = 0; i < scheduleResults.length; i++) {
+      const result = scheduleResults[i];
+      const ruleId = schedulingPayloads[i].ruleId;
+      const gapsBatch = gapsByRuleId.get(ruleId) || [];
 
-  // Schedule all backfills in a single bulk operation
-  const scheduleResults = await scheduleBackfill(context, schedulingPayloads, gaps, gapsByRuleId);
-
-  for (let i = 0; i < scheduleResults.length; i++) {
-    const result = scheduleResults[i];
-    const ruleId = schedulingPayloads[i].ruleId;
-    const gapsBatch = gapsByRuleId.get(ruleId) || [];
-
-    if ('error' in result) {
-      const backfillError = result.error;
-      results.push({
-        ruleId,
-        processedGaps: gapsBatch.length,
-        status: 'error',
-        error: backfillError.message,
-      });
-    } else {
-      logProcessedAsAuditEvent(context, { id: ruleId, name: ruleId });
-      results.push({
-        ruleId,
-        processedGaps: gapsBatch.length,
-        status: 'success',
-      });
+      if ('error' in result) {
+        const backfillError = result.error;
+        results.push({
+          ruleId,
+          processedGaps: gapsBatch.length,
+          status: 'error',
+          error: backfillError.message,
+        });
+      } else {
+        logProcessedAsAuditEvent(context, { id: ruleId, name: ruleId });
+        results.push({
+          ruleId,
+          processedGaps: gapsBatch.length,
+          status: 'success',
+        });
+      }
     }
-  }
 
-  return { results };
+    return { results };
+  } catch (error) {
+    console.log('error scheduleBackfill', JSON.stringify(error));
+    return { results: [] };
+  }
 };

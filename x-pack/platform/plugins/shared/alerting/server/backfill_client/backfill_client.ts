@@ -459,6 +459,7 @@ function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts)
   }
 
   // if rule exists, check that it is enabled
+  console.log('rule', JSON.stringify(rule));
   if (!rule.enabled) {
     return { error: createBackfillError(`Rule ${ruleId} is disabled`, ruleId, rule.name) };
   }
