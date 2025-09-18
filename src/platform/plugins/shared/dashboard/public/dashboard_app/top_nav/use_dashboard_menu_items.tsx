@@ -23,7 +23,7 @@ import type { SaveDashboardReturn } from '../../services/dashboard_content_manag
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
-import { ShowAddMenu } from './add_menu/show_add_menu';
+import { showAddMenu } from './add_menu/show_add_menu';
 import { ShowShareModal } from './share/show_share_modal';
 
 export const useDashboardMenuItems = ({
@@ -229,7 +229,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
         run: (anchorElement: HTMLElement) =>
-          ShowAddMenu({ dashboardApi, anchorElement, coreServices }),
+          showAddMenu({ dashboardApi, anchorElement, coreServices }),
       },
     };
   }, [
