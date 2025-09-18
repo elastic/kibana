@@ -58,7 +58,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   const fetchGroupLeafData = useCallback(() => {
     const dataFetchFn = async () => {
       const groupLeafData = await onCascadeLeafNodeExpanded({
-        row,
+        row: row.original,
         nodePathMap,
         nodePath,
       });
