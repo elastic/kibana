@@ -21,9 +21,4 @@ export type {
   ScopedRunnerRunAgentParams,
   RunAgentOnEventFn,
 } from './runner';
-export type {
-  BuiltInAgentDefinition,
-  BuiltInAgentConfiguration,
-  BuiltInAgentConfigurationAccessor,
-  BuiltInAgentDefinitionContext,
-} from './builtin_definition';
+export type { BuiltInAgentDefinition, BuiltInAgentConfiguration } from './builtin_definition';
