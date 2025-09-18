@@ -906,12 +906,16 @@ export const findInternalCaseUserActions = async ({
 };
 
 export const deleteAllCaseAnalyticsItems = async (es: Client) => {
-  await Promise.all([
-    deleteCasesAnalytics(es),
-    deleteAttachmentsAnalytics(es),
-    deleteCommentsAnalytics(es),
-    deleteActivityAnalytics(es),
-  ]);
+  try {
+    await Promise.all([
+      deleteCasesAnalytics(es),
+      deleteAttachmentsAnalytics(es),
+      deleteCommentsAnalytics(es),
+      deleteActivityAnalytics(es),
+    ]);
+  } catch (_) {
+    // ignore errors, indexes might not exist yet
+  }
 };
 
 export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
