@@ -11,7 +11,10 @@ import {
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  INDEX_PATTERN_REGEX,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
@@ -180,7 +183,7 @@ ${
 // Construct actor and target entities data
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actor.entity.id, "\\"",
-    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", actorEntityName, "\\"",
       ",\\"type\\":\\"", actorEntityType, "\\"",
@@ -188,7 +191,7 @@ ${
   "}")
 | EVAL targetDocData = CONCAT("{",
     "\\"id\\":\\"", target.entity.id, "\\"",
-    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", targetEntityName, "\\"",
       ",\\"type\\":\\"", targetEntityType, "\\"",

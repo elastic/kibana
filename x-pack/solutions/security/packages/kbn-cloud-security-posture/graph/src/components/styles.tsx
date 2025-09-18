@@ -55,7 +55,11 @@ export const ExpandPopoverListItem = (
   return (
     <EuiListGroupItem
       {...rest}
-      icon={iconType ? <PopoverListItemIcon color="text" type={iconType} size="m" /> : undefined}
+      icon={
+        iconType ? (
+          <PopoverListItemIcon color={disabled ? 'textSubdued' : 'text'} type={iconType} size="m" />
+        ) : undefined
+      }
       label={<EuiText>{label}</EuiText>}
       onClick={onClick}
       isDisabled={disabled}

@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   EdgeColor,
   EdgeDataModel,
@@ -90,7 +89,7 @@ const getEntityDocuments = (
   // Filter documents that match this entity ID
   const matchingDocs = nodesDataArray.filter((doc) => doc.id === entityId);
 
-  return matchingDocs.map((doc) => ({ ...doc, type: DOCUMENT_TYPE_ENTITY }));
+  return matchingDocs;
 };
 
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
@@ -154,9 +153,9 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         nodesMap[id] = {
           documentsData: getEntityDocuments(id, actorsDocDataArray),
           id,
-          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
+          label: undefined,
           color: 'primary',
-          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray]),
+          ...determineEntityNodeVisualProps(id, actorsDocDataArray),
         };
       }
     });
@@ -169,7 +168,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeVisualProps(id, [...targetsDocDataArray]),
+          ...determineEntityNodeVisualProps(id, targetsDocDataArray),
         };
       }
     });
