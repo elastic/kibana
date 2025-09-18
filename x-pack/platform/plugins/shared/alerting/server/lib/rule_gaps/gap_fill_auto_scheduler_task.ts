@@ -9,6 +9,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
 import dateMath from '@kbn/datemath';
 import { getRuleIdsWithGaps } from '../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
@@ -18,6 +19,8 @@ import { processGapsBatchFromRules } from '../../application/rule/methods/bulk_f
 import type { RulesClient } from '../../rules_client/rules_client';
 import { gapStatus } from '../../../common/constants';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
+import type { Gap } from './gap';
+import type { BackfillClient } from '../../backfill_client/backfill_client';
 
 interface GapFillTaskState {
   config: {
@@ -110,11 +113,11 @@ function createGapFillAutoSchedulerEventLogger({
             duration_ms: duration,
             config: {
               name: config.name,
-              max_amount_of_gaps_to_process_per_run: config.maxAmountOfGapsToProcessPerRun,
-              max_amount_of_rules_to_process_per_run: config.maxAmountOfRulesToProcessPerRun,
-              amount_of_retries: config.amountOfRetries,
-              rules_filter: config.rulesFilter,
-              gap_fill_range: config.gapFillRange,
+              maxAmountOfGapsToProcessPerRun: config.maxAmountOfGapsToProcessPerRun,
+              maxAmountOfRulesToProcessPerRun: config.maxAmountOfRulesToProcessPerRun,
+              amountOfRetries: config.amountOfRetries,
+              rulesFilter: config.rulesFilter,
+              gapFillRange: config.gapFillRange,
               schedule: config.schedule,
             },
             results: results?.map((result) => ({
@@ -124,10 +127,10 @@ function createGapFillAutoSchedulerEventLogger({
               error: result.error,
             })),
             summary: {
-              total_rules: summary.totalRules,
-              successful_rules: summary.successfulRules,
-              failed_rules: summary.failedRules,
-              total_gaps_processed: summary.totalGapsProcessed,
+              totalRules: summary.totalRules,
+              successfulRules: summary.successfulRules,
+              failedRules: summary.failedRules,
+              totalGapsProcessed: summary.totalGapsProcessed,
             },
           },
         },
@@ -143,11 +146,17 @@ export function registerGapFillAutoSchedulerTask({
   logger,
   getRulesClientWithRequest,
   eventLogger,
+  // getActionsClientWithRequest,
+  // getSavedObjectsClientWithRequest,
+  backfillClient,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClient>;
   eventLogger: IEventLogger;
+  // getActionsClientWithRequest: (request: KibanaRequest) => Promise<ActionsClient>;
+  // getSavedObjectsClientWithRequest: (request: KibanaRequest) => any;
+  backfillClient: BackfillClient;
 }) {
   taskManager.registerTaskDefinitions({
     'gap-fill-auto-scheduler-task': {
@@ -168,7 +177,7 @@ export function registerGapFillAutoSchedulerTask({
             const startTime = new Date();
             // Get the RulesClient using the fake request
             const rulesClient = await getRulesClientWithRequest(fakeRequest!);
-            const context = rulesClient.context;
+            const context = rulesClient.context as any;
             const { configId } =
               (taskInstance.params as { configId?: string; spaceId?: string }) || {};
             // Load scheduler SO for config
@@ -206,18 +215,68 @@ export function registerGapFillAutoSchedulerTask({
               };
             }
 
+            // Function to filter gaps that have overlapping backfills
+            const filterGapsWithOverlappingBackfills = async (gaps: Gap[]) => {
+              const filteredGaps: Gap[] = [];
+              const gapsWithOverlappingBackfills: Array<{
+                gap: Gap;
+                overlappingBackfills: number;
+              }> = [];
+
+              const actionsClient = await context.getActionsClient();
+
+              for (const gap of gaps) {
+                try {
+                  const overlappingBackfills = await backfillClient.findOverlappingBackfills({
+                    ruleId: gap.ruleId,
+                    start: gap.range.gte,
+                    end: gap.range.lte,
+                    savedObjectsRepository: context.internalSavedObjectsRepository,
+                    actionsClient,
+                  });
+
+                  if (overlappingBackfills.length === 0) {
+                    filteredGaps.push(gap);
+                  } else {
+                    gapsWithOverlappingBackfills.push({
+                      gap,
+                      overlappingBackfills: overlappingBackfills.length,
+                    });
+                  }
+                } catch (error) {
+                  logger.warn(
+                    `Failed to check overlapping backfills for gap in rule ${gap.ruleId}: ${error.message}`
+                  );
+                  // If we can't check for overlapping backfills, include the gap to be safe
+                  filteredGaps.push(gap);
+                }
+              }
+
+              if (gapsWithOverlappingBackfills.length > 0) {
+                logger.info(
+                  `Filtered out ${
+                    gapsWithOverlappingBackfills.length
+                  } gaps that have overlapping backfills: ${gapsWithOverlappingBackfills
+                    .map((g) => `rule ${g.gap.ruleId} (${g.overlappingBackfills} backfills)`)
+                    .join(', ')}`
+                );
+              }
+
+              return filteredGaps;
+            };
+
             try {
               // Create the event logger function once
               const logEvent = createGapFillAutoSchedulerEventLogger({
                 eventLogger,
-                context: rulesClient.context,
+                context,
                 taskInstance,
 
                 startTime,
                 config,
               });
 
-              const earlySuccessReturn = (message) => {
+              const earlySuccessReturn = (message: string) => {
                 const endTime = new Date();
                 logEvent({
                   status: 'success',
@@ -275,7 +334,7 @@ export function registerGapFillAutoSchedulerTask({
                 { name: 'getRuleIdsWithGaps', type: 'rule run', labels: { plugin: 'alerting' } },
                 async () => {
                   const { ruleIds: ruleIdsFromGetRuleIdsWithGaps } = await getRuleIdsWithGaps(
-                    rulesClient.context,
+                    context,
                     {
                       start: startDate.toISOString(),
                       end: now.toISOString(),
@@ -327,12 +386,12 @@ export function registerGapFillAutoSchedulerTask({
               }
 
               // Step 3: Fetch gaps for these enabled rule IDs (limit by maxAmountOfRulesToProcessPerRun)
-              let gaps: GapInfo[] = [];
+              let gaps: Gap[] = [];
               await withSpan(
                 { name: 'findGaps', type: 'rule run', labels: { plugin: 'alerting' } },
                 async () => {
                   const { data: gapsFromFindGaps } = await findGaps({
-                    eventLogClient: await rulesClient.context.getEventLogClient(),
+                    eventLogClient: await context.getEventLogClient(),
                     logger,
                     params: {
                       ruleIds: enabledRuleIds,
@@ -356,8 +415,38 @@ export function registerGapFillAutoSchedulerTask({
                 return earlySuccessReturn('Gap fill execution completed - no gaps found');
               }
 
-              // Step 4: Bulk schedule backfills for all rules at once
-              let results;
+              // Step 4: Filter out gaps that already have overlapping backfills
+              let filteredGaps: Gap[] = [];
+              await withSpan(
+                {
+                  name: 'filterGapsWithOverlappingBackfills',
+                  type: 'rule run',
+                  labels: { plugin: 'alerting' },
+                },
+                async () => {
+                  filteredGaps = await filterGapsWithOverlappingBackfills(gaps);
+                }
+              );
+
+              if (filteredGaps.length === 0) {
+                return earlySuccessReturn(
+                  `Gap fill execution completed - all ${gaps.length} gaps already have overlapping backfills`
+                );
+              }
+
+              logger.info(
+                `Filtered gaps: ${filteredGaps.length} gaps remaining after filtering out ${
+                  gaps.length - filteredGaps.length
+                } gaps with overlapping backfills`
+              );
+
+              // Step 5: Bulk schedule backfills for all rules at once
+              let results: Array<{
+                ruleId: string;
+                processedGaps: number;
+                status: 'success' | 'error';
+                error?: string;
+              }> = [];
               await withSpan(
                 {
                   name: 'processGapsBatchFromRules',
@@ -366,8 +455,8 @@ export function registerGapFillAutoSchedulerTask({
                 },
                 async () => {
                   const { results: resultsFromProcessGapsBatchFromRules } =
-                    await processGapsBatchFromRules(rulesClient.context, {
-                      gaps,
+                    await processGapsBatchFromRules(context, {
+                      gaps: filteredGaps,
                       range: {
                         start: startDate.toISOString(),
                         end: now.toISOString(),
@@ -378,15 +467,15 @@ export function registerGapFillAutoSchedulerTask({
               );
               // TODO: think about status etc.'
 
-              let overallStatus: 'success' | 'failure' | 'warning' = 'success';
+              let overallStatus: 'success' | 'error' = 'success';
               const allSuccess = results.every((r) => r.status === 'success');
               const allError = results.every((r) => r.status === 'error');
               if (allSuccess) {
                 overallStatus = 'success';
               } else if (allError) {
-                overallStatus = 'failure';
+                overallStatus = 'error';
               } else {
-                overallStatus = 'warning';
+                overallStatus = 'error';
               }
               const summary = {
                 totalRules: results.length,
@@ -420,7 +509,7 @@ export function registerGapFillAutoSchedulerTask({
               const endTime = new Date();
               const logEvent = createGapFillAutoSchedulerEventLogger({
                 eventLogger,
-                context: rulesClient.context,
+                context,
                 taskInstance,
 
                 startTime,
