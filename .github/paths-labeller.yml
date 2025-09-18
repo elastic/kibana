@@ -32,4 +32,4 @@
     - 'x-pack/plugins/observability_solution/**/*.*'
     - 'x-pack/solutions/observability/plugins/serverless_observability/**/*.*'
     - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
-    - 'x-pack/test/observability_*/**/*.*'
+    - 'x-pack/solutions/observability/test/observability_*/**/*.*'

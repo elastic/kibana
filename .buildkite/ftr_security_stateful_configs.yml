@@ -8,7 +8,6 @@ disabled:
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.frozen.trial.ts
   - x-pack/solutions/security/test/security_solution_endpoint/configs/config.base.ts
   - x-pack/solutions/security/test/security_solution_endpoint/config.base.ts
-  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
   - x-pack/solutions/security/test/api_integration/config.ts
   - x-pack/solutions/security/test/functional/config.base.ts
 

@@ -7,7 +7,6 @@
 
 import type { ObservabilityTelemetryFtrProviderContext } from './config.telemetry';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: ObservabilityTelemetryFtrProviderContext) {
   describe('serverless observability UI - telemetry', function () {
     this.tags(['skipMKI', 'esGate']);
