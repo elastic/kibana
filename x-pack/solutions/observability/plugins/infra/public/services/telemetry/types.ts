@@ -56,8 +56,8 @@ export interface HostsViewQueryHostsCountRetrievedParams {
   total: number;
   with_query: boolean;
   with_filters: boolean;
-  schema_selected?: DataSchemaFormat;
-  schemas_available?: DataSchemaFormat[];
+  schema_selected?: DataSchemaFormat | 'no schema available';
+  schemas_available?: DataSchemaFormat[] | 'no schema available'[];
   schema_error?: boolean;
 }
 

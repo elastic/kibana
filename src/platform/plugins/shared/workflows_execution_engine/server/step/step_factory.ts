@@ -25,9 +25,19 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
-import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
-import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
+import {
+  EnterTryBlockNodeImpl,
+  ExitTryBlockNodeImpl,
+  EnterNormalPathNodeImpl,
+  ExitNormalPathNodeImpl,
+  EnterFallbackPathNodeImpl,
+  ExitFallbackPathNodeImpl,
+} from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { KibanaActionStepImpl } from './kibana_action_step';
 
 export class StepFactory {
   constructor(
@@ -43,10 +53,21 @@ export class StepFactory {
     step: TStep // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
-
+    const stepId = (step as any).id || (step as any).name;
     if (!stepType) {
       throw new Error('Step type is not defined for step: ' + JSON.stringify(step));
     }
+
+    const stepLogger = this.workflowLogger.createStepLogger(
+      this.workflowRuntime.getCurrentStepExecutionId(),
+      stepId,
+      stepId,
+      stepType
+    );
+
+    // Check if it's an internal action type
+    const isElasticsearchAction = stepType && stepType.startsWith('elasticsearch.');
+    const isKibanaAction = stepType && stepType.startsWith('kibana.');
 
     switch (stepType) {
       case 'enter-foreach':
@@ -54,33 +75,47 @@ export class StepFactory {
           step as any,
           this.workflowRuntime,
           this.contextManager,
-          this.workflowLogger
+          stepLogger
         );
       case 'exit-foreach':
-        return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new ExitForeachNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           step as any,
           this.workflowRuntime,
           this.workflowTaskManager,
-          this.workflowLogger
+          stepLogger
         );
       case 'exit-retry':
-        return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new ExitRetryNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'enter-continue':
-        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
+      case 'enter-try-block':
+        return new EnterTryBlockNodeImpl(step as any, this.workflowRuntime);
+      case 'exit-try-block':
+        return new ExitTryBlockNodeImpl(step as any, this.workflowRuntime);
+      case 'enter-normal-path':
+        return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, stepLogger);
+      case 'enter-fallback-path':
+        return new EnterFallbackPathNodeImpl(this.workflowRuntime);
+      case 'exit-normal-path':
+        return new ExitNormalPathNodeImpl(step as any, this.workflowRuntime);
+      case 'exit-fallback-path':
+        return new ExitFallbackPathNodeImpl(step as any, this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,
           this.workflowRuntime,
           this.contextManager,
-          this.workflowLogger
+          stepLogger
         );
-      case 'enter-condition-branch':
-        return new EnterConditionBranchNodeImpl(this.workflowRuntime);
-      case 'exit-condition-branch':
+      case 'enter-then-branch':
+      case 'enter-else-branch':
+        return new EnterConditionBranchNodeImpl(step as any, this.workflowRuntime);
+      case 'exit-then-branch':
+      case 'exit-else-branch':
         return new ExitConditionBranchNodeImpl(step as any, this.workflowRuntime);
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, this.workflowRuntime);
@@ -88,30 +123,58 @@ export class StepFactory {
         return new WaitStepImpl(
           step as any,
           this.workflowRuntime,
-          this.workflowLogger,
+          stepLogger,
           this.workflowTaskManager
         );
       case 'atomic':
+        // Default atomic step (connector-based)
         return new AtomicStepImpl(
           step as any,
           this.contextManager,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          stepLogger
         );
       case 'http':
         return new HttpStepImpl(
           step as any,
           this.contextManager,
-          this.workflowLogger,
+          stepLogger,
           this.urlValidator,
           this.workflowRuntime
         );
       case 'parallel':
-      // return new ParallelStepImpl(step as ParallelStep, contextManager);
+        throw new Error(`Parallel step not implemented yet: ${stepType}`);
       case 'merge':
-      // return new MergeStepImpl(step as MergeStep, contextManager);
+        throw new Error(`Merge step not implemented yet: ${stepType}`);
       default:
+        // Handle elasticsearch.* and kibana.* actions
+        if (isElasticsearchAction) {
+          this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${stepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'elasticsearch', 'internal-action'],
+          });
+          return new ElasticsearchActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
+        if (isKibanaAction) {
+          this.workflowLogger.logInfo(`Creating Kibana action step: ${stepType}`, {
+            event: { action: 'internal-action-creation', outcome: 'success' },
+            tags: ['step-factory', 'kibana', 'internal-action'],
+          });
+          return new KibanaActionStepImpl(
+            step as any,
+            this.contextManager,
+            this.workflowRuntime,
+            this.workflowLogger
+          );
+        }
+
         throw new Error(`Unknown node type: ${stepType}`);
     }
   }

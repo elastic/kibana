@@ -437,6 +437,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.ransomware.diagnostic',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ransomware.diagnostic',
+      {
+        defaultMessage:
+          'Set this to false to disable diagnostic ransomware protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.populate_file_data',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Set this to false to disable collection of header bytes on file events. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1739,7 +1761,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default is true from 9.2.0",
       }
     ),
   },
@@ -1915,7 +1937,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default is true from 9.2.0",
       }
     ),
   },

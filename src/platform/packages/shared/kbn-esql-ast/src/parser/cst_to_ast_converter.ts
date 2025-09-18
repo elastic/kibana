@@ -744,7 +744,7 @@ export class CstToAstConverter {
         const renameToken = asToken || assignToken;
 
         if (renameToken && textExistsAndIsValid(renameToken.getText())) {
-          const renameFunction = this.createFunction(
+          const renameFunction = this.toFunction(
             renameToken.getText().toLowerCase(),
             clause,
             undefined,
@@ -857,10 +857,17 @@ export class CstToAstConverter {
       command.incomplete = true;
     }
 
-    command.args.push(
-      ...this.toOnOptionFromEnrichCommand(ctx),
-      ...this.toWithOptionFromEnrichCommand(ctx)
-    );
+    const onOption = this.toOnOptionFromEnrichCommand(ctx);
+
+    if (onOption) {
+      command.args.push(onOption);
+    }
+
+    const withOption = this.toWithOptionFromEnrichCommand(ctx);
+
+    if (withOption) {
+      command.args.push(withOption);
+    }
 
     return command;
   }
@@ -960,12 +967,11 @@ export class CstToAstConverter {
     return source;
   }
 
-  /**
-   * @todo Make it return a single ON option.
-   */
-  private toOnOptionFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommandOption[] {
+  private toOnOptionFromEnrichCommand(
+    ctx: cst.EnrichCommandContext
+  ): ast.ESQLCommandOption | undefined {
     if (!ctx._matchField) {
-      return [];
+      return undefined;
     }
 
     const identifier = ctx.qualifiedNamePattern();
@@ -982,24 +988,20 @@ export class CstToAstConverter {
       fn.location.min = ctx.ON()!.symbol.start;
       fn.location.max = max;
 
-      return [fn];
+      return fn;
     }
 
-    return [];
+    return undefined;
   }
 
-  /**
-   * @todo Make it return a single WITH option.
-   */
-  private toWithOptionFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommandOption[] {
-    const options: ast.ESQLCommandOption[] = [];
+  private toWithOptionFromEnrichCommand(
+    ctx: cst.EnrichCommandContext
+  ): ast.ESQLCommandOption | undefined {
     const withCtx = ctx.WITH();
 
     if (withCtx) {
       const option = this.toOption(withCtx.getText().toLowerCase(), ctx);
       const clauses = ctx.enrichWithClause_list();
-
-      options.push(option);
 
       for (const clause of clauses) {
         if (clause._enrichField) {
@@ -1018,7 +1020,7 @@ export class CstToAstConverter {
             }
           }
           if (args.length) {
-            const fn = this.createFunction('=', clause, undefined, 'binary-expression');
+            const fn = this.toFunction('=', clause, undefined, 'binary-expression');
             fn.args.push(args[0], args[1] ? [args[1]] : []);
             option.args.push(fn);
           }
@@ -1030,9 +1032,11 @@ export class CstToAstConverter {
         location.min = withCtx.symbol.start;
         location.max = lastArg?.location?.max ?? withCtx.symbol.stop;
       }
+
+      return option;
     }
 
-    return options;
+    return undefined;
   }
 
   // ---------------------------------------------------------------- MV_EXPAND
@@ -1079,7 +1083,21 @@ export class CstToAstConverter {
   }
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
-    return this.toSource(ctx._index);
+    if (ctx._index) {
+      return this.toSource(ctx._index);
+    } else {
+      return Builder.expression.source.node(
+        {
+          sourceType: 'index',
+          name: '',
+        },
+        {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: true,
+          text: ctx?.getText(),
+        }
+      );
+    }
   }
 
   // ------------------------------------------------------------- CHANGE_POINT
@@ -1151,7 +1169,7 @@ export class CstToAstConverter {
       const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
 
-      const assignment = this.createFunction(
+      const assignment = this.toFunction(
         ctx.ASSIGN().getText(),
         ctx,
         undefined,
@@ -1276,7 +1294,7 @@ export class CstToAstConverter {
     // Handle target field assignment: RERANK target = "query"
     if (ctx._targetField && ctx.ASSIGN()) {
       const targetField = this.toColumn(ctx._targetField);
-      const assignment = this.createFunction(
+      const assignment = this.toFunction(
         ctx.ASSIGN().getText(),
         ctx,
         undefined,
@@ -1338,8 +1356,32 @@ export class CstToAstConverter {
     }
 
     const withOption = this.fromCommandNamedParameters(namedParamsCtx);
-    if (withOption && !withOption.incomplete) {
+
+    if (!withOption) {
+      return;
+    }
+
+    // check the existence of inference_id
+    const namedParameters = withOption.args[0] as ast.ESQLMap | undefined;
+    command.inferenceId = undefined;
+
+    if (namedParameters) {
       command.args.push(withOption);
+
+      command.inferenceId = Builder.expression.literal.string(
+        '',
+        { name: 'inferenceId' },
+        { incomplete: true }
+      );
+
+      const inferenceIdParam = namedParameters?.entries.find(
+        (param) => param.key.valueUnquoted === 'inference_id'
+      )?.value as ast.ESQLStringLiteral;
+
+      if (inferenceIdParam) {
+        command.inferenceId = inferenceIdParam;
+        command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
+      }
     }
   }
 
@@ -1390,7 +1432,7 @@ export class CstToAstConverter {
       if (ctx.ASSIGN() && ctx.booleanExpression()) {
         const left = this.toColumn(qualifiedNameCtx);
         const right = this.collectBooleanExpression(ctx.booleanExpression());
-        const assignment = this.createFunction(
+        const assignment = this.toFunction(
           ctx.ASSIGN().getText(),
           ctx,
           undefined,
@@ -1536,7 +1578,7 @@ export class CstToAstConverter {
   }
 
   private visitLogicalNot(ctx: cst.LogicalNotContext) {
-    const fn = this.createFunction('not', ctx, undefined, 'unary-expression');
+    const fn = this.toFunction('not', ctx, undefined, 'unary-expression');
     fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
     // update the location of the assign based on arguments
     const argsLocationExtends = this.computeLocationExtends(fn);
@@ -1545,7 +1587,7 @@ export class CstToAstConverter {
   }
 
   private visitLogicalAndsOrs(ctx: cst.LogicalBinaryContext) {
-    const fn = this.createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
+    const fn = this.toFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
     fn.args.push(
       ...this.collectBooleanExpression(ctx._left),
       ...this.collectBooleanExpression(ctx._right)
@@ -1624,7 +1666,7 @@ export class CstToAstConverter {
       this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
     ) as ast.ESQLAstExpression;
     const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
-    const expression = this.createFunction(
+    const expression = this.toFunction(
       ctx.NOT() ? 'not in' : 'in',
       ctx,
       { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
@@ -1660,7 +1702,7 @@ export class CstToAstConverter {
     }
     if (ctx instanceof cst.ComparisonContext) {
       const comparisonNode = ctx.comparisonOperator();
-      const comparisonFn = this.createFunction(
+      const comparisonFn = this.toFunction(
         this.getComparisonName(comparisonNode),
         comparisonNode,
         undefined,
@@ -1684,19 +1726,14 @@ export class CstToAstConverter {
     if (ctx instanceof cst.ArithmeticUnaryContext) {
       const arg = this.visitOperatorExpression(ctx.operatorExpression());
       // this is a number sign thing
-      const fn = this.createFunction('*', ctx, undefined, 'binary-expression');
+      const fn = this.toFunction('*', ctx, undefined, 'binary-expression');
       fn.args.push(this.createFakeMultiplyLiteral(ctx, 'integer'));
       if (arg) {
         fn.args.push(arg);
       }
       return fn;
     } else if (ctx instanceof cst.ArithmeticBinaryContext) {
-      const fn = this.createFunction(
-        this.getMathOperation(ctx),
-        ctx,
-        undefined,
-        'binary-expression'
-      );
+      const fn = this.toFunction(this.getMathOperation(ctx), ctx, undefined, 'binary-expression');
       const args = [
         this.visitOperatorExpression(ctx._left),
         this.visitOperatorExpression(ctx._right),
@@ -1746,38 +1783,12 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
       return this.collectBooleanExpression(ctx.booleanExpression());
     } else if (ctx instanceof cst.FunctionContext) {
-      const functionExpressionCtx = ctx.functionExpression();
-      const fn = this.createFunctionCall(ctx);
-      const asteriskArg = functionExpressionCtx.ASTERISK()
-        ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
-        : undefined;
-      if (asteriskArg) {
-        fn.args.push(asteriskArg);
-      }
-
-      // TODO: Remove array manipulations here.
-      const functionArgs = functionExpressionCtx
-        .booleanExpression_list()
-        .flatMap(this.collectBooleanExpression.bind(this))
-        .filter(nonNullable);
-
-      if (functionArgs.length) {
-        fn.args.push(...(functionArgs as any));
-      }
-
-      const mapExpressionCtx = functionExpressionCtx.mapExpression();
-
-      if (mapExpressionCtx) {
-        const trailingMap = this.fromMapExpression(mapExpressionCtx);
-
-        fn.args.push(trailingMap);
-      }
-
-      return fn;
+      return this.fromFunction(ctx);
     } else if (ctx instanceof cst.InlineCastContext) {
       return this.collectInlineCast(ctx);
+    } else {
+      return this.fromParserRuleToUnknown(ctx);
     }
-    return this.fromParserRuleToUnknown(ctx);
   }
 
   private fromCommandNamedParameters(
@@ -1844,7 +1855,7 @@ export class CstToAstConverter {
             const negate = regex.NOT();
             const likeType = regex instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
             const fnName = `${negate ? 'not ' : ''}${likeType}`;
-            const fn = this.createFunction(fnName, regex, undefined, 'binary-expression');
+            const fn = this.toFunction(fnName, regex, undefined, 'binary-expression');
             const arg = this.visitValueExpression(regex.valueExpression());
             if (arg) {
               fn.args.push(arg);
@@ -1867,7 +1878,7 @@ export class CstToAstConverter {
     }
     const negate = ctx.NOT();
     const fnName = `is${negate ? ' not ' : ' '}null`;
-    const fn = this.createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
+    const fn = this.toFunction(fnName, ctx, undefined, 'postfix-unary-expression');
     const arg = this.visitValueExpression(ctx.valueExpression());
     if (arg) {
       fn.args.push(arg);
@@ -1907,6 +1918,21 @@ export class CstToAstConverter {
       .flat();
   }
 
+  private fromBooleanExpressions(
+    ctx: cst.BooleanExpressionContext[] | undefined
+  ): ast.ESQLAstItem[] {
+    const list: ast.ESQLAstItem[] = [];
+
+    if (!ctx) {
+      return list;
+    }
+
+    for (const expr of ctx) {
+      list.push(...this.collectBooleanExpression(expr));
+    }
+    return list;
+  }
+
   public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
     return this.collectBooleanExpression(ctx)[0] || this.fromParserRuleToUnknown(ctx);
   }
@@ -1938,7 +1964,7 @@ export class CstToAstConverter {
     if (constantCtx) {
       const constantExpression = this.fromConstant(constantCtx);
 
-      expression = this.createBinaryExpression(':', ctx, [expression, constantExpression]);
+      expression = this.toBinaryExpression(':', ctx, [expression, constantExpression]);
     }
 
     return expression;
@@ -2073,7 +2099,10 @@ export class CstToAstConverter {
         throw new Error(`Unexpected node type: ${(node as ast.ESQLProperNode).type} in toColumn`);
       }
     } else if (ctx instanceof cst.QualifiedNameContext) {
-      const list = ctx.identifierOrParameter_list();
+      // TODO: new grammar also introduced here bracketed syntax.
+      // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R156-R158
+      const fieldNameCtx = ctx._name ?? ctx.fieldName();
+      const list = fieldNameCtx ? fieldNameCtx.identifierOrParameter_list() : [];
 
       for (const item of list) {
         if (item instanceof cst.IdentifierOrParameterContext) {
@@ -2116,7 +2145,10 @@ export class CstToAstConverter {
     ctx: cst.QualifiedNamePatternContext
   ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
     const args: ast.ESQLColumn['args'] = [];
-    const patterns = ctx.identifierPattern_list();
+    // TODO: new grammar also introduced here bracketed syntax.
+    // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R165-R167
+    const fieldNamePatternCtx = ctx._name ?? ctx.fieldNamePattern();
+    const patterns = fieldNamePatternCtx ? fieldNamePatternCtx.identifierPattern_list() : [];
 
     // Special case: a single parameter is returned as a param literal
     if (patterns.length === 1) {
@@ -2252,7 +2284,7 @@ export class CstToAstConverter {
     //     should dereference `ctx.qualifiedName()` only once.
     if (ctx.qualifiedName() && ctx.ASSIGN()) {
       // TODO: use binary expression construction method.
-      const assignment = this.createFunction(
+      const assignment = this.toFunction(
         ctx.ASSIGN()!.getText(),
         ctx,
         undefined,
@@ -2281,8 +2313,61 @@ export class CstToAstConverter {
 
   // --------------------------------------------------- expression: "function"
 
-  // TODO: Rename to `toFunction` or similar.
-  private createFunction<Subtype extends ast.FunctionSubtype>(
+  private fromFunction(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
+    const functionExpressionCtx = ctx.functionExpression();
+    const functionNameCtx = functionExpressionCtx.functionName();
+    const mapExpressionCtx = functionExpressionCtx.mapExpression();
+    const args = this.fromBooleanExpressions(functionExpressionCtx.booleanExpression_list());
+    const fn: ast.ESQLFunctionCallExpression = {
+      type: 'function',
+      subtype: 'variadic-call',
+      name: functionNameCtx.getText().toLowerCase(),
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      args,
+      incomplete: Boolean(ctx.exception),
+    };
+    const identifierOrParameterCtx = functionNameCtx.identifierOrParameter();
+    const asteriskNode = functionExpressionCtx.ASTERISK()
+      ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
+      : undefined;
+
+    if (identifierOrParameterCtx instanceof cst.IdentifierOrParameterContext) {
+      const operator = this.fromIdentifierOrParam(identifierOrParameterCtx);
+
+      if (operator) {
+        fn.operator = operator;
+      }
+    } else {
+      const lastCtx = functionNameCtx.LAST();
+
+      if (lastCtx) {
+        fn.operator = this.fromNodeToIdentifier(lastCtx);
+        fn.operator.name = fn.operator.name.toLowerCase();
+      } else {
+        const firstCtx = functionNameCtx.FIRST();
+
+        if (firstCtx) {
+          fn.operator = this.fromNodeToIdentifier(firstCtx);
+          fn.operator.name = fn.operator.name.toLowerCase();
+        }
+      }
+    }
+
+    if (asteriskNode) {
+      fn.args.push(asteriskNode);
+    }
+
+    if (mapExpressionCtx) {
+      const trailingMap = this.fromMapExpression(mapExpressionCtx);
+
+      fn.args.push(trailingMap);
+    }
+
+    return fn;
+  }
+
+  private toFunction<Subtype extends ast.FunctionSubtype>(
     name: string,
     ctx: antlr.ParserRuleContext,
     customPosition?: ast.ESQLLocation,
@@ -2306,40 +2391,12 @@ export class CstToAstConverter {
     return node;
   }
 
-  // TODO: Rename to `toFunctionCall` or similar.
-  private createFunctionCall(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
-    const functionExpressionCtx = ctx.functionExpression();
-    const functionName = functionExpressionCtx.functionName();
-    const node: ast.ESQLFunctionCallExpression = {
-      type: 'function',
-      subtype: 'variadic-call',
-      name: functionName.getText().toLowerCase(),
-      text: ctx.getText(),
-      location: getPosition(ctx.start, ctx.stop),
-      args: [],
-      incomplete: Boolean(ctx.exception),
-    };
-
-    const identifierOrParameter = functionName.identifierOrParameter();
-
-    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.fromIdentifierOrParam(identifierOrParameter);
-
-      if (operator) {
-        node.operator = operator;
-      }
-    }
-
-    return node;
-  }
-
-  // TODO: Rename to `toBinaryExpression` or similar.
-  private createBinaryExpression(
+  private toBinaryExpression(
     operator: ast.BinaryExpressionOperator,
     ctx: antlr.ParserRuleContext,
     args: ast.ESQLBinaryExpression['args']
   ): ast.ESQLBinaryExpression {
-    const node = Builder.expression.func.binary(
+    return Builder.expression.func.binary(
       operator,
       args,
       {},
@@ -2349,8 +2406,6 @@ export class CstToAstConverter {
         incomplete: Boolean(ctx.exception),
       }
     ) as ast.ESQLBinaryExpression;
-
-    return node;
   }
 
   // -------------------------------------------------------- expression: "map"
@@ -2367,8 +2422,13 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
+
       if (entry) {
         map.entries.push(entry);
+
+        if (entry.incomplete) {
+          map.incomplete = true;
+        }
       } else {
         map.incomplete = true;
       }
@@ -2382,17 +2442,40 @@ export class CstToAstConverter {
     const valueCtx = ctx._value;
 
     if (keyCtx && valueCtx) {
+      let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+      if (!key) {
+        return undefined;
+      }
 
-      const entry = Builder.expression.entry(key, value, {
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      });
+      const constantCtx = valueCtx.constant();
 
-      return entry;
+      if (constantCtx) {
+        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+      }
+
+      const mapExpressionCtx = valueCtx.mapExpression();
+
+      if (mapExpressionCtx) {
+        value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (!value) {
+        value = this.fromParserRuleToUnknown(valueCtx);
+        value.incomplete = true;
+      }
+
+      if (value) {
+        const entry = Builder.expression.entry(key, value, {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+        });
+
+        return entry;
+      }
     }
+    return undefined;
   }
 
   // ----------------------------------------------------- constant expressions

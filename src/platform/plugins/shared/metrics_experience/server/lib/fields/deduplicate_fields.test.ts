@@ -8,14 +8,14 @@
  */
 
 import { deduplicateFields } from './deduplicate_fields';
-import type { MetricField } from '../../../common/fields/types';
+import type { MetricField } from '../../../common/types';
 
 describe('deduplicateFields', () => {
   const baseField: Omit<MetricField, 'name'> = {
     index: 'test-index',
     dimensions: [],
     type: 'double',
-    time_series_metric: 'gauge',
+    instrument: 'gauge',
   };
 
   it('should prefer the non-prefixed field when the prefixed one comes first', () => {

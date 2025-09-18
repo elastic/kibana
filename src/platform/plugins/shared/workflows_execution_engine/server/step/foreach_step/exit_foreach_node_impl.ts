@@ -20,18 +20,20 @@ export class ExitForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.exitScope();
     const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.startNodeId);
 
     if (!foreachState) {
       throw new Error(`Foreach state for step ${this.step.startNodeId} not found`);
     }
+    // Exit the scope of the current iteration
+    this.wfExecutionRuntimeManager.exitScope();
 
     if (foreachState.items[foreachState.index + 1]) {
       this.wfExecutionRuntimeManager.goToStep(this.step.startNodeId);
       return;
     }
-
+    // All items have been processed, exit the foreach scope
+    this.wfExecutionRuntimeManager.exitScope();
     await this.wfExecutionRuntimeManager.setStepState(this.step.startNodeId, undefined);
     await this.wfExecutionRuntimeManager.finishStep(this.step.startNodeId);
     this.workflowLogger.logDebug(

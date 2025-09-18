@@ -18,7 +18,7 @@ import { SecurityPageName } from '../../../../../common';
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
-import { TableHeader } from './header';
+import { TableHeader } from '../../../common/components';
 
 interface ActionNameProps {
   disableActions?: boolean;

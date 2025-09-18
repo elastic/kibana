@@ -192,6 +192,7 @@ export function initializeFetch({
               data: discoverServices.data,
               expressions: discoverServices.expressions,
               scopedProfilesManager,
+              searchSessionId,
             });
             return {
               columnsMeta: result.esqlQueryColumns

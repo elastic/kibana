@@ -13,6 +13,7 @@ import type {
   DatasetDetailsNavigatedEbtProps,
   DatasetDetailsTrackingState,
   DatasetNavigatedEbtProps,
+  FailureStoreUpdateEbtProps,
 } from './types';
 import { DatasetQualityTelemetryEventTypes } from './types';
 
@@ -61,5 +62,9 @@ export class TelemetryClient implements ITelemetryClient {
       ...eventProps,
       tracking_id: this.datasetDetailsTrackingId,
     });
+  };
+
+  public trackFailureStoreUpdated = (eventProps: FailureStoreUpdateEbtProps) => {
+    this.analytics.reportEvent(DatasetQualityTelemetryEventTypes.FAILURE_STORE_UPDATED, eventProps);
   };
 }

@@ -14,6 +14,7 @@ import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
@@ -28,36 +29,53 @@ export interface UpsertStreamInput {
 
 export function createUpsertStreamActor({
   streamsRepositoryClient,
-}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient'>) {
-  return fromPromise<UpsertStreamResponse, UpsertStreamInput>(({ input, signal }) => {
-    return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
-      signal,
-      params: {
-        path: {
-          name: input.definition.stream.name,
+  telemetryClient,
+}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient' | 'telemetryClient'>) {
+  return fromPromise<UpsertStreamResponse, UpsertStreamInput>(async ({ input, signal }) => {
+    const response = await streamsRepositoryClient.fetch(
+      `PUT /api/streams/{name}/_ingest 2023-10-31`,
+      {
+        signal,
+        params: {
+          path: {
+            name: input.definition.stream.name,
+          },
+          body: Streams.WiredStream.GetResponse.is(input.definition)
+            ? {
+                ingest: {
+                  ...input.definition.stream.ingest,
+                  processing: {
+                    steps: input.processors.map(processorConverter.toAPIDefinition),
+                  },
+                  ...(input.fields && {
+                    wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
+                  }),
+                },
+              }
+            : {
+                ingest: {
+                  ...input.definition.stream.ingest,
+                  processing: {
+                    steps: input.processors.map(processorConverter.toAPIDefinition),
+                  },
+                  ...(input.fields && {
+                    classic: {
+                      ...input.definition.stream.ingest.classic,
+                      field_overrides: input.fields,
+                    },
+                  }),
+                },
+              },
         },
-        body: Streams.WiredStream.GetResponse.is(input.definition)
-          ? {
-              ingest: {
-                ...input.definition.stream.ingest,
-                processing: {
-                  steps: input.processors.map(processorConverter.toAPIDefinition),
-                },
-                ...(input.fields && {
-                  wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
-                }),
-              },
-            }
-          : {
-              ingest: {
-                ...input.definition.stream.ingest,
-                processing: {
-                  steps: input.processors.map(processorConverter.toAPIDefinition),
-                },
-              },
-            },
-      },
+      }
+    );
+
+    telemetryClient.trackProcessingSaved({
+      processors_count: input.processors.length,
+      stream_type: getStreamTypeFromDefinition(input.definition.stream),
     });
+
+    return response;
   });
 }
 
