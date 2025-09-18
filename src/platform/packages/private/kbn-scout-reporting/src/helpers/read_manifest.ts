@@ -11,12 +11,21 @@ import path from 'path';
 import fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 
-export interface PluginManifest {
+export interface KibanaJsoncMetadata {
   id: string;
+  type: string;
   group: string;
   owner: string[];
   visibility: string;
-  plugin: { id: string };
+  plugin?: { id: string };
+}
+
+export interface KibanaModuleMetadata {
+  id: string;
+  type: string;
+  group: string;
+  owner: string[];
+  visibility: string;
 }
 
 /**
@@ -25,7 +34,7 @@ export interface PluginManifest {
  * @returns Absolute path to the `kibana.jsonc` file.
  * @throws Error if `scout` is not found in the path.
  */
-export const getManifestPath = (configPath: string): string => {
+export const getKibanaModulePath = (configPath: string): string => {
   const pathSegments = configPath.split(path.sep);
   const testDirIndex = pathSegments.indexOf('scout');
 
@@ -43,10 +52,10 @@ export const getManifestPath = (configPath: string): string => {
 /**
  * Reads and parses the `kibana.jsonc` manifest file.
  * @param filePath - Absolute path to the `kibana.jsonc` file.
- * @returns Parsed `PluginManifest` object.
+ * @returns Parsed `KibanaModuleMetadata` object.
  * @throws Error if the file does not exist, cannot be read, or is invalid.
  */
-export const readPluginManifest = (filePath: string): PluginManifest => {
+export const readKibanaModuleManifest = (filePath: string): KibanaModuleMetadata => {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Manifest file not found: ${filePath}`);
   }
@@ -58,29 +67,31 @@ export const readPluginManifest = (filePath: string): PluginManifest => {
     throw new Error(`Failed to read manifest file at ${filePath}: ${error.message}`);
   }
 
-  let manifest: Partial<PluginManifest>;
+  let manifest: Partial<KibanaJsoncMetadata>;
   try {
-    manifest = Jsonc.parse(fileContent) as Partial<PluginManifest>;
+    manifest = Jsonc.parse(fileContent) as Partial<KibanaJsoncMetadata>;
   } catch (error) {
     throw new Error(`Invalid JSON format in manifest file at ${filePath}: ${error.message}`);
   }
 
-  const { id, group, visibility, owner, plugin } = manifest;
-  if (!id || !group || !visibility || !plugin?.id) {
+  const { group, visibility, owner } = manifest;
+  const id = manifest.plugin ? manifest.plugin.id : manifest.id;
+  const type = manifest.plugin ? 'plugin' : 'package';
+  if (!id || !group || !visibility) {
     throw new Error(
-      `Invalid manifest structure at ${filePath}. Expected required fields: id, group, visibility, plugin.id`
+      `Invalid manifest structure at ${filePath}. Expected required fields: id, group, visibility`
     );
   }
 
-  return { id, group, visibility, owner: owner || [], plugin };
+  return { id, type, group, visibility, owner: owner || [] };
 };
 
 /**
  * Resolves the plugin manifest file path and reads its content.
  * @param configPath - Absolute path to the Playwright configuration file in the plugin directory.
- * @returns Parsed `PluginManifest` object.
+ * @returns Parsed `KibanaModuleMetadata` object.
  */
-export const getPluginManifestData = (configPath: string): PluginManifest => {
-  const manifestPath = getManifestPath(configPath);
-  return readPluginManifest(manifestPath);
+export const getKibanaModuleData = (configPath: string): KibanaModuleMetadata => {
+  const manifestPath = getKibanaModulePath(configPath);
+  return readKibanaModuleManifest(manifestPath);
 };

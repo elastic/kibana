@@ -47,11 +47,12 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly runId: string;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
-  private target: string;
-  private plugin: TestFailure['plugin'];
-  private command: string;
+  private readonly command: string;
 
-  constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
+  private target = 'undefined'; // when '--grep' is not provided in the command line
+  private kibanaModule: TestFailure['kibanaModule'];
+
+  constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
@@ -59,14 +60,21 @@ export class ScoutFailedTestReporter implements Reporter {
 
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
-
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.target = 'undefined'; // when '--grep' is not provided in the command line
     this.command = stripRunCommand(process.argv);
   }
 
   private getFileOwners(filePath: string): string[] {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+  }
+
+  private formatTestError(result: TestResult): TestFailure['error'] {
+    return {
+      message: result.error?.message ? stripFilePath(result.error.message) : undefined,
+      stack_trace: result.error?.stack
+        ? excapeHtmlCharacters(stripFilePath(result.error.stack))
+        : undefined,
+    };
   }
 
   public get reportRootPath(): string {
@@ -79,45 +87,45 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    // Get plugin metadata from kibana.jsonc
+    this.target = getRunTarget();
+
+    // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
       const metadata = getPluginManifestData(config.configFile);
-      this.plugin = {
-        id: metadata.plugin.id,
+      this.kibanaModule = {
+        id: metadata.id,
+        type: metadata.type,
         visibility: metadata.visibility,
         group: metadata.group,
       };
     }
-
-    this.target = getRunTarget();
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status === 'failed') {
-      this.report.logEvent({
-        id: getTestIDForTitle(test.titlePath().join(' ')),
-        suite: test.parent.title,
-        title: test.title,
-        target: this.target,
-        command: this.command,
-        location: stripFilePath(test.location.file),
-        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-        plugin: this.plugin,
-        duration: result.duration,
-        error: {
-          message: result.error?.message ? stripFilePath(result.error.message) : undefined,
-          stack_trace: result.error?.stack
-            ? excapeHtmlCharacters(stripFilePath(result.error.stack))
-            : undefined,
-        },
-        stdout: result.stdout ? parseStdout(result.stdout) : undefined,
-        attachments: result.attachments.map((attachment) => ({
-          name: attachment.name,
-          path: attachment.path,
-          contentType: attachment.contentType,
-        })),
-      });
+    if (result.status !== 'failed') {
+      return;
     }
+
+    const testFailure: TestFailure = {
+      id: getTestIDForTitle(test.titlePath().join(' ')),
+      suite: test.parent.title,
+      title: test.title,
+      target: this.target,
+      command: this.command,
+      location: stripFilePath(test.location.file),
+      owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+      kibanaModule: this.kibanaModule,
+      duration: result.duration,
+      error: this.formatTestError(result),
+      stdout: result.stdout ? parseStdout(result.stdout) : undefined,
+      attachments: result.attachments.map((attachment) => ({
+        name: attachment.name,
+        path: attachment.path,
+        contentType: attachment.contentType,
+      })),
+    };
+
+    this.report.logEvent(testFailure);
   }
 
   onEnd(result: FullResult) {
