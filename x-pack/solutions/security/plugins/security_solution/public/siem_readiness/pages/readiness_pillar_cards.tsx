@@ -18,42 +18,26 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PillarStats } from '../hooks/use_readiness_tasks_stats';
 import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
-import { usePillarProps } from '../hooks/use_pillar_props';
+import { usePillarsProps } from '../hooks/use_pillar_props';
 import type { PillarProps } from '../hooks/use_pillar_props';
 
 // Color constants
 const BRONZE_COLOR = '#966B03';
 const SILVER_COLOR = '#5A6D8C';
 const GOLD_COLOR = '#F5BC00';
-const DEFAULT_SHIELD_COLOR = '#966B03';
 
-interface PillarCardProps {
+const CARDS_HEIGHT = 240;
+
+interface Pillar {
   pillarProps: PillarProps;
-  pillarData: {
-    completed: number;
-    total: number;
-  };
+  pillarStats: PillarStats;
 }
 
-interface PillarDetailsProps {
-  pillarProps: PillarProps;
-  pillarData: {
-    completed: number;
-    total: number;
-  };
-}
-
-interface PillarLevelProgressProps {
-  pillarProps: PillarProps;
-  pillarData: {
-    completed: number;
-    total: number;
-  };
-}
-
-const PillarDetails: React.FC<PillarDetailsProps> = ({ pillarProps, pillarData }) => {
-  const { completed, total } = pillarData;
+const PillarDetails: React.FC<Pillar> = ({ pillarProps, pillarStats }) => {
+  const { completed, total } = pillarStats;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
@@ -74,14 +58,18 @@ const PillarDetails: React.FC<PillarDetailsProps> = ({ pillarProps, pillarData }
       </EuiFlexItem>
 
       <EuiFlexItem grow={9}>
-        <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%', paddingLeft: 16 }}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          css={{ height: '100%', paddingLeft: euiTheme.size.base }}
+        >
           <EuiFlexItem grow={1}>
             <EuiFlexGroup direction="row" alignItems="baseline" gutterSize="s">
               <EuiTitle size="l">
-                <span style={{ fontWeight: 'bold' }}>{`${completed}/${total}`}</span>
+                <span>{`${completed}/${total}`}</span>
               </EuiTitle>
               <EuiTitle size="xs">
-                <span style={{ fontWeight: 'bold' }}>
+                <span>
                   {i18n.translate('xpack.securitySolution.siemReadiness.tasksCompletedLabel', {
                     defaultMessage: 'Tasks completed',
                   })}
@@ -92,7 +80,7 @@ const PillarDetails: React.FC<PillarDetailsProps> = ({ pillarProps, pillarData }
 
           <EuiFlexItem grow={1}>
             <EuiTitle size="xs">
-              <h3 style={{ fontWeight: 'bold', marginBottom: '2px' }}>{pillarProps.displayName}</h3>
+              <h3 style={{ marginBottom: euiTheme.size.xxs }}>{pillarProps.displayName}</h3>
             </EuiTitle>
             <EuiText size="s">
               <p>{pillarProps.description}</p>
@@ -104,9 +92,9 @@ const PillarDetails: React.FC<PillarDetailsProps> = ({ pillarProps, pillarData }
   );
 };
 
-const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, pillarData }) => {
+const PillarLevelProgress: React.FC<Pillar> = ({ pillarProps, pillarStats }) => {
   const { euiTheme } = useEuiTheme();
-  const { completed, total } = pillarData;
+  const { completed, total } = pillarStats;
 
   // Calculate level thresholds
   const bronzeThreshold = 1;
@@ -143,6 +131,44 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
     gold: goldReached ? GOLD_COLOR : levelUnreachedColor,
   };
 
+  const commonStyle = {
+    position: 'absolute',
+    top: '-5px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  };
+
+  const shields = [
+    {
+      key: 'bronze',
+      left: '0%',
+      transform: 'translateX(-50%)',
+      color: levelColors.bronze,
+      label: i18n.translate('xpack.securitySolution.siemReadiness.bronzeLevelLabel', {
+        defaultMessage: 'Bronze',
+      }),
+    },
+    {
+      key: 'silver',
+      left: 'calc(50% - 8px)',
+      transform: 'none',
+      color: levelColors.silver,
+      label: i18n.translate('xpack.securitySolution.siemReadiness.silverLevelLabel', {
+        defaultMessage: 'Silver',
+      }),
+    },
+    {
+      key: 'gold',
+      left: '100%',
+      transform: 'translateX(-50%)',
+      color: levelColors.gold,
+      label: i18n.translate('xpack.securitySolution.siemReadiness.goldLevelLabel', {
+        defaultMessage: 'Gold',
+      }),
+    },
+  ];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
@@ -161,7 +187,7 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
               <EuiBadge
                 iconType="bullseye"
                 color={euiTheme.colors.backgroundTransparentPlain}
-                style={{ color: euiTheme.colors.primary }}
+                css={{ color: euiTheme.colors.primary }}
               >
                 {i18n.translate('xpack.securitySolution.siemReadiness.tasksToNextLevelBadge', {
                   defaultMessage: '{count} tasks to next level',
@@ -183,80 +209,37 @@ const PillarLevelProgress: React.FC<PillarLevelProgressProps> = ({ pillarProps, 
         <div style={{ position: 'relative' }}>
           <EuiProgress color={pillarProps.color} value={progressValue} max={progressMax} size="s" />
 
-          {/* Bronze Shield - Left */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '0%',
-              top: '-5px',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <ShieldIcon color={levelColors.bronze} />
-            <EuiText size="xs" style={{ marginTop: '2px', fontWeight: 'bold' }}>
-              {i18n.translate('xpack.securitySolution.siemReadiness.bronzeLevelLabel', {
-                defaultMessage: 'Bronze',
-              })}
-            </EuiText>
-          </div>
-
-          {/* Silver Shield - Middle */}
-          <div
-            style={{
-              position: 'absolute',
-              left: `calc(50% - 8px)`, // 50% minus half the shield width
-              top: '-5px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <ShieldIcon color={levelColors.silver} />
-            <EuiText size="xs" style={{ marginTop: '2px', fontWeight: 'bold' }}>
-              {i18n.translate('xpack.securitySolution.siemReadiness.silverLevelLabel', {
-                defaultMessage: 'Silver',
-              })}
-            </EuiText>
-          </div>
-
-          {/* Gold Shield - Right */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '100%',
-              top: '-5px',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <ShieldIcon color={levelColors.gold} />
-            <EuiText size="xs" style={{ marginTop: '2px', fontWeight: 'bold' }}>
-              {i18n.translate('xpack.securitySolution.siemReadiness.goldLevelLabel', {
-                defaultMessage: 'Gold',
-              })}
-            </EuiText>
-          </div>
+          {shields.map((shield) => (
+            <div
+              key={shield.key}
+              style={{
+                ...commonStyle,
+                left: shield.left,
+                transform: shield.transform,
+              }}
+            >
+              <ShieldIcon color={shield.color} />
+              <EuiText size="xs" style={{ marginTop: euiTheme.size.xxs }}>
+                <strong>{shield.label}</strong>
+              </EuiText>
+            </div>
+          ))}
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-const PillarCard: React.FC<PillarCardProps> = ({ pillarProps, pillarData }) => {
+const PillarCard: React.FC<Pillar> = ({ pillarProps, pillarStats }) => {
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={6}>
-          <PillarDetails pillarProps={pillarProps} pillarData={pillarData} />
+          <PillarDetails pillarProps={pillarProps} pillarStats={pillarStats} />
         </EuiFlexItem>
         <EuiHorizontalRule margin="m" />
         <EuiFlexItem grow={4}>
-          <PillarLevelProgress pillarProps={pillarProps} pillarData={pillarData} />
+          <PillarLevelProgress pillarProps={pillarProps} pillarStats={pillarStats} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -264,26 +247,17 @@ const PillarCard: React.FC<PillarCardProps> = ({ pillarProps, pillarData }) => {
 };
 
 export const ReadinessPillarCards: React.FC = () => {
-  const { pillars } = usePillarProps();
+  const { pillarsProps } = usePillarsProps();
   const { readinessTasksStats } = useReadinessTasksStats();
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="l" style={{ height: 240 }}>
-      {Object.values(pillars).map((pillarProps) => {
-        // Find the corresponding data for this pillar using the value property
-        const statsData = readinessTasksStats.pillarsData.find(
-          (p) => p.pillar === pillarProps.value
-        );
-
-        // Only pass raw completion data
-        const pillarData = {
-          completed: statsData?.completed || 0,
-          total: statsData?.total || 0,
-        };
+    <EuiFlexGroup direction="row" gutterSize="l" style={{ height: CARDS_HEIGHT }}>
+      {Object.values(pillarsProps).map((pillar) => {
+        const stats = readinessTasksStats.pillarStats[pillar.pillarKey];
 
         return (
-          <EuiFlexItem key={pillarProps.value}>
-            <PillarCard pillarProps={pillarProps} pillarData={pillarData} />
+          <EuiFlexItem key={pillar.pillarKey}>
+            <PillarCard pillarProps={pillar} pillarStats={stats} />
           </EuiFlexItem>
         );
       })}
@@ -291,7 +265,7 @@ export const ReadinessPillarCards: React.FC = () => {
   );
 };
 
-const ShieldIcon = ({ color = DEFAULT_SHIELD_COLOR, width = 16, height = 16 }) => (
+const ShieldIcon = ({ color, width = 16, height = 16 }) => (
   <svg
     width={width}
     height={height}

@@ -7,28 +7,30 @@
 
 import { useEuiTheme } from '@elastic/eui';
 
-interface UsePillarProps {
-  pillars: PillarProps;
+interface UsePillarsProps {
+  pillars: PillarsProps;
+}
+
+export type PillarKey = 'visibility' | 'detection' | 'response';
+
+export interface PillarsProps {
+  [key: PillarKey]: PillarProps;
 }
 
 export interface PillarProps {
-  [key: string]: {
-    value: string;
-    displayName: string;
-    color: string;
-    description: string;
-    icon: string;
-  };
+  pillarKey: PillarKey;
+  displayName: 'Visibility' | 'Detection' | 'Response';
+  color: string;
+  description: string;
+  icon: string;
 }
 
-export const usePillarProps = () => {
+export const usePillarsProps = (): UsePillarsProps => {
   const { euiTheme } = useEuiTheme();
 
-  console.log(euiTheme);
-
-  const pillars = {
+  const pillarsProps = {
     visibility: {
-      value: 'visibility',
+      pillarKey: 'visibility',
       displayName: 'Visibility',
       color: euiTheme.colors.vis.euiColorVisBehindText2,
       description:
@@ -36,7 +38,7 @@ export const usePillarProps = () => {
       icon: 'eye',
     },
     detection: {
-      value: 'detection',
+      pillarKey: 'detection',
       displayName: 'Detection',
       color: euiTheme.colors.vis.euiColorVisBehindText4,
       description:
@@ -44,7 +46,7 @@ export const usePillarProps = () => {
       icon: 'securitySignal',
     },
     response: {
-      value: 'response',
+      pillarKey: 'response',
       displayName: 'Response',
       color: euiTheme.colors.vis.euiColorVisBehindText0,
       description:
@@ -54,6 +56,6 @@ export const usePillarProps = () => {
   };
 
   return {
-    pillars,
+    pillarsProps,
   };
 };

@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  htmlIdGenerator,
   useEuiTheme,
   EuiHealth,
   EuiBasicTable,
@@ -25,28 +24,27 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
+import { usePillarsProps } from '../hooks/use_pillar_props';
 
-interface PillarData {
-  pillar: string;
-  pillarName: string;
-  pillarColor: string;
+const PieChartSize = 200;
+const siemReadinessPieChartChartId = 'siem-readiness-pie-chart';
+
+interface LegendTableDataItem {
+  pillarKey: string;
   completed: number;
   total: number;
 }
 
-interface ChartDataItem {
-  pillar: string;
-  count: number;
-  color: string;
+interface PieChartDataItem {
+  pillarKey: string;
+  completedTasksCount: number;
 }
 
 const PillarsPieChart: React.FC = () => {
   const { readinessTasksStats } = useReadinessTasksStats();
+  const { pillarsProps } = usePillarsProps();
   const { euiTheme } = useEuiTheme();
   const { charts } = useKibana<CoreStart>().services;
-  const htmlId = htmlIdGenerator();
-  const chartId = htmlId();
-
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const themeOverrides: PartialTheme = {
@@ -58,21 +56,55 @@ const PillarsPieChart: React.FC = () => {
     },
   };
 
+  const pieChartData: PieChartDataItem[] = Object.entries(readinessTasksStats.pillarStats).map(
+    ([pillarKey, pillarStats]) => {
+      return {
+        pillarKey,
+        completedTasksCount: pillarStats.completed,
+      };
+    }
+  );
+
+  pieChartData.push({
+    pillarKey: 'incomplete',
+    completedTasksCount: readinessTasksStats.totalIncomplete,
+  });
+
   return (
-    <div style={{ position: 'relative', width: 200 }}>
-      <Chart size={{ height: 200 }}>
-        <Settings baseTheme={chartBaseTheme} theme={themeOverrides} ariaLabelledBy={chartId} />
+    <div style={{ position: 'relative', width: PieChartSize }}>
+      <Chart size={{ height: PieChartSize }}>
+        <Settings
+          baseTheme={chartBaseTheme}
+          theme={themeOverrides}
+          ariaLabelledBy={siemReadinessPieChartChartId}
+        />
         <Partition
           id="pillarDonut"
-          data={readinessTasksStats.chartData}
+          data={pieChartData}
           layout={PartitionLayout.sunburst}
-          valueAccessor={(d) => d.count}
+          valueAccessor={(d) => d.completedTasksCount}
           layers={[
             {
-              groupByRollup: (d: ChartDataItem) => d.pillar,
+              groupByRollup: (d: PieChartDataItem) => d.pillarKey,
+              nodeLabel: (pillarKey) => {
+                if (pillarKey === 'incomplete') {
+                  return i18n.translate(
+                    'xpack.securitySolution.siemReadiness.incompleteTasksLabel',
+                    {
+                      defaultMessage: 'Incomplete',
+                    }
+                  );
+                }
+
+                return pillarsProps[pillarKey].displayName;
+              },
               shape: {
-                fillColor: (groupName) => {
-                  return readinessTasksStats.chartData.find((d) => d.pillar === groupName)?.color;
+                fillColor: (pillarKey) => {
+                  if (pillarKey === 'incomplete') {
+                    return euiTheme.colors.lightShade;
+                  }
+
+                  return pillarsProps[pillarKey].color;
                 },
               },
             },
@@ -80,6 +112,7 @@ const PillarsPieChart: React.FC = () => {
         />
       </Chart>
 
+      {/* positioning the text in the middle of the donut chart */}
       <div
         style={{
           display: 'flex',
@@ -109,6 +142,17 @@ const PillarsPieChart: React.FC = () => {
 
 const PillarsMiniSummaryTable: React.FC = () => {
   const { readinessTasksStats } = useReadinessTasksStats();
+  const { pillarsProps } = usePillarsProps();
+
+  const legendTableData: LegendTableDataItem[] = Object.entries(
+    readinessTasksStats.pillarStats
+  ).map(([pillarKey, pillarStats]) => {
+    return {
+      pillarKey,
+      pillarName: pillarsProps[pillarKey].displayName,
+      ...pillarStats,
+    };
+  });
 
   const columns = [
     {
@@ -116,8 +160,8 @@ const PillarsMiniSummaryTable: React.FC = () => {
       name: i18n.translate('xpack.securitySolution.siemReadiness.readinessSectionColumnName', {
         defaultMessage: 'Readiness Section',
       }),
-      render: (pillarName: string, record: PillarData) => (
-        <EuiHealth color={record.pillarColor}>{pillarName}</EuiHealth>
+      render: (pillarName: string, record: LegendTableDataItem) => (
+        <EuiHealth color={pillarsProps[record.pillarKey].color}>{pillarName}</EuiHealth>
       ),
     },
     {
@@ -125,7 +169,7 @@ const PillarsMiniSummaryTable: React.FC = () => {
       name: i18n.translate('xpack.securitySolution.siemReadiness.taskScoreColumnName', {
         defaultMessage: 'Task Score',
       }),
-      render: (_: unknown, record: PillarData) => `${record.completed}/${record.total}`,
+      render: (_: unknown, record: LegendTableDataItem) => `${record.completed}/${record.total}`,
     },
   ];
 
@@ -137,9 +181,10 @@ const PillarsMiniSummaryTable: React.FC = () => {
           defaultMessage: 'Pillar Task Completion Summary',
         }
       )}
-      items={readinessTasksStats.pillarsData}
+      items={legendTableData}
       columns={columns}
       compressed
+      // removes the table row borders
       css={{
         '& *': {
           borderBlock: 'none !important',
@@ -178,6 +223,7 @@ const AboutSiemReadiness = () => {
             defaultMessage="This page highlights gaps and turns them into clear tasks. Completing these tasks improves your readiness score and strengthens your security posture. Use the task list to focus on what matters—like enabling logs, deploying endpoint protection, or activating detection rules. Learn more in our {docsLink}."
             values={{
               docsLink: (
+                // TODO siem-readiness: update link to point to siem readiness docs when available
                 <EuiLink href="https://www.elastic.co/guide/index.html" target="_blank" external>
                   {'docs'}
                 </EuiLink>
@@ -191,13 +237,15 @@ const AboutSiemReadiness = () => {
 };
 
 export const ReadinessSummary = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <EuiPanel hasBorder={true} style={{ padding: '20px 40px' }}>
-      <EuiFlexGroup style={{ gap: 40 }}>
-        <EuiFlexItem grow={false}>
+    <EuiPanel hasBorder={true} css={{ padding: `${euiTheme.size.l} ${euiTheme.size.xxl}` }}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xxl }}>
           <PillarsPieChart />
         </EuiFlexItem>
-        <EuiFlexItem grow={3} style={{ alignSelf: 'center' }}>
+        <EuiFlexItem grow={3} css={{ alignSelf: 'center' }}>
           <PillarsMiniSummaryTable />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

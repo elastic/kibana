@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
 import { useReadinessTasks, READINESS_TASKS } from '@kbn/siem-readiness';
-import { usePillarProps } from '../hooks/use_pillar_props';
+import { usePillarsProps } from '../hooks/use_pillar_props';
 
 import illustration_aerospace from '../assets/illustration_aerospace.svg';
 import illustration_packed_box from '../assets/illustration_packed_box.svg';
@@ -49,12 +49,13 @@ import illustration_organize_folders from '../assets/illustration_organize_folde
 const INCOMPLETE_BADGE_COLOR = '#FDE9B5';
 const COMPLETED_BADGE_COLOR = '#4DD2CA';
 
-const PANEL_HEIGHT = 600; // px, adjust as needed
+const PANEL_HEIGHT = 600;
+const ILLUSTRATION_SIZE = 128;
 
 export const ReadinessTasksTable: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<string>('');
 
-  const { pillars } = usePillarProps();
+  const { pillarsProps } = usePillarsProps();
   const { euiTheme } = useEuiTheme();
   const { logReadinessTask, getLatestTasks } = useReadinessTasks();
 
@@ -73,15 +74,14 @@ export const ReadinessTasksTable: React.FC = () => {
           defaultMessage: 'All Categories',
         }),
       },
-      ...Object.values(pillars).map((pillar) => ({
-        value: pillar.value,
+      ...Object.values(pillarsProps).map((pillar) => ({
+        value: pillar.pillarKey,
         inputDisplay: pillar.displayName,
       })),
     ],
-    [pillars]
+    [pillarsProps]
   );
 
-  // Filter and sort tasks
   const filteredTasks = useMemo(
     () =>
       READINESS_TASKS.filter(
@@ -238,14 +238,14 @@ export const ReadinessTasksTable: React.FC = () => {
           const taskData = getLatestTasks.data?.find(
             (latestTaskData) => latestTaskData.task_id === task.id
           );
-          const taskPillar = pillars[task.pillar];
+          const taskPillar = pillarsProps[task.pillar];
 
           return (
             <EuiAccordion
               css={{
                 backgroundColor: euiTheme.colors.plainLight,
                 margin: `${euiTheme.size.m} 0`,
-                paddingRight: 6,
+                paddingRight: euiTheme.size.s,
               }}
               borders="all"
               key={task.id}
@@ -255,7 +255,12 @@ export const ReadinessTasksTable: React.FC = () => {
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
                   <EuiFlexItem>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ marginRight: euiTheme.size.s, fontWeight: 600 }}>
+                      <span
+                        style={{
+                          marginRight: euiTheme.size.s,
+                          fontWeight: euiTheme.font.weight.bold,
+                        }}
+                      >
                         {i18n.translate('xpack.securitySolution.siemReadiness.categoryLabel', {
                           defaultMessage: 'Category:',
                         })}
@@ -265,13 +270,18 @@ export const ReadinessTasksTable: React.FC = () => {
                           type={taskPillar.icon}
                           size="m"
                           color={taskPillar.color}
-                          style={{ marginRight: euiTheme.size.s }}
+                          css={{ marginRight: euiTheme.size.s }}
                         />
                       )}
                       <span style={{ marginRight: euiTheme.size.m }}>
                         {taskPillar?.displayName}
                       </span>
-                      <span style={{ fontWeight: 600, marginRight: 4 }}>
+                      <span
+                        style={{
+                          fontWeight: euiTheme.font.weight.bold,
+                          marginRight: euiTheme.size.s,
+                        }}
+                      >
                         {i18n.translate('xpack.securitySolution.siemReadiness.taskLabel', {
                           defaultMessage: 'Task:',
                         })}
@@ -322,7 +332,7 @@ export const ReadinessTasksTable: React.FC = () => {
                         justifyContent: 'flex-start',
                         alignItems: 'flex-end',
                         flexDirection: 'row',
-                        gap: 8,
+                        gap: euiTheme.size.s,
                       }}
                     >
                       {taskAddOn.actionButtonLabel && taskAddOn.action && (
@@ -349,8 +359,11 @@ export const ReadinessTasksTable: React.FC = () => {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ width: 128 }}>
-                  <EuiIcon type={taskAddOn.illustration} style={{ width: 128, height: 128 }} />
+                <EuiFlexItem grow={false} css={{ width: ILLUSTRATION_SIZE }}>
+                  <EuiIcon
+                    type={taskAddOn.illustration}
+                    css={{ width: ILLUSTRATION_SIZE, height: ILLUSTRATION_SIZE }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiAccordion>
