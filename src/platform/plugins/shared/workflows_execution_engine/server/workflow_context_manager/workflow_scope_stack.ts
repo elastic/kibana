@@ -35,13 +35,12 @@ export class WorkflowScopeStack {
    * This static factory method creates a new immutable instance containing deep copies
    * of the provided frames to ensure isolation from the source data.
    *
-   * @param frames - Array of stack frames to initialize the scope stack with
+   * @param stackFrames - Array of stack frames to initialize the scope stack with
    * @returns A new WorkflowScopeStack instance containing the cloned frames
    */
-  public static fromStackFrames(frames: StackFrame[]): WorkflowScopeStack {
+  public static fromStackFrames(stackFrames: StackFrame[]): WorkflowScopeStack {
     const instance = new WorkflowScopeStack();
-    instance._stackFrames = frames;
-    instance._stackFrames = instance.cloneFrames();
+    instance._stackFrames = instance.cloneFrames(stackFrames);
     return instance;
   }
 
@@ -54,7 +53,7 @@ export class WorkflowScopeStack {
    * @returns A deep copy of the current stack frames array
    */
   public get stackFrames(): StackFrame[] {
-    return this.cloneFrames();
+    return this.cloneFrames(this._stackFrames);
   }
 
   /**
@@ -101,7 +100,7 @@ export class WorkflowScopeStack {
    */
   public enterScope(enterScopeData: ScopeData): WorkflowScopeStack {
     if (this._stackFrames.length && this._stackFrames.at(-1)!.stepId === enterScopeData.stepId) {
-      const clonedFrames = this.cloneFrames();
+      const clonedFrames = this.cloneFrames(this.stackFrames);
       const stackFrame = clonedFrames.at(-1)!;
       return WorkflowScopeStack.fromStackFrames(
         clonedFrames.slice(0, -1).concat([
@@ -121,7 +120,7 @@ export class WorkflowScopeStack {
     }
 
     return WorkflowScopeStack.fromStackFrames(
-      this.cloneFrames().concat([
+      this.cloneFrames(this.stackFrames).concat([
         {
           stepId: enterScopeData.stepId,
           nestedScopes: [
@@ -147,7 +146,7 @@ export class WorkflowScopeStack {
    */
   public exitScope(): WorkflowScopeStack {
     if (this._stackFrames.length && this._stackFrames.at(-1)!.nestedScopes.length > 1) {
-      const clonedFrames = this.cloneFrames();
+      const clonedFrames = this.cloneFrames(this.stackFrames);
       const stackFrame = clonedFrames.at(-1)!;
       return WorkflowScopeStack.fromStackFrames(
         clonedFrames.slice(0, -1).concat([
@@ -159,7 +158,7 @@ export class WorkflowScopeStack {
       );
     }
 
-    return WorkflowScopeStack.fromStackFrames(this.cloneFrames().slice(0, -1));
+    return WorkflowScopeStack.fromStackFrames(this.cloneFrames(this.stackFrames).slice(0, -1));
   }
 
   /**
@@ -170,8 +169,8 @@ export class WorkflowScopeStack {
    *
    * @returns A deep copy of the current stack frames with all nested objects cloned
    */
-  private cloneFrames(): StackFrame[] {
-    return this._stackFrames.map((frame) => ({
+  private cloneFrames(stackFrames: StackFrame[]): StackFrame[] {
+    return stackFrames.map((frame) => ({
       stepId: frame.stepId,
       nestedScopes: frame.nestedScopes.map((scope) => ({ ...scope })),
     }));
