@@ -6,20 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiButton,
   EuiCode,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
-  EuiTimeline,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,8 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DraggableProcessorListItem } from './processors_list';
-import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { SimulationPlayground } from './simulation_playground';
 import {
@@ -41,7 +33,8 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { NoProcessorsEmptyPrompt } from './empty_prompts';
+import { NoStepsEmptyPrompt } from './empty_prompts';
+import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 
@@ -150,7 +143,7 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <ProcessorsEditor />
+                <StepsEditor />
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
               <EuiResizablePanel
@@ -179,19 +172,10 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 }
 
-const ProcessorsEditor = React.memo(() => {
+const StepsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
-  const { addProcessor, reorderProcessors } = useStreamEnrichmentEvents();
-
-  const canAddProcessor = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'processors.add' })
-  );
-  const canReorderProcessors = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'processors.reorder', from: Number(), to: Number() })
-  );
-
-  const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
+  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
@@ -223,172 +207,95 @@ const ProcessorsEditor = React.memo(() => {
     };
   }, [simulation]);
 
-  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      reorderProcessors(source.index, destination.index);
-    }
-  };
-  const hasProcessors = !isEmpty(processorsRefs);
+  const hasSteps = !isEmpty(stepRefs);
 
   return (
     <>
-      <EuiPanel paddingSize="xs" hasShadow={false} borderRadius="none" grow={false}>
-        <EuiFlexGroup alignItems="center" wrap>
-          <EuiFlexItem>
-            <EuiTitle size="xxs">
-              <h2>
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
-                  {
-                    defaultMessage: 'Add and configure processors',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiText component="p" size="xs">
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
-                  {
-                    defaultMessage: 'Reorder processors to change their execution order',
-                  }
-                )}
-              </EuiText>
-              <EuiIconTip
-                size="m"
-                content={i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitleTooltip',
-                  {
-                    defaultMessage:
-                      'The simulation runs only on new processors. If none are being edited, it includes all new ones. If a processor is under edit, it runs only up to that point, any new processors after it are excluded. If there’s a mix of persisted and new processors, the simulation is skipped entirely.',
-                  }
-                )}
-                position="right"
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiButton
-            size="s"
-            iconType="plus"
-            data-test-subj="streamsAppStreamDetailEnrichmentAddProcessorButton"
-            onClick={() => addProcessor()}
-            disabled={!canAddProcessor}
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButton',
-              { defaultMessage: 'Add processor' }
-            )}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiPanel>
-      {hasProcessors ? (
-        <EuiPanel
-          hasShadow={false}
-          borderRadius="none"
-          css={css`
-            overflow: auto;
-            padding: ${euiTheme.size.m};
-          `}
-        >
-          <SortableList onDragItem={handlerItemDrag}>
-            <EuiTimeline aria-label="Processors list" gutterSize="m">
-              {processorsRefs.map((processorRef, idx) => (
-                <DraggableProcessorListItem
-                  isDragDisabled={!canReorderProcessors}
-                  key={processorRef.id}
-                  idx={idx}
-                  processorRef={processorRef}
-                  processorMetrics={simulation?.processors_metrics[processorRef.id]}
-                />
-              ))}
-            </EuiTimeline>
-          </SortableList>
-        </EuiPanel>
-      ) : (
-        <NoProcessorsEmptyPrompt />
-      )}
-      <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
-        {!isEmpty(errors.ignoredFields) && (
-          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-            <EuiAccordion
-              id="ignored-fields-failures-accordion"
-              initialIsOpen
-              buttonContent={
-                <strong>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                    { defaultMessage: 'Some fields were ignored during the simulation.' }
-                  )}
-                </strong>
-              }
-            >
-              <EuiText component="p" size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
-                    {
-                      defaultMessage:
-                        'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
-                    }
-                  )}
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                    defaultMessage="The ignored fields are: {fields}"
-                    values={{
-                      fields: (
-                        <EuiFlexGroup
-                          gutterSize="s"
-                          css={css`
-                            margin-top: ${euiTheme.size.s};
-                          `}
-                        >
-                          {errors.ignoredFields.map((field) => (
-                            <EuiCode>{field}</EuiCode>
-                          ))}
-                        </EuiFlexGroup>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiAccordion>
-          </EuiPanel>
-        )}
-        {!isEmpty(errors.mappingFailures) && (
-          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-            <EuiAccordion
-              id="mapping-failures-accordion"
-              initialIsOpen
-              buttonContent={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
-                {
-                  defaultMessage: 'Field conflicts during simulation',
+      {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
+      {(!isEmpty(errors.ignoredFields) || !isEmpty(errors.mappingFailures)) && (
+        <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+          {!isEmpty(errors.ignoredFields) && (
+            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+              <EuiAccordion
+                id="ignored-fields-failures-accordion"
+                initialIsOpen
+                buttonContent={
+                  <strong>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                      { defaultMessage: 'Some fields were ignored during the simulation.' }
+                    )}
+                  </strong>
                 }
-              )}
-            >
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                    defaultMessage="These are some mapping failures that occurred during the simulation:"
-                  />
-                </p>
-                <ul>
-                  {errors.mappingFailures.map((failureMessage, id) => (
-                    <li key={id}>
-                      <EuiText css={clampTwoLines} size="s">
-                        {failureMessage}
-                      </EuiText>
-                    </li>
-                  ))}
-                </ul>
-              </EuiText>
-            </EuiAccordion>
-          </EuiPanel>
-        )}
-      </EuiPanel>
+              >
+                <EuiText component="p" size="s">
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                      {
+                        defaultMessage:
+                          'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                      }
+                    )}
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                      defaultMessage="The ignored fields are: {fields}"
+                      values={{
+                        fields: (
+                          <EuiFlexGroup
+                            gutterSize="s"
+                            css={css`
+                              margin-top: ${euiTheme.size.s};
+                            `}
+                          >
+                            {errors.ignoredFields.map((field) => (
+                              <EuiCode key={field}>{field}</EuiCode>
+                            ))}
+                          </EuiFlexGroup>
+                        ),
+                      }}
+                    />
+                  </p>
+                </EuiText>
+              </EuiAccordion>
+            </EuiPanel>
+          )}
+          {!isEmpty(errors.mappingFailures) && (
+            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+              <EuiAccordion
+                id="mapping-failures-accordion"
+                initialIsOpen
+                buttonContent={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                  {
+                    defaultMessage: 'Field conflicts during simulation',
+                  }
+                )}
+              >
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                      defaultMessage="These are some mapping failures that occurred during the simulation:"
+                    />
+                  </p>
+                  <ul>
+                    {errors.mappingFailures.map((failureMessage, id) => (
+                      <li key={id}>
+                        <EuiText css={clampTwoLines} size="s">
+                          {failureMessage}
+                        </EuiText>
+                      </li>
+                    ))}
+                  </ul>
+                </EuiText>
+              </EuiAccordion>
+            </EuiPanel>
+          )}
+        </EuiPanel>
+      )}
     </>
   );
 });
