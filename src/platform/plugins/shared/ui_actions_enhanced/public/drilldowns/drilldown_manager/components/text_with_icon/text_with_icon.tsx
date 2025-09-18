@@ -16,7 +16,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiIconTip,
-} from '@elastic/eui';rom '@elastic/eui';
+} from '@elastic/eui';
 
 export interface TextWithIconProps {
   color?: EuiTextColorProps['color'];
