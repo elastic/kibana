@@ -173,7 +173,7 @@ export function getDashboardApi({
         isManaged,
         lastSavedId: savedObjectId$.value,
         viewMode: viewModeManager.api.viewMode$.value,
-        accessControl: accessControlManager.internalApi.accessControl$.value,
+        accessControl: accessControlManager.api.accessControl$.value,
         ...getState(),
       });
 
@@ -228,14 +228,14 @@ export function getDashboardApi({
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
     createdBy: savedObjectResult?.createdBy,
     user,
-    accessControl$: accessControlManager.internalApi.accessControl$,
-    changeAccessMode: accessControlManager.internalApi.changeAccessMode,
+    // TODO: accessControl$ and changeAccessMode should be moved to internalApi
+    accessControl$: accessControlManager.api.accessControl$,
+    changeAccessMode: accessControlManager.api.changeAccessMode,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
-    ...accessControlManager.internalApi,
     setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),

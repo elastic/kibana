@@ -173,8 +173,6 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
-  changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
 }
 
 export interface DashboardUser {
