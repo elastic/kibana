@@ -33,20 +33,26 @@ export class EuiSelectableWrapper {
     this.selectableList = this.selectableWrapper.locator(subj('euiSelectableList'));
     this.selectableSearchInput = this.selectableWrapper.locator('.euiFieldSearch');
     this.selectableClearButton = this.selectableWrapper.locator(subj('clearSearchButton'));
-    this.selectedOptions = this.selectableList.locator('li[role="option"][aria-checked="true"]');
+    this.selectedOptions = this.selectableList.locator(
+      'li[role="option"][aria-checked="true"] .euiSelectableListItem__text'
+    );
   }
 
   async getSelectedOptions() {
-    const selectedOptionElements = await this.selectedOptions.all();
+    await this.selectableWrapper.waitFor({ state: 'visible' });
+    await this.selectableList.waitFor({ state: 'visible' });
 
-    const selectedOptions = [];
-    for (const element of selectedOptionElements) {
-      const title = await element.getAttribute('title');
-      if (title) {
-        selectedOptions.push(title);
-      }
-    }
-    return selectedOptions;
+    // Get array of selected option text
+    const selectedTexts = await this.selectedOptions.evaluateAll((elements) =>
+      elements.map((e) =>
+        // Extract only text nodes – ignore text in child <div>
+        Array.from(e.childNodes)
+          .filter((n) => n.nodeType === Node.TEXT_NODE)
+          .map((n) => (n.textContent ?? '').trim())
+          .join('')
+      )
+    );
+    return selectedTexts;
   }
 
   private async checkIfSelected(value: string): Promise<boolean> {

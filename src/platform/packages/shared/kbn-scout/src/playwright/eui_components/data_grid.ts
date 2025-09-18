@@ -85,11 +85,21 @@ export class EuiDataGridWrapper {
 
     const columnField = this.getColumnHeaderLocator(columnName);
     await columnField.waitFor({ state: 'visible' });
+    //  It is important to focus and hover on header cell before button interactions
+    // Otherwise 'columnField' or 'actionButton' may be outside viewport and not interactable
+    await columnField.focus();
     await columnField.hover();
-    await columnField
-      .locator('.euiDataGridHeaderCell__button')
-      .waitFor({ state: 'visible', timeout: 5000 });
-    await columnField.locator('.euiDataGridHeaderCell__button').click();
+
+    const actionButton = columnField.locator('.euiDataGridHeaderCell__button');
+    await actionButton.scrollIntoViewIfNeeded();
+    await actionButton.waitFor({ state: 'visible', timeout: 5000 });
+
+    try {
+      await actionButton.click({ timeout: 5000 });
+    } catch {
+      // eslint-disable-next-line playwright/no-force-option
+      await actionButton.click({ force: true });
+    }
 
     const contextMenu = await this.waitForContextMenu();
     await contextMenu.locator(`.euiListGroupItem__label[title="${actionName}"]`).click();
