@@ -11,7 +11,6 @@ import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleTypesByQueryParams, GetRuleTypesByQueryResponse } from './types';
 import { buildKueryNodeFilter } from '../../../../rules_client/common/build_kuery_node_filter';
-export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
 export async function getRuleTypesByQuery(
   context: RulesClientContext,

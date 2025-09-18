@@ -2198,15 +2198,15 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
-  integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
+"@elastic/eslint-plugin-eui@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.4.0.tgz#b793170bec1dbf7c15f7a7e7c5a64f4a8e622f23"
+  integrity sha512-M+eV/dBtTlr8bazzkyyZKOU1N4dL483GtNNFYA1mrMpxVqroassB9rawmBHav0IATUhNVGzTevbv1nG9U4Zm5w==
 
-"@elastic/eui-theme-borealis@3.3.2":
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.2.tgz#b3b6a9bf0df3cbfc4c4e07f24c5a2f8eec2abd94"
-  integrity sha512-0NbT2MtoaM2ltzyc1ms/lIc163p/XgG/6ePMsEWuHTWkScZe5V1sN7cnjzKncwpIIDJ0CfdOkeJQKcL/gj7bBA==
+"@elastic/eui-theme-borealis@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.4.0.tgz#12804076016708c2d458ca9bb972965763ad5e37"
+  integrity sha512-xOFaVYdj/i5Hyjca8Qqb2KjWxwiWU5KkI4QzRAMjPwNPKzgkKlrCmJyDtMCnhsUWuFGBjaPnHvHTgLmTHLmARg==
 
 "@elastic/eui-theme-common@4.0.0":
   version "4.0.0"
@@ -2217,10 +2217,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@106.5.0":
-  version "106.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.5.0.tgz#a37d0839545c41a023aa366e37ac1287cf262586"
-  integrity sha512-RIEETOUwx475vmF8NPao6em0yU2RlyGNflrMtmGQ04Ka3vZzs/AUIpdGcLJclOCyDj94gq4dltlXPuXkc1aMYw==
+"@elastic/eui@106.6.0":
+  version "106.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.6.0.tgz#95612842ce1bece58e4fd8f74ca36e565a007191"
+  integrity sha512-4dQkpMl+pG5li+1DnCmb6Mc5ymLj/W63va25KfafFNS2Yp8/pLA0bdMveW9cFsUbVmBStUMo1RU/KNrceBmGoQ==
   dependencies:
     "@elastic/eui-theme-common" "4.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -4256,6 +4256,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chat-data-registry-plugin@link:x-pack/platform/plugins/shared/chat_data_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
@@ -5609,6 +5613,10 @@
   uid ""
 
 "@kbn/deeplinks-shared@link:src/platform/packages/shared/deeplinks/shared":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-workflows@link:src/platform/packages/shared/deeplinks/workflows":
   version "0.0.0"
   uid ""
 
