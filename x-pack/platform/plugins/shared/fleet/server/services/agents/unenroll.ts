@@ -70,7 +70,7 @@ export async function unenrollAgent(
   }
   const now = new Date().toISOString();
   const currentSpaceId = getCurrentNamespace(soClient);
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
