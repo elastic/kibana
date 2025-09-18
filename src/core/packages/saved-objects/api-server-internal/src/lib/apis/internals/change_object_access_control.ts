@@ -249,7 +249,12 @@ export const changeObjectAccessControl = async (
   const expectedBulkOperationResults: Array<
     Either<
       { id: string; type: string; error: any },
-      { id: string; type: string; esRequestIndex: number }
+      {
+        id: string;
+        type: string;
+        esRequestIndex: number;
+        doc: estypes.GetGetResult<SavedObjectsRawDocSource>;
+      }
     >
   > = expectedBulkGetResults.map((expectedBulkGetResult) => {
     if (isLeft(expectedBulkGetResult)) {
@@ -257,13 +262,14 @@ export const changeObjectAccessControl = async (
     }
 
     const { id, type, esRequestIndex } = expectedBulkGetResult.value;
-    const doc = bulkGetResponse!.body.docs[esRequestIndex];
-    if (
-      isMgetError(doc) ||
-      !doc?.found ||
-      // @ts-expect-error MultiGetHit._source is optional
-      !rawDocExistsInNamespace(registry, doc, namespace)
-    ) {
+    const rawDoc = bulkGetResponse!.body.docs[esRequestIndex];
+
+    if (isMgetError(rawDoc) || !rawDoc?.found) {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      return left({ id, type, error });
+    }
+
+    if (!rawDocExistsInNamespace(registry, rawDoc as unknown as SavedObjectsRawDoc, namespace)) {
       const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       return left({ id, type, error });
     }
@@ -282,18 +288,12 @@ export const changeObjectAccessControl = async (
       return left({ id, type, error });
     }
 
-    const currentSource = doc._source;
+    const currentSource = rawDoc._source;
 
     const versionProperties = getExpectedVersionProperties(
       undefined,
-      doc as unknown as SavedObjectsRawDoc
+      rawDoc as unknown as SavedObjectsRawDoc
     );
-
-    const expectedResult = {
-      type,
-      id,
-      esRequestIndex: bulkOperationRequestIndexCounter++,
-    };
 
     const documentMetadata = {
       _id: serializer.generateRawId(undefined, type, id),
@@ -325,7 +325,12 @@ export const changeObjectAccessControl = async (
 
     bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
 
-    return right(expectedResult);
+    return right({
+      type,
+      id,
+      esRequestIndex: bulkOperationRequestIndexCounter++,
+      doc: rawDoc,
+    });
   });
 
   const bulkOperationResponse = bulkOperationParams.length
