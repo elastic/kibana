@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateQuery, type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
-import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
+import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
+import { suggest, validateQuery, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../monaco_imports';
+import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
-import { buildEsqlTheme } from './lib/theme';
-import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
+import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { getHoverItem } from './lib/hover/hover';
 import { monacoPositionToOffset } from './lib/shared/utils';
-import type { CustomLangModuleType } from '../../types';
+import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -26,7 +26,9 @@ const removeKeywordSuffix = (name: string) => {
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
-export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
+export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
+
+export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const language = monarch.create({
