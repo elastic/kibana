@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useHistory } from 'react-router-dom';
 import type {
   DatasetQualityDetailsController,
@@ -50,7 +50,9 @@ export const useDatasetQualityController = (
       if (initialState === null) {
         initialState = {
           dataStream: definition.stream.name,
-          view: 'streams' as DatasetQualityView,
+          view: Streams.WiredStream.Definition.is(definition.stream)
+            ? 'wired'
+            : ('classic' as DatasetQualityView),
         };
       }
 
@@ -58,7 +60,9 @@ export const useDatasetQualityController = (
         await datasetQuality.createDatasetQualityDetailsController({
           initialState: {
             ...initialState,
-            view: 'streams' as DatasetQualityView,
+            view: Streams.WiredStream.Definition.is(definition.stream)
+              ? 'wired'
+              : ('classic' as DatasetQualityView),
           },
         });
       datasetQualityDetailsController.service.start();
@@ -94,6 +98,7 @@ export const useDatasetQualityController = (
     urlStateStorageContainer,
     definition.stream.name,
     saveStateInUrl,
+    definition.stream,
   ]);
 
   return controller;
