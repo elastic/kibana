@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
+import { css } from '@emotion/react';
 import type { JobMessage } from '../../../../common/types/audit_message';
 
 import { blurButtonOnClick } from '../../util/component_utils';
@@ -140,6 +141,8 @@ export const JobMessages: FC<JobMessagesProps> = ({
     },
   };
 
+  const cssOverride = css({ '.euiPagination__list': { listStyle: 'none', margin: 0, padding: 0 } });
+
   return (
     <>
       <EuiSpacer size="s" />
@@ -150,7 +153,10 @@ export const JobMessages: FC<JobMessagesProps> = ({
         compressed={true}
         loading={loading}
         error={error}
-        pagination={true}
+        pagination={{
+          initialPageSize: 25,
+        }}
+        css={cssOverride}
         data-test-subj={'mlAnalyticsDetailsJobMessagesTable'}
       />
     </>
