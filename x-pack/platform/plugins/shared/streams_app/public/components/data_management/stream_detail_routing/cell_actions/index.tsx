@@ -13,30 +13,49 @@ import React from 'react';
 import { useStreamsRoutingSelector } from '../state_management/stream_routing_state_machine';
 import type { RoutingDefinitionWithUIAttributes } from '../types';
 
+type BtnMode = '+' | '-';
+type FilterOperator = 'eq' | 'neq' | 'exist';
 export type RoutingFilterFn = (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => void;
+
+const getOperator = (value: StringOrNumberOrBoolean, mode: BtnMode): FilterOperator => {
+  if (typeof value === 'boolean') {
+    return 'exist';
+  }
+
+  return mode === '+' ? 'eq' : 'neq';
+};
+
+const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator) => {
+  if (typeof value === 'boolean') {
+    return { exist: value };
+  }
+
+  return { [operator]: `${value}` };
+};
 
 const FilterBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   context,
   onFilter,
-  operator,
+  mode,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   context: FlattenRecord[];
   onFilter: RoutingFilterFn;
-  operator: 'eq' | 'neq';
+  mode: BtnMode;
 }) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { currentRuleId, routing } = routingSnapshot.context;
 
   const currentRule = routing.find((rule) => rule.id === currentRuleId);
-
-  const iconType = operator === 'eq' ? 'plusInCircle' : 'minusInCircle';
+  const iconType = mode === '+' ? 'plusInCircle' : 'minusInCircle';
+  const operator = getOperator(context[rowIndex][columnId] as StringOrNumberOrBoolean, mode);
+  const condition = getCondition(context[rowIndex][columnId] as StringOrNumberOrBoolean, operator);
 
   const buttonTitle = i18n.translate('xpack.streams.routing.condition.filter', {
     defaultMessage: 'Add routing condition: {operator}',
     values: {
-      operator: operator === 'eq' ? 'equals' : 'not equals',
+      operator: operator === 'eq' ? 'equals' : operator === 'neq' ? 'not equals' : 'exists',
     },
   });
 
@@ -47,9 +66,7 @@ const FilterBtn = ({
           ...currentRule,
           where: {
             field: columnId,
-            ...(operator === 'eq'
-              ? { eq: context[rowIndex][columnId] as StringOrNumberOrBoolean }
-              : { neq: context[rowIndex][columnId] as StringOrNumberOrBoolean }),
+            ...condition,
           },
         });
       }}
@@ -68,14 +85,14 @@ export function buildCellActions(context: FlattenRecord[], onFilter: RoutingFilt
         cellActionProps,
         context,
         onFilter,
-        operator: 'eq',
+        mode: '+',
       }),
     (cellActionProps: EuiDataGridColumnCellActionProps) =>
       FilterBtn({
         cellActionProps,
         context,
         onFilter,
-        operator: 'neq',
+        mode: '-',
       }),
   ];
 }
