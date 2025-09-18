@@ -336,11 +336,6 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async failStep(error: Error | string): Promise<void> {
-    if (String(error).includes('Retry step')) {
-      const stack = this.workflowExecution.stack;
-      console.log('FOO');
-    }
-
     const stepId = this.getCurrentNode().stepId;
     return withSpan(
       {

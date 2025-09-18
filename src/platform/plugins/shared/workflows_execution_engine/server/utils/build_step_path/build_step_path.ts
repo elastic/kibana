@@ -27,10 +27,17 @@ import type { StackEntry } from '@kbn/workflows';
  * @returns A string array representing the deterministic step path
  */
 export function buildStepPath(stepId: string, stack: StackEntry[]): string[] {
-  return stack.flatMap((stackEntry) => {
-    return [
-      stackEntry.stepId,
-      ...stackEntry.scope.map((x) => x.scopeId as string).filter((x) => !!x),
-    ];
-  });
+  return stack
+    .filter((stackEntry) => !stackEntry.scope.every((x) => !x.scopeId))
+    .flatMap((stackEntry) => {
+      const scopeWithSubScope = stackEntry.scope
+        .filter((scope) => scope.scopeId)
+        .map((scope) => scope.scopeId!);
+
+      if (!scopeWithSubScope.length) {
+        return [];
+      }
+
+      return [stackEntry.stepId, ...scopeWithSubScope];
+    });
 }
