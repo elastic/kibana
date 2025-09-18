@@ -104,7 +104,9 @@ describe('SyncBadge Component', () => {
 
       await user.hover(badge);
       expect(
-        screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')
+        await screen.findByText(
+          'Indicates whether the span was executed synchronously or asynchronously.'
+        )
       ).toBeInTheDocument();
     });
 
@@ -117,7 +119,9 @@ describe('SyncBadge Component', () => {
 
       await user.hover(badge);
       expect(
-        screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')
+        await screen.findByText(
+          'Indicates whether the span was executed synchronously or asynchronously.'
+        )
       ).toBeInTheDocument();
     });
 
@@ -130,7 +134,9 @@ describe('SyncBadge Component', () => {
 
       await user.hover(badge);
       expect(
-        screen.getByText('Indicates whether the span was executed synchronously or asynchronously.')
+        await screen.findByText(
+          'Indicates whether the span was executed synchronously or asynchronously.'
+        )
       ).toBeInTheDocument();
     });
 
