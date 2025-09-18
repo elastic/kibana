@@ -73,6 +73,7 @@ import type {
   PolicySecretReference,
   AssetsMap,
   AgentPolicy,
+  PreconfiguredInputs,
 } from '../../common/types';
 import {
   FleetError,
@@ -926,7 +927,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
@@ -1121,6 +1127,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
       const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
+<<<<<<< HEAD
       // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
       const removeProtection =
         isEndpointPolicy &&
@@ -1134,6 +1141,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         })
       );
     }
+=======
+        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+        const removeProtection =
+          isEndpointPolicy &&
+          ((assignedInOldPolicy && !assignedInNewPolicy) ||
+            (!assignedInOldPolicy && assignedInNewPolicy));
+        if (options?.bumpRevision !== false) {
+          return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+            removeProtection,
+          });
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+    );
+>>>>>>> 2738a40a6ec ([Fleet] Update frozen variables for preconfigured managed policies (#235306))
 
     const assetRemovePromise = removeOldAssets({
       soClient,
@@ -2962,7 +2985,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 
