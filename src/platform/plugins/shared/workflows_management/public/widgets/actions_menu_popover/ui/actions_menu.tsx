@@ -17,8 +17,10 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTitle,
+  euiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -30,16 +32,32 @@ export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
 }
 
-function getActionOptions(): ActionOptionData[] {
+function getConnectorIconType(connectorType: string): string {
+  if (connectorType.includes('.')) {
+    const [base, _] = connectorType.split('.');
+    connectorType = base;
+  }
+  if (connectorType === 'slack') {
+    return 'logoSlack';
+  } else if (connectorType === 'console') {
+    return 'console';
+  } else if (connectorType === 'inference') {
+    return 'sparkles';
+  }
+  return 'globe';
+}
+
+function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
   const connectors = getAllConnectors();
   const triggersGroup: ActionOptionData = {
     iconType: 'menuDown',
+    iconColor: euiTheme.colors.vis.euiColorVis6,
     id: 'triggers',
     label: i18n.translate('workflows.actionsMenu.triggers', {
       defaultMessage: 'Triggers',
     }),
     description: i18n.translate('workflows.actionsMenu.triggersDescription', {
-      defaultMessage: 'Triggers are the events that start a workflow.',
+      defaultMessage: 'Choose which event starts a workflow',
     }),
     isGroupLabel: false,
     options: [
@@ -49,9 +67,10 @@ function getActionOptions(): ActionOptionData[] {
           defaultMessage: 'Manual',
         }),
         description: i18n.translate('workflows.actionsMenu.manualDescription', {
-          defaultMessage: 'Manually start a workflow.',
+          defaultMessage: 'Manually start from the UI',
         }),
         iconType: 'play',
+        iconColor: 'success',
         isGroupLabel: false,
       },
       {
@@ -60,9 +79,10 @@ function getActionOptions(): ActionOptionData[] {
           defaultMessage: 'Alert',
         }),
         description: i18n.translate('workflows.actionsMenu.alertDescription', {
-          defaultMessage: 'Start a workflow when an alert is triggered.',
+          defaultMessage: 'When an alert from rule is created',
         }),
         iconType: 'bell',
+        iconColor: euiTheme.colors.vis.euiColorVis6,
         isGroupLabel: false,
       },
       {
@@ -71,9 +91,10 @@ function getActionOptions(): ActionOptionData[] {
           defaultMessage: 'Schedule',
         }),
         description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-          defaultMessage: 'Start a workflow on a schedule.',
+          defaultMessage: 'On a schedule (e.g. every 10 minutes)',
         }),
         iconType: 'clock',
+        iconColor: euiTheme.colors.textParagraph,
         isGroupLabel: false,
       },
     ],
@@ -85,12 +106,13 @@ function getActionOptions(): ActionOptionData[] {
       defaultMessage: 'Kibana',
     }),
     description: i18n.translate('workflows.actionsMenu.kibanaDescription', {
-      defaultMessage: 'Work with Kibana data and features directly from your workflow.',
+      defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     isGroupLabel: false,
   };
   const externalGroup: ActionOptionData = {
     iconType: 'globe',
+    iconColor: euiTheme.colors.vis.euiColorVis0,
     id: 'external',
     label: i18n.translate('workflows.actionsMenu.external', {
       defaultMessage: 'External Systems & Apps',
@@ -102,12 +124,13 @@ function getActionOptions(): ActionOptionData[] {
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
+    iconColor: euiTheme.colors.vis.euiColorVis0,
     id: 'flowControl',
     label: i18n.translate('workflows.actionsMenu.aggregations', {
       defaultMessage: 'Flow Control',
     }),
     description: i18n.translate('workflows.actionsMenu.flowControlDescription', {
-      defaultMessage: 'Control your workflow with logic, delays, looping, and more.',
+      defaultMessage: 'Control your workflow with logic, delays, looping, and more',
     }),
     isGroupLabel: false,
     options: [
@@ -117,9 +140,10 @@ function getActionOptions(): ActionOptionData[] {
           defaultMessage: 'If Condition',
         }),
         description: i18n.translate('workflows.actionsMenu.ifDescription', {
-          defaultMessage: 'If the condition is true, the action is executed.',
+          defaultMessage: 'Define condition with KQL to execute the action',
         }),
         iconType: 'branch',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
         isGroupLabel: false,
       },
       {
@@ -128,9 +152,10 @@ function getActionOptions(): ActionOptionData[] {
           defaultMessage: 'Loop',
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {
-          defaultMessage: 'Iterate the action over a specified list.',
+          defaultMessage: 'Iterate the action over a specified list',
         }),
         iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
         isGroupLabel: false,
       },
       {
@@ -139,9 +164,10 @@ function getActionOptions(): ActionOptionData[] {
           defaultMessage: 'Wait',
         }),
         description: i18n.translate('workflows.actionsMenu.waitDescription', {
-          defaultMessage: 'Wait for a specified amount of time before continuing.',
+          defaultMessage: 'Pause for a specified amount of time before continuing',
         }),
         iconType: 'clock',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
         isGroupLabel: false,
       },
     ],
@@ -153,7 +179,7 @@ function getActionOptions(): ActionOptionData[] {
       defaultMessage: 'Elasticsearch',
     }),
     description: i18n.translate('workflows.actionsMenu.elasticsearchDescription', {
-      defaultMessage: 'Work with Elastic data and features directly from your workflow.',
+      defaultMessage: 'Work with Elastic data and features directly from your workflow',
     }),
     isGroupLabel: false,
   };
@@ -165,8 +191,8 @@ function getActionOptions(): ActionOptionData[] {
       }
       elasticSearchGroup.options.push({
         id: connector.type,
-        label: connector.type,
-        description: connector.description,
+        label: connector.description || connector.type,
+        description: connector.type,
         iconType: 'logoElasticsearch',
         isGroupLabel: false,
       });
@@ -176,8 +202,8 @@ function getActionOptions(): ActionOptionData[] {
       }
       kibanaGroup.options.push({
         id: connector.type,
-        label: connector.type,
-        description: connector.description,
+        label: connector.description || connector.type,
+        description: connector.type,
         iconType: 'logoKibana',
         isGroupLabel: false,
       });
@@ -185,18 +211,28 @@ function getActionOptions(): ActionOptionData[] {
       if (!externalGroup.options) {
         externalGroup.options = [];
       }
-      let iconType = 'globe';
-      if (connector.type === 'slack') {
-        iconType = 'logoSlack';
-      } else if (connector.type === 'console') {
-        iconType = 'console';
-      } else if (connector.type.startsWith('inference.')) {
-        iconType = 'sparkles';
+      const [baseType, subtype] = connector.type.split('.');
+      let groupOption = externalGroup;
+      if (subtype) {
+        let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
+        // create a group for the basetype if not yet exists
+        if (!connectorGroup) {
+          connectorGroup = {
+            id: baseType,
+            label: baseType,
+            iconType: getConnectorIconType(baseType),
+            isGroupLabel: false,
+            options: [],
+          };
+          externalGroup.options.push(connectorGroup);
+        }
+        groupOption = connectorGroup;
       }
-      externalGroup.options.push({
+      const iconType = getConnectorIconType(connector.type);
+      groupOption.options!.push({
         id: connector.type,
-        label: connector.type,
-        description: connector.description,
+        label: connector.description || connector.type,
+        description: connector.type,
         iconType,
         isGroupLabel: false,
       });
@@ -206,32 +242,42 @@ function getActionOptions(): ActionOptionData[] {
   return [triggersGroup, elasticSearchGroup, kibanaGroup, externalGroup, flowControlGroup];
 }
 
-const defaultOptions = getActionOptions();
-const flatOptions = defaultOptions.map((option) => [option, ...(option.options || [])]).flat();
-
 export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
-  const [options, setOptions] =
-    useState<Array<EuiSelectableOption<ActionOptionData>>>(defaultOptions);
+  const { euiTheme } = useEuiTheme();
+  const defaultOptions = useMemo(() => getActionOptions(euiTheme), [euiTheme]);
+  const flatOptions = useMemo(
+    () => defaultOptions.map((option) => [option, ...(option.options || [])]).flat(),
+    [defaultOptions]
+  );
+
+  const [options, setOptions] = useState<EuiSelectableOption<ActionOptionData>[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const renderActionOption = (
     option: EuiSelectableOption<ActionOptionData>,
     searchValue: string
   ) => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={option.iconType} size="m" />
+      <EuiFlexGroup alignItems="center" css={styles.actionOption}>
+        <EuiFlexItem
+          grow={false}
+          css={[styles.iconOuter, option.options ? styles.groupIconOuter : styles.actionIconOuter]}
+        >
+          <span css={option.options ? styles.groupIconInner : styles.actionIconInner}>
+            <EuiIcon type={option.iconType} size="m" color={option?.iconColor} />
+          </span>
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
-            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+            <EuiTitle size="xxxs" css={styles.actionTitle}>
+              <h6>
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              </h6>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="xs" color="subdued" className="eui-displayBlock">
-              <small>
-                <EuiHighlight search={searchValue}>{option.description || ''}</EuiHighlight>
-              </small>
+            <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
+              <EuiHighlight search={searchValue}>{option.description || ''}</EuiHighlight>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -278,7 +324,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   };
 
   return (
-    <EuiSelectable
+    <EuiSelectable<ActionOptionData>
       aria-label="Selectable example with custom list items"
       searchable
       options={options}
@@ -289,10 +335,11 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
         onChange: handleSearchChange,
       }}
       listProps={{
-        rowHeight: 50,
+        rowHeight: 64,
         showIcons: false,
       }}
       renderOption={renderActionOption}
+      css={styles.selectable}
       singleSelection
     >
       {(list, search) => (
@@ -308,7 +355,14 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                     />
                   </h3>
                 ) : (
-                  <EuiButtonEmpty onClick={handleBack} iconType="arrowLeft" size="xs">
+                  <EuiButtonEmpty
+                    onClick={handleBack}
+                    iconType="arrowLeft"
+                    size="xs"
+                    aria-label={i18n.translate('workflows.actionsMenu.back', {
+                      defaultMessage: 'Back',
+                    })}
+                  >
                     <FormattedMessage id="workflows.actionsMenu.back" defaultMessage="Back" />
                   </EuiButtonEmpty>
                 )}
@@ -325,15 +379,64 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
 }
 
 const componentStyles = {
-  title: ({ euiTheme }: UseEuiTheme) =>
+  selectable: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'flex',
-      alignItems: 'flex-start',
-      // to avoid layout shift when the header is button
-      minHeight: '24px',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      '& .euiSelectableListItem': {
+        paddingBlock: euiTheme.size.m,
+        paddingInline: '16px',
+      },
     }),
+  title: css({
+    display: 'flex',
+    alignItems: 'flex-start',
+    // to avoid layout shift when the header is button
+    minHeight: '24px',
+  }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
+    }),
+  actionOption: css({
+    gap: '12px',
+  }),
+  iconOuter: css({
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }),
+  groupIconOuter: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      borderRadius: euiTheme.border.radius.medium,
+    }),
+  actionIconOuter: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      borderRadius: '100%',
+    }),
+  groupIconInner: ({ euiTheme }: UseEuiTheme) => css({}),
+  actionIconInner: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '24px',
+      height: '24px',
+      borderRadius: '100%',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }),
+  actionTitle: (euiThemeContext: UseEuiTheme) =>
+    css({
+      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
+      '&::first-letter': {
+        textTransform: 'capitalize',
+      },
+    }),
+  actionDescription: (euiThemeContext: UseEuiTheme) =>
+    css({
+      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
     }),
 };

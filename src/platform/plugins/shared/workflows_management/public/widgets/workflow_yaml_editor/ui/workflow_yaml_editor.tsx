@@ -47,6 +47,7 @@ import { generateConnectorSnippet } from '../lib/snippets/generate_connector_sni
 import { generateBuiltInStepSnippet } from '../lib/snippets/generate_builtin_step_snippet';
 import { prependIndentToLines } from '../lib/prepend_indent_to_lines';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
@@ -1648,6 +1649,7 @@ export const WorkflowYAMLEditor = ({
             }
             navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
           }}
+          rightSide={<WorkflowYAMLEditorShortcuts />}
         />
       </div>
     </div>

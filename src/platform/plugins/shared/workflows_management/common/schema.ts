@@ -23,7 +23,7 @@ const staticConnectors: ConnectorContract[] = [
       .required(),
     outputSchema: z.string(),
     description: i18n.translate('workflows.connectors.console.description', {
-      defaultMessage: 'Debug workflow with a message',
+      defaultMessage: 'Log a message to the workflow logs',
     }),
   },
   {
