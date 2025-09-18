@@ -254,7 +254,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       });
 
     const dashboardsColumns = useMigrationDashboardsTableColumns({
-      isDisabled: isDashboardsLoading || isTableLoading,
+      shouldDisableActions: isDashboardsLoading || isTableLoading,
       installDashboard: installSingleDashboard,
       openDashboardDetailsFlyout: openMigrationDashboardDetails,
     });

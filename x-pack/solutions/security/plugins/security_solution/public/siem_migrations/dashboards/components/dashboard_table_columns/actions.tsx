@@ -20,12 +20,16 @@ import type { TableColumn } from './constants';
 import { TableHeader } from '../../../common/components';
 
 interface ActionNameProps {
-  isDisabled?: boolean;
+  shouldDisableActions?: boolean;
   migrationDashboard: DashboardMigrationDashboard;
   installDashboard: (migrationDashboard: DashboardMigrationDashboard) => void;
 }
 
-const ActionName = ({ migrationDashboard, installDashboard, isDisabled }: ActionNameProps) => {
+const ActionName = ({
+  migrationDashboard,
+  installDashboard,
+  shouldDisableActions: isDisabled,
+}: ActionNameProps) => {
   const onInstall = useCallback(() => {
     installDashboard(migrationDashboard);
   }, [installDashboard, migrationDashboard]);
@@ -63,10 +67,10 @@ const ActionName = ({ migrationDashboard, installDashboard, isDisabled }: Action
   }
 };
 
-export type CreateActionsColumnParams = Pick<ActionNameProps, 'installDashboard' | 'isDisabled'>;
+export type CreateActionsColumnParams = Omit<ActionNameProps, 'migrationDashboard'>;
 
 export const createActionsColumn = ({
-  isDisabled = false,
+  shouldDisableActions = false,
   installDashboard,
 }: CreateActionsColumnParams): TableColumn => {
   return {
@@ -102,7 +106,7 @@ export const createActionsColumn = ({
         <ActionName
           migrationDashboard={dashboard}
           installDashboard={installDashboard}
-          isDisabled={isDisabled}
+          shouldDisableActions={shouldDisableActions}
         />
       );
     },

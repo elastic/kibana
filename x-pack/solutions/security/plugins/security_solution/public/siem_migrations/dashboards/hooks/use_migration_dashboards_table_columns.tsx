@@ -24,7 +24,7 @@ type UseMigrationDashboardsTableColumnsParams = CreateActionsColumnParams & Crea
 export const useMigrationDashboardsTableColumns = ({
   installDashboard,
   openDashboardDetailsFlyout,
-  isDisabled,
+  shouldDisableActions,
 }: UseMigrationDashboardsTableColumnsParams): TableColumn[] => {
   return useMemo(
     () => [
@@ -35,10 +35,10 @@ export const useMigrationDashboardsTableColumns = ({
       createStatusColumn(),
       createTagsColumn(),
       createActionsColumn({
-        isDisabled,
+        shouldDisableActions,
         installDashboard,
       }),
     ],
-    [installDashboard, openDashboardDetailsFlyout, isDisabled]
+    [installDashboard, openDashboardDetailsFlyout, shouldDisableActions]
   );
 };
