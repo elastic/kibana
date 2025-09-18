@@ -38,7 +38,7 @@ const maybeMoonify = (tsconfigPath: string) => {
   }
 };
 
-async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[], isMoon = false) {
+async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
   const writes: Array<[path: string, content: string]> = [];
 
   // write tsconfig.type_check.json files for each project that is not the root
@@ -126,8 +126,7 @@ run(
 
     log.info(`Running typecheck for ${projects.length} projects, (filter: ${projectFilter})`);
 
-    const created = await createTypeCheckConfigs(log, projects, false);
-    // const created = await createTypeCheckConfigs(log, projects, true);
+    const created = await createTypeCheckConfigs(log, projects);
 
     if (flagsReader.boolean('config-only')) {
       log.success('Generated typecheck configs, exiting due to --config-only');
