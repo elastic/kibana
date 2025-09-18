@@ -8,7 +8,9 @@
 import * as rt from 'io-ts';
 import { dataStreamRT, degradedFieldRT, qualityIssuesRT, timeRangeRT } from './common';
 
-export const isStream = (value: unknown): value is { dataStream: string; view: 'streams' } =>
+export const isStream = (
+  value: unknown
+): value is { dataStream: string; view: 'classic' | 'wired' } =>
   rt.type({ dataStream: rt.string, view: rt.literal('classic') }).is(value) ||
   rt.type({ dataStream: rt.string, view: rt.literal('wired') }).is(value);
 
@@ -17,7 +19,7 @@ export const urlSchemaRT = rt.union([
   rt.intersection([
     rt.type({
       dataStream: rt.string,
-      view: rt.literal('streams'),
+      view: rt.literal('classic'),
     }),
     rt.partial({
       v: rt.literal(2),
