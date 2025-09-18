@@ -25,7 +25,11 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { coreServices } from '../services/kibana_services';
-import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';
+import {
+  createConfirmStrings,
+  resetConfirmStrings,
+  unsavedChangesConfirmStrings,
+} from './_dashboard_listing_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
@@ -48,9 +52,93 @@ export const confirmDiscardUnsavedChanges = (
     });
 };
 
+export const confirmDiscardOrSaveUnsavedChanges = ({
+  discardCallback,
+  saveCallback,
+  cancelCallback,
+}: {
+  discardCallback: () => void;
+  saveCallback: () => void;
+  cancelCallback?: () => void;
+}) => {
+  const titleId = 'confirmDiscardOrKeepTitle';
+  const descriptionId = 'confirmDiscardOrKeepDescription';
+
+  const session = coreServices.overlays.openModal(
+    toMountPoint(
+      <EuiFocusTrap
+        clickOutsideDisables={true}
+        initialFocus={'.dashboardCreateConfirmContinueButton'}
+      >
+        <EuiOutsideClickDetector onOutsideClick={() => session.close()}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            aria-describedby={descriptionId}
+          >
+            <EuiModalHeader data-test-subj="dashboardUnsavedChangesCancel">
+              <EuiModalHeaderTitle id={titleId} component="h2">
+                {unsavedChangesConfirmStrings.getUnsavedChangesTitle()}
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+
+            <EuiModalBody>
+              <EuiText>
+                <p id={descriptionId}>{unsavedChangesConfirmStrings.getUnsavedChangesSubtitle()}</p>
+              </EuiText>
+            </EuiModalBody>
+
+            <EuiModalFooter>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="dashboard"
+                onClick={() => {
+                  cancelCallback?.();
+                  session.close();
+                }}
+              >
+                {unsavedChangesConfirmStrings.getCancelButtonLabel()}
+              </EuiButtonEmpty>
+              <EuiButtonEmpty
+                color="danger"
+                size="s"
+                data-test-subj="dashboardUnsavedChangesConfirmDiscard"
+                onClick={() => {
+                  discardCallback();
+                  session.close();
+                }}
+              >
+                {unsavedChangesConfirmStrings.getDiscardButtonText()}
+              </EuiButtonEmpty>
+              <EuiButton
+                fill
+                size="s"
+                data-test-subj="dashboardUnsavedChangesConfirmSave"
+                className="dashboardCreateConfirmContinueButton"
+                onClick={() => {
+                  saveCallback();
+                  session.close();
+                }}
+              >
+                {unsavedChangesConfirmStrings.getSaveButtonText()}
+              </EuiButton>
+            </EuiModalFooter>
+          </div>
+        </EuiOutsideClickDetector>
+      </EuiFocusTrap>,
+      coreServices
+    ),
+    {
+      'data-test-subj': 'dashboardCreateConfirmModal',
+      maxWidth: 500,
+    }
+  );
+};
+
 export const confirmCreateWithUnsaved = (
   startBlankCallback: () => void,
-  contineCallback: () => void
+  continueCallback: () => void
 ) => {
   const titleId = 'confirmDiscardOrKeepTitle';
   const descriptionId = 'confirmDiscardOrKeepDescription';
@@ -102,7 +190,7 @@ export const confirmCreateWithUnsaved = (
                 data-test-subj="dashboardCreateConfirmContinue"
                 className="dashboardCreateConfirmContinueButton"
                 onClick={() => {
-                  contineCallback();
+                  continueCallback();
                   session.close();
                 }}
               >

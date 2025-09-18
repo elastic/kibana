@@ -30,11 +30,15 @@ export const useDashboardMenuItems = ({
   setIsLabsShown,
   maybeRedirect,
   showResetChange,
+  isResetting,
+  setIsResetting,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
+  isResetting: boolean;
+  setIsResetting: (isResetting: boolean) => void;
 }) => {
   const isMounted = useMountedState();
 
@@ -51,6 +55,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const isCreatingNewDashboard = viewMode === 'edit' && !lastSavedId;
 
   /**
    * Show the Dashboard app's share menu
@@ -88,7 +93,6 @@ export const useDashboardMenuItems = ({
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
-  const [isResetting, setIsResetting] = useState(false);
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
       dashboardApi.clearOverlays();
@@ -111,7 +115,7 @@ export const useDashboardMenuItems = ({
         }
       }, viewMode);
     },
-    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
+    [dashboardApi, hasUnsavedChanges, viewMode, setIsResetting, isMounted]
   );
 
   /**
@@ -149,7 +153,6 @@ export const useDashboardMenuItems = ({
         },
         disableButton: disableTopNav,
       } as TopNavMenuData,
-
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
@@ -163,29 +166,18 @@ export const useDashboardMenuItems = ({
 
       interactiveSave: {
         disableButton: disableTopNav,
-        emphasize: !Boolean(lastSavedId),
+        emphasize: isCreatingNewDashboard,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: lastSavedId ? undefined : 'save',
         run: dashboardInteractiveSave,
-        label:
-          viewMode === 'view'
-            ? topNavStrings.viewModeInteractiveSave.label
-            : Boolean(lastSavedId)
-            ? topNavStrings.editModeInteractiveSave.label
-            : topNavStrings.quickSave.label,
+        label: isCreatingNewDashboard
+          ? topNavStrings.quickSave.label
+          : topNavStrings.viewModeInteractiveSave.label,
         description:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
             : topNavStrings.editModeInteractiveSave.description,
-      } as TopNavMenuData,
-
-      switchToViewMode: {
-        ...topNavStrings.switchToViewMode,
-        id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId || isResetting,
-        isLoading: isResetting,
-        testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
       } as TopNavMenuData,
 
       share: {
@@ -221,16 +213,15 @@ export const useDashboardMenuItems = ({
     disableTopNav,
     isSaveInProgress,
     hasUnsavedChanges,
-    lastSavedId,
-    dashboardInteractiveSave,
     viewMode,
+    lastSavedId,
+    isCreatingNewDashboard,
+    dashboardInteractiveSave,
     showShare,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
     quickSaveDashboard,
-    resetChanges,
-    isResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -316,15 +307,14 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
-
+      editModeItems.push(menuItems.interactiveSave);
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
 
       editModeItems.push(menuItems.quickSave);
     } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
+      editModeItems.push(menuItems.interactiveSave);
     }
 
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
@@ -340,7 +330,6 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.settings,
     menuItems.interactiveSave,
-    menuItems.switchToViewMode,
     menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,

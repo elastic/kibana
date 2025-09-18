@@ -73,6 +73,36 @@ describe('Internal dashboard top nav', () => {
     expect(component.getByText('Managed')).toBeInTheDocument();
   });
 
+  it('should show the edit button when the dashboard is in view mode', async () => {
+    const { api } = buildMockDashboardApi();
+    const dashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+    };
+    const component = render(
+      <DashboardContext.Provider value={dashboardApi}>
+        <InternalDashboardTopNav redirectTo={jest.fn()} />
+      </DashboardContext.Provider>
+    );
+
+    expect(component.getByTestId('dashboardEnterEditMode')).toBeInTheDocument();
+  });
+
+  it('should show the exit edit button when the dashboard is in edit mode', async () => {
+    const { api } = buildMockDashboardApi();
+    const dashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('edit'),
+    };
+    const component = render(
+      <DashboardContext.Provider value={dashboardApi}>
+        <InternalDashboardTopNav redirectTo={jest.fn()} />
+      </DashboardContext.Provider>
+    );
+
+    expect(component.getByTestId('dashboardViewOnlyMode')).toBeInTheDocument();
+  });
+
   describe('embed mode', () => {
     it('should hide all top nav and unified search elements except filter bar by default', async () => {
       const { api } = buildMockDashboardApi();

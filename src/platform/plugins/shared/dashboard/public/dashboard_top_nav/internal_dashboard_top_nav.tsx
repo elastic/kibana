@@ -30,6 +30,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
+import { setBreadcrumbs } from '@kbn/remote-clusters-plugin/public/application/services/breadcrumb';
 import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
@@ -55,6 +56,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { ViewModeToggle } from './view_mode_toggle';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -79,7 +81,9 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
+  const { showWriteControls } = getDashboardCapabilities();
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -235,8 +239,7 @@ export function InternalDashboardTopNav({
       ? false
       : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
-    const showSearchBar = showQueryBar || showFilterBar;
+    const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
       showTopNavMenu,
       showSearchBar,
@@ -267,6 +270,8 @@ export function InternalDashboardTopNav({
     setIsLabsShown,
     maybeRedirect,
     showResetChange,
+    isResetting,
+    setIsResetting,
   });
 
   UseUnmount(() => {
@@ -288,7 +293,6 @@ export function InternalDashboardTopNav({
       });
     }
 
-    const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
@@ -335,14 +339,14 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [hasUnsavedChanges, viewMode, showWriteControls, dashboardApi, isPopoverOpen, maybeRedirect]);
 
-  const setFavoriteButtonMountPoint = useCallback(
-    (mountPoint: MountPoint<HTMLElement> | undefined) => {
+  const setMountPoint = useCallback(
+    (order: number) => (mountPoint: MountPoint<HTMLElement> | undefined) => {
       if (mountPoint) {
         return coreServices.chrome.setBreadcrumbsAppendExtension({
           content: mountPoint,
-          order: 0,
+          order,
         });
       }
     },
@@ -392,9 +396,20 @@ export function InternalDashboardTopNav({
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
-      <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
+      <MountPointPortal setMountPoint={setMountPoint(0)}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
       </MountPointPortal>
+      {showWriteControls && !dashboardApi.isManaged && (
+        <MountPointPortal setMountPoint={setMountPoint(1)}>
+          <ViewModeToggle
+            viewMode={viewMode}
+            dashboardApi={dashboardApi}
+            hasUnsavedChanges={hasUnsavedChanges}
+            isResetting={isResetting}
+            setIsResetting={setIsResetting}
+          />
+        </MountPointPortal>
+      )}
     </div>
   );
 }
