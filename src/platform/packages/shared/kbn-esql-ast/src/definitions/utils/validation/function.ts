@@ -8,20 +8,22 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import { errors, getFunctionDefinition } from '..';
-import { FunctionDefinitionTypes, within } from '../../../..';
+import { FunctionDefinitionTypes } from '../../../..';
 import {
   isColumn,
   isFunctionExpression,
   isIdentifier,
   isInlineCast,
   isLiteral,
-  isOptionNode,
   isParamLiteral,
 } from '../../../ast/is';
-import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
-import { Location, getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import { getLocationInfo } from '../../../commands_registry/location';
+import type {
+  ICommandCallbacks,
+  ICommandContext,
+  Location,
+} from '../../../commands_registry/types';
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
-import { Walker } from '../../../walker';
 import type { FunctionDefinition, SupportedDataType } from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
@@ -227,7 +229,7 @@ class FunctionValidator {
    * Gets information about the location of the current function
    */
   private get location(): { displayName: string; id: Location } {
-    return getFunctionLocation(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
+    return getLocationInfo(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
   }
 
   /**
@@ -238,31 +240,6 @@ class FunctionValidator {
     const arity = this.fn.args.length;
     return arity >= min && arity <= max;
   }
-}
-
-/**
- * Identifies the location ID of the function's position
- */
-function getFunctionLocation(
-  fn: ESQLFunction,
-  parentCommand: ESQLCommand,
-  ast: ESQLAst,
-  withinAggFunction: boolean
-) {
-  if (withinAggFunction && ast[0].name === 'ts') {
-    return {
-      id: Location.STATS_TIMESERIES,
-      displayName: 'agg_function_in_timeseries_context',
-    };
-  }
-
-  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
-
-  const displayName = (option ?? parentCommand).name;
-
-  const id = getLocationFromCommandOrOptionName(displayName);
-
-  return { id, displayName };
 }
 
 /**

@@ -10,6 +10,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 
 import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import { getLocationInfo } from '../../../commands_registry/location';
 import {
   isAssignment,
   isColumn,
@@ -31,7 +32,6 @@ import type {
   ISuggestionItem,
   ItemKind,
 } from '../../../commands_registry/types';
-import { Location, getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
@@ -144,14 +144,12 @@ export async function getFunctionArgsSuggestions(
     return [];
   }
   let command = astContext.command;
-  let option = astContext.option;
   if (astContext.command?.name === 'fork') {
-    const { command: forkCommand, option: forkOption } =
+    const { command: forkCommand } =
       astContext.command?.name === 'fork'
         ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
-        : { command: undefined, option: undefined };
+        : { command: undefined };
     command = forkCommand || astContext.command;
-    option = forkOption || astContext.option;
   }
   const functionNode = node as ESQLFunction;
   const fnDefinition = getFunctionDefinition(functionNode.name);
@@ -311,6 +309,13 @@ export async function getFunctionArgsSuggestions(
 
     // Fields
 
+    // In most cases, just suggest fields that match the parameter types.
+    // But in the case of boolean conditions, we want to suggest fields of any type,
+    // since they may be used in comparisons.
+
+    // and we always add a comma at the end if there are more mandatory args
+    // but this needs to be refined when full expressions begin to be supported
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
@@ -337,13 +342,12 @@ export async function getFunctionArgsSuggestions(
 
     // Functions
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
-      let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
-      // If the user is working with timeseries data, we want to suggest
-      // functions that are relevant to the timeseries context.
-      const isTSSourceCommand = commands[0].name === 'ts';
-      if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
-        location = Location.STATS_TIMESERIES;
-      }
+      const location = getLocationInfo(
+        offset,
+        command,
+        commands,
+        isAggFunctionUsedAlready(command, finalCommandArgIndex)
+      ).id;
       suggestions.push(
         ...getFunctionSuggestions(
           {
@@ -364,7 +368,6 @@ export async function getFunctionArgsSuggestions(
       );
     }
 
-    // could also be in stats (bucket) but our autocomplete is not great yet
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
         ['where', 'eval'].includes(command.name) &&
@@ -460,7 +463,7 @@ async function getListArgsSuggestions(
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],
-            getLocationFromCommandOrOptionName(command.name),
+            getLocationInfo(offset, command, commands, false).id,
             getFieldsByType,
             {
               functions: true,
@@ -512,7 +515,7 @@ export const getInsideFunctionsSuggestions = async (
     ) {
       return await getSuggestionsToRightOfOperatorExpression({
         queryText: innerText,
-        location: getLocationFromCommandOrOptionName(command.name),
+        location: getLocationInfo(cursorPosition ?? 0, command, ast, false).id,
         rootOperator: node,
         getExpressionType: (expression) => getExpressionType(expression, context?.columns),
         getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
