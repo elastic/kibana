@@ -30,7 +30,7 @@ export async function requestDiagnostics(
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  const response = await createAgentAction(esClient, {
+  const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'REQUEST_DIAGNOSTICS',
