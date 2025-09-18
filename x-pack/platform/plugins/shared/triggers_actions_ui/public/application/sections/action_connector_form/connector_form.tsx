@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { isEmpty } from 'lodash';
+
+import { isEmpty, isEqual } from 'lodash';
 import { useSecretHeaders } from '@kbn/stack-connectors-plugin/public/common';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -18,7 +19,7 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import type { ConnectorFormSchema } from './types';
+import type { ConnectorFormSchema, InternalHeader } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 import { connectorOverrides } from './connector_overrides';
 
@@ -28,13 +29,6 @@ export interface ConnectorFormState {
   isSubmitting: boolean;
   submit: FormHook<ConnectorFormSchema>['submit'];
   preSubmitValidator: ConnectorValidationFunc | null;
-}
-
-// this type needs to be moved
-interface InternalHeader {
-  key: string;
-  value: string;
-  type: 'config' | 'secret';
 }
 
 // this type needs to be improved
@@ -174,7 +168,14 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onFormModifiedChange,
   setResetForm,
 }) => {
-  const secretHeaders: Array<InternalHeader> = useSecretHeaders(connector.id);
+  const isWebhookConnector = ['.webhook', '.cases_webhook', '.gen-ai'].includes(
+    connector.actionTypeId
+  );
+  const secretHeaders: Array<InternalHeader> = useSecretHeaders(
+    isWebhookConnector ? connector.id : undefined
+  );
+
+  console.log('after fetching, secretHeaders: ', secretHeaders);
 
   const { form } = useForm({
     defaultValue: connector,
@@ -210,7 +211,8 @@ const ConnectorFormComponent: React.FC<Props> = ({
   }, [isFormModified, onFormModifiedChange]);
 
   useEffect(() => {
-    if (secretHeaders.length === 0) return;
+    if (!isWebhookConnector) return;
+
     const currentFormData = form.getFormData() as InternalConnectorForm;
 
     const configHeaders = Object.keys(
@@ -228,17 +230,22 @@ const ConnectorFormComponent: React.FC<Props> = ({
       ? configHeaders.concat(secretHeaders)
       : secretHeaders;
 
-    form.updateFieldValues(
-      {
-        ...currentFormData,
-        __internal__: {
-          ...__internal__,
-          hasHeaders: mergedHeaders.length > 0,
-          headers: mergedHeaders,
+    const prevHeaders = currentFormData.__internal__?.headers ?? [];
+
+    if (!isEqual(mergedHeaders, prevHeaders)) {
+      form.updateFieldValues(
+        {
+          ...currentFormData,
+          __internal__: {
+            ...__internal__,
+            hasHeaders: mergedHeaders.length > 0,
+            headers: mergedHeaders,
+          },
         },
-      },
-      { runDeserializer: false }
-    );
+        { runDeserializer: false }
+      );
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secretHeaders, __internal__]);
 

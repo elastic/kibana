@@ -115,9 +115,22 @@ export const HEADERS_SUBTITLE = i18n.translate(
   }
 );
 
+export const MAX_HEADERS_LIMIT = (maxHeaders: number) =>
+  i18n.translate('xpack.cases.customFields.maxCustomFieldLimit', {
+    values: { maxHeaders },
+    defaultMessage: 'Maximum number of {maxHeaders} custom fields reached.',
+  });
+
 export const KEY_LABEL = i18n.translate('xpack.stackConnectors.components.auth.keyTextFieldLabel', {
   defaultMessage: 'Key',
 });
+
+export const SAME_HEADER_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.sameHeaderKeyError',
+  {
+    defaultMessage: 'This key is already used in another header',
+  }
+);
 
 export const VALUE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.auth.valueTextFieldLabel',

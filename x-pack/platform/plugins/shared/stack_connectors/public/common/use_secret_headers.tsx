@@ -23,9 +23,8 @@ export function useSecretHeaders(connectorId?: string) {
   } = useKibana().services;
 
   const query = useQuery<SecretHeader[], ServerError>(
-    ['secretHeaders', connectorId], // queryKey
+    ['secretHeaders', connectorId],
     async () => {
-      // query fn
       const response = await http.get<string[]>(
         `/internal/stack_connectors/${connectorId}/secret_headers`
       );
