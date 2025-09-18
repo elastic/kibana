@@ -31,6 +31,9 @@ export const changeDataViewStyles = ({
       border: `${theme.border.width.thin} solid ${theme.colors.borderBasePlain}`,
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
+      height: theme.size.xl,
+      paddingInline: theme.size.s,
+      fontSize: theme.size.m,
     },
     popoverContent: {
       width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], {

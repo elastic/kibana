@@ -271,6 +271,7 @@ export function createSearchBar({
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
             textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
             displayStyle={props.displayStyle}
+          controlSize={props.controlSize}
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}

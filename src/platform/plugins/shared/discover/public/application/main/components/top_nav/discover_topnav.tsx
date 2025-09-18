@@ -261,6 +261,7 @@ export const DiscoverTopNav = ({
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
         showDatePicker={showDatePicker}
+        controlSize="s"
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}

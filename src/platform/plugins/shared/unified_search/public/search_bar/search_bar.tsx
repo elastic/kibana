@@ -131,6 +131,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // defines padding and border; use 'inPage' to avoid any padding or border;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached' | 'withBorders';
+  // Global control size. Use 's' for a compact 32px height.
+  controlSize?: 'm' | 's';
   // super update button background fill control
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
@@ -600,7 +602,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
         showSaveQuery={this.props.showSaveQuery}
         showSavedQueryControls={this.props.showSavedQueryControls}
         isDisabled={this.props.isDisabled}
-        buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
+        buttonProps={{ size: this.props.controlSize === 's' || this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         filtersForSuggestions={this.props.filtersForSuggestions}
@@ -679,6 +681,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onChange={this.onQueryBarChange}
           onDraftChange={this.props.onDraftChange}
           isDirty={this.isDirty()}
+          controlSize={this.props.controlSize}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }

@@ -285,16 +285,30 @@ export function ChangeDataView({
             <EuiFlexItem
               grow={false}
               css={css`
-                padding: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: ${euiTheme.size.xl};
+                padding: 0 ${euiTheme.size.s};
+                line-height: ${euiTheme.size.xl};
                 border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
-                background-color: ${euiTheme.colors.lightestShade};
+                background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
                 border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
                 border-right: 0;
               `}
             >
-              {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                defaultMessage: 'Data view',
-              })}
+              <span
+                css={css`
+                  font-size: ${euiTheme.size.m};
+                  line-height: ${euiTheme.size.xl};
+                  font-weight: 500;
+                  color: ${euiTheme.colors.text};
+                `}
+              >
+                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                  defaultMessage: 'Data view',
+                })}
+              </span>
             </EuiFlexItem>
             <EuiFlexItem grow={true} css={shrinkableContainerCss}>
               <EuiPopover
