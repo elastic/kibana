@@ -139,17 +139,16 @@ export class WorkflowExecutionRuntimeManager {
 
     if (
       this.workflowExecution.stack.length &&
-      this.workflowExecution.stack[this.workflowExecution.stack.length - 1].stepId ===
-        currentNode.stepId
+      this.workflowExecution.stack.at(-1)!.stepId === currentNode.stepId
     ) {
-      // Path 1: Extend existing stack entry (correct)
-      const StackFrame = this.workflowExecution.stack[this.workflowExecution.stack.length - 1];
+      // Path 1: Extend existing stack entry
+      const stackFrame = this.workflowExecution.stack.at(-1)!;
       this.workflowExecutionState.updateWorkflowExecution({
         stack: this.workflowExecution.stack.slice(0, -1).concat([
           {
-            ...StackFrame,
-            scope: [
-              ...StackFrame.scope,
+            ...stackFrame,
+            nestedScopes: [
+              ...stackFrame.nestedScopes,
               {
                 nodeId: currentNode.id,
                 scopeId: subScopeId,
@@ -161,13 +160,13 @@ export class WorkflowExecutionRuntimeManager {
       return;
     }
 
-    // Path 2: Create new stack entry (FIXED - removed slice(0, -1))
+    // Path 2: Create new stack entry
     this.workflowExecutionState.updateWorkflowExecution({
       stack: this.workflowExecution.stack.concat([
         // ✅ FIXED: Don't remove last entry
         {
           stepId: currentNode.stepId,
-          scope: [
+          nestedScopes: [
             {
               nodeId: currentNode.id,
               scopeId: subScopeId,
@@ -184,7 +183,7 @@ export class WorkflowExecutionRuntimeManager {
     if (
       this.workflowExecution.stack.length &&
       this.workflowExecution.stack.at(-1)!.stepId === currentNode.stepId &&
-      this.workflowExecution.stack.at(-1)!.scope.length > 1
+      this.workflowExecution.stack.at(-1)!.nestedScopes.length > 1
     ) {
       const StackFrame = this.workflowExecution.stack.at(-1)!;
 
@@ -192,7 +191,7 @@ export class WorkflowExecutionRuntimeManager {
         stack: this.workflowExecution.stack.slice(0, -1).concat([
           {
             ...StackFrame,
-            scope: StackFrame.scope.slice(0, -1),
+            nestedScopes: StackFrame.nestedScopes.slice(0, -1),
           },
         ]),
       });

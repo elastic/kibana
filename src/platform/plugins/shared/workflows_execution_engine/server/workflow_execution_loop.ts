@@ -130,13 +130,19 @@ async function catchError(
   workflowGraph: WorkflowGraph
 ) {
   try {
+    // Loop through nested scopes in reverse order to handle errors at each level.
+    // The loop continues while:
+    // 1. There's an active error in the workflow execution
+    // 2. There are items in the execution stack
+    // 3. The top stack entry has nested scopes to process
+    // This allows error handling to bubble up through the scope hierarchy.
     while (
       workflowRuntime.getWorkflowExecution().error &&
       workflowRuntime.getWorkflowExecution().stack.length &&
-      workflowRuntime.getWorkflowExecution().stack.at(-1)!.scope.length
+      workflowRuntime.getWorkflowExecution().stack.at(-1)!.nestedScopes.length
     ) {
       // exit the whole node scope
-      const scopeEntry = workflowRuntime.getWorkflowExecution().stack.at(-1)!.scope.at(-1)!;
+      const scopeEntry = workflowRuntime.getWorkflowExecution().stack.at(-1)!.nestedScopes.at(-1)!;
       workflowRuntime.navigateToNode(scopeEntry.nodeId);
       workflowRuntime.exitScope();
 

@@ -39,14 +39,22 @@ export const ExecutionTypeValues = Object.values(ExecutionType);
  */
 
 export interface ScopeEntry {
+  /**
+   * Node that entered this scope.
+   * Examples: enterForeach_step1, enterRetry_step1, etc
+   */
   nodeId: string;
-  scopeId?: string; // Optional scope identifier for nested scopes
+  /**
+   * Optional unique identifier for the scope instance.
+   * For example, iteration identifier (0,1,2,3,etc), retry attempt identifier (attempt-1, attempt-2, etc), and so on
+   */
+  scopeId?: string;
 }
 export interface StackFrame {
   /** Step that created this frame */
   stepId: string;
   /** Scope entries within this frame */
-  scope: ScopeEntry[];
+  nestedScopes: ScopeEntry[];
 }
 
 export interface EsWorkflowExecution {

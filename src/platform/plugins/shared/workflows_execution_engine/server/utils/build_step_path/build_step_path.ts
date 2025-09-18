@@ -23,21 +23,21 @@ import type { StackFrame } from '@kbn/workflows';
  * sub-scope identifiers when present.
  *
  * @param stepId - The current step identifier being processed
- * @param stackFrames - Array of stack entries representing the execution hierarchy
+ * @param stackFrames - Array of stack frames representing the execution hierarchy
  * @returns A string array representing the deterministic step path
  */
 export function buildStepPath(stackFrames: StackFrame[]): string[] {
   return stackFrames
-    .filter((StackFrame) => !StackFrame.scope.every((x) => !x.scopeId))
-    .flatMap((StackFrame) => {
-      const scopeWithSubScope = StackFrame.scope
-        .filter((scope) => scope.scopeId)
-        .map((scope) => scope.scopeId!);
+    .filter((stackFrame) => !stackFrame.nestedScopes.every((scopeEntry) => !scopeEntry.scopeId))
+    .flatMap((stackFrame) => {
+      const scopeWithSubScope = stackFrame.nestedScopes
+        .filter((scopeEntry) => scopeEntry.scopeId)
+        .map((scopeEntry) => scopeEntry.scopeId!);
 
       if (!scopeWithSubScope.length) {
         return [];
       }
 
-      return [StackFrame.stepId, ...scopeWithSubScope];
+      return [stackFrame.stepId, ...scopeWithSubScope];
     });
 }
