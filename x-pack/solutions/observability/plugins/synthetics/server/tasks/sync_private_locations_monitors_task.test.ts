@@ -121,8 +121,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   });
 
   describe('runTask', () => {
-    it('should skip sync if no data has changed', async () => {
-      const taskInstance = getMockTaskInstance();
+    it('should skip sync if no data has changed and policiesRequireReformatting is false', async () => {
+      const taskInstance = getMockTaskInstance({ packagePoliciesRequireReformatting: false });
       jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
         hasDataChanged: false,
         totalParams: 1,
@@ -149,8 +149,61 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         lastStartedAt: taskInstance.startedAt?.toISOString(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
+        packagePoliciesRequireReformatting: false,
       });
     });
+
+    it.each([true, undefined])(
+      'should run sync if policiesRequireReformatting true or undefined, even if no data has changed',
+      async (packagePoliciesRequireReformatting) => {
+        const taskInstance = getMockTaskInstance({
+          packagePoliciesRequireReformatting,
+        });
+        jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
+          hasDataChanged: false,
+          totalParams: 1,
+          totalMWs: 1,
+        });
+        jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+          {
+            id: 'pl-1',
+            label: 'Private Location 1',
+            isServiceManaged: false,
+            agentPolicyId: 'policy-1',
+          },
+        ]);
+
+        jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+          {
+            id: 'pl-1',
+            label: 'Private Location 1',
+            isServiceManaged: false,
+            agentPolicyId: 'policy-1',
+          },
+        ]);
+        jest.spyOn(task, 'syncGlobalParams').mockResolvedValue(undefined);
+
+        const result = await task.runTask({ taskInstance });
+
+        expect(mockLogger.debug).toHaveBeenNthCalledWith(
+          1,
+          '[syncGlobalParams] Syncing private location monitors, last total params 1 '
+        );
+        expect(mockLogger.debug).toHaveBeenNthCalledWith(
+          2,
+          '[syncGlobalParams] Sync of private location monitors succeeded '
+        );
+
+        expect(task.syncGlobalParams).toHaveBeenCalled();
+        expect(result.error).toBeUndefined();
+        expect(result.state).toEqual({
+          lastStartedAt: taskInstance.startedAt?.toISOString(),
+          lastTotalParams: 1,
+          lastTotalMWs: 1,
+          packagePoliciesRequireReformatting: false,
+        });
+      }
+    );
 
     it('should run sync if data has changed', async () => {
       const taskInstance = getMockTaskInstance();
@@ -189,6 +242,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         lastStartedAt: taskInstance.startedAt?.toISOString(),
         lastTotalParams: 2,
         lastTotalMWs: 1,
+        packagePoliciesRequireReformatting: false,
       });
     });
 
@@ -226,6 +280,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         lastStartedAt: taskInstance.startedAt?.toISOString(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
+        packagePoliciesRequireReformatting: true,
       });
     });
   });
