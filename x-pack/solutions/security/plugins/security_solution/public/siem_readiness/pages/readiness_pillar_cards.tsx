@@ -29,6 +29,7 @@ const SILVER_COLOR = '#5A6D8C';
 const GOLD_COLOR = '#F5BC00';
 
 const CARDS_HEIGHT = 240;
+const PROGRESS_BAR_SIZE = 120;
 
 interface Pillar {
   pillarProps: PillarProps;
@@ -52,7 +53,7 @@ const PillarDetails: React.FC<Pillar> = ({ pillarProps, pillarStats }) => {
             position: 'absolute',
             top: '70px',
             left: '-42px',
-            width: '120px',
+            width: PROGRESS_BAR_SIZE,
           }}
         />
       </EuiFlexItem>
@@ -61,7 +62,7 @@ const PillarDetails: React.FC<Pillar> = ({ pillarProps, pillarStats }) => {
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
-          css={{ height: '100%', paddingLeft: euiTheme.size.base }}
+          css={{ height: '100%', paddingLeft: euiTheme.size.base, minHeight: PROGRESS_BAR_SIZE }}
         >
           <EuiFlexItem grow={1}>
             <EuiFlexGroup direction="row" alignItems="baseline" gutterSize="s">

@@ -55,6 +55,7 @@ const COMPLETED_BADGE_COLOR = '#4DD2CA';
 
 const PANEL_HEIGHT = 600;
 const ILLUSTRATION_SIZE = 128;
+const FILTER_WIDTH = 150; // Width for longest filter label
 
 export const ReadinessTasksTable: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useLocalStorage<string>(
@@ -315,6 +316,7 @@ export const ReadinessTasksTable: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSuperSelect
+                  css={{ width: FILTER_WIDTH }}
                   options={selectOptions}
                   valueOfSelected={selectedPillar}
                   onChange={(value) => setSelectedPillar(value)}
