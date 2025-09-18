@@ -24,8 +24,9 @@ export const getTemperatureIfValid = (
     model
   ) {
     const normalizedModelName = model.toLowerCase();
-    const shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some((m) =>
-      normalizedModelName.startsWith(m)
+    const shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some(
+      //  e.g openai/gpt-5 or gpt-5-xxx
+      (m) => normalizedModelName.startsWith(m) || normalizedModelName.endsWith(m)
     );
     return shouldExcludeTemperature ? {} : { temperature };
   }
