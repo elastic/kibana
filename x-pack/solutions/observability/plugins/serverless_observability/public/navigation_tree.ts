@@ -212,6 +212,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
+            spaceBefore: null,
             iconV2: 'info',
             children: [
               {
@@ -461,12 +462,12 @@ export const createNavigationTree = ({
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [
-                  { link: 'management:dataViews' },
-                  { link: 'management:spaces' },
-                  { link: 'management:objects' },
-                  { link: 'management:filesManagement' },
-                  { link: 'management:reporting' },
-                  { link: 'management:tags' },
+                  { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
+                  { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                  { link: 'management:objects', breadcrumbStatus: 'hidden' },
+                  { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
+                  { link: 'management:reporting', breadcrumbStatus: 'hidden' },
+                  { link: 'management:tags', breadcrumbStatus: 'hidden' },
                 ],
               },
               {
