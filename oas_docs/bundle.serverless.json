@@ -48859,6 +48859,9 @@
                                                         {
                                                           "additionalProperties": false,
                                                           "properties": {
+                                                            "customIdentifier": {
+                                                              "type": "string"
+                                                            },
                                                             "where": {
                                                               "allOf": [
                                                                 {
@@ -52194,6 +52197,9 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "customIdentifier": {
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "allOf": [
                                                             {
@@ -55126,6 +55132,9 @@
                                                         {
                                                           "additionalProperties": false,
                                                           "properties": {
+                                                            "customIdentifier": {
+                                                              "type": "string"
+                                                            },
                                                             "where": {
                                                               "allOf": [
                                                                 {
@@ -58157,6 +58166,9 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "customIdentifier": {
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "allOf": [
                                                             {
@@ -61673,6 +61685,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "customIdentifier": {
+                                              "type": "string"
+                                            },
                                             "where": {
                                               "allOf": [
                                                 {
@@ -64863,6 +64878,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "customIdentifier": {
+                                              "type": "string"
+                                            },
                                             "where": {
                                               "allOf": [
                                                 {
