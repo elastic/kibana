@@ -14,6 +14,7 @@ import { TinesConnector } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { API_MAX_RESULTS, TINES_CONNECTOR_ID } from '../../../common/tines/constants';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('axios');
 (axios as jest.Mocked<typeof axios>).create.mockImplementation(
@@ -149,6 +150,17 @@ describe('TinesConnector', () => {
       const response = await connector.getStories(undefined, connectorUsageCollector);
       expect(response.incompleteResponse).toEqual(true);
     });
+
+    it('should throw a user error in case of 429 status', async () => {
+      const error = new Error('Network Error') as AxiosError;
+      error.status = 429;
+      mockRequest.mockRejectedValue(error);
+      try {
+        await connector.getStories(undefined, connectorUsageCollector);
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
   });
 
   describe('Error handling', () => {
@@ -208,6 +220,17 @@ describe('TinesConnector', () => {
       const response = await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
       expect(response.incompleteResponse).toEqual(true);
     });
+
+    it('should throw a user error in case of 429 status', async () => {
+      const error = new Error('Network Error') as AxiosError;
+      error.status = 429;
+      mockRequest.mockRejectedValue(error);
+      try {
+        await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
   });
 
   describe('runWebhook', () => {
@@ -257,6 +280,23 @@ describe('TinesConnector', () => {
         },
         connectorUsageCollector,
       });
+    });
+
+    it('should throw a user error in case of 429 status', async () => {
+      const error = new Error('Network Error') as AxiosError;
+      error.status = 429;
+      mockRequest.mockRejectedValue(error);
+      try {
+        await connector.runWebhook(
+          {
+            webhookUrl,
+            body: '[]',
+          },
+          connectorUsageCollector
+        );
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 });

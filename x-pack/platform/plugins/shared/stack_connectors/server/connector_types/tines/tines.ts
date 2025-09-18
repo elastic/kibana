@@ -8,8 +8,10 @@
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import type { AxiosError } from 'axios';
+import { HttpStatusCode, type AxiosError } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { createTaskRunError } from '@kbn/task-manager-plugin/server';
 import {
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,
@@ -57,6 +59,15 @@ const webhooksReducer = ({ agents }: TinesWebhooksApiResponse) => ({
     []
   ),
 });
+
+const wrapError = (error: AxiosError) => {
+  return createTaskRunError(
+    error,
+    error.status === HttpStatusCode.TooManyRequests
+      ? TaskErrorSource.USER
+      : TaskErrorSource.FRAMEWORK
+  );
+};
 
 export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets> {
   private urls: {
@@ -113,17 +124,21 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     reducer: (response: R) => T,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<T & { incompleteResponse: boolean }> {
-    const response = await this.request<R>(
-      {
-        ...req,
-        params: { ...req.params, per_page: API_MAX_RESULTS },
-      },
-      connectorUsageCollector
-    );
-    return {
-      ...reducer(response.data),
-      incompleteResponse: response.data.meta.pages > 1,
-    };
+    try {
+      const response = await this.request<R>(
+        {
+          ...req,
+          params: { ...req.params, per_page: API_MAX_RESULTS },
+        },
+        connectorUsageCollector
+      );
+      return {
+        ...reducer(response.data),
+        incompleteResponse: response.data.meta.pages > 1,
+      };
+    } catch (error) {
+      throw wrapError(error);
+    }
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
@@ -168,18 +183,22 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     { webhook, webhookUrl, body }: TinesRunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<TinesRunActionResponse> {
-    if (!webhook && !webhookUrl) {
-      throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
+    try {
+      if (!webhook && !webhookUrl) {
+        throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
+      }
+      const response = await this.request(
+        {
+          url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
+          method: 'post',
+          responseSchema: TinesRunApiResponseSchema,
+          data: body,
+        },
+        connectorUsageCollector
+      );
+      return response.data;
+    } catch (error) {
+      throw wrapError(error);
     }
-    const response = await this.request(
-      {
-        url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
-        method: 'post',
-        responseSchema: TinesRunApiResponseSchema,
-        data: body,
-      },
-      connectorUsageCollector
-    );
-    return response.data;
   }
 }
