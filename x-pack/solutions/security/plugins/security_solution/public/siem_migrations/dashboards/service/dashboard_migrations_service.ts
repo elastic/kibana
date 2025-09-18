@@ -62,7 +62,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
       automaticDashboardsMigration &&
       !siemMigrationsDisabled &&
       licenseService.isEnterprise() &&
-      !this.hasMissingCapabilities('all')
+      !this.hasMissingCapabilities('minimum')
     );
   }
 
