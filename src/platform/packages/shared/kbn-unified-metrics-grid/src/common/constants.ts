@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Full screen classes
 export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsExperienceGridWrapper--fullScreen';
 export const METRICS_GRID_FULL_SCREEN_CLASS = 'metricsExperienceGrid--fullScreen';
 export const METRICS_GRID_RESTRICT_BODY_CLASS = 'metricsExperienceGrid--restrictBody';
+
+// Selection limits
+export const MAX_VALUES_SELECTIONS = 10;
+export const MAX_DIMENSIONS_SELECTIONS = 10;
