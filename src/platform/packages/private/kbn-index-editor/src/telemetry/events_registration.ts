@@ -8,6 +8,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { once } from 'lodash';
 
 /**
  * Event types.
@@ -15,7 +16,11 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 export const INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE = 'index_editor.flyout_opened';
 export const INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE = 'index_editor.save_submitted';
 
-export const registerIndexEditorAnalyticsEvents = (analytics: AnalyticsServiceSetup) => {
+/**
+ * Registers the index editor analytics events.
+ * This function is wrapped in `once` to ensure that the events are registered only once.
+ */
+export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
     eventType: INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE,
     schema: {
@@ -99,4 +104,4 @@ export const registerIndexEditorAnalyticsEvents = (analytics: AnalyticsServiceSe
       },
     },
   });
-};
+});
