@@ -24,28 +24,3 @@ export function createFieldSuggestions(
   const orderedFields = getAllFieldsInOrder(previewRecords, detectedFields);
   return orderedFields.map((fieldName) => ({ name: fieldName }));
 }
-
-/**
- * Sort fields by processor type preference (based on field names)
- */
-export function sortFieldsByProcessorType(
-  fields: FieldSuggestion[],
-  processorType?: string
-): FieldSuggestion[] {
-  if (!processorType) return fields;
-
-  return [...fields].sort((a, b) => {
-    // For grok processor, prioritize message-like fields
-    if (processorType === 'grok') {
-      const messageFields = ['message', 'log', 'event', 'text'];
-      const aIsMessage = messageFields.some((field) => a.name.toLowerCase().includes(field));
-      const bIsMessage = messageFields.some((field) => b.name.toLowerCase().includes(field));
-
-      if (aIsMessage && !bIsMessage) return -1;
-      if (!aIsMessage && bIsMessage) return 1;
-    }
-
-    // Default alphabetical sort
-    return a.name.localeCompare(b.name);
-  });
-}

@@ -7,11 +7,7 @@
 
 import { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  createFieldSuggestions,
-  sortFieldsByProcessorType,
-  type FieldSuggestion,
-} from '../utils/field_suggestions';
+import { createFieldSuggestions, type FieldSuggestion } from '../utils/field_suggestions';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 
@@ -25,16 +21,12 @@ export const useFieldSuggestions = (
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
   return useMemo(() => {
-    let fields = createFieldSuggestions(previewRecords, detectedFields);
-
-    if (processorType) {
-      fields = sortFieldsByProcessorType(fields, processorType);
-    }
+    const fields = createFieldSuggestions(previewRecords, detectedFields);
 
     return fields.map((field) => ({
       label: field.name,
       value: field,
       'data-test-subj': `field-suggestion-${field.name}`,
     }));
-  }, [previewRecords, detectedFields, processorType]);
+  }, [previewRecords, detectedFields]);
 };
