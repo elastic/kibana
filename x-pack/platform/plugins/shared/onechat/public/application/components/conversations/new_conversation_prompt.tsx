@@ -27,6 +27,7 @@ import { appPaths } from '../../utils/app_paths';
 import { ConversationContentWithMargins } from './conversation_grid';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { useConversationGridCenterColumnWidth } from './conversation_grid.styles';
+import { docsPaths } from '../../utils/docs_paths';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -86,8 +87,10 @@ const WelcomeText: React.FC<{}> = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href="#"
+          href={docsPaths.root}
           target="_blank"
+          iconSide="right"
+          iconType="popout"
           size="m"
           aria-label={i18n.translate(
             'xpack.onechat.newConversationPrompt.agentBuilderDocsAriaLabel',
@@ -105,7 +108,13 @@ const WelcomeText: React.FC<{}> = () => {
   );
 };
 
-const cards = [
+const cards: Array<{
+  key: string;
+  title: ReactNode;
+  description: ReactNode;
+  iconType: string;
+  link: { path: string } | { url: string };
+}> = [
   // Create agent
   {
     key: 'createAgent',
@@ -122,7 +131,7 @@ const cards = [
       />
     ),
     iconType: 'plus',
-    path: appPaths.agents.new,
+    link: { path: appPaths.agents.new },
   },
   // Manage agents
   {
@@ -140,7 +149,7 @@ const cards = [
       />
     ),
     iconType: 'controls',
-    path: appPaths.agents.list,
+    link: { path: appPaths.agents.list },
   },
   // Manage tools
   {
@@ -158,7 +167,7 @@ const cards = [
       />
     ),
     iconType: 'wrench',
-    path: appPaths.tools.list,
+    link: { path: appPaths.tools.list },
   },
   // Documentation
   {
@@ -176,8 +185,7 @@ const cards = [
       />
     ),
     iconType: 'documentation',
-    // TODO: Add documentation link
-    path: '',
+    link: { url: docsPaths.root },
   },
 ];
 
@@ -199,7 +207,7 @@ const QuickNavigationCards: React.FC<{}> = () => {
   `;
   return (
     <EuiFlexGroup gutterSize="s">
-      {cards.map(({ key, title, description, iconType, path }) => {
+      {cards.map(({ key, title, description, iconType, link }) => {
         return (
           <EuiFlexItem key={key}>
             <EuiCard
@@ -214,7 +222,7 @@ const QuickNavigationCards: React.FC<{}> = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
-              href={createOnechatUrl(path)}
+              href={'url' in link ? link.url : createOnechatUrl(link.path)}
             />
           </EuiFlexItem>
         );
