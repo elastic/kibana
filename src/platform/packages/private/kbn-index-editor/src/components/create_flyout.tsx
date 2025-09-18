@@ -12,8 +12,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
+import { combineLatest, distinctUntilChanged, first, from, skip, takeUntil } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import { isPlaceholderColumn } from '../utils';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
   const {
@@ -30,6 +31,20 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     indexUpdateService.setIndexName(props.indexName);
   }
   indexUpdateService.setIndexCreated(props.doesIndexExist);
+
+  // Track telemetry event when flyout is opened
+  if (props.doesIndexExist) {
+    combineLatest([indexUpdateService.totalHits$, indexUpdateService.dataTableColumns$])
+      .pipe(first())
+      .subscribe(([docCount, columns]) => {
+        deps.indexEditorTelemetryService.trackFlyoutOpened({
+          docCount,
+          fieldCount: columns.filter((c) => !isPlaceholderColumn(c.name)).length,
+        });
+      });
+  } else {
+    deps.indexEditorTelemetryService.trackFlyoutOpened({ docCount: 0, fieldCount: 0 });
+  }
 
   const LazyFlyoutContent = lazy(async () => {
     const { FlyoutContent } = await import('./flyout_content');

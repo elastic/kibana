@@ -15,6 +15,7 @@ import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from './constants';
+import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export function createEditLookupIndexContentAction(
   dependencies: EditLookupIndexFlyoutDeps
@@ -55,6 +56,13 @@ export function createEditLookupIndexContentAction(
         }
       }
 
+      const indexEditorTelemetryService = new IndexEditorTelemetryService(
+        coreStart.analytics,
+        context.canEditIndex,
+        context.doesIndexExist,
+        context.invocationSource
+      );
+
       const existingIndexName = doesIndexExist ? indexName : null;
 
       const fileManager = new FileUploadManager(
@@ -78,7 +86,16 @@ export function createEditLookupIndexContentAction(
       const storage = new Storage(localStorage);
 
       try {
-        createFlyout({ ...dependencies, indexUpdateService, fileManager, storage }, context);
+        createFlyout(
+          {
+            ...dependencies,
+            indexUpdateService,
+            indexEditorTelemetryService,
+            fileManager,
+            storage,
+          },
+          context
+        );
       } catch (e) {
         return Promise.reject(e);
       }
