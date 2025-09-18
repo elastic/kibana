@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const optionsControlId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.optionsListOpenPopover(optionsControlId);
       await a11y.testAppSnapshot();
-      const rangeControlId = (await dashboardControls.getAllControlIds())[1];
+      const rangeControlId = (await dashboardControls.getAllControlIds())[2];
       await dashboardControls.rangeSliderOpenPopover(rangeControlId);
       await a11y.testAppSnapshot();
     });
