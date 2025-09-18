@@ -64,7 +64,7 @@ export const ACTIONS_INSTALL_LABEL = i18n.translate(
 );
 
 export const COLUMN_ACTIONS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tableColumn.actionsLabel',
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsLabel',
   {
     defaultMessage: 'Actions',
   }

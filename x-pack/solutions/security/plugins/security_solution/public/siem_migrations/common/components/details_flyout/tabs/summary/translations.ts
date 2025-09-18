@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ASSISTANT_COMMENTS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.summaryTab.commentsLabel',
+  'xpack.securitySolution.siemMigrations.common.translationDetails.summaryTab.commentsLabel',
   {
     defaultMessage: 'Assistant comments',
   }
 );
 
 export const ASSISTANT_USERNAME = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.summaryTab.assistantUsername',
+  'xpack.securitySolution.siemMigrations.common.translationDetails.summaryTab.assistantUsername',
   {
     defaultMessage: 'Assistant',
   }
