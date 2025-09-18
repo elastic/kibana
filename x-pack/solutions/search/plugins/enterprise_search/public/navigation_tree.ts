@@ -334,10 +334,12 @@ export const getNavigationTreeDefinition = ({
                               pathNameSerialized.startsWith(
                                 prepend('/app/elasticsearch/index_management/indices')
                               ) ||
-                              pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
+                              pathNameSerialized.startsWith(
+                                prepend('/app/management/data/index_management')
+                              )
                             );
                           },
-                          link: 'elasticsearchIndexManagement',
+                          link: 'management:index_management',
                         },
                         { link: 'management:index_lifecycle_management' },
                         { link: 'management:snapshot_restore' },
@@ -477,6 +479,16 @@ export const getNavigationTreeDefinition = ({
                         },
                         {
                           children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:agentBuilder' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
+                            defaultMessage: 'AI',
+                          }),
+                        },
+                        {
+                          children: [
                             { link: 'management:users' },
                             { link: 'management:roles' },
                             { link: 'management:api_keys' },
@@ -508,9 +520,6 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:filesManagement' },
                             { link: 'management:objects' },
                             { link: 'management:tags' },
-                            { link: 'management:genAiSettings' },
-                            { link: 'management:aiAssistantManagementSelection' },
-                            { link: 'management:agentBuilder' },
                             { link: 'management:search_sessions' },
                             { link: 'management:spaces' },
                             { link: 'management:settings' },
