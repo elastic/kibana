@@ -9,7 +9,6 @@ import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
-import { useIntegrations } from '../hooks/use_integrations';
 import { EmptyPage } from '../modules/empty_page/empty_page';
 import { useIndicatorsTotalCount } from '../modules/indicators/hooks/use_total_count';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
@@ -24,9 +23,10 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
   const { isLoading: indicatorsTotalCountLoading, count: indicatorsTotalCount } =
     useIndicatorsTotalCount();
 
-  const { isLoading: integrationLoading, data: installedTIIntegrations } = useIntegrations({
-    enabled: !indicatorsTotalCountLoading,
-  });
+  const { isLoading: integrationLoading, data: installedTIIntegrations } = {
+    isLoading: false,
+    data: ['data'],
+  };
 
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
