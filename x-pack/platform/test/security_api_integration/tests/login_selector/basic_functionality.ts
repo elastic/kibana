@@ -23,7 +23,7 @@ import {
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
-import { SessionValue } from '@kbn/security-plugin/server/session_management';
+import type { SessionValue } from '@kbn/security-plugin/server/session_management';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

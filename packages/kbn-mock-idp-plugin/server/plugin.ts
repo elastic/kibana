@@ -27,7 +27,6 @@ import {
   MOCK_IDP_LOGOUT_PATH,
 } from '@kbn/mock-idp-utils';
 
-
 export interface PluginSetupDependencies {
   cloud: CloudSetup;
 }
