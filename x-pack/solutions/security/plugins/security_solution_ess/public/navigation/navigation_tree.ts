@@ -384,6 +384,7 @@ const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           { link: 'management:objects' },
           { link: 'management:tags' },
           { link: 'management:aiAssistantManagementSelection' },
+          { link: 'management:genAiSettings' },
           { link: 'management:search_sessions' }, // not in the sheet // doesn't show up?
           { link: 'management:spaces' },
           { link: 'maps' },
@@ -391,6 +392,13 @@ const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           { link: 'graph' },
           { link: 'canvas' },
           { link: 'management:settings' },
+        ],
+      },
+      {
+        title: i18nStrings.stackManagement.stack.title,
+        children: [
+          { link: 'management:license_management' },
+          { link: 'management:upgrade_assistant' },
         ],
       },
     ],
