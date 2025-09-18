@@ -17,7 +17,7 @@ export const transformFindMaintenanceWindowResponse = (
     page: result.page,
     per_page: result.perPage,
     total: result.total,
-    data: result.data.map((maintenanceWindow: MaintenanceWindow) =>
+    maintenanceWindows: result.data.map((maintenanceWindow: MaintenanceWindow) =>
       transformInternalMaintenanceWindowToExternalV1(maintenanceWindow)
     ),
   };

@@ -88,7 +88,7 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({});
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        data: mockMaintenanceWindows.data.map((data) =>
+        maintenanceWindows: mockMaintenanceWindows.data.map((data) =>
           transformInternalMaintenanceWindowToExternalV1(data)
         ),
         total: 2,
@@ -156,7 +156,7 @@ describe('findMaintenanceWindowsRoute', () => {
 
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        data: mockMaintenanceWindows.data.map((data) =>
+        maintenanceWindows: mockMaintenanceWindows.data.map((data) =>
           transformInternalMaintenanceWindowToExternalV1(data)
         ),
         total: 2,

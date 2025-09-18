@@ -92,9 +92,9 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body.data.length).to.eql(2);
+              expect(response.body.maintenanceWindows.length).to.eql(2);
 
-              const maintenanceWindow = response.body.data[0];
+              const maintenanceWindow = response.body.maintenanceWindows[0];
 
               expect(maintenanceWindow.title).to.eql('test-maintenance-window');
               expect(maintenanceWindow.status).to.eql('upcoming');
@@ -155,8 +155,8 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
         .expect(200);
 
       expect(response.statusCode).to.eql(200);
-      expect(response.body.data.length).to.eql(1);
-      expect(response.body.data[0].title).to.eql('foobar');
+      expect(response.body.maintenanceWindows.length).to.eql(1);
+      expect(response.body.maintenanceWindows[0].title).to.eql('foobar');
     });
 
     it('should find maintenance window by creator', async () => {
@@ -196,10 +196,10 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
         .expect(200);
 
       expect(response.statusCode).to.eql(200);
-      expect(response.body.data.length).to.eql(2);
+      expect(response.body.maintenanceWindows.length).to.eql(2);
 
-      expect(response.body.data[0].created_by).to.eql('elastic');
-      expect(response.body.data[1].created_by).to.eql('elastic');
+      expect(response.body.maintenanceWindows[0].created_by).to.eql('elastic');
+      expect(response.body.maintenanceWindows[1].created_by).to.eql('elastic');
     });
 
     it('should find maintenance window by status', async () => {
@@ -247,8 +247,8 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
         .expect(200);
 
       expect(findArchivedResponse.statusCode).to.eql(200);
-      expect(findArchivedResponse.body.data.length).to.eql(1);
-      expect(findArchivedResponse.body.data[0].status).to.eql('archived');
+      expect(findArchivedResponse.body.maintenanceWindows.length).to.eql(1);
+      expect(findArchivedResponse.body.maintenanceWindows[0].status).to.eql('archived');
 
       const findUpcomingResponse = await supertest
         .get(`${getUrlPrefix('space1')}/api/maintenance_window/_find?status=upcoming`)
@@ -256,8 +256,8 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
         .expect(200);
 
       expect(findUpcomingResponse.statusCode).to.eql(200);
-      expect(findUpcomingResponse.body.data.length).to.eql(1);
-      expect(findUpcomingResponse.body.data[0].status).to.eql('upcoming');
+      expect(findUpcomingResponse.body.maintenanceWindows.length).to.eql(1);
+      expect(findUpcomingResponse.body.maintenanceWindows[0].status).to.eql('upcoming');
     });
 
     it('should find maintenance window with pagination', async () => {
@@ -293,7 +293,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
         .expect(200);
 
       expect(response.body.total).to.eql(2);
-      expect(response.body.data.length).to.eql(1);
+      expect(response.body.maintenanceWindows.length).to.eql(1);
     });
   });
 }

@@ -50,5 +50,5 @@ export const findMaintenanceWindowsResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),
-  data: schema.arrayOf(maintenanceWindowResponseSchemaV1),
+  maintenanceWindows: schema.arrayOf(maintenanceWindowResponseSchemaV1),
 });
