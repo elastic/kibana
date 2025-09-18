@@ -44,7 +44,7 @@ export const isRetryableEsClientError = (e: EsErrors.ElasticsearchClientError): 
 const MAX_BUCKETS_LIMIT = 65535;
 export async function getAllSpacesWithCases(savedObjectsClient: SavedObjectsClientContract) {
   // This is one way to get all spaces that we want for case analytics purposes.
-  // The advantage of this approach is that only spaces are selected that actually contain cases.
+  // The advantage of this approach is that only spaces that actually contain cases are selected .
   // In turn that means that no unnecessary indices are created.
   // The disadvantage is that the query is an aggregation across the entire cluster and could be
   // slow in case there are many shards and a lot of cases.
