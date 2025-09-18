@@ -732,6 +732,44 @@ export class ComposerQuery {
     return this;
   }
 
+  public inlineParam(name: string): this {
+    const value = this.params.get(name);
+    if (value === undefined) {
+      throw new Error(`Parameter "${name}" does not exist in the query.`);
+    }
+
+    Walker.replaceAll(this.ast, { type: 'literal', literalType: 'param', value: name }, (node) => {
+      const param = node as ESQLNamedParamLiteral;
+      if (param.paramKind === '??') {
+        throw new Error('not implemented');
+      } else {
+        switch (typeof value) {
+          case 'string': {
+            return synth.str(value);
+          }
+          case 'number': {
+            return synth.num(value);
+          }
+          case 'boolean': {
+            return synth.bool(value);
+          }
+        }
+      }
+
+      throw new Error(`Cannot inline parameter "${name}" of unsupported type.`);
+    });
+
+    this.params.delete(name);
+    return this;
+  }
+
+  public inlineParams(): this {
+    for (const name of [...this.params.keys()]) {
+      this.inlineParam(name);
+    }
+    return this;
+  }
+
   /**
    * Prints the query to a string in a specified format.
    *

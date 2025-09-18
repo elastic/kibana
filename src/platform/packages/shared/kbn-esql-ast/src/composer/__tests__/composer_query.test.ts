@@ -540,6 +540,70 @@ describe('high-level helpers', () => {
   });
 });
 
+describe('.inlineParams()', () => {
+  test('can inline single parameter', () => {
+    const param1 = 5.5;
+
+    const query = esql`FROM kibana_ecommerce_index`.pipe`WHERE foo > ${esql.par(param1)}`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > ?p0',
+      params: [{ p0: param1 }],
+    });
+
+    query.inlineParams();
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 5.5',
+      params: [],
+    });
+
+    expect(query.getParams()).toEqual({});
+  });
+
+  test('can inline multiple parameters', () => {
+    const param1 = 5.5;
+    const param2 = 'asdf';
+    const param3 = 123;
+
+    const query = esql`FROM kibana_ecommerce_index`.pipe`WHERE foo > ${esql.par(
+      param1
+    )} AND bar < ${esql.par(param2)}`.pipe`EVAL a = ${esql.par(param3)}`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > ?p0 AND bar < ?p1 | EVAL a = ?p2',
+      params: [{ p0: param1 }, { p1: param2 }, { p2: param3 }],
+    });
+
+    query.inlineParams();
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 5.5 AND bar < "asdf" | EVAL a = 123',
+      params: [],
+    });
+
+    expect(query.getParams()).toEqual({});
+  });
+
+  test('no-op when no parameters', () => {
+    const query = esql`FROM kibana_ecommerce_index`.pipe`WHERE foo > 42`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 42',
+      params: [],
+    });
+    expect(query.getParams()).toEqual({});
+
+    query.inlineParams();
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 42',
+      params: [],
+    });
+    expect(query.getParams()).toEqual({});
+  });
+});
+
 describe('.toRequest()', () => {
   test('can return query as "request" object', () => {
     const query = esql`
