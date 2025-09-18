@@ -11,12 +11,14 @@ import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-import React, { useImperativeHandle, useMemo, useRef } from 'react';
+import React, { useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
+import type { HasType } from '@kbn/presentation-publishing';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
+import { useReportingItem } from './use_reporting_item';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -52,6 +54,7 @@ export const EmbeddableRenderer = <
   hidePanelChrome?: boolean;
 }) => {
   const phaseTracker = useRef(new PhaseTracker());
+  const [embeddableApi, setEmbeddableApi] = useState<Api>();
 
   const componentPromise = useMemo(
     () => {
@@ -100,6 +103,7 @@ export const EmbeddableRenderer = <
 
         try {
           const { api, Component } = await buildEmbeddable();
+          setEmbeddableApi(api);
           onApiAvailable?.(api);
           return React.forwardRef<typeof api>((_, ref) => {
             // expose the api into the imperative handle
@@ -135,11 +139,21 @@ export const EmbeddableRenderer = <
     [type]
   );
 
+  const { reportingAttributes, reportingRef } = useReportingItem<SerializedState, Api>(api);
+
   return (
-    <PresentationPanel<Api, {}>
-      hidePanelChrome={hidePanelChrome}
-      {...panelProps}
-      Component={componentPromise}
-    />
+    <div
+      ref={(ref) => (reportingRef.current = ref as HTMLElement)}
+      {...(embeddableApi &&
+      ['image', 'lens', 'links'].includes((embeddableApi as unknown as HasType).type)
+        ? reportingAttributes
+        : {})}
+    >
+      <PresentationPanel<Api, {}>
+        hidePanelChrome={hidePanelChrome}
+        {...panelProps}
+        Component={componentPromise}
+      />
+    </div>
   );
 };
