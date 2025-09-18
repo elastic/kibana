@@ -9,7 +9,7 @@
 
 import type { StackFrame } from '@kbn/workflows';
 import crypto from 'crypto';
-import { buildStepPath } from '../build_step_path/build_step_path';
+
 /**
  * Generates a unique identifier for a step execution by combining execution ID, path, and step ID,
  * then hashing the result with SHA-256.
@@ -25,12 +25,13 @@ import { buildStepPath } from '../build_step_path/build_step_path';
  *
  * @example
  * ```typescript
+ * const stackFrames = [{ stepId: 'foreachstep', subScopeId: '1' }];
  * const stepExecId = buildStepExecutionId(
- *   'exec-123',
- *   'some-connector-step',
- *   [{ stepId: 'foreachstep', subScopeId: '1' }]
+ *   'workflow-exec-abc123',
+ *   'connector-send-email',
+ *   stackFrames
  * );
- * // Returns: "a1b2c3d4e5f6..." (SHA-256 hash)
+ * // Returns: "7f8a9b2c3d4e5f6a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5"
  * ```
  */
 export function buildStepExecutionId(
@@ -38,7 +39,9 @@ export function buildStepExecutionId(
   stepId: string,
   stackFrames: StackFrame[]
 ): string {
-  const stepPath = buildStepPath(stackFrames);
+  const stepPath = stackFrames
+    .map((frame) => [frame.stepId, ...frame.nestedScopes.map((s) => s.scopeId || '')])
+    .flat();
   const generatedId = [executionId, ...stepPath, stepId].join('_');
   const hashedId = crypto.createHash('sha256').update(generatedId).digest('hex');
   return hashedId;
