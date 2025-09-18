@@ -62,7 +62,6 @@ main_scan() {
     else
       echo "Scanning for compromised JS file hashes..."
       local found_any_hash=false
-      # Hash all JS files using find and xargs to avoid argument list too long errors
       if ! find . -type f -name "*.js" -print -quit | read; then
         echo "No JS files found."
       else
@@ -77,7 +76,7 @@ main_scan() {
               found_any_hash=true
             fi
           done
-        done < <(sha256sum "${JS_FILES[@]}")
+        done < <(find . -type f -name "*.js" -print0 | xargs -0 sha256sum)
         if [ "$found_any_hash" = false ]; then
           echo "No compromised JS file found."
         fi
