@@ -27,6 +27,7 @@ import {
   enrichStream,
   shouldComposeTree,
   filterStreamsByQuery,
+  filterCollapsedStreamRows,
 } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
@@ -82,25 +83,7 @@ export function StreamsTreeTable({
 
   // Helper: flatten tree, skipping children of collapsed nodes
   const flattenTreeWithCollapse = React.useCallback(
-    (rows: ReturnType<typeof buildStreamRows>) => {
-      if (!shouldComposeTree(sortField, searchQuery)) return rows;
-      const result: typeof rows = [];
-      const collapsedSet = collapsed;
-      for (const row of rows) {
-        // If any ancestor is collapsed, skip this row
-        const segments = row.stream.name.split('.');
-        let skip = false;
-        for (let i = 1; i < segments.length; ++i) {
-          const ancestor = segments.slice(0, i).join('.');
-          if (collapsedSet.has(ancestor)) {
-            skip = true;
-            break;
-          }
-        }
-        if (!skip) result.push(row);
-      }
-      return result;
-    },
+    (rows: TableRow[]) => filterCollapsedStreamRows(rows, collapsed, sortField, searchQuery),
     [collapsed, sortField, searchQuery]
   );
 

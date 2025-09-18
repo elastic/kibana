@@ -71,6 +71,31 @@ export function filterStreamsByQuery(
   return Array.from(resultSet.values());
 }
 
+// Filters out rows that are children of collapsed streams
+export function filterCollapsedStreamRows(
+  rows: TableRow[],
+  collapsedStreams: Set<string>,
+  sortField: SortableField,
+  searchQuery: string
+) {
+  if (!shouldComposeTree(sortField, searchQuery)) return rows;
+  const result: TableRow[] = [];
+  for (const row of rows) {
+    // If any ancestor is collapsed, skip this row
+    const segments = row.stream.name.split('.');
+    let skip = false;
+    for (let i = 1; i < segments.length; ++i) {
+      const ancestor = segments.slice(0, i).join('.');
+      if (collapsedStreams.has(ancestor)) {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) result.push(row);
+  }
+  return result;
+}
+
 export function buildStreamRows(
   enrichedStreams: EnrichedStream[],
   sortField: SortableField,
