@@ -238,7 +238,6 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should disable cancel command for Microsoft Defender Endpoint when feature flag is disabled', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       // @ts-expect-error - we do not need to specify whole object for testing purposes
       mockedExperimentalFeaturesService.get.mockReturnValue({
         microsoftDefenderEndpointCancelEnabled: false,
