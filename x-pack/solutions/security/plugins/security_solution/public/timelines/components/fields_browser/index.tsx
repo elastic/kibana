@@ -13,7 +13,6 @@ import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/response-ops-alerts-fields-browser/types';
-import { browserFieldsManager } from '../../../data_view_manager/utils/security_browser_fields_manager';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -114,7 +113,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             // Fetch the updated list of fields
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
             if (newDataViewPickerEnabled) {
-              browserFieldsManager.removeFromCache(selectedDataViewId);
               dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
@@ -176,7 +174,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             startTransaction({ name: FIELD_BROWSER_ACTIONS.FIELD_DELETED });
 
             if (newDataViewPickerEnabled) {
-              browserFieldsManager.removeFromCache(selectedDataViewId);
               dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
