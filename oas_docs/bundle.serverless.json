@@ -43566,7 +43566,7 @@
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
-                    "data": {
+                    "maintenanceWindows": {
                       "items": {
                         "additionalProperties": false,
                         "properties": {
@@ -43741,7 +43741,7 @@
                     "page",
                     "per_page",
                     "total",
-                    "data"
+                    "maintenanceWindows"
                   ],
                   "type": "object"
                 }
