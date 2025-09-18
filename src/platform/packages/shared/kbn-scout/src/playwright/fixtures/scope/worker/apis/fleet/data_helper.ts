@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface AgentPolicyCreateOptions {
+export interface AgentPolicyCreateBody {
   advanced_settings?: Record<string, any>;
   agent_features?: Array<{ enabled: boolean; name: string }>;
   agentless?: {
@@ -41,7 +41,6 @@ export interface AgentPolicyCreateOptions {
   };
   monitoring_output_id?: string;
   monitoring_pprof_enabled?: boolean;
-  namespace?: string;
   overrides?: Record<string, any>;
   required_versions?: Array<{ percentage?: number; version?: string }>;
   space_ids?: string[];
@@ -49,7 +48,7 @@ export interface AgentPolicyCreateOptions {
   unenroll_timeout?: number;
 }
 
-export interface FleetOutputCreateOptions {
+export interface FleetOutputBody {
   allow_edit?: string[];
   ca_sha256?: string;
   ca_trusted_fingerprint?: string;
@@ -86,5 +85,31 @@ export interface FleetOutputCreateOptions {
     key?: string;
     verification_mode?: string;
   };
-  type: string;
+}
+
+export interface FleetServerHostCreateBody {
+  id?: string;
+  is_default?: boolean;
+  is_internal?: boolean;
+  is_preconfigured?: boolean;
+  proxy_id?: string;
+  secrets?: {
+    ssl?: {
+      es_key?: {
+        id?: string;
+      };
+      key?: {
+        id?: string;
+      };
+    };
+  };
+  ssl?: {
+    certificate?: string;
+    certificate_authorities?: string[];
+    client_auth?: string;
+    es_certificate?: string;
+    es_certificate_authorities?: string[];
+    es_key?: string;
+    key?: string;
+  };
 }

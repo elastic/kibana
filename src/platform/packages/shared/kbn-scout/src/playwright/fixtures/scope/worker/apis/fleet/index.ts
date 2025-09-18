@@ -9,7 +9,11 @@
 
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
-import type { AgentPolicyCreateOptions, FleetOutputCreateOptions } from './data_helper';
+import type {
+  AgentPolicyCreateBody,
+  FleetOutputBody,
+  FleetServerHostCreateBody,
+} from './data_helper';
 
 export interface FleetApiService {
   integration: {
@@ -17,14 +21,32 @@ export interface FleetApiService {
     delete: (name: string) => Promise<void>;
   };
   agent_policies: {
-    create: (name: string, options?: AgentPolicyCreateOptions) => Promise<void>;
-    delete: (name: string) => Promise<void>;
+    create: (
+      policyName: string,
+      policyNamespace: string,
+      params?: AgentPolicyCreateBody
+    ) => Promise<void>;
+    delete: (id: string) => Promise<void>;
   };
   outputs: {
     getOutputs: () => Promise<any>;
-    getOutput: (outputId: string) => Promise<any>;
-    create: (name: string, hosts: string[], options?: FleetOutputCreateOptions) => Promise<any>;
+    getOutput: (id: string) => Promise<any>;
+    create: (
+      outputName: string,
+      outputHosts: string[],
+      outputType: string,
+      params?: FleetOutputBody
+    ) => Promise<any>;
     delete: (outputId: string) => Promise<void>;
+  };
+  server_hosts: {
+    get: () => Promise<any>;
+    create: (
+      hostName: string,
+      hostUrls: string[],
+      params?: FleetServerHostCreateBody
+    ) => Promise<any>;
+    delete: (id: string) => Promise<any>;
   };
 }
 
@@ -60,43 +82,46 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
       },
     },
     agent_policies: {
-      create: async (name: string, options?: AgentPolicyCreateOptions) => {
-        await measurePerformanceAsync(log, `fleetApi.agent_policies.create [${name}]`, async () => {
-          await kbnClient.request({
-            method: 'POST',
-            path: `/api/fleet/agent_policies`,
-            headers: {
-              'kbn-xsrf': 'true',
-              'Content-Type': 'application/json',
-            },
-            body: {
-              name,
-              ...options,
-            },
-          });
-        });
-      },
-
-      delete: async (agentPolicyId: string, force: boolean = true) => {
+      create: async (
+        policyName: string,
+        policyNamespace: string,
+        params?: AgentPolicyCreateBody
+      ) => {
         await measurePerformanceAsync(
           log,
-          `fleetApi.agent_policies.delete [${agentPolicyId}]`,
+          `fleetApi.agent_policies.create [${policyName}]`,
           async () => {
             await kbnClient.request({
               method: 'POST',
-              path: `/api/fleet/agent_policies/delete`,
+              path: `/api/fleet/agent_policies`,
               headers: {
-                'kbn-xsrf': 'true',
                 'Content-Type': 'application/json',
               },
               body: {
-                agentPolicyId,
-                force,
+                name: policyName,
+                namespace: policyNamespace,
+                ...params,
               },
-              ignoreErrors: [400],
             });
           }
         );
+      },
+
+      delete: async (id: string, isForceSet?: boolean) => {
+        await measurePerformanceAsync(log, `fleetApi.agent_policies.delete [${id}]`, async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: `/api/fleet/agent_policies/delete`,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: {
+              agentPolicyId: id,
+              ...(typeof isForceSet !== 'undefined' ? { force: isForceSet } : {}),
+            },
+            ignoreErrors: [400],
+          });
+        });
       },
     },
     outputs: {
@@ -120,28 +145,79 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           }
         );
       },
-      create: async (name: string, hosts: string[], options?: FleetOutputCreateOptions) => {
-        return await measurePerformanceAsync(log, `fleetApi.outputs.create [${name}]`, async () => {
-          return await kbnClient.request({
-            method: 'POST',
-            path: `/api/fleet/outputs`,
-            headers: {
-              'kbn-xsrf': 'true',
-              'Content-Type': 'application/json',
-            },
-            body: { name, hosts, ...options },
-          });
-        });
+      create: async (
+        outputName: string,
+        outputHosts: string[],
+        outputType: string,
+        params?: FleetOutputBody
+      ) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.outputs.create [${outputName}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/outputs`,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: { name: outputName, hosts: outputHosts, type: outputType, ...params },
+            });
+          }
+        );
       },
       delete: async (outputId: string) => {
         await measurePerformanceAsync(log, `fleetApi.outputs.delete [${outputId}]`, async () => {
           await kbnClient.request({
             method: 'DELETE',
             path: `/api/fleet/outputs/${outputId}`,
-            headers: { 'kbn-xsrf': 'true' },
             ignoreErrors: [400, 404],
           });
         });
+      },
+    },
+    server_hosts: {
+      get: async () => {
+        await measurePerformanceAsync(log, `fleetApi.server_hosts.get`, async () => {
+          await kbnClient.request({
+            method: 'GET',
+            path: `/api/fleet/fleet_server_hosts`,
+          });
+        });
+      },
+      create: async (hostName: string, hostUrls: string[], params?: FleetServerHostCreateBody) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.server_hosts.create [${hostName}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/fleet_server_hosts`,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: {
+                name: hostName,
+                host_urls: hostUrls,
+                ...params,
+              },
+            });
+          }
+        );
+      },
+
+      delete: async (fleetServerHostId: string) => {
+        await measurePerformanceAsync(
+          log,
+          `fleetApi.server_hosts.delete [${fleetServerHostId}]`,
+          async () => {
+            await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/fleet/fleet_server_hosts/${fleetServerHostId}`,
+              ignoreErrors: [400, 404],
+            });
+          }
+        );
       },
     },
   };
