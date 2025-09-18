@@ -63,75 +63,79 @@ export function IdleRoutingStreamEntry({
         }
       `}
     >
-      <EuiFlexGroup
-        justifyContent="flexStart"
-        gutterSize="xs"
-        alignItems="center"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            className="streamsDragHandle"
-            color="transparent"
-            paddingSize="s"
-            data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
-            {...draggableProvided.dragHandleProps}
-            aria-label={i18n.translate(
-              'xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel',
-              { defaultMessage: 'Drag Handle' }
-            )}
-          >
-            <EuiIcon type="grabOmnidirectional" />
-          </EuiPanel>
-        </EuiFlexItem>
-        {!isRoutingEnabled(routingRule.status) && (
-          <EuiBadge color="hollow">
-            {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
-              defaultMessage: 'Disabled',
-            })}
-          </EuiBadge>
-        )}
-        <EuiLink
-          href={router.link('/{key}/management/{tab}', {
-            path: { key: routingRule.destination, tab: 'partitioning' },
-          })}
-          data-test-subj="streamsAppRoutingStreamEntryButton"
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup
+          justifyContent="flexStart"
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
         >
-          <EuiText size="s">{routingRule.destination}</EuiText>
-        </EuiLink>
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              className="streamsDragHandle"
+              color="transparent"
+              paddingSize="s"
+              data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
+              {...draggableProvided.dragHandleProps}
+              aria-label={i18n.translate(
+                'xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel',
+                { defaultMessage: 'Drag Handle' }
+              )}
+            >
+              <EuiIcon type="grabOmnidirectional" />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiLink
+            href={router.link('/{key}/management/{tab}', {
+              path: { key: routingRule.destination, tab: 'partitioning' },
+            })}
+            data-test-subj="streamsAppRoutingStreamEntryButton"
+          >
+            <EuiText size="s">{routingRule.destination}</EuiText>
+          </EuiLink>
+
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+          >
+            {!isRoutingEnabled(routingRule.status) && (
+              <EuiBadge color="subdued">
+                {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
+                  defaultMessage: 'Disabled',
+                })}
+              </EuiBadge>
+            )}
+            {childrenCount > 0 && (
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
+                  defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
+                  values: { childrenCount },
+                })}
+              </EuiBadge>
+            )}
+            <EuiButtonIcon
+              data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
+              iconType="pencil"
+              disabled={!isEditingEnabled}
+              onClick={() => onEditIconClick(routingRule.id)}
+              aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+                defaultMessage: 'Edit',
+              })}
+            />
+          </EuiFlexGroup>
+        </EuiFlexGroup>
         <EuiFlexItem
           className={css`
             overflow: hidden;
+            padding-left: ${euiTheme.size.s};
           `}
         >
           <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
             <ConditionMessage condition={routingRule.where} />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-        >
-          {childrenCount > 0 && (
-            <EuiBadge color="hollow">
-              {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
-                defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
-                values: { childrenCount },
-              })}
-            </EuiBadge>
-          )}
-          <EuiButtonIcon
-            data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
-            iconType="pencil"
-            disabled={!isEditingEnabled}
-            onClick={() => onEditIconClick(routingRule.id)}
-            aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
-              defaultMessage: 'Edit',
-            })}
-          />
-        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );
