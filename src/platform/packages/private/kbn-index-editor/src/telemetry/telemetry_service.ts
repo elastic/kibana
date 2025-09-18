@@ -62,7 +62,6 @@ export class IndexEditorTelemetryService {
     outcome: 'success' | 'error';
     latency: number;
   }) {
-    console.log('latency', eventData.latency);
     this.reportEvent(INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE, {
       flyout_mode: this._flyoutMode,
       pending_rows_added: eventData.pendingRowsAdded,
