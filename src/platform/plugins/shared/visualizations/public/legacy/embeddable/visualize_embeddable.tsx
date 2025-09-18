@@ -327,6 +327,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dirty = true;
     }
 
+    if (this.vis.description && this.domNode) {
+      this.domNode.setAttribute('data-description', this.vis.description);
+    }
+
     return dirty;
   }
 
@@ -366,6 +370,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   hasInspector = () => Boolean(this.getInspectorAdapters());
 
   onContainerLoading = () => {
+    this.renderComplete.dispatchInProgress();
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
@@ -383,6 +388,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   onContainerRender = () => {
+    this.renderComplete.dispatchComplete();
     this.updateOutput({
       ...this.getOutput(),
       rendered: true,
@@ -393,6 +399,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.abortController) {
       this.abortController.abort();
     }
+    this.renderComplete.dispatchError();
 
     if (isFallbackDataView(this.vis.data.indexPattern)) {
       error = new Error(
@@ -512,7 +519,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         .subscribe()
     );
 
+    if (this.vis.description) {
+      div.setAttribute('data-description', this.vis.description);
+    }
+
     div.setAttribute('data-test-subj', 'visualizationLoader');
+    div.setAttribute('data-shared-item', '');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));

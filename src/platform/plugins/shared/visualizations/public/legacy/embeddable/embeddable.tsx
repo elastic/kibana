@@ -11,7 +11,8 @@ import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, skip } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type {
   EmbeddableError,
@@ -57,6 +58,8 @@ export abstract class Embeddable<
 
   private readonly initializationFinished = new Rx.Subject<void>();
 
+  protected renderComplete = new RenderCompleteDispatcher();
+
   protected destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput) {
@@ -80,6 +83,13 @@ export abstract class Embeddable<
 
     this.inputSubject.next(this.input);
     this.outputSubject.next(this.output);
+
+    this.getOutput$()
+      .pipe(
+        map(({ title }) => title || ''),
+        distinctUntilChanged()
+      )
+      .subscribe((title) => this.renderComplete.setTitle(title));
 
     setTimeout(() => {
       // after the constructor has finished, we initialize this embeddable if it isn't delayed
@@ -175,6 +185,9 @@ export abstract class Embeddable<
   }
 
   public render(el: HTMLElement): TNode | void {
+    this.renderComplete.setEl(el);
+    this.renderComplete.setTitle(this.output.title || '');
+
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
