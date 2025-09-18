@@ -51,7 +51,7 @@ export class WorkflowContextManager {
       steps: {},
     };
 
-    const currentNode = this.workflowExecutionRuntime.getCurrentNode();
+    const currentNode = this.workflowExecutionRuntime.getCurrentNode()!;
     const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);

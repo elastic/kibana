@@ -90,9 +90,9 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
-  public getCurrentNode(): GraphNode {
+  public getCurrentNode(): GraphNode | null {
     if (!this.workflowExecution.currentNodeId) {
-      return null as any; // TODO: better handling
+      return null;
     }
 
     return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
@@ -101,7 +101,7 @@ export class WorkflowExecutionRuntimeManager {
   public getCurrentStepExecutionId(): string {
     return buildStepExecutionId(
       this.workflowExecution.id,
-      this.getCurrentNode().stepId,
+      this.getCurrentNode()!.stepId,
       this.workflowExecution.scopeStack
     );
   }
@@ -136,7 +136,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public enterScope(subScopeId?: string): void {
-    const currentNode = this.getCurrentNode();
+    const currentNode = this.getCurrentNode()!;
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
         nodeId: currentNode.id,
@@ -176,7 +176,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async setCurrentStepResult(result: RunStepResult): Promise<void> {
-    const currentNode = this.getCurrentNode();
+    const currentNode = this.getCurrentNode()!;
 
     if (result.error) {
       this.setWorkflowError(result.error);
@@ -196,7 +196,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
-    const stepId = this.getCurrentNode().stepId;
+    const stepId = this.getCurrentNode()!.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
       stepId,
@@ -205,8 +205,8 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async startStep(): Promise<void> {
-    const currentNode = this.getCurrentNode();
-    const stepId = this.getCurrentNode().stepId;
+    const currentNode = this.getCurrentNode()!;
+    const stepId = currentNode.stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}`,
@@ -241,7 +241,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async finishStep(): Promise<void> {
-    const stepId = this.getCurrentNode().stepId;
+    const stepId = this.getCurrentNode()!.stepId;
     const stepExecutionId = this.getCurrentStepExecutionId();
     const startedStepExecution = this.workflowExecutionState.getStepExecution(stepExecutionId);
 
@@ -283,7 +283,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async failStep(error: Error | string): Promise<void> {
-    const stepId = this.getCurrentNode().stepId;
+    const stepId = this.getCurrentNode()!.stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}.fail`,
@@ -327,7 +327,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public async setWaitStep(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const stepId = this.getCurrentNode().stepId;
+    const stepId = this.getCurrentNode()!.stepId;
     return withSpan(
       {
         name: `workflow.step.${stepId}.delayed`,
@@ -584,14 +584,15 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private logStepStart(stepId: string, stepExecutionId: string): void {
+    const currentNode = this.getCurrentNode()!;
     this.workflowLogger?.logInfo(`Step '${stepId}' started`, {
       workflow: { step_id: stepId, step_execution_id: stepExecutionId },
       event: { action: 'step-start', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'start'],
       labels: {
-        step_type: this.getCurrentNode().stepType,
-        connector_type: this.getCurrentNode().stepType,
-        step_name: this.getCurrentNode().stepId,
+        step_type: currentNode.stepType,
+        connector_type: currentNode.stepType,
+        step_name: currentNode.stepId,
         step_id: stepId,
       },
     });
@@ -599,7 +600,8 @@ export class WorkflowExecutionRuntimeManager {
 
   private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
-    const stepId = this.getCurrentNode().stepId;
+    const currentNode = this.getCurrentNode()!;
+    const stepId = currentNode.stepId;
     this.workflowLogger?.logInfo(`Step '${stepId}' ${isSuccess ? 'completed' : 'failed'}`, {
       workflow: { step_id: stepId, step_execution_id: step.id },
       event: {
@@ -609,10 +611,10 @@ export class WorkflowExecutionRuntimeManager {
       },
       tags: ['workflow', 'step', 'complete'],
       labels: {
-        step_type: this.getCurrentNode().stepType,
-        connector_type: this.getCurrentNode().stepType,
-        step_name: this.getCurrentNode().stepId,
-        step_id: this.getCurrentNode().stepId,
+        step_type: currentNode.stepType,
+        connector_type: currentNode.stepType,
+        step_name: currentNode.stepId,
+        step_id: currentNode.stepId,
         execution_time_ms: step.executionTimeMs,
       },
       ...(step.error && {
@@ -632,9 +634,9 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private logStepFail(stepExecutionId: string, error: Error | string): void {
-    const node = this.getCurrentNode();
-    const stepName = node.stepId;
-    const stepType = node.stepType || 'unknown';
+    const currentNode = this.getCurrentNode()!;
+    const stepName = currentNode.stepId;
+    const stepType = currentNode.stepType || 'unknown';
     const _error = typeof error === 'string' ? Error(error) : error;
 
     // Include error message in the log message
@@ -642,14 +644,14 @@ export class WorkflowExecutionRuntimeManager {
     const message = `Step '${stepName}' failed: ${errorMsg}`;
 
     this.workflowLogger?.logError(message, _error, {
-      workflow: { step_id: node.stepId, step_execution_id: stepExecutionId },
+      workflow: { step_id: currentNode.stepId, step_execution_id: stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'fail'],
       labels: {
         step_type: stepType,
         connector_type: stepType,
         step_name: stepName,
-        step_id: node.stepId,
+        step_id: currentNode.stepId,
       },
     });
   }
