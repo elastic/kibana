@@ -7,7 +7,7 @@
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 /**
- * Adds custom fields to the cases SO.
+ * Adds eventId field to the comments SO.
  */
 export const modelVersion1: SavedObjectsModelVersion = {
   changes: [

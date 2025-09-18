@@ -23,7 +23,7 @@ import {
   tableDefaults,
 } from '@kbn/securitysolution-data-table';
 import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
-import React, { useMemo, useEffect, useContext, type FC, useState } from 'react';
+import React, { useMemo, useEffect, useContext, type FC, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ThemeContext } from 'styled-components';
@@ -166,11 +166,16 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     [controlColumns, data, itemsPerPage, loadingEventIds, theme]
   );
 
+  const getFieldSpec = useCallback(
+    (fieldName: string) => dataView.fields.getByName(fieldName)?.toSpec(),
+    [dataView.fields]
+  );
+
   return (
     <DataTableComponent
       browserFields={browserFields}
       data={data}
-      getFieldSpec={(fieldName: string) => dataView.fields.getByName(fieldName)?.toSpec()}
+      getFieldSpec={getFieldSpec}
       id={EVENTS_TABLE_FOR_CASES_ID}
       totalItems={data.length}
       unitCountText={TABLE_UNIT}

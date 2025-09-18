@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
-import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const searchEvents = async (
   signal: AbortSignal | undefined,
-  dataView: DataView | undefined,
+  dataView: DataView,
   parameters: {
     eventIds: string[];
     sort: SortColumnTable[];
@@ -57,9 +55,10 @@ export const searchEvents = async (
 
   return (
     response?.rawResponse?.hits?.hits?.map((row) => {
-      const ecs = structuredClone(EcsFlat) as unknown as EcsSecurityExtension;
-      ecs._id = row?._id as string;
-      ecs._index = row._index as string;
+      const ecs = {
+        _id: row?._id as string,
+        _index: row._index as string,
+      };
 
       return {
         _id: row._id as string,
