@@ -135,7 +135,7 @@ export const buildDatasetState = (
   }
 
   const reference = (references ?? []).find(
-    (ref) => ref.name === `indexpattern-datasource-${layerId}`
+    (ref) => ref.name === `indexpattern-datasource-layer-${layerId}`
   );
   if (reference) {
     if (adHocDataViews?.[reference.id]) {

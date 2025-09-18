@@ -128,7 +128,8 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, 'layer_0');
+  const layerId = visualization.layerId;
+  const dataset = buildDatasetState(layer, adHocDataViews, references, layerId);
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 

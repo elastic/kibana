@@ -1,0 +1,31 @@
+{
+  "title": "Metric - simple",
+  "description": "Simple Lens Metric",
+  "type": "metric",
+  "dataset": {
+    "type": "dataView",
+    "name": "90943e30-9a47-11e8-b64d-95841ca0b247"
+  },
+  "sampling": 1,
+  "ignore_global_filters": "undefined",
+  "metric": {
+    "operation": "count",
+    "empty_as_null": false,
+    "background_chart": {
+      "type": "trend",
+      "goal_value": {
+        "operation": "max",
+        "field": "bytes"
+      },
+      "direction": "undefined"
+    },
+    "color": {
+      "type": "static",
+      "color": "#FFf"
+    }
+  },
+  "secondary_metric": {
+    "operation": "average",
+    "field": "bytes"
+  }
+}
