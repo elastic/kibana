@@ -66,7 +66,6 @@ export const ExitEditButton = ({
     <EuiButton
       size="s"
       color="text"
-      iconType="pencil"
       onClick={switchToViewMode}
       isDisabled={isResetting}
       css={{
