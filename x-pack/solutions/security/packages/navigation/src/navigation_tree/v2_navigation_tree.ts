@@ -10,6 +10,7 @@ import { defaultNavigationTree } from '../../navigation_tree';
 
 import { SecurityPageName } from '../..';
 import { securityLink } from '../../links';
+import { iconBulb } from './v2_icons/bulb';
 
 export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   defaultNavigationTree.dashboards({ sideNavVersion: 'v2' }),
@@ -33,6 +34,7 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   defaultNavigationTree.investigations({ sideNavVersion: 'v2' }),
   {
     id: SecurityPageName.cloudSecurityPostureFindings,
+    iconV2: 'bug',
     link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     sideNavVersion: 'v2',
   },
@@ -44,6 +46,7 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   },
   {
     id: SecurityPageName.threatIntelligence,
+    iconV2: iconBulb,
     link: securityLink(SecurityPageName.threatIntelligence),
     sideNavVersion: 'v2',
   },

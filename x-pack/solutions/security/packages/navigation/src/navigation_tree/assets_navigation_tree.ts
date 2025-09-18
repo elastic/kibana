@@ -19,6 +19,7 @@ export const createAssetsNavigationTree = (
   { sideNavVersion }: { sideNavVersion?: SideNavVersion } = { sideNavVersion: 'v1' }
 ): NodeDefinition => ({
   id: SecurityGroupName.assets,
+  iconV2: 'folderClosed',
   title: SecurityLinkGroup[SecurityGroupName.assets].title,
   renderAs: 'panelOpener',
   sideNavVersion,

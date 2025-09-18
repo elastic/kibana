@@ -17,7 +17,7 @@ export const createRulesNavigationTree = (
 ): NodeDefinition => ({
   id: SecurityGroupName.rules,
   title: SecurityLinkGroup[SecurityGroupName.rules].title,
-  iconV2: 'list',
+  iconV2: 'securitySignal',
   renderAs: 'panelOpener',
   sideNavVersion,
   children: [
