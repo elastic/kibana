@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Alerts - Group 1', () => {
+  describe('Alerts - Group 8', () => {
     describe('alerts', () => {
       before(async () => {
         await setupSpacesAndUsers(getService);
@@ -19,7 +19,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
-      loadTestFile(require.resolve('./backfill'));
+      loadTestFile(require.resolve('./gap'));
     });
   });
 }
