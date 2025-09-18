@@ -97,7 +97,7 @@ export const useAlertsTableConfiguration = ({
           } else {
             configurationStorage.set(id, serializedConfig);
           }
-          return newConfig;
+          return parsedConfig;
         } catch {
           // TODO add toast?
         }

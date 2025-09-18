@@ -26,10 +26,10 @@ const insert = ({
   const isInDefaultConfig = defaultIndex >= 0;
   const newColumn = defaultColumns[defaultIndex];
 
-  // If the column isn't shown, but it's part of the default config
-  // insert into the same position as in the default config
+  // If the column isn't shown, but it's part of the default config insert into the same position
+  // as in the default config and with the same default config (i.e. display name)
   if (isInDefaultConfig) {
-    return [...columns.slice(0, defaultIndex), newColumn, ...columns.slice(defaultIndex)];
+    return [...columns.slice(0, defaultIndex), { ...newColumn }, ...columns.slice(defaultIndex)];
   }
 
   if (columns.length === 0) {

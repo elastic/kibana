@@ -219,17 +219,13 @@ const AlertsTableContent = typedForwardRef(
       notifications,
     });
 
-    // Keep a stable reference to the default columns to allow resetting them
-    const [defaultColumns] = useState(
-      applyColumnsConfiguration({
-        columns: columnsProp ?? defaultAlertsTableColumns,
-        configuredColumns: configuration?.columns,
-      })
-    );
     const [columns, setColumns] = useControllableState({
       prop: columnsProp,
       onChange: onColumnsChange,
-      defaultValue: defaultColumns,
+      defaultValue: applyColumnsConfiguration({
+        columns: columnsProp ?? defaultAlertsTableColumns,
+        configuredColumns: configuration?.columns,
+      }),
     });
     const [defaultVisibleColumns] = useState(
       configuration?.visibleColumns ?? columns.map((c) => c.id)
@@ -271,7 +267,7 @@ const AlertsTableContent = typedForwardRef(
       useColumns({
         columns,
         setColumns,
-        defaultColumns,
+        defaultColumns: defaultAlertsTableColumns,
         visibleColumns,
         setVisibleColumns,
         defaultVisibleColumns,
