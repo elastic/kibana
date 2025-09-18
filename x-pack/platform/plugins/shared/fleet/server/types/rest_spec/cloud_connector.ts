@@ -92,6 +92,9 @@ export const DeleteCloudConnectorRequestSchema = {
   params: schema.object({
     cloudConnectorId: schema.string(),
   }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const DeleteCloudConnectorResponseSchema = schema.object({

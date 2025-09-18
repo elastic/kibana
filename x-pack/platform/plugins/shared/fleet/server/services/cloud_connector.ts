@@ -47,7 +47,11 @@ export interface CloudConnectorServiceInterface {
     cloudConnectorId: string,
     updates: Partial<Pick<CreateCloudConnectorRequest, 'name' | 'vars'>>
   ): Promise<CloudConnectorResponse>;
-  delete(soClient: SavedObjectsClientContract, cloudConnectorId: string): Promise<{ id: string }>;
+  delete(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string,
+    force?: boolean
+  ): Promise<{ id: string }>;
 }
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
@@ -271,12 +275,13 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   async delete(
     soClient: SavedObjectsClientContract,
-    cloudConnectorId: string
+    cloudConnectorId: string,
+    force: boolean = false
   ): Promise<{ id: string }> {
     const logger = this.getLogger('delete');
 
     try {
-      logger.info(`Deleting cloud connector ${cloudConnectorId}`);
+      logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
 
       // First, get the cloud connector to check packagePolicyCount
       const cloudConnector = await soClient.get<CloudConnectorSOAttributes>(
@@ -284,11 +289,18 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudConnectorId
       );
 
-      // Check if cloud connector is still in use by package policies
-      if (cloudConnector.attributes.packagePolicyCount > 0) {
+      // Check if cloud connector is still in use by package policies (unless force is true)
+      if (!force && cloudConnector.attributes.packagePolicyCount > 0) {
         const errorMessage = `Cannot delete cloud connector "${cloudConnector.attributes.name}" as it is being used by ${cloudConnector.attributes.packagePolicyCount} package policies`;
         logger.error(errorMessage);
         throw new CloudConnectorDeleteError(errorMessage);
+      }
+
+      // Log a warning if force deleting a connector that's still in use
+      if (force && cloudConnector.attributes.packagePolicyCount > 0) {
+        logger.warn(
+          `Force deleting cloud connector "${cloudConnector.attributes.name}" which is still being used by ${cloudConnector.attributes.packagePolicyCount} package policies`
+        );
       }
 
       // Delete the cloud connector
@@ -301,6 +313,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       };
     } catch (error) {
       logger.error('Failed to delete cloud connector', error.message);
+
+      // Re-throw CloudConnectorDeleteError as-is to preserve the original error message
+      if (error instanceof CloudConnectorDeleteError) {
+        throw error;
+      }
 
       throw new CloudConnectorDeleteError(
         `Failed to delete cloud connector: ${error.message}\n${error.stack}`

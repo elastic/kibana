@@ -145,18 +145,19 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
 
 export const deleteCloudConnectorHandler: FleetRequestHandler<
   { cloudConnectorId: string },
-  undefined
+  { force?: boolean }
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
   const cloudConnectorId = request.params.cloudConnectorId;
+  const force = request.query.force || false;
   const logger = appContextService
     .getLogger()
     .get('CloudConnectorService deleteCloudConnectorHandler');
 
   try {
-    logger.info(`Deleting cloud connector ${cloudConnectorId}`);
-    const result = await cloudConnectorService.delete(internalSoClient, cloudConnectorId);
+    logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
+    const result = await cloudConnectorService.delete(internalSoClient, cloudConnectorId, force);
     logger.info(`Successfully deleted cloud connector ${cloudConnectorId}`);
     return response.ok({ body: result });
   } catch (error) {

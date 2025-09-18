@@ -2910,18 +2910,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
     const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+    const agentlessCloudConnectorsEnabled = agentPolicy.agentless?.cloud_connectors?.enabled;
 
-    if (!cloudProvider) {
-      logger.debug('No cloud provider specified for cloud connector');
+    if (!agentlessCloudConnectorsEnabled) {
+      logger.debug('No agentless cloud connectors enabled for cloud provider');
       return;
     }
+
     const cloudConnectorVars = extractPackagePolicyVars(
       cloudProvider,
       enrichedPackagePolicy,
       logger
     );
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
-      logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
       if (enrichedPackagePolicy?.cloud_connector_id) {
         const existingCloudConnector = await soClient.get<CloudConnectorResponse>(
           CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -2944,6 +2945,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new CloudConnectorUpdateError(`${e}`);
         }
       } else {
+        logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
           const cloudConnector = await cloudConnectorService.create(soClient, {
             name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,

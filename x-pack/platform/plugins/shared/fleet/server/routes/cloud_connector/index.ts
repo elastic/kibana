@@ -213,7 +213,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Delete cloud connector',
+      summary: 'Delete cloud connector (supports force deletion)',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
       },
