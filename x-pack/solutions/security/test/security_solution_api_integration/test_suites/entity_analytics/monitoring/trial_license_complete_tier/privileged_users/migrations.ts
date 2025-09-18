@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACES = ['default', 'space1'];
 
-  describe('@ess @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
     beforeEach(async () => {
       await asyncForEach(SPACES, async (space) => {
         if (space !== 'default') {
