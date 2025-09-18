@@ -19,7 +19,7 @@ import { EngineComponentResourceEnum } from '../../../../../../common/api/entity
 import {
   defaultState,
   stateSchemaByVersion,
-  type LatestTaskStateSchema as EntityStoreFieldRetentionTaskState,
+  type LatestTaskStateSchema as EntityStoreSnapshotTaskState,
 } from './state';
 import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constants';
 import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_snapshot_index';
@@ -178,12 +178,13 @@ export async function runTask({
   context: RunContext;
   esClientGetter: () => Promise<ElasticsearchClient>;
 }): Promise<{
-  state: EntityStoreFieldRetentionTaskState;
+  state: EntityStoreSnapshotTaskState;
 }> {
-  const state = context.taskInstance.state as EntityStoreFieldRetentionTaskState;
-  const taskId = context.taskInstance.id;
+  const state = context.taskInstance.state as EntityStoreSnapshotTaskState;
+  const taskId: string = context.taskInstance.id;
+  const abort: AbortController = context.abortController;
   const msg = entityStoreTaskLogMessageFactory(taskId);
-  const esClient = await esClientGetter();
+  const esClient: ElasticsearchClient = await esClientGetter();
   try {
     const taskStartTime = moment().utc();
     const snapshotDate = rewindToYesterday(taskStartTime.toDate());
@@ -218,48 +219,57 @@ export async function runTask({
     });
 
     logger.info(msg(`reindexing entities to ${snapshotIndex}`));
-    const snapshotReindexResponse = await esClient.reindex({
-      source: {
-        index: [getEntitiesIndexName(entityType, namespace)],
+    const snapshotReindexResponse = await esClient.reindex(
+      {
+        source: {
+          index: [getEntitiesIndexName(entityType, namespace)],
+        },
+        dest: {
+          index: snapshotIndex,
+        },
+        conflicts: 'proceed',
       },
-      dest: {
-        index: snapshotIndex,
-      },
-      conflicts: 'proceed',
-    });
+      { signal: abort.signal }
+    );
     logger.info(
       msg(`reindexed to ${snapshotIndex}: ${prettyReindexResponse(snapshotReindexResponse)}`)
     );
 
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
     logger.info(msg(`removing old entries from ${resetIndex}`));
-    const cleanResetResponse = await esClient.deleteByQuery({
-      index: resetIndex,
-      query: {
-        match_all: {},
+    const cleanResetResponse = await esClient.deleteByQuery(
+      {
+        index: resetIndex,
+        query: {
+          match_all: {},
+        },
+        refresh: true,
       },
-      refresh: true,
-    });
+      { signal: abort.signal }
+    );
     logger.info(msg(`removed ${cleanResetResponse.deleted} old entries from ${resetIndex}`));
 
     logger.info(msg(`reindexing entities to ${resetIndex}`));
-    const resetReindexResponse = await esClient.reindex({
-      source: {
-        index: [getEntitiesIndexName(entityType, namespace)],
-      },
-      dest: {
-        index: resetIndex,
-      },
-      conflicts: 'proceed',
-      script: {
-        source: removeAllFieldsAndResetTimestamp,
-        lang: 'painless',
-        params: {
-          entityType,
-          timestampNow: new Date().toISOString(),
+    const resetReindexResponse = await esClient.reindex(
+      {
+        source: {
+          index: [getEntitiesIndexName(entityType, namespace)],
+        },
+        dest: {
+          index: resetIndex,
+        },
+        conflicts: 'proceed',
+        script: {
+          source: removeAllFieldsAndResetTimestamp,
+          lang: 'painless',
+          params: {
+            entityType,
+            timestampNow: new Date().toISOString(),
+          },
         },
       },
-    });
+      { signal: abort.signal }
+    );
     logger.info(msg(`reindexed to ${resetIndex}: ${prettyReindexResponse(resetReindexResponse)}`));
 
     const taskCompletionTime = moment().utc().toISOString();
