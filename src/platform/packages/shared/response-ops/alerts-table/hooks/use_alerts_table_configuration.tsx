@@ -23,6 +23,11 @@ export interface UseAlertsTableConfigurationParams {
   notifications: NotificationsStart;
 }
 
+/**
+ * Manages the alerts table configuration persistence.
+ * Loads, validates, and saves table settings to storage, returning a `React.useState`-compatible tuple.
+ * Handles invalid configurations by resetting and notifying the user.
+ */
 export const useAlertsTableConfiguration = ({
   id,
   configurationStorage,

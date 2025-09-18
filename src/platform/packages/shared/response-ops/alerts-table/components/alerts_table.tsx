@@ -223,7 +223,7 @@ const AlertsTableContent = typedForwardRef(
     const [defaultColumns] = useState(
       applyColumnsConfiguration({
         columns: columnsProp ?? defaultAlertsTableColumns,
-        columnsOverrides: configuration?.columns,
+        configuredColumns: configuration?.columns,
       })
     );
     const [columns, setColumns] = useControllableState({

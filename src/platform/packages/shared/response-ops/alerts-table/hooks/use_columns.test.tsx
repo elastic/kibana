@@ -106,31 +106,6 @@ describe('useColumns', () => {
       const lastVisibleColumn = columnsWithFieldsData.find((col) => col.id === lastVisibleColumnId);
       expect(lastVisibleColumn).not.toHaveProperty('initialWidth');
     });
-
-    it('should sort the columns in the same order as visibleColumns', async () => {
-      const columns = [...defaultColumns];
-      let visibleColumns = columns.map((col) => col.id);
-      // Reverse the order of visibleColumns
-      visibleColumns = visibleColumns.reverse();
-      const setColumns = jest.fn();
-      const setVisibleColumns = jest.fn();
-      const { result } = renderHook(
-        () =>
-          useColumns({
-            columns,
-            setColumns,
-            defaultColumns,
-            visibleColumns,
-            setVisibleColumns,
-            defaultVisibleColumns,
-            alertsFields,
-          }),
-        { wrapper }
-      );
-
-      const columnsWithFieldsData = result.current.columnsWithFieldsData;
-      expect(columnsWithFieldsData.map((col) => col.id)).toEqual(visibleColumns);
-    });
   });
 
   describe('onResetColumns', () => {

@@ -12,7 +12,7 @@ import type { AlertsTableConfiguration } from '../schemas/alerts_table_configura
 
 interface ApplyColumnsConfigurationParams {
   columns: EuiDataGridColumn[];
-  columnsOverrides?: AlertsTableConfiguration['columns'];
+  configuredColumns?: AlertsTableConfiguration['columns'];
   visibleColumns?: AlertsTableConfiguration['visibleColumns'];
 }
 
@@ -21,14 +21,14 @@ interface ApplyColumnsConfigurationParams {
  */
 export const applyColumnsConfiguration = ({
   columns,
-  columnsOverrides,
+  configuredColumns,
 }: ApplyColumnsConfigurationParams) => {
-  if (!columnsOverrides?.length) {
-    // No overrides to apply, return the original columns
+  if (!configuredColumns?.length) {
+    // User didn't customize the columns, return the original ones
     return columns;
   }
-  // Apply overrides to configured columns
-  return columnsOverrides.map((columnOverrides) => {
+  // Enrich the configured columns with the properties from the original columns
+  return configuredColumns.map((columnOverrides) => {
     const column = columns.find((o) => o.id === columnOverrides.id) ?? {};
     return { ...column, ...columnOverrides };
   });
