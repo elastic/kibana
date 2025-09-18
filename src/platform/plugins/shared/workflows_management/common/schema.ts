@@ -798,6 +798,12 @@ export function convertDynamicConnectorsToContracts(
 // Global cache for all connectors (static + generated + dynamic)
 let allConnectorsCache: ConnectorContract[] | null = null;
 
+// Global cache for dynamic connector types (with instances)
+let dynamicConnectorTypesCache: Record<string, any> | null = null;
+
+// Track the last processed connector types to avoid unnecessary re-processing
+let lastProcessedConnectorTypesHash: string | null = null;
+
 /**
  * Add dynamic connectors to the global cache
  * Call this when dynamic connector data is fetched from the API
@@ -825,6 +831,18 @@ export function addDynamicConnectorsToCache(
     }
   >
 ) {
+  // Create a simple hash of the connector types to detect changes
+  const currentHash = JSON.stringify(Object.keys(dynamicConnectorTypes).sort());
+  
+  // Skip processing if the connector types haven't changed
+  if (lastProcessedConnectorTypesHash === currentHash && dynamicConnectorTypesCache !== null) {
+    return;
+  }
+  
+  // Store the raw dynamic connector types for completion provider access
+  dynamicConnectorTypesCache = dynamicConnectorTypes;
+  lastProcessedConnectorTypesHash = currentHash;
+
   // Get base connectors if cache is empty
   if (allConnectorsCache === null) {
     const elasticsearchConnectors = generateElasticsearchConnectors();
@@ -843,8 +861,15 @@ export function addDynamicConnectorsToCache(
 
   if (newDynamicConnectors.length > 0) {
     allConnectorsCache.push(...newDynamicConnectors);
-    console.debug(`Added ${newDynamicConnectors.length} new dynamic connectors to cache`);
   }
+}
+
+/**
+ * Get cached dynamic connector types (with instances)
+ * Used by completion provider to access connector instances
+ */
+export function getCachedDynamicConnectorTypes(): Record<string, any> | null {
+  return dynamicConnectorTypesCache;
 }
 
 // Combine static connectors with dynamic Elasticsearch and Kibana connectors
@@ -926,7 +951,7 @@ export function getAllConnectorsWithDynamic(
       (c) => !staticConnectorTypes.has(c.type)
     );
 
-    console.debug(`Added ${uniqueDynamicConnectors.length} dynamic connectors to schema`);
+    // Connectors added successfully without logging noise
     return [...staticAndGeneratedConnectors, ...uniqueDynamicConnectors];
   } catch (error) {
     console.error('Error processing dynamic connectors, falling back to static connectors:', error);

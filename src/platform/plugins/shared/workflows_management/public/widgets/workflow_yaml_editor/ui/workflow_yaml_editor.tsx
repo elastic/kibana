@@ -28,6 +28,8 @@ import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
 import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public';
 import { getWorkflowZodSchemaLoose, addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../hooks/use_available_connectors';
+import { getCurrentPath } from '../../../../common/lib/yaml_utils';
+import { getConnectorTypeFromContext, getConnectorInstancesForType } from '../lib/get_completion_item_provider';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -318,18 +320,6 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {
-        // Handle base connector type extraction properly
-        let baseConnectorType: string;
-        if (connectorType.startsWith('.')) {
-          // For connectors like ".jira", remove the leading dot
-          baseConnectorType = connectorType.substring(1);
-        } else if (connectorType.includes('.')) {
-          // For connectors like "thehive.createAlert", use base name
-          baseConnectorType = connectorType.split('.')[0];
-        } else {
-          // For simple connectors like "slack", use as-is
-          baseConnectorType = connectorType;
-        }
 
         css += `
         /* Strategy 1: Target by aria-label content - be more specific to avoid conflicts */
@@ -351,6 +341,20 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
         /* Strategy 2: Target by detail text (fallback) - be more specific */
         .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before {
           background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
+        }
+        
+        /* Strategy 3: Target connector-id suggestions by detail text containing connector type */
+        .monaco-list .monaco-list-row[data-detail*="${connectorType}"] .suggest-icon:before,
+        .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before,
+        .monaco-list .monaco-list-row:has(.suggest-detail:contains("${connectorType}")) .suggest-icon:before {
+          background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
+          background-size: 16px 16px !important;
+          background-repeat: no-repeat !important;
+          background-position: center !important;
+          content: " " !important;
+          width: 16px !important;
+          height: 16px !important;
+          display: block !important;
         }
       `;
       }
@@ -593,15 +597,32 @@ export const WorkflowYAMLEditor = ({
   const { data: connectorsData } = useAvailableConnectors();
 
   // Add dynamic connectors to cache when data is fetched
+  // Use a ref to track the last processed connector types to avoid unnecessary re-processing
+  const lastConnectorTypesRef = useRef<Record<string, any> | null>(null);
+  
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
-      addDynamicConnectorsToCache(connectorsData.connectorTypes);
-      // Inject dynamic CSS for connector icons
-      // Note: We don't await this to avoid blocking the UI
-      // The icon functions don't actually use the services, so we pass null
-      injectDynamicConnectorIcons(connectorsData.connectorTypes, null);
-      // Inject dynamic CSS for shadow icons (::after pseudo-elements)
-      injectDynamicShadowIcons(connectorsData.connectorTypes, null);
+      // Only process if the connector types have actually changed
+      const currentConnectorTypes = connectorsData.connectorTypes;
+      const lastConnectorTypes = lastConnectorTypesRef.current;
+      
+      // Simple check: compare the number of connector types and their keys
+      const hasChanged = !lastConnectorTypes || 
+        Object.keys(currentConnectorTypes).length !== Object.keys(lastConnectorTypes).length ||
+        !Object.keys(currentConnectorTypes).every(key => key in lastConnectorTypes);
+      
+      if (hasChanged) {
+        addDynamicConnectorsToCache(currentConnectorTypes);
+        // Inject dynamic CSS for connector icons
+        // Note: We don't await this to avoid blocking the UI
+        // The icon functions don't actually use the services, so we pass null
+        injectDynamicConnectorIcons(currentConnectorTypes, null);
+        // Inject dynamic CSS for shadow icons (::after pseudo-elements)
+        injectDynamicShadowIcons(currentConnectorTypes, null);
+        
+        // Update the ref to track this version
+        lastConnectorTypesRef.current = currentConnectorTypes;
+      }
     }
   }, [connectorsData?.connectorTypes]);
   const workflowJsonSchema = useWorkflowJsonSchema();
@@ -632,6 +653,9 @@ export const WorkflowYAMLEditor = ({
   const triggerTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const connectorTypeDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+    
+  const connectorIdShadowDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const unifiedProvidersRef = useRef<{
     hover: any;
@@ -725,6 +749,11 @@ export const WorkflowYAMLEditor = ({
     if (connectorTypeDecorationCollectionRef.current) {
       connectorTypeDecorationCollectionRef.current.clear();
     }
+    
+    if (connectorIdShadowDecorationCollectionRef.current) {
+      connectorIdShadowDecorationCollectionRef.current.clear();
+    }
+    
     // Also clear step execution decorations
     if (unifiedProvidersRef.current?.stepExecution) {
       unifiedProvidersRef.current.stepExecution.dispose();
@@ -755,7 +784,7 @@ export const WorkflowYAMLEditor = ({
             // Let the decoration hooks handle updates naturally
           } else {
             // If not typing - continue with the original logic (always clear)
-            clearAllDecorations();
+            // clearAllDecorations();
           }
 
           setYamlDocument(parsedDocument);
@@ -795,11 +824,13 @@ export const WorkflowYAMLEditor = ({
       glyphMargin: true,
     });
 
+
     // Add custom keybinding for Cmd+I (Mac) / Ctrl+I (Windows) to trigger suggestions
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
       // Trigger the suggest widget manually
       editor.getAction('editor.action.triggerSuggest')?.run();
     });
+
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
@@ -958,6 +989,80 @@ export const WorkflowYAMLEditor = ({
       }, 50);
     }
   }, [readOnly, isEditorMounted, changeSideEffects]);
+
+  // Connector-id shadow text decorations effect
+  useEffect(() => {
+    if (!isEditorMounted || !editorRef.current || !yamlDocument) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const editor = editorRef.current!;
+      const model = editor.getModel();
+      if (!model) return;
+
+      // Clear existing connector-id shadow decorations
+      if (connectorIdShadowDecorationCollectionRef.current) {
+        connectorIdShadowDecorationCollectionRef.current.clear();
+        connectorIdShadowDecorationCollectionRef.current = null;
+      }
+
+      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+      // Find all connector-id lines in the document
+      const totalLines = model.getLineCount();
+      for (let lineNumber = 1; lineNumber <= totalLines; lineNumber++) {
+        const line = model.getLineContent(lineNumber);
+        const connectorIdMatch = line.match(/^\s*connector-id:\s*([a-zA-Z0-9-_]+)\s*$/);
+        
+        if (connectorIdMatch) {
+          const connectorId = connectorIdMatch[1];
+          
+          // Get the connector type for this step by finding the step context
+          try {
+            const absolutePosition = model.getOffsetAt({ lineNumber, column: 1 });
+            const path = getCurrentPath(yamlDocument, absolutePosition);
+            const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, { lineNumber, column: 1 });
+            
+            if (connectorType && connectorsData?.connectorTypes) {
+              const instances = getConnectorInstancesForType(connectorType, connectorsData.connectorTypes);
+              const instance = instances.find(i => i.id === connectorId);
+              
+              if (instance) {
+                // Add shadow text decoration at the end of the line
+                decorations.push({
+                  range: new monaco.Range(lineNumber, line.length + 1, lineNumber, line.length + 1),
+                  options: {
+                    after: {
+                      content: ` # ${instance.name}`,
+                      inlineClassName: 'connector-id-shadow-text',
+                    },
+                  },
+                });
+                console.log('Creating decoration:', {
+                  lineNumber,
+                  line,
+                  lineLength: line.length,
+                  endColumn: line.length + 1,
+                  content: ` # ${instance.name}`
+                });
+              }
+              
+            }
+          } catch (error) {
+            // Ignore errors in shadow text generation
+          }
+        }
+      }
+
+      if (decorations.length > 0) {
+        connectorIdShadowDecorationCollectionRef.current =
+          editor.createDecorationsCollection(decorations);
+      }
+    }, 100); // Small delay to avoid multiple rapid executions
+
+    return () => clearTimeout(timeoutId);
+  }, [isEditorMounted, yamlDocument, connectorsData?.connectorTypes]);
 
   // Step execution provider - managed through provider architecture
   useEffect(() => {
@@ -1611,6 +1716,14 @@ export const WorkflowYAMLEditor = ({
           background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zLjI5MyA5LjI5MyA0IDEwbC0xIDRoMTBsLTEtNCAuNzA3LS43MDdhMSAxIDAgMCAxIC4yNjMuNDY0bDEgNEExIDEgMCAwIDEgMTMgMTVIM2ExIDEgMCAwIDEtLjk3LTEuMjQybDEtNGExIDEgMCAwIDEgLjI2My0uNDY1Wk04IDljMyAwIDQgMSA0IDEgLjcwNy0uNzA3LjcwNi0uNzA4LjcwNi0uNzA4bC0uMDAxLS4wMDEtLjAwMi0uMDAyLS4wMDUtLjAwNS0uMDEtLjAxYTEuNzk4IDEuNzk4IDAgMCAwLS4xMDEtLjA4OSAyLjkwNyAyLjkwNyAwIDAgMC0uMjM1LS4xNzMgNC42NiA0LjY2IDAgMCAwLS44NTYtLjQ0IDcuMTEgNy4xMSAwIDAgMC0xLjEzNi0uMzQyIDQgNCAwIDEgMC00LjcyIDAgNy4xMSA3LjExIDAgMCAwLTEuMTM2LjM0MiA0LjY2IDQuNjYgMCAwIDAtLjg1Ni40NCAyLjkwOSAyLjkwOSAwIDAgMC0uMzM1LjI2MmwtLjAxMS4wMS0uMDA1LjAwNS0uMDAyLjAwMmgtLjAwMVMzLjI5MyA5LjI5NCA0IDEwYzAgMCAxLTEgNC0xWm0wLTFhMyAzIDAgMSAwIDAtNiAzIDMgMCAwIDAgMCA2WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPgo=");
           background-size: contain;
           background-repeat: no-repeat;
+        }
+
+        /* Connector-id shadow text styling */
+        .connector-id-shadow-text {
+          color: red !important;
+          background-color: yellow !important;
+          font-size: 16px !important;
+          font-weight: bold !important;
         }
 
         /* After content icons */
