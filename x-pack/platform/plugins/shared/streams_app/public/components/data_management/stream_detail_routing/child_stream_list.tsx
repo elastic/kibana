@@ -103,7 +103,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       direction="column"
       gutterSize="none"
       className={css`
-        display: flex;
+        overflow: auto;
       `}
     >
       <CurrentStreamEntry definition={definition} />
