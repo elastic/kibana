@@ -44,6 +44,9 @@ const OTHER_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
 const AGENTS_TITLE = i18n.translate('xpack.serverlessSearch.nav.agents', {
   defaultMessage: 'Agents',
 });
+const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.title', {
+  defaultMessage: 'AI',
+});
 
 export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
   function isAvailable<T>(appId: string, content: T): T[] {
@@ -279,22 +282,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               {
                 children: [
                   {
-                    breadcrumbStatus: 'hidden',
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return (
                         pathNameSerialized.startsWith(
                           prepend('/app/elasticsearch/index_management/indices')
-                        ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
+                        ) ||
+                        pathNameSerialized.startsWith(
+                          prepend('/app/management/data/index_management')
+                        )
                       );
                     },
-                    link: 'elasticsearchIndexManagement',
+                    link: 'management:index_management',
                   },
                   { link: 'management:index_lifecycle_management' },
                   { link: 'management:snapshot_restore' },
                   { link: 'management:transform' },
                   { link: 'management:rollup_jobs' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
-                  { link: 'management:data_usage' },
+                  { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
                   defaultMessage: 'Indices, data streams and roll ups',
@@ -391,7 +396,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
                   },
                   {
-                    title: 'AI',
+                    title: AI_TITLE,
                     children: [
                       { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
                       { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
@@ -467,7 +472,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   },
                   {
                     cloudLink: 'userAndRoles',
-                    title: MANAGE_ORG_MEMBERS_TITLE,
+                    title: i18n.translate(
+                      'xpack.serverlessSearch.nav.adminAndSettings.org.members.title',
+                      {
+                        defaultMessage: 'Members',
+                      }
+                    ),
                   },
                 ],
               },
@@ -491,14 +501,21 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     link: 'searchInferenceEndpoints',
                     breadcrumbStatus: 'hidden',
                   },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
                 ],
               },
               {
-                id: 'settings_data',
-                title: i18n.translate('xpack.serverlessSearch.nav.settings.data', {
-                  defaultMessage: 'Data',
-                }),
-                children: [{ link: 'management:data_usage', breadcrumbStatus: 'hidden' }],
+                id: 'settings_ai',
+                title: AI_TITLE,
+                children: [
+                  { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+                  { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
+                  {
+                    link: 'management:observabilityAiAssistantManagement',
+                    breadcrumbStatus: 'hidden',
+                  },
+                ],
               },
               {
                 id: 'settings_content',
@@ -513,16 +530,14 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ],
               },
               {
-                title: OTHER_TITLE,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                  { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
+                title: i18n.translate(
+                  'xpack.serverlessSearch.nav.adminAndSettings.settings.title',
                   {
-                    link: 'management:observabilityAiAssistantManagement',
-                    breadcrumbStatus: 'hidden',
-                  },
-                ],
+                    defaultMessage: 'Settings',
+                  }
+                ),
+                breadcrumbStatus: 'hidden',
+                children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
               },
             ],
           },
