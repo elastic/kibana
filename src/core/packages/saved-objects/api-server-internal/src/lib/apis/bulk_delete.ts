@@ -53,7 +53,7 @@ export interface PerformBulkDeleteParams<T = unknown> {
 export function isGetGetResult<TDocument = unknown>(
   item: estypes.MgetResponseItem<TDocument> | undefined
 ): item is estypes.GetGetResult<TDocument> {
-  return item !== undefined && (item as estypes.MgetMultiGetError).error === undefined;
+  return (item as estypes.MgetMultiGetError).error === undefined;
 }
 
 export const performBulkDelete = async <T>(
@@ -104,38 +104,34 @@ export const performBulkDelete = async <T>(
 
   if (securityExtension) {
     // Perform Auth Check (on both L/R, we'll deal with that later)
-    const bulkDeleteAuthObjects = expectedBulkDeleteMultiNamespaceDocsResults.map((element) => {
-      const index = (element.value as { esRequestIndex: number }).esRequestIndex;
-      const { type, id } = element.value;
-      const preflightResult =
-        index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+    const authObjects: AuthorizeUpdateObject[] = expectedBulkDeleteMultiNamespaceDocsResults.map(
+      (element) => {
+        const index = (element.value as { esRequestIndex: number }).esRequestIndex;
+        const { type, id } = element.value;
+        const preflightResult =
+          index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
-      // Confirm that the preflight result is a valid get result and not an MGetError
-      if (isGetGetResult(preflightResult)) {
+        // @ts-expect-error MultiGetHit._source is optional
         const accessControl = preflightResult?._source?.accessControl;
         const name = preflightResult
-          ? SavedObjectsUtils.getName(registry.getNameAttribute(type), {
-              attributes: preflightResult?._source?.[type],
-            })
+          ? SavedObjectsUtils.getName(
+              registry.getNameAttribute(type),
+              // @ts-expect-error MultiGetHit._source is optional
+              { attributes: preflightResult?._source?.[type] }
+            )
           : undefined;
 
-        return right({
+        return {
           type,
           id,
           name,
           ...(accessControl ? { accessControl } : {}),
+          // @ts-expect-error MultiGetHit._source is optional
           existingNamespaces: preflightResult?._source?.namespaces ?? [],
-        });
+        };
       }
-      return left({
-        type,
-        id,
-        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-      });
-    });
-    const authObjects: AuthorizeUpdateObject[] = bulkDeleteAuthObjects
-      .filter(isRight)
-      .map((element) => element.value);
+    );
+
     await securityExtension.authorizeBulkDelete({
       namespace,
       objects: authObjects,
