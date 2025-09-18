@@ -8005,6 +8005,9 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "fips_agents": {
+                            "type": "number"
+                          },
                           "fleet_server_host_id": {
                             "nullable": true,
                             "type": "string"
@@ -8184,6 +8187,11 @@
                                     },
                                     "agents": {
                                       "type": "number"
+                                    },
+                                    "cloud_connector_id": {
+                                      "description": "ID of the cloud connector associated with this package policy.",
+                                      "nullable": true,
+                                      "type": "string"
                                     },
                                     "created_at": {
                                       "type": "string"
@@ -8591,6 +8599,9 @@
                                           },
                                           "type": "array"
                                         },
+                                        "fips_compatible": {
+                                          "type": "boolean"
+                                        },
                                         "name": {
                                           "description": "Package name",
                                           "type": "string"
@@ -8652,6 +8663,12 @@
                                     "supports_agentless": {
                                       "default": false,
                                       "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                      "nullable": true,
+                                      "type": "boolean"
+                                    },
+                                    "supports_cloud_connector": {
+                                      "default": false,
+                                      "description": "Indicates whether the package policy supports cloud connectors.",
                                       "nullable": true,
                                       "type": "boolean"
                                     },
@@ -9348,6 +9365,9 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fips_agents": {
+                          "type": "number"
+                        },
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
@@ -9527,6 +9547,11 @@
                                   },
                                   "agents": {
                                     "type": "number"
+                                  },
+                                  "cloud_connector_id": {
+                                    "description": "ID of the cloud connector associated with this package policy.",
+                                    "nullable": true,
+                                    "type": "string"
                                   },
                                   "created_at": {
                                     "type": "string"
@@ -9934,6 +9959,9 @@
                                         },
                                         "type": "array"
                                       },
+                                      "fips_compatible": {
+                                        "type": "boolean"
+                                      },
                                       "name": {
                                         "description": "Package name",
                                         "type": "string"
@@ -9995,6 +10023,12 @@
                                   "supports_agentless": {
                                     "default": false,
                                     "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                    "nullable": true,
+                                    "type": "boolean"
+                                  },
+                                  "supports_cloud_connector": {
+                                    "default": false,
+                                    "description": "Indicates whether the package policy supports cloud connectors.",
                                     "nullable": true,
                                     "type": "boolean"
                                   },
@@ -10397,6 +10431,9 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "fips_agents": {
+                            "type": "number"
+                          },
                           "fleet_server_host_id": {
                             "nullable": true,
                             "type": "string"
@@ -10576,6 +10613,11 @@
                                     },
                                     "agents": {
                                       "type": "number"
+                                    },
+                                    "cloud_connector_id": {
+                                      "description": "ID of the cloud connector associated with this package policy.",
+                                      "nullable": true,
+                                      "type": "string"
                                     },
                                     "created_at": {
                                       "type": "string"
@@ -10983,6 +11025,9 @@
                                           },
                                           "type": "array"
                                         },
+                                        "fips_compatible": {
+                                          "type": "boolean"
+                                        },
                                         "name": {
                                           "description": "Package name",
                                           "type": "string"
@@ -11044,6 +11089,12 @@
                                     "supports_agentless": {
                                       "default": false,
                                       "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                      "nullable": true,
+                                      "type": "boolean"
+                                    },
+                                    "supports_cloud_connector": {
+                                      "default": false,
+                                      "description": "Indicates whether the package policy supports cloud connectors.",
                                       "nullable": true,
                                       "type": "boolean"
                                     },
@@ -11692,6 +11743,9 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fips_agents": {
+                          "type": "number"
+                        },
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
@@ -11871,6 +11925,11 @@
                                   },
                                   "agents": {
                                     "type": "number"
+                                  },
+                                  "cloud_connector_id": {
+                                    "description": "ID of the cloud connector associated with this package policy.",
+                                    "nullable": true,
+                                    "type": "string"
                                   },
                                   "created_at": {
                                     "type": "string"
@@ -12278,6 +12337,9 @@
                                         },
                                         "type": "array"
                                       },
+                                      "fips_compatible": {
+                                        "type": "boolean"
+                                      },
                                       "name": {
                                         "description": "Package name",
                                         "type": "string"
@@ -12339,6 +12401,12 @@
                                   "supports_agentless": {
                                     "default": false,
                                     "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                    "nullable": true,
+                                    "type": "boolean"
+                                  },
+                                  "supports_cloud_connector": {
+                                    "default": false,
+                                    "description": "Indicates whether the package policy supports cloud connectors.",
                                     "nullable": true,
                                     "type": "boolean"
                                   },
@@ -13036,6 +13104,9 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fips_agents": {
+                          "type": "number"
+                        },
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
@@ -13215,6 +13286,11 @@
                                   },
                                   "agents": {
                                     "type": "number"
+                                  },
+                                  "cloud_connector_id": {
+                                    "description": "ID of the cloud connector associated with this package policy.",
+                                    "nullable": true,
+                                    "type": "string"
                                   },
                                   "created_at": {
                                     "type": "string"
@@ -13622,6 +13698,9 @@
                                         },
                                         "type": "array"
                                       },
+                                      "fips_compatible": {
+                                        "type": "boolean"
+                                      },
                                       "name": {
                                         "description": "Package name",
                                         "type": "string"
@@ -13683,6 +13762,12 @@
                                   "supports_agentless": {
                                     "default": false,
                                     "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                    "nullable": true,
+                                    "type": "boolean"
+                                  },
+                                  "supports_cloud_connector": {
+                                    "default": false,
+                                    "description": "Indicates whether the package policy supports cloud connectors.",
                                     "nullable": true,
                                     "type": "boolean"
                                   },
@@ -14179,6 +14264,9 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fips_agents": {
+                          "type": "number"
+                        },
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
@@ -14358,6 +14446,11 @@
                                   },
                                   "agents": {
                                     "type": "number"
+                                  },
+                                  "cloud_connector_id": {
+                                    "description": "ID of the cloud connector associated with this package policy.",
+                                    "nullable": true,
+                                    "type": "string"
                                   },
                                   "created_at": {
                                     "type": "string"
@@ -14765,6 +14858,9 @@
                                         },
                                         "type": "array"
                                       },
+                                      "fips_compatible": {
+                                        "type": "boolean"
+                                      },
                                       "name": {
                                         "description": "Package name",
                                         "type": "string"
@@ -14826,6 +14922,12 @@
                                   "supports_agentless": {
                                     "default": false,
                                     "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                    "nullable": true,
+                                    "type": "boolean"
+                                  },
+                                  "supports_cloud_connector": {
+                                    "default": false,
+                                    "description": "Indicates whether the package policy supports cloud connectors.",
                                     "nullable": true,
                                     "type": "boolean"
                                   },
@@ -20194,6 +20296,306 @@
         "summary": "Check permissions",
         "tags": [
           "Fleet internals"
+        ]
+      }
+    },
+    "/api/fleet/cloud_connectors": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.",
+        "operationId": "get-fleet-cloud-connectors",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "perPage",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "cloudProvider": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "namespace": {
+                        "type": "string"
+                      },
+                      "packagePolicyCount": {
+                        "type": "number"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "vars": {
+                        "additionalProperties": {},
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "cloudProvider",
+                      "vars",
+                      "packagePolicyCount",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a bad request call."
+          }
+        },
+        "summary": "Get cloud connectors",
+        "tags": [
+          "Fleet cloud connectors"
+        ]
+      },
+      "post": {
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.",
+        "operationId": "post-fleet-cloud-connectors",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cloudProvider": {
+                    "enum": [
+                      "aws",
+                      "azure",
+                      "gcp"
+                    ],
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "vars": {
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "maxLength": 1000,
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "frozen": {
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "maxLength": 50,
+                              "type": "string"
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 1000,
+                                  "type": "string"
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "maxLength": 255,
+                                      "type": "string"
+                                    },
+                                    "isSecretRef": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "isSecretRef",
+                                    "id"
+                                  ],
+                                  "type": "object"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "cloudProvider",
+                  "vars"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "cloudProvider": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    },
+                    "packagePolicyCount": {
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "vars": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "cloudProvider",
+                    "vars",
+                    "packagePolicyCount",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a bad request call."
+          }
+        },
+        "summary": "Create cloud connector",
+        "tags": [
+          "Fleet cloud connectors"
         ]
       }
     },
@@ -34826,6 +35228,11 @@
                           "agents": {
                             "type": "number"
                           },
+                          "cloud_connector_id": {
+                            "description": "ID of the cloud connector associated with this package policy.",
+                            "nullable": true,
+                            "type": "string"
+                          },
                           "created_at": {
                             "type": "string"
                           },
@@ -35232,6 +35639,9 @@
                                 },
                                 "type": "array"
                               },
+                              "fips_compatible": {
+                                "type": "boolean"
+                              },
                               "name": {
                                 "description": "Package name",
                                 "type": "string"
@@ -35293,6 +35703,12 @@
                           "supports_agentless": {
                             "default": false,
                             "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                            "nullable": true,
+                            "type": "boolean"
+                          },
+                          "supports_cloud_connector": {
+                            "default": false,
+                            "description": "Indicates whether the package policy supports cloud connectors.",
                             "nullable": true,
                             "type": "boolean"
                           },
@@ -35490,6 +35906,11 @@
                         },
                         "nullable": true,
                         "type": "array"
+                      },
+                      "cloud_connector_id": {
+                        "description": "ID of the cloud connector associated with this package policy.",
+                        "nullable": true,
+                        "type": "string"
                       },
                       "description": {
                         "description": "Package policy description",
@@ -35750,6 +36171,9 @@
                             },
                             "type": "array"
                           },
+                          "fips_compatible": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "description": "Package name",
                             "type": "string"
@@ -35793,6 +36217,12 @@
                       "supports_agentless": {
                         "default": false,
                         "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                        "nullable": true,
+                        "type": "boolean"
+                      },
+                      "supports_cloud_connector": {
+                        "default": false,
+                        "description": "Indicates whether the package policy supports cloud connectors.",
                         "nullable": true,
                         "type": "boolean"
                       },
@@ -36010,6 +36440,9 @@
                             },
                             "type": "array"
                           },
+                          "fips_compatible": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "description": "Package name",
                             "type": "string"
@@ -36126,6 +36559,11 @@
                         },
                         "agents": {
                           "type": "number"
+                        },
+                        "cloud_connector_id": {
+                          "description": "ID of the cloud connector associated with this package policy.",
+                          "nullable": true,
+                          "type": "string"
                         },
                         "created_at": {
                           "type": "string"
@@ -36533,6 +36971,9 @@
                               },
                               "type": "array"
                             },
+                            "fips_compatible": {
+                              "type": "boolean"
+                            },
                             "name": {
                               "description": "Package name",
                               "type": "string"
@@ -36594,6 +37035,12 @@
                         "supports_agentless": {
                           "default": false,
                           "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                          "nullable": true,
+                          "type": "boolean"
+                        },
+                        "supports_cloud_connector": {
+                          "default": false,
+                          "description": "Indicates whether the package policy supports cloud connectors.",
                           "nullable": true,
                           "type": "boolean"
                         },
@@ -36840,6 +37287,11 @@
                           },
                           "agents": {
                             "type": "number"
+                          },
+                          "cloud_connector_id": {
+                            "description": "ID of the cloud connector associated with this package policy.",
+                            "nullable": true,
+                            "type": "string"
                           },
                           "created_at": {
                             "type": "string"
@@ -37247,6 +37699,9 @@
                                 },
                                 "type": "array"
                               },
+                              "fips_compatible": {
+                                "type": "boolean"
+                              },
                               "name": {
                                 "description": "Package name",
                                 "type": "string"
@@ -37308,6 +37763,12 @@
                           "supports_agentless": {
                             "default": false,
                             "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                            "nullable": true,
+                            "type": "boolean"
+                          },
+                          "supports_cloud_connector": {
+                            "default": false,
+                            "description": "Indicates whether the package policy supports cloud connectors.",
                             "nullable": true,
                             "type": "boolean"
                           },
@@ -37577,6 +38038,9 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "fips_compatible": {
+                            "type": "boolean"
                           },
                           "name": {
                             "description": "Package name",
@@ -38007,6 +38471,11 @@
                                 "agents": {
                                   "type": "number"
                                 },
+                                "cloud_connector_id": {
+                                  "description": "ID of the cloud connector associated with this package policy.",
+                                  "nullable": true,
+                                  "type": "string"
+                                },
                                 "created_at": {
                                   "type": "string"
                                 },
@@ -38413,6 +38882,9 @@
                                       },
                                       "type": "array"
                                     },
+                                    "fips_compatible": {
+                                      "type": "boolean"
+                                    },
                                     "name": {
                                       "description": "Package name",
                                       "type": "string"
@@ -38474,6 +38946,12 @@
                                 "supports_agentless": {
                                   "default": false,
                                   "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                  "nullable": true,
+                                  "type": "boolean"
+                                },
+                                "supports_cloud_connector": {
+                                  "default": false,
+                                  "description": "Indicates whether the package policy supports cloud connectors.",
                                   "nullable": true,
                                   "type": "boolean"
                                 },
@@ -38580,6 +39058,11 @@
                                   },
                                   "nullable": true,
                                   "type": "array"
+                                },
+                                "cloud_connector_id": {
+                                  "description": "ID of the cloud connector associated with this package policy.",
+                                  "nullable": true,
+                                  "type": "string"
                                 },
                                 "created_at": {
                                   "type": "string"
@@ -38889,6 +39372,9 @@
                                       },
                                       "type": "array"
                                     },
+                                    "fips_compatible": {
+                                      "type": "boolean"
+                                    },
                                     "name": {
                                       "description": "Package name",
                                       "type": "string"
@@ -38944,6 +39430,12 @@
                                 "supports_agentless": {
                                   "default": false,
                                   "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                                  "nullable": true,
+                                  "type": "boolean"
+                                },
+                                "supports_cloud_connector": {
+                                  "default": false,
+                                  "description": "Indicates whether the package policy supports cloud connectors.",
                                   "nullable": true,
                                   "type": "boolean"
                                 },
@@ -39177,6 +39669,11 @@
                         },
                         "agents": {
                           "type": "number"
+                        },
+                        "cloud_connector_id": {
+                          "description": "ID of the cloud connector associated with this package policy.",
+                          "nullable": true,
+                          "type": "string"
                         },
                         "created_at": {
                           "type": "string"
@@ -39584,6 +40081,9 @@
                               },
                               "type": "array"
                             },
+                            "fips_compatible": {
+                              "type": "boolean"
+                            },
                             "name": {
                               "description": "Package name",
                               "type": "string"
@@ -39645,6 +40145,12 @@
                         "supports_agentless": {
                           "default": false,
                           "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                          "nullable": true,
+                          "type": "boolean"
+                        },
+                        "supports_cloud_connector": {
+                          "default": false,
+                          "description": "Indicates whether the package policy supports cloud connectors.",
                           "nullable": true,
                           "type": "boolean"
                         },
@@ -39855,6 +40361,11 @@
                         },
                         "nullable": true,
                         "type": "array"
+                      },
+                      "cloud_connector_id": {
+                        "description": "ID of the cloud connector associated with this package policy.",
+                        "nullable": true,
+                        "type": "string"
                       },
                       "description": {
                         "description": "Package policy description",
@@ -40109,6 +40620,9 @@
                             },
                             "type": "array"
                           },
+                          "fips_compatible": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "description": "Package name",
                             "type": "string"
@@ -40152,6 +40666,12 @@
                       "supports_agentless": {
                         "default": false,
                         "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                        "nullable": true,
+                        "type": "boolean"
+                      },
+                      "supports_cloud_connector": {
+                        "default": false,
+                        "description": "Indicates whether the package policy supports cloud connectors.",
                         "nullable": true,
                         "type": "boolean"
                       },
@@ -40368,6 +40888,9 @@
                             },
                             "type": "array"
                           },
+                          "fips_compatible": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "description": "Package name",
                             "type": "string"
@@ -40483,6 +41006,11 @@
                         },
                         "agents": {
                           "type": "number"
+                        },
+                        "cloud_connector_id": {
+                          "description": "ID of the cloud connector associated with this package policy.",
+                          "nullable": true,
+                          "type": "string"
                         },
                         "created_at": {
                           "type": "string"
@@ -40890,6 +41418,9 @@
                               },
                               "type": "array"
                             },
+                            "fips_compatible": {
+                              "type": "boolean"
+                            },
                             "name": {
                               "description": "Package name",
                               "type": "string"
@@ -40951,6 +41482,12 @@
                         "supports_agentless": {
                           "default": false,
                           "description": "Indicates whether the package policy belongs to an agentless agent policy.",
+                          "nullable": true,
+                          "type": "boolean"
+                        },
+                        "supports_cloud_connector": {
+                          "default": false,
+                          "description": "Indicates whether the package policy supports cloud connectors.",
                           "nullable": true,
                           "type": "boolean"
                         },
@@ -49207,6 +49744,9 @@
                                                         {
                                                           "additionalProperties": false,
                                                           "properties": {
+                                                            "customIdentifier": {
+                                                              "type": "string"
+                                                            },
                                                             "where": {
                                                               "allOf": [
                                                                 {
@@ -49514,11 +50054,64 @@
                                                   "steps"
                                                 ],
                                                 "type": "object"
+                                              },
+                                              "settings": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "index.number_of_replicas": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.number_of_shards": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.refresh_interval": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "enum": [
+                                                              -1
+                                                            ],
+                                                            "type": "number"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  }
+                                                },
+                                                "type": "object"
                                               }
                                             },
                                             "required": [
                                               "lifecycle",
-                                              "processing"
+                                              "processing",
+                                              "settings"
                                             ],
                                             "type": "object"
                                           }
@@ -52489,6 +53082,9 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "customIdentifier": {
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "allOf": [
                                                             {
@@ -52796,11 +53392,64 @@
                                               "steps"
                                             ],
                                             "type": "object"
+                                          },
+                                          "settings": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "index.number_of_replicas": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.number_of_shards": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.refresh_interval": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "anyOf": [
+                                                      {
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "enum": [
+                                                          -1
+                                                        ],
+                                                        "type": "number"
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              }
+                                            },
+                                            "type": "object"
                                           }
                                         },
                                         "required": [
                                           "lifecycle",
-                                          "processing"
+                                          "processing",
+                                          "settings"
                                         ],
                                         "type": "object"
                                       }
@@ -55368,6 +56017,9 @@
                                                         {
                                                           "additionalProperties": false,
                                                           "properties": {
+                                                            "customIdentifier": {
+                                                              "type": "string"
+                                                            },
                                                             "where": {
                                                               "allOf": [
                                                                 {
@@ -55675,11 +56327,64 @@
                                                   "steps"
                                                 ],
                                                 "type": "object"
+                                              },
+                                              "settings": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "index.number_of_replicas": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.number_of_shards": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "type": "number"
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "index.refresh_interval": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "value": {
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "enum": [
+                                                              -1
+                                                            ],
+                                                            "type": "number"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "value"
+                                                    ],
+                                                    "type": "object"
+                                                  }
+                                                },
+                                                "type": "object"
                                               }
                                             },
                                             "required": [
                                               "lifecycle",
-                                              "processing"
+                                              "processing",
+                                              "settings"
                                             ],
                                             "type": "object"
                                           }
@@ -58346,6 +59051,9 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "customIdentifier": {
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "allOf": [
                                                             {
@@ -58653,11 +59361,64 @@
                                               "steps"
                                             ],
                                             "type": "object"
+                                          },
+                                          "settings": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "index.number_of_replicas": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.number_of_shards": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "type": "number"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "index.refresh_interval": {
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                  "value": {
+                                                    "anyOf": [
+                                                      {
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "enum": [
+                                                          -1
+                                                        ],
+                                                        "type": "number"
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "value"
+                                                ],
+                                                "type": "object"
+                                              }
+                                            },
+                                            "type": "object"
                                           }
                                         },
                                         "required": [
                                           "lifecycle",
-                                          "processing"
+                                          "processing",
+                                          "settings"
                                         ],
                                         "type": "object"
                                       }
@@ -61809,6 +62570,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "customIdentifier": {
+                                              "type": "string"
+                                            },
                                             "where": {
                                               "allOf": [
                                                 {
@@ -62116,11 +62880,64 @@
                                   "steps"
                                 ],
                                 "type": "object"
+                              },
+                              "settings": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "index.number_of_replicas": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.number_of_shards": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.refresh_interval": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "enum": [
+                                              -1
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
                               }
                             },
                             "required": [
                               "lifecycle",
-                              "processing"
+                              "processing",
+                              "settings"
                             ],
                             "type": "object"
                           },
@@ -64946,6 +65763,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "customIdentifier": {
+                                              "type": "string"
+                                            },
                                             "where": {
                                               "allOf": [
                                                 {
@@ -65253,11 +66073,64 @@
                                   "steps"
                                 ],
                                 "type": "object"
+                              },
+                              "settings": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "index.number_of_replicas": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.number_of_shards": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "index.refresh_interval": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "value": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "enum": [
+                                              -1
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
                               }
                             },
                             "required": [
                               "lifecycle",
-                              "processing"
+                              "processing",
+                              "settings"
                             ],
                             "type": "object"
                           },
@@ -66614,6 +67487,9 @@
     },
     {
       "name": "Elastic Package Manager (EPM)"
+    },
+    {
+      "name": "Fleet cloud connectors"
     },
     {
       "name": "Fleet enrollment API keys"
