@@ -553,7 +553,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments",
+                  "Failed to find rule types by query: Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments",
                 statusCode: 400,
               });
               expect(response.statusCode).to.eql(400);
