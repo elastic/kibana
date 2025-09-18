@@ -36,7 +36,7 @@ import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
 import { comparisonFunctions } from '../../all_operators';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
+import { FULL_TEXT_SEARCH_FUNCTIONS, timeUnitsToSuggest } from '../../constants';
 import type { FunctionParameter, FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes, isNumericType } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../ast';
@@ -48,7 +48,7 @@ import {
   getFunctionDefinition,
   getFunctionSuggestions,
 } from '../functions';
-import { getCompatibleLiterals, getDateLiterals } from '../literals';
+import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getSuggestionsToRightOfOperatorExpression } from '../operators';
 import { buildValueDefinitions } from '../values';
 import {
@@ -177,6 +177,11 @@ export async function getFunctionArgsSuggestions(
       fullText,
       offset
     );
+
+  const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
+    return Array.from(new Set(paramDefs.map(({ type }) => type)));
+  };
+
   const arg: ESQLAstItem = enrichedArgs[argIndex];
 
   // Whether to prepend comma to suggestion string
@@ -277,10 +282,6 @@ export async function getFunctionArgsSuggestions(
       (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
 
-    const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
-      return Array.from(new Set(paramDefs.map(({ type }) => type)));
-    };
-
     const supportsControls = Boolean(context?.supportsControls);
     const variables = context?.variables;
 
@@ -368,6 +369,7 @@ export async function getFunctionArgsSuggestions(
       );
     }
 
+    // TODO shouldn't depend on command, only parameter type
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
         ['where', 'eval'].includes(command.name) &&
@@ -375,6 +377,7 @@ export async function getFunctionArgsSuggestions(
       (['stats', 'inlinestats'].includes(command.name) &&
         typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
     )
+      // TODO merge with getCompatibleLiterals
       suggestions.push(
         ...getDateLiterals({
           addComma: shouldAddComma,
@@ -385,17 +388,23 @@ export async function getFunctionArgsSuggestions(
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
-    if (command.name !== 'stats' && command.name !== 'inlinestats') {
-      if (isLiteral(arg) && isNumericType(arg.literalType)) {
-        // ... | EVAL fn(2 <suggest>)
-        suggestions.push(
-          ...getCompatibleLiterals(['time_literal_unit'], {
-            addComma: shouldAddComma,
-            advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-          })
-        );
-      }
+    if (
+      isLiteral(arg) &&
+      isNumericType(arg.literalType) &&
+      (getTypesFromParamDefs(typesToSuggestNext).includes('time_duration') ||
+        getTypesFromParamDefs(typesToSuggestNext).includes('date_period'))
+    ) {
+      // ... | EVAL fn(2 <suggest>)
+      suggestions.push(
+        ...buildConstantsDefinitions(
+          timeUnitsToSuggest.map(({ name }) => name),
+          undefined,
+          undefined,
+          { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
+        )
+      );
     }
+
     // Suggest comparison functions for boolean conditions
     if (canBeBooleanCondition) {
       suggestions.push(
@@ -407,6 +416,7 @@ export async function getFunctionArgsSuggestions(
         }))
       );
     }
+
     if (hasMoreMandatoryArgs) {
       // Suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
