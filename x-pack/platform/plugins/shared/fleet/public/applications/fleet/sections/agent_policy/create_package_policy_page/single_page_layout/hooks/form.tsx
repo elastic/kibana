@@ -14,10 +14,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
-import {
-  AgentlessAgentCreateFleetUnreachableError,
-  AgentlessAgentCreateOverProvisionedError,
-} from '../../../../../../../../common/errors';
+import { AgentlessAgentCreateOverProvisionedError } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import {
   type AgentPolicy,
@@ -46,7 +43,6 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
 import { getMaxPackageName } from '../../../../../../../../common/services';
-import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -59,6 +55,7 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
+import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
@@ -140,39 +137,29 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void,
-  setPackagePolicy: (policy: NewPackagePolicy) => void
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void
 ) => {
-  const input = packagePolicy.inputs?.find(
+  const input = packagePolicy.inputs?.filter(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  );
+  )[0];
 
-  const targetCsp = input?.type.match(/aws|azure|gcp/)?.[0];
-
-  const enabled = input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
-
+  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
   if (
-    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled ||
-      newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp) &&
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
     newAgentPolicy?.supports_agentless
   ) {
-    if (targetCsp === 'gcp' && newAgentPolicy.agentless?.cloud_connectors) {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
-        },
-      });
-
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: false,
-      });
-      return;
+    let targetCsp;
+    if (input?.type.includes('aws')) {
+      targetCsp = 'aws';
+    }
+    if (input?.type.includes('gcp')) {
+      targetCsp = 'gcp';
+    }
+    if (input?.type.includes('azure')) {
+      targetCsp = 'azure';
     }
 
-    if (targetCsp !== 'gcp') {
+    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
       setNewAgentPolicy({
         ...newAgentPolicy,
         agentless: {
@@ -182,11 +169,6 @@ export const updateAgentlessCloudConnectorConfig = (
             target_csp: targetCsp,
           },
         },
-      });
-
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: true,
       });
     }
   }
@@ -213,7 +195,6 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges,
   setNewAgentPolicy,
   setSelectedPolicyTab,
-  isAddIntegrationFlyout,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -225,7 +206,6 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges: boolean;
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
-  isAddIntegrationFlyout?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -240,14 +220,14 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const isFetchingBasePackage = useRef<boolean>(false);
+  // Used to initialize the package policy once
+  const isInitializedRef = useRef(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
   });
-  const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -319,58 +299,32 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (
-        !packageInfo ||
-        (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
-      ) {
+      if (isInitializedRef.current || !packageInfo) {
         return;
-      }
-      if (integrationToEnable !== integration) {
-        setIntegration(integrationToEnable);
       }
 
       // Fetch all packagePolicies having the package name
-      if (!isFetchingBasePackage.current) {
-        // Prevent multiple calls to fetch base package
-        isFetchingBasePackage.current = true;
-        const { data: packagePolicyData } = await sendGetPackagePolicies({
-          perPage: SO_SEARCH_LIMIT,
-          page: 1,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-        });
-        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
+      const { data: packagePolicyData } = await sendGetPackagePolicies({
+        perPage: SO_SEARCH_LIMIT,
+        page: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+      });
+      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-        const basePackagePolicy = packageToPackagePolicy(
-          packageInfo,
-          agentPolicies.map((policy) => policy.id),
-          '',
-          DEFAULT_PACKAGE_POLICY.name || incrementedName,
-          DEFAULT_PACKAGE_POLICY.description,
-          integrationToEnable
-        );
-
-        // Set the package policy with the fetched package
-        updatePackagePolicy(basePackagePolicy);
-        setIsInitialized(true);
-        isFetchingBasePackage.current = false;
-      }
+      isInitializedRef.current = true;
+      const basePackagePolicy = packageToPackagePolicy(
+        packageInfo,
+        agentPolicies.map((policy) => policy.id),
+        '',
+        DEFAULT_PACKAGE_POLICY.name || incrementedName,
+        DEFAULT_PACKAGE_POLICY.description,
+        integrationToEnable
+      );
+      updatePackagePolicy(basePackagePolicy);
+      setIsInitialized(true);
     }
-    if (!isInitialized || isAddIntegrationFlyout) {
-      // Fetch agent policies
-      init();
-    }
-  }, [
-    isFetchingBasePackage,
-    packageInfo,
-    agentPolicies,
-    updatePackagePolicy,
-    integrationToEnable,
-    isInitialized,
-    packagePolicy.package?.name,
-    integration,
-    setIntegration,
-    isAddIntegrationFlyout,
-  ]);
+    init();
+  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
     if (
@@ -399,7 +353,6 @@ export function useOnSubmit({
     packageInfo,
     packagePolicy,
     integrationToEnable,
-    hideAgentlessSelector: isAddIntegrationFlyout,
   });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change
@@ -412,19 +365,12 @@ export function useOnSubmit({
 
   const newInputs = useMemo(() => {
     return packagePolicy.inputs.map((input, i) => {
-      if (
-        isInputAllowedForDeploymentMode(
-          input,
-          isAgentlessSelected ? 'agentless' : 'default',
-          packageInfo
-        )
-      ) {
-        return input;
-      } else {
+      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
         return { ...input, enabled: false };
       }
+      return packagePolicy.inputs[i];
     });
-  }, [packagePolicy.inputs, isAgentlessSelected, packageInfo]);
+  }, [packagePolicy.inputs, isAgentlessSelected]);
 
   useEffect(() => {
     if (prevSetupTechnology !== selectedSetupTechnology) {
@@ -434,12 +380,7 @@ export function useOnSubmit({
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
-  updateAgentlessCloudConnectorConfig(
-    packagePolicy,
-    newAgentPolicy,
-    setNewAgentPolicy,
-    setPackagePolicy
-  );
+  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
 
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,
@@ -455,12 +396,7 @@ export function useOnSubmit({
     async ({
       force,
       overrideCreatedAgentPolicy,
-      skipConfirmModal,
-    }: {
-      overrideCreatedAgentPolicy?: AgentPolicy;
-      force?: boolean;
-      skipConfirmModal?: boolean;
-    } = {}) => {
+    }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -511,33 +447,6 @@ export function useOnSubmit({
                     defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
                     values={{
                       limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
-                      docLink: (
-                        <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
-                          <FormattedMessage
-                            id="xpack.fleet.createAgentlessPolicy.seeDocLink"
-                            defaultMessage="See agentless documentation."
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </>
-              ),
-            });
-          }
-          if (e?.attributes?.type === AgentlessAgentCreateFleetUnreachableError.name) {
-            notifications.toasts.addError(e, {
-              title: i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
-                defaultMessage: 'Unable to create integration',
-              }),
-              // @ts-expect-error
-              toastMessage: (
-                <>
-                  <FormattedMessage
-                    id="xpack.fleet.createAgentlessPolicy.FleetUnreachableErrorMessage"
-                    defaultMessage="Fleet is not reachable and required to create agentless policy. Error: {errorMessage}. {docLink}"
-                    values={{
-                      errorMessage: e?.message ?? '',
                       docLink: (
                         <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
                           <FormattedMessage
@@ -606,7 +515,7 @@ export function useOnSubmit({
       const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
-      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
+      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
         if (agentCount) {
           setFormState('SUBMITTED');
         } else if (hasAzureArmTemplate) {
@@ -628,29 +537,27 @@ export function useOnSubmit({
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
-        if (!skipConfirmModal) {
-          if (promptForAgentEnrollment && hasAzureArmTemplate) {
-            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-            return;
-          }
-          if (promptForAgentEnrollment && hasCloudFormation) {
-            setFormState('SUBMITTED_CLOUD_FORMATION');
-            return;
-          }
-          if (promptForAgentEnrollment && hasGoogleCloudShell) {
-            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-            return;
-          }
-          if (promptForAgentEnrollment) {
-            setFormState('SUBMITTED_NO_AGENTS');
-            return;
-          }
+        if (promptForAgentEnrollment && hasAzureArmTemplate) {
+          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          return;
+        }
+        if (promptForAgentEnrollment && hasCloudFormation) {
+          setFormState('SUBMITTED_CLOUD_FORMATION');
+          return;
+        }
+        if (promptForAgentEnrollment && hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+          return;
+        }
+        if (promptForAgentEnrollment) {
+          setFormState('SUBMITTED_NO_AGENTS');
+          return;
+        }
 
-          if (isAgentlessConfigured) {
-            onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
-          } else {
-            onSaveNavigate(data!.item);
-          }
+        if (isAgentlessConfigured) {
+          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+        } else {
+          onSaveNavigate(data!.item);
         }
 
         notifications.toasts.addSuccess({
