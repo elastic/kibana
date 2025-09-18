@@ -17,6 +17,12 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/functional_with_es_ssl/plugins/alerts
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/features-plugin'
+  - '@kbn/alerting-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/shared-ux-router'
 tags:
   - platform
   - plugin

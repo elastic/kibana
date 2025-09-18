@@ -17,6 +17,19 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/plugins/shared/es_ui_shared
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-view-validation'
+  - '@kbn/i18n'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/i18n-react'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/share-plugin'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/storybook'
+  - '@kbn/shared-ux-link-redirect-app'
+  - '@kbn/code-editor'
+  - '@kbn/core-application-common'
 tags:
   - platform
   - plugin

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/locator_explorer
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/share-plugin'
+  - '@kbn/locator-examples-plugin'
+  - '@kbn/developer-examples-plugin'
 tags:
   - common
   - plugin

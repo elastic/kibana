@@ -17,6 +17,17 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/security/api_key_management
+dependsOn:
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/security-form-components'
+  - '@kbn/code-editor'
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/security-plugin-types-common'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/ui-theme'
 tags:
   - platform
   - shared-browser

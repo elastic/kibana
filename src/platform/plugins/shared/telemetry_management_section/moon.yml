@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/plugins/shared/telemetry_management_section
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/telemetry-plugin'
+  - '@kbn/advanced-settings-plugin'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/management-settings-section-registry'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/management-settings-field-definition'
+  - '@kbn/management-settings-types'
+  - '@kbn/management-settings-components-field-row'
+  - '@kbn/core-ui-settings-browser'
 tags:
   - platform
   - plugin

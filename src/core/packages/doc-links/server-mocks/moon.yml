@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/doc-links/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/doc-links'
+  - '@kbn/core-doc-links-server'
+  - '@kbn/core-doc-links-server-internal'
 tags:
   - platform
   - shared-server

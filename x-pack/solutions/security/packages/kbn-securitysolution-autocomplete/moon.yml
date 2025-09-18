@@ -17,6 +17,15 @@ project:
   owner: '@elastic/security-detection-engine'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-autocomplete
+dependsOn:
+  - '@kbn/datemath'
+  - '@kbn/es-query'
+  - '@kbn/i18n'
+  - '@kbn/securitysolution-io-ts-list-types'
+  - '@kbn/securitysolution-list-hooks'
+  - '@kbn/securitysolution-list-utils'
+  - '@kbn/doc-links'
+  - '@kbn/securitysolution-utils'
 tags:
   - security
   - shared-common

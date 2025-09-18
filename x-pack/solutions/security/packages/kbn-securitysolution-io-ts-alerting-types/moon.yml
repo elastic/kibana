@@ -18,6 +18,9 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types
+dependsOn:
+  - '@kbn/securitysolution-io-ts-types'
+  - '@kbn/securitysolution-io-ts-utils'
 tags:
   - security
   - shared-common

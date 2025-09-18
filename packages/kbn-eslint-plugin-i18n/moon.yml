@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: packages/kbn-eslint-plugin-i18n
+dependsOn: []
 tags:
   - common
   - shared-common

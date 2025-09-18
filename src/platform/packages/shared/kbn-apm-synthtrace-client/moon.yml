@@ -17,6 +17,10 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-apm-synthtrace-client
+dependsOn:
+  - '@kbn/datemath'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/tooling-log'
 tags:
   - platform
   - shared-common

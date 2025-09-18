@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/analytics/browser-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/core-analytics-browser-internal'
 tags:
   - platform
   - shared-browser

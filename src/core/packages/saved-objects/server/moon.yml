@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/saved-objects/server
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/core-http-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-security-common'
 tags:
   - platform
   - shared-server

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-find-used-node-modules
+dependsOn:
+  - '@kbn/import-resolver'
+  - '@kbn/babel-preset'
+  - '@kbn/import-locator'
+  - '@kbn/repo-info'
 tags:
   - common
   - shared-common

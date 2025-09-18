@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/cancellable_search
+dependsOn:
+  - '@kbn/data-plugin'
+  - '@kbn/search-types'
 tags:
   - platform
   - shared-common

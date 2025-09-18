@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/packages/kbn-synthetics-private-location
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/dev-utils'
 tags:
   - common
   - shared-common

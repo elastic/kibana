@@ -17,6 +17,11 @@ project:
   owner: '@elastic/security-threat-hunting'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/index-adapter
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/std'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/logging-mocks'
 tags:
   - security
   - shared-server

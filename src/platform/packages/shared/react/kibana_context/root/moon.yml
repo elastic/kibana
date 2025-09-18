@@ -17,6 +17,18 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/react/kibana_context/root
+dependsOn:
+  - '@kbn/react-kibana-context-common'
+  - '@kbn/core-i18n-browser-mocks'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/core-base-common'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-browser-mocks'
+  - '@kbn/core-execution-context-browser'
+  - '@kbn/core-execution-context-browser-mocks'
+  - '@kbn/shared-ux-router'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - platform
   - shared-common

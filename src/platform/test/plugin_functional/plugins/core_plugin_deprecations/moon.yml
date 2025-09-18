@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_deprecations
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/config'
 tags:
   - platform
   - plugin

@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/security/plugin_types_common
+dependsOn:
+  - '@kbn/core-security-common'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - shared-common

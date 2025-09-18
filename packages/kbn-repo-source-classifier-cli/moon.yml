@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-repo-source-classifier-cli
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/import-resolver'
+  - '@kbn/repo-source-classifier'
+  - '@kbn/get-repo-files'
+  - '@kbn/repo-info'
 tags:
   - common
   - shared-common

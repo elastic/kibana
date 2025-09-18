@@ -17,6 +17,14 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/file-upload
+dependsOn:
+  - '@kbn/file-upload-plugin'
+  - '@kbn/file-upload-common'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/core'
+  - '@kbn/data-views-plugin'
+  - '@kbn/i18n'
+  - '@kbn/data-plugin'
 tags:
   - platform
   - shared-common

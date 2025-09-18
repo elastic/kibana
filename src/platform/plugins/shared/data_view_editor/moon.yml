@@ -17,6 +17,22 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/plugins/shared/data_view_editor
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/i18n'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/ui-theme'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/code-editor'
+  - '@kbn/rollup'
+  - '@kbn/css-utils'
 tags:
   - platform
   - plugin

@@ -17,6 +17,14 @@ project:
   owner: '@elastic/security-detection-engine'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types
+dependsOn:
+  - '@kbn/securitysolution-io-ts-types'
+  - '@kbn/securitysolution-io-ts-utils'
+  - '@kbn/securitysolution-list-constants'
+  - '@kbn/es-query'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/securitysolution-exceptions-common'
 tags:
   - security
   - shared-common

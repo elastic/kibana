@@ -17,6 +17,13 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/code_editor/impl
+dependsOn:
+  - '@kbn/monaco'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/shared-ux-storybook-mock'
+  - '@kbn/code-editor-mock'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: packages/kbn-generate-console-definitions
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/repo-info'
+  - '@kbn/console-plugin'
+  - '@kbn/tooling-log'
 tags:
   - common
   - shared-common

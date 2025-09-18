@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/packages/private/default-nav/devtools
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/deeplinks-devtools'
 tags:
   - platform
   - shared-common

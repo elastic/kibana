@@ -17,6 +17,14 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/page/no_data/impl
+dependsOn:
+  - '@kbn/shared-ux-card-no-data'
+  - '@kbn/shared-ux-page-no-data-types'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/shared-ux-page-no-data-mocks'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-avatar-solution'
 tags:
   - platform
   - shared-browser

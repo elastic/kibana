@@ -17,6 +17,11 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/ui_actions
+dependsOn:
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-data-grid-in-table-search
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/visualization-utils'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/ui-settings/server
+dependsOn:
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-ui-settings-common'
 tags:
   - platform
   - shared-server

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/workchat-eng'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat
+dependsOn:
+  - '@kbn/evals'
+  - '@kbn/onechat-common'
+  - '@kbn/tooling-log'
+  - '@kbn/core'
 tags:
   - platform
   - functional-tests

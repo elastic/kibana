@@ -17,6 +17,11 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/toolbar_selector
+dependsOn:
+  - '@kbn/shared-ux-button-toolbar'
+  - '@kbn/i18n-react'
+  - '@kbn/calculate-width-from-char-count'
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-browser

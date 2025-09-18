@@ -17,6 +17,19 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/plugins/shared/charts
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/expressions-plugin'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/coloring'
+  - '@kbn/i18n'
+  - '@kbn/utility-types'
+  - '@kbn/i18n-react'
+  - '@kbn/ui-theme'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/data-plugin'
+  - '@kbn/core-lifecycle-browser-mocks'
+  - '@kbn/palettes'
 tags:
   - platform
   - plugin

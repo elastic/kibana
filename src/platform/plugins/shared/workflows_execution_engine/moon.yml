@@ -17,6 +17,15 @@ project:
   owner: '@elastic/workflows-eng'
   metadata:
     sourceRoot: src/platform/plugins/shared/workflows_execution_engine
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/actions-plugin'
+  - '@kbn/workflows'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/apm-utils'
+  - '@kbn/es-query'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - platform
   - plugin

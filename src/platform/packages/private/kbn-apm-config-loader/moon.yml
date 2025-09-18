@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-apm-config-loader
+dependsOn:
+  - '@kbn/safer-lodash-set'
+  - '@kbn/utils'
+  - '@kbn/config-schema'
+  - '@kbn/std'
+  - '@kbn/telemetry-config'
+  - '@kbn/metrics-config'
 tags:
   - platform
   - shared-server

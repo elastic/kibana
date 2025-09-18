@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-failed-test-reporter-cli
+dependsOn:
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-utils'
+  - '@kbn/tooling-log'
+  - '@kbn/ftr-screenshot-filename'
+  - '@kbn/jest-serializers'
+  - '@kbn/journeys'
+  - '@kbn/repo-info'
 tags:
   - common
   - shared-common

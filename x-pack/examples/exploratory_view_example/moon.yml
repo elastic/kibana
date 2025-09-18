@@ -17,6 +17,15 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: x-pack/examples/exploratory_view_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/observability-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/exploratory-view-plugin'
+  - '@kbn/shared-ux-link-redirect-app'
 tags:
   - observability
   - plugin

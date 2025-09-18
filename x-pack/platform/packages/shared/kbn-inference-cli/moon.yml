@@ -17,6 +17,19 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-inference-cli
+dependsOn:
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/sse-utils-client'
+  - '@kbn/tooling-log'
+  - '@kbn/kibana-api-cli'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/inference-langchain'
+  - '@kbn/repo-info'
+  - '@kbn/core'
+  - '@kbn/telemetry'
+  - '@kbn/inference-tracing'
+  - '@kbn/logging'
 tags:
   - platform
   - shared-common

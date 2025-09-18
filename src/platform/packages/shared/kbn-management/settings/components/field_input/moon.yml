@@ -18,6 +18,22 @@ project:
   metadata:
     sourceRoot: >-
       src/platform/packages/shared/kbn-management/settings/components/field_input
+dependsOn:
+  - '@kbn/management-settings-types'
+  - '@kbn/management-settings-field-definition'
+  - '@kbn/monaco'
+  - '@kbn/management-settings-utilities'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/react-kibana-context-root'
+  - '@kbn/core-theme-browser-mocks'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/core-analytics-browser-mocks'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/code-editor'
+  - '@kbn/core-user-profile-browser-mocks'
 tags:
   - platform
   - shared-browser

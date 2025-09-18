@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-scout-security
+dependsOn:
+  - '@kbn/scout'
+  - '@kbn/es'
 tags:
   - security
   - test-helper

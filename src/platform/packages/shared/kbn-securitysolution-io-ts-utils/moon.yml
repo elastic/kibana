@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-detection-engine'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-securitysolution-io-ts-utils
+dependsOn:
+  - '@kbn/datemath'
 tags:
   - platform
   - shared-common

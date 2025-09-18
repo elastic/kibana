@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/cloud_integration/plugins/saml_provider
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/dev-utils'
 tags:
   - platform
   - plugin

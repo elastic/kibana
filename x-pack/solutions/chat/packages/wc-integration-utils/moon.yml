@@ -17,6 +17,9 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/chat/packages/wc-integration-utils
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/zod'
 tags:
   - chat
   - shared-common

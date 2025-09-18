@@ -17,6 +17,18 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/observability_logs_explorer
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/i18n'
+  - '@kbn/shared-ux-router'
+  - '@kbn/rison'
+  - '@kbn/data-plugin'
+  - '@kbn/es-query'
+  - '@kbn/discover-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/discover-utils'
 tags:
   - observability
   - plugin

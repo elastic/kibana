@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/plugins/shared/expressions
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/inspector-plugin'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/logging'
+  - '@kbn/utility-types'
+  - '@kbn/interpreter'
+  - '@kbn/i18n'
+  - '@kbn/std'
+  - '@kbn/core-execution-context-common'
+  - '@kbn/tinymath'
+  - '@kbn/panel-loader'
+  - '@kbn/es-query'
 tags:
   - platform
   - plugin

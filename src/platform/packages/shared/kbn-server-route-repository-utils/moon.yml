@@ -17,6 +17,12 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-server-route-repository-utils
+dependsOn:
+  - '@kbn/core-http-server'
+  - '@kbn/core'
+  - '@kbn/zod'
+  - '@kbn/core-http-browser'
+  - '@kbn/sse-utils'
 tags:
   - platform
   - shared-common

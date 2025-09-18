@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/get-padded-alert-time-range-util
+dependsOn: []
 tags:
   - observability
   - shared-common

@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/cloud_integrations/cloud_chat
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/core-plugins-server'
 tags:
   - platform
   - plugin

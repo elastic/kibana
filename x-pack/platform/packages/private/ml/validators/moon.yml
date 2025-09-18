@@ -17,6 +17,8 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/validators
+dependsOn:
+  - '@kbn/ml-parse-interval'
 tags:
   - platform
   - shared-common

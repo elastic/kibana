@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-sse-utils-client
+dependsOn:
+  - '@kbn/sse-utils'
 tags:
   - platform
   - shared-common

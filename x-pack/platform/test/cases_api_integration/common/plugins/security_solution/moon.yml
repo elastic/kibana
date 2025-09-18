@@ -18,6 +18,12 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/files-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/security-plugin'
 tags:
   - platform
   - plugin

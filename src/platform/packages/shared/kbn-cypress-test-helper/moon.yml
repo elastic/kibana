@@ -17,6 +17,17 @@ project:
   owner: '@elastic/security-solution'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cypress-test-helper
+dependsOn:
+  - '@kbn/es'
+  - '@kbn/security-plugin'
+  - '@kbn/tooling-log'
+  - '@kbn/repo-info'
+  - '@kbn/test'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/core-status-common'
+  - '@kbn/dev-utils'
+  - '@kbn/spaces-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - test-helper

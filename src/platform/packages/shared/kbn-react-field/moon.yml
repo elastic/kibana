@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-react-field
+dependsOn:
+  - '@kbn/css-utils'
 tags:
   - platform
   - shared-browser

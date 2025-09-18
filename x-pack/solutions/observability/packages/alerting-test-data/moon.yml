@@ -17,6 +17,10 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/alerting-test-data
+dependsOn:
+  - '@kbn/observability-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerting-comparators'
 tags:
   - observability
   - shared-common

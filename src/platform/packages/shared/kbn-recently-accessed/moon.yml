@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-recently-accessed
+dependsOn:
+  - '@kbn/crypto-browser'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - platform
   - shared-common

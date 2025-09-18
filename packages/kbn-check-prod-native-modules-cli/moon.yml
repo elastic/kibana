@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-check-prod-native-modules-cli
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/yarn-lock-validator'
 tags:
   - common
   - shared-server

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/prompt/no_data_views/types
+dependsOn:
+  - '@kbn/share-plugin'
 tags:
   - platform
   - shared-browser

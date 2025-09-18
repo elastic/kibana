@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/eui_provider_dev_warning
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/plugins/shared/screenshot_mode
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/utility-types-jest'
 tags:
   - platform
   - plugin

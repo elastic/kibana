@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-yarn-lock-validator
+dependsOn:
+  - '@kbn/some-dev-log'
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
 tags:
   - common
   - shared-common

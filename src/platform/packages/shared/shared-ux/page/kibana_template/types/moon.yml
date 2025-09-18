@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/page/kibana_template/types
+dependsOn:
+  - '@kbn/shared-ux-page-solution-nav'
+  - '@kbn/shared-ux-page-no-data-config-types'
 tags:
   - platform
   - shared-browser

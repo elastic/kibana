@@ -17,6 +17,22 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/cloud_integrations/cloud_links
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/cloud-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/i18n'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/user-profile-components'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/share-plugin'
+  - '@kbn/cloud'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-mount-utils-browser'
+  - '@kbn/core-plugins-browser'
+  - '@kbn/config'
 tags:
   - platform
   - plugin

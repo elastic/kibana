@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

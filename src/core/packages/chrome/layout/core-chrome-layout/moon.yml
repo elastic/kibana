@@ -17,6 +17,14 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/chrome/layout/core-chrome-layout
+dependsOn:
+  - '@kbn/core-application-common'
+  - '@kbn/core-application-browser-internal'
+  - '@kbn/core-chrome-browser-internal'
+  - '@kbn/core-overlays-browser'
+  - '@kbn/core-chrome-layout-components'
+  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/core-chrome-layout-feature-flags'
 tags:
   - platform
   - shared-browser

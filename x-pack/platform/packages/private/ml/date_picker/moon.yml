@@ -17,6 +17,18 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/date_picker
+dependsOn:
+  - '@kbn/es-query'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/ml-url-state'
+  - '@kbn/data-plugin'
+  - '@kbn/datemath'
+  - '@kbn/core'
+  - '@kbn/data-views-plugin'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/ml-query-utils'
+  - '@kbn/react-kibana-mount'
 tags:
   - platform
   - shared-browser

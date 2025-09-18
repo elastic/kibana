@@ -17,6 +17,13 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/favorites/favorites_public
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core-http-browser'
+  - '@kbn/content-management-favorites-server'
+  - '@kbn/i18n-react'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/core-user-profile-browser'
 tags:
   - platform
   - shared-browser

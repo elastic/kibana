@@ -18,6 +18,15 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/actions-plugin'
+  - '@kbn/alerting-api-integration-helpers'
+  - '@kbn/expect'
+  - '@kbn/dev-utils'
 tags:
   - platform
   - plugin

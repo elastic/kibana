@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/notifications/browser
+dependsOn:
+  - '@kbn/core-mount-utils-browser'
 tags:
   - platform
   - shared-browser

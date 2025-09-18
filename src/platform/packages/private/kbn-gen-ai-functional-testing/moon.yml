@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-gen-ai-functional-testing
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/repo-info'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,14 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/fields_metadata
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/io-ts-utils'
+  - '@kbn/logging'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-http-server'
+  - '@kbn/logging-mocks'
+  - '@kbn/otel-semantic-conventions'
 tags:
   - platform
   - plugin

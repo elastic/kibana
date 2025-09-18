@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/plugins/shared/dashboard_markdown
+dependsOn:
+  - '@kbn/css-utils'
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/visualizations-plugin'
+  - '@kbn/presentation-publishing'
+  - '@kbn/presentation-containers'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/embeddable-plugin'
 tags:
   - platform
   - plugin

@@ -17,6 +17,13 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/chat/packages/wc-framework-types-server
+dependsOn:
+  - '@kbn/inference-langchain'
+  - '@kbn/wc-framework-types-common'
+  - '@kbn/logging'
+  - '@kbn/utility-types'
+  - '@kbn/zod'
+  - '@kbn/core'
 tags:
   - chat
   - shared-common

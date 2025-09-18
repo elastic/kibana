@@ -17,6 +17,10 @@ project:
   owner: '@elastic/security-solution'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/indices_metadata
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

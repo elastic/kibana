@@ -17,6 +17,24 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/searchprofiler
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/dev-tools-plugin'
+  - '@kbn/home-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/i18n'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/expect'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/code-editor'
+  - '@kbn/monaco'
+  - '@kbn/css-utils'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

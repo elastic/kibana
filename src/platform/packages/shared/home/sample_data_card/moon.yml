@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/home/sample_data_card
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/home-sample-data-types'
+  - '@kbn/test-jest-helpers'
 tags:
   - platform
   - shared-common

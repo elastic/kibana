@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/developer_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-rendering-browser'
 tags:
   - common
   - plugin

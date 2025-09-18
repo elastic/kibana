@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-apm-types
+dependsOn:
+  - '@kbn/elastic-agent-utils'
 tags:
   - platform
   - shared-common

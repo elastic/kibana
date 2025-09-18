@@ -17,6 +17,10 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: src/platform/packages/shared/dashboards/dashboards-selector
+dependsOn:
+  - '@kbn/content-management-plugin'
+  - '@kbn/content-management-utils'
+  - '@kbn/core'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-screenshotting-server
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/config-schema'
 tags:
   - platform
   - shared-server

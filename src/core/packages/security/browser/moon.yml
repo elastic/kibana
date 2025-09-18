@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/security/browser
+dependsOn:
+  - '@kbn/core-security-common'
 tags:
   - platform
   - shared-browser

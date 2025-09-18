@@ -18,6 +18,7 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/solutions/observability/packages/observability-ai/observability-ai-common
+dependsOn: []
 tags:
   - observability
   - shared-common

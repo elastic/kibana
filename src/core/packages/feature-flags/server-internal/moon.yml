@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/feature-flags/server-internal
+dependsOn:
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/logging'
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/config-schema'
+  - '@kbn/config-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/std'
 tags:
   - platform
   - shared-server

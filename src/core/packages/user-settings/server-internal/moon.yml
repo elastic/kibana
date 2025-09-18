@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/core/packages/user-settings/server-internal
+dependsOn:
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/core-http-server'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/logging'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/core-user-profile-server-mocks'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server-internal'
 tags:
   - platform
   - shared-server

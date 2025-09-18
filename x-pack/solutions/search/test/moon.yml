@@ -17,6 +17,22 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/test
+dependsOn:
+  - '@kbn/test'
+  - '@kbn/core-http-common'
+  - '@kbn/scout-info'
+  - '@kbn/test-suites-xpack-platform'
+  - '@kbn/expect'
+  - '@kbn/search-playground'
+  - '@kbn/tooling-log'
+  - '@kbn/ftr-common-functional-ui-services'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/observability-ai-assistant-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/test-suites-src'
+  - '@kbn/dev-utils'
+  - '@kbn/cases-plugin'
+  - '@kbn/serverless-search-settings'
 tags:
   - search
   - test-helper

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/platform/packages/private/kbn-infra-forge
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/datemath'
 tags:
   - platform
   - shared-common

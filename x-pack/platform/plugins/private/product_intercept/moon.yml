@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/product_intercept
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/config-schema'
+  - '@kbn/i18n'
+  - '@kbn/intercepts-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/cloud-plugin'
+  - '@kbn/core-analytics-browser-mocks'
 tags:
   - platform
   - plugin

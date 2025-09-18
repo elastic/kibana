@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/files_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/files-plugin'
+  - '@kbn/shared-ux-file-types'
+  - '@kbn/shared-ux-file-context'
+  - '@kbn/shared-ux-file-image'
+  - '@kbn/shared-ux-file-upload'
+  - '@kbn/shared-ux-file-picker'
+  - '@kbn/developer-examples-plugin'
 tags:
   - common
   - plugin

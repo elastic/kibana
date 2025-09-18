@@ -17,6 +17,16 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/private/inspect_component
+dependsOn:
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/repo-info'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/logging'
 tags:
   - platform
   - plugin

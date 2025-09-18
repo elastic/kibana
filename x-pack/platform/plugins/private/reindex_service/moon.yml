@@ -17,6 +17,21 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/reindex_service
+dependsOn:
+  - '@kbn/security-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/core'
+  - '@kbn/upgrade-assistant-pkg-server'
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/core-http-server-utils'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/i18n'
+  - '@kbn/upgrade-assistant-pkg-common'
+  - '@kbn/std'
 tags:
   - platform
   - plugin

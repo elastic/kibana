@@ -17,6 +17,16 @@ project:
   owner: '@elastic/workflows-eng'
   metadata:
     sourceRoot: examples/workflows
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-router'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/i18n'
+  - '@kbn/navigation-plugin'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/code-editor'
+  - '@kbn/security-plugin'
 tags:
   - common
   - plugin

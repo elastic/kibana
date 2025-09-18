@@ -17,6 +17,18 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/private/advanced_settings
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/management-plugin'
+  - '@kbn/home-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/i18n'
+  - '@kbn/config-schema'
+  - '@kbn/core-plugins-server'
+  - '@kbn/management-settings-section-registry'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/management-settings-application'
+  - '@kbn/spaces-plugin'
 tags:
   - platform
   - plugin

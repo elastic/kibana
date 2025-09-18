@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-calculate-auto
+dependsOn: []
 tags:
   - platform
   - shared-common

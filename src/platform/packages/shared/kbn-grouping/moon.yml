@@ -17,6 +17,14 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-grouping
+dependsOn:
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-svg'
+  - '@kbn/analytics'
 tags:
   - platform
   - shared-common

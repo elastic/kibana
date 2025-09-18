@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/ai_infra/llm_tasks
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/config-schema'
+  - '@kbn/product-doc-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/product-doc-base-plugin'
+  - '@kbn/logging-mocks'
+  - '@kbn/inference-common'
 tags:
   - platform
   - plugin

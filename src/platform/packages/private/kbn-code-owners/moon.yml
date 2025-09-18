@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-code-owners
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-cli-runner'
 tags:
   - platform
   - shared-common

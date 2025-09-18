@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-encrypted-saved-objects-shared
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - shared-common

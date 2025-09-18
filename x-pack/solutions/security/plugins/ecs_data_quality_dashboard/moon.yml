@@ -17,6 +17,22 @@ project:
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/ecs_data_quality_dashboard
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-http-server'
+  - '@kbn/licensing-plugin'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/securitysolution-io-ts-utils'
+  - '@kbn/securitysolution-io-ts-types'
+  - '@kbn/i18n'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/data-stream-adapter'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-security-common'
+  - '@kbn/datemath'
 tags:
   - security
   - plugin

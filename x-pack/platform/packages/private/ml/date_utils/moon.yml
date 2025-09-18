@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/date_utils
+dependsOn:
+  - '@kbn/datemath'
+  - '@kbn/es-query'
 tags:
   - platform
   - shared-common

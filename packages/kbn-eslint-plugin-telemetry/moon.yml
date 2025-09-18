@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: packages/kbn-eslint-plugin-telemetry
+dependsOn:
+  - '@kbn/repo-packages'
+  - '@kbn/repo-info'
 tags:
   - common
   - shared-common

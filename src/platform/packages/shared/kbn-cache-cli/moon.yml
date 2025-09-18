@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cache-cli
+dependsOn:
+  - '@kbn/repo-info'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   metadata:
     sourceRoot: src/platform/packages/shared/serverless/settings/security_project
+dependsOn:
+  - '@kbn/management-settings-ids'
 tags:
   - platform
   - shared-common

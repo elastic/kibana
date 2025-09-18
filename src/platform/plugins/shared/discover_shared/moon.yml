@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/plugins/shared/discover_shared
+dependsOn:
+  - '@kbn/discover-utils'
+  - '@kbn/core'
+  - '@kbn/unified-data-table'
+  - '@kbn/es-query'
+  - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
 tags:
   - platform
   - plugin

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-grok-heuristics
+dependsOn:
+  - '@kbn/inference-common'
+  - '@kbn/zod'
+  - '@kbn/tooling-log'
+  - '@kbn/sample-log-parser'
 tags:
   - platform
   - shared-common

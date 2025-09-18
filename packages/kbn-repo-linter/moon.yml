@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-repo-linter
+dependsOn:
+  - '@kbn/repo-packages'
+  - '@kbn/tooling-log'
+  - '@kbn/ts-projects'
+  - '@kbn/repo-path'
+  - '@kbn/repo-info'
+  - '@kbn/some-dev-log'
 tags:
   - common
   - shared-common

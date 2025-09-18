@@ -18,6 +18,8 @@ project:
   metadata:
     sourceRoot: >-
       src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-infra/product-doc-common
+dependsOn:
+  - '@kbn/inference-common'
 tags:
   - platform
   - shared-common

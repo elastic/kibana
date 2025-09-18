@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/packages/shared/presentation/presentation_util
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-esql'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-utils
+dependsOn:
+  - '@kbn/data-views-plugin'
+  - '@kbn/crypto-browser'
+  - '@kbn/data-view-utils'
+  - '@kbn/esql-ast'
+  - '@kbn/esql-types'
+  - '@kbn/search-types'
+  - '@kbn/expressions-plugin'
+  - '@kbn/field-types'
+  - '@kbn/es-types'
+  - '@kbn/i18n'
+  - '@kbn/datemath'
+  - '@kbn/es-query'
+  - '@kbn/monaco'
 tags:
   - platform
   - shared-common

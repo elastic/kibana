@@ -17,6 +17,9 @@ project:
   owner: '@elastic/workchat-eng'
   metadata:
     sourceRoot: x-pack/solutions/chat/test
+dependsOn:
+  - '@kbn/test'
+  - '@kbn/test-suites-xpack-platform'
 tags:
   - chat
   - test-helper

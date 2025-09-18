@@ -17,6 +17,10 @@ project:
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/expandable-flyout
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/i18n-react'
 tags:
   - security
   - shared-browser

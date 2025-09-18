@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/page/solution_nav
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-avatar-solution'
 tags:
   - platform
   - shared-browser

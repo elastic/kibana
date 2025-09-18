@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-router-utils
+dependsOn: []
 tags:
   - platform
   - shared-common

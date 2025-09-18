@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-import-resolver
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/jest-serializers'
+  - '@kbn/repo-packages'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/cloud
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/logging-mocks'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/std'
+  - '@kbn/projects-solutions-groups'
 tags:
   - platform
   - plugin

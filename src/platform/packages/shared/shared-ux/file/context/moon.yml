@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/file/context
+dependsOn:
+  - '@kbn/shared-ux-file-types'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-dom-drag-drop
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

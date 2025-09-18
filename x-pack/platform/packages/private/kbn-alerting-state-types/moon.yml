@@ -17,6 +17,8 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/packages/private/kbn-alerting-state-types
+dependsOn:
+  - '@kbn/config-schema'
 tags:
   - platform
   - shared-server

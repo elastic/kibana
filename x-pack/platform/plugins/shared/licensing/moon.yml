@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/licensing
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/i18n-react'
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/std'
+  - '@kbn/i18n'
+  - '@kbn/logging-mocks'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

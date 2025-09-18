@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-page-attachment-schema
+dependsOn:
+  - '@kbn/zod'
 tags:
   - platform
   - shared-common

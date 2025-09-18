@@ -17,6 +17,22 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/serverless_observability
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/management-plugin'
+  - '@kbn/serverless'
+  - '@kbn/observability-shared-plugin'
+  - '@kbn/i18n'
+  - '@kbn/management-cards-navigation'
+  - '@kbn/observability-plugin'
+  - '@kbn/serverless-observability-settings'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/discover-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/streams-plugin'
+  - '@kbn/observability-ai-assistant-plugin'
+  - '@kbn/cases-plugin'
 tags:
   - observability
   - plugin

@@ -17,6 +17,17 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/profiling_data_access
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/es-query'
+  - '@kbn/es-types'
+  - '@kbn/apm-utils'
+  - '@kbn/profiling-utils'
+  - '@kbn/fleet-plugin'
+  - '@kbn/cloud-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/observability-plugin'
 tags:
   - observability
   - plugin

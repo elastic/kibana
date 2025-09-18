@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-lint-packages-cli
+dependsOn:
+  - '@kbn/repo-linter'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/get-repo-files'
+  - '@kbn/repo-packages'
+  - '@kbn/repo-info'
+  - '@kbn/ts-projects'
+  - '@kbn/repo-file-maps'
+  - '@kbn/json-ast'
+  - '@kbn/set-map'
+  - '@kbn/std'
+  - '@kbn/repo-path'
+  - '@kbn/picomatcher'
 tags:
   - common
   - shared-common

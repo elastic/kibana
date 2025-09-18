@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/packages/private/upgrade-assistant/public
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-browser

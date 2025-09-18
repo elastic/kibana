@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-test-eui-helpers
+dependsOn: []
 tags:
   - platform
   - shared-common

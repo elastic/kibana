@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-defend-workflows'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-osquery-io-ts-types
+dependsOn:
+  - '@kbn/io-ts-utils'
 tags:
   - platform
   - shared-common

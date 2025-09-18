@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-repo-file-maps
+dependsOn:
+  - '@kbn/set-map'
+  - '@kbn/repo-packages'
+  - '@kbn/repo-path'
+  - '@kbn/repo-linter'
+  - '@kbn/repo-info'
+  - '@kbn/picomatcher'
+  - '@kbn/ts-projects'
 tags:
   - common
   - shared-common

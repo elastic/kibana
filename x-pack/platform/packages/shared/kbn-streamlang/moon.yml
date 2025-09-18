@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-streamlang
+dependsOn:
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - platform
   - shared-common

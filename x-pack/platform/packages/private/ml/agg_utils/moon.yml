@@ -17,6 +17,13 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/agg_utils
+dependsOn:
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/field-types'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/ml-string-hash'
+  - '@kbn/data-views-plugin'
+  - '@kbn/ml-random-sampler-utils'
 tags:
   - platform
   - shared-common

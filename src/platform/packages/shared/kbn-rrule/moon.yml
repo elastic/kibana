@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-rrule
+dependsOn: []
 tags:
   - platform
   - shared-common

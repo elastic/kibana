@@ -17,6 +17,10 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/url_state
+dependsOn:
+  - '@kbn/ml-nested-property'
+  - '@kbn/rison'
+  - '@kbn/ml-is-populated-object'
 tags:
   - platform
   - shared-common

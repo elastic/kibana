@@ -17,6 +17,8 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/random_sampler_utils
+dependsOn:
+  - '@kbn/ml-is-populated-object'
 tags:
   - platform
   - shared-common

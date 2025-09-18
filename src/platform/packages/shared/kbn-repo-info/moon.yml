@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-repo-info
+dependsOn:
+  - '@kbn/projects-solutions-groups'
 tags:
   - platform
   - shared-common

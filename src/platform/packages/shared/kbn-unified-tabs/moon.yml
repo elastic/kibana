@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unified-tabs
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/es-query'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/core'
 tags:
   - platform
   - shared-browser

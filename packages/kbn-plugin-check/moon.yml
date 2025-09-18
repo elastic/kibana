@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: packages/kbn-plugin-check
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/docs-utils'
+  - '@kbn/dev-cli-runner'
 tags:
   - common
   - shared-server

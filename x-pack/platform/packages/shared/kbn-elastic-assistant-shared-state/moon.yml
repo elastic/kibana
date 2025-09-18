@@ -17,6 +17,9 @@ project:
   owner: '@elastic/security-generative-ai'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state
+dependsOn:
+  - '@kbn/elastic-assistant'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - platform
   - shared-browser

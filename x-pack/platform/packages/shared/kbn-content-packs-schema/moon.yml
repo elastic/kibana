@@ -17,6 +17,16 @@ project:
   owner: '@elastic/streams-program-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-content-packs-schema
+dependsOn:
+  - '@kbn/esql-utils'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/core'
+  - '@kbn/es-query'
+  - '@kbn/lens-plugin'
+  - '@kbn/zod'
+  - '@kbn/data-views-plugin'
+  - '@kbn/streams-schema'
 tags:
   - platform
   - shared-common

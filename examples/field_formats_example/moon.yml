@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: examples/field_formats_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/data-view-field-editor-plugin'
+  - '@kbn/field-types'
 tags:
   - common
   - plugin

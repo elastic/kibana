@@ -17,6 +17,8 @@ project:
   owner: '@elastic/workflows-eng'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-workflows
+dependsOn:
+  - '@kbn/zod'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,23 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/plugins/shared/usage_collection
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/analytics'
+  - '@kbn/config-schema'
+  - '@kbn/screenshot-mode-plugin'
+  - '@kbn/std'
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/analytics-collection-utils'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/es-query'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-saved-objects-api-server'
 tags:
   - platform
   - plugin

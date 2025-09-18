@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-aiops-utils
+dependsOn:
+  - '@kbn/data-views-plugin'
+  - '@kbn/field-types'
 tags:
   - platform
   - shared-common

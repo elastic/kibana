@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/error_utils
+dependsOn:
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/core-http-browser'
 tags:
   - platform
   - shared-common

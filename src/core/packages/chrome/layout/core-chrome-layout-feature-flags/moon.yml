@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/chrome/layout/core-chrome-layout-feature-flags
+dependsOn:
+  - '@kbn/core-feature-flags-browser'
 tags:
   - platform
   - shared-browser

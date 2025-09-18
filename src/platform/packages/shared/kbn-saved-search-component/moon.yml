@@ -17,6 +17,16 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-saved-search-component
+dependsOn:
+  - '@kbn/embeddable-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/discover-utils'
+  - '@kbn/es-query'
+  - '@kbn/data-plugin'
+  - '@kbn/discover-plugin'
+  - '@kbn/i18n'
+  - '@kbn/presentation-publishing'
+  - '@kbn/saved-search-plugin'
 tags:
   - platform
   - shared-browser

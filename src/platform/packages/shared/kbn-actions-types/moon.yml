@@ -17,6 +17,8 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-actions-types
+dependsOn:
+  - '@kbn/licensing-types'
 tags:
   - platform
   - shared-common

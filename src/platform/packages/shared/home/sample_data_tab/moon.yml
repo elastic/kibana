@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/home/sample_data_tab
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/home-sample-data-card'
+  - '@kbn/home-sample-data-types'
 tags:
   - platform
   - shared-common

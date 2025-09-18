@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/injected-metadata/common-internal
+dependsOn:
+  - '@kbn/config'
+  - '@kbn/ui-shared-deps-npm'
+  - '@kbn/core-base-common'
+  - '@kbn/core-custom-branding-common'
+  - '@kbn/core-logging-common-internal'
+  - '@kbn/core-ui-settings-common'
 tags:
   - platform
   - shared-common

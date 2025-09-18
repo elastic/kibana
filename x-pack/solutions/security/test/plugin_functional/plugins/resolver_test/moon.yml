@@ -17,6 +17,13 @@ project:
   owner: '@elastic/security-solution'
   metadata:
     sourceRoot: x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/security-solution-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-router'
 tags:
   - security
   - plugin

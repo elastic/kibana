@@ -17,6 +17,33 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-ai-assistant
+dependsOn:
+  - '@kbn/core-http-browser'
+  - '@kbn/i18n'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/actions-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/core'
+  - '@kbn/observability-ai-assistant-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/std'
+  - '@kbn/utility-types-jest'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/monaco'
+  - '@kbn/licensing-plugin'
+  - '@kbn/code-editor'
+  - '@kbn/ml-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/inference-common'
+  - '@kbn/storybook'
+  - '@kbn/ai-assistant-icon'
+  - '@kbn/datemath'
+  - '@kbn/security-plugin-types-common'
+  - '@kbn/ml-trained-models-utils'
+  - '@kbn/licensing-types'
+  - '@kbn/product-doc-base-plugin'
 tags:
   - platform
   - shared-browser

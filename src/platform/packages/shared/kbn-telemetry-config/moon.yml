@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-telemetry-config
+dependsOn:
+  - '@kbn/tracing-config'
+  - '@kbn/config-schema'
+  - '@kbn/metrics-config'
 tags:
   - platform
   - shared-common

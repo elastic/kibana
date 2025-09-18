@@ -17,6 +17,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

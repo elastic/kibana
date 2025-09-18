@@ -17,6 +17,13 @@ project:
   owner: '@elastic/security-detection-engine'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-lists-common
+dependsOn:
+  - '@kbn/zod-helpers'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
+  - '@kbn/core-http-common'
+  - '@kbn/securitysolution-utils'
+  - '@kbn/zod'
 tags:
   - security
   - shared-common

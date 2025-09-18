@@ -17,6 +17,25 @@ project:
   owner: '@elastic/kibana-cloud-security-posture'
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/session_view
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/security-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/rule-registry-plugin'
+  - '@kbn/i18n'
+  - '@kbn/std'
+  - '@kbn/ui-theme'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/alerting-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/securitysolution-es-utils'
+  - '@kbn/shared-ux-router'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/analytics'
+  - '@kbn/securitysolution-rules'
+  - '@kbn/es-types'
 tags:
   - security
   - plugin

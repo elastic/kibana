@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-router-to-openapispec
+dependsOn:
+  - '@kbn/core-http-router-server-internal'
+  - '@kbn/core-http-server'
+  - '@kbn/config-schema'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-server

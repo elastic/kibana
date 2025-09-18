@@ -17,6 +17,12 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/prompt/no_data_views/impl
+dependsOn:
+  - '@kbn/i18n-react'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/shared-ux-prompt-no-data-views-types'
+  - '@kbn/shared-ux-prompt-no-data-views-mocks'
+  - '@kbn/deeplinks-analytics'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,18 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-ai-tools
+dependsOn:
+  - '@kbn/aiops-log-pattern-analysis'
+  - '@kbn/calculate-auto'
+  - '@kbn/core'
+  - '@kbn/es-query'
+  - '@kbn/es-types'
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/std'
+  - '@kbn/traced-es-client'
+  - '@kbn/zod'
 tags:
   - platform
   - shared-server

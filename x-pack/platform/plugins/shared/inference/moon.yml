@@ -17,6 +17,32 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/inference
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/esql-ast'
+  - '@kbn/esql-validation-autocomplete'
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/babel-register'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/expect'
+  - '@kbn/tooling-log'
+  - '@kbn/repo-info'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-http-server'
+  - '@kbn/actions-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/inference-common'
+  - '@kbn/es-types'
+  - '@kbn/field-types'
+  - '@kbn/expressions-plugin'
+  - '@kbn/inference-langchain'
+  - '@kbn/sse-utils-server'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/sse-utils-client'
+  - '@kbn/zod'
+  - '@kbn/inference-tracing'
+  - '@kbn/core-ui-settings-common'
 tags:
   - platform
   - plugin

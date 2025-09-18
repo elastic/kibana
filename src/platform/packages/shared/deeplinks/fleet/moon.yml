@@ -17,6 +17,7 @@ project:
   owner: '@elastic/fleet'
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/fleet
+dependsOn: []
 tags:
   - platform
   - shared-common

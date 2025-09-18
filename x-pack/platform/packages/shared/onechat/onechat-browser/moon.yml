@@ -17,6 +17,8 @@ project:
   owner: '@elastic/workchat-eng'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/onechat/onechat-browser
+dependsOn:
+  - '@kbn/onechat-common'
 tags:
   - platform
   - shared-common

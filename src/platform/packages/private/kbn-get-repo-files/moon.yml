@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-get-repo-files
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/repo-path'
+  - '@kbn/repo-packages'
 tags:
   - platform
   - shared-common

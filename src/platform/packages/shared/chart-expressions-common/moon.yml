@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/chart-expressions-common
+dependsOn:
+  - '@kbn/core-execution-context-common'
+  - '@kbn/expressions-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/coloring'
 tags:
   - platform
   - shared-common

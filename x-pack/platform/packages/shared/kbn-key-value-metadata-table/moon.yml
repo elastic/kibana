@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-key-value-metadata-table
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

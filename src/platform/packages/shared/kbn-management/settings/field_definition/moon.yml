@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/settings/field_definition
+dependsOn:
+  - '@kbn/management-settings-types'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/management-settings-utilities'
 tags:
   - platform
   - shared-browser

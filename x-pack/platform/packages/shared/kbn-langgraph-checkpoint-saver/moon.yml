@@ -17,6 +17,11 @@ project:
   owner: '@elastic/security-generative-ai'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver
+dependsOn:
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-saved-objects-utils-server'
 tags:
   - platform
   - shared-server

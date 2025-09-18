@@ -17,6 +17,22 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-cli-dev-mode
+dependsOn:
+  - '@kbn/config'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/optimizer'
+  - '@kbn/server-http-tools'
+  - '@kbn/repo-info'
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/jest-serializers'
+  - '@kbn/stdio-dev-helpers'
+  - '@kbn/tooling-log'
+  - '@kbn/repo-source-classifier'
+  - '@kbn/import-resolver'
+  - '@kbn/picomatcher'
+  - '@kbn/repo-packages'
+  - '@kbn/dev-utils'
 tags:
   - common
   - shared-server

@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/di/browser-internal
+dependsOn:
+  - '@kbn/std'
+  - '@kbn/core-application-browser'
+  - '@kbn/core-di'
+  - '@kbn/core-di-browser'
+  - '@kbn/core-di-internal'
+  - '@kbn/core-di-mocks'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-scout-reporting
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/scout-info'
+  - '@kbn/repo-info'
+  - '@kbn/code-owners'
+  - '@kbn/repo-packages'
+  - '@kbn/zod'
 tags:
   - platform
   - shared-common

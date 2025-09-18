@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/plugins/private/vis_type_markdown
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/expressions-plugin'
+  - '@kbn/visualizations-plugin'
+  - '@kbn/vis-default-editor-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/data-plugin'
 tags:
   - platform
   - plugin

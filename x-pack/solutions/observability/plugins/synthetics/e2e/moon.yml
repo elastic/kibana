@@ -17,6 +17,13 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/synthetics/e2e
+dependsOn:
+  - '@kbn/test'
+  - '@kbn/dev-utils'
+  - '@kbn/ftr-common-functional-services'
+  - '@kbn/synthetics-plugin'
+  - '@kbn/observability-synthetics-test-data'
+  - '@kbn/ftr-common-functional-ui-services'
 tags:
   - observability
   - test-helper

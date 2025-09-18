@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/plugins/shared/dev_tools
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/url-forwarding-plugin'
+  - '@kbn/management-plugin'
+  - '@kbn/i18n'
+  - '@kbn/shared-ux-router'
+  - '@kbn/deeplinks-devtools'
+  - '@kbn/config-schema'
+  - '@kbn/core-plugins-server'
+  - '@kbn/react-kibana-context-render'
 tags:
   - platform
   - plugin

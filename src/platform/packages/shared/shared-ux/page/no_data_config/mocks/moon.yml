@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/page/no_data_config/mocks
+dependsOn:
+  - '@kbn/shared-ux-page-no-data-mocks'
+  - '@kbn/shared-ux-storybook-mock'
+  - '@kbn/shared-ux-page-no-data-config-types'
 tags:
   - platform
   - shared-common

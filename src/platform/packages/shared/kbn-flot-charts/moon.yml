@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-flot-charts
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

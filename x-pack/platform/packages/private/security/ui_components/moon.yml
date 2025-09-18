@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/packages/private/security/ui_components
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/security-plugin-types-common'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/security-role-management-model'
+  - '@kbn/features-plugin'
 tags:
   - platform
   - shared-browser

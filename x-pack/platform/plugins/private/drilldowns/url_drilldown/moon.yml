@@ -17,6 +17,23 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/drilldowns/url_drilldown
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/ui-actions-enhanced-plugin'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/i18n'
+  - '@kbn/es-query'
+  - '@kbn/monaco'
+  - '@kbn/std'
+  - '@kbn/image-embeddable-plugin'
+  - '@kbn/core-ui-settings-browser-mocks'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/core-theme-browser-mocks'
+  - '@kbn/presentation-publishing'
 tags:
   - platform
   - plugin

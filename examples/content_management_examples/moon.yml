@@ -17,6 +17,21 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/content_management_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/content-management-plugin'
+  - '@kbn/shared-ux-link-redirect-app'
+  - '@kbn/content-management-table-list-view'
+  - '@kbn/content-management-table-list-view-table'
+  - '@kbn/i18n-react'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/core-saved-objects-api-browser'
+  - '@kbn/content-management-table-list-view-table'
+  - '@kbn/content-management-table-list-view'
+  - '@kbn/shared-ux-router'
+  - '@kbn/saved-objects-finder-plugin'
+  - '@kbn/content-management-table-list-view-common'
 tags:
   - common
   - plugin

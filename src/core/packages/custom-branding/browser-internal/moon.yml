@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/custom-branding/browser-internal
+dependsOn:
+  - '@kbn/core-custom-branding-browser'
+  - '@kbn/core-custom-branding-common'
 tags:
   - platform
   - shared-browser

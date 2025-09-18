@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: examples/feature_flags_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/core-plugins-server'
+  - '@kbn/config-schema'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/core-feature-flags-browser'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

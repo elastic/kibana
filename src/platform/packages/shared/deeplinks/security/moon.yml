@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-solution'
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/security
+dependsOn: []
 tags:
   - platform
   - shared-common

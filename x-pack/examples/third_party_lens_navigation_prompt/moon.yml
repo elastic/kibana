@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: x-pack/examples/third_party_lens_navigation_prompt
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-views-plugin'
+  - '@kbn/lens-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/data-plugin'
 tags:
   - common
   - plugin

@@ -17,6 +17,12 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-inference-prompt-utils
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/inference-common'
+  - '@kbn/inference-tracing'
+  - '@kbn/zod'
 tags:
   - platform
   - shared-server

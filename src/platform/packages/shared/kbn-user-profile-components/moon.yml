@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-user-profile-components
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core'
+  - '@kbn/core-theme-browser'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/core-user-profile-browser'
 tags:
   - platform
   - shared-common

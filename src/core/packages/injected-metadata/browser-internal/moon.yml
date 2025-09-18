@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/injected-metadata/browser-internal
+dependsOn:
+  - '@kbn/std'
+  - '@kbn/core-base-common'
+  - '@kbn/core-injected-metadata-common-internal'
+  - '@kbn/core-custom-branding-common'
 tags:
   - platform
   - shared-browser

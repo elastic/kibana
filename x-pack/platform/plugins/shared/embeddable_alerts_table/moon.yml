@@ -17,6 +17,30 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/embeddable_alerts_table
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/presentation-containers'
+  - '@kbn/presentation-publishing'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/response-ops-alerts-table'
+  - '@kbn/response-ops-rules-apis'
+  - '@kbn/data-plugin'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/rule-data-utils'
+  - '@kbn/response-ops-alerts-filters-form'
+  - '@kbn/i18n-react'
+  - '@kbn/alerting-types'
+  - '@kbn/es-query'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/presentation-util'
 tags:
   - platform
   - plugin

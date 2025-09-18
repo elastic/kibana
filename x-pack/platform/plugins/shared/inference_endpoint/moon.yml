@@ -17,6 +17,12 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/inference_endpoint
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/config-schema'
+  - '@kbn/safer-lodash-set'
 tags:
   - platform
   - plugin

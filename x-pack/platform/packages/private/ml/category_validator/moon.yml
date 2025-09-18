@@ -17,6 +17,10 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/category_validator
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/ml-runtime-field-utils'
 tags:
   - platform
   - shared-common

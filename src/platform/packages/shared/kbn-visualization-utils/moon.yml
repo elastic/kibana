@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-visualization-utils
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/interpreter'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
+  - '@kbn/data-plugin'
 tags:
   - platform
   - shared-common

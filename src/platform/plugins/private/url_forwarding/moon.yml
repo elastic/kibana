@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/plugins/private/url_forwarding
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

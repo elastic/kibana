@@ -17,6 +17,11 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/error_boundary
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/shared-ux-page-kibana-template'
 tags:
   - common
   - plugin

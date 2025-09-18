@@ -17,6 +17,11 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-search-index-documents
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - platform
   - shared-common

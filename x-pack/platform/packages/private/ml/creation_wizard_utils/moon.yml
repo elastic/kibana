@@ -17,6 +17,8 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/creation_wizard_utils
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

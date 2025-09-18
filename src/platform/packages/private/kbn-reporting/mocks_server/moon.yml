@@ -17,6 +17,8 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-reporting/mocks_server
+dependsOn:
+  - '@kbn/reporting-server'
 tags:
   - platform
   - shared-common

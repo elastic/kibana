@@ -17,6 +17,12 @@ project:
   owner: '@elastic/security-generative-ai'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/security-ai-prompts
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/actions-plugin'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/utility-types'
+  - '@kbn/inference-common'
 tags:
   - security
   - shared-server

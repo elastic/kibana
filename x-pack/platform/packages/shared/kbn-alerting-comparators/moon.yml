@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-alerting-comparators
+dependsOn: []
 tags:
   - platform
   - shared-common

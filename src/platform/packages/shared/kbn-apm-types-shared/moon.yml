@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-apm-types-shared
+dependsOn: []
 tags:
   - platform
   - shared-common

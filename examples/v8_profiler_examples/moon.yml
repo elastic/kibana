@@ -17,6 +17,9 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: examples/v8_profiler_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
 tags:
   - common
   - plugin

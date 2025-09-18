@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: packages/kbn-capture-oas-snapshot-cli
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/core-plugins-server-internal'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/test'
+  - '@kbn/dev-utils'
+  - '@kbn/tooling-log'
 tags:
   - common
   - shared-common

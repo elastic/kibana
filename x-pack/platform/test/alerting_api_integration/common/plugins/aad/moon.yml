@@ -17,6 +17,12 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/aad
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/alerting-plugin'
 tags:
   - platform
   - plugin

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/eui-team'
   metadata:
     sourceRoot: src/core/packages/chrome/navigation
+dependsOn:
+  - '@kbn/core-chrome-layout-components'
+  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
 tags:
   - platform
   - shared-browser

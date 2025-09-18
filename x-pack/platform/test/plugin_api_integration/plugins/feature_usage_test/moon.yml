@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/licensing-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

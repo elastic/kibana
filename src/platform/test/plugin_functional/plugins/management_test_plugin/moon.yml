@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/management_test_plugin
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/management-plugin'
+  - '@kbn/shared-ux-router'
 tags:
   - platform
   - plugin

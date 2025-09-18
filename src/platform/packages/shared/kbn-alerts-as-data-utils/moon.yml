@@ -17,6 +17,9 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-alerts-as-data-utils
+dependsOn:
+  - '@kbn/rule-data-utils'
+  - '@kbn/safer-lodash-set'
 tags:
   - platform
   - shared-common

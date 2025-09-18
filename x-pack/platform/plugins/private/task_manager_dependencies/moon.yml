@@ -17,6 +17,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/task_manager_dependencies
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/task-manager-plugin'
 tags:
   - platform
   - plugin

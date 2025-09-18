@@ -17,6 +17,11 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/response-ops/alerts-fields-browser
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/rule-registry-plugin'
+  - '@kbn/alerts-as-data-utils'
+  - '@kbn/rule-data-utils'
 tags:
   - platform
   - shared-browser

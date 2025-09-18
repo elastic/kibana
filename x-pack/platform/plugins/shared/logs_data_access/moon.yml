@@ -17,6 +17,26 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/logs_data_access
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/calculate-auto'
+  - '@kbn/es-types'
+  - '@kbn/core-http-server'
+  - '@kbn/management-settings-ids'
+  - '@kbn/config-schema'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/i18n'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/es-query'
+  - '@kbn/use-tracked-promise'
+  - '@kbn/core-application-browser'
+  - '@kbn/i18n-react'
 tags:
   - platform
   - plugin

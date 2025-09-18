@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-test-jest-helpers
+dependsOn:
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-router'
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

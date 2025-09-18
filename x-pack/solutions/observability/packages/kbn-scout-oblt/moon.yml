@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/kbn-scout-oblt
+dependsOn:
+  - '@kbn/scout'
+  - '@kbn/data-forge'
+  - '@kbn/test'
 tags:
   - observability
   - test-helper

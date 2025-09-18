@@ -17,6 +17,13 @@ project:
   owner: '@elastic/kibana-esql'
   metadata:
     sourceRoot: examples/esql_validation_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/esql-validation-autocomplete'
+  - '@kbn/esql-ast'
 tags:
   - common
   - plugin

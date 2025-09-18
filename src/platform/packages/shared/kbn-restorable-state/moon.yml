@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-restorable-state
+dependsOn:
+  - '@kbn/kibana-utils-plugin'
 tags:
   - platform
   - shared-browser

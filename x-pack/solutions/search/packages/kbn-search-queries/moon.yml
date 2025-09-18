@@ -17,6 +17,7 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/packages/kbn-search-queries
+dependsOn: []
 tags:
   - search
   - shared-common

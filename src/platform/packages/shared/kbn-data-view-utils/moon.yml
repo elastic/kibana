@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-data-view-utils
+dependsOn:
+  - '@kbn/data-views-plugin'
+  - '@kbn/expressions-plugin'
 tags:
   - platform
   - shared-common

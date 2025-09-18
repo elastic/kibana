@@ -18,6 +18,11 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/platform/packages/shared/index-management/index_management_shared_types
+dependsOn:
+  - '@kbn/core-application-browser'
+  - '@kbn/utility-types'
+  - '@kbn/share-plugin'
+  - '@kbn/management-plugin'
 tags:
   - platform
   - shared-common

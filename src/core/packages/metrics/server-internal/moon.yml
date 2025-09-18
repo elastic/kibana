@@ -17,6 +17,24 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/metrics/server-internal
+dependsOn:
+  - '@kbn/logging'
+  - '@kbn/config-schema'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-http-server-internal'
+  - '@kbn/core-metrics-server'
+  - '@kbn/core-metrics-collectors-server-internal'
+  - '@kbn/core-elasticsearch-server-internal'
+  - '@kbn/core-metrics-collectors-server-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-elasticsearch-client-server-internal'
+  - '@kbn/config-mocks'
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-http-server'
+  - '@kbn/safer-lodash-set'
 tags:
   - platform
   - shared-server

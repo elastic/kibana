@@ -17,6 +17,11 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/chat/packages/wci-server
+dependsOn:
+  - '@kbn/wci-common'
+  - '@kbn/utility-types'
+  - '@kbn/core'
+  - '@kbn/zod'
 tags:
   - chat
   - shared-server

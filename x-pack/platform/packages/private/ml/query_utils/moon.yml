@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/query_utils
+dependsOn:
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/es-query'
 tags:
   - platform
   - shared-common

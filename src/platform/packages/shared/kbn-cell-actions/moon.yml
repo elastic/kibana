@@ -17,6 +17,17 @@ project:
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cell-actions
+dependsOn:
+  - '@kbn/ui-theme'
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/es-query'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/field-types'
+  - '@kbn/data-views-plugin'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-common

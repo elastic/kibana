@@ -17,6 +17,19 @@ project:
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/ecs-data-quality-dashboard
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/elastic-assistant'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/core'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/ai-assistant-icon'
+  - '@kbn/react-kibana-context-render'
 tags:
   - security
   - shared-browser

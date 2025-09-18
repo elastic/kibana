@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/test/common/plugins/otel_metrics
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

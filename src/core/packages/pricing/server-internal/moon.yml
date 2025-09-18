@@ -17,6 +17,18 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/pricing/server-internal
+dependsOn:
+  - '@kbn/config'
+  - '@kbn/config-schema'
+  - '@kbn/core-pricing-common'
+  - '@kbn/core-http-server'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/logging'
+  - '@kbn/core-http-server-internal'
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-pricing-server'
 tags:
   - platform
   - shared-server

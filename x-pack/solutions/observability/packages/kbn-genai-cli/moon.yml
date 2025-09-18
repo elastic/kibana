@@ -17,6 +17,11 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/kbn-genai-cli
+dependsOn:
+  - '@kbn/inference-common'
+  - '@kbn/kibana-api-cli'
+  - '@kbn/inference-cli'
+  - '@kbn/zod'
 tags:
   - observability
   - shared-common

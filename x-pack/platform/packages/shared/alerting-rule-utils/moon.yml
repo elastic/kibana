@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/alerting-rule-utils
+dependsOn:
+  - '@kbn/alerts-as-data-utils'
+  - '@kbn/object-utils'
 tags:
   - platform
   - shared-common

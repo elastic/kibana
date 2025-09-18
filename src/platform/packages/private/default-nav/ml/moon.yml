@@ -17,6 +17,10 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: src/platform/packages/private/default-nav/ml
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/deeplinks-ml'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,30 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-test
+dependsOn:
+  - '@kbn/dev-utils'
+  - '@kbn/std'
+  - '@kbn/tooling-log'
+  - '@kbn/get-repo-files'
+  - '@kbn/peggy'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/repo-info'
+  - '@kbn/es'
+  - '@kbn/dev-proc-runner'
+  - '@kbn/jest-serializers'
+  - '@kbn/stdio-dev-helpers'
+  - '@kbn/babel-register'
+  - '@kbn/repo-packages'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/mock-idp-utils'
+  - '@kbn/code-owners'
+  - '@kbn/scout-reporting'
+  - '@kbn/scout-info'
+  - '@kbn/react-mute-legacy-root-warning'
+  - '@kbn/babel-preset'
+  - '@kbn/dot-text'
 tags:
   - platform
   - shared-common

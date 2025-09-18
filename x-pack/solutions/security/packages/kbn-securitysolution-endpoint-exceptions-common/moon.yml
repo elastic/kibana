@@ -18,6 +18,10 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common
+dependsOn:
+  - '@kbn/securitysolution-exceptions-common'
+  - '@kbn/openapi-common'
+  - '@kbn/zod'
 tags:
   - security
   - shared-common

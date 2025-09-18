@@ -17,6 +17,9 @@ project:
   owner: '@elastic/security-generative-ai'
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/elastic_assistant_shared_state
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/elastic-assistant-shared-state'
 tags:
   - security
   - plugin

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-import-locator
+dependsOn: []
 tags:
   - common
   - shared-common

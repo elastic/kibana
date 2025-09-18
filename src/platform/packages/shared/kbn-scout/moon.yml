@@ -17,6 +17,28 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-scout
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/repo-info'
+  - '@kbn/es'
+  - '@kbn/dev-proc-runner'
+  - '@kbn/test'
+  - '@kbn/es-archiver'
+  - '@kbn/dev-utils'
+  - '@kbn/mock-idp-utils'
+  - '@kbn/test-subj-selector'
+  - '@kbn/scout-info'
+  - '@kbn/scout-reporting'
+  - '@kbn/apm-synthtrace'
+  - '@kbn/apm-synthtrace-client'
+  - '@kbn/projects-solutions-groups'
+  - '@kbn/zod'
+  - '@kbn/core-http-common'
+  - '@kbn/streams-schema'
+  - '@kbn/streamlang'
 tags:
   - platform
   - test-helper

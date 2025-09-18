@@ -17,6 +17,25 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/plugins/search_assistant
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/observability-ai-assistant-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/ai-assistant'
+  - '@kbn/i18n'
+  - '@kbn/serverless'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/shared-ux-link-redirect-app'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/licensing-plugin'
+  - '@kbn/ml-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/ai-assistant-icon'
 tags:
   - search
   - plugin

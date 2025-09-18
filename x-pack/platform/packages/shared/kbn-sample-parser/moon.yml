@@ -17,6 +17,10 @@ project:
   owner: '@elastic/streams-program-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-sample-parser
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/repo-info'
+  - '@kbn/zod'
 tags:
   - platform
   - shared-common

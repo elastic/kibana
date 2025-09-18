@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: packages/kbn-relocate
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
+  - '@kbn/tooling-log'
+  - '@kbn/projects-solutions-groups'
 tags:
   - common
   - shared-server

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-triggers-actions-ui-types
+dependsOn:
+  - '@kbn/alerting-types'
 tags:
   - platform
   - shared-common

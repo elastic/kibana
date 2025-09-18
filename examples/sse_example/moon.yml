@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: examples/sse_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-plugins-server'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/sse-utils-client'
+  - '@kbn/sse-utils-server'
+  - '@kbn/sse-utils'
 tags:
   - common
   - plugin

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/observability
+dependsOn:
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-common

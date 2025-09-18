@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-ftr-common-functional-ui-services
+dependsOn:
+  - '@kbn/test'
+  - '@kbn/tooling-log'
+  - '@kbn/repo-info'
+  - '@kbn/test-subj-selector'
+  - '@kbn/ftr-common-functional-services'
+  - '@kbn/std'
+  - '@kbn/expect'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - platform
   - test-helper

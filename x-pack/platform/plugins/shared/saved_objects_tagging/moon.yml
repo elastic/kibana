@@ -17,6 +17,22 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/saved_objects_tagging
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/management-plugin'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/i18n'
+  - '@kbn/utility-types'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/ebt-tools'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - platform
   - plugin

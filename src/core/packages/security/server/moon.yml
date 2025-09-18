@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/security/server
+dependsOn:
+  - '@kbn/core-security-common'
+  - '@kbn/core-http-server'
+  - '@kbn/logging'
 tags:
   - platform
   - shared-server

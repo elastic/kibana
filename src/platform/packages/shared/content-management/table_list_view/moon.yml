@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/table_list_view
+dependsOn:
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/content-management-table-list-view-table'
+  - '@kbn/content-management-table-list-view-common'
 tags:
   - platform
   - shared-browser

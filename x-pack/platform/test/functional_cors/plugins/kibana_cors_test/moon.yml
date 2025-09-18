@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/test'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

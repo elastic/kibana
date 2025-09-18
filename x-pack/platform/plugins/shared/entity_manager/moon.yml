@@ -17,6 +17,28 @@ project:
   owner: '@elastic/obs-entities'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/entity_manager
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/entities-schema'
+  - '@kbn/core'
+  - '@kbn/core-plugins-server'
+  - '@kbn/logging'
+  - '@kbn/core-http-server'
+  - '@kbn/security-plugin'
+  - '@kbn/es-query'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/datemath'
+  - '@kbn/server-route-repository'
+  - '@kbn/zod'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/features-plugin'
+  - '@kbn/zod-helpers'
 tags:
   - platform
   - plugin

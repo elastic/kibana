@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/saved-objects/browser-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-saved-objects-browser'
+  - '@kbn/core-saved-objects-browser-internal'
+  - '@kbn/core-saved-objects-api-browser'
+  - '@kbn/core-saved-objects-common'
 tags:
   - platform
   - shared-browser

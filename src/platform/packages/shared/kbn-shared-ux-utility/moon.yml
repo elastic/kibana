@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-shared-ux-utility
+dependsOn:
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/core-analytics-browser'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cypress-config
+dependsOn:
+  - '@kbn/node-libs-browser-webpack-plugin'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-event-annotation-common
+dependsOn:
+  - '@kbn/data-plugin'
+  - '@kbn/visualization-ui-components'
+  - '@kbn/ui-theme'
+  - '@kbn/i18n'
+  - '@kbn/content-management-table-list-view-common'
 tags:
   - platform
   - shared-common

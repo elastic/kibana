@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-generate
+dependsOn:
+  - '@kbn/sort-package-json'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/tooling-log'
+  - '@kbn/repo-packages'
+  - '@kbn/projects-solutions-groups'
 tags:
   - common
   - shared-common

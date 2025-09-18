@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/react/kibana_context/render
+dependsOn:
+  - '@kbn/react-kibana-context-root'
+  - '@kbn/shared-ux-error-boundary'
 tags:
   - platform
   - shared-common

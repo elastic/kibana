@@ -17,6 +17,22 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-optimizer
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/dev-utils'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/optimizer-webpack-helpers'
+  - '@kbn/std'
+  - '@kbn/ui-shared-deps-npm'
+  - '@kbn/ui-shared-deps-src'
+  - '@kbn/tooling-log'
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/jest-serializers'
+  - '@kbn/repo-packages'
+  - '@kbn/node-libs-browser-webpack-plugin'
 tags:
   - common
   - shared-server

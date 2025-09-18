@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-ts-projects
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
+  - '@kbn/picomatcher'
+  - '@kbn/dev-cli-errors'
 tags:
   - common
   - shared-common

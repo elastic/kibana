@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_b
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-plugin-a-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/shared-ux-router'
+  - '@kbn/react-kibana-context-render'
 tags:
   - platform
   - plugin

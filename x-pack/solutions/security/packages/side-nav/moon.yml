@@ -17,6 +17,11 @@ project:
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/side-nav
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/analytics'
+  - '@kbn/shared-ux-page-solution-nav'
+  - '@kbn/security-solution-navigation'
 tags:
   - security
   - shared-common

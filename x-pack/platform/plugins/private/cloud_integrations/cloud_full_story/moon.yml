@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/cloud_integrations/cloud_full_story
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/cloud-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

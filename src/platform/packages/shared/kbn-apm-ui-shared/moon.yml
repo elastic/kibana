@@ -17,6 +17,11 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-apm-ui-shared
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/charts-theme'
+  - '@kbn/apm-types-shared'
+  - '@kbn/custom-icons'
 tags:
   - platform
   - shared-browser

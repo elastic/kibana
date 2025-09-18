@@ -17,6 +17,15 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: examples/screenshot_mode_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/navigation-plugin'
+  - '@kbn/screenshot-mode-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/analytics'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-router'
 tags:
   - common
   - plugin

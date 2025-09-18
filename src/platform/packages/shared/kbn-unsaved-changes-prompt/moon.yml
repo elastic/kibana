@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unsaved-changes-prompt
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core'
 tags:
   - platform
   - shared-browser

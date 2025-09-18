@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-entities'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-entities-schema
+dependsOn:
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - platform
   - shared-common

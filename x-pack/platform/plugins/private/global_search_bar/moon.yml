@@ -17,6 +17,17 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/global_search_bar
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/global-search-plugin'
+  - '@kbn/saved-objects-tagging-plugin'
+  - '@kbn/analytics'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

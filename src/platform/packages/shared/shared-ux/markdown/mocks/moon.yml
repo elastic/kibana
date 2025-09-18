@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/markdown/mocks
+dependsOn:
+  - '@kbn/shared-ux-storybook-mock'
+  - '@kbn/shared-ux-markdown-types'
 tags:
   - platform
   - shared-common

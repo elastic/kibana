@@ -17,6 +17,17 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-apm-synthtrace
+dependsOn:
+  - '@kbn/datemath'
+  - '@kbn/apm-synthtrace-client'
+  - '@kbn/dev-utils'
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/zod'
+  - '@kbn/sample-log-parser'
+  - '@kbn/tooling-log'
+  - '@kbn/streams-schema'
+  - '@kbn/streamlang'
+  - '@kbn/repo-info'
 tags:
   - platform
   - shared-server

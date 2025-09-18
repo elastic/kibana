@@ -17,6 +17,11 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/data_frame_analytics_utils
+dependsOn:
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/field-types'
+  - '@kbn/ml-error-utils'
+  - '@kbn/ml-anomaly-utils'
 tags:
   - platform
   - shared-common

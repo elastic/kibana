@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/plugins/shared/telemetry_collection_manager
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
 tags:
   - platform
   - plugin

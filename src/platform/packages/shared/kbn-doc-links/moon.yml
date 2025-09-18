@@ -17,6 +17,8 @@ project:
   owner: '@elastic/docs'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-doc-links
+dependsOn:
+  - '@kbn/std'
 tags:
   - platform
   - shared-common

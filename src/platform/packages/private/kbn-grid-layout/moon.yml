@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-grid-layout
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/ui-theme'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: examples/routing_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/core-http-browser'
+  - '@kbn/config-schema'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

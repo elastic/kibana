@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-es
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/dev-utils'
+  - '@kbn/dev-proc-runner'
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/mock-idp-utils'
+  - '@kbn/jest-serializers'
+  - '@kbn/repo-info'
 tags:
   - platform
   - shared-common

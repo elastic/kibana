@@ -17,6 +17,13 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/chrome/navigation
+dependsOn:
+  - '@kbn/core-chrome-browser'
+  - '@kbn/core-application-browser'
+  - '@kbn/i18n'
+  - '@kbn/shared-ux-storybook-mock'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-analytics-browser'
 tags:
   - platform
   - shared-browser

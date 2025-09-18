@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/shared/saved_objects_tagging_oss
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

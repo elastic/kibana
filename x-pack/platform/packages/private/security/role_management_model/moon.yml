@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/packages/private/security/role_management_model
+dependsOn:
+  - '@kbn/features-plugin'
+  - '@kbn/security-plugin-types-common'
+  - '@kbn/security-authorization-core'
+  - '@kbn/security-authorization-core-common'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - shared-common

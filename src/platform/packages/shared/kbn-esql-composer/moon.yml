@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-composer
+dependsOn:
+  - '@kbn/esql-ast'
 tags:
   - platform
   - shared-common

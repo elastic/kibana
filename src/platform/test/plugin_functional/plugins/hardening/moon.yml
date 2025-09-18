@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/hardening
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

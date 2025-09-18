@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-react-hooks
+dependsOn:
+  - '@kbn/std'
+  - '@kbn/monaco'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-performance-testing'
   metadata:
     sourceRoot: packages/kbn-performance-testing-dataset-extractor
+dependsOn:
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/tooling-log'
+  - '@kbn/journeys'
 tags:
   - common
   - test-helper

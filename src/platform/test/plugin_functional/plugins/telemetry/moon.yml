@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/telemetry
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/telemetry-plugin'
 tags:
   - platform
   - plugin

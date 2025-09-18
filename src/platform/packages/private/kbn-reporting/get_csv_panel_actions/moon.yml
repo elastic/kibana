@@ -17,6 +17,24 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-reporting/get_csv_panel_actions
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/i18n'
+  - '@kbn/reporting-export-types-csv-common'
+  - '@kbn/licensing-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/discover-utils'
+  - '@kbn/saved-search-plugin'
+  - '@kbn/discover-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/reporting-public'
+  - '@kbn/presentation-publishing'
+  - '@kbn/reporting-common'
+  - '@kbn/es-query'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - shared-browser

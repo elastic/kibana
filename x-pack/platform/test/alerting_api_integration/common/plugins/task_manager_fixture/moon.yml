@@ -18,6 +18,10 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/task-manager-plugin'
 tags:
   - platform
   - plugin

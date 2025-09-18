@@ -17,6 +17,12 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-inference-tracing
+dependsOn:
+  - '@kbn/inference-tracing-config'
+  - '@kbn/inference-common'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/std'
+  - '@kbn/tracing-utils'
 tags:
   - platform
   - shared-server

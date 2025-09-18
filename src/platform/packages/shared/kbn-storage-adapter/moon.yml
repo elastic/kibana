@@ -17,6 +17,11 @@ project:
   owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-storage-adapter
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/es-types'
+  - '@kbn/es-errors'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - platform
   - shared-server

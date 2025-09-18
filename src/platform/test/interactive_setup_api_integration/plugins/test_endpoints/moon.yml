@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/test/interactive_setup_api_integration/plugins/test_endpoints
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

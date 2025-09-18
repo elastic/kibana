@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-failure-store-modal
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/es-ui-shared-plugin'
 tags:
   - platform
   - shared-browser

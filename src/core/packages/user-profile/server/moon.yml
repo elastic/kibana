@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/user-profile/server
+dependsOn:
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-http-server'
 tags:
   - platform
   - shared-server

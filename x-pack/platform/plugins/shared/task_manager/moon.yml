@@ -17,6 +17,36 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/task_manager
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/config'
+  - '@kbn/utility-types'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/es-types'
+  - '@kbn/apm-utils'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/alerting-state-types'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/logging'
+  - '@kbn/core-lifecycle-server'
+  - '@kbn/cloud-plugin'
+  - '@kbn/core-saved-objects-base-server-internal'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/es-query'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/encrypted-saved-objects-shared'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-http-server-utils'
+  - '@kbn/licensing-plugin'
+  - '@kbn/rrule'
+  - '@kbn/logging-mocks'
+  - '@kbn/spaces-utils'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

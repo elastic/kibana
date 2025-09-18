@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/custom-branding/server
+dependsOn:
+  - '@kbn/core-custom-branding-common'
+  - '@kbn/core-http-server'
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-server

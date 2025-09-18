@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/user-profile/common
+dependsOn: []
 tags:
   - platform
   - shared-common

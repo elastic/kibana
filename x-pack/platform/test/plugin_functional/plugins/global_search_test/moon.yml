@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/plugin_functional/plugins/global_search_test
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/global-search-plugin'
 tags:
   - platform
   - plugin

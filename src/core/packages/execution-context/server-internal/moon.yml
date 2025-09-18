@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/execution-context/server-internal
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-execution-context-common'
+  - '@kbn/core-execution-context-server'
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - platform
   - shared-server

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-io-ts-utils
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/datemath'
 tags:
   - platform
   - shared-common

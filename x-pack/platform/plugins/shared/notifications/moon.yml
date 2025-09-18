@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/notifications
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/actions-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

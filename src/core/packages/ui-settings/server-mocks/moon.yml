@@ -17,6 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/ui-settings/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/core-ui-settings-server-internal'
 tags:
   - platform
   - shared-server

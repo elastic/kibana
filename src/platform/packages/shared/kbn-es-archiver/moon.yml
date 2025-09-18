@@ -17,6 +17,16 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-es-archiver
+dependsOn:
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/dev-utils'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
+  - '@kbn/utils'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/repo-info'
+  - '@kbn/jest-serializers'
 tags:
   - platform
   - test-helper

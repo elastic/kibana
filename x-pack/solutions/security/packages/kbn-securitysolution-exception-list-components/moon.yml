@@ -18,6 +18,11 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components
+dependsOn:
+  - '@kbn/securitysolution-io-ts-list-types'
+  - '@kbn/securitysolution-autocomplete'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
 tags:
   - security
   - shared-common

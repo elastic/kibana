@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-crypto
+dependsOn:
+  - '@kbn/dev-utils'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,25 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/plugins/shared/data_view_field_editor
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/i18n'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/monaco'
+  - '@kbn/analytics'
+  - '@kbn/i18n-react'
+  - '@kbn/field-types'
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/code-editor'
+  - '@kbn/css-utils'
 tags:
   - platform
   - plugin

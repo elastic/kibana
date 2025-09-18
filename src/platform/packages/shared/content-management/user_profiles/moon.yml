@@ -17,6 +17,11 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/user_profiles
+dependsOn:
+  - '@kbn/user-profile-components'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
 tags:
   - platform
   - shared-browser

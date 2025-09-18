@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/usage_collection/plugins/application_usage_test
+dependsOn:
+  - '@kbn/core'
 tags:
   - platform
   - plugin

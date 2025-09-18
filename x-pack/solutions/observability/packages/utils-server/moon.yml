@@ -17,6 +17,12 @@ project:
   owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/utils-server
+dependsOn:
+  - '@kbn/es-query'
+  - '@kbn/traced-es-client'
+  - '@kbn/alerting-plugin'
+  - '@kbn/rule-registry-plugin'
+  - '@kbn/rule-data-utils'
 tags:
   - observability
   - shared-server

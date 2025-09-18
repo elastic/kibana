@@ -17,6 +17,18 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-storybook
+dependsOn:
+  - '@kbn/ui-shared-deps-npm'
+  - '@kbn/ui-shared-deps-src'
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/core-theme-browser'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/react-kibana-context-root'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/node-libs-browser-webpack-plugin'
 tags:
   - platform
   - shared-common

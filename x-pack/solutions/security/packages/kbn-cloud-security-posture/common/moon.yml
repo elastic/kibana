@@ -17,6 +17,14 @@ project:
   owner: '@elastic/kibana-cloud-security-posture'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/common
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/data-views-plugin'
+  - '@kbn/i18n'
+  - '@kbn/analytics'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/es-query'
+  - '@kbn/core'
 tags:
   - security
   - shared-common

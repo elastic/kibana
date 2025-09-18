@@ -17,6 +17,15 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/response-ops/alerts-delete
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/alerting-plugin'
+  - '@kbn/core-http-browser'
+  - '@kbn/i18n-react'
+  - '@kbn/alerting-types'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/kibana-react-plugin'
 tags:
   - platform
   - shared-browser

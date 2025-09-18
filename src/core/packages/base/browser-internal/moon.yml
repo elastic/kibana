@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/base/browser-internal
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/config'
+  - '@kbn/core-base-common-internal'
+  - '@kbn/logging'
 tags:
   - platform
   - shared-browser

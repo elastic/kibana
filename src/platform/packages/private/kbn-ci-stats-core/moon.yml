@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ci-stats-core
+dependsOn:
+  - '@kbn/some-dev-log'
 tags:
   - platform
   - shared-common

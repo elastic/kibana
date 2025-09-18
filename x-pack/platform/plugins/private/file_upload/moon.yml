@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/file_upload
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/config-schema'
+  - '@kbn/code-editor'
+  - '@kbn/datemath'
+  - '@kbn/file-upload-common'
+  - '@kbn/test-jest-helpers'
 tags:
   - platform
   - plugin

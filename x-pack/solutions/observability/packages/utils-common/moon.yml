@@ -17,6 +17,10 @@ project:
   owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/utils-common
+dependsOn:
+  - '@kbn/es-query'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/utility-types'
 tags:
   - observability
   - shared-common

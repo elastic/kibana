@@ -17,6 +17,12 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/react/kibana_context/theme
+dependsOn:
+  - '@kbn/test-jest-helpers'
+  - '@kbn/react-kibana-context-common'
+  - '@kbn/react-kibana-context-root'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-browser-mocks'
 tags:
   - platform
   - shared-common

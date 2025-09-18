@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: examples/user_profile_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/security-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/features-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/config-schema'
 tags:
   - common
   - plugin

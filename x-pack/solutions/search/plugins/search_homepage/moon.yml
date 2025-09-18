@@ -17,6 +17,35 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/plugins/search_homepage
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/doc-links'
+  - '@kbn/shared-ux-router'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/security-plugin'
+  - '@kbn/security-plugin-types-common'
+  - '@kbn/i18n'
+  - '@kbn/console-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/analytics'
+  - '@kbn/cloud-plugin'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/core-http-server'
+  - '@kbn/search-navigation'
+  - '@kbn/search-api-keys-components'
+  - '@kbn/logging'
+  - '@kbn/sample-data-ingest'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/search-shared-ui'
+  - '@kbn/search-code-examples'
+  - '@kbn/try-in-console'
+  - '@kbn/management-settings-ids'
 tags:
   - search
   - plugin

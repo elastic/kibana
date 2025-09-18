@@ -17,6 +17,15 @@ project:
   owner: '@elastic/workchat-eng'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/onechat/onechat-server
+dependsOn:
+  - '@kbn/inference-langchain'
+  - '@kbn/zod'
+  - '@kbn/utility-types'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-http-server'
+  - '@kbn/onechat-common'
+  - '@kbn/inference-common'
+  - '@kbn/logging'
 tags:
   - platform
   - shared-common

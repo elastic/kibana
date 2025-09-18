@@ -17,6 +17,19 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: examples/expressions_explorer
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/inspector-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/code-editor'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - common
   - plugin

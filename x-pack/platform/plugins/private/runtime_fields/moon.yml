@@ -17,6 +17,17 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/runtime_fields
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/monaco'
+  - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
+  - '@kbn/react-kibana-mount'
 tags:
   - platform
   - plugin

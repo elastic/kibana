@@ -17,6 +17,9 @@ project:
   owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/utils-browser
+dependsOn:
+  - '@kbn/data-plugin'
+  - '@kbn/core-ui-settings-browser'
 tags:
   - observability
   - shared-browser

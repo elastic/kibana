@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ai-assistant'
   metadata:
     sourceRoot: packages/kbn-lock-manager
+dependsOn:
+  - '@kbn/logging'
+  - '@kbn/core'
 tags:
   - common
   - shared-server

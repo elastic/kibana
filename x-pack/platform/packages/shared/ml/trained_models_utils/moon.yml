@@ -17,6 +17,8 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/trained_models_utils
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

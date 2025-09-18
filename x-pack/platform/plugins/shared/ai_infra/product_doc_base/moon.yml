@@ -17,6 +17,22 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/ai_infra/product_doc_base
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/config-schema'
+  - '@kbn/product-doc-common'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/utils'
+  - '@kbn/core-http-browser'
+  - '@kbn/logging-mocks'
+  - '@kbn/licensing-plugin'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/core-security-server'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/i18n'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

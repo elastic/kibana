@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/logging/common-internal
+dependsOn:
+  - '@kbn/logging'
 tags:
   - platform
   - shared-common

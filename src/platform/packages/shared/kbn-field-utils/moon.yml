@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-field-utils
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/data-views-plugin'
+  - '@kbn/react-field'
+  - '@kbn/field-types'
+  - '@kbn/expressions-plugin'
+  - '@kbn/data-view-utils'
+  - '@kbn/fields-metadata-plugin'
+  - '@kbn/shared-ux-markdown'
 tags:
   - platform
   - shared-browser

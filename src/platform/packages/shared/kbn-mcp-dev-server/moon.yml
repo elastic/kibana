@@ -17,6 +17,13 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-mcp-dev-server
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/zod'
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
+  - '@kbn/std'
+  - '@kbn/es-query'
 tags:
   - platform
   - shared-server

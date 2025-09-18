@@ -17,6 +17,23 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-generate-csv
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/i18n'
+  - '@kbn/reporting-common'
+  - '@kbn/reporting-server'
+  - '@kbn/reporting-export-types-csv-common'
+  - '@kbn/es-query'
+  - '@kbn/es-types'
+  - '@kbn/data-views-plugin'
+  - '@kbn/search-types'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/esql-utils'
+  - '@kbn/safer-lodash-set'
 tags:
   - platform
   - shared-server

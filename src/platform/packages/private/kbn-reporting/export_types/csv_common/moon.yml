@@ -17,6 +17,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-reporting/export_types/csv_common
+dependsOn:
+  - '@kbn/data-plugin'
+  - '@kbn/reporting-common'
+  - '@kbn/data-views-plugin'
 tags:
   - platform
   - shared-common

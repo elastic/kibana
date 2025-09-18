@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/settings/section_registry
+dependsOn:
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core-ui-settings-common'
 tags:
   - platform
   - shared-browser

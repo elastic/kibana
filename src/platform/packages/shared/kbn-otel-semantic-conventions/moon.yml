@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-otel-semantic-conventions
+dependsOn: []
 tags:
   - platform
   - shared-common

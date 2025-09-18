@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/button_toolbar
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/test-jest-helpers'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/chart-test-jest-helpers
+dependsOn:
+  - '@kbn/test-jest-helpers'
 tags:
   - platform
   - shared-common

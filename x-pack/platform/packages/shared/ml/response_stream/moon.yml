@@ -17,6 +17,11 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/response_stream
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-http-server'
+  - '@kbn/logging'
+  - '@kbn/ml-is-populated-object'
 tags:
   - platform
   - shared-common

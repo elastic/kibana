@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-sort-predicates
+dependsOn:
+  - '@kbn/field-formats-plugin'
+  - '@kbn/expressions-plugin'
 tags:
   - platform
   - shared-common

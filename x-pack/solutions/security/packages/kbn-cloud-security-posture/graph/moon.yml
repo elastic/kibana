@@ -17,6 +17,21 @@ project:
   owner: '@elastic/kibana-cloud-security-posture'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/graph
+dependsOn:
+  - '@kbn/cloud-security-posture-common'
+  - '@kbn/data-views-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/ui-theme'
+  - '@kbn/utility-types'
+  - '@kbn/unified-search-plugin'
+  - '@kbn/es-query'
+  - '@kbn/data-service'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/storybook'
+  - '@kbn/data-plugin'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/core'
 tags:
   - security
   - shared-browser

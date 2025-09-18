@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-use-tracked-promise
+dependsOn: []
 tags:
   - platform
   - shared-common

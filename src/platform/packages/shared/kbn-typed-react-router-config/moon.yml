@@ -17,6 +17,14 @@ project:
   owner: '@elastic/obs-knowledge-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-typed-react-router-config
+dependsOn:
+  - '@kbn/io-ts-utils'
+  - '@kbn/shared-ux-router'
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/serverless'
 tags:
   - platform
   - shared-browser

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/security-threat-hunting'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/data-stream-adapter
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/index-adapter'
 tags:
   - security
   - shared-server

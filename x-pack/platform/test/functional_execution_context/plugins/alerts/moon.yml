@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/functional_execution_context/plugins/alerts
+dependsOn:
+  - '@kbn/apm-config-loader'
+  - '@kbn/repo-info'
+  - '@kbn/core'
+  - '@kbn/alerting-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/security-plugin'
 tags:
   - platform
   - plugin

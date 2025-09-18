@@ -17,6 +17,10 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/synthetics-test-data
+dependsOn:
+  - '@kbn/apm-plugin'
+  - '@kbn/es-archiver'
+  - '@kbn/repo-info'
 tags:
   - observability
   - shared-common

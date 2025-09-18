@@ -17,6 +17,17 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/event_log
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/spaces-plugin'
+  - '@kbn/es-query'
+  - '@kbn/config-schema'
+  - '@kbn/i18n'
+  - '@kbn/utility-types'
+  - '@kbn/std'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/serverless'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - platform
   - plugin

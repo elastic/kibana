@@ -17,6 +17,9 @@ project:
   owner: '@elastic/security-detections-response'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-rule-data-utils
+dependsOn:
+  - '@kbn/es-query'
+  - '@kbn/elastic-assistant-common'
 tags:
   - platform
   - shared-common

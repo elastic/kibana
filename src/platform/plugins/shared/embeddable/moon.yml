@@ -17,6 +17,25 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/plugins/shared/embeddable
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/inspector-plugin'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/es-query'
+  - '@kbn/i18n'
+  - '@kbn/expressions-plugin'
+  - '@kbn/saved-objects-management-plugin'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/saved-objects-finder-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/content-management-plugin'
+  - '@kbn/presentation-panel-plugin'
+  - '@kbn/presentation-publishing'
+  - '@kbn/presentation-containers'
+  - '@kbn/analytics'
+  - '@kbn/content-management-utils'
 tags:
   - platform
   - plugin

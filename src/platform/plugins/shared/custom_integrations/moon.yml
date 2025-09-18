@@ -17,6 +17,15 @@ project:
   owner: '@elastic/fleet'
   metadata:
     sourceRoot: src/platform/plugins/shared/custom_integrations
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/ui-theme'
+  - '@kbn/logging-mocks'
+  - '@kbn/config-schema'
+  - '@kbn/storybook'
 tags:
   - platform
   - plugin

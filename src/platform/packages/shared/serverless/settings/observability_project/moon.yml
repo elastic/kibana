@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/serverless/settings/observability_project
+dependsOn:
+  - '@kbn/management-settings-ids'
 tags:
   - platform
   - shared-common

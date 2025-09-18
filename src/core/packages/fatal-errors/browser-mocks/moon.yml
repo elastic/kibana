@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/fatal-errors/browser-mocks
+dependsOn:
+  - '@kbn/core-fatal-errors-browser'
+  - '@kbn/core-fatal-errors-browser-internal'
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-browser

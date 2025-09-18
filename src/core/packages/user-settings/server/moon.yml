@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/core/packages/user-settings/server
+dependsOn: []
 tags:
   - platform
   - shared-server

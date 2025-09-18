@@ -17,6 +17,11 @@ project:
   owner: '@elastic/streams-program-team'
   metadata:
     sourceRoot: x-pack/platform/packages/private/kbn-evals-suite-streams
+dependsOn:
+  - '@kbn/evals'
+  - '@kbn/sse-utils-client'
+  - '@kbn/object-utils'
+  - '@kbn/grok-heuristics'
 tags:
   - platform
   - functional-tests

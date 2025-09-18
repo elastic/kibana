@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/route_utils
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-execution-context-common'
 tags:
   - platform
   - shared-common

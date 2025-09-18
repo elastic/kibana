@@ -17,6 +17,14 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-grok-ui
+dependsOn:
+  - '@kbn/monaco'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
+  - '@kbn/code-editor'
+  - '@kbn/i18n'
+  - '@kbn/object-utils'
+  - '@kbn/react-hooks'
 tags:
   - platform
   - shared-common

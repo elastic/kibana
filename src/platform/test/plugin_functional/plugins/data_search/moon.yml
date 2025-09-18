@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/data_search
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

@@ -17,6 +17,11 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/page/kibana_template/mocks
+dependsOn:
+  - '@kbn/shared-ux-page-no-data-config-mocks'
+  - '@kbn/shared-ux-storybook-mock'
+  - '@kbn/shared-ux-card-no-data-mocks'
+  - '@kbn/shared-ux-page-kibana-template-types'
 tags:
   - platform
   - shared-browser

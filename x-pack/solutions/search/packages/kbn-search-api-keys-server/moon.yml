@@ -17,6 +17,11 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/packages/kbn-search-api-keys-server
+dependsOn:
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/logging'
+  - '@kbn/core'
+  - '@kbn/config-schema'
 tags:
   - search
   - shared-server

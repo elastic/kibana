@@ -17,6 +17,12 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-kibana-api-cli
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/core-http-browser'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/core'
+  - '@kbn/logging'
 tags:
   - platform
   - shared-common

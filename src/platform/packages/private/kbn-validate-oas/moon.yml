@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-validate-oas
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
 tags:
   - platform
   - shared-common

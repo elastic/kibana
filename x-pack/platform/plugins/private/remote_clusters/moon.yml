@@ -17,6 +17,28 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/remote_clusters
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/licensing-plugin'
+  - '@kbn/management-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/cloud-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/core-execution-context-browser-mocks'
+  - '@kbn/i18n'
+  - '@kbn/utility-types'
+  - '@kbn/share-plugin'
+  - '@kbn/core-http-browser'
+  - '@kbn/analytics'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/expect'
+  - '@kbn/shared-ux-router'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

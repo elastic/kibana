@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/global_search
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/licensing-plugin'
+  - '@kbn/i18n'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/config-schema'
+  - '@kbn/utility-types'
+  - '@kbn/core-test-helpers-test-utils'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

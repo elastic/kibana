@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-profiling-utils
+dependsOn: []
 tags:
   - platform
   - shared-common

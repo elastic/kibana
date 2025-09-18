@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/platform/packages/private/kbn-data-quality
+dependsOn:
+  - '@kbn/dataset-quality-plugin'
 tags:
   - platform
   - shared-common

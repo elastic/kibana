@@ -17,6 +17,14 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-reporting/common
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/utility-types'
+  - '@kbn/screenshotting-plugin'
+  - '@kbn/i18n'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - shared-common

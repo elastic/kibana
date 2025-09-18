@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/saved-objects/browser
+dependsOn:
+  - '@kbn/core-saved-objects-api-browser'
 tags:
   - platform
   - shared-browser

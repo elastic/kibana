@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/private/shared-ux/storybook/config
+dependsOn:
+  - '@kbn/storybook'
 tags:
   - platform
   - shared-common

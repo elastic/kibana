@@ -17,6 +17,17 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/response-ops/alerts-filters-form
+dependsOn:
+  - '@kbn/response-ops-rules-apis'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/alerting-types'
+  - '@kbn/es-query'
+  - '@kbn/rule-data-utils'
 tags:
   - platform
   - shared-browser

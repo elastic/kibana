@@ -17,6 +17,12 @@ project:
   owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-traced-es-client
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/es-types'
+  - '@kbn/apm-utils'
+  - '@kbn/utility-types'
+  - '@kbn/task-manager-plugin'
 tags:
   - platform
   - shared-server

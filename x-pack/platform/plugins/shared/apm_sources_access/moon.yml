@@ -17,6 +17,11 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/apm_sources_access
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/server-route-repository'
 tags:
   - platform
   - plugin

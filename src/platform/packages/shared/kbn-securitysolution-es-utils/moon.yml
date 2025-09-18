@@ -17,6 +17,9 @@ project:
   owner: '@elastic/security-detection-engine'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-securitysolution-es-utils
+dependsOn:
+  - '@kbn/zod-helpers'
+  - '@kbn/zod'
 tags:
   - platform
   - shared-common

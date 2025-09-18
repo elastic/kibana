@@ -17,6 +17,17 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/grokdebugger
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/home-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/code-editor'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

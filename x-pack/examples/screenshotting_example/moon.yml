@@ -17,6 +17,12 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/examples/screenshotting_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/screenshotting-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

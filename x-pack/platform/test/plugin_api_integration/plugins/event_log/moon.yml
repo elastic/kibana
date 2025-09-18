@@ -17,6 +17,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/event_log
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/event-log-plugin'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

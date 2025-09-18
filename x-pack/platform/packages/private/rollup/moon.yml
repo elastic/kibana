@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/packages/private/rollup
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

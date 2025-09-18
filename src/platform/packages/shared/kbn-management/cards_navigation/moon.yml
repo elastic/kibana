@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/cards_navigation
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

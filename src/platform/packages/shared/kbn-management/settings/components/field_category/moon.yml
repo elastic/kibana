@@ -18,6 +18,12 @@ project:
   metadata:
     sourceRoot: >-
       src/platform/packages/shared/kbn-management/settings/components/field_category
+dependsOn:
+  - '@kbn/management-settings-utilities'
+  - '@kbn/management-settings-field-definition'
+  - '@kbn/management-settings-components-field-row'
+  - '@kbn/management-settings-types'
+  - '@kbn/i18n-react'
 tags:
   - platform
   - shared-browser

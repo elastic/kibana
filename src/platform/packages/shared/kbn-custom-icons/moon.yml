@@ -17,6 +17,9 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-custom-icons
+dependsOn:
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/kibana-react-plugin'
 tags:
   - platform
   - shared-common

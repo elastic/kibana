@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-react-mute-legacy-root-warning
+dependsOn: []
 tags:
   - platform
   - shared-common

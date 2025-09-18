@@ -17,6 +17,7 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/aiops_change_point_detection
+dependsOn: []
 tags:
   - platform
   - shared-common

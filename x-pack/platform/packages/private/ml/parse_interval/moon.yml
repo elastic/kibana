@@ -17,6 +17,8 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/parse_interval
+dependsOn:
+  - '@kbn/datemath'
 tags:
   - platform
   - shared-common

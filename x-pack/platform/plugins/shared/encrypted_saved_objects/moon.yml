@@ -17,6 +17,23 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/encrypted_saved_objects
+dependsOn:
+  - '@kbn/security-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/utility-types'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-saved-objects-base-server-internal'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-security-common'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/config'
+  - '@kbn/encrypted-saved-objects-shared'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-saved-objects-api-server-internal'
+  - '@kbn/core-root-server-internal'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-test-helpers-so-type-serializer'
 tags:
   - platform
   - plugin

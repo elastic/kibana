@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-xstate-utils
+dependsOn: []
 tags:
   - platform
   - shared-browser

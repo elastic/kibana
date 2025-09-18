@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/banners
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/screenshot-mode-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/i18n'
+  - '@kbn/shared-ux-markdown'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - plugin

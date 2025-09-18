@@ -17,6 +17,11 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: x-pack/examples/third_party_maps_source_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/maps-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/data-plugin'
 tags:
   - common
   - plugin

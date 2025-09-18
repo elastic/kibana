@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/favorites/favorites_common
+dependsOn: []
 tags:
   - platform
   - shared-common

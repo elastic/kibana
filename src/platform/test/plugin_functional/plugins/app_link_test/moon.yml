@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/app_link_test
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/shared-ux-link-redirect-app'
 tags:
   - platform
   - plugin

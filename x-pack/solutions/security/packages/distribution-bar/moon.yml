@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-cloud-security-posture'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/distribution-bar
+dependsOn: []
 tags:
   - security
   - shared-browser

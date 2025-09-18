@@ -17,6 +17,15 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-telemetry-tools
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/repo-info'
+  - '@kbn/import-resolver'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/safer-lodash-set'
 tags:
   - platform
   - shared-server

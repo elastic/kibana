@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: examples/eso_model_version_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/features-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/spaces-plugin'
 tags:
   - common
   - plugin

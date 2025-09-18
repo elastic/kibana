@@ -17,6 +17,14 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/ui-settings/browser-internal
+dependsOn:
+  - '@kbn/core-test-helpers-http-setup-browser'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-injected-metadata-browser-mocks'
+  - '@kbn/core-injected-metadata-browser-internal'
+  - '@kbn/core-http-browser-internal'
 tags:
   - platform
   - shared-browser

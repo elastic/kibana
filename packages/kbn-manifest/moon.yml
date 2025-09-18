@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: packages/kbn-manifest
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/tooling-log'
 tags:
   - common
   - shared-server

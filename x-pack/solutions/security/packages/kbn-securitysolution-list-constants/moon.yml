@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-detection-engine'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-list-constants
+dependsOn:
+  - '@kbn/std'
 tags:
   - security
   - shared-common

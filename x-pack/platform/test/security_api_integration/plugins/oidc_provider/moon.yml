@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/test/security_api_integration/plugins/oidc_provider
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/security-api-integration-helpers'
 tags:
   - platform
   - plugin

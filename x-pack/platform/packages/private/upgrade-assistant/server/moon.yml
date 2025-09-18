@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/packages/private/upgrade-assistant/server
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/licensing-plugin'
+  - '@kbn/upgrade-assistant-pkg-common'
 tags:
   - platform
   - shared-server

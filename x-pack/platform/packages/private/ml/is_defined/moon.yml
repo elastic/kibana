@@ -17,6 +17,7 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/is_defined
+dependsOn: []
 tags:
   - platform
   - shared-common

@@ -17,6 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/global_search_providers
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/global-search-plugin'
 tags:
   - platform
   - plugin

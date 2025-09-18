@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-unsaved-changes-badge
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/navigation-plugin'
 tags:
   - platform
   - shared-common

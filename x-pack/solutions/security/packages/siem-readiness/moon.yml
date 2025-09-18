@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-cloud-security-posture'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/siem-readiness
+dependsOn:
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/core'
+  - '@kbn/i18n'
 tags:
   - security
   - shared-browser

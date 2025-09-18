@@ -17,6 +17,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/aiops_common
+dependsOn:
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/react/kibana_context/styled
+dependsOn:
+  - '@kbn/ui-theme'
 tags:
   - platform
   - shared-common

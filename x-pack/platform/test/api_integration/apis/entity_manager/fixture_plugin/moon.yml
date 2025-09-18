@@ -17,6 +17,11 @@ project:
   owner: '@elastic/obs-entities'
   metadata:
     sourceRoot: x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/core-plugins-server'
+  - '@kbn/security-plugin-types-server'
 tags:
   - platform
   - plugin

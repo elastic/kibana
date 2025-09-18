@@ -17,6 +17,20 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/plugins/shared/inspector
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/i18n'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/i18n-react'
+  - '@kbn/monaco'
+  - '@kbn/core-ui-settings-browser-mocks'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/std'
+  - '@kbn/code-editor'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/presentation-util'
 tags:
   - platform
   - plugin

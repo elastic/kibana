@@ -18,6 +18,16 @@ project:
   metadata:
     sourceRoot: >-
       src/platform/packages/shared/content-management/content_insights/content_insights_public
+dependsOn:
+  - '@kbn/content-management-user-profiles'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/user-profile-components'
+  - '@kbn/core-http-browser'
+  - '@kbn/content-management-content-insights-server'
+  - '@kbn/content-management-table-list-view-common'
+  - '@kbn/charts-theme'
+  - '@kbn/logging'
 tags:
   - platform
   - shared-browser

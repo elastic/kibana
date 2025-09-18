@@ -17,6 +17,16 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/http/rate-limiter-server-internal
+dependsOn:
+  - '@kbn/core-http-server-internal'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-metrics-server-mocks'
+  - '@kbn/utility-types'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-metrics-server'
+  - '@kbn/core-metrics-server-internal'
+  - '@kbn/core-status-common'
 tags:
   - platform
   - shared-server

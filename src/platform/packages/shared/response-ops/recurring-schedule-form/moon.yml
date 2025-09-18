@@ -17,6 +17,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/response-ops/recurring-schedule-form
+dependsOn:
+  - '@kbn/rrule'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-browser

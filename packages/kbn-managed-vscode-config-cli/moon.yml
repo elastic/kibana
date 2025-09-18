@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-managed-vscode-config-cli
+dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/managed-vscode-config'
+  - '@kbn/repo-info'
 tags:
   - common
   - shared-common

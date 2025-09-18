@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: packages/kbn-dependency-ownership
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
 tags:
   - common
   - shared-common

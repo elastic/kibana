@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-managed-vscode-config
+dependsOn:
+  - '@kbn/kibana-manifest-schema'
 tags:
   - common
   - shared-common

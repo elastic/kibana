@@ -17,6 +17,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-ci-stats-shipper-cli
+dependsOn:
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-cli-runner'
 tags:
   - common
   - shared-common

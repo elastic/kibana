@@ -17,6 +17,12 @@ project:
   owner: '@elastic/kibana-esql'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-ast
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
+  - '@kbn/esql-types'
+  - '@kbn/core-pricing-common'
+  - '@kbn/licensing-types'
 tags:
   - platform
   - shared-common

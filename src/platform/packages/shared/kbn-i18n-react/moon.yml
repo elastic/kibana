@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-i18n-react
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - platform
   - shared-common

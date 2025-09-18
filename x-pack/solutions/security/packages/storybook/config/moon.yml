@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/storybook/config
+dependsOn:
+  - '@kbn/storybook'
 tags:
   - security
   - shared-common

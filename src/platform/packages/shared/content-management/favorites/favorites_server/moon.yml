@@ -17,6 +17,13 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/favorites/favorites_server
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-lifecycle-server'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/content-management-favorites-common'
 tags:
   - platform
   - shared-server

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/alerting_api_integration/packages/helpers
+dependsOn: []
 tags:
   - platform
   - test-helper

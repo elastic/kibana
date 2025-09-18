@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/packages/shared/controls/controls-schemas
+dependsOn:
+  - '@kbn/controls-constants'
+  - '@kbn/config-schema'
 tags:
   - platform
   - shared-server

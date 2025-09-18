@@ -17,6 +17,8 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/json_schemas
+dependsOn:
+  - '@kbn/dev-cli-runner'
 tags:
   - platform
   - shared-common

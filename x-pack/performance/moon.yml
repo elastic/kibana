@@ -17,6 +17,15 @@ project:
   owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: x-pack/performance
+dependsOn:
+  - '@kbn/journeys'
+  - '@kbn/test-subj-selector'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
+  - '@kbn/expect'
+  - '@kbn/dev-utils'
+  - '@kbn/apm-synthtrace-client'
+  - '@kbn/test-suites-src'
 tags:
   - common
   - test-helper
