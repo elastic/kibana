@@ -30,6 +30,7 @@ import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
+  GenericMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import {
@@ -518,6 +519,9 @@ export const WorkflowYAMLEditor = ({
         kibanaHost: kibanaHost || window.location.origin,
       });
       registerMonacoConnectorHandler(kibanaHandler);
+
+      const genericHandler = new GenericMonacoConnectorHandler();
+      registerMonacoConnectorHandler(genericHandler);
 
       // Create unified providers
       const providerConfig = {
