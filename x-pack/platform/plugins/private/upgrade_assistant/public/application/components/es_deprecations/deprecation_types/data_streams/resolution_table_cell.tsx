@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { DataStreamResolutionType, DataStreamsAction } from '../../../../../../common/types';
 import { DataStreamMigrationStatus } from '../../../../../../common/types';
@@ -189,16 +189,13 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
           <EuiText size="s" color="subdued">
             <em>
               {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-              >
-                <EuiIcon
-                  type="info"
-                  aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-                  size="s"
-                />
-              </EuiToolTip>
+                type="info"
+                aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+                size="s"
+              />
             </em>
           </EuiText>
         );

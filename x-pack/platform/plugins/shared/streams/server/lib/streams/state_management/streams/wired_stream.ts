@@ -760,6 +760,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_systems',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
   }
 }
