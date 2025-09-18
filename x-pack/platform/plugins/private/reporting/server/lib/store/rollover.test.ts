@@ -41,6 +41,7 @@ describe('rollDataStreamIfRequired', () => {
 
     expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
       index: REPORTING_DATA_STREAM_ALIAS,
+      expand_wildcards: 'all',
     });
     expect(mockLogger.debug).toHaveBeenCalledWith(`${msgPrefix} does not exist so ${skipMessage}`);
     expect(mockEsClient.indices.getIndexTemplate).not.toHaveBeenCalled();
