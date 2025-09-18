@@ -34,6 +34,7 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { Toolbar } from './toolbar';
+import { SettingsPanelToolbar } from './settingsPanelToolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
@@ -665,6 +666,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  SettingsPanelToolbar(props) {
+    return <SettingsPanelToolbar {...props} />;
   },
 
   DimensionEditorDataExtraComponent(props) {
