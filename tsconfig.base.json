@@ -2142,8 +2142,6 @@
       "@kbn/telemetry-tools/*": ["src/platform/packages/private/kbn-telemetry-tools/*"],
       "@kbn/test": ["src/platform/packages/shared/kbn-test"],
       "@kbn/test/*": ["src/platform/packages/shared/kbn-test/*"],
-      "@kbn/test-api-clients": ["x-pack/solutions/security/packages/test-api-clients"],
-      "@kbn/test-api-clients/*": ["x-pack/solutions/security/packages/test-api-clients/*"],
       "@kbn/test-eui-helpers": ["src/platform/packages/private/kbn-test-eui-helpers"],
       "@kbn/test-eui-helpers/*": ["src/platform/packages/private/kbn-test-eui-helpers/*"],
       "@kbn/test-feature-usage-plugin": ["x-pack/platform/test/licensing_plugin/plugins/test_feature_usage"],
@@ -2363,9 +2361,7 @@
       // END AUTOMATED PACKAGE LISTING
       // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
       // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
-      "@elastic/kibana-d3-color": [
-        "node_modules/@types/d3-color"
-      ],
+      "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": [
         "typings/@emotion"

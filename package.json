@@ -1042,7 +1042,7 @@
     "@kbn/telemetry-management-section-plugin": "link:src/platform/plugins/shared/telemetry_management_section",
     "@kbn/telemetry-plugin": "link:src/platform/plugins/shared/telemetry",
     "@kbn/telemetry-test-plugin": "link:src/platform/test/plugin_functional/plugins/telemetry",
-    "@kbn/test-api-clients": "link:x-pack/solutions/security/packages/test-api-clients",
+    "@kbn/security-solution-test-api-clients": "link:x-pack/solutions/security/packages/test-api-clients",
     "@kbn/test-feature-usage-plugin": "link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage",
     "@kbn/testing-embedded-lens-plugin": "link:x-pack/examples/testing_embedded_lens",
     "@kbn/third-party-lens-navigation-prompt-plugin": "link:x-pack/examples/third_party_lens_navigation_prompt",

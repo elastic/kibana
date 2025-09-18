@@ -27,7 +27,7 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    "@kbn/test-api-clients",
+    "@kbn/security-solution-test-api-clients",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",

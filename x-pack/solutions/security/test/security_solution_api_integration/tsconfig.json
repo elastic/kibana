@@ -64,6 +64,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/std",
     "@kbn/securitysolution-utils",
-    "@kbn/test-api-clients"
+    "@kbn/security-solution-test-api-clients"
   ]
 }

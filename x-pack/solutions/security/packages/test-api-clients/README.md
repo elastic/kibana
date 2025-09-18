@@ -1,4 +1,4 @@
-# @kbn/test-api-clients
+# @kbn/security-solution-test-api-clients
 
 Auto-generated API clients for Security Solution testing.
 
@@ -7,7 +7,7 @@ This package contains Supertest API clients generated from OpenAPI schemas for u
 ## Usage
 
 ```typescript
-import { SecuritySolutionApiProvider } from '@kbn/test-api-clients';
+import { SecuritySolutionApiProvider } from '@kbn/security-solution-test-api-clients';
 
 // Use in your test services configuration
 export const services = {
