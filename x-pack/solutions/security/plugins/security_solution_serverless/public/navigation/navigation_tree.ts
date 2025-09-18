@@ -57,14 +57,15 @@ export const createNavigationTree = async (
           {
             link: 'discover',
           },
-          defaultNavigationTree.dashboards(),
+          defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
           {
             breadcrumbStatus: 'hidden',
             children: [
-              defaultNavigationTree.rules(),
+              defaultNavigationTree.rules({ sideNavVersion: 'v1' }),
               {
                 id: SecurityPageName.alerts,
                 link: securityLink(SecurityPageName.alerts),
+                sideNavVersion: 'v1',
               },
               {
                 link: 'workflows',
@@ -74,27 +75,31 @@ export const createNavigationTree = async (
                   icon: 'beaker',
                   tooltip: i18nStrings.workflows.badgeTooltip,
                 },
+                sideNavVersion: 'v1',
               },
               {
                 id: SecurityPageName.attackDiscovery,
                 link: securityLink(SecurityPageName.attackDiscovery),
+                sideNavVersion: 'v1',
               },
               {
                 id: SecurityPageName.cloudSecurityPostureFindings,
                 link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+                sideNavVersion: 'v1',
               },
-              defaultNavigationTree.cases(),
+              defaultNavigationTree.cases({ sideNavVersion: 'v1' }),
             ],
           },
           {
             breadcrumbStatus: 'hidden',
             children: [
-              defaultNavigationTree.entityAnalytics(),
-              defaultNavigationTree.explore(),
-              defaultNavigationTree.investigations(),
+              defaultNavigationTree.entityAnalytics({ sideNavVersion: 'v1' }),
+              defaultNavigationTree.explore({ sideNavVersion: 'v1' }),
+              defaultNavigationTree.investigations({ sideNavVersion: 'v1' }),
               {
                 id: SecurityPageName.threatIntelligence,
                 link: securityLink(SecurityPageName.threatIntelligence),
+                sideNavVersion: 'v1',
               },
             ],
           },
@@ -104,15 +109,17 @@ export const createNavigationTree = async (
               {
                 id: SecurityPageName.assetInventory,
                 link: securityLink(SecurityPageName.assetInventory),
+                sideNavVersion: 'v1',
               },
               defaultNavigationTree.assets(services),
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
+                sideNavVersion: 'v1',
               },
             ],
           },
-          defaultNavigationTree.ml(),
+          defaultNavigationTree.ml({ sideNavVersion: 'v1' }),
         ],
       },
     ],
