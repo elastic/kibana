@@ -446,7 +446,9 @@ export default ({ getService }: FtrProviderContext) => {
         const user1AfterSecondSync = privmonUtils.findUser(usersAfterSecondSync, user1.name);
         log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 
-        expect(user1AfterSecondSync?.['@timestamp']).toEqual(user1AfterFirstSync?.['@timestamp']);
+        expect(user1AfterSecondSync?.event?.['@timestamp']).toEqual(
+          user1AfterFirstSync?.event?.['@timestamp']
+        );
         expect(user1AfterSecondSync?.event?.ingested).toEqual(user1AfterFirstSync?.event?.ingested);
       });
     });
