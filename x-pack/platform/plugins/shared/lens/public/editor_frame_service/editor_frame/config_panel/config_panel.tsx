@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, memo, useCallback } from 'react';
+import React, { useEffect, useMemo, memo, useCallback } from 'react';
 import {
   EuiForm,
   EuiTabs,
@@ -43,8 +43,10 @@ import {
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
+  setSelectedLayerId,
   useLensSelector,
   selectVisualization,
+  selectSelectedLayerId,
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
@@ -73,6 +75,7 @@ export function LayerPanels(
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
+  const selectedLayerId = useLensSelector(selectSelectedLayerId);
 
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -80,8 +83,6 @@ export function LayerPanels(
   const dispatchLens = useLensDispatch();
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
-
-  const [selectedLayerId, setSelectedLayerId] = useState(layerIds[0] || '');
 
   const {
     setNextFocusedId: setNextFocusedLayerId,
@@ -262,11 +263,11 @@ export function LayerPanels(
       dispatchLens(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
       );
+      dispatchLens(setSelectedLayerId({ layerId }));
 
-      setSelectedLayerId(layerId);
       setNextFocusedLayerId(layerId);
     },
-    [dispatchLens, setNextFocusedLayerId, setSelectedLayerId]
+    [dispatchLens, setNextFocusedLayerId]
   );
 
   const registerLibraryAnnotationGroupFunction = useCallback<
@@ -275,16 +276,19 @@ export function LayerPanels(
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
-  const onSelectedTabChanged = (id: string) => {
-    setSelectedLayerId(id);
-  };
+  const onSelectedTabChanged = useCallback(
+    (layerId: string) => {
+      dispatchLens(setSelectedLayerId({ layerId }));
+    },
+    [dispatchLens]
+  );
 
   // if the selected tab got removed, switch back first tab
   useEffect(() => {
-    if (!layerIds.includes(selectedLayerId)) {
-      setSelectedLayerId(layerIds[0] || '');
+    if (selectedLayerId === null || (!layerIds.includes(selectedLayerId) && layerIds.length > 0)) {
+      dispatchLens(setSelectedLayerId({ layerId: layerIds[0] }));
     }
-  }, [selectedLayerId, layerIds]);
+  }, [dispatchLens, selectedLayerId, layerIds]);
 
   const layerConfigs = useMemo(() => {
     return layerIds.map((layerId) => ({
@@ -399,6 +403,7 @@ export function LayerPanels(
     indexPatternService,
     layerConfigs,
     layerLabels,
+    onSelectedTabChanged,
     props.dataViews,
     props.framePublicAPI,
     props?.setIsInlineFlyoutVisible,
@@ -408,7 +413,6 @@ export function LayerPanels(
     visualization.state,
   ]);
 
-  const layerIndex = layerIds.indexOf(selectedLayerId);
   const layerConfig = useMemo(
     () => layerConfigs.find((l) => l.layerId === selectedLayerId),
     [layerConfigs, selectedLayerId]
@@ -433,7 +437,7 @@ export function LayerPanels(
       {!hideAddLayerButton && <EuiTabs>{renderTabs()}</EuiTabs>}
 
       {/* Render the current layer panel */}
-      {layerConfig && (
+      {selectedLayerId && layerConfig && (
         <LayerPanel
           {...props}
           onDropToDimension={handleDimensionDrop}
@@ -443,7 +447,7 @@ export function LayerPanels(
           registerNewLayerRef={registerNewLayerRef}
           key={selectedLayerId}
           layerId={selectedLayerId}
-          layerIndex={layerIndex}
+          layerIndex={layerIds.indexOf(selectedLayerId)}
           visualizationState={visualization.state}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
