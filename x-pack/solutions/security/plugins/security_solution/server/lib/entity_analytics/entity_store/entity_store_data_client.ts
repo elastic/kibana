@@ -24,7 +24,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
@@ -1018,5 +1018,17 @@ export class EntityStoreDataClient {
     };
 
     return this.options.auditLogger?.log(event);
+  }
+
+  async isCapabilityEnabled(type: EntityType, capability: EntityStoreCapability): Promise<boolean> {
+    const { definitions } = await this.entityClient.getEntityDefinitions({ type });
+
+    if (definitions.length === 0) {
+      return false;
+    }
+
+    const capabilities = definitions[0].capabilities || [];
+
+    return capabilities.indexOf(capability) > -1;
   }
 }
