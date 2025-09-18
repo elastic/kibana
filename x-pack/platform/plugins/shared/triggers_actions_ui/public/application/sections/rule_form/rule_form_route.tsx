@@ -8,9 +8,8 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { getCreateRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -37,11 +36,10 @@ export const RuleFormRoute = () => {
     ...startServices
   } = useKibana().services;
 
-  const history = useHistory();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const {
     id,
-    ruleTypeId,
+    ruleTypeId: ruleTypeIdParams,
     templateId: templateIdParams,
   } = useParams<{
     id?: string;
@@ -49,6 +47,19 @@ export const RuleFormRoute = () => {
     templateId?: string;
   }>();
   const { returnApp, returnPath } = location.state || {};
+
+  const templateId = templateIdParams;
+
+  const {
+    data: ruleTemplate,
+    error: ruleTemplateError,
+    isLoading: isLoadingRuleTemplate,
+    isError: isErrorRuleTemplate,
+  } = useRuleTemplate({
+    templateId,
+  });
+
+  const ruleTypeId = ruleTypeIdParams ?? ruleTemplate?.ruleTypeId;
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -67,29 +78,7 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const [searchParams] = useSearchParams();
-  const templateId = templateIdParams ?? searchParams.get('fromTemplate') ?? undefined;
-
-  const {
-    data: ruleTemplate,
-    error: ruleTemplateError,
-    isLoading: isLoadingRuleTemplate,
-    isError: isErrorRuleTemplate,
-  } = useRuleTemplate({
-    templateId,
-  });
-
-  useEffect(() => {
-    if (ruleTemplate && ruleTypeId !== ruleTemplate.ruleTypeId) {
-      application.navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(
-          ruleTemplate.ruleTypeId
-        )}?fromTemplate=${templateId}`,
-      });
-    }
-  }, [history, ruleTypeId, ruleTemplate, templateId, application]);
+  }, [ruleTypeId]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
