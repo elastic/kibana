@@ -11,45 +11,87 @@ export const TEMPLATES: Record<
   string,
   { name: string; serviceId: string; templateValues: HttpRequestConfig }
 > = {
-  'jira-create-incident': {
+  'jira:add-comment': {
     serviceId: 'jira',
-    name: 'Jira - Create Incident',
+    name: 'Jira - Add Comment',
     templateValues: {
       method: 'post',
-      url: 'jira.com',
+      url: 'http://<enter domain>/rest/api/2/issue/{{issueIdOrKey}}/comment',
+      urlTemplateFields: [
+        {
+          name: 'issueIdOrKey',
+          label: 'Issue Id or Key',
+          type: 'text',
+          required: true,
+        },
+      ],
       contentType: 'json',
       paramFields: [
+        {
+          name: 'comment',
+          label: 'Comment',
+          type: 'textarea',
+          required: true,
+        },
+      ],
+    },
+  },
+  'jira:create-issue': {
+    serviceId: 'jira',
+    name: 'Jira - Create Issue',
+    templateValues: {
+      method: 'post',
+      url: 'http://<enter domain>/rest/api/2/issue',
+      contentType: 'json',
+      urlTemplateFields: [],
+      paramFields: [
+        {
+          name: 'projectId',
+          label: 'Project Id',
+          type: 'text',
+          required: true,
+          placeholder: '',
+        },
+        {
+          name: 'issueType',
+          label: 'Issue Type',
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'task', text: 'Task' },
+            { value: 'story', text: 'Story' },
+            { value: 'bug', text: 'Bug' },
+            { value: 'epic', text: 'Epic' },
+            { value: 'initiative', text: 'Initiative' },
+            { value: 'theme', text: 'Theme' },
+            { value: 'discovery', text: 'Discovery' },
+          ],
+        },
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'todo', text: 'To Do' },
+            { value: 'inProgress', text: 'In Progress' },
+            { value: 'done', text: 'Done' },
+            { value: 'wontDo', text: `Won't Do` },
+          ],
+        },
         {
           name: 'summary',
           label: 'Summary',
           type: 'text',
           required: true,
-          placeholder: 'Enter a short summary',
+          placeholder: '',
         },
         {
           name: 'description',
           label: 'Description',
           type: 'textarea',
           required: false,
-          placeholder: 'Enter detailed description',
-        },
-        {
-          name: 'priority',
-          label: 'Priority',
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'high', text: 'High' },
-            { value: 'medium', text: 'Medium' },
-            { value: 'low', text: 'Low' },
-          ],
-        },
-        {
-          name: 'assignee',
-          label: 'Assignee',
-          type: 'text',
-          required: false,
-          placeholder: 'Assign to user',
+          placeholder: '',
         },
       ],
     },

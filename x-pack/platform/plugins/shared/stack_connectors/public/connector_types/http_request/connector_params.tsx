@@ -105,7 +105,9 @@ const HttpRequestParamsFields: React.FunctionComponent<
 > = ({ actionParams, editAction, index, messageVariables, errors, actionConnector }) => {
   return jsonFormGenerator({
     form: {
-      fields: actionConnector!.config.paramFields,
+      fields: (actionConnector!.config.urlTemplateFields || []).concat(
+        actionConnector!.config.paramFields
+      ),
     },
     values: actionParams,
     onChange: (name, val) => editAction(name, val, 0),

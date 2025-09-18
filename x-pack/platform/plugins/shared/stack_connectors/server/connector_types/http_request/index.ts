@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import Mustache from 'mustache';
 import { i18n } from '@kbn/i18n';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type {
@@ -73,10 +74,28 @@ async function executor(
 
   const axiosInstance = axios.create();
 
+  const urlTemplateFields = [];
+  const urlTemplateValues: Record<string, unknown> = {};
+  for (const field of config.urlTemplateFields) {
+    urlTemplateValues[field.name] = params[field.name];
+    urlTemplateFields.push(field.name);
+  }
+
+  const filteredParams: Record<string, unknown> = {};
+  for (const field of Object.keys(params)) {
+    if (!urlTemplateFields.includes(field)) {
+      filteredParams[field] = params[field];
+    }
+  }
+
+  const url = Mustache.render(config.url, urlTemplateValues);
+  console.log('URL', url);
+  console.log('Params', filteredParams);
+
   const result = await request({
     axios: axiosInstance,
     method: config.method,
-    url: config.url,
+    url,
     logger,
     headers: {
       'Content-Type':
@@ -84,7 +103,7 @@ async function executor(
           ? config.customContentType!
           : CONTENT_TYPE_MAP[config.contentType],
     },
-    data: params.body,
+    data: filteredParams,
     configurationUtilities,
     connectorUsageCollector,
   });

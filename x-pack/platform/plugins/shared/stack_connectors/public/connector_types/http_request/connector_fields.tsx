@@ -51,6 +51,7 @@ const COMBINED_TEMPLATES: Record<
     templateValues: {
       method: 'post',
       url: '',
+      urlTemplateFields: [],
       contentType: 'json',
       paramFields: [],
     },
@@ -69,6 +70,7 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       'config.contentType',
       'config.paramFields',
       'config.customContentType',
+      'config.urlTemplateFields',
     ],
   });
 
@@ -98,6 +100,10 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               setFieldValue('config.url', templateValues.url);
               setFieldValue('config.contentType', templateValues.contentType);
               setFieldValue('config.customContentType', templateValues.customContentType);
+              setFieldValue(
+                'config.urlTemplateFields',
+                JSON.stringify(templateValues.urlTemplateFields, null, 2)
+              );
               setFieldValue(
                 'config.paramFields',
                 JSON.stringify(templateValues.paramFields, null, 2)
@@ -200,6 +206,33 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             />
           </EuiFlexItem>
         )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            path="config.urlTemplateFields"
+            component={JsonEditorField}
+            config={{
+              label: i18n.translate(
+                'xpack.stackConnectors.components.httpRequest.urlTemplateFieldsJSONEditorFieldLabel',
+                {
+                  defaultMessage: 'Url Template Fields',
+                }
+              ),
+            }}
+            componentProps={{
+              euiCodeEditorProps: {
+                fullWidth: true,
+                height: '200px',
+                options: {
+                  fontSize: '12px',
+                  renderValidationDecorations: 'off',
+                },
+              },
+            }}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup>

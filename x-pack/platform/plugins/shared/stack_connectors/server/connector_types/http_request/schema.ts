@@ -23,6 +23,7 @@ export const configSchema = schema.object({
     schema.literal('data'),
     schema.literal('custom'),
   ]),
+  urlTemplateFields: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   customContentType: schema.maybe(schema.string()),
   paramFields: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
 });
@@ -31,7 +32,5 @@ export type HttpRequestConfig = TypeOf<typeof configSchema>;
 export const secretsSchema = schema.object({});
 export type HttpRequestSecrets = TypeOf<typeof secretsSchema>;
 
-export const paramsSchema = schema.object({
-  body: schema.maybe(schema.string()),
-});
+export const paramsSchema = schema.recordOf(schema.string(), schema.any());
 export type HttpRequestParams = TypeOf<typeof paramsSchema>;
