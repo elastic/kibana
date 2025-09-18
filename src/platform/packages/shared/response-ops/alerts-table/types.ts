@@ -358,10 +358,12 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    *   pageSize,
    *   pageIndex,
    *   expandedAlertIndex,
+   *   isLoading,
    *   alerts,
    * }) => {
    *   const alertIndexInPage = expandedAlertIndex - pageIndex * pageSize;
    *   // This can be undefined when a new page of alerts is still loading
+   *   // Use this in combination with isLoading to show a loading indicator
    *   const alert = alerts[alertIndexInPage] as Alert | undefined;
    *
    *   render (...);

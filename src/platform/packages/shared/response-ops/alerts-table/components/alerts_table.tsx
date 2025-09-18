@@ -297,7 +297,7 @@ const AlertsTableContent = typedForwardRef(
       [bulkActionsState, dispatchBulkAction]
     );
 
-    const [queryParams, setQueryParams] = useAlertsTableQueryParams({
+    const queryParams = useAlertsTableQueryParams({
       ruleTypeIds,
       consumers,
       fields,
@@ -371,7 +371,7 @@ const AlertsTableContent = typedForwardRef(
     const refresh = useCallback(() => {
       if (pageIndex !== 0) {
         // Refetch from the first page when refreshing
-        setQueryParams((prevQueryParams) => ({ ...prevQueryParams, pageIndex: 0 }));
+        setPageIndex(0);
       } else {
         refetchAlerts();
       }
@@ -379,13 +379,13 @@ const AlertsTableContent = typedForwardRef(
       queryClient.invalidateQueries(alertsQueryKeys.getMutedAlerts(ruleIds));
       queryClient.invalidateQueries(queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds));
     }, [
-      caseIds,
-      maintenanceWindowIds,
-      queryClient,
       pageIndex,
-      refetchAlerts,
+      queryClient,
+      caseIds,
       ruleIds,
-      setQueryParams,
+      maintenanceWindowIds,
+      setPageIndex,
+      refetchAlerts,
     ]);
 
     useEffect(() => {

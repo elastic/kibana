@@ -14,7 +14,9 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
+  EuiPagination,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -24,6 +26,7 @@ import type { Alert } from '@kbn/alerting-types';
 import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import {
   ALERT_FLYOUT_DEFAULT_TITLE,
+  ALERT_FLYOUT_PAGINATION_ARIA_LABEL,
   getAlertFlyoutAriaLabel,
 } from '@kbn/response-ops-alerts-table/translations';
 import { getAlertFormatters } from './render_cell_value';
@@ -34,6 +37,7 @@ export const AlertsTableFlyout: GetAlertsTableProp<'renderExpandedAlertView'> = 
   expandedAlertIndex,
   onExpandedAlertIndexChange,
   alerts,
+  alertsCount,
   isLoading,
   columns,
 }) => {
@@ -69,6 +73,21 @@ export const AlertsTableFlyout: GetAlertsTableProp<'renderExpandedAlertView'> = 
               : ALERT_FLYOUT_DEFAULT_TITLE}
           </h3>
         </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              aria-label={ALERT_FLYOUT_PAGINATION_ARIA_LABEL}
+              pageCount={alertsCount}
+              activePage={expandedAlertIndex}
+              onPageClick={(activePage) => {
+                onExpandedAlertIndexChange?.(activePage);
+              }}
+              compressed
+              data-test-subj="alertFlyoutPagination"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       {isLoading ? (

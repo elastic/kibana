@@ -122,5 +122,5 @@ export const useAlertsTableQueryParams = ({
     dispatchBulkAction,
   ]);
 
-  return [queryParams, setQueryParams] as const;
+  return queryParams;
 };
