@@ -29,7 +29,7 @@ import type {
   QueryCommandTagParametrized,
 } from './types';
 import { Walker } from '../walker';
-import { isColumn, isFunctionExpression } from '../ast/is';
+import { isColumn, isFunctionExpression, isSource } from '../ast/is';
 import { replaceProperties } from '../walker/helpers';
 
 export class ComposerQuery {
@@ -743,20 +743,22 @@ export class ComposerQuery {
 
     Walker.replaceAll(this.ast, { type: 'literal', literalType: 'param', value: name }, (node) => {
       const param = node as ESQLNamedParamLiteral;
-      if (param.paramKind === '??') {
-        const parent = Walker.parent(this.ast, node);
-        if (parent) {
-          if (isFunctionExpression(parent) && parent.operator === node) {
-            return Builder.identifier(String(value));
-          }
-          if (isColumn(parent)) {
-            if (parent.args.length === 1 && parent.args[0] === node) {
-              replaceProperties(parent, synth.exp(String(value)));
-              return { ...node };
-            } else {
-              return Builder.identifier(String(value));
-            }
-          }
+      const parent = Walker.parent(this.ast, node);
+
+      if (parent && isFunctionExpression(parent) && parent.operator === node) {
+        return Builder.identifier(String(value));
+      } else if (
+        parent &&
+        isColumn(parent) &&
+        parent.args.length === 1 &&
+        parent.args[0] === node
+      ) {
+        replaceProperties(parent, synth.exp(String(value)));
+
+        return { ...node };
+      } else if (param.paramKind === '??') {
+        if (parent && isColumn(parent)) {
+          return Builder.identifier(String(value));
         }
 
         return synth.exp(String(value));
