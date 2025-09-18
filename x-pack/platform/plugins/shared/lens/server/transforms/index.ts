@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ConfigBuilderStub } from './config_builder_stub';
+export { getLensServerTransforms } from './transforms';

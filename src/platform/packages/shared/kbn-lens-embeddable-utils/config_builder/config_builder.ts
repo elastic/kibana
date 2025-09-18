@@ -10,6 +10,7 @@
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { LensItem } from '@kbn/lens-plugin/server/content_management';
 import type { LensAttributes, LensConfig, LensConfigOptions } from './types';
 import {
   buildGauge,
@@ -24,6 +25,20 @@ import {
 import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
 import type { LensApiState } from './schema';
 import { isLensLegacyFormat } from './utils';
+
+export { lensApiStateSchema, metricStateSchema } from './schema';
+
+const compatibilityMap: Record<string, string> = {
+  lnsMetric: 'metric',
+};
+
+/**
+ * A minimal type to extend for type lookup
+ */
+type ChartTypeLike =
+  | Pick<LensItem, 'visualizationType'>
+  | Pick<LensConfig, 'chartType'>
+  | Pick<LensApiState, 'type'>;
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -45,6 +60,7 @@ export class LensConfigBuilder {
   private apiConvertersByChart = {
     metric: { fromAPItoLensState, fromLensStateToAPI },
   };
+
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon | undefined;
 
@@ -52,6 +68,22 @@ export class LensConfigBuilder {
   constructor(dataViewsAPI?: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
+  }
+
+  isSupported(chartType?: string | null): boolean {
+    if (!chartType) return false;
+    const type = compatibilityMap[chartType] ?? chartType;
+    return type in this.apiConvertersByChart;
+  }
+
+  getType<C extends ChartTypeLike>(config: C): string | undefined | null {
+    return 'visualizationType' in config
+      ? config.visualizationType
+      : isLensLegacyFormat(config)
+      ? config.chartType
+      : 'type' in config
+      ? config.type
+      : null;
   }
 
   /**

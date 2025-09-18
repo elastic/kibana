@@ -29,21 +29,11 @@ import type {
   lensCMUpdateOptionsSchema,
   lensCMSearchOptionsSchema,
   lensItemSchema,
-  lensItemMetaSchema,
-  lensResponseItemSchema,
-  lensAPIAttributesSchema,
-  lensAPIConfigSchema,
 } from './schema';
 import type { LENS_CONTENT_TYPE } from '../../../common/constants';
 
 export type LensAttributes = TypeOf<typeof lensItemAttributesSchema>;
-export type LensAPIAttributes = TypeOf<typeof lensAPIAttributesSchema>;
-
 export type LensItem = TypeOf<typeof lensItemSchema>;
-export type LensItemMeta = TypeOf<typeof lensItemMetaSchema>;
-
-export type LensAPIConfig = TypeOf<typeof lensAPIConfigSchema>;
-export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
 
 export type LensCreateOptions = TypeOf<typeof lensCMCreateOptionsSchema>;
 export type LensUpdateOptions = TypeOf<typeof lensCMUpdateOptionsSchema>;
