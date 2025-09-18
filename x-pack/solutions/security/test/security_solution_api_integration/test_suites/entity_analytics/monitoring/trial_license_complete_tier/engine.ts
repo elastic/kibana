@@ -493,7 +493,11 @@ export default ({ getService }: FtrProviderContext) => {
           expect(r.labels.sources).toContain('entity_analytics_integration');
         });
         // update okta user to non-privileged, to test sync updates
-        await privMonUtils.updateOktaUserRole('AZlHQD20hY07UD0HNBs-', false);
+        await privMonUtils.setIntegrationUserPrivilege({
+          id: 'AZlHQD20hY07UD0HNBs-',
+          isPrivileged: false,
+          indexPattern: 'logs-entityanalytics_okta.user-default',
+        });
         // schedule another sync
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();

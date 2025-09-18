@@ -177,9 +177,17 @@ export const PrivMonUtils = (
       },
     });
 
-  const updateOktaUserRole = async (id: string, isPrivileged: boolean) => {
+  const setIntegrationUserPrivilege = async ({
+    id,
+    isPrivileged,
+    indexPattern,
+  }: {
+    id: string;
+    isPrivileged: boolean;
+    indexPattern: string;
+  }) => {
     await es.updateByQuery({
-      index: 'logs-entityanalytics_okta.user-default',
+      index: indexPattern,
       refresh: true,
       conflicts: 'proceed',
       query: { ids: { values: [id] } },
@@ -206,6 +214,6 @@ export const PrivMonUtils = (
     assertIsPrivileged,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
-    updateOktaUserRole,
+    setIntegrationUserPrivilege,
   };
 };

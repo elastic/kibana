@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Matcher } from '../../../constants';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { AfterKey } from './privileged_status_match';
-import type { PrivMonOktaIntegrationsUser } from '../../../../types';
+import type { PrivMonIntegrationsUser } from '../../../../types';
 import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
 
 /**
@@ -110,7 +110,7 @@ export const applyPrivilegedUpdates = async ({
   users,
 }: {
   dataClient: PrivilegeMonitoringDataClient;
-  users: PrivMonOktaIntegrationsUser[];
+  users: PrivMonIntegrationsUser[];
 }) => {
   if (users.length === 0) return;
 

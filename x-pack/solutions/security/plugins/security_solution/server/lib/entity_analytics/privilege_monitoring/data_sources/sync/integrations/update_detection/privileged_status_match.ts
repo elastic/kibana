@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
-import type { PrivMonOktaIntegrationsUser } from '../../../../types';
+import type { PrivMonIntegrationsUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
 
 export type AfterKey = Record<string, string> | undefined;
@@ -55,7 +55,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   const searchService = createSearchService(dataClient);
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
-  ): Promise<PrivMonOktaIntegrationsUser[]> => {
+  ): Promise<PrivMonIntegrationsUser[]> => {
     // quick exits / setup
     if (!source.matchers?.length) {
       dataClient.log('info', `No matchers for source id=${source.id ?? '(unknown)'}`);
@@ -68,7 +68,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     let afterKey: AfterKey | undefined;
     let fetchMore = true;
     const pageSize = 100; // number of agg buckets per page
-    const users: PrivMonOktaIntegrationsUser[] = [];
+    const users: PrivMonIntegrationsUser[] = [];
 
     try {
       while (fetchMore) {
@@ -83,8 +83,8 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
         // process current page
         if (buckets.length && aggregations) {
-          const processedAggregations = await processAggregations(aggregations);
-          users.push(...processedAggregations);
+          const privMonUsers = await extractPrivMonUsers(aggregations);
+          users.push(...privMonUsers);
         }
 
         // next page
@@ -100,9 +100,9 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     }
   };
 
-  const processAggregations = async (
+  const extractPrivMonUsers = async (
     aggregation: PrivMatchersAggregation
-  ): Promise<PrivMonOktaIntegrationsUser[]> => {
+  ): Promise<PrivMonIntegrationsUser[]> => {
     const buckets: PrivBucket[] | undefined =
       aggregation.privileged_user_status_since_last_run?.buckets;
     if (!buckets) {

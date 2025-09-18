@@ -13,9 +13,8 @@ export interface PrivMonBulkUser {
   sourceId: string;
 }
 
-export interface PrivMonOktaIntegrationsUser extends PrivMonBulkUser {
+export interface PrivMonIntegrationsUser extends PrivMonBulkUser {
   id: string; // do you actually need this? I think you can use existingUserId instead
-  email: string | undefined;
   roles: string[];
   lastSeen: string;
   isPrivileged: boolean;
