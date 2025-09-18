@@ -179,7 +179,10 @@ export const updateAgentlessCloudConnectorConfig = (
       return;
     }
 
-    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== packagePolicy?.supports_cloud_connector) {
+    if (
+      newAgentPolicy.agentless?.cloud_connectors?.enabled !==
+      packagePolicy?.supports_cloud_connector
+    ) {
       setNewAgentPolicy({
         ...newAgentPolicy,
         agentless: {

@@ -91,9 +91,13 @@ export const AwsCredentialsFormAgentless = ({
   const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
+    const newPackagePolicy = {
+      ...newPolicy,
+      supports_cloud_connector: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+    };
     updatePolicy({
       updatedPolicy: {
-        ...updatePolicyWithInputs(newPolicy, awsPolicyType, {
+        ...updatePolicyWithInputs(newPackagePolicy, awsPolicyType, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -247,7 +251,7 @@ export const AwsCredentialsFormAgentless = ({
         <>
           {!showCloudTemplates && isCloudFormationSupported && (
             <>
-              <EuiCallOut color="warning">
+              <EuiCallOut announceOnMount color="warning">
                 <FormattedMessage
                   id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.supportedMessage"
                   defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."

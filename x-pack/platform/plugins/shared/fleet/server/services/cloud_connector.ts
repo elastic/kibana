@@ -14,13 +14,17 @@ import type {
   CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
-import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
+import type {
+  CreateCloudConnectorRequest,
+  UpdateCloudConnectorRequest,
+} from '../routes/cloud_connector/handlers';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import {
   CloudConnectorCreateError,
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
+  CloudConnectorDeleteError,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -34,6 +38,16 @@ export interface CloudConnectorServiceInterface {
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
   ): Promise<CloudConnectorResponse[]>;
+  getById(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<CloudConnectorResponse>;
+  update(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string,
+    updates: Partial<Pick<CreateCloudConnectorRequest, 'name' | 'vars'>>
+  ): Promise<CloudConnectorResponse>;
+  delete(soClient: SavedObjectsClientContract, cloudConnectorId: string): Promise<{ id: string }>;
 }
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
@@ -142,6 +156,154 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       logger.error('Failed to get cloud connectors list', error.message);
       throw new CloudConnectorGetListError(
         `Failed to get cloud connectors list: ${error.message}\n${error.stack}`
+      );
+    }
+  }
+
+  async getById(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<CloudConnectorResponse> {
+    const logger = this.getLogger('getById');
+
+    try {
+      logger.info(`Getting cloud connector ${cloudConnectorId}`);
+
+      const cloudConnector = await soClient.get<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        cloudConnectorId
+      );
+
+      logger.info(`Successfully retrieved cloud connector ${cloudConnectorId}`);
+
+      return {
+        id: cloudConnector.id,
+        name: cloudConnector.attributes.name,
+        namespace: cloudConnector.attributes.namespace,
+        cloudProvider: cloudConnector.attributes.cloudProvider,
+        vars: cloudConnector.attributes.vars,
+        packagePolicyCount: cloudConnector.attributes.packagePolicyCount,
+        created_at: cloudConnector.attributes.created_at,
+        updated_at: cloudConnector.attributes.updated_at,
+      };
+    } catch (error) {
+      logger.error('Failed to get cloud connector', error.message);
+      throw new CloudConnectorGetListError(
+        `Failed to get cloud connector: ${error.message}\n${error.stack}`
+      );
+    }
+  }
+
+  async update(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string,
+    updates: Partial<UpdateCloudConnectorRequest>
+  ): Promise<CloudConnectorResponse> {
+    const logger = this.getLogger('update');
+
+    try {
+      logger.info(`Updating cloud connector ${cloudConnectorId}`);
+
+      // Get existing cloud connector
+      const existingCloudConnector = await soClient.get<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        cloudConnectorId
+      );
+
+      // Validate updates if vars are provided
+      if (updates.vars) {
+        const tempCloudConnector = {
+          name: updates.name || existingCloudConnector.attributes.name,
+          vars: updates.vars,
+          cloudProvider: existingCloudConnector.attributes.cloudProvider,
+        };
+        this.validateCloudConnectorDetails(tempCloudConnector);
+      }
+
+      // Prepare update attributes
+      const updateAttributes: Partial<CloudConnectorSOAttributes> = {
+        updated_at: new Date().toISOString(),
+      };
+
+      if (updates.name) {
+        updateAttributes.name = updates.name;
+      }
+
+      if (updates.vars) {
+        updateAttributes.vars = {
+          ...(updates.vars.role_arn?.value && { role_arn: updates.vars.role_arn }),
+          ...(updates.vars.external_id?.value && { external_id: updates.vars.external_id }),
+        };
+      }
+
+      // Update the saved object
+      const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        cloudConnectorId,
+        updateAttributes
+      );
+
+      logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
+
+      // Return the updated cloud connector with merged attributes
+      const mergedAttributes = {
+        ...existingCloudConnector.attributes,
+        ...updatedSavedObject.attributes,
+      };
+
+      return {
+        id: cloudConnectorId,
+        name: mergedAttributes.name,
+        cloudProvider: mergedAttributes.cloudProvider,
+        vars: mergedAttributes.vars,
+        packagePolicyCount: mergedAttributes.packagePolicyCount,
+        created_at: mergedAttributes.created_at,
+        updated_at: mergedAttributes.updated_at,
+        namespace: mergedAttributes.namespace,
+      };
+    } catch (error) {
+      logger.error('Failed to update cloud connector', error.message);
+      throw new CloudConnectorCreateError(
+        `Failed to update cloud connector: ${error.message}\n${error.stack}`
+      );
+    }
+  }
+
+  async delete(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<{ id: string }> {
+    const logger = this.getLogger('delete');
+
+    try {
+      logger.info(`Deleting cloud connector ${cloudConnectorId}`);
+
+      // First, get the cloud connector to check packagePolicyCount
+      const cloudConnector = await soClient.get<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        cloudConnectorId
+      );
+
+      // Check if cloud connector is still in use by package policies
+      if (cloudConnector.attributes.packagePolicyCount > 0) {
+        const errorMessage = `Cannot delete cloud connector "${cloudConnector.attributes.name}" as it is being used by ${cloudConnector.attributes.packagePolicyCount} package policies`;
+        logger.error(errorMessage);
+        throw new CloudConnectorDeleteError(errorMessage);
+      }
+
+      // Delete the cloud connector
+      await soClient.delete(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, cloudConnectorId);
+
+      logger.info(`Successfully deleted cloud connector ${cloudConnectorId}`);
+
+      return {
+        id: cloudConnectorId,
+      };
+    } catch (error) {
+      logger.error('Failed to delete cloud connector', error.message);
+
+      throw new CloudConnectorDeleteError(
+        `Failed to delete cloud connector: ${error.message}\n${error.stack}`
       );
     }
   }

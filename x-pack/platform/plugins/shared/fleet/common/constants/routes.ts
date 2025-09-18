@@ -98,7 +98,10 @@ export const AGENT_POLICY_API_ROUTES = {
 // Cloud Connector API routes
 export const CLOUD_CONNECTOR_API_ROUTES = {
   LIST_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
+  INFO_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   CREATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
+  UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
+  DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
 };
 
 // Kubernetes Manifest API routes
