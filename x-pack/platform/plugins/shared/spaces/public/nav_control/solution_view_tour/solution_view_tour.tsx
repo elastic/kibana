@@ -58,7 +58,7 @@ export const SolutionViewTour: FC<Props> = ({
   return (
     <EuiTourStep
       content={
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"

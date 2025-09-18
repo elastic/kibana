@@ -21,7 +21,7 @@ export const tourSteps: TourStep[] = [
     id: 'sidenav-home',
     title: 'Improved navigation menu',
     content: (
-      <EuiText>
+      <EuiText size={'s'}>
         <p>
           <FormattedMessage
             id="core.chrome.navigationTour.sidenavHomeMessage"
@@ -47,7 +47,7 @@ export const tourSteps: TourStep[] = [
     id: 'sidenav-manage-data',
     title: 'Data management now has its own menu',
     content: (
-      <EuiText>
+      <EuiText size={'s'}>
         <p>
           <FormattedMessage
             id="core.chrome.navigationTour.sidenavDataManagementMessage"
@@ -58,6 +58,6 @@ export const tourSteps: TourStep[] = [
       </EuiText>
     ),
     // TODO: Update the target when there is a dedicated data management app
-    target: '[data-test-subj~="projectSideNav"] [data-test-subj*="stack_management"]',
+    target: '[data-test-subj~="projectSideNav"] [data-test-subj*="ingest_and_data"]',
   },
 ];
