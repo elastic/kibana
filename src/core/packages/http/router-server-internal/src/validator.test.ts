@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import { RouteValidationError } from '@kbn/core-http-server';
@@ -99,210 +100,104 @@ describe('Router validator', () => {
     expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(/Required/);
   });
 
-  describe('query parameter array handling', () => {
-    it('should convert single string value to array when schema expects array', () => {
-      const validator = RouteValidator.from({
-        query: schema.object({
-          fields: schema.arrayOf(schema.string()),
-        }),
-      });
+  it('should validate and infer the type from a config-schema non-ObjectType', () => {
+    const schemaValidation = RouteValidator.from({ params: schema.buffer() });
 
-      // Single value should be converted to array
-      const result = validator.getQuery({ fields: 'id' });
-      expect(result).toStrictEqual({ fields: ['id'] });
-    });
-
-    it('should preserve array values when schema expects array', () => {
-      const validator = RouteValidator.from({
-        query: schema.object({
-          fields: schema.arrayOf(schema.string()),
-        }),
-      });
-
-      // Array values should remain as arrays
-      const result = validator.getQuery({ fields: ['id', 'title'] });
-      expect(result).toStrictEqual({ fields: ['id', 'title'] });
-    });
-
-    it('should handle mixed query parameters with both array and non-array fields', () => {
-      const validator = RouteValidator.from({
-        query: schema.object({
-          fields: schema.arrayOf(schema.string()),
-          search: schema.string(),
-          tags: schema.arrayOf(schema.string()),
-        }),
-      });
-
-      // Test with single values for array fields and regular field
-      const result = validator.getQuery({
-        fields: 'id',
-        search: 'test',
-        tags: 'important',
-      });
-      expect(result).toStrictEqual({
-        fields: ['id'],
-        search: 'test',
-        tags: ['important'],
-      });
-    });
-
-    it('should handle empty values correctly', () => {
-      const validator = RouteValidator.from({
-        query: schema.object({
-          fields: schema.maybe(schema.arrayOf(schema.string())),
-        }),
-      });
-
-      // Empty object should work
-      const result1 = validator.getQuery({});
-      expect(result1).toStrictEqual({ fields: undefined });
-
-      // Undefined fields should work
-      const result2 = validator.getQuery({ fields: undefined });
-      expect(result2).toStrictEqual({ fields: undefined });
-    });
-
-    it('should not convert non-string values to arrays', () => {
-      const validator = RouteValidator.from({
-        query: schema.object({
-          numbers: schema.arrayOf(schema.number()),
-        }),
-      });
-
-      // Number value should remain as number (and validation will handle if it's wrong)
-      expect(() => validator.getQuery({ numbers: 42 })).toThrowError();
-    });
-
-    it('should preserve original behavior for non-object schemas', () => {
-      const validator = RouteValidator.from({
-        query: schema.arrayOf(schema.string()),
-      });
-
-      // Should not break when query schema is not an object
-      expect(() => validator.getQuery('single-value')).toThrowError();
-
-      const result = validator.getQuery(['value1', 'value2']);
-      expect(result).toStrictEqual(['value1', 'value2']);
-    });
-
-    it('should handle validation errors gracefully', () => {
-      const validator = RouteValidator.from({
-        query: schema.object({
-          fields: schema.arrayOf(schema.string()),
-        }),
-      });
-
-      // Invalid data types should still throw appropriate errors
-      expect(() => validator.getQuery({ fields: 123 })).toThrowError();
-      expect(() => validator.getQuery({ fields: null })).toThrowError();
-      expect(() => validator.getQuery({ fields: {} })).toThrowError();
-    });
+    const foo = Buffer.from('hi!');
+    expect(schemaValidation.getParams(foo)).toStrictEqual(foo);
+    expect(schemaValidation.getParams(foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
+    expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
+      'expected value of type [Buffer] but got [Object]'
+    );
+    expect(() => schemaValidation.getParams({})).toThrowError(
+      'expected value of type [Buffer] but got [Object]'
+    );
+    expect(() => schemaValidation.getParams(undefined)).toThrowError(
+      `expected value of type [Buffer] but got [undefined]`
+    );
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
+      '[myField]: expected value of type [Buffer] but got [Object]'
+    );
   });
 
-  it('should support required config fields', () => {
+  it('should catch the errors thrown by the validate function', () => {
     const validator = RouteValidator.from({
-      params: schema.object({ requiredField: schema.string() }),
-      body: schema.object({
+      params: (data) => {
+        throw new Error('Something went terribly wrong');
+      },
+    });
+
+    expect(() => validator.getParams({ foo: 1 })).toThrowError('Something went terribly wrong');
+    expect(() => validator.getParams({}, 'myField')).toThrowError(
+      '[myField]: Something went terribly wrong'
+    );
+  });
+
+  it('should not accept invalid validation options', () => {
+    const wrongValidateSpec = RouteValidator.from({
+      params: { validate: <T>(data: T): T => data } as Type<any>,
+    });
+
+    expect(() => wrongValidateSpec.getParams({ foo: 1 })).toThrowError(
+      'The validation rule provided in the handler is not valid'
+    );
+  });
+
+  it('should validate and infer type when data is an array', () => {
+    expect(
+      RouteValidator.from({
         body: schema.arrayOf(schema.string()),
-        bool: schema.boolean(),
-      }),
-    });
-
-    expect(validator.getParams({ requiredField: 'any' })).toStrictEqual({
-      requiredField: 'any',
-    });
-    expect(validator.getBody({ body: ['any'], bool: true })).toStrictEqual({
-      body: ['any'],
-      bool: true,
-    });
-  });
-
-  it('should support optional config fields', () => {
-    const validator = RouteValidator.from({
-      params: schema.object({ optionalField: schema.maybe(schema.string()) }),
-      body: schema.object({
+      }).getBody(['foo', 'bar'])
+    ).toStrictEqual(['foo', 'bar']);
+    expect(
+      RouteValidator.from({
         body: schema.arrayOf(schema.number()),
-        bool: schema.boolean(),
-      }),
-    });
-
-    expect(validator.getParams({ optionalField: 'any' })).toStrictEqual({
-      optionalField: 'any',
-    });
-    expect(validator.getParams({})).toStrictEqual({ optionalField: undefined });
-    expect(validator.getBody({ body: [1, 2, 3], bool: true })).toStrictEqual({
-      body: [1, 2, 3],
-      bool: true,
-    });
-  });
-
-  it('should support required config fields if all required fields are specified', () => {
-    const validator = RouteValidator.from({
-      body: schema.object({
+      }).getBody([1, 2, 3])
+    ).toStrictEqual([1, 2, 3]);
+    expect(
+      RouteValidator.from({
         body: schema.arrayOf(schema.object({ foo: schema.string() })),
-      }),
-    });
+      }).getBody([{ foo: 'bar' }, { foo: 'dolly' }])
+    ).toStrictEqual([{ foo: 'bar' }, { foo: 'dolly' }]);
 
-    expect(() => validator.getBody({})).toThrowError(
-      '[body]: expected value of type [array] but got [undefined]'
-    );
-    expect(() => validator.getBody({ body: [{ bar: 'baz' }] })).toThrowError(
-      '[body.0.foo]: expected value of type [string] but got [undefined]'
-    );
-    expect(validator.getBody({ body: [{ foo: 'bar' }] })).toStrictEqual({
-      body: [{ foo: 'bar' }],
-    });
-  });
-
-  it('config schema with defaults can be used for validation and throw errors when value does not match schema type', () => {
-    const validator = RouteValidator.from({
-      body: schema.object({
+    expect(() =>
+      RouteValidator.from({
         body: schema.arrayOf(schema.number()),
-        bool: schema.boolean(),
-      }),
-    });
-
-    expect(() => validator.getBody({ body: ['1', '2'], bool: true })).toThrowError(
-      '[body.0]: expected value of type [number] but got [string]'
-    );
-    expect(() => validator.getBody({ body: [1, 2], bool: 'true' })).toThrowError(
-      '[bool]: expected value of type [boolean] but got [string]'
-    );
-  });
-
-  it('should support config schema options', () => {
-    const validator = RouteValidator.from({
-      params: schema.object({ foo: schema.string() }),
-      body: schema.object({
+      }).getBody(['foo', 'bar', 'dolly'])
+    ).toThrowError('[0]: expected value of type [number] but got [string]');
+    expect(() =>
+      RouteValidator.from({
         body: schema.arrayOf(schema.number()),
-        bool: schema.boolean({ defaultValue: true }),
-      }),
-    });
-
-    expect(validator.getBody({ body: [1, 2, 3] })).toStrictEqual({
-      body: [1, 2, 3],
-      bool: true,
-    });
+      }).getBody({ foo: 'bar' })
+    ).toThrowError('expected value of type [array] but got [Object]');
   });
 
-  it('should turn result into `any` if no schema is declared', () => {
-    const validator = RouteValidator.from({ params: undefined });
+  it('should validate and infer type when data is a primitive', () => {
+    expect(
+      RouteValidator.from({
+        body: schema.string(),
+      }).getBody('foobar')
+    ).toStrictEqual('foobar');
+    expect(
+      RouteValidator.from({
+        body: schema.number(),
+      }).getBody(42)
+    ).toStrictEqual(42);
+    expect(
+      RouteValidator.from({
+        body: schema.boolean(),
+      }).getBody(true)
+    ).toStrictEqual(true);
 
-    expect(validator.getParams('text')).toStrictEqual({});
-    expect(validator.getParams([])).toStrictEqual({});
-    expect(validator.getParams(1234)).toStrictEqual({});
-    expect(validator.getParams({})).toStrictEqual({});
-  });
-
-  it('should never allow undefined even if no validation is declared', () => {
-    const validator = RouteValidator.from({ params: undefined });
-
-    expect(validator.getParams(undefined)).toStrictEqual({});
-  });
-
-  it('should never allow null even if no validation is declared', () => {
-    const validator = RouteValidator.from({ params: undefined });
-
-    expect(validator.getParams(null)).toStrictEqual({});
+    expect(() =>
+      RouteValidator.from({
+        body: schema.string(),
+      }).getBody({ foo: 'bar' })
+    ).toThrowError('expected value of type [string] but got [Object]');
+    expect(() =>
+      RouteValidator.from({
+        body: schema.number(),
+      }).getBody('foobar')
+    ).toThrowError('expected value of type [number] but got [string]');
   });
 });

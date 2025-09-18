@@ -61,13 +61,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getQuery(data: unknown, namespace?: string): Readonly<Q> {
-    const preprocessedData = this.preprocessQueryData(data, this.config.query);
-    return this.validate(
-      this.config.query,
-      this.options.unsafe?.query,
-      preprocessedData,
-      namespace
-    ) as Q;
+    return this.validate(this.config.query, this.options.unsafe?.query, data, namespace) as Q;
   }
 
   /**
@@ -84,43 +78,6 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    */
   public hasBody(): boolean {
     return typeof this.config.body !== 'undefined';
-  }
-
-  /**
-   * Preprocesses query parameters to handle single values for array schemas.
-   * If a schema expects an array but receives a single string value, convert it to an array.
-   * @internal
-   */
-  private preprocessQueryData<T>(data: unknown, validationRule?: RouteValidationSpec<T>): unknown {
-    if (!validationRule || !isConfigSchema(validationRule) || !data || typeof data !== 'object') {
-      return data;
-    }
-
-    // Clone the data to avoid mutating the original
-    const processedData = { ...data } as Record<string, any>;
-
-    try {
-      const joiSchema = validationRule.getSchema();
-
-      if (joiSchema && joiSchema.type === 'object' && joiSchema.$_terms && joiSchema.$_terms.keys) {
-        for (const keyDef of joiSchema.$_terms.keys) {
-          const fieldName = keyDef.key;
-          const fieldSchema = keyDef.schema;
-
-          if (fieldSchema && fieldSchema.type === 'array' && fieldName in processedData) {
-            const value = processedData[fieldName];
-
-            if (typeof value === 'string') {
-              processedData[fieldName] = [value];
-            }
-          }
-        }
-      }
-    } catch (error) {
-      return data;
-    }
-
-    return processedData;
   }
 
   private validate<T>(
