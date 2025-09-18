@@ -3,8 +3,13 @@ tags:
 tasks:
   build-webpack:
     command: yarn
+    deps:
+      - '^:build-webpack'
     args:
       - build
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
   watch-webpack:
@@ -14,8 +19,11 @@ tasks:
     command: yarn
     args:
       - build
-      - --watch
+      - '--watch'
     deps:
       - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm

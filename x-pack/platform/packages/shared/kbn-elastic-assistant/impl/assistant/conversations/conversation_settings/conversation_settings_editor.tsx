@@ -33,9 +33,9 @@ import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 export interface ConversationSettingsEditorProps {
   allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
+  currentUser?: User;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
-  isAssistantSharingEnabled?: boolean;
   isDisabled?: boolean;
   selectedConversation: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -51,8 +51,8 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
   ({
     allSystemPrompts,
     conversationsSettingsBulkActions,
+    currentUser,
     http,
-    isAssistantSharingEnabled = false,
     isDisabled = false,
     selectedConversation,
     setConversationsSettingsBulkActions,
@@ -310,8 +310,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             />
           </EuiFormRow>
         )}
-
-        {isAssistantSharingEnabled && (
+        {currentUser && (
           <EuiFormRow
             data-test-subj="shared-field"
             display="rowCompressed"

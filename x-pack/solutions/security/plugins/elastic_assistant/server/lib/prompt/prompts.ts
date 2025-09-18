@@ -8,7 +8,7 @@
 export { DEFEND_INSIGHTS } from './defend_insight_prompts';
 
 export const KNOWLEDGE_HISTORY =
-  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.\n\n{knowledgeHistory}';
+  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
 export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with the provided citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" \n2. "The alert has a risk score of 72. {reference(OdRs2)}"\n\nOnly use the citations returned by tools\n\n`;
 export const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security. ${KNOWLEDGE_HISTORY} {citations_prompt} \n{formattedTime}`;
 // system prompt from @afirstenberg
@@ -16,7 +16,7 @@ const BASE_GEMINI_PROMPT =
   'You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary.';
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
-export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}{knowledgeHistory}\n\n${KB_CATCH}\n\n{formattedTime}`;
+export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}\n\n${KB_CATCH}\n\n{formattedTime}`;
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
@@ -284,3 +284,16 @@ export const starterPromptTitle4 = 'Suggest';
 export const starterPromptIcon4 = 'sparkles';
 export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
+
+export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+
+\`\`\`
+- Between July 18 and August 18, daily cost savings **averaged around $135K**
+- The lowest point, **just above $70K**, occurred in early August.
+- **Peaks near $160K** appeared in late July and mid-August.
+- After a mid-period decline, savings steadily recovered and grew toward the end of the month.
+- At this pace, projected annual savings **exceed $48M**, confirming strong and predictable ROI.
+\`\`\`
+
+Respond only with the markdown. Do not include any explanation or extra text.`;

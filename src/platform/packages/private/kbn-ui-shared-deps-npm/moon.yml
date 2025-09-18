@@ -32,8 +32,13 @@ tasks:
     description: Run jest tests for the project
   build-webpack:
     command: yarn
+    deps:
+      - ^:build-webpack
     args:
       - build
+    inputs:
+      - '@group(src)'
+      - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
   watch-webpack:
@@ -46,5 +51,8 @@ tasks:
       - '--watch'
     deps:
       - ^:build-webpack
+    inputs:
+      - '@group(src)'
+      - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/grok-heuristics'
 type: unknown
 owners:
-  defaultOwner: '@elastic/streams-program-team'
+  defaultOwner: '@elastic/obs-ux-logs-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/grok-heuristics'
   description: Moon project for @kbn/grok-heuristics
   channel: ''
-  owner: '@elastic/streams-program-team'
+  owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-grok-heuristics
 tags:
