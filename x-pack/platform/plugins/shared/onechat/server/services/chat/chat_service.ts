@@ -157,8 +157,8 @@ class ChatServiceImpl implements ChatService {
               this.conversationService.getScopedClient({ request })
             ),
             agent: defer(async () => {
-              const agentClient = await this.agentService.getScopedClient({ request });
-              return agentClient.get(agentId);
+              const agentRegistry = await this.agentService.getRegistry({ request });
+              return agentRegistry.get(agentId);
             }),
             chatModel: getChatModel$({
               connectorId: selectedConnectorId,

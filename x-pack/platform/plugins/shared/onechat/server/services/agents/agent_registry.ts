@@ -47,12 +47,10 @@ export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistr
 };
 
 class AgentRegistryImpl implements AgentRegistry {
-  private request: KibanaRequest;
   private persistedProvider: WritableAgentProvider;
   private builtinProvider: ReadonlyAgentProvider;
 
-  constructor({ persistedProvider, builtinProvider, request }: CreateAgentRegistryOpts) {
-    this.request = request;
+  constructor({ persistedProvider, builtinProvider }: CreateAgentRegistryOpts) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
   }
