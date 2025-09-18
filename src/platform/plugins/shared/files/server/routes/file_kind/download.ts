@@ -13,7 +13,7 @@ import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
-import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
+import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
 import { getById, validateFileNameExtension } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
 import type { CreateRouteDefinition } from '../api_routes';
@@ -48,10 +48,12 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
     }
 
     const body: Response = await file.downloadContent();
+    const fileHttpResponseOptions = getFileHttpResponseOptions(file);
+
     return res.file({
       body,
       filename: fileName ?? getDownloadedFileName(file),
-      headers: getDownloadHeadersForFile(file),
+      ...fileHttpResponseOptions,
     });
   } catch (e) {
     if (e instanceof fileErrors.NoDownloadAvailableError) {

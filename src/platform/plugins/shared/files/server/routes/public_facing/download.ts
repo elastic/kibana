@@ -19,7 +19,7 @@ import {
 import type { FilesRouter } from '../types';
 import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
-import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
+import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
 import { fileNameWithExt } from '../common_schemas';
 import type { CreateHandler } from '../types';
 import { validateFileNameExtension } from '../file_kind/helpers';
@@ -53,10 +53,12 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     }
 
     const body: Readable = await file.downloadContent();
+    const fileHttpResponseOptions = getFileHttpResponseOptions(file);
+
     return res.file({
       body,
       filename: fileName ?? getDownloadedFileName(file),
-      headers: getDownloadHeadersForFile(file),
+      ...fileHttpResponseOptions,
     });
   } catch (e) {
     if (

@@ -8,27 +8,29 @@
  */
 
 import type { File } from '../file';
-import { getDownloadHeadersForFile } from './common';
+import { getFileHttpResponseOptions } from './common';
 
 describe('getDownloadHeadersForFile', () => {
-  function expectHeaders({ contentType }: { contentType: string }) {
+  function expectResult({ contentType }: { contentType: string }) {
     return {
-      'content-type': contentType,
-      'cache-control': 'max-age=31536000, immutable',
+      fileContentType: contentType,
+      headers: {
+        'cache-control': 'max-age=31536000, immutable',
+      },
     };
   }
 
   const file = { data: { name: 'test', mimeType: undefined } } as unknown as File;
   test('no mime type', () => {
-    expect(getDownloadHeadersForFile(file)).toEqual(
-      expectHeaders({ contentType: 'application/octet-stream' })
+    expect(getFileHttpResponseOptions(file)).toEqual(
+      expectResult({ contentType: 'application/octet-stream' })
     );
   });
 
   test('mime type', () => {
     const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile(fileWithMime)).toEqual(
-      expectHeaders({ contentType: 'application/pdf' })
+    expect(getFileHttpResponseOptions(fileWithMime)).toEqual(
+      expectResult({ contentType: 'application/pdf' })
     );
   });
 });
