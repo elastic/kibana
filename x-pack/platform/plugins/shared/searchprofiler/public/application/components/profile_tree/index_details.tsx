@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiToolTip, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { msToPretty } from '../../lib';
 import type { Index } from '../../types';
