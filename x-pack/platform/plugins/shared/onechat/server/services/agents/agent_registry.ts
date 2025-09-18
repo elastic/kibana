@@ -60,13 +60,15 @@ class AgentRegistryImpl implements AgentRegistry {
   private request: KibanaRequest;
   private persistedProvider: WritableAgentProvider;
   private builtinProvider: ReadonlyAgentProvider;
-  private orderedProviders: AgentProvider[];
 
   constructor({ persistedProvider, builtinProvider, request }: CreateAgentRegistryOpts) {
     this.request = request;
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
-    this.orderedProviders = [builtinProvider, persistedProvider];
+  }
+
+  private get orderedProviders() {
+    return [this.builtinProvider, this.persistedProvider];
   }
 
   async has(agentId: string): Promise<boolean> {

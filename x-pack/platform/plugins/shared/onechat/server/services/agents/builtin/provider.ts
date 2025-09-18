@@ -6,8 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { AgentType, createAgentNotFoundError } from '@kbn/onechat-common';
+import type {
+  BuiltInAgentDefinition,
+  BuiltInAgentDefinitionContext,
+} from '@kbn/onechat-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
-import type { ReadonlyAgentProvider, AgentProviderFn } from '../agent_source';
+import type { AgentProviderFn, ReadonlyAgentProvider } from '../agent_source';
+import type { InternalAgentDefinition } from '../agent_registry';
 
 export const createBuiltinProviderFn =
   ({ registry }: { registry: BuiltinAgentRegistry }): AgentProviderFn<true> =>
@@ -29,13 +35,47 @@ const registryToProvider = ({
       return registry.has(agentId);
     },
     get: (agentId: string) => {
-      // TODO: convert to format.
-      return registry.get(agentId);
+      const definition = registry.get(agentId);
+      if (!definition) {
+        throw createAgentNotFoundError({ agentId });
+      }
+      return toInternalDefinition({ definition, request });
     },
-
     list: (opts) => {
-      // TODO: convert to format.
-      return registry.list();
+      const definitions = registry.list();
+      return Promise.all(
+        definitions.map((definition) => toInternalDefinition({ definition, request }))
+      );
     },
+  };
+};
+
+export const createDynamicContext = ({
+  request,
+}: {
+  request: KibanaRequest;
+}): BuiltInAgentDefinitionContext => {
+  return { request };
+};
+
+export const toInternalDefinition = async ({
+  definition,
+  request,
+}: {
+  definition: BuiltInAgentDefinition;
+  request: KibanaRequest;
+}): Promise<InternalAgentDefinition> => {
+  const context = createDynamicContext({ request });
+
+  const configuration =
+    typeof definition.configuration === 'function'
+      ? await definition.configuration(context)
+      : definition.configuration;
+
+  return {
+    ...definition,
+    configuration,
+    type: AgentType.chat,
+    readonly: true,
   };
 };

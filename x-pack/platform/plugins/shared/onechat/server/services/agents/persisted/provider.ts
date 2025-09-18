@@ -12,6 +12,8 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
 import { createClient } from './client';
+import type { InternalAgentDefinition } from '../agent_registry';
+import type { PersistedAgentDefinition } from './types';
 
 export const createPersistedProviderFn =
   (opts: {
@@ -48,24 +50,35 @@ const createPersistedProvider = async ({
     has: (agentId: string) => {
       return client.has(agentId);
     },
-    get: (agentId: string) => {
-      // TODO: convert
-      return client.get(agentId);
+    get: async (agentId: string) => {
+      const definition = await client.get(agentId);
+      return toInternalDefinition({ definition });
     },
-    list: (opts) => {
-      // TODO: convert
-      return client.list(opts);
+    list: async (opts) => {
+      const definitions = await client.list(opts);
+      return definitions.map((definition) => toInternalDefinition({ definition }));
     },
-    create: (createRequest) => {
-      // TODO: convert
-      return client.create(createRequest);
+    create: async (createRequest) => {
+      const definition = await client.create(createRequest);
+      return toInternalDefinition({ definition });
     },
-    update: (agentId, update) => {
-      // TODO: convert
-      return client.update(agentId, update);
+    update: async (agentId, update) => {
+      const definition = await client.update(agentId, update);
+      return toInternalDefinition({ definition });
     },
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
     },
+  };
+};
+
+export const toInternalDefinition = ({
+  definition,
+}: {
+  definition: PersistedAgentDefinition;
+}): InternalAgentDefinition => {
+  return {
+    ...definition,
+    readonly: false,
   };
 };
