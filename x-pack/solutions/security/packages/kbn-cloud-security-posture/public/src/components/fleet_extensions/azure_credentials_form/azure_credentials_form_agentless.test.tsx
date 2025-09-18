@@ -92,7 +92,7 @@ describe('AzureCredentialsFormAgentless', () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
       });
 
-      it('shows cloud connector credential type', () => {
+      it('shows cloud connector credential type', async () => {
         render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
 
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
@@ -101,8 +101,15 @@ describe('AzureCredentialsFormAgentless', () => {
         expect(
           screen.getByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
         ).toBeInTheDocument();
-        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
-        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+
+        await waitFor(() => {
+          expect(
+            screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)
+          ).toBeInTheDocument();
+          expect(
+            screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)
+          ).toBeInTheDocument();
+        });
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
         ).toBeInTheDocument();
@@ -192,15 +199,42 @@ describe('AzureCredentialsFormAgentless', () => {
 
   describe('on Cloud', () => {
     describe(' with cloud connectors ', () => {
-      const cloudMocker = createCloudServerlessMock(true, AZURE_PROVIDER, AZURE_PROVIDER);
+      const cloudMocker = createCloudServerlessMock(false, AZURE_PROVIDER, AZURE_PROVIDER);
       beforeEach(() => {
         // this will return true for all settings checks for  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
       });
 
-      it('shows cloud connector credential type', () => {
-        render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMocker} />);
+      it('does not show cloud connector credential type on regular cloud', () => {
+        // Enable cloud connectors in settings
+        uiSettingsClient.get = jest.fn().mockReturnValue(true);
 
+        render(
+          <AzureCredentialsFormAgentlessWrapper
+            cloud={cloudMocker}
+            packageInfo={getPackageInfoMock({ includeAzureTemplates: true }) as PackageInfo}
+          />
+        );
+
+        expect(
+          screen.queryByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)
+        ).not.toBeInTheDocument();
+
+        expect(
+          screen.queryByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
+        ).not.toBeInTheDocument();
+
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
+        ).toBeInTheDocument();
+      });
+
+      // TODO: Unskip tests when they are enabled in ECH
+
+      it.skip('shows cloud connector credential type', () => {
+        render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMocker} />);
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
           AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
         );
@@ -214,70 +248,58 @@ describe('AzureCredentialsFormAgentless', () => {
         ).toBeInTheDocument();
       });
 
-      it('shows client, tenant and secret key when selecting service principal with client secret credential', async () => {
+      it.skip('shows client, tenant and secret key when selecting service principal with client secret credential', async () => {
         render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMocker} />);
-
         const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
-
         userEvent.selectOptions(
           credentialSelector,
           AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
         );
-
         await waitFor(() =>
           expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
             AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
           )
         );
-
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
         ).toBeInTheDocument();
       });
-
-      it('does not show the cloud_connector option in when cloud connector is disabled', () => {
+      it.skip('does not show the cloud_connector option in when cloud connector is disabled', () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(false);
         render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMocker} />);
-
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
         ).toBeInTheDocument();
       });
-
-      it('does not show cloud credentials when the package version is less than the enabled version', () => {
+      it.skip('does not show cloud credentials when the package version is less than the enabled version', () => {
         // Simulate a package version less than the enabled version
         const packageInforWithLowerVersion = getPackageInfoMock({
           includeCloudFormationTemplates: true,
         }) as PackageInfo;
-
         packageInforWithLowerVersion.version = '1.0.0';
-
         render(
           <AzureCredentialsFormAgentlessWrapper
             packageInfo={packageInforWithLowerVersion}
             cloud={cloudMocker}
           />
         );
-
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
         ).toBeInTheDocument();
       });
-
-      it('shows cloud connectors when the cloudHost provider is different than azure', () => {
+      it.skip('shows cloud connectors when the cloudHost provider is different than azure', () => {
         const cloudMockerWithDifferentHost = createCloudServerlessMock(
           true,
           AZURE_PROVIDER,
           GCP_PROVIDER
         );
         render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMockerWithDifferentHost} />);
-
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
           AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
         );

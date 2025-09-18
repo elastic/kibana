@@ -64,8 +64,8 @@ export const AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
 };
 
 export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
-  TENANT_ID: 'cloudSetupAzureTenantId',
-  CLIENT_ID: 'cloudSetupAzureClientId',
+  TENANT_ID: 'textInput-tenant-id',
+  CLIENT_ID: 'textInput-client-id',
   CLIENT_SECRET: 'passwordInput-client-secret',
   CLIENT_CERTIFICATE_PATH: 'cloudSetupAzureClientCertificatePath',
   CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
