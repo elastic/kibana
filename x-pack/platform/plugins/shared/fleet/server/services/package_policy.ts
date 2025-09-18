@@ -1953,6 +1953,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       skipUnassignFromAgentPolicies?: boolean;
       force?: boolean;
+      spaceIds?: string[];
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -1970,8 +1971,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = this.getLogger('delete');
     logger.debug(`Deleting package policies ${ids}`);
 
-    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
-    if (!packagePolicies) {
+    const packagePolicies = await this.getByIDs(soClient, ids, {
+      ignoreMissing: true,
+      spaceIds: options?.spaceIds,
+    });
+    if (!packagePolicies || packagePolicies.length === 0) {
       return [];
     }
 
