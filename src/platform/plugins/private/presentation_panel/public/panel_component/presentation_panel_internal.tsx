@@ -32,6 +32,7 @@ export const PresentationPanelInternal = <
 >({
   index,
   hideHeader,
+  hidePanelChrome,
   showShadow,
   showBorder,
 
@@ -108,7 +109,55 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  return (
+  const panelContent = useMemo(
+    () => (
+      <>
+        {blockingError && api && (
+          <EuiFlexGroup
+            alignItems="center"
+            css={panelErrorCss}
+            className="eui-fullHeight"
+            data-test-subj="embeddableError"
+            justifyContent="center"
+          >
+            <PresentationPanelErrorInternal api={api} error={blockingError} />
+          </EuiFlexGroup>
+        )}
+        {!initialLoadComplete && <PanelLoader />}
+        <div
+          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
+          css={styles.embPanelContent}
+          {...(api && ['image', 'lens', 'links'].includes((api as unknown as HasType).type)
+            ? reportingAttributes
+            : {})}
+          ref={(ref) => (reportingRef.current = ref as HTMLElement)}
+        >
+          <EuiErrorBoundary>
+            <Component
+              {...(componentProps as React.ComponentProps<typeof Component>)}
+              ref={(newApi) => {
+                if (newApi && !api) setApi(newApi);
+              }}
+            />
+          </EuiErrorBoundary>
+        </div>
+      </>
+    ),
+    [
+      api,
+      blockingError,
+      Component,
+      componentProps,
+      initialLoadComplete,
+      panelErrorCss,
+      reportingAttributes,
+      reportingRef,
+    ]
+  );
+
+  return hidePanelChrome ? (
+    panelContent
+  ) : (
     <PresentationPanelHoverActionsWrapper
       {...{
         index,
@@ -147,35 +196,7 @@ export const PresentationPanelInternal = <
             panelDescription={panelDescription ?? defaultPanelDescription}
           />
         )}
-        {blockingError && api && (
-          <EuiFlexGroup
-            alignItems="center"
-            css={panelErrorCss}
-            className="eui-fullHeight"
-            data-test-subj="embeddableError"
-            justifyContent="center"
-          >
-            <PresentationPanelErrorInternal api={api} error={blockingError} />
-          </EuiFlexGroup>
-        )}
-        {!initialLoadComplete && <PanelLoader />}
-        <div
-          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
-          css={styles.embPanelContent}
-          {...(api && ['image', 'lens', 'links'].includes((api as unknown as HasType).type)
-            ? reportingAttributes
-            : {})}
-          ref={(ref) => (reportingRef.current = ref as HTMLElement)}
-        >
-          <EuiErrorBoundary>
-            <Component
-              {...(componentProps as React.ComponentProps<typeof Component>)}
-              ref={(newApi) => {
-                if (newApi && !api) setApi(newApi);
-              }}
-            />
-          </EuiErrorBoundary>
-        </div>
+        {panelContent}
       </EuiPanel>
     </PresentationPanelHoverActionsWrapper>
   );
