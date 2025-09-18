@@ -1342,7 +1342,7 @@
     "react-dom": "~18.2.0",
     "react-dropzone": "^11.7.1",
     "react-fast-compare": "^3.2.2",
-    "react-hook-form": "^7.44.2",
+    "react-hook-form": "^7.62.0",
     "react-intl": "6.6.6",
     "react-markdown": "^6.0.3",
     "react-popper-tooltip": "^4.4.2",
