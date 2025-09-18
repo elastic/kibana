@@ -123,10 +123,6 @@ export const ControlPanel = ({
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
   const controlLabel = undefined;
-  // const hasRoundedBorders = !api?.CustomPrependComponent && !isEditable && isTwoLine;
-
-  const insertBefore = isOver && (index ?? -1) < (activeIndex ?? -1);
-  const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
   const styles = useMemoCss(controlPanelStyles);
 
@@ -145,13 +141,11 @@ export const ControlPanel = ({
       data-control-id={uuid}
       data-test-subj="control-frame"
       data-render-complete="true"
-      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles, styles.dragStyles])}
+      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
       className={classNames({
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--large': controlWidth === 'large',
-        'controlFrameWrapper--insertBefore': insertBefore,
-        'controlFrameWrapper--insertAfter': insertAfter,
       })}
     >
       <EuiFormRow
@@ -226,36 +220,21 @@ export const ControlPanel = ({
 
 const controlPanelStyles = {
   draggingItem: css({
-    opacity: 0,
+    '.euiFormRow': {
+      opacity: 0,
+      visibility: 'hidden',
+    },
+    '&:after': {
+      content: "''",
+      display: 'block',
+      backgroundColor: 'red',
+      width: '100%',
+      height: '32px',
+      position: 'absolute',
+      top: 0,
+    },
   }),
   controlWidthStyles,
-  dragStyles: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '&.controlFrameWrapper--insertBefore': {
-        '&:after': {
-          content: "''",
-          position: 'absolute' as const,
-          borderRadius: euiTheme.border.radius.medium,
-          top: 0,
-          bottom: 0,
-          width: euiTheme.size.xxs,
-          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
-          left: `calc(-${euiTheme.size.xs} - 1px)`,
-        },
-      },
-      '&.controlFrameWrapper--insertAfter': {
-        '&:after': {
-          content: "''",
-          position: 'absolute' as const,
-          borderRadius: euiTheme.border.radius.medium,
-          top: 0,
-          bottom: 0,
-          width: euiTheme.size.xxs,
-          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
-          right: `calc(-${euiTheme.size.xs} - 1px)`,
-        },
-      },
-    }),
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.euiFormControlLayout__prepend': {
