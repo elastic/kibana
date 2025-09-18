@@ -48,178 +48,190 @@ afterEach(async () => {
   await server.stop();
 });
 
-describe('Options', () => {
-  describe('authRequired', () => {
-    describe('optional', () => {
-      it('User has access to a route if auth mechanism not registered', async () => {
-        const { server: innerServer, createRouter, auth } = await server.setup(setupDeps);
-        const router = createRouter('/');
+describe('Security.authc.enabled', () => {
+  describe('optional', () => {
+    it('User has access to a route if auth mechanism not registered', async () => {
+      const { server: innerServer, createRouter, auth } = await server.setup(setupDeps);
+      const router = createRouter('/');
 
-        router.get(
-          {
-            path: '/',
-            validate: false,
-            options: { authRequired: 'optional' },
-            security: { authz: { enabled: false, reason: '' } },
+      router.get(
+        {
+          path: '/',
+          validate: false,
+          security: {
+            authc: { enabled: 'optional', reason: '' },
+            authz: { enabled: false, reason: '' },
           },
-          (context, req, res) =>
-            res.ok({
-              body: {
-                httpAuthIsAuthenticated: auth.isAuthenticated(req),
-                requestIsAuthenticated: req.auth.isAuthenticated,
-              },
-            })
-        );
-        await server.start();
-
-        await supertest(innerServer.listener).get('/').expect(200, {
-          httpAuthIsAuthenticated: false,
-          requestIsAuthenticated: false,
-        });
-      });
-
-      it('Authenticated user has access to a route', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        registerAuth((req, res, toolkit) => {
-          return toolkit.authenticated();
-        });
-        router.get(
-          {
-            path: '/',
-            security: { authz: { enabled: false, reason: '' } },
-            validate: false,
-            options: { authRequired: 'optional' },
-          },
-          (context, req, res) =>
-            res.ok({
-              body: {
-                httpAuthIsAuthenticated: auth.isAuthenticated(req),
-                requestIsAuthenticated: req.auth.isAuthenticated,
-              },
-            })
-        );
-        await server.start();
-
-        await supertest(innerServer.listener).get('/').expect(200, {
-          httpAuthIsAuthenticated: true,
-          requestIsAuthenticated: true,
-        });
-      });
-
-      it('User with no credentials can access a route', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        registerAuth((req, res, toolkit) => toolkit.notHandled());
-
-        router.get(
-          {
-            path: '/',
-            security: { authz: { enabled: false, reason: '' } },
-            validate: false,
-            options: { authRequired: 'optional' },
-          },
-          (context, req, res) =>
-            res.ok({
-              body: {
-                httpAuthIsAuthenticated: auth.isAuthenticated(req),
-                requestIsAuthenticated: req.auth.isAuthenticated,
-              },
-            })
-        );
-        await server.start();
-
-        await supertest(innerServer.listener).get('/').expect(200, {
-          httpAuthIsAuthenticated: false,
-          requestIsAuthenticated: false,
-        });
-      });
-
-      it('User with invalid credentials can access a route', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        registerAuth((req, res, toolkit) => res.unauthorized());
-
-        router.get(
-          {
-            path: '/',
-            security: { authz: { enabled: false, reason: '' } },
-            validate: false,
-            options: { authRequired: 'optional' },
-          },
-          (context, req, res) =>
-            res.ok({
-              body: {
-                httpAuthIsAuthenticated: auth.isAuthenticated(req),
-                requestIsAuthenticated: req.auth.isAuthenticated,
-              },
-            })
-        );
-        await server.start();
-
-        await supertest(innerServer.listener).get('/').expect(200, {
-          httpAuthIsAuthenticated: false,
-          requestIsAuthenticated: false,
-        });
-      });
-
-      it('does not redirect user and allows access to a resource', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        registerAuth((req, res, toolkit) =>
-          toolkit.redirected({
-            location: '/redirect-to',
+        },
+        (context, req, res) =>
+          res.ok({
+            body: {
+              httpAuthIsAuthenticated: auth.isAuthenticated(req),
+              requestIsAuthenticated: req.auth.isAuthenticated,
+            },
           })
-        );
+      );
+      await server.start();
 
-        router.get(
-          {
-            path: '/',
-            security: { authz: { enabled: false, reason: '' } },
-            validate: false,
-            options: { authRequired: 'optional' },
-          },
-          (context, req, res) =>
-            res.ok({
-              body: {
-                httpAuthIsAuthenticated: auth.isAuthenticated(req),
-                requestIsAuthenticated: req.auth.isAuthenticated,
-              },
-            })
-        );
-        await server.start();
-
-        await supertest(innerServer.listener).get('/').expect(200, {
-          httpAuthIsAuthenticated: false,
-          requestIsAuthenticated: false,
-        });
+      await supertest(innerServer.listener).get('/').expect(200, {
+        httpAuthIsAuthenticated: false,
+        requestIsAuthenticated: false,
       });
     });
 
+    it('Authenticated user has access to a route', async () => {
+      const {
+        server: innerServer,
+        createRouter,
+        registerAuth,
+        auth,
+      } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      registerAuth((req, res, toolkit) => {
+        return toolkit.authenticated();
+      });
+      router.get(
+        {
+          path: '/',
+          security: {
+            authc: { enabled: 'optional', reason: '' },
+            authz: { enabled: false, reason: '' },
+          },
+          validate: false,
+        },
+        (context, req, res) =>
+          res.ok({
+            body: {
+              httpAuthIsAuthenticated: auth.isAuthenticated(req),
+              requestIsAuthenticated: req.auth.isAuthenticated,
+            },
+          })
+      );
+      await server.start();
+
+      await supertest(innerServer.listener).get('/').expect(200, {
+        httpAuthIsAuthenticated: true,
+        requestIsAuthenticated: true,
+      });
+    });
+
+    it('User with no credentials can access a route', async () => {
+      const {
+        server: innerServer,
+        createRouter,
+        registerAuth,
+        auth,
+      } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      registerAuth((req, res, toolkit) => toolkit.notHandled());
+
+      router.get(
+        {
+          path: '/',
+          security: {
+            authc: { enabled: 'optional', reason: '' },
+            authz: { enabled: false, reason: '' },
+          },
+          validate: false,
+        },
+        (context, req, res) =>
+          res.ok({
+            body: {
+              httpAuthIsAuthenticated: auth.isAuthenticated(req),
+              requestIsAuthenticated: req.auth.isAuthenticated,
+            },
+          })
+      );
+      await server.start();
+
+      await supertest(innerServer.listener).get('/').expect(200, {
+        httpAuthIsAuthenticated: false,
+        requestIsAuthenticated: false,
+      });
+    });
+
+    it('User with invalid credentials can access a route', async () => {
+      const {
+        server: innerServer,
+        createRouter,
+        registerAuth,
+        auth,
+      } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      registerAuth((req, res) => res.unauthorized());
+
+      router.get(
+        {
+          path: '/',
+          security: {
+            authc: { enabled: 'optional', reason: '' },
+            authz: { enabled: false, reason: '' },
+          },
+          validate: false,
+        },
+        (context, req, res) =>
+          res.ok({
+            body: {
+              httpAuthIsAuthenticated: auth.isAuthenticated(req),
+              requestIsAuthenticated: req.auth.isAuthenticated,
+            },
+          })
+      );
+      await server.start();
+
+      await supertest(innerServer.listener).get('/').expect(200, {
+        httpAuthIsAuthenticated: false,
+        requestIsAuthenticated: false,
+      });
+    });
+
+    it('does not redirect user and allows access to a resource', async () => {
+      const {
+        server: innerServer,
+        createRouter,
+        registerAuth,
+        auth,
+      } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      registerAuth((req, res, toolkit) =>
+        toolkit.redirected({
+          location: '/redirect-to',
+        })
+      );
+
+      router.get(
+        {
+          path: '/',
+          security: {
+            authc: { enabled: 'optional', reason: '' },
+            authz: { enabled: false, reason: '' },
+          },
+          validate: false,
+        },
+        (context, req, res) =>
+          res.ok({
+            body: {
+              httpAuthIsAuthenticated: auth.isAuthenticated(req),
+              requestIsAuthenticated: req.auth.isAuthenticated,
+            },
+          })
+      );
+      await server.start();
+
+      await supertest(innerServer.listener).get('/').expect(200, {
+        httpAuthIsAuthenticated: false,
+        requestIsAuthenticated: false,
+      });
+    });
+  });
+});
+
+describe('Options', () => {
+  describe('authRequired', () => {
     describe('true', () => {
       it('User has access to a route if auth  interceptor is not registered', async () => {
         const { server: innerServer, createRouter, auth } = await server.setup(setupDeps);
@@ -230,7 +242,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) =>
             res.ok({
@@ -265,7 +276,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) =>
             res.ok({
@@ -293,7 +303,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );
@@ -313,7 +322,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );
@@ -338,7 +346,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );

@@ -307,7 +307,7 @@ describe('CoreKibanaRequest', () => {
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
 
-        expect(kibanaRequest.route.options.authRequired).toBe('optional');
+        expect(kibanaRequest.route.options.authRequired).toBe(false);
       });
 
       it('handles required auth: { mode: "try" } as "optional"', () => {
@@ -320,7 +320,7 @@ describe('CoreKibanaRequest', () => {
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
 
-        expect(kibanaRequest.route.options.authRequired).toBe('optional');
+        expect(kibanaRequest.route.options.authRequired).toBe(false);
       });
 
       it('throws on auth: strategy name', () => {
@@ -396,6 +396,25 @@ describe('CoreKibanaRequest', () => {
         const kibanaRequest = CoreKibanaRequest.from(request);
 
         expect(kibanaRequest.route.options.authRequired).toBe(true);
+      });
+
+      it('handles required authc: { enabled: optional }', () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: { enabled: 'optional', reason: 'Authentication is optional' } },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe(false);
+        expect(kibanaRequest.route.options.security?.authc).toEqual({
+          enabled: 'optional',
+          reason: 'Authentication is optional',
+        });
       });
 
       it('handles required authz simple config', () => {

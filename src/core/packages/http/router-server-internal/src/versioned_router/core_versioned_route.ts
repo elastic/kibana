@@ -90,7 +90,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   private isPublic: boolean;
   private env: Env;
   private enableQueryVersion: boolean;
-  private defaultSecurityConfig: RouteSecurity | undefined;
+  private readonly defaultSecurityConfig: RouteSecurity;
   private defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
   private constructor(
     private readonly router: Router,
@@ -111,7 +111,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.useDefaultStrategyForPath =
       this.isPublic || useVersionResolutionStrategyForInternalPaths.has(path);
     this.enableQueryVersion = options.enableQueryVersion === true;
-    this.defaultSecurityConfig = validRouteSecurity(options.security, options.options);
+    this.defaultSecurityConfig = validRouteSecurity(options.security);
     this.options = options;
     this.router.registerRoute({
       path: this.path,
@@ -298,8 +298,6 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     // authc can be defined only on the top route level,
     // so we need to merge it with the versioned one which can have different authz per version
-    return security
-      ? { authz: security.authz, authc: this.defaultSecurityConfig?.authc }
-      : undefined;
+    return { authz: security.authz, authc: this.defaultSecurityConfig.authc };
   };
 }

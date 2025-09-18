@@ -26,9 +26,18 @@ describe('registerTranslationsRoute', () => {
         path: '/translations/{locale}.json',
         options: {
           access: 'public',
-          authRequired: false,
           excludeFromRateLimiter: true,
           httpResource: true,
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+          authc: {
+            enabled: false,
+            reason: expect.any(String),
+          },
         },
       }),
       expect.any(Function)
@@ -39,9 +48,18 @@ describe('registerTranslationsRoute', () => {
         path: '/translations/XXXX/{locale}.json',
         options: {
           access: 'public',
-          authRequired: false,
           excludeFromRateLimiter: true,
           httpResource: true,
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+          authc: {
+            enabled: false,
+            reason: expect.any(String),
+          },
         },
       }),
       expect.any(Function)

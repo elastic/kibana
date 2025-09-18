@@ -272,7 +272,6 @@ export class CoreKibanaRequest<
 
     const options = {
       ...omitBy({ excludeFromRateLimiter: this.isExcludedFromRateLimiter(request) }, isNil),
-      authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
       //     Property 'app' does not exist on type 'RouteSettings'
@@ -311,7 +310,7 @@ export class CoreKibanaRequest<
     };
   }
 
-  private getSecurity(request: RawRequest): RouteSecurity | undefined {
+  private getSecurity(request: RawRequest) {
     const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.security;
 
@@ -322,38 +321,6 @@ export class CoreKibanaRequest<
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
       ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ?? 'internal'
-    );
-  }
-
-  private getAuthRequired(request: RawRequest): boolean | 'optional' {
-    if (isFakeRawRequest(request)) {
-      return true;
-    }
-
-    const authOptions = request.route.settings.auth;
-    if (typeof authOptions === 'object') {
-      // 'try' is used in the legacy platform
-      if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
-        return 'optional';
-      }
-      if (authOptions.mode === 'required') {
-        return true;
-      }
-    }
-
-    // legacy platform routes
-    if (authOptions === undefined) {
-      return true;
-    }
-
-    // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
-    if (authOptions === false) {
-      return false;
-    }
-    throw new Error(
-      `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.pathname
-      }${this.url.search}`
     );
   }
 

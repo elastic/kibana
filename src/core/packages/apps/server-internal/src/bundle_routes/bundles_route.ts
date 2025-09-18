@@ -33,7 +33,6 @@ export function registerRouteForBundle(
       path: `${routePath}{path*}`,
       options: {
         httpResource: true,
-        authRequired: false,
         access: 'public',
         excludeFromRateLimiter: true,
       },
@@ -43,6 +42,10 @@ export function registerRouteForBundle(
         }),
       },
       security: {
+        authc: {
+          enabled: false,
+          reason: 'This route is used for serving assets and does not require authentication.',
+        },
         authz: {
           enabled: false,
           reason: 'This route is used for serving assets and does not require authorization.',

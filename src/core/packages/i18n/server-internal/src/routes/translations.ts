@@ -39,6 +39,10 @@ export const registerTranslationsRoute = ({
         {
           path: routePath,
           security: {
+            authc: {
+              enabled: false,
+              reason: 'This route is only used for serving i18n translations.',
+            },
             authz: {
               enabled: false,
               reason: 'This route is only used for serving i18n translations.',
@@ -52,7 +56,6 @@ export const registerTranslationsRoute = ({
           options: {
             access: 'public',
             httpResource: true,
-            authRequired: false,
             excludeFromRateLimiter: true,
           },
         },

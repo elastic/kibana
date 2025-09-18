@@ -20,10 +20,12 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
       security: {
         authz: {
           enabled: false,
-          reason: 'This route delegates authorization to the Capabilities Resolver',
+          reason: 'This route delegates authorization to the Capabilities Resolver.',
         },
         authc: {
           enabled: 'optional',
+          reason:
+            'This route is used to compute capabilities for both authenticated and unauthenticated users (e.g. the login page).',
         },
       },
       validate: {

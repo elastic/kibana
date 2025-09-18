@@ -48,7 +48,6 @@ export function registerEndpointSuggestionsRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

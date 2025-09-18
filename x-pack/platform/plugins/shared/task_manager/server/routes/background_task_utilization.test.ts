@@ -57,13 +57,13 @@ describe('backgroundTaskUtilizationRoute', () => {
     expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
-    expect(config1.options?.authRequired).toEqual(true);
+    expect(config1.security.authc?.enabled).toEqual(true);
     expect(config1.options?.tags).toEqual(['security:acceptJWT']);
 
     const [config2] = router.get.mock.calls[1];
 
     expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
-    expect(config2.options?.authRequired).toEqual(true);
+    expect(config1.security.authc?.enabled).toEqual(true);
     expect(config2.options?.tags).toEqual(['security:acceptJWT']);
   });
 
@@ -89,12 +89,12 @@ describe('backgroundTaskUtilizationRoute', () => {
     expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
-    expect(config1.options?.authRequired).toEqual(true);
+    expect(config1.security.authc?.enabled).toEqual(true);
 
     const [config2] = router.get.mock.calls[1];
 
     expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
-    expect(config2.options?.authRequired).toEqual(false);
+    expect(config1.security.authc?.enabled).toEqual(false);
   });
 
   it('checks user privileges and increments usage counter when API is accessed', async () => {

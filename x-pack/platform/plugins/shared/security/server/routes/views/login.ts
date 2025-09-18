@@ -43,6 +43,7 @@ export function defineLoginRoutes({
       security: {
         authc: {
           enabled: 'optional',
+          reason: 'This route is used to render login page for anonymous users.',
         },
         authz: {
           enabled: false,

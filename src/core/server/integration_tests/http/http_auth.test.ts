@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, RouteConfigOptions, HttpAuth } from '@kbn/core-http-server';
+import type { IRouter, HttpAuth } from '@kbn/core-http-server';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('http auth', () => {
@@ -26,19 +26,17 @@ describe('http auth', () => {
     await root.shutdown();
   });
 
-  const registerRoute = (
-    router: IRouter,
-    auth: HttpAuth,
-    authRequired: RouteConfigOptions<'get'>['authRequired']
-  ) => {
+  const registerRoute = (router: IRouter, auth: HttpAuth, authMode: boolean | 'optional') => {
     router.get(
       {
         path: '/route',
-        security: { authz: { enabled: false, reason: '' } },
-        validate: false,
-        options: {
-          authRequired,
+        security: {
+          authc: {
+            ...(authMode === true ? { enabled: authMode } : { enabled: authMode, reason: '' }),
+          },
+          authz: { enabled: false, reason: '' },
         },
+        validate: false,
       },
       (context, req, res) => res.ok({ body: { authenticated: auth.isAuthenticated(req) } })
     );
@@ -125,7 +123,7 @@ describe('http auth', () => {
         await request.get(root, '/route').expect(200, { authenticated: false });
       });
     });
-    describe('when authRequired is `optional`', () => {
+    describe('when security.authc.enabled is `optional`', () => {
       it('allows authenticated access when auth returns `authenticated`', async () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;

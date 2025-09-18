@@ -95,7 +95,7 @@ export function adoptToHapiAuthFormat(
 
       if (authResult.isRedirected(result)) {
         // we cannot redirect a user when resources with optional auth requested
-        if (kibanaRequest.route.options.authRequired === 'optional') {
+        if (kibanaRequest.route.options.security?.authc?.enabled === 'optional') {
           return responseToolkit.continue;
         }
 
@@ -108,7 +108,7 @@ export function adoptToHapiAuthFormat(
       }
 
       if (authResult.isNotHandled(result)) {
-        if (kibanaRequest.route.options.authRequired === 'optional') {
+        if (kibanaRequest.route.options.security?.authc?.enabled === 'optional') {
           return responseToolkit.continue;
         }
         return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());

@@ -16,15 +16,18 @@ export const registerInfoRoute = (router: BannersRouter, config: BannersConfigTy
     {
       path: '/api/banners/info',
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Banner config should be available for authenticated and unauthenticated requests.',
+        },
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'Unauthenticated users get a default banner config without sensitive info, while authenticated users get config from advanced settings with authorization handled by the UiSettings client.',
         },
       },
       validate: false,
-      options: {
-        authRequired: 'optional',
-      },
     },
     async (ctx, req, res) => {
       const allowed = isValidLicense((await ctx.licensing).license);

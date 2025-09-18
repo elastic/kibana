@@ -129,8 +129,10 @@ describe('APM HTTP API spans', () => {
         {
           path: '/',
           validate: false,
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: { enabled: 'optional', reason: '' },
+            authz: { enabled: false, reason: '' },
+          },
         },
         (context, req, res) => res.ok({})
       );
