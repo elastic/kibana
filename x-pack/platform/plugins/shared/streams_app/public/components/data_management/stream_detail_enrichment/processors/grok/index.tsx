@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
@@ -19,7 +20,10 @@ export const GrokProcessorForm = () => {
       <ProcessorFieldSelector
         fieldKey="from"
         processorType="grok"
-        helpText="Field to search for grok matches in simulation data"
+        helpText={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.setGrokFieldHelpText',
+          { defaultMessage: 'Field to search for grok matches in simulation data' }
+        )}
       />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />

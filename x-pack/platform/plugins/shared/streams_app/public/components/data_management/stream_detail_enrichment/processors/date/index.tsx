@@ -139,7 +139,10 @@ export const DateProcessorForm = () => {
       <ProcessorFieldSelector
         fieldKey="from"
         processorType="date"
-        helpText="Field containing date values to parse."
+        helpText={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.setDateFieldHelpText',
+          { defaultMessage: 'Field containing date values to parse.' }
+        )}
         onChange={handleProcessorFieldChange}
       />
       <DateFormatsField onGenerate={handleGenerateSuggestionClick} />
