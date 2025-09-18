@@ -28,12 +28,6 @@ export interface AgentRegistry {
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
-
-  /*
-  execute<TParams extends object = Record<string, unknown>>(
-    params: ScopedRunnerRunToolsParams<TParams>
-  ): Promise<RunToolReturn>;
-  */
 }
 
 interface CreateAgentRegistryOpts {

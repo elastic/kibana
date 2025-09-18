@@ -11,6 +11,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import { validateAgentId } from '@kbn/onechat-common/agents';
 import {
   createAgentNotFoundError,
   createBadRequestError,
@@ -28,7 +29,7 @@ import type { PersistedAgentDefinition } from '../types';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
-import { ensureValidId, validateToolSelection } from './utils';
+import { validateToolSelection } from './utils';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -123,7 +124,10 @@ class AgentClientImpl implements AgentClient {
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
     const now = new Date();
 
-    ensureValidId(profile.id);
+    const validationError = validateAgentId({ agentId: profile.id, builtIn: false });
+    if (validationError) {
+      throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
+    }
 
     if (await this.exists(profile.id)) {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
