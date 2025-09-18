@@ -129,7 +129,7 @@ onechat.tools.register({
 });
 ```
 
-#### emitting events
+#### reporting tool progress
 
 ```ts
 onechat.tools.register({
@@ -138,17 +138,13 @@ onechat.tools.register({
   description: 'Some example',
   schema: z.object({}),
   handler: async ({}, { events }) => {
-    events.emit({
-      type: 'my_custom_event',
-      data: { stage: 'before' },
-    });
+    events.reportProgress('Doing something');
 
     const response = doSomething();
 
-    events.emit({
-      type: 'my_custom_event',
-      data: { stage: 'after' },
-    });
+    events.reportProgress('Doing something else');
+
+    return doSomethingElse(response);
 
     return response;
   },
@@ -174,85 +170,6 @@ const tool = await onechat.tools.registry.get({ toolId: 'my_tool', request });
 const { result } = await tool.execute({ toolParams: { someNumber: 9000 } });
 ```
 
-### Event handling
-
-Tool execution emits `toolCall` and `toolResponse` events:
-
-```ts
-import { isToolCallEvent, isToolResponseEvent } from '@kbn/onechat-server';
-
-const { result } = await onechat.tools.execute({
-  toolId: 'my_tool',
-  toolParams: { someNumber: 9000 },
-  request,
-  onEvent: (event) => {
-    if (isToolCallEvent(event)) {
-      const {
-        data: { toolId, toolParams },
-      } = event;
-    }
-    if (isToolResponseEvent(event)) {
-      const {
-        data: { toolResult },
-      } = event;
-    }
-  },
-});
-```
-
-### Tool identifiers
-
-Because tools are coming from multiple sources, and because we need to be able to identify
-which source a given tool is coming from (e.g. for execution), we're using the concept of tool identifier
-to represent more than a plain id.
-
-Tool identifier come into 3 shapes:
-
-- `PlainIdToolIdentifier`: plain tool identifiers
-- `StructuredToolIdentifier`: structured (object version)
-- `SerializedToolIdentifier`: serialized string version
-
-Using a `plain` id is always possible but discouraged, as in case of id conflict,
-the system will then just pick an arbitrary tool in any source available.
-
-E.g. avoid doing:
-
-```ts
-await onechat.tools.execute({
-  toolId: 'my_tool',
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
-And instead do:
-
-```ts
-import { ToolSourceType, builtinSourceId } from '@kbn/onechat-common';
-
-await onechat.tools.execute({
-  toolId: {
-    toolId: 'my_tool',
-    sourceType: ToolSourceType.builtIn,
-    sourceId: builtinSourceId,
-  },
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
-Or, with the corresponding utility:
-
-```ts
-import { createBuiltinToolId } from '@kbn/onechat-common';
-
-await onechat.tools.execute({
-  toolId: createBuiltinToolId('my_tool'),
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
 ### Error handling
 
 All onechat errors inherit from the `OnechatError` error type. Various error utilities
@@ -272,6 +189,40 @@ try {
 } catch (e) {
   if (isToolNotFoundError(e)) {
     throw new Error(`run ${e.meta.runId} failed because tool was not found`);
+  }
+}
+```
+
+## Agents
+
+Agents can be either built-in or user-defined.
+
+### Registering a built-in agent
+
+Registering a built-in agent is done using the `agents.register` API of the onechat setup contract:
+
+#### Basic example
+
+```ts
+class MyPlugin {
+  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
+    onechat.agents.register({
+      id: 'platform.core.dashboard',
+      name: 'Dashboard agent',
+      description: 'Agent specialized in dashboard related tasks',
+      configuration: {
+        instructions: 'You are a dashboard specialist [...]',
+        tools: [
+          {
+            tool_ids: [
+              'platform.dashboard.create_dashboard',
+              'platform.dashboard.edit_dashboard',
+              '[...]',
+            ],
+          },
+        ],
+      },
+    });
   }
 }
 ```
