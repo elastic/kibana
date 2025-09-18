@@ -35,6 +35,7 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
+import type { CloudProvider, CloudConnectorVars } from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -287,3 +288,13 @@ export interface DownloadSourceSOAttributes {
   };
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
+
+export interface CloudConnectorSOAttributes {
+  name: string;
+  namespace?: string;
+  cloudProvider: CloudProvider;
+  vars: CloudConnectorVars;
+  packagePolicyCount: number;
+  created_at: string;
+  updated_at: string;
+}
