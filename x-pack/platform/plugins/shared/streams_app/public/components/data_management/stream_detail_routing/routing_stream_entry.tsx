@@ -25,6 +25,7 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { EditRoutingRuleControls } from './control_bars';
+import { StreamNameFormRow } from './stream_name_form_row';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export function RoutingStreamEntry({
@@ -92,16 +93,14 @@ export function RoutingStreamEntry({
             </EuiPanel>
           </EuiFlexItem>
         )}
-        {!isRoutingEnabled(routingRule.status) && (
+        {!isRoutingEnabled(routingRule.status) && !isEditing && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
             })}
           </EuiBadge>
         )}
-        {isEditing ? (
-          <EuiText size="s">{routingRule.destination}</EuiText>
-        ) : (
+        {!isEditing && (
           <EuiLink
             href={router.link('/{key}/management/{tab}', {
               path: { key: routingRule.destination, tab: 'partitioning' },
@@ -122,33 +121,36 @@ export function RoutingStreamEntry({
             </EuiText>
           </EuiFlexItem>
         )}
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-        >
-          {childrenCount > 0 && (
-            <EuiBadge color="hollow">
-              {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
-                defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
-                values: { childrenCount },
+        {!isEditing && (
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+          >
+            {childrenCount > 0 && (
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
+                  defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
+                  values: { childrenCount },
+                })}
+              </EuiBadge>
+            )}
+            <EuiButtonIcon
+              data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
+              iconType="pencil"
+              disabled={!isEditingEnabled}
+              onClick={() => onEditIconClick(routingRule.id)}
+              aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+                defaultMessage: 'Edit',
               })}
-            </EuiBadge>
-          )}
-          <EuiButtonIcon
-            data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
-            iconType="pencil"
-            disabled={!isEditingEnabled}
-            onClick={() => onEditIconClick(routingRule.id)}
-            aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
-              defaultMessage: 'Edit',
-            })}
-          />
-        </EuiFlexGroup>
+            />
+          </EuiFlexGroup>
+        )}
       </EuiFlexGroup>
       {isEditing && (
-        <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <StreamNameFormRow value={routingRule.destination} disabled />
           <RoutingConditionEditor
             condition={routingRule.where}
             status={routingRule.status}
