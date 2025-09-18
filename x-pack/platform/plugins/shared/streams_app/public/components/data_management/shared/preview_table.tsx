@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type {
+  EuiDataGridColumnCellAction,
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
@@ -50,6 +51,7 @@ export function PreviewTable({
   showRowSourceAvatars = false,
   originalSamples,
   onRowSelected,
+  cellActions,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
@@ -65,6 +67,7 @@ export function PreviewTable({
   showRowSourceAvatars?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
   onRowSelected?: (rowIndex: number) => void;
+  cellActions?: EuiDataGridColumnCellAction[];
 }) {
   const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
@@ -211,8 +214,9 @@ export function PreviewTable({
             }
           : (false as false),
       initialWidth: columnWidths[column],
+      cellActions,
     }));
-  }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
+  }, [canonicalColumnOrder, setVisibleColumns, setSorting, columnWidths, cellActions]);
 
   return (
     <EuiDataGrid
