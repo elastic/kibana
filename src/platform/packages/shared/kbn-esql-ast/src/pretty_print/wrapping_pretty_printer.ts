@@ -606,7 +606,7 @@ export class WrappingPrettyPrinter {
         operator = LeafPrinter.param(ctx.node.operator);
       } else {
         if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
-          operator = ctx.node.name;
+          operator = ctx.node.operator.name;
         }
         operator =
           this.opts.lowercaseFunctions ?? this.opts.lowercase

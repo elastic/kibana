@@ -401,7 +401,7 @@ export class BasicPrettyPrinter {
             operator = LeafPrinter.param(ctx.node.operator);
           } else {
             if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
-              operator = ctx.node.name;
+              operator = ctx.node.operator.name;
             }
             operator = opts.lowercaseFunctions ? operator.toLowerCase() : operator.toUpperCase();
           }
