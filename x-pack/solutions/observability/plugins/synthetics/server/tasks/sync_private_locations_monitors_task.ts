@@ -188,6 +188,8 @@ export class SyncPrivateLocationMonitorsTask {
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
+    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
+      [];
 
     const { configsBySpaces, paramsBySpace, spaceIds, maintenanceWindows } =
       await this.getAllMonitorConfigs({
@@ -196,11 +198,6 @@ export class SyncPrivateLocationMonitorsTask {
       });
 
     for (const spaceId of spaceIds) {
-      const privateConfigs: Array<{
-        config: HeartbeatConfig;
-        globalParams: Record<string, string>;
-      }> = [];
-
       const monitors = configsBySpaces[spaceId];
       this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
       if (!monitors) {
