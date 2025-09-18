@@ -78,9 +78,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   hasUpdateMappingsPrivilege?: boolean;
 }> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
   const {
-    services: { extensionsService },
     core: {
-      getUrlForApp,
       application: { capabilities, navigateToUrl },
       http,
     },
