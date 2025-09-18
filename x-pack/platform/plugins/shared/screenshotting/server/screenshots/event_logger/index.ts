@@ -21,6 +21,7 @@ export enum Actions {
   GET_RENDER_ERRORS = 'get-render-errors',
   GET_TIMERANGE = 'get-timerange',
   INJECT_CSS = 'inject-css',
+  INJECT_CANVAS_RENDERING_PROPS = 'inject-canvas-rendering-props',
   REPOSITION = 'position-elements',
   WAIT_RENDER = 'wait-for-render',
   WAIT_VISUALIZATIONS = 'wait-for-visualizations',

@@ -11,6 +11,7 @@ export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 // FIXME: cleanup: remove this file and use the EventLogger's Actions enum instead
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
 export const CONTEXT_INJECTCSS = 'InjectCss';
+export const CONTEXT_INJECTCANVASRENDERINGPROPS = 'InjectCanvasRenderingProps';
 export const CONTEXT_WAITFORRENDER = 'WaitForRender';
 export const CONTEXT_GETRENDERERRORS = 'GetVisualisationsRenderErrors';
 export const CONTEXT_GETTIMERANGE = 'GetTimeRange';

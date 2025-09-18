@@ -25,6 +25,7 @@ import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
+import { injectCanvasRenderingProps } from './inject_canvas_rendering_props';
 import { openUrl } from './open_url';
 import type { PhaseInstance, PhaseTimeouts, Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
@@ -204,6 +205,8 @@ export class ScreenshotObservableHandler {
       // Waiting till _after_ elements have rendered before injecting our CSS
       // allows for them to be displayed properly in many cases
       await injectCustomCss(driver, eventLogger, layout);
+
+      await injectCanvasRenderingProps(driver, eventLogger, layout);
 
       const spanEnd = this.eventLogger.logScreenshottingEvent(
         'get positions of visualization elements',
