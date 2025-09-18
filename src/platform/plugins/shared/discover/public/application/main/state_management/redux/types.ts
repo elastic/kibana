@@ -33,6 +33,12 @@ export interface TabStateGlobalState {
   filters?: Filter[];
 }
 
+export enum TabInitialFetchState {
+  firstTrigger = 'firstTrigger',
+  forceTrigger = 'forceTrigger',
+  triggered = 'triggered',
+}
+
 export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
@@ -43,6 +49,7 @@ export interface TabState extends TabItem {
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
+  initialFetchState: TabInitialFetchState;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving

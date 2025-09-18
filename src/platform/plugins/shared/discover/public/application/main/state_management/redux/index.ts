@@ -28,11 +28,12 @@ import {
   resetDiscoverSession,
 } from './actions';
 
-export type {
-  DiscoverInternalState,
-  TabState,
-  TabStateGlobalState,
-  InternalStateDataRequestParams,
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type InternalStateDataRequestParams,
+  TabInitialFetchState,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';

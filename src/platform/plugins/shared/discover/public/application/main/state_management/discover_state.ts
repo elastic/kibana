@@ -336,7 +336,10 @@ export function getDiscoverStateContainer({
       addLog('[discoverState] undo changes since saved search did not change');
       await internalState
         .dispatch(
-          internalStateActions.resetDiscoverSession({ discoverSession: persistedDiscoverSession })
+          internalStateActions.resetDiscoverSession({
+            discoverSession: persistedDiscoverSession,
+            resetInitialFetchState: true,
+          })
         )
         .unwrap();
     } else {

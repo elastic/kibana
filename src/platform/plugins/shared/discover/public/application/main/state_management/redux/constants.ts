@@ -8,10 +8,11 @@
  */
 
 import type { TabItem } from '@kbn/unified-tabs';
-import type { TabState } from './types';
+import { TabInitialFetchState, type TabState } from './types';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   globalState: {},
+  initialFetchState: TabInitialFetchState.firstTrigger,
   isDataViewLoading: false,
   dataRequestParams: {
     timeRangeAbsolute: undefined,
