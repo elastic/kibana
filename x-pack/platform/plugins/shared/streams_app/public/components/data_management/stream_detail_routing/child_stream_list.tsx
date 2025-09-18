@@ -106,13 +106,15 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         display: flex;
       `}
     >
+      <CurrentStreamEntry definition={definition} />
+
+      {/* Scrollable routing rules container */}
       <EuiFlexItem
         grow={false}
         className={css`
           display: flex;
           flex-direction: column;
           overflow-y: auto;
-          min-height: 60px;
           max-height: calc(100% - 120px);
         `}
       >
@@ -120,10 +122,9 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           direction="column"
           gutterSize="xs"
           className={css`
-            padding: 0 16px;
+            padding-left: 16px;
           `}
         >
-          <CurrentStreamEntry definition={definition} />
           <EuiDragDropContext onDragEnd={handlerItemDrag}>
             <EuiDroppable droppableId="routing_children_reordering" spacing="none">
               <EuiFlexGroup direction="column" gutterSize="xs">

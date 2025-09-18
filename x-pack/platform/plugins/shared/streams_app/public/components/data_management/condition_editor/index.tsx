@@ -226,6 +226,7 @@ function FilterForm(props: {
           handleConditionChange({ field: e.target.value });
         }}
         disabled={disabled}
+        autoFocus
       />
       <EuiSelect
         aria-label={i18n.translate('xpack.streams.filter.operator', {
