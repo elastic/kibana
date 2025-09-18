@@ -270,8 +270,6 @@ This is why the overall recommendation is to return as much information as possi
 
 If you have a use case where you'd like your API to remove defaults from the response, you can do so, but we recommend that you add a query parameter to control stripping defaults so that Terraform can always retrieve them by requesting the full response.
 
-To achieve smaller responses, we recommend following Elasticsearch's approach, by using `filter_path` ([docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#common-options-response-filtering)).
-
 ### Be predictable
 
 Terraform relies on the same input resulting in the same output. Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.
