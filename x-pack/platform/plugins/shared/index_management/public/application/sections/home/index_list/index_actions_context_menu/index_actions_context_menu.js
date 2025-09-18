@@ -257,7 +257,13 @@ export class IndexActionsContextMenu extends Component {
 
       const indexMode = indices.find((index) => index.name === indexName)?.mode;
 
-      if (indexMode !== 'lookup') {
+      const {
+        plugins: { reindexService },
+      } = this.context;
+
+      // Only show the "Convert to lookup index" action if the reindexService plugin is available
+      // and the index is not already a lookup index
+      if (reindexService && indexMode !== 'lookup') {
         items.push({
           'data-test-subj': 'convertToLookupIndexButton',
           name: (

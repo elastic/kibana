@@ -160,7 +160,7 @@ export async function mountManagementSection({
   const { uiMetricService } = initSetup({
     usageCollection,
     core,
-    reindexService: reindexService.reindexService,
+    reindexService: reindexService?.reindexService,
   });
   const appDependencies = getIndexManagementDependencies({
     cloud,

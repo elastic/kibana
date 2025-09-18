@@ -8,7 +8,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 
 import { getReindexStatus, startReindex } from '../../services';
 
