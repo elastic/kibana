@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
@@ -41,7 +41,7 @@ export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
 }
 
 export function getAllFieldsInOrder(
-  previewRecords: any[] = [],
+  previewRecords: FlattenRecord[] = [],
   detectedFields: DetectedField[] = []
 ): string[] {
   const fields = new Set<string>();
