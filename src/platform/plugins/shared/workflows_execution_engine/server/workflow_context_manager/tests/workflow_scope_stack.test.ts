@@ -8,7 +8,7 @@
  */
 
 import type { StackFrame } from '@kbn/workflows';
-import { WorkflowScopeStack, type EnterScopeData } from '../workflow_call_stack';
+import { WorkflowScopeStack, type EnterScopeData } from '../workflow_scope_stack';
 
 describe('WorkflowScopeStack', () => {
   const createMockEnterScopeData = (
@@ -57,7 +57,7 @@ describe('WorkflowScopeStack', () => {
       ];
 
       const stack = WorkflowScopeStack.fromStackFrames(frames);
-      
+
       // Modify the original frames
       frames[0].stepId = 'modified';
       frames[0].nestedScopes[0].nodeId = 'modified';

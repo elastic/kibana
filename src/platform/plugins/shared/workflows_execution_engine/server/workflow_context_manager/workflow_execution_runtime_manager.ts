@@ -16,7 +16,7 @@ import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { buildStepExecutionId } from '../utils';
-import { WorkflowScopeStack } from './workflow_call_stack';
+import { WorkflowScopeStack } from './workflow_scope_stack';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -185,7 +185,6 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
       stepId: currentNode.stepId,
-      scopeStack: this.workflowExecution.scopeStack,
       input: result.input,
       output: result.output,
       error: result.error,
@@ -201,7 +200,6 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
       stepId,
-      scopeStack: this.workflowExecution.scopeStack,
       state,
     });
   }
@@ -307,8 +305,6 @@ export class WorkflowExecutionRuntimeManager {
         );
         const stepExecutionUpdate = {
           id: this.getCurrentStepExecutionId(),
-          stepId,
-          scopeStack: this.workflowExecution.scopeStack,
           status: ExecutionStatus.FAILED,
           completedAt: new Date().toISOString(),
           output: null,

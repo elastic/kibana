@@ -101,6 +101,7 @@ describe('WorkflowExecutionState', () => {
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
       stepExecutionIndex: 0,
+      globalExecutionIndex: 0,
     } as EsWorkflowStepExecution);
     expect(stepExecutionRepository.createStepExecution).not.toHaveBeenCalled();
   });
@@ -122,6 +123,28 @@ describe('WorkflowExecutionState', () => {
     expect(underTest.getLatestStepExecution('test-step-execution-id')).toEqual(
       expect.objectContaining({
         stepExecutionIndex: 2,
+      } as EsWorkflowStepExecution)
+    );
+    expect(stepExecutionRepository.createStepExecution).not.toHaveBeenCalled();
+  });
+
+  it('should create step execution with globalExecutionIndex', () => {
+    underTest.upsertStep({
+      id: 'fake-id-1',
+      stepId: 'test-step-execution-id',
+    });
+    underTest.upsertStep({
+      id: 'fake-id-2',
+      stepId: 'test-step-execution-id-2',
+    });
+    underTest.upsertStep({
+      id: 'fake-id-3',
+      stepId: 'test-step-execution-id-3',
+    });
+
+    expect(underTest.getLatestStepExecution('test-step-execution-id-3')).toEqual(
+      expect.objectContaining({
+        globalExecutionIndex: 2,
       } as EsWorkflowStepExecution)
     );
     expect(stepExecutionRepository.createStepExecution).not.toHaveBeenCalled();

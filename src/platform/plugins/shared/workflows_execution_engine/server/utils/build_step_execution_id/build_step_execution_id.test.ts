@@ -7,275 +7,347 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import crypto from 'crypto';
 import type { StackFrame } from '@kbn/workflows';
+import crypto from 'crypto';
 import { buildStepExecutionId } from './build_step_execution_id';
 
 describe('buildStepExecutionId', () => {
   describe('basic functionality', () => {
-    it('should generate a deterministic SHA-256 hash', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [];
+    it('should generate a SHA-256 hash for a simple case with no stack frames', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [];
 
-      const result = buildStepExecutionId(executionId, stepId, path);
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      // Should be a 64-character hex string (SHA-256)
+      // Should be a valid SHA-256 hash (64 characters, hexadecimal)
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
+
+      // Verify it's deterministic by calling again
+      const result2 = buildStepExecutionId(executionId, stepId, stackFrames);
+      expect(result).toBe(result2);
+    });
+
+    it('should generate a SHA-256 hash for a case with stack frames', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: '1' }],
+        },
+      ];
+
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
+      // Should be a valid SHA-256 hash
       expect(result).toMatch(/^[a-f0-9]{64}$/);
       expect(result.length).toBe(64);
     });
 
-    it('should generate the same hash for identical inputs', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
+    it('should be deterministic - same inputs produce same output', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: '1' }],
+        },
+      ];
 
-      const result1 = buildStepExecutionId(executionId, stepId, path);
-      const result2 = buildStepExecutionId(executionId, stepId, path);
+      const result1 = buildStepExecutionId(executionId, stepId, stackFrames);
+      const result2 = buildStepExecutionId(executionId, stepId, stackFrames);
+      const result3 = buildStepExecutionId(executionId, stepId, stackFrames);
 
       expect(result1).toBe(result2);
+      expect(result2).toBe(result3);
+    });
+  });
+
+  describe('different inputs produce different outputs', () => {
+    it('should generate different hashes for different execution IDs', () => {
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [];
+
+      const result1 = buildStepExecutionId('execution-1', stepId, stackFrames);
+      const result2 = buildStepExecutionId('execution-2', stepId, stackFrames);
+
+      expect(result1).not.toBe(result2);
     });
 
-    it('should generate different hashes for different inputs', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [];
+    it('should generate different hashes for different step IDs', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stackFrames: StackFrame[] = [];
 
-      const result1 = buildStepExecutionId(executionId, stepId, path);
-      const result2 = buildStepExecutionId('exec-456', stepId, path);
+      const result1 = buildStepExecutionId(executionId, 'step-1', stackFrames);
+      const result2 = buildStepExecutionId(executionId, 'step-2', stackFrames);
+
+      expect(result1).not.toBe(result2);
+    });
+
+    it('should generate different hashes for different stack frames', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+
+      const stackFrames1: StackFrame[] = [
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: '1' }],
+        },
+      ];
+
+      const stackFrames2: StackFrame[] = [
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: '2' }],
+        },
+      ];
+
+      const result1 = buildStepExecutionId(executionId, stepId, stackFrames1);
+      const result2 = buildStepExecutionId(executionId, stepId, stackFrames2);
 
       expect(result1).not.toBe(result2);
     });
   });
 
-  describe('with empty path', () => {
-    it('should handle empty path array', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [];
-
-      const result = buildStepExecutionId(executionId, stepId, path);
-
-      // Manually compute expected hash for verification
-      const expectedInput = 'exec-123_step-456';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
-
-      expect(result).toBe(expectedHash);
-    });
-  });
-
-  describe('with single path entry', () => {
-    it('should include single path entry in hash computation', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
-
-      const result = buildStepExecutionId(executionId, stepId, path);
-
-      // Manually compute expected hash
-      const expectedInput = 'exec-123_parent-step_1_step-456';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
-
-      expect(result).toBe(expectedHash);
-    });
-
-    it('should handle path entry with empty subScopeId', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '' }];
-
-      const result = buildStepExecutionId(executionId, stepId, path);
-
-      // Should include empty subScopeId in the computation
-      const expectedInput = 'exec-123_parent-step__step-456';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
-
-      expect(result).toBe(expectedHash);
-    });
-  });
-
-  describe('with multiple path entries', () => {
-    it('should include all path entries in order', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'foreach-step', subScopeId: '1' },
-        { nodeId: 'node-2', stepId: 'nested-step', subScopeId: '2' },
-        { nodeId: 'node-3', stepId: 'deep-step', subScopeId: '3' },
+  describe('complex stack frame scenarios', () => {
+    it('should handle multiple stack frames', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'retrystep',
+          nestedScopes: [{ nodeId: 'enterRetry_step1', nodeType: 'retry', scopeId: 'attempt-1' }],
+        },
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step2', nodeType: 'foreach', scopeId: '0' }],
+        },
       ];
 
-      const result = buildStepExecutionId(executionId, stepId, path);
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      // Manually compute expected hash
-      const expectedInput = 'exec-123_foreach-step_1_nested-step_2_deep-step_3_step-456';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
-
-      expect(result).toBe(expectedHash);
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
     });
 
-    it('should be sensitive to path order', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-      const path1: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'step-a', subScopeId: '1' },
-        { nodeId: 'node-2', stepId: 'step-b', subScopeId: '2' },
-      ];
-      const path2: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'step-b', subScopeId: '2' },
-        { nodeId: 'node-2', stepId: 'step-a', subScopeId: '1' },
+    it('should handle stack frames with multiple nested scopes', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'parentstep',
+          nestedScopes: [
+            { nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: '0' },
+            { nodeId: 'enterRetry_step2', nodeType: 'retry', scopeId: 'attempt-1' },
+          ],
+        },
       ];
 
-      const result1 = buildStepExecutionId(executionId, stepId, path1);
-      const result2 = buildStepExecutionId(executionId, stepId, path2);
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result1).not.toBe(result2);
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
+    });
+
+    it('should handle stack frames with empty scopeId', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach' }], // no scopeId
+        },
+      ];
+
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
+    });
+
+    it('should handle stack frames with undefined scopeId', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'foreachstep',
+          nestedScopes: [{ nodeId: 'enterForeach_step1', nodeType: 'foreach', scopeId: undefined }],
+        },
+      ];
+
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
+    });
+
+    it('should handle empty nested scopes array', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'somestep',
+          nestedScopes: [],
+        },
+      ];
+
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
     });
   });
 
   describe('edge cases', () => {
+    it('should handle empty strings', () => {
+      const result = buildStepExecutionId('', '', []);
+
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+      expect(result.length).toBe(64);
+    });
+
     it('should handle special characters in IDs', () => {
-      const executionId = 'exec-123!@#$%';
-      const stepId = 'step_456-789.test';
-      const path: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'parent@step', subScopeId: 'scope#1' },
+      const executionId = 'workflow-exec-abc123!@#$%^&*()';
+      const stepId = 'connector-send-email-with-special-chars_123';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'special-step-123',
+          nestedScopes: [{ nodeId: 'node@123', nodeType: 'foreach', scopeId: 'scope#456' }],
+        },
       ];
 
-      const result = buildStepExecutionId(executionId, stepId, path);
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
       expect(result).toMatch(/^[a-f0-9]{64}$/);
       expect(result.length).toBe(64);
     });
 
-    it('should handle very long IDs', () => {
-      const executionId = 'a'.repeat(1000);
-      const stepId = 'b'.repeat(1000);
-      const path: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'c'.repeat(1000), subScopeId: 'd'.repeat(1000) },
-      ];
-
-      const result = buildStepExecutionId(executionId, stepId, path);
+    it('should handle very long strings', () => {
+      const longString = 'a'.repeat(1000);
+      const result = buildStepExecutionId(longString, longString, []);
 
       expect(result).toMatch(/^[a-f0-9]{64}$/);
       expect(result.length).toBe(64);
     });
+  });
 
-    it('should handle empty string IDs', () => {
-      const executionId = '';
-      const stepId = '';
-      const path: StackFrame[] = [{ nodeId: '', stepId: '', subScopeId: '' }];
+  describe('internal hash generation', () => {
+    it('should match expected hash for known input', () => {
+      const executionId = 'test-exec-123';
+      const stepId = 'test-step';
+      const stackFrames: StackFrame[] = [];
 
-      const result = buildStepExecutionId(executionId, stepId, path);
-
-      // Let's construct the expected input to match the actual implementation
-      const expectedInput = [
-        executionId,
-        ...path.flatMap((x) => [x.stepId, x.subScopeId]),
-        stepId,
-      ].join('_');
+      // Calculate expected hash manually to verify implementation
+      const expectedInput = 'test-exec-123_test-step';
       const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
 
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
       expect(result).toBe(expectedHash);
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
     });
 
-    it('should handle Unicode characters', () => {
-      const executionId = 'exec-🚀';
-      const stepId = 'step-✨';
-      const path: StackFrame[] = [{ nodeId: 'node-🎯', stepId: 'parent-🎯', subScopeId: '流程' }];
+    it('should match expected hash for input with stack frames', () => {
+      const executionId = 'test-exec-123';
+      const stepId = 'test-step';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'parent-step',
+          nestedScopes: [{ nodeId: 'node1', nodeType: 'foreach', scopeId: 'scope1' }],
+        },
+      ];
 
-      const result = buildStepExecutionId(executionId, stepId, path);
+      // Calculate expected hash manually
+      const expectedInput = 'test-exec-123_parent-step_scope1_test-step';
+      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
+      expect(result).toBe(expectedHash);
+    });
+
+    it('should include empty string for missing scopeId in path', () => {
+      const executionId = 'test-exec-123';
+      const stepId = 'test-step';
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'parent-step',
+          nestedScopes: [{ nodeId: 'node1', nodeType: 'foreach' }], // no scopeId
+        },
+      ];
+
+      // Calculate expected hash manually - should include empty string for missing scopeId
+      const expectedInput = 'test-exec-123_parent-step__test-step';
+      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
+
+      const result = buildStepExecutionId(executionId, stepId, stackFrames);
+
+      expect(result).toBe(expectedHash);
     });
   });
 
-  describe('hash collision resistance', () => {
-    it('should generate different hashes for similar but different execution IDs', () => {
-      const stepId = 'step-456';
-      const path: StackFrame[] = [];
+  describe('order sensitivity', () => {
+    it('should generate different hashes when stack frame order changes', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
 
-      const result1 = buildStepExecutionId('exec-123', stepId, path);
-      const result2 = buildStepExecutionId('exec-124', stepId, path);
-
-      expect(result1).not.toBe(result2);
-    });
-
-    it('should generate different hashes for similar but different step IDs', () => {
-      const executionId = 'exec-123';
-      const path: StackFrame[] = [];
-
-      const result1 = buildStepExecutionId(executionId, 'step-456', path);
-      const result2 = buildStepExecutionId(executionId, 'step-457', path);
-
-      expect(result1).not.toBe(result2);
-    });
-
-    it('should generate different hashes for different path entries', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-
-      const path1: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-1', subScopeId: '1' }];
-      const path2: StackFrame[] = [{ nodeId: 'node-2', stepId: 'parent-2', subScopeId: '1' }];
-
-      const result1 = buildStepExecutionId(executionId, stepId, path1);
-      const result2 = buildStepExecutionId(executionId, stepId, path2);
-
-      expect(result1).not.toBe(result2);
-    });
-
-    it('should generate different hashes for different subScopeIds', () => {
-      const executionId = 'exec-123';
-      const stepId = 'step-456';
-
-      const path1: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
-      const path2: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '2' }];
-
-      const result1 = buildStepExecutionId(executionId, stepId, path1);
-      const result2 = buildStepExecutionId(executionId, stepId, path2);
-
-      expect(result1).not.toBe(result2);
-    });
-  });
-
-  describe('real-world usage examples', () => {
-    it('should match the example from the JSDoc', () => {
-      const executionId = 'exec-123';
-      const stepId = 'some-connector-step';
-      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'foreachstep', subScopeId: '1' }];
-
-      const result = buildStepExecutionId(executionId, stepId, path);
-
-      // Verify the structure matches expectations
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
-
-      // Verify deterministic behavior
-      const result2 = buildStepExecutionId(executionId, stepId, path);
-      expect(result).toBe(result2);
-    });
-
-    it('should handle complex nested workflow paths', () => {
-      const executionId = 'workflow-execution-abc123';
-      const stepId = 'http-request-connector';
-      const path: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'main-workflow', subScopeId: '0' },
-        { nodeId: 'node-2', stepId: 'parallel-branch', subScopeId: '2' },
-        { nodeId: 'node-3', stepId: 'foreach-loop', subScopeId: '5' },
-        { nodeId: 'node-4', stepId: 'conditional-check', subScopeId: '1' },
+      const stackFrames1: StackFrame[] = [
+        {
+          stepId: 'step1',
+          nestedScopes: [{ nodeId: 'node1', nodeType: 'foreach', scopeId: 'scope1' }],
+        },
+        {
+          stepId: 'step2',
+          nestedScopes: [{ nodeId: 'node2', nodeType: 'retry', scopeId: 'scope2' }],
+        },
       ];
 
-      const result = buildStepExecutionId(executionId, stepId, path);
-
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
-
-      // Verify it's different from a simpler path
-      const simplePath: StackFrame[] = [
-        { nodeId: 'node-1', stepId: 'main-workflow', subScopeId: '0' },
+      const stackFrames2: StackFrame[] = [
+        {
+          stepId: 'step2',
+          nestedScopes: [{ nodeId: 'node2', nodeType: 'retry', scopeId: 'scope2' }],
+        },
+        {
+          stepId: 'step1',
+          nestedScopes: [{ nodeId: 'node1', nodeType: 'foreach', scopeId: 'scope1' }],
+        },
       ];
-      const simpleResult = buildStepExecutionId(executionId, stepId, simplePath);
-      expect(result).not.toBe(simpleResult);
+
+      const result1 = buildStepExecutionId(executionId, stepId, stackFrames1);
+      const result2 = buildStepExecutionId(executionId, stepId, stackFrames2);
+
+      expect(result1).not.toBe(result2);
+    });
+
+    it('should generate different hashes when nested scope order changes', () => {
+      const executionId = 'workflow-exec-abc123';
+      const stepId = 'connector-send-email';
+
+      const stackFrames1: StackFrame[] = [
+        {
+          stepId: 'parent-step',
+          nestedScopes: [
+            { nodeId: 'node1', nodeType: 'foreach', scopeId: 'scope1' },
+            { nodeId: 'node2', nodeType: 'retry', scopeId: 'scope2' },
+          ],
+        },
+      ];
+
+      const stackFrames2: StackFrame[] = [
+        {
+          stepId: 'parent-step',
+          nestedScopes: [
+            { nodeId: 'node2', nodeType: 'retry', scopeId: 'scope2' },
+            { nodeId: 'node1', nodeType: 'foreach', scopeId: 'scope1' },
+          ],
+        },
+      ];
+
+      const result1 = buildStepExecutionId(executionId, stepId, stackFrames1);
+      const result2 = buildStepExecutionId(executionId, stepId, stackFrames2);
+
+      expect(result1).not.toBe(result2);
     });
   });
 });
