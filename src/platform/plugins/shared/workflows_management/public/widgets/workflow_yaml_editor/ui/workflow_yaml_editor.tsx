@@ -29,7 +29,10 @@ import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public';
 import { getWorkflowZodSchemaLoose, addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../hooks/use_available_connectors';
 import { getCurrentPath } from '../../../../common/lib/yaml_utils';
-import { getConnectorTypeFromContext, getConnectorInstancesForType } from '../lib/get_completion_item_provider';
+import {
+  getConnectorTypeFromContext,
+  getConnectorInstancesForType,
+} from '../lib/get_completion_item_provider';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -320,7 +323,6 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {
-
         css += `
         /* Strategy 1: Target by aria-label content - be more specific to avoid conflicts */
         .monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
@@ -599,18 +601,19 @@ export const WorkflowYAMLEditor = ({
   // Add dynamic connectors to cache when data is fetched
   // Use a ref to track the last processed connector types to avoid unnecessary re-processing
   const lastConnectorTypesRef = useRef<Record<string, any> | null>(null);
-  
+
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
       // Only process if the connector types have actually changed
       const currentConnectorTypes = connectorsData.connectorTypes;
       const lastConnectorTypes = lastConnectorTypesRef.current;
-      
+
       // Simple check: compare the number of connector types and their keys
-      const hasChanged = !lastConnectorTypes || 
+      const hasChanged =
+        !lastConnectorTypes ||
         Object.keys(currentConnectorTypes).length !== Object.keys(lastConnectorTypes).length ||
-        !Object.keys(currentConnectorTypes).every(key => key in lastConnectorTypes);
-      
+        !Object.keys(currentConnectorTypes).every((key) => key in lastConnectorTypes);
+
       if (hasChanged) {
         addDynamicConnectorsToCache(currentConnectorTypes);
         // Inject dynamic CSS for connector icons
@@ -619,7 +622,7 @@ export const WorkflowYAMLEditor = ({
         injectDynamicConnectorIcons(currentConnectorTypes, null);
         // Inject dynamic CSS for shadow icons (::after pseudo-elements)
         injectDynamicShadowIcons(currentConnectorTypes, null);
-        
+
         // Update the ref to track this version
         lastConnectorTypesRef.current = currentConnectorTypes;
       }
@@ -654,7 +657,7 @@ export const WorkflowYAMLEditor = ({
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const connectorTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-    
+
   const connectorIdShadowDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const unifiedProvidersRef = useRef<{
@@ -749,11 +752,11 @@ export const WorkflowYAMLEditor = ({
     if (connectorTypeDecorationCollectionRef.current) {
       connectorTypeDecorationCollectionRef.current.clear();
     }
-    
+
     if (connectorIdShadowDecorationCollectionRef.current) {
       connectorIdShadowDecorationCollectionRef.current.clear();
     }
-    
+
     // Also clear step execution decorations
     if (unifiedProvidersRef.current?.stepExecution) {
       unifiedProvidersRef.current.stepExecution.dispose();
@@ -824,13 +827,11 @@ export const WorkflowYAMLEditor = ({
       glyphMargin: true,
     });
 
-
     // Add custom keybinding for Cmd+I (Mac) / Ctrl+I (Windows) to trigger suggestions
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
       // Trigger the suggest widget manually
       editor.getAction('editor.action.triggerSuggest')?.run();
     });
-
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
@@ -1014,20 +1015,26 @@ export const WorkflowYAMLEditor = ({
       for (let lineNumber = 1; lineNumber <= totalLines; lineNumber++) {
         const line = model.getLineContent(lineNumber);
         const connectorIdMatch = line.match(/^\s*connector-id:\s*([a-zA-Z0-9-_]+)\s*$/);
-        
+
         if (connectorIdMatch) {
           const connectorId = connectorIdMatch[1];
-          
+
           // Get the connector type for this step by finding the step context
           try {
             const absolutePosition = model.getOffsetAt({ lineNumber, column: 1 });
             const path = getCurrentPath(yamlDocument, absolutePosition);
-            const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, { lineNumber, column: 1 });
-            
+            const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, {
+              lineNumber,
+              column: 1,
+            });
+
             if (connectorType && connectorsData?.connectorTypes) {
-              const instances = getConnectorInstancesForType(connectorType, connectorsData.connectorTypes);
-              const instance = instances.find(i => i.id === connectorId);
-              
+              const instances = getConnectorInstancesForType(
+                connectorType,
+                connectorsData.connectorTypes
+              );
+              const instance = instances.find((i) => i.id === connectorId);
+
               if (instance) {
                 // Add shadow text decoration at the end of the line
                 decorations.push({
@@ -1044,10 +1051,9 @@ export const WorkflowYAMLEditor = ({
                   line,
                   lineLength: line.length,
                   endColumn: line.length + 1,
-                  content: ` # ${instance.name}`
+                  content: ` # ${instance.name}`,
                 });
               }
-              
             }
           } catch (error) {
             // Ignore errors in shadow text generation

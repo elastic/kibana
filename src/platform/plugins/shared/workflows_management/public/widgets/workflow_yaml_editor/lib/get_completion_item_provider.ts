@@ -25,7 +25,11 @@ import {
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getAllConnectors, getAllConnectorsWithDynamic, getCachedDynamicConnectorTypes } from '../../../../common/schema';
+import {
+  getAllConnectors,
+  getAllConnectorsWithDynamic,
+  getCachedDynamicConnectorTypes,
+} from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
@@ -273,10 +277,10 @@ function generateConnectorSnippet(
   // Add connector-id if required
   if (connectorTypeRequiresConnectorId(connectorType, dynamicConnectorTypes)) {
     const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
-    
+
     if (instances.length > 0) {
       // Use the first non-deprecated instance as default, or first instance if all are deprecated
-      const defaultInstance = instances.find(i => !i.isDeprecated) || instances[0];
+      const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
       snippet += `\nconnector-id: ${defaultInstance.id}`;
     } else {
       // No instances configured, add placeholder
@@ -344,7 +348,10 @@ function generateBuiltInStepSnippet(stepType: string, shouldBeQuoted: boolean): 
 /**
  * Check if a connector type requires a connector-id field
  */
-function connectorTypeRequiresConnectorId(connectorType: string, dynamicConnectorTypes?: Record<string, any>): boolean {
+function connectorTypeRequiresConnectorId(
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, any>
+): boolean {
   // Built-in step types don't need connector-id
   const builtInStepTypes = ['foreach', 'if', 'parallel', 'merge', 'http', 'wait'];
   if (builtInStepTypes.includes(connectorType)) {
@@ -363,7 +370,10 @@ function connectorTypeRequiresConnectorId(connectorType: string, dynamicConnecto
 /**
  * Get connector instances for a specific connector type
  */
-export function getConnectorInstancesForType(connectorType: string, dynamicConnectorTypes?: Record<string, any>): Array<{
+export function getConnectorInstancesForType(
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, any>
+): Array<{
   id: string;
   name: string;
   isPreconfigured: boolean;
@@ -374,8 +384,10 @@ export function getConnectorInstancesForType(connectorType: string, dynamicConne
   }
 
   // For sub-action connectors (e.g., "inference.completion"), get the base type
-  const baseConnectorType = connectorType.includes('.') ? connectorType.split('.')[0] : connectorType;
-  
+  const baseConnectorType = connectorType.includes('.')
+    ? connectorType.split('.')[0]
+    : connectorType;
+
   // Try multiple lookup strategies to find the connector type
   const lookupCandidates = [
     connectorType, // Direct match (e.g., "slack")
@@ -386,12 +398,12 @@ export function getConnectorInstancesForType(connectorType: string, dynamicConne
 
   for (const candidate of lookupCandidates) {
     const connectorTypeInfo = dynamicConnectorTypes[candidate];
-    
+
     if (connectorTypeInfo?.instances?.length > 0) {
       return connectorTypeInfo.instances;
     }
   }
-  
+
   return [];
 }
 
@@ -404,12 +416,12 @@ function getConnectorIdSuggestions(
   dynamicConnectorTypes?: Record<string, any>
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
-  
+
   const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
-  
+
   instances.forEach((instance) => {
     let connectorName = instance.name;
-    
+
     // Add status indicators to connector name
     if (instance.isDeprecated) {
       connectorName += ' (deprecated)';
@@ -417,24 +429,28 @@ function getConnectorIdSuggestions(
     if (instance.isPreconfigured) {
       connectorName += ' (preconfigured)';
     }
-    
+
     // Create a label that shows both ID and name for better visibility
     const displayLabel = `${instance.id} • ${connectorName}`;
-    
+
     suggestions.push({
       label: displayLabel, // Show both connector ID and name
       kind: monaco.languages.CompletionItemKind.Value, // Use generic value kind
       insertText: instance.id, // Still insert only the ID
       range,
       detail: connectorType, // Show connector type as detail - this is what CSS targets
-      documentation: `Connector ID: ${instance.id}\nName: ${instance.name}\nType: ${connectorType}\nStatus: ${instance.isDeprecated ? 'Deprecated' : 'Active'}${instance.isPreconfigured ? ', Preconfigured' : ''}`,
+      documentation: `Connector ID: ${instance.id}\nName: ${
+        instance.name
+      }\nType: ${connectorType}\nStatus: ${instance.isDeprecated ? 'Deprecated' : 'Active'}${
+        instance.isPreconfigured ? ', Preconfigured' : ''
+      }`,
       sortText: `${instance.isDeprecated ? 'z' : 'a'}_${instance.name}`, // Sort deprecated items last
       preselect: !instance.isDeprecated, // Don't preselect deprecated connectors
       // Add custom attributes for better CSS targeting
       filterText: `${instance.id} ${connectorName} ${connectorType}`, // Enhanced filter text for better targeting
     });
   });
-  
+
   // If no instances are configured, still allow manual input
   if (instances.length === 0) {
     suggestions.push({
@@ -447,7 +463,7 @@ function getConnectorIdSuggestions(
       sortText: 'z_manual',
     });
   }
-  
+
   return suggestions;
 }
 
@@ -499,7 +515,7 @@ export function getConnectorTypeFromContext(
     if (path.length >= 3 && path[0] === 'steps' && path[2] === 'connector-id') {
       const stepPath = [path[0], path[1]]; // ["steps", stepIndex]
       const stepNode = yamlDocument.getIn(stepPath, true) as any;
-      
+
       if (stepNode && stepNode.has && typeof stepNode.has === 'function' && stepNode.has('type')) {
         const typeNode = stepNode.get('type', true) as any;
         if (typeNode && typeNode.value) {
@@ -511,10 +527,15 @@ export function getConnectorTypeFromContext(
 
     // ADDITIONAL CASE: If we're in a step context but not in a 'with' block, also try to get the step's type
     // This handles cases like shadow text where we need the connector type from any field in the step
-    if (path.length >= 2 && path[0] === 'steps' && typeof path[1] === 'number' && !path.includes('with')) {
+    if (
+      path.length >= 2 &&
+      path[0] === 'steps' &&
+      typeof path[1] === 'number' &&
+      !path.includes('with')
+    ) {
       const stepPath = [path[0], path[1]]; // ["steps", stepIndex]
       const stepNode = yamlDocument.getIn(stepPath, true) as any;
-      
+
       if (stepNode && stepNode.has && typeof stepNode.has === 'function' && stepNode.has('type')) {
         const typeNode = stepNode.get('type', true) as any;
         if (typeNode && typeNode.value) {
@@ -1119,7 +1140,6 @@ function getRequiredParamsForConnector(
   return basicConnectorParams[connectorType] || [];
 }
 
-
 /**
  * Get appropriate Monaco completion kind for different connector types
  */
@@ -1403,8 +1423,9 @@ export function getCompletionItemProvider(
     provideCompletionItems: (model, position, completionContext) => {
       try {
         // Get the latest connector data from cache instead of relying on closure
-        const currentDynamicConnectorTypes = getCachedDynamicConnectorTypes() || dynamicConnectorTypes;
-        
+        const currentDynamicConnectorTypes =
+          getCachedDynamicConnectorTypes() || dynamicConnectorTypes;
+
         const { lineNumber } = position;
         const line = model.getLineContent(lineNumber);
         const wordUntil = model.getWordUntilPosition(position);
@@ -1485,19 +1506,27 @@ export function getCompletionItemProvider(
 
         // SPECIAL CASE: Connector-ID completion (must come before variable expression completion)
         // Check if we're trying to complete a connector-id field value
-        const connectorIdCompletionMatch = lineUpToCursor.match(
-          /^\s*connector-id:\s*(.*)$/i
-        );
+        const connectorIdCompletionMatch = lineUpToCursor.match(/^\s*connector-id:\s*(.*)$/i);
 
-        if (connectorIdCompletionMatch && completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke) {
+        if (
+          connectorIdCompletionMatch &&
+          completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke
+        ) {
           // Find the connector type for this step
-          const stepConnectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
-          
+          const stepConnectorType = getConnectorTypeFromContext(
+            yamlDocument,
+            path,
+            model,
+            position
+          );
+
           if (stepConnectorType) {
             // For connector-id values, we replace from the start of the value to the end of the line
-            // Find the position right after "connector-id: " 
+            // Find the position right after "connector-id: "
             const connectorIdFieldMatch = lineUpToCursor.match(/^(\s*connector-id:\s*)/i);
-            const valueStartColumn = connectorIdFieldMatch ? connectorIdFieldMatch[1].length + 1 : position.column;
+            const valueStartColumn = connectorIdFieldMatch
+              ? connectorIdFieldMatch[1].length + 1
+              : position.column;
             const adjustedRange = {
               startLineNumber: range.startLineNumber,
               endLineNumber: range.endLineNumber,
@@ -1522,7 +1551,10 @@ export function getCompletionItemProvider(
         // Handle completions inside {{ }} or after @ triggers
         // BUT NOT when we're completing connector-id values
         const isConnectorIdCompletion = lineUpToCursor.match(/^\s*connector-id:\s*(.*)$/i);
-        if ((parseResult.matchType === 'variable-unfinished' || parseResult.matchType === 'at') && !isConnectorIdCompletion) {
+        if (
+          (parseResult.matchType === 'variable-unfinished' || parseResult.matchType === 'at') &&
+          !isConnectorIdCompletion
+        ) {
           // We're inside a variable expression, provide context-based completions
           if (context instanceof z.ZodObject) {
             const contextKeys = Object.keys(context.shape);
@@ -1606,7 +1638,6 @@ export function getCompletionItemProvider(
             incomplete: false, // Prevent other providers from adding suggestions
           };
         }
-
 
         // 🔍 SPECIAL CASE: Check if we're inside a connector's 'with' block
         // Checking if we're inside a connector's 'with' block
@@ -1904,43 +1935,65 @@ export function getCompletionItemProvider(
 
         // Check if we should suggest connector-id field for the current step
         // Only do this expensive check when manually triggered (Cmd+I/Ctrl+I)
-        const shouldSuggestConnectorId = completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke ? (() => {
-          // Only suggest in steps context, not triggers
-          if (isInTriggersContext(path)) {
-            return false;
-          }
-
-          // Try to find the connector type for this step
-          const stepConnectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
-          
-          if (stepConnectorType && connectorTypeRequiresConnectorId(stepConnectorType, currentDynamicConnectorTypes)) {
-            // Check if connector-id already exists in this step
-            const stepPath = path.slice(0, path.findIndex(segment => segment === 'with') || path.length);
-            if (stepPath.length >= 2 && stepPath[0] === 'steps') {
-              try {
-                const stepNode = yamlDocument.getIn(stepPath, true) as any;
-                if (stepNode && stepNode.has && typeof stepNode.has === 'function' && !stepNode.has('connector-id')) {
-                  return { connectorType: stepConnectorType, stepNode };
+        const shouldSuggestConnectorId =
+          completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke
+            ? (() => {
+                // Only suggest in steps context, not triggers
+                if (isInTriggersContext(path)) {
+                  return false;
                 }
-              } catch (error) {
-                // Ignore errors when checking for existing connector-id
-              }
-            }
-          }
-          
-          return false;
-        })() : false;
+
+                // Try to find the connector type for this step
+                const stepConnectorType = getConnectorTypeFromContext(
+                  yamlDocument,
+                  path,
+                  model,
+                  position
+                );
+
+                if (
+                  stepConnectorType &&
+                  connectorTypeRequiresConnectorId(stepConnectorType, currentDynamicConnectorTypes)
+                ) {
+                  // Check if connector-id already exists in this step
+                  const stepPath = path.slice(
+                    0,
+                    path.findIndex((segment) => segment === 'with') || path.length
+                  );
+                  if (stepPath.length >= 2 && stepPath[0] === 'steps') {
+                    try {
+                      const stepNode = yamlDocument.getIn(stepPath, true) as any;
+                      if (
+                        stepNode &&
+                        stepNode.has &&
+                        typeof stepNode.has === 'function' &&
+                        !stepNode.has('connector-id')
+                      ) {
+                        return { connectorType: stepConnectorType, stepNode };
+                      }
+                    } catch (error) {
+                      // Ignore errors when checking for existing connector-id
+                    }
+                  }
+                }
+
+                return false;
+              })()
+            : false;
 
         // Add connector-id suggestion if appropriate
         if (shouldSuggestConnectorId && typeof shouldSuggestConnectorId === 'object') {
           const { connectorType } = shouldSuggestConnectorId;
-          const instances = getConnectorInstancesForType(connectorType, currentDynamicConnectorTypes);
-          
+          const instances = getConnectorInstancesForType(
+            connectorType,
+            currentDynamicConnectorTypes
+          );
+
           let insertText = 'connector-id: ';
-          let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
-          
+          const insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
+
           if (instances.length > 0) {
-            const defaultInstance = instances.find(i => !i.isDeprecated) || instances[0];
+            const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
             insertText = `connector-id: ${defaultInstance.id}`;
           } else {
             insertText = 'connector-id: ';
@@ -1955,13 +2008,22 @@ export function getCompletionItemProvider(
             sortText: '!connector-id', // High priority, after type
             detail: `string (required for ${connectorType})`,
             documentation: {
-              value: `**Connector ID**\n\nSpecifies which connector instance to use for this ${connectorType} step.\n\n${instances.length > 0 ? `**Available instances:**\n${instances.map(i => `- ${i.name} (${i.id})${i.isDeprecated ? ' - deprecated' : ''}`).join('\n')}` : 'No instances are currently configured for this connector type.'}`,
+              value: `**Connector ID**\n\nSpecifies which connector instance to use for this ${connectorType} step.\n\n${
+                instances.length > 0
+                  ? `**Available instances:**\n${instances
+                      .map((i) => `- ${i.name} (${i.id})${i.isDeprecated ? ' - deprecated' : ''}`)
+                      .join('\n')}`
+                  : 'No instances are currently configured for this connector type.'
+              }`,
             },
             preselect: true,
-            command: instances.length === 0 ? {
-              id: 'editor.action.triggerSuggest',
-              title: 'Trigger Suggest',
-            } : undefined,
+            command:
+              instances.length === 0
+                ? {
+                    id: 'editor.action.triggerSuggest',
+                    title: 'Trigger Suggest',
+                  }
+                : undefined,
           };
 
           suggestions.push(connectorIdSuggestion);

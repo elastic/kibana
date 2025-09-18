@@ -833,12 +833,12 @@ export function addDynamicConnectorsToCache(
 ) {
   // Create a simple hash of the connector types to detect changes
   const currentHash = JSON.stringify(Object.keys(dynamicConnectorTypes).sort());
-  
+
   // Skip processing if the connector types haven't changed
   if (lastProcessedConnectorTypesHash === currentHash && dynamicConnectorTypesCache !== null) {
     return;
   }
-  
+
   // Store the raw dynamic connector types for completion provider access
   dynamicConnectorTypesCache = dynamicConnectorTypes;
   lastProcessedConnectorTypesHash = currentHash;
