@@ -61,15 +61,6 @@ class SecurityBrowserFieldsManager {
   }
 
   /**
-   * Builds the browser fields from the provided dataView fields.
-   * @param fields - The fields from the dataView to be processed.
-   * @returns An object containing the browserFields.
-   */
-  private buildBrowserFields(fields: DataView['fields']): BrowserFieldsResult {
-    return buildBrowserFields(fields);
-  }
-
-  /**
    *
    * @param dataViewtitle - The title of the dataView, which is used as a key for caching.
    * This is typically the index pattern of the dataView.
@@ -132,7 +123,7 @@ class SecurityBrowserFieldsManager {
     }
 
     // If scope is not provided or title is not defined, return the browser fields without caching
-    return this.buildBrowserFields(fields);
+    return buildBrowserFields(fields);
   }
 
   public removeFromCache(scope: DataViewManagerScopeName): void {
