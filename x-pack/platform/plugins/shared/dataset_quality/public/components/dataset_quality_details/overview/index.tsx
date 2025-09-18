@@ -55,7 +55,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         </EuiFlexItem>
       )}
 
-      {view === 'classic' && (
+      {view === 'dataQuality' && (
         <>
           <Summary />
           <EuiSpacer size="m" />

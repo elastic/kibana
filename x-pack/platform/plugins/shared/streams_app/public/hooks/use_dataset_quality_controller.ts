@@ -50,9 +50,9 @@ export const useDatasetQualityController = (
       if (initialState === null) {
         initialState = {
           dataStream: definition.stream.name,
-          view: Streams.WiredStream.Definition.is(definition.stream)
+          view: (Streams.WiredStream.Definition.is(definition.stream)
             ? 'wired'
-            : ('classic' as DatasetQualityView),
+            : 'classic') as DatasetQualityView,
         };
       }
 
@@ -60,9 +60,9 @@ export const useDatasetQualityController = (
         await datasetQuality.createDatasetQualityDetailsController({
           initialState: {
             ...initialState,
-            view: Streams.WiredStream.Definition.is(definition.stream)
+            view: (Streams.WiredStream.Definition.is(definition.stream)
               ? 'wired'
-              : ('classic' as DatasetQualityView),
+              : 'classic') as DatasetQualityView,
           },
         });
       datasetQualityDetailsController.service.start();
