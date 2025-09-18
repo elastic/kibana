@@ -132,7 +132,7 @@ export async function rangeControlFactory(
       controlParams.id,
       controlParams.fieldName,
       controlParams.indexPattern,
-      dataPluginStart.indexPatterns,
+      dataPluginStart.dataViews,
       deps.data.query.filterManager
     ),
     useTimeFilter,
