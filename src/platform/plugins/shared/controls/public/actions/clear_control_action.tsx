@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
@@ -17,6 +19,7 @@ import {
   type EmbeddableApiContext,
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';

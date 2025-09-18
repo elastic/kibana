@@ -36,7 +36,6 @@ const compatibilityCheck = (api: unknown): api is DataControlApi => {
       hasEditCapabilities(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 };

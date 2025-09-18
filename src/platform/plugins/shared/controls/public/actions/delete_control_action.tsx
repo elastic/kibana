@@ -42,7 +42,6 @@ export const compatibilityCheck = (api: unknown | null): api is DeleteControlAct
       apiHasUniqueId(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 

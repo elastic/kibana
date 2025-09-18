@@ -10,17 +10,16 @@
 import classNames from 'classnames';
 import type { FC, ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../actions/controls_hover_trigger';
 
 export interface FloatingActionsProps {
   children: ReactElement;
@@ -28,21 +27,41 @@ export interface FloatingActionsProps {
   className?: string;
   isEnabled?: boolean;
   api?: unknown;
+  uuid: string;
   viewMode?: ViewMode;
   disabledActions?: string[];
+  uiActions: UiActionsStart;
 }
 
 export type FloatingActionItem = AnyApiAction & {
   MenuItem: React.FC<{ context: unknown }>;
 };
 
+const getFloatingActionItem = (uuid: string, action: Action, context: any): FloatingActionItem => ({
+  ...action,
+  MenuItem: () => (
+    <EuiToolTip
+      key={`control-action-${uuid}-${action.id}`}
+      content={action.getDisplayNameTooltip?.(context) ?? action.getDisplayName(context)}
+    >
+      <EuiButtonIcon
+        iconType={action.getIconType(context) ?? 'empty'}
+        color="text"
+        onClick={() => action.execute(context)}
+      />
+    </EuiToolTip>
+  ),
+});
+
 export const FloatingActions: FC<FloatingActionsProps> = ({
   children,
   viewMode,
   isEnabled,
   api,
+  uuid,
   className = '',
   disabledActions,
+  uiActions,
 }) => {
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
@@ -52,7 +71,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     let canceled = false;
     const context = {
       embeddable: api,
-      trigger: controlHoverTrigger,
+      trigger: uiActions.getTrigger('CONTROL_HOVER_TRIGGER'),
     };
 
     const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
@@ -60,15 +79,16 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
-      return [];
-      // const actions = (
-      //   await uiActionsService.getTriggerCompatibleActions(CONTROL_HOVER_TRIGGER, context)
-      // )
-      //   .filter((action) => {
-      //     return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
-      //   })
-      //   .sort(sortByOrder);
-      // return actions as FloatingActionItem[];
+      // return [];
+      const actions = (
+        await uiActions.getTriggerCompatibleActions('CONTROL_HOVER_TRIGGER', context)
+      )
+        .filter((action) => {
+          return (disabledActions ?? []).indexOf(action.id) === -1;
+        })
+        .sort(sortByOrder)
+        .map((action) => getFloatingActionItem(uuid, action, context));
+      return actions as FloatingActionItem[];
     };
 
     const subscriptions = new Subscription();
@@ -80,7 +100,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           ?.filter((current) => current.id !== action.id)
           .sort(sortByOrder) as FloatingActionItem[];
         if (isCompatible) {
-          return [action as FloatingActionItem, ...newActions];
+          return [
+            getFloatingActionItem(uuid, action, context) as FloatingActionItem,
+            ...newActions,
+          ];
         }
         return newActions;
       });
@@ -91,11 +114,11 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       if (canceled) return;
       setFloatingActions(actions);
 
-      const frequentlyChangingActions = [];
-      // await uiActionsService.getFrequentlyChangingActionsForTrigger(
-      //   CONTROL_HOVER_TRIGGER,
-      //   context
-      // );
+      const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
+        'CONTROL_HOVER_TRIGGER',
+        context
+      );
+      await uiActions.getFrequentlyChangingActionsForTrigger('CONTROL_HOVER_TRIGGER', context);
       if (canceled) return;
 
       for (const action of frequentlyChangingActions) {
@@ -117,7 +140,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       canceled = true;
       subscriptions.unsubscribe();
     };
-  }, [api, viewMode, disabledActions]);
+  }, [api, uuid, viewMode, disabledActions, uiActions]);
 
   const styles = useMemoCss(floatingActionsStyles);
 

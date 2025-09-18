@@ -53,6 +53,7 @@ import {
   dataService,
   navigationService,
   serverlessService,
+  uiActionsService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
@@ -404,6 +405,7 @@ export function InternalDashboardTopNav({
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       <ControlsRenderer
+        uiActions={uiActionsService}
         parentApi={dashboardApi}
         getInitialState={() => {
           return { controls: dashboardApi.layout$.getValue().controls };

@@ -40,8 +40,10 @@ import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export const ControlsRenderer = ({
+  uiActions,
   parentApi,
   getInitialState,
 }: {
@@ -55,6 +57,7 @@ export const ControlsRenderer = ({
     controls: { [controlId: string]: ControlsGroupState['controls'][number] & { order: number } };
     compressed?: boolean;
   };
+  uiActions: UiActionsStart;
 }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
@@ -120,6 +123,7 @@ export const ControlsRenderer = ({
         >
           {controlsInOrder.map(({ id, type, grow, width }) => (
             <ControlPanel
+              uiActions={uiActions}
               key={id}
               type={type}
               uuid={id!}

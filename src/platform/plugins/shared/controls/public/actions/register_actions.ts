@@ -41,6 +41,7 @@ export function registerActions(uiActions: UiActionsStart) {
     return new ClearControlAction();
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLEAR_CONTROL);
+  uiActions.attachAction(CONTROL_HOVER_TRIGGER, ACTION_CLEAR_CONTROL);
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_CONTROL, async () => {
     const { createControlAction } = await import('../controls_module');

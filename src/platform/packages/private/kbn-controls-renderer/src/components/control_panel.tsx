@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import { type Subscription, of } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -28,19 +28,18 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
-  type PublishesViewMode,
   apiPublishesDataLoading,
   apiPublishesTitle,
   useBatchedPublishingSubjects,
   type PublishesDisabledActionIds,
+  type PublishesViewMode,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { PresentationPanelHoverActionsWrapper } from '@kbn/presentation-panel-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
-import type { Action } from '@kbn/ui-actions-plugin/public/actions';
 
 export const ControlPanel = ({
   parentApi,
@@ -50,6 +49,7 @@ export const ControlPanel = ({
   width,
   compressed,
   setControlPanelRef,
+  uiActions,
 }: {
   parentApi: PresentationContainer &
     PublishesViewMode &
@@ -62,21 +62,11 @@ export const ControlPanel = ({
   grow: ControlsGroupState['controls'][number]['grow'];
   width: ControlsGroupState['controls'][number]['width'];
   compressed?: boolean;
+  uiActions: UiActionsStart;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
   const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isOver,
-    isDragging,
-    index,
-    isSorting,
-    activeIndex,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,
   });
 
@@ -92,22 +82,23 @@ export const ControlPanel = ({
     if (!api) return;
 
     /** Setup subscriptions for necessary state once API is available */
-    const subscriptions: Subscription[] = [];
+    const subscriptions = new Subscription();
+
     if (apiPublishesDataLoading(api)) {
-      subscriptions.push(
+      subscriptions.add(
         api.dataLoading$.subscribe((result) => {
           setDataLoading(result);
         })
       );
     }
     if (apiPublishesTitle(api)) {
-      subscriptions.push(
+      subscriptions.add(
         api.title$.subscribe((result) => {
           setPanelTitle(result);
         })
       );
       if (api.defaultTitle$) {
-        subscriptions.push(
+        subscriptions.add(
           api.defaultTitle$.subscribe((result) => {
             setDefaultPanelTitle(result);
           })
@@ -115,7 +106,7 @@ export const ControlPanel = ({
       }
     }
     return () => {
-      subscriptions.forEach((subscription) => subscription?.unsubscribe());
+      subscriptions.unsubscribe();
     };
   }, [api]);
 
@@ -148,91 +139,90 @@ export const ControlPanel = ({
         'controlFrameWrapper--large': controlWidth === 'large',
       })}
     >
-      <EuiFormRow
-        data-test-subj="control-frame-title"
-        fullWidth
-        label={controlLabel}
-        id={`control-title-${uuid}`}
-        aria-label={`Control for ${controlLabel}`}
-        css={css({
-          '.euiFormControlLayout__childrenWrapper': {
-            '.euiPopover, .euiFilterGroup': {
-              // TODO: Remove options list styles
-              height: '100%',
-            },
-          },
-        })}
+      <FloatingActions
+        data-test-subj="control-frame-floating-actions"
+        api={api}
+        uuid={uuid}
+        viewMode={viewMode}
+        disabledActions={disabledActionIds}
+        isEnabled={true}
+        uiActions={uiActions}
       >
-        <EuiFormControlLayout
+        <EuiFormRow
+          data-test-subj="control-frame-title"
           fullWidth
-          isLoading={Boolean(dataLoading)}
-          className={classNames('controlFrame__formControlLayout', {
-            'controlFrame__formControlLayout--edit': isEditable,
-            type,
+          label={controlLabel}
+          id={`control-title-${uuid}`}
+          aria-label={`Control for ${controlLabel}`}
+          css={css({
+            '.euiFormControlLayout__childrenWrapper': {
+              '.euiPopover, .euiFilterGroup': {
+                // TODO: Remove options list styles
+                height: '100%',
+              },
+            },
           })}
-          css={styles.formControl}
-          prepend={
-            <>
-              <DragHandle
-                isEditable={isEditable}
-                controlTitle={panelTitle || defaultPanelTitle}
-                {...attributes}
-                {...listeners}
-              />
-              {/* {api?.CustomPrependComponent ? (
+        >
+          <EuiFormControlLayout
+            fullWidth
+            isLoading={Boolean(dataLoading)}
+            className={classNames('controlFrame__formControlLayout', {
+              'controlFrame__formControlLayout--edit': isEditable,
+              type,
+            })}
+            css={styles.formControl}
+            prepend={
+              <>
+                <DragHandle
+                  isEditable={isEditable}
+                  controlTitle={panelTitle || defaultPanelTitle}
+                  {...attributes}
+                  {...listeners}
+                />
+                {/* {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : */}
-              <EuiToolTip
-                content={panelTitle || defaultPanelTitle}
-                anchorProps={{ className: 'eui-textTruncate' }}
-              >
-                <EuiFormLabel className="controlPanel--label">
-                  {panelTitle || defaultPanelTitle}
-                </EuiFormLabel>
-              </EuiToolTip>
-              {/* )} */}
-            </>
-          }
-          compressed={compressed}
-        >
-          <EmbeddableRenderer
-            key={uuid}
-            maybeId={uuid}
-            type={type}
-            getParentApi={() => parentApi}
-            onApiAvailable={(panelApi) => {
-              const newPanelApi = {
-                ...panelApi,
-                serializeState: () => {
-                  return { rawState: { ...panelApi.serializeState().rawState, grow, width } };
-                },
-              };
-              setApi(newPanelApi);
-              parentApi.registerChildApi(newPanelApi);
-            }}
-            hidePanelChrome
-          />
-        </EuiFormControlLayout>
-      </EuiFormRow>
+                <EuiToolTip
+                  content={panelTitle || defaultPanelTitle}
+                  anchorProps={{ className: 'eui-textTruncate' }}
+                >
+                  <EuiFormLabel className="controlPanel--label">
+                    {panelTitle || defaultPanelTitle}
+                  </EuiFormLabel>
+                </EuiToolTip>
+                {/* )} */}
+              </>
+            }
+            compressed={compressed}
+          >
+            <EmbeddableRenderer
+              key={uuid}
+              maybeId={uuid}
+              type={type}
+              getParentApi={() => parentApi}
+              onApiAvailable={(panelApi) => {
+                const newPanelApi = {
+                  ...panelApi,
+                  serializeState: () => {
+                    return { rawState: { ...panelApi.serializeState().rawState, grow, width } };
+                  },
+                };
+                setApi(newPanelApi);
+                parentApi.registerChildApi(newPanelApi);
+              }}
+              hidePanelChrome
+            />
+          </EuiFormControlLayout>
+        </EuiFormRow>
+      </FloatingActions>
     </EuiFlexItem>
   );
 };
 
 const controlPanelStyles = {
   draggingItem: css({
-    '.euiFormRow': {
-      opacity: 0,
-      visibility: 'hidden',
-    },
-    '&:after': {
-      content: "''",
-      display: 'block',
-      backgroundColor: 'red',
-      width: '100%',
-      height: '32px',
-      position: 'absolute',
-      top: 0,
-    },
+    opacity: 0,
+    visibility: 'hidden',
   }),
   controlWidthStyles,
   formControl: ({ euiTheme }: UseEuiTheme) =>
