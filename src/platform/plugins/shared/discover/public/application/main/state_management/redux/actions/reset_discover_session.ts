@@ -18,25 +18,25 @@ import {
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
 import { setTabs } from './tabs';
-import { TabInitialFetchState } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
   async (
-    {
-      discoverSession,
-      resetInitialFetchState,
-    }: {
-      discoverSession: DiscoverSession;
-      resetInitialFetchState?: boolean;
-    },
+    { updatedDiscoverSession }: { updatedDiscoverSession?: DiscoverSession } | undefined = {},
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
     const state = getState();
+    const discoverSession = updatedDiscoverSession ?? state.persistedDiscoverSession;
 
-    const { unsavedTabIds } = resetInitialFetchState
-      ? selectHasUnsavedChanges(state, { runtimeStateManager, services })
-      : { unsavedTabIds: new Set<string>() };
+    if (!discoverSession) {
+      return;
+    }
+
+    // If an updated session is provided, we know it has just been saved and all tab state is up to date.
+    // Otherwise we're resetting the current session, and need to detect changes to mark tabs for refetch.
+    const { unsavedTabIds } = updatedDiscoverSession
+      ? { unsavedTabIds: new Set<string>() }
+      : selectHasUnsavedChanges(state, { runtimeStateManager, services });
 
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
@@ -67,8 +67,10 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           existingTab: selectTab(state, tab.id),
         });
 
+        // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.
+        // We don't need to do this for the current tab since it's already being synced.
         if (tab.id !== state.tabs.unsafeCurrentId && unsavedTabIds.has(tab.id)) {
-          tabState.initialFetchState = TabInitialFetchState.forceTrigger;
+          tabState.forceFetchOnSelect = true;
         }
 
         return tabState;

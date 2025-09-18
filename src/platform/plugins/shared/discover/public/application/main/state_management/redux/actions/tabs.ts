@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { TabInitialFetchState, type TabState } from '../types';
+import { type TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -204,11 +204,12 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           query ?? services.data.query.queryString.getDefaultQuery()
         );
 
-        if (nextTab.initialFetchState === TabInitialFetchState.forceTrigger) {
-          nextTabStateContainer.dataState.reset();
-        }
-
         nextTabStateContainer.actions.initializeAndSync();
+
+        if (nextTab.forceFetchOnSelect) {
+          nextTabStateContainer.dataState.reset();
+          nextTabStateContainer.actions.fetchData();
+        }
       } else {
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
         await urlStateStorage.set(APP_STATE_URL_KEY, null);

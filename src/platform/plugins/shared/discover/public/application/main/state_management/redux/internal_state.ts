@@ -104,7 +104,8 @@ export const internalStateSlice = createSlice({
       >(
         (acc, tab) => ({
           ...acc,
-          [tab.id]: tab,
+          [tab.id]:
+            tab.id === action.payload.selectedTabId ? { ...tab, forceFetchOnSelect: false } : tab,
         }),
         {}
       );
@@ -113,9 +114,9 @@ export const internalStateSlice = createSlice({
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
     },
 
-    setInitialFetchState: (state, action: TabAction<Pick<TabState, 'initialFetchState'>>) =>
+    setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
       withTab(state, action, (tab) => {
-        tab.initialFetchState = action.payload.initialFetchState;
+        tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
