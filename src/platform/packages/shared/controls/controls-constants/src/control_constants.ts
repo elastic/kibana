@@ -11,3 +11,10 @@ export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export const ESQL_CONTROL = 'esqlControl';
+
+export const CONTROL_TYPES = [
+  TIME_SLIDER_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  ESQL_CONTROL,
+];

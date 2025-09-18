@@ -19,7 +19,6 @@ import {
   merge,
   skip,
 } from 'rxjs';
-import { omit } from 'lodash';
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
@@ -344,8 +343,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       };
 
       return {
-        /** TODO: Do this in a better way */
-        api: { ...api, parentApi: omit(api.parentApi, ['expandPanel']) },
+        api,
         Component: () => {
           useEffect(() => {
             return () => {
