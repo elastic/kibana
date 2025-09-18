@@ -94,6 +94,20 @@ describe('HeadersField', () => {
     expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toBeInTheDocument();
   });
 
+  it('renders the encrypted headers badge when secret headers are present', async () => {
+    render(
+      <AuthFormTestProvider onSubmit={onSubmit}>
+        <HeadersFields readOnly={false} />
+      </AuthFormTestProvider>
+    );
+
+    const typeSelector = await screen.findByTestId('webhookHeaderTypeSelect');
+    await userEvent.click(typeSelector);
+    await userEvent.click(await screen.findByTestId('option-secret'), { pointerEventsCheck: 0 });
+
+    expect(await screen.findByTestId('encryptedHeadersBadge')).toBeInTheDocument();
+  });
+
   describe('validation', () => {
     it('is valid with 1 config header and non-empty value', async () => {
       const testData = {
