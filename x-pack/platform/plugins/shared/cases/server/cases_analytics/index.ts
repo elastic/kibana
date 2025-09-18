@@ -87,7 +87,7 @@ export async function createCasesAnalyticsIndexesForSpaceId({
         spaceId,
         owner,
       });
-      const casesAttachmentsIndex = createCommentsAnalyticsIndex({
+      const casesCommentsIndex = createCommentsAnalyticsIndex({
         logger,
         esClient,
         isServerless,
@@ -95,7 +95,7 @@ export async function createCasesAnalyticsIndexesForSpaceId({
         spaceId,
         owner,
       });
-      const casesCommentsIndex = createAttachmentsAnalyticsIndex({
+      const casesAttachmentsIndex = createAttachmentsAnalyticsIndex({
         logger,
         esClient,
         isServerless,
@@ -113,8 +113,8 @@ export async function createCasesAnalyticsIndexesForSpaceId({
       });
       return operations.concat([
         casesIndex.upsertIndex(),
-        casesAttachmentsIndex.upsertIndex(),
         casesCommentsIndex.upsertIndex(),
+        casesAttachmentsIndex.upsertIndex(),
         casesActivityIndex.upsertIndex(),
       ]);
     }, [])
