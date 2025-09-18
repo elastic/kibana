@@ -21,18 +21,18 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { executeAddLensPanelAction } from '../dashboard_actions/execute_add_lens_panel_action';
-import type { DashboardApi } from '../dashboard_api/types';
+import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
+import type { DashboardApi } from '../../../dashboard_api/types';
+import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
+import { uiActionsService } from '../../../services/kibana_services';
 import {
   getAddControlButtonTitle,
   getControlButtonTitle,
   getAddESQLControlButtonTitle,
   getAddTimeSliderControlButtonTitle,
   getCreateVisualizationButtonTitle,
-} from '../dashboard_app/_dashboard_app_strings';
-import { AddPanelFlyout } from '../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout';
-import { uiActionsService } from '../services/kibana_services';
-import { addFromLibrary } from './add_panel_from_library';
+} from '../../_dashboard_app_strings';
+import { AddPanelFlyout } from '../add_panel_button/components/add_panel_flyout';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
@@ -52,7 +52,7 @@ function cleanup() {
   isOpen = false;
 }
 
-const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
+export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
 

@@ -18,12 +18,12 @@ import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
-import { ShowAddMenu } from '../../dashboard_renderer/show_add_menu';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
+import { ShowAddMenu } from './add_menu/show_add_menu';
 import { ShowShareModal } from './share/show_share_modal';
 
 export const useDashboardMenuItems = ({
