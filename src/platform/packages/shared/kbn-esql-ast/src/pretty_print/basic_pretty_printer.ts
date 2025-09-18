@@ -11,6 +11,7 @@ import {
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
+  isIdentifier,
   isIntegerLiteral,
   isLiteral,
   isParamLiteral,
@@ -398,8 +399,11 @@ export class BasicPrettyPrinter {
           // Check if function name is a parameter stored in node.operator
           if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
             operator = LeafPrinter.param(ctx.node.operator);
-          } else if (opts.lowercaseFunctions) {
-            operator = operator.toLowerCase();
+          } else {
+            if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
+              operator = ctx.node.name;
+            }
+            operator = opts.lowercaseFunctions ? operator.toLowerCase() : operator.toUpperCase();
           }
 
           let args = '';
