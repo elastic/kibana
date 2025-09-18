@@ -137,73 +137,31 @@ export async function getFunctionArgsSuggestions(
   context?: ICommandContext,
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
-  const astContext = findAstPosition(commands, offset);
-  const node = astContext.node;
-  // If the node is not
-  if (!node) {
-    return [];
-  }
-  let command = astContext.command;
-  if (astContext.command?.name === 'fork') {
-    const { command: forkCommand } =
-      astContext.command?.name === 'fork'
-        ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
-        : { command: undefined };
-    command = forkCommand || astContext.command;
-  }
-  const functionNode = node as ESQLFunction;
-  const fnDefinition = getFunctionDefinition(functionNode.name);
-  // early exit on no hit
-  if (!fnDefinition) {
+  const analysis = analyzeParameterLocation(
+    fullText,
+    offset,
+    commands,
+    context,
+    hasMinimumLicenseRequired
+  );
+
+  if (!analysis) {
     return [];
   }
 
-  const filteredFnDefinition = {
-    ...fnDefinition,
-    signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
-  };
+  const {
+    compatibleParamDefs,
+    shouldAddComma,
+    shouldAdvanceCursor,
+    hasMoreMandatoryArgs,
+    currentArg,
+    fnToIgnore,
+  } = analysis;
 
-  const columnMap: Map<string, ESQLColumnData> = context?.columns || new Map();
-
-  const references = {
-    columns: columnMap,
-  };
-
-  const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
-    getValidSignaturesAndTypesToSuggestNext(functionNode, references, filteredFnDefinition);
-
-  const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
-    return Array.from(new Set(paramDefs.map(({ type }) => type)));
-  };
-
-  const arg: ESQLAstItem = enrichedArgs[argIndex];
-
-  // Whether to prepend comma to suggestion string
-  // E.g. if true, "fieldName" -> "fieldName, "
-  const isCursorFollowedByComma = fullText
-    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
-    : false;
-
-  // TODO remove this special handling
-  const canBeBooleanCondition =
-    // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
-    fnDefinition.name === 'case' ||
-    // If the type is explicitly a boolean condition
-    typesToSuggestNext.some((t) => t && t.type === 'boolean' && t.name === 'condition');
-
-  const shouldAddComma =
-    hasMoreMandatoryArgs &&
-    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
-    !isCursorFollowedByComma &&
-    !canBeBooleanCondition;
-
-  const shouldAdvanceCursor =
-    hasMoreMandatoryArgs &&
-    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
-    !isCursorFollowedByComma;
-
+  // 4. Parameter Types to Suggest
+  // Suggested constant values and compatible literals
   const suggestedConstants = uniq(
-    typesToSuggestNext
+    compatibleParamDefs
       .map((d) => d.suggestedValues)
       .filter((d) => d)
       .flat()
@@ -216,87 +174,53 @@ export async function getFunctionArgsSuggestions(
     });
   }
 
-  const suggestions: ISuggestionItem[] = [];
-  const noArgDefined = !arg;
-  const isUnknownColumn =
-    arg &&
-    isColumn(arg) &&
-    !getColumnExists(arg, {
-      columns: columnMap,
-    });
-  if (noArgDefined || isUnknownColumn) {
-    // ... | EVAL fn( <suggest>)
-    // ... | EVAL fn( field, <suggest>)
-
-    const commandArgIndex = command.args.findIndex(
-      (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
-    );
-    const finalCommandArgIndex =
-      command.name !== 'stats' && command.name !== 'inlinestats'
-        ? -1
-        : commandArgIndex < 0
-        ? Math.max(command.args.length - 1, 0)
-        : commandArgIndex;
-
-    const finalCommandArg = command.args[finalCommandArgIndex];
-
-    const fnToIgnore = [];
-
-    fnToIgnore.push(
-      ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
-    );
-
-    if (
-      (command.name !== 'stats' && command.name !== 'inlinestats') ||
-      (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
-    ) {
-      // ignore the current function
-      fnToIgnore.push(node.name);
-    } else {
-      fnToIgnore.push(
-        ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-        ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
-          ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
-          : []),
-        // TODO — can this be captured in just the location ID computation?
-        ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
-          ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
-              ({ name }) => name
-            )
-          : [])
-      );
+  // Helper to ensure both keyword and text types are present
+  const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+    if (types.includes('keyword') && !types.includes('text')) {
+      types.push('text');
     }
-    // Separate the param definitions into two groups:
-    // fields should only be suggested if the param isn't constant-only,
-    // and constant suggestions should only be given if it is.
-    //
-    // TODO — improve this to inherit the constant flag from the outer function
-    // (e.g. if func1's first parameter is constant-only, any nested functions should
-    // inherit that constraint: func1(func2(shouldBeConstantOnly)))
-    //
-    const constantOnlyParamDefs = typesToSuggestNext.filter(
-      (p) => p.constantOnly || ['time_duration', 'date_period'].includes(p.type)
-    );
+    if (types.includes('text') && !types.includes('keyword')) {
+      types.push('keyword');
+    }
+    return types;
+  };
 
-    const supportsControls = Boolean(context?.supportsControls);
-    const variables = context?.variables;
+  // Helper to get unique types from param defs
+  const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
+    return ensureKeywordAndText(Array.from(new Set(paramDefs.map(({ type }) => type))));
+  };
 
-    // Literals
-    // TODO - these literals are only suggested if there is a parameter that only accepts constants
-    // is that intended?
+  // Separate the param definitions into two groups:
+  // fields should only be suggested if the param isn't constant-only,
+  // and constant suggestions should only be given if it is.
+  //
+  // TODO — improve this to inherit the constant flag from the outer function
+  // (e.g. if func1's first parameter is constant-only, any nested functions should
+  // inherit that constraint: func1(func2(shouldBeConstantOnly)))
+  //
+  const constantOnlyParamDefs = compatibleParamDefs.filter(
+    (p) => p.constantOnly || ['time_duration', 'date_period'].includes(p.type)
+  );
+
+  // --- Suggestion Generation Section ---
+
+  const suggestions: ISuggestionItem[] = [];
+  const noArgDefined = !currentArg;
+
+  if (noArgDefined || getExpressionType(currentArg) === 'unknown') {
     suggestions.push(
       ...getCompatibleLiterals(
         getTypesFromParamDefs(constantOnlyParamDefs),
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-          supportsControls,
+          supportsControls: context?.supportsControls,
         },
-        variables
+        context?.variables
       )
     );
 
-    if (getTypesFromParamDefs(typesToSuggestNext).includes('date'))
+    if (getTypesFromParamDefs(compatibleParamDefs).includes('date'))
       suggestions.push(
         ...getDateLiterals({
           addComma: shouldAddComma,
@@ -304,38 +228,12 @@ export async function getFunctionArgsSuggestions(
         })
       );
 
-    const ensureKeywordAndText = (types: FunctionParameterType[]) => {
-      if (types.includes('keyword') && !types.includes('text')) {
-        types.push('text');
-      }
-      if (types.includes('text') && !types.includes('keyword')) {
-        types.push('keyword');
-      }
-      return types;
-    };
-
-    // Fields
-
-    // In most cases, just suggest fields that match the parameter types.
-    // But in the case of boolean conditions, we want to suggest fields of any type,
-    // since they may be used in comparisons.
-
-    // and we always add a comma at the end if there are more mandatory args
-    // but this needs to be refined when full expressions begin to be supported
-
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
-          // For example, in case() where we are expecting a boolean condition
-          // we can accept any field types (field1 !== field2)
-          canBeBooleanCondition
-            ? ['any']
-            : // @TODO: have a way to better suggest constant only params
-              ensureKeywordAndText(
-                getTypesFromParamDefs(
-                  typesToSuggestNext.filter((d) => !d.constantOnly)
-                ) as FunctionParameterType[]
-              ),
+          getTypesFromParamDefs(
+            compatibleParamDefs.filter((d) => !d.constantOnly)
+          ) as FunctionParameterType[],
           [],
           {
             addComma: shouldAddComma,
@@ -347,8 +245,7 @@ export async function getFunctionArgsSuggestions(
       )
     );
 
-    // Functions
-    if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+    if (compatibleParamDefs.every((d) => !d.fieldsOnly)) {
       const location = getLocationInfo(
         offset,
         command,
@@ -359,11 +256,7 @@ export async function getFunctionArgsSuggestions(
         ...getFunctionSuggestions(
           {
             location,
-            returnTypes: canBeBooleanCondition
-              ? ['any']
-              : (ensureKeywordAndText(
-                  getTypesFromParamDefs(typesToSuggestNext)
-                ) as FunctionParameterType[]),
+            returnTypes: getTypesFromParamDefs(compatibleParamDefs),
             ignored: fnToIgnore,
           },
           hasMinimumLicenseRequired,
@@ -376,15 +269,13 @@ export async function getFunctionArgsSuggestions(
     }
   }
 
-  // for eval and row commands try also to complete numeric literals with time intervals where possible
-  if (arg) {
+  if (currentArg) {
     if (
-      isLiteral(arg) &&
-      isNumericType(arg.literalType) &&
-      (getTypesFromParamDefs(typesToSuggestNext).includes('time_duration') ||
-        getTypesFromParamDefs(typesToSuggestNext).includes('date_period'))
+      isLiteral(currentArg) &&
+      isNumericType(currentArg.literalType) &&
+      (getTypesFromParamDefs(compatibleParamDefs).includes('time_duration') ||
+        getTypesFromParamDefs(compatibleParamDefs).includes('date_period'))
     ) {
-      // ... | EVAL fn(2 <suggest>)
       suggestions.push(
         ...buildConstantsDefinitions(
           timeUnitsToSuggest.map(({ name }) => name),
@@ -392,18 +283,6 @@ export async function getFunctionArgsSuggestions(
           undefined,
           { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
         )
-      );
-    }
-
-    // Suggest comparison functions for boolean conditions
-    if (canBeBooleanCondition) {
-      suggestions.push(
-        ...comparisonFunctions.map<ISuggestionItem>(({ name, description }) => ({
-          label: name,
-          text: name,
-          kind: 'Function' as ItemKind,
-          detail: description,
-        }))
       );
     }
 
@@ -415,11 +294,128 @@ export async function getFunctionArgsSuggestions(
 
   // For special case of COUNT, suggest * if cursor is in empty spot
   // e.g. count( / ) -> suggest `*`
-  if (fnDefinition.name === 'count' && !arg) {
+  if (fnDefinition.name === 'count' && !currentArg) {
     suggestions.push(allStarConstant);
   }
   return suggestions;
 }
+
+const analyzeParameterLocation = (
+  fullText: string,
+  offset: number,
+  commands: ESQLCommand[],
+  context?: ICommandContext,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
+) => {
+  // --- Context Gathering Section ---
+  // 1. AST Node Context
+  // Find the AST node and command at the cursor position
+  const astContext = findAstPosition(commands, offset);
+  const node = astContext.node;
+  if (!node) {
+    return;
+  }
+  let command = astContext.command;
+  // Special handling if the command is a `fork`
+  if (astContext.command?.name === 'fork') {
+    const { command: forkCommand } =
+      astContext.command?.name === 'fork'
+        ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+        : { command: undefined };
+    command = forkCommand || astContext.command;
+  }
+
+  // 2. Function Definition
+  // The function’s metadata and signatures (fnDefinition)
+  const functionNode = node as ESQLFunction;
+  const fnDefinition = getFunctionDefinition(functionNode.name);
+  // early exit on no hit
+  if (!fnDefinition) {
+    return;
+  }
+  // Filtered signatures based on license requirements
+  const filteredFnDefinition = {
+    ...fnDefinition,
+    signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
+  };
+
+  // 3. Argument State
+  // Available columns and their types (columnMap)
+  const columnMap: Map<string, ESQLColumnData> = context?.columns || new Map();
+  const references = {
+    columns: columnMap,
+  };
+  // Extract argument index, types to suggest, etc.
+  const {
+    typesToSuggestNext: compatibleParamDefs,
+    hasMoreMandatoryArgs,
+    enrichedArgs,
+    argIndex,
+  } = getValidSignaturesAndTypesToSuggestNext(functionNode, references, filteredFnDefinition);
+
+  // The specific argument at the cursor
+  const currentArg = enrichedArgs[argIndex];
+
+  // 6. Special Function Handling
+  // Whether to add a comma after the suggestion
+  const isCursorFollowedByComma = fullText
+    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
+    : false;
+  // Whether the function is a boolean condition (e.g., `case`)
+  const canBeBooleanCondition =
+    // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
+    fnDefinition.name === 'case' ||
+    // If the type is explicitly a boolean condition
+    compatibleParamDefs.some((t) => t && t.type === 'boolean' && t.name === 'condition');
+  // Whether to add a comma after the suggestion
+  const shouldAddComma = hasMoreMandatoryArgs && !isCursorFollowedByComma && !canBeBooleanCondition;
+  // Whether to advance the cursor or open suggestions
+  const shouldAdvanceCursor = hasMoreMandatoryArgs && !isCursorFollowedByComma;
+
+  // 7. Ignored Functions
+  // Functions to ignore based on context (e.g., grouping, aggregation, already-used functions)
+  const commandArgIndex = command.args.findIndex(
+    (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
+  );
+  const finalCommandArgIndex =
+    command.name !== 'stats' && command.name !== 'inlinestats'
+      ? -1
+      : commandArgIndex < 0
+      ? Math.max(command.args.length - 1, 0)
+      : commandArgIndex;
+  const finalCommandArg = command.args[finalCommandArgIndex];
+  const fnToIgnore = [];
+  fnToIgnore.push(
+    ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+  );
+  if (
+    (command.name !== 'stats' && command.name !== 'inlinestats') ||
+    (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
+  ) {
+    // ignore the current function
+    fnToIgnore.push(node.name);
+  } else {
+    fnToIgnore.push(
+      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+      // TODO — can this be captured in just the location ID computation?
+      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
+        ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+        : []),
+      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+        ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
+        : [])
+    );
+  }
+
+  return {
+    compatibleParamDefs,
+    shouldAddComma,
+    shouldAdvanceCursor,
+    hasMoreMandatoryArgs,
+    currentArg,
+    fnToIgnore,
+  };
+};
 
 function isOperator(node: ESQLFunction) {
   return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
