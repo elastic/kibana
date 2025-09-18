@@ -182,5 +182,9 @@ const getResourcePath = (id: string, resource: EngineComponentResource) => {
   if (resource === EngineComponentResourceEnum.transform) {
     return `data/transform?_a=(transform:(queryText:'${id}'))`;
   }
+
+  if (resource === EngineComponentResourceEnum.ilm_policy) {
+    return `data/index_lifecycle_management/policies?policy=${id}`;
+  }
   return null;
 };
