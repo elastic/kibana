@@ -29,6 +29,8 @@ import type {
   QueryCommandTagParametrized,
 } from './types';
 import { Walker } from '../walker';
+import { isColumn, isFunctionExpression } from '../ast/is';
+import { replaceProperties } from '../walker/helpers';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -734,6 +736,7 @@ export class ComposerQuery {
 
   public inlineParam(name: string): this {
     const value = this.params.get(name);
+
     if (value === undefined) {
       throw new Error(`Parameter "${name}" does not exist in the query.`);
     }
@@ -741,7 +744,22 @@ export class ComposerQuery {
     Walker.replaceAll(this.ast, { type: 'literal', literalType: 'param', value: name }, (node) => {
       const param = node as ESQLNamedParamLiteral;
       if (param.paramKind === '??') {
-        throw new Error('not implemented');
+        const parent = Walker.parent(this.ast, node);
+        if (parent) {
+          if (isFunctionExpression(parent) && parent.operator === node) {
+            return Builder.identifier(String(value));
+          }
+          if (isColumn(parent)) {
+            if (parent.args.length === 1 && parent.args[0] === node) {
+              replaceProperties(parent, synth.exp(String(value)));
+              return { ...node };
+            } else {
+              return Builder.identifier(String(value));
+            }
+          }
+        }
+
+        return synth.exp(String(value));
       } else {
         switch (typeof value) {
           case 'string': {
@@ -760,6 +778,7 @@ export class ComposerQuery {
     });
 
     this.params.delete(name);
+
     return this;
   }
 

@@ -602,6 +602,38 @@ describe('.inlineParams()', () => {
     });
     expect(query.getParams()).toEqual({});
   });
+
+  describe('identifier params', () => {
+    test.skip('can replace function name', () => {
+      const query = esql({ par: 'myFunction' })`FROM index | WHERE ??par(1, 2, 3) > 123`;
+
+      expect(query.toRequest()).toMatchObject({
+        params: [{ par: 'myFunction' }],
+      });
+
+      query.inlineParams();
+
+      expect(query.toRequest()).toEqual({
+        query: 'FROM index | WHERE myFunction(1, 2, 3) > 123',
+        params: [],
+      });
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace column names', () => {
+      const query = esql({ par1: 'col1', par2: 'nested.col2' })`ROW FN(??par1, ??par2, 3)`;
+      expect(query.print('basic')).toBe('ROW FN(??par1, ??par2, 3)');
+      expect(query.getParams()).toEqual({
+        par1: 'col1',
+        par2: 'nested.col2',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('ROW FN(col1, nested.col2, 3)');
+      expect(query.getParams()).toEqual({});
+    });
+  });
 });
 
 describe('.toRequest()', () => {
