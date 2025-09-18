@@ -404,13 +404,9 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
-      <ControlsRenderer
-        uiActions={uiActionsService}
-        parentApi={dashboardApi}
-        getInitialState={() => {
-          return { controls: dashboardApi.layout$.getValue().controls };
-        }}
-      />
+
+      <ControlsRenderer uiActions={uiActionsService} parentApi={dashboardApi} />
+
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />

@@ -8,8 +8,9 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BehaviorSubject, Subscription, combineLatest, distinctUntilChanged, map, of } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -46,13 +47,13 @@ import {
   type ControlPanelState,
   buildControlPanelApi,
 } from './build_control_panel_api';
+import { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
+import { pick } from 'lodash';
 
 export const ControlPanel = ({
   parentApi,
   uuid,
   type,
-  order,
-  getInitialState,
   compressed,
   setControlPanelRef,
   uiActions,
@@ -62,23 +63,19 @@ export const ControlPanel = ({
     HasSerializedChildState<object> &
     Partial<PublishesDisabledActionIds> & {
       registerChildApi: (api: DefaultEmbeddableApi) => void;
+      layout$: BehaviorSubject<DashboardLayout>;
     };
   uuid: string;
   type: string;
-  order: number;
-  getInitialState: () => ControlPanelState;
   compressed?: boolean;
   uiActions: UiActionsStart;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
   const [api, setApi] = useState<ControlPanelApi | null>(null);
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,
   });
-
-  const initialState = getInitialState();
-  const [grow, setGrow] = useState<ControlPanelState['grow']>(initialState.grow);
-  const [width, setWidth] = useState<ControlPanelState['width']>(initialState.width);
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
@@ -88,10 +85,31 @@ export const ControlPanel = ({
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
   const [dataLoading, setDataLoading] = useState<boolean | undefined>();
 
+  const initialState = useMemo(() => {
+    return parentApi.layout$.getValue().controls[uuid];
+  }, [parentApi, uuid]);
+
+  const [grow, setGrow] = useState<ControlPanelState['grow']>(initialState.grow);
+  const [width, setWidth] = useState<ControlPanelState['width']>(initialState.width);
+  const [order, setOrder] = useState<ControlPanelState['order']>(initialState.order);
+
   useEffect(() => {
-    if (!api) return;
-    if (api.order$.getValue() !== order) api.setOrder(order);
-  }, [api, order]);
+    const stateSubscription = parentApi.layout$
+      .pipe(
+        map(({ controls }) => pick(controls[uuid], ['grow', 'width', 'order'])),
+        distinctUntilChanged(deepEqual)
+      )
+      .subscribe((newState) => {
+        console.log({ newState });
+        setGrow(newState.grow);
+        setWidth(newState.width);
+        setOrder(newState.order);
+      });
+
+    return () => {
+      stateSubscription.unsubscribe();
+    };
+  }, [parentApi, uuid]);
 
   useEffect(() => {
     if (!api) return;
@@ -99,16 +117,16 @@ export const ControlPanel = ({
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
 
-    subscriptions.add(
-      api.grow$.subscribe((result) => {
-        setGrow(result);
-      })
-    );
-    subscriptions.add(
-      api.width$.subscribe((result) => {
-        setWidth(result);
-      })
-    );
+    // subscriptions.add(
+    //   api.grow$.subscribe((result) => {
+    //     setGrow(result);
+    //   })
+    // );
+    // subscriptions.add(
+    //   api.width$.subscribe((result) => {
+    //     setWidth(result);
+    //   })
+    // );
 
     if (apiPublishesDataLoading(api)) {
       subscriptions.add(
@@ -227,9 +245,9 @@ export const ControlPanel = ({
               type={type}
               getParentApi={() => parentApi}
               onApiAvailable={(panelApi) => {
-                const newApi = buildControlPanelApi(uuid, initialState, panelApi);
-                setApi(newApi);
-                parentApi.registerChildApi(newApi);
+                // const newApi = buildControlPanelApi(uuid, initialState, panelApi);
+                setApi(panelApi);
+                parentApi.registerChildApi(panelApi);
               }}
               hidePanelChrome
             />

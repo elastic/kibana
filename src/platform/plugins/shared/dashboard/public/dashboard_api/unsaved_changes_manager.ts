@@ -169,6 +169,7 @@ export function initializeUnsavedChangesManager({
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
+        console.log('ON SAVE', { savedState });
         lastSavedState$.next(savedState);
       },
     },

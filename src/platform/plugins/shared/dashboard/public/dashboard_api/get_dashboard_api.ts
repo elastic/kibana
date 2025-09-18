@@ -111,7 +111,7 @@ export function getDashboardApi({
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      controlGroupInput: initialState.controlGroupInput,
+      controlGroupInput,
     };
 
     return {

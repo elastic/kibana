@@ -419,9 +419,11 @@ export function initializeLayoutManager(
             )
           ),
           map(([currentLayout]) => {
+            console.log({ lastSavedLayout, currentLayout });
             if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              return { panels: serializeLayout(currentLayout, currentChildState).panels };
+              const serialized = serializeLayout(currentLayout, currentChildState);
+              return { panels: serialized.panels, controlGroupInput: serialized.controlGroupInput };
             }
             return {};
           })
