@@ -171,9 +171,12 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardInteractiveSaveMenuItem',
         iconType: lastSavedId ? undefined : 'save',
         run: dashboardInteractiveSave,
-        label: isCreatingNewDashboard
-          ? topNavStrings.quickSave.label
-          : topNavStrings.viewModeInteractiveSave.label,
+        label:
+          viewMode === 'view'
+            ? topNavStrings.viewModeInteractiveSave.label
+            : isCreatingNewDashboard
+            ? topNavStrings.editModeInteractiveSave.label
+            : topNavStrings.quickSave.label,
         description:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
