@@ -358,6 +358,7 @@ export class Parser {
             endColumn: 0,
             message: `Invalid query [${this.src}]`,
             severity: 'error',
+            code: 'parseError',
           },
         ],
         tokens: [],
@@ -376,11 +377,6 @@ export class Parser {
  * @deprecated Use `Parser.create` instead.
  */
 export const createParser = Parser.create;
-
-/**
- * @deprecated Use `Parser.parseErrors` instead.
- */
-export const parseErrors = Parser.parseErrors;
 
 /**
  * @deprecated Use `Parser.parse` instead.

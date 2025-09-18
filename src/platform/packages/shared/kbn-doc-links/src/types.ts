@@ -432,7 +432,6 @@ export interface DocLinks {
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
     elasticServerlessSearchManagedLlmUsageCost: string;
-
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -558,6 +557,7 @@ export interface DocLinks {
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
     agentReleaseProcess: string;
+    fipsIngest: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
