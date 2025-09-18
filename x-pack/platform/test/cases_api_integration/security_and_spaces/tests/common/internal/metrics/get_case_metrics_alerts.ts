@@ -24,6 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
 
   // Failing: See https://github.com/elastic/kibana/issues/235446
+  // Failing: See https://github.com/elastic/kibana/issues/235449
   describe.skip('case alert metrics', () => {
     describe('alert details', () => {
       let caseId: string;
