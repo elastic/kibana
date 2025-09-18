@@ -24,7 +24,7 @@ import { Walker } from '../../../walker';
 import { logicalOperators } from '../../all_operators';
 import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
-import { FunctionDefinitionTypes, isParameterType, type SupportedDataType } from '../../types';
+import { isParameterType, type SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
 import { getFunctionSuggestions } from '../functions';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
@@ -612,9 +612,7 @@ function strictlyGetParamAtPosition(
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
   context: ICommandContext,
-  fnDefinition: FunctionDefinition,
-  fullText: string,
-  offset: number
+  fnDefinition: FunctionDefinition
 ) {
   const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
   const enrichedArgs = node.args.map((arg, idx) => ({
@@ -627,7 +625,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
   >;
 
   // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
+  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER); // NOTE: I think this is checking if the cursor is after a comma.
   let argIndex = Math.max(node.args.length, 0);
   if (!shouldGetNextArgument && argIndex) {
     argIndex -= 1;
@@ -648,21 +646,10 @@ export function getValidSignaturesAndTypesToSuggestNext(
     // no need to suggest comma
     .some((p) => p === null || p?.optional === true);
 
-  // Whether to prepend comma to suggestion string
-  // E.g. if true, "fieldName" -> "fieldName, "
-  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
-  const shouldAddComma =
-    hasMoreMandatoryArgs &&
-    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
-    !alreadyHasComma;
-  const currentArg = enrichedArgs[argIndex];
   return {
-    shouldAddComma,
     typesToSuggestNext,
-    validSignatures,
     hasMoreMandatoryArgs,
     enrichedArgs,
     argIndex,
-    currentArg,
   };
 }

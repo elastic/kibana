@@ -201,9 +201,7 @@ async function getHintForFunctionArg(
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
     fnNode,
     references,
-    fnDefinition,
-    query,
-    offset
+    fnDefinition
   );
 
   const hoveredArg: ESQLAstItem & {

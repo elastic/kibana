@@ -95,7 +95,7 @@ function getFnContent(fn: ESQLFunction): string[] {
   return [fn.name].concat(extractFunctionArgs(fn.args).flatMap(getFnContent));
 }
 
-export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: number) {
+function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: number) {
   if (argIndex < 0) {
     return [];
   }
@@ -170,13 +170,7 @@ export async function getFunctionArgsSuggestions(
   };
 
   const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
-    getValidSignaturesAndTypesToSuggestNext(
-      functionNode,
-      references,
-      filteredFnDefinition,
-      fullText,
-      offset
-    );
+    getValidSignaturesAndTypesToSuggestNext(functionNode, references, filteredFnDefinition);
 
   const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
     return Array.from(new Set(paramDefs.map(({ type }) => type)));
@@ -189,6 +183,8 @@ export async function getFunctionArgsSuggestions(
   const isCursorFollowedByComma = fullText
     ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
     : false;
+
+  // TODO remove this special handling
   const canBeBooleanCondition =
     // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
     fnDefinition.name === 'case' ||
@@ -200,6 +196,7 @@ export async function getFunctionArgsSuggestions(
     fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
     !isCursorFollowedByComma &&
     !canBeBooleanCondition;
+
   const shouldAdvanceCursor =
     hasMoreMandatoryArgs &&
     fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
@@ -261,6 +258,7 @@ export async function getFunctionArgsSuggestions(
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : []),
+        // TODO — can this be captured in just the location ID computation?
         ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
               ({ name }) => name
@@ -272,20 +270,20 @@ export async function getFunctionArgsSuggestions(
     // fields should only be suggested if the param isn't constant-only,
     // and constant suggestions should only be given if it is.
     //
-    // TODO - consider incorporating the literalOptions into this
-    //
     // TODO — improve this to inherit the constant flag from the outer function
     // (e.g. if func1's first parameter is constant-only, any nested functions should
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
     const constantOnlyParamDefs = typesToSuggestNext.filter(
-      (p) => p.constantOnly || /_duration/.test(p.type as string)
+      (p) => p.constantOnly || ['time_duration', 'date_period'].includes(p.type)
     );
 
     const supportsControls = Boolean(context?.supportsControls);
     const variables = context?.variables;
 
     // Literals
+    // TODO - these literals are only suggested if there is a parameter that only accepts constants
+    // is that intended?
     suggestions.push(
       ...getCompatibleLiterals(
         getTypesFromParamDefs(constantOnlyParamDefs),
