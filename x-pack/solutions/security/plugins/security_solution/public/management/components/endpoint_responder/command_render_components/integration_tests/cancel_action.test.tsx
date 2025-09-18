@@ -19,17 +19,20 @@ import { waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
-import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { PendingActionsResponse } from '../../../../../../common/endpoint/types';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
 jest.mock('../../../../../common/experimental_features_service');
 
-const mockedExperimentalFeaturesService = ExperimentalFeaturesService as jest.Mocked<typeof ExperimentalFeaturesService>;
+const mockedExperimentalFeaturesService = ExperimentalFeaturesService as jest.Mocked<
+  typeof ExperimentalFeaturesService
+>;
 
 // Test data factories
-const createMockPendingActions = (actions: Record<string, number> = { isolate: 1 }): PendingActionsResponse => ({
+const createMockPendingActions = (
+  actions: Record<string, number> = { isolate: 1 }
+): PendingActionsResponse => ({
   data: [
     {
       agent_id: 'a.b.c',
@@ -100,6 +103,7 @@ describe('When using cancel action from response actions console', () => {
     mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
 
     // Reset the ExperimentalFeaturesService mock to default enabled state
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedExperimentalFeaturesService.get.mockReturnValue({
       microsoftDefenderEndpointCancelEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
@@ -120,7 +124,7 @@ describe('When using cancel action from response actions console', () => {
 
     it('should not show cancel command in help when user lacks write permissions', async () => {
       const renderResult = await renderConsole('microsoft_defender_endpoint', {
-        canAccessResponseConsole: false,
+        canCancelAction: false,
       });
 
       await enterConsoleCommand(renderResult, user, 'help');
@@ -151,10 +155,12 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should handle cancel API response correctly', async () => {
-      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(createMockPendingActions());
+      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(
+        createMockPendingActions()
+      );
 
       const renderResult = await renderConsole('microsoft_defender_endpoint', {
-        canAccessResponseConsole: true,
+        canCancelAction: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
@@ -171,7 +177,7 @@ describe('When using cancel action from response actions console', () => {
 
       const renderResult = await renderConsole('microsoft_defender_endpoint', {
         canKillProcess: false,
-        canAccessResponseConsole: true,
+        canCancelAction: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
@@ -193,26 +199,30 @@ describe('When using cancel action from response actions console', () => {
 
     it('should show error when trying to use cancel command', async () => {
       const renderResult = await renderConsole(agentType, {
-        canAccessResponseConsole: true,
+        canCancelAction: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel');
 
       await waitFor(() => {
-        const historyItems = renderResult.container.querySelectorAll('[data-test-subj*="historyItem"]');
+        const historyItems = renderResult.container.querySelectorAll(
+          '[data-test-subj*="historyItem"]'
+        );
         expect(historyItems.length).toBeGreaterThan(0);
       });
     });
 
     it('should reject cancel command with action ID', async () => {
       const renderResult = await renderConsole(agentType, {
-        canAccessResponseConsole: true,
+        canCancelAction: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action test-action-id');
 
       await waitFor(() => {
-        const historyItems = renderResult.container.querySelectorAll('[data-test-subj*="historyItem"]');
+        const historyItems = renderResult.container.querySelectorAll(
+          '[data-test-subj*="historyItem"]'
+        );
         expect(historyItems.length).toBeGreaterThan(0);
       });
     });
@@ -228,6 +238,7 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should disable cancel command for Microsoft Defender Endpoint when feature flag is disabled', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockedExperimentalFeaturesService.get.mockReturnValue({
         microsoftDefenderEndpointCancelEnabled: false,
         responseActionsMSDefenderEndpointEnabled: true,
@@ -242,14 +253,17 @@ describe('When using cancel action from response actions console', () => {
       expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
     });
 
-    describe.each(UNSUPPORTED_AGENT_TYPES)('Agent type %s with feature flag enabled', (agentType) => {
-      it('should not show cancel command regardless of feature flag', async () => {
-        const renderResult = await renderConsole(agentType);
+    describe.each(UNSUPPORTED_AGENT_TYPES)(
+      'Agent type %s with feature flag enabled',
+      (agentType) => {
+        it('should not show cancel command regardless of feature flag', async () => {
+          const renderResult = await renderConsole(agentType);
 
-        await enterConsoleCommand(renderResult, user, 'help');
+          await enterConsoleCommand(renderResult, user, 'help');
 
-        expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
-      });
-    });
+          expect(renderResult.getByTestId('test-helpOutput').textContent).not.toContain('cancel');
+        });
+      }
+    );
   });
 });

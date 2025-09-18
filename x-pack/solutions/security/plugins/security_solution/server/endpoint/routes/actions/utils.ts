@@ -7,7 +7,7 @@
 
 import { deepFreeze } from '@kbn/std';
 import { get } from 'lodash';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointAuthorizationError } from '../../errors';
@@ -176,7 +176,7 @@ export const ensureUserHasAuthzToFilesForAction = async (
       hasAuthzToCommand = userAuthz.canWriteExecuteOperations;
       break;
     case 'cancel':
-      hasAuthzToCommand = userAuthz.canAccessResponseConsole;
+      hasAuthzToCommand = userAuthz.canCancelAction;
       break;
   }
 
@@ -254,12 +254,11 @@ export const buildResponseActionResult = (
 export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppContext) => {
   return async (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
-    logger: Logger
+    request: KibanaRequest
   ): Promise<void> => {
     const { parameters } = request.body as CancelActionRequestBody;
     const actionId = parameters.id;
-
+    const logger = endpointContext.logFactory.get('cancelActionAdditionalChecks');
     // Get space ID from context
     const spaceId = (await context.securitySolution).getSpaceId();
 
@@ -275,7 +274,7 @@ export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppC
     const agentType = originalAction.EndpointActions?.input_type;
 
     if (!command) {
-      logger.warn(`Action ${actionId} missing command information`);
+      logger.error(`Action ${actionId} missing command information for ${agentType}`);
       throw new CustomHttpRequestError(
         `Unable to determine command type for action '${actionId}'`,
         500
@@ -283,7 +282,7 @@ export const createCancelActionAdditionalChecks = (endpointContext: EndpointAppC
     }
 
     if (!agentType) {
-      logger.warn(`Action ${actionId} missing agent type information`);
+      logger.error(`Action ${actionId} missing agent type information for ${command}`);
       throw new CustomHttpRequestError(
         `Unable to determine agent type for action '${actionId}'`,
         500

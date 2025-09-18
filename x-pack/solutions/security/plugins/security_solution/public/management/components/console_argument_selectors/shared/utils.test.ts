@@ -68,6 +68,7 @@ describe('utils', () => {
       canSuspendProcess: true,
       canGetRunningProcesses: true,
       canAccessResponseConsole: true,
+      canCancelAction: true,
       canWriteExecuteOperations: true,
       canWriteFileOperations: true,
       canWriteScanOperations: true,

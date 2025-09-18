@@ -13,7 +13,6 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
@@ -26,7 +25,7 @@ export function registerActionStateRoutes(
   canEncrypt?: boolean
 ) {
   const responseActionAuthzNames = uniq(
-    Object.values(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ) as Array<keyof EndpointAuthz>
+    Object.values(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ)
   );
 
   router.versioned

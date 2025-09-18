@@ -60,13 +60,21 @@ export const PendingActionsSelector = memo<
 
   const userPrivileges = useUserPrivileges();
 
-  const { data, isLoading, error } = useGetEndpointActionList({
-    agentTypes: agentType,
-    agentIds: endpointId,
-    page: 1,
-    pageSize: 200,
-    statuses: ['pending'],
-  });
+  const state = useBaseSelectorState(store, value);
+
+  const { data, isLoading, error } = useGetEndpointActionList(
+    {
+      agentTypes: agentType,
+      agentIds: endpointId,
+      page: 1,
+      pageSize: 200,
+      statuses: ['pending'],
+    },
+    {
+      refetchInterval: state.isPopoverOpen ? 3000 : false, // Only refetch when popover is open
+      enabled: true, // Always keep query enabled for initial load
+    }
+  );
 
   const privilegeChecker = useCallback(
     (actionCommand: string) => {
@@ -85,7 +93,6 @@ export const PendingActionsSelector = memo<
     services: { notifications },
   } = useKibana();
 
-  const state = useBaseSelectorState(store, value);
   const { handleOpenPopover, handleClosePopover } = useBaseSelectorHandlers(
     state,
     onChange,

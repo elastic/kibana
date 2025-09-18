@@ -105,8 +105,6 @@ export interface ResponseActionRunScriptOutputContent {
 
 export interface ResponseActionCancelOutputContent {
   code: string;
-  actionId: string;
-  canceledAt: string;
 }
 
 export const ActivityLogItemTypes = {

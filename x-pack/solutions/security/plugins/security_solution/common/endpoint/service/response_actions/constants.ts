@@ -180,7 +180,27 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
-  cancel: 'canAccessResponseConsole', // Cancel uses base console permission
+  cancel: 'canCancelAction', // Cancel uses specific cancel permission
+});
+
+/**
+ * The list of actions that can be cancelled, mapped to their required authorization.
+ * Used to calculate if a user has permission to cancel any response actions.
+ */
+export const CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
+  Record<ConsoleResponseActionCommands, EndpointAuthzKeyList[number]>
+>({
+  isolate: 'canIsolateHost',
+  release: 'canUnIsolateHost',
+  execute: 'canWriteExecuteOperations',
+  'get-file': 'canWriteFileOperations',
+  upload: 'canWriteFileOperations',
+  processes: 'canGetRunningProcesses',
+  'kill-process': 'canKillProcess',
+  'suspend-process': 'canSuspendProcess',
+  scan: 'canWriteScanOperations',
+  runscript: 'canWriteExecuteOperations',
+  cancel: 'canCancelAction',
 });
 
 // 4 hrs in seconds

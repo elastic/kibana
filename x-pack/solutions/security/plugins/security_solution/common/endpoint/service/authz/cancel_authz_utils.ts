@@ -21,9 +21,9 @@ import { isActionSupportedByAgentType } from '../response_actions/is_response_ac
  * Checks if cancel operations are available for the given agent type and environment.
  * This is a general capability check, not command-specific.
  *
- * Uses `canAccessResponseConsole` as the base permission because cancel operations require
+ * Uses `canCancelAction` as the base permission because cancel operations require
  * meaningful response action capabilities (not just read access). This permission is calculated
- * based on having Enterprise license AND at least one non-release/non-cancel response action permission.
+ * based on having least one non-release/non-cancel response action permission.
  *
  * @param authz - The user's endpoint authorization permissions
  * @param featureFlags - Experimental features configuration
@@ -36,7 +36,7 @@ export const isCancelFeatureAvailable = (
   agentType: ResponseActionAgentType
 ): boolean => {
   // Check base access to security solution
-  if (!authz.canAccessResponseConsole) {
+  if (!authz.canCancelAction) {
     return false;
   }
 
@@ -67,8 +67,8 @@ export const canUserCancelCommand = (
   command: ResponseActionsApiCommandNames
 ): boolean => {
   const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-  const requiredPermission = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
-  return requiredPermission ? (authz[requiredPermission] as boolean) : false;
+  const requiredAuthzKey = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
+  return authz[requiredAuthzKey];
 };
 
 /**

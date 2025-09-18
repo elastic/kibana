@@ -354,7 +354,7 @@ export function registerResponseActionRoutes(
         },
       },
       withEndpointAuthz(
-        { all: ['canAccessResponseConsole'] },
+        { all: ['canCancelAction'] },
         logger,
         responseActionRequestHandler(endpointContext, 'cancel'),
         createCancelActionAdditionalChecks(endpointContext)

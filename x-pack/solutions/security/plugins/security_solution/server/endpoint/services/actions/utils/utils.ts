@@ -76,8 +76,6 @@ export interface NormalizedActionRequest {
   error?: EcsError;
   /** Host info that might have been stored along with the Action Request (ex. 3rd party EDR actions) */
   hosts: ActionDetails['hosts'];
-  /** Additional metadata that might be stored with the action (ex. 3rd party EDR action IDs) */
-  meta?: {};
 }
 
 /**

@@ -229,6 +229,7 @@ describe('Endpoint Authz service', () => {
       ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
+      ['canCancelAction', responseConsolePrivileges],
     ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
       privileges.forEach((privilege) => {
         fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
@@ -283,6 +284,7 @@ describe('Endpoint Authz service', () => {
       ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
+      ['canCancelAction', responseConsolePrivileges],
     ])(
       '%s should be false if `packagePrivilege.%s` is `false` and user roles is undefined',
       (auth, privileges) => {
@@ -363,6 +365,7 @@ describe('Endpoint Authz service', () => {
         canSuspendProcess: false,
         canGetRunningProcesses: false,
         canAccessResponseConsole: false,
+        canCancelAction: false,
         canWriteExecuteOperations: false,
         canWriteScanOperations: false,
         canWriteFileOperations: false,

@@ -416,13 +416,48 @@ describe('PendingActionsSelector', () => {
       <PendingActionsSelector {...defaultProps} command={commandWithEndpointId} />
     );
 
-    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith({
-      agentTypes: 'microsoft_defender_endpoint',
-      agentIds: 'test-endpoint-id',
-      page: 1,
-      pageSize: 200,
-      statuses: ['pending'],
-    });
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      {
+        agentTypes: 'microsoft_defender_endpoint',
+        agentIds: 'test-endpoint-id',
+        page: 1,
+        pageSize: 200,
+        statuses: ['pending'],
+      },
+      {
+        enabled: true,
+        refetchInterval: false,
+      }
+    );
+  });
+
+  test('enables refetch interval when popover is open and disables when closed', async () => {
+    // Test with popover closed (default state)
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        refetchInterval: false, // Should be false when popover is closed
+        enabled: true,
+      })
+    );
+
+    // Clear previous calls
+    mockUseGetEndpointActionList.mockClear();
+
+    // Test with popover open
+    await renderAndWaitForComponent(
+      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+    );
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        refetchInterval: 3000, // Should be 3000ms when popover is open
+        enabled: true,
+      })
+    );
   });
 
   describe('Privilege validation', () => {

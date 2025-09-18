@@ -116,7 +116,7 @@ describe('When using `withEndpointAuthz()`', () => {
       additionalChecks
     )(routeContextMock, mockRequest, mockResponse);
 
-    expect(additionalChecks).toHaveBeenCalledWith(routeContextMock, mockRequest, logger);
+    expect(additionalChecks).toHaveBeenCalledWith(routeContextMock, mockRequest);
     expect(mockRequestHandler).toHaveBeenCalled();
   });
 
