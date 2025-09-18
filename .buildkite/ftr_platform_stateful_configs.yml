@@ -144,6 +144,8 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group5/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group6/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group7/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group8/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
