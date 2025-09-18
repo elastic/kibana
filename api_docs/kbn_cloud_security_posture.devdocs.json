@@ -873,7 +873,7 @@
             "section": "def-public.UseCspOptions",
             "text": "UseCspOptions"
           },
-          ", isPreview?: boolean) => { index: string; size: number; aggs: { count: { filters: { other_bucket_key: string; filters: { [x: string]: { term: { 'vulnerability.severity': { value: string; case_insensitive: boolean; }; }; }; }; }; }; by_datastream_dataset: { terms: { field: string; size: number; }; }; }; ignore_unavailable: boolean; query: { bool: { filter: (",
+          ", isPreview?: boolean) => { index: string; size: number; aggs: { count: { filters: { other_bucket_key: string; filters: { [x: string]: { term: { 'vulnerability.severity': { value: string; case_insensitive: boolean; }; }; }; }; }; }; }; ignore_unavailable: boolean; query: { bool: { filter: (",
           "QueryDslQueryContainer",
           " | undefined)[]; }; }; sort: { [key: string]: string; }[] | undefined; }"
         ],
@@ -2216,23 +2216,6 @@
               "<",
               "AggregationsStringRareTermsBucketKeys",
               ">"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingsAggs.by_datastream_dataset",
-            "type": "Object",
-            "tags": [],
-            "label": "by_datastream_dataset",
-            "description": [],
-            "signature": [
-              "AggregationsMultiBucketAggregateBase",
-              "<",
-              "AggregationsStringRareTermsBucketKeys",
-              "> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
