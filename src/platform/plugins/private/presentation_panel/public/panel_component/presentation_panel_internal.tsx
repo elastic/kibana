@@ -125,8 +125,12 @@ export const PresentationPanelInternal = <
         )}
         {!initialLoadComplete && <PanelLoader />}
         <div
-          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
-          css={styles.embPanelContent}
+          {...(!hidePanelChrome
+            ? {
+                className: blockingError ? 'embPanel__content--hidden' : 'embPanel__content',
+                css: styles.embPanelContent,
+              }
+            : {})}
           {...(api &&
           ['image', 'lens', 'links', 'visualization'].includes((api as unknown as HasType).type)
             ? reportingAttributes
@@ -149,6 +153,7 @@ export const PresentationPanelInternal = <
       blockingError,
       Component,
       componentProps,
+      hidePanelChrome,
       initialLoadComplete,
       panelErrorCss,
       reportingAttributes,
