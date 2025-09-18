@@ -16,11 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { isCondition } from '@kbn/streamlang';
+import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
+import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { PreviewTable } from '../preview_table';
 import {
   selectPreviewDocuments,
   useStreamRoutingEvents,
@@ -28,7 +29,8 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
-import { processCondition } from './utils';
+import { processCondition, toDataTableRecordWithIndex } from './utils';
+import { MemoPreviewTable, PreviewFlyout } from '../shared';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -104,6 +106,9 @@ const SamplePreviewPanel = () => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
+  const streamName = useStreamSamplesSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
 
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = useStreamSamplesSelector((snapshot) =>
@@ -117,6 +122,22 @@ const SamplePreviewPanel = () => {
   const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
     ? Number.NaN
     : parseFloat(approximateMatchingPercentage!);
+
+  const [sorting, setSorting] = useState<{
+    fieldName?: string;
+    direction: 'asc' | 'desc';
+  }>();
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
+  const docViewsRegistry = useDocViewerSetup();
+
+  const hits = useMemo(() => {
+    return toDataTableRecordWithIndex(documents);
+  }, [documents]);
+
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
 
   let content: React.ReactNode | null = null;
 
@@ -171,7 +192,23 @@ const SamplePreviewPanel = () => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <PreviewTable documents={documents} />
+        <MemoPreviewTable
+          documents={documents}
+          sorting={sorting}
+          setSorting={setSorting}
+          toolbarVisibility={true}
+          displayColumns={visibleColumns}
+          setVisibleColumns={setVisibleColumns}
+          selectedRowIndex={selectedRowIndex}
+          onRowSelected={onRowSelected}
+        />
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={setExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
+        />
       </EuiFlexItem>
     );
   }
