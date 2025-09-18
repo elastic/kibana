@@ -312,7 +312,6 @@ const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           { link: 'management:transform' },
           { link: 'management:rollup_jobs' },
           { link: 'management:data_quality' }, // data set quality
-          // { link: 'management:migrate_data' },
         ],
       },
     ],
