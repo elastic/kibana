@@ -8,6 +8,7 @@
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+
 import type {
   CoreSetup,
   Logger,
@@ -26,6 +27,7 @@ import type { ReindexServiceInternalApi } from './src/lib/reindex_service_wrappe
 import { ReindexServiceWrapper } from './src/lib/reindex_service_wrapper';
 import { credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
+import type { ReindexConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PluginsSetup {}
@@ -36,13 +38,15 @@ interface PluginsStart {
 }
 
 export class ReindexServiceServerPlugin
-  implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
+  implements Plugin<void, ReindexServiceServerPluginStart | void, PluginsSetup, PluginsStart>
 {
   private reindexService: ReindexServiceInternalApi | null = null;
   private readonly logger: Logger;
   private version: Version;
+  private readonly config: ReindexConfig;
 
-  constructor({ logger, env }: PluginInitializerContext) {
+  constructor({ logger, env, config }: PluginInitializerContext) {
+    this.config = config.get();
     this.logger = logger.get();
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
@@ -53,6 +57,10 @@ export class ReindexServiceServerPlugin
     savedObjects,
     getStartServices,
   }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>) {
+    if (!this.config.enabled) {
+      return;
+    }
+
     const dependencies: RouteDependencies = {
       router: http.createRouter(),
       getReindexService: async () => {
@@ -73,7 +81,11 @@ export class ReindexServiceServerPlugin
       elasticsearch,
     }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
     { security, licensing }: PluginsStart
-  ): ReindexServiceServerPluginStart {
+  ): ReindexServiceServerPluginStart | void {
+    if (!this.config.enabled) {
+      return;
+    }
+
     const soClient = new SavedObjectsClient(
       savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
     );
