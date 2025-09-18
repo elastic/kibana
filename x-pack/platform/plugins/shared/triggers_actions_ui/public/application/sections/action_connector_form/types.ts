@@ -34,9 +34,3 @@ export interface InferenceConnectorProviderConfig {
   max_number_of_allocations?: number;
   adaptive_allocations?: { max_number_of_allocations?: number };
 }
-
-export interface InternalHeader {
-  key: string;
-  value: string;
-  type: 'config' | 'secret';
-}

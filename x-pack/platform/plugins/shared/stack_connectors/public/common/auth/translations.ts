@@ -116,7 +116,7 @@ export const HEADERS_SUBTITLE = i18n.translate(
 );
 
 export const MAX_HEADERS_LIMIT = (maxHeaders: number) =>
-  i18n.translate('xpack.cases.customFields.maxCustomFieldLimit', {
+  i18n.translate('xpack.stackConnectors.components.auth.maxCustomFieldLimit', {
     values: { maxHeaders },
     defaultMessage: 'Maximum number of {maxHeaders} custom fields reached.',
   });
@@ -124,6 +124,21 @@ export const MAX_HEADERS_LIMIT = (maxHeaders: number) =>
 export const KEY_LABEL = i18n.translate('xpack.stackConnectors.components.auth.keyTextFieldLabel', {
   defaultMessage: 'Key',
 });
+
+export const ENCRYPTED_HEADERS_BADGE = i18n.translate(
+  'xpack.stackConnectors.components.auth.encryptedHeadersBadge',
+  {
+    defaultMessage: 'Encrypted Headers',
+  }
+);
+
+export const ENCRYPTED_HEADERS_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.stackConnectors.components.auth.encryptedHeadersTooltipContent',
+  {
+    defaultMessage:
+      'Values of the secret headers are encrypted. You must re-enter them when editing the connector',
+  }
+);
 
 export const SAME_HEADER_KEY_ERROR = i18n.translate(
   'xpack.stackConnectors.components.auth.sameHeaderKeyError',

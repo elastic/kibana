@@ -19,7 +19,7 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import type { ConnectorFormSchema, InternalHeader } from './types';
+import type { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 import { connectorOverrides } from './connector_overrides';
 
@@ -29,6 +29,12 @@ export interface ConnectorFormState {
   isSubmitting: boolean;
   submit: FormHook<ConnectorFormSchema>['submit'];
   preSubmitValidator: ConnectorValidationFunc | null;
+}
+
+export interface InternalHeader {
+  key: string;
+  value: string;
+  type: 'config' | 'secret';
 }
 
 // this type needs to be improved
@@ -174,8 +180,6 @@ const ConnectorFormComponent: React.FC<Props> = ({
   const secretHeaders: Array<InternalHeader> = useSecretHeaders(
     isWebhookConnector ? connector.id : undefined
   );
-
-  console.log('after fetching, secretHeaders: ', secretHeaders);
 
   const { form } = useForm({
     defaultValue: connector,

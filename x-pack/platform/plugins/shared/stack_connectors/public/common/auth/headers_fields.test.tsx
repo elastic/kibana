@@ -164,7 +164,5 @@ describe('HeadersField', () => {
         });
       });
     });
-
-    // fails validation when config header and secret header have the same key
   });
 });

@@ -20,11 +20,14 @@ import {
   useEuiTheme,
   EuiFormRow,
   EuiText,
+  EuiBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { UseArray, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -105,9 +108,7 @@ export const HeadersFields: React.FC<Props> = ({ readOnly }) => {
                   {i18n.MAX_HEADERS_LIMIT(MAX_HEADERS)}
                 </EuiText>
               )}
-
               <EuiSpacer size="s" />
-
               {items.map((item) => (
                 <UseField
                   key={item.id}
@@ -118,7 +119,34 @@ export const HeadersFields: React.FC<Props> = ({ readOnly }) => {
                     const headerTypeValue = typeField.value;
 
                     return (
-                      <EuiFlexGroup>
+                      <EuiFlexGroup direction="column" gutterSize="s">
+                        {headerTypeValue === 'secret' && (
+                          <EuiFlexGroup>
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge
+                                css={css`
+                                  max-width: fit-content;
+                                `}
+                                data-test-subj="encryptedHeadersBadge"
+                              >
+                                <span
+                                  css={css`
+                                    margin-right: 5px;
+                                  `}
+                                >
+                                  {i18n.ENCRYPTED_HEADERS_BADGE}
+                                </span>
+                                <EuiIconTip
+                                  type="info"
+                                  size="s"
+                                  content={i18n.ENCRYPTED_HEADERS_TOOLTIP_CONTENT}
+                                  position="top"
+                                />
+                              </EuiBadge>
+                            </EuiFlexItem>{' '}
+                          </EuiFlexGroup>
+                        )}
+
                         <EuiPanel
                           hasBorder={true}
                           hasShadow={false}
