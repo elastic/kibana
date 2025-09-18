@@ -24,6 +24,7 @@ export {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
   CONTROL_TYPES,
+  type ControlType,
 } from './src/control_constants';
 
 export { DEFAULT_SEARCH_TECHNIQUE, OPTIONS_LIST_DEFAULT_SORT } from './src/options_list_constants';

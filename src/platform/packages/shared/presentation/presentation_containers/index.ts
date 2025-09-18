@@ -14,6 +14,7 @@ export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initializ
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
+  apiCannotBeExpanded,
   type CanDuplicatePanels,
   type CanExpandPanels,
 } from './interfaces/panel_management';

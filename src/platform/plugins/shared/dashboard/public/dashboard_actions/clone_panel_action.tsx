@@ -23,11 +23,10 @@ import {
   apiHasUniqueId,
   getInheritedViewMode,
   apiHasSerializableState,
-  apiIsOfType,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { apiCannotBeDuplicated } from '@kbn/presentation-containers/interfaces/panel_management';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
@@ -51,7 +50,7 @@ const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
        * The problem with this is that the user cannot edit variable names after the control is created.
        * Once we come up with a good UX solution to this, we can remove this check
        */
-      !apiIsOfType(api, ESQL_CONTROL)
+      !apiCannotBeDuplicated(api)
   );
 
 export class ClonePanelAction implements Action<EmbeddableApiContext> {

@@ -29,7 +29,7 @@ export const apiIsOfType = <T extends string = string>(
 
 export const apiIsOneOfType = <T extends string = string>(
   api: unknown | null,
-  typesToCheck: T[]
+  typesToCheck: readonly T[]
 ): api is HasType<T> => {
   return typesToCheck.some((type) => apiIsOfType(api, type));
 };

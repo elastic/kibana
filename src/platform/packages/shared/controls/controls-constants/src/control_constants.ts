@@ -17,4 +17,6 @@ export const CONTROL_TYPES = [
   RANGE_SLIDER_CONTROL,
   OPTIONS_LIST_CONTROL,
   ESQL_CONTROL,
-];
+] as const;
+
+export type ControlType = (typeof CONTROL_TYPES)[number];
