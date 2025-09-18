@@ -118,7 +118,6 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             iconV2: 'spaces',
-            spaceBefore: null,
             children: [
               {
                 id: 'apm',
@@ -181,7 +180,6 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             iconV2: 'storage',
-            spaceBefore: null,
             children: [
               {
                 children: [
@@ -212,7 +210,6 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
-            spaceBefore: null,
             iconV2: 'info',
             children: [
               {
@@ -300,7 +297,6 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
               defaultMessage: 'Other tools',
             }),
-            spaceBefore: null,
             renderAs: 'panelOpener',
             children: [
               {
@@ -354,6 +350,7 @@ export const createNavigationTree = ({
             renderAs: 'panelOpener',
             spaceBefore: null,
             icon: 'info',
+            breadcrumbStatus: 'hidden',
             children: [
               {
                 title: i18n.translate('xpack.serverlessObservability.nav.ingestAndIntegrations', {
@@ -361,6 +358,7 @@ export const createNavigationTree = ({
                   description:
                     'The title of the ingest and integrations navigation item in the serverless observability nav tree.',
                 }),
+                breadcrumbStatus: 'hidden',
                 children: [
                   { link: 'integrations' },
                   { link: 'fleet' },
@@ -433,7 +431,8 @@ export const createNavigationTree = ({
                 children: [
                   { link: 'observability-overview:alerts' },
                   { link: 'observability-overview:rules' },
-                  { link: 'management:triggersActionsConnectors' },
+                  { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                  { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
                 ],
               },
               {
@@ -445,7 +444,13 @@ export const createNavigationTree = ({
                   }
                 ),
                 breadcrumbStatus: 'hidden',
-                children: [{ link: 'management:trained_models' }],
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                  { link: 'management:supplied_configurations' },
+                ],
               },
               {
                 id: 'data',
