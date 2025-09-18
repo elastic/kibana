@@ -9,13 +9,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { ChatMessageText } from './chat_message_text';
 
+const TOKEN_DELAY = 17;
 interface StreamingTextProps {
   content: string;
   steps: ConversationRoundStep[];
   tokenDelay?: number; // ms between tokens. Defaults to 17ms to ensure 60fps.
 }
 
-export const StreamingText = ({ content, steps, tokenDelay = 17 }: StreamingTextProps) => {
+export const StreamingText = ({ content, steps, tokenDelay = TOKEN_DELAY }: StreamingTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const tokenQueueRef = useRef<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
