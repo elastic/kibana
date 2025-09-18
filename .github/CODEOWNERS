@@ -2453,12 +2453,12 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/kibana-cloud-security-posture
 
 ## Security Solution sub teams - Security Entity Store
-x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/entity-store
-x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/entity-store
-x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/entity-store
-x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/entity-store
-x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/entity-store
-x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/entity-store
+x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/core-analysis
+x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/core-analysis
+x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/core-analysis
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/core-analysis
+x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/core-analysis
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/core-analysis
 
 ## Security Solution sub teams - Threat Hunting
 
