@@ -63,7 +63,7 @@ export const MlVcuUsageCostTour = ({
                   <EuiLink
                     data-test-subj="mlVcuUsageLearnMoreLink"
                     target="_blank"
-                    href={docLinks.links.cloud.elasticsearchBillingDimensions}
+                    href={docLinks.links.cloud.elasticsearchBillingManagingCosts}
                   >
                     <FormattedMessage
                       id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.learnMore"

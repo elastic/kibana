@@ -52,7 +52,7 @@ export interface DocLinks {
   };
   readonly cloud: {
     readonly beatsAndLogstashConfiguration: string;
-    readonly elasticsearchBillingDimensions: string;
+    readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
   };
   readonly console: {
