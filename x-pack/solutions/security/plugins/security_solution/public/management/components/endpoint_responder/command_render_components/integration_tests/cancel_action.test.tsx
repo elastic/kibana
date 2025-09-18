@@ -103,12 +103,12 @@ describe('When using cancel action from response actions console', () => {
     mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
 
     // Reset the ExperimentalFeaturesService mock to default enabled state
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // @ts-expect-error - we do not need to specify whole object for testing purposes
     mockedExperimentalFeaturesService.get.mockReturnValue({
       microsoftDefenderEndpointCancelEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
       microsoftDefenderEndpointRunScriptEnabled: true,
-    } as any);
+    });
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
   });
@@ -239,11 +239,12 @@ describe('When using cancel action from response actions console', () => {
 
     it('should disable cancel command for Microsoft Defender Endpoint when feature flag is disabled', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // @ts-expect-error - we do not need to specify whole object for testing purposes
       mockedExperimentalFeaturesService.get.mockReturnValue({
         microsoftDefenderEndpointCancelEnabled: false,
         responseActionsMSDefenderEndpointEnabled: true,
         microsoftDefenderEndpointRunScriptEnabled: true,
-      } as any);
+      });
       mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: false });
 
       const renderResult = await renderConsole('microsoft_defender_endpoint');
