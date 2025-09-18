@@ -15,7 +15,7 @@ import type { StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public
 import { STREAMS_TIERED_ML_FEATURE } from '@kbn/streams-plugin/common';
 import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { EnhancedFieldSelector } from '../enhanced_field_selector';
+import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
@@ -111,8 +111,7 @@ export const DateProcessorForm = () => {
    * the component does not try to call it.
    */
   const handleProcessorFieldChange = areSuggestionsAvailable
-    ? (event: React.ChangeEvent<HTMLInputElement>) => {
-        const field = event.target.value;
+    ? (field: string) => {
         const prevFormats = form.getValues('formats');
         const hasFormats = !isEmpty(prevFormats);
         const isTouched = form.formState.touchedFields.formats;
@@ -137,18 +136,11 @@ export const DateProcessorForm = () => {
 
   return (
     <>
-      <EnhancedFieldSelector
+      <ProcessorFieldSelector
         fieldKey="from"
         processorType="date"
         helpText="Field containing date values to parse."
-        onChange={
-          handleProcessorFieldChange
-            ? (value) => {
-                const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLInputElement>;
-                handleProcessorFieldChange(syntheticEvent);
-              }
-            : undefined
-        }
+        onChange={handleProcessorFieldChange}
       />
       <DateFormatsField onGenerate={handleGenerateSuggestionClick} />
       <EuiSpacer size="m" />

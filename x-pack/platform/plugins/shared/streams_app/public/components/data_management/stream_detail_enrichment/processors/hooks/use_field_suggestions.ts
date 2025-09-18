@@ -22,9 +22,10 @@ export const useFieldSuggestions = (
   processorType?: string
 ): Array<EuiComboBoxOptionOption<FieldSuggestion>> => {
   const previewRecords = useSimulatorSelector((state) => selectPreviewRecords(state.context));
+  const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
   return useMemo(() => {
-    let fields = createFieldSuggestions(previewRecords);
+    let fields = createFieldSuggestions(previewRecords, detectedFields);
 
     if (processorType) {
       fields = sortFieldsByProcessorType(fields, processorType);
@@ -35,5 +36,5 @@ export const useFieldSuggestions = (
       value: field,
       'data-test-subj': `field-suggestion-${field.name}`,
     }));
-  }, [previewRecords, processorType]);
+  }, [previewRecords, detectedFields, processorType]);
 };

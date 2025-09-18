@@ -6,34 +6,23 @@
  */
 
 import type { FlattenRecord } from '@kbn/streams-schema';
+import type { DetectedField } from '../../state_management/simulation_state_machine/types';
+import { getAllFieldsInOrder } from '../../state_management/simulation_state_machine';
 
 export interface FieldSuggestion {
   name: string;
 }
 
 /**
- * Extract unique field names from simulation preview records
+ * Create field suggestions from simulation records and detected fields
+ * Uses the centralized field ordering logic from simulation state machine
  */
-export function getFieldNamesFromRecords(previewRecords?: FlattenRecord[]): string[] {
-  if (!previewRecords?.length) return [];
-
-  const fieldNames = new Set<string>();
-  previewRecords.forEach((record) => {
-    Object.keys(record).forEach((fieldName) => {
-      fieldNames.add(fieldName);
-    });
-  });
-
-  return Array.from(fieldNames).sort();
-}
-
-/**
- * Create field suggestions from simulation records
- */
-export function createFieldSuggestions(previewRecords?: FlattenRecord[]): FieldSuggestion[] {
-  const fieldNames = getFieldNamesFromRecords(previewRecords);
-
-  return fieldNames.map((fieldName) => ({ name: fieldName }));
+export function createFieldSuggestions(
+  previewRecords?: FlattenRecord[],
+  detectedFields?: DetectedField[]
+): FieldSuggestion[] {
+  const orderedFields = getAllFieldsInOrder(previewRecords, detectedFields);
+  return orderedFields.map((fieldName) => ({ name: fieldName }));
 }
 
 /**

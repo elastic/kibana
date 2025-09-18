@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormProvider, useForm } from 'react-hook-form';
-import { EnhancedFieldSelector } from './enhanced_field_selector';
+import { ProcessorFieldSelector } from './processor_field_selector';
 
 jest.mock('../state_management/stream_enrichment_state_machine', () => ({
   useSimulatorSelector: jest.fn(),
@@ -39,12 +39,12 @@ const TestWrapper = ({
 const renderComponent = (props = {}, formValues = {}) => {
   return render(
     <TestWrapper defaultValues={formValues}>
-      <EnhancedFieldSelector {...props} />
+      <ProcessorFieldSelector {...props} />
     </TestWrapper>
   );
 };
 
-describe('EnhancedFieldSelector', () => {
+describe('ProcessorFieldSelector', () => {
   const mockSuggestions = [
     { label: 'message', value: { name: 'message' } },
     { label: 'host.name', value: { name: 'host.name' } },

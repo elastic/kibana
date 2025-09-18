@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { EnhancedFieldSelector } from '../enhanced_field_selector';
+import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
@@ -18,7 +18,7 @@ import { SetValueOrCopyFromField } from './set_value_or_copy_from_field';
 export const SetProcessorForm = () => {
   return (
     <>
-      <EnhancedFieldSelector
+      <ProcessorFieldSelector
         fieldKey="to"
         processorType="set"
         helpText={i18n.translate(

@@ -40,6 +40,23 @@ export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
 }
 
+export function getAllFieldsInOrder(
+  previewRecords: any[] = [],
+  detectedFields: DetectedField[] = []
+): string[] {
+  const fields = new Set<string>();
+  previewRecords.forEach((record) => {
+    Object.keys(record).forEach((key) => {
+      fields.add(key);
+    });
+  });
+
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+  const otherFields = Array.from(fields).filter((field) => !uniqueDetectedFields.includes(field));
+
+  return [...uniqueDetectedFields, ...otherFields.sort()];
+}
+
 export function getTableColumns({
   currentProcessorSourceField,
   detectedFields = [],
