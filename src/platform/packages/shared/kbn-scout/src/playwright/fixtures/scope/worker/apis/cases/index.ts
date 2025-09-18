@@ -53,8 +53,16 @@ export interface UpdateCaseParams {
 
 export interface CreateCommentParams {
   owner: 'cases' | 'observability' | 'securitySolution';
-  type: 'alert' | 'user';
+  type: 'user';
+  comment: string;
+}
+
+export interface CreateAlertParams {
+  type: 'alert';
+  owner: 'cases' | 'observability' | 'securitySolution';
   comment?: string;
+  alertId: string | string[];
+  rule: { id: string; name: string };
 }
 
 export interface CasesApiService {
@@ -67,7 +75,11 @@ export interface CasesApiService {
     get: (spaceId?: string) => Promise<any>;
   };
   comments: {
-    create: (caseId: string, params: CreateCommentParams, spaceId?: string) => Promise<any>;
+    create: (
+      caseId: string,
+      params: CreateCommentParams | CreateAlertParams,
+      spaceId?: string
+    ) => Promise<any>;
     get: (caseId: string, commentId: string, spaceId?: string) => Promise<any>;
   };
   cleanup: {
@@ -83,7 +95,11 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
 
   return {
     comments: {
-      create: async (caseId: string, params: CreateCommentParams, spaceId?: string) => {
+      create: async (
+        caseId: string,
+        params: CreateCommentParams | CreateAlertParams,
+        spaceId?: string
+      ) => {
         return await measurePerformanceAsync(
           log,
           `casesApi.comments.create [${caseId}]`,
@@ -92,11 +108,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/api/cases/${caseId}/comments`,
               retries: 3,
-              body: {
-                comment: params.comment,
-                type: params.type,
-                owner: params.owner,
-              },
+              body: params,
             });
           }
         );

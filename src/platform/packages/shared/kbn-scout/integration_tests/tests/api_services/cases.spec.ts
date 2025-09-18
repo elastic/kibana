@@ -12,7 +12,7 @@ import { createCasePayload } from '../../fixtures/constants';
 
 apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   let caseId: string;
-  let caseOwner = '';
+  let caseOwner: 'cases' | 'securitySolution' | 'observability';
 
   apiTest.beforeEach(async ({ apiServices, config }) => {
     caseOwner =
@@ -94,16 +94,16 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
 
     const fetchedResponse1 = await apiServices.cases.get(createdResponse1.data.id);
     const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
+    caseId = createdResponse2.data.id;
 
     // this case should have been deleted because it was assigned "tag1"
     expect(fetchedResponse1.status).toBe(404);
 
     // this case shouldn't been deleted because it was assigned "tag2"
     expect(fetchedResponse2.status).toBe(200);
-    caseId = createdResponse2.data.id;
   });
 
-  apiTest.only('should add a comment', async ({ apiServices }) => {
+  apiTest('should post a comment', async ({ apiServices }) => {
     const createdResponse = await apiServices.cases.create({
       ...createCasePayload,
       owner: caseOwner,
@@ -114,11 +114,36 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     const createdComment = await apiServices.cases.comments.create(caseId, {
       type: 'user',
       comment: 'This is a test comment',
-      owner: 'cases',
+      owner: caseOwner,
     });
 
     expect(createdComment.status).toBe(200);
     expect(createdComment.data.totalComment).toBe(1);
     expect(createdComment.data.comments[0].comment).toBe('This is a test comment');
+
+    // find comment by ID
+    const commentId = createdComment.data.comments[0].id;
+    const fetchedResponse = await apiServices.cases.comments.get(caseId, commentId);
+    expect(fetchedResponse.status).toBe(200);
+  });
+
+  apiTest('should post an alert', async ({ apiServices }) => {
+    const createdResponse = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+    });
+    caseId = createdResponse.data.id;
+    expect(createdResponse.status).toBe(200);
+
+    const createdAlert = await apiServices.cases.comments.create(caseId, {
+      type: 'alert',
+      owner: caseOwner,
+      alertId: 'test-alert-id',
+      index: 'test-index',
+      rule: { id: 'test-rule-id', name: 'test-rule-name' },
+    });
+
+    expect(createdAlert.status).toBe(200);
+    expect(createdAlert.data.totalAlerts).toBe(1);
   });
 });
