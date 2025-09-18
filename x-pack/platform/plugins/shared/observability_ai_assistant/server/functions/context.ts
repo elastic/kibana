@@ -73,7 +73,7 @@ export function registerContextFunction({
           id: connectorId,
           throwIfSystemAction: true,
         });
-        
+
         const { scores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,

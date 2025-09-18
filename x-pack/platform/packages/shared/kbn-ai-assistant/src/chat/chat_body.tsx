@@ -153,7 +153,7 @@ export function ChatBody({
   );
 
   const scopes = useScopes();
-  
+
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
     initialMessages,
