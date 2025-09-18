@@ -49,6 +49,8 @@ export class AccessControlService {
       }
     }
 
+    // ToDo: potentially return an array of which objects specifically require manage access control so we can use that from places like import/export
+    // or for surfacing better messages to the user.
     return { typesRequiringAccessControl: typesRequiringCheck };
   }
 
