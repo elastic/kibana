@@ -8,74 +8,74 @@
  */
 
 import {
+  EuiButton,
+  EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOutsideClickDetector,
-  useEuiTheme,
-  EuiDatePicker,
-  EuiToolTip,
-  EuiButton,
-  type EuiButtonColor,
-  useGeneratedHtmlId,
   EuiFormLabel,
+  EuiOutsideClickDetector,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type EuiButtonColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { isEqual, memoize } from 'lodash';
+import { Global, css } from '@emotion/react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import useObservable from 'react-use/lib/useObservable';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-types';
-import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import type { ComponentProps } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
-import { createPortal } from 'react-dom';
-import { css, Global } from '@emotion/react';
+import type { FieldType } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { FieldType } from '@kbn/esql-ast';
+import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
+import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { isEqual, memoize } from 'lodash';
+import moment from 'moment';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
+import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
-import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
-import {
-  clearCacheWhenOld,
-  getESQLSources,
-  parseErrors,
-  parseWarning,
-  useDebounceWithOptions,
-  onKeyDownResizeHandler,
-  onMouseDownResizeHandler,
-  getEditorOverwrites,
-  type MonacoMessage,
-  filterDataErrors,
-} from './helpers';
-import { addQueriesToCache } from './history_local_storage';
-import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
-  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   EDITOR_MAX_HEIGHT,
+  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type {
-  ESQLEditorProps as ESQLEditorPropsInternal,
-  ESQLEditorDeps,
-  ControlsContext,
-} from './types';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import {
+  clearCacheWhenOld,
+  filterDataErrors,
+  getESQLSources,
+  getEditorOverwrites,
+  onKeyDownResizeHandler,
+  onMouseDownResizeHandler,
+  parseErrors,
+  parseWarning,
+  useDebounceWithOptions,
+} from './helpers';
+import { addQueriesToCache } from './history_local_storage';
+import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
-import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
+import type {
+  ControlsContext,
+  ESQLEditorDeps,
+  ESQLEditorProps as ESQLEditorPropsInternal,
+} from './types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -553,7 +553,9 @@ const ESQLEditorInternal = function ESQLEditor({
       getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
-        if (activeSolutionId) {
+        // Only fetch recommendations if there's an active solutionId and a non-empty query
+        // Otherwise the route will return an error
+        if (activeSolutionId && queryString.trim() !== '') {
           return (
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
               queryString,
@@ -687,7 +689,13 @@ const ESQLEditorInternal = function ESQLEditor({
       }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
+        monaco.editor.setModelMarkers(
+          editorModel.current,
+          'Unified search',
+          // don't show the code in the editor
+          // but we need it above
+          markers.map((m) => ({ ...m, code: undefined }))
+        );
         return;
       }
     },
@@ -945,10 +953,6 @@ const ESQLEditorInternal = function ESQLEditor({
                       editorModel.current = model;
                       await addLookupIndicesDecorator();
                     }
-
-                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
-                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
-                    });
 
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
