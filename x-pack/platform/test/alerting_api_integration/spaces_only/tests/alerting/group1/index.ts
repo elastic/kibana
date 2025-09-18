@@ -13,22 +13,22 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
 
-    loadTestFile(require.resolve('./aggregate')); // 1 min
+    loadTestFile(require.resolve('./aggregate'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./disable')); // 40 sec
+    loadTestFile(require.resolve('./disable'));
     loadTestFile(require.resolve('./enable'));
     loadTestFile(require.resolve('./find'));
-    loadTestFile(require.resolve('./find_internal')); // 3 min till here
+    loadTestFile(require.resolve('./find_internal'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_alert_state'));
     loadTestFile(require.resolve('./get_alert_summary'));
-    loadTestFile(require.resolve('./get_execution_log')); // + 1.5 min
+    loadTestFile(require.resolve('./get_execution_log'));
     loadTestFile(require.resolve('./get_action_error_log'));
     loadTestFile(require.resolve('./get_rule_tags'));
-    // 9 min
     loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./rule_types_internal'));
+    // the next file takes ~37 min to run
     loadTestFile(require.resolve('./event_log'));
   });
 }
