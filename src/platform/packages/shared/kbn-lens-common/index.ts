@@ -378,3 +378,4 @@ export {
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
+export { getLensLayerTypeDisplayName } from './visualizations/layer_type_display_name';

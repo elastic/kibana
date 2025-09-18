@@ -24,6 +24,7 @@ import {
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
+import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -48,6 +49,29 @@ import {
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
+
+// Utility function to count layers by type for proper numbering
+function getLayerCountByType(
+  layerConfigs: Array<{ layerType: string | undefined; layerId: string }>,
+  currentLayerId: string
+): number {
+  const currentLayerType = layerConfigs.find(
+    (config) => config.layerId === currentLayerId
+  )?.layerType;
+  if (!currentLayerType) return 1;
+
+  // Count how many layers of the same type come before this one
+  let count = 0;
+  for (const config of layerConfigs) {
+    if (config.layerType === currentLayerType) {
+      count++;
+      if (config.layerId === currentLayerId) {
+        break;
+      }
+    }
+  }
+  return count;
+}
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();
@@ -277,6 +301,7 @@ export function LayerPanels(
   const layerConfigs = useMemo(() => {
     return layerIds.map((layerId) => ({
       layerId,
+      layerType: activeVisualization.getLayerType(layerId, visualization.state),
       config: activeVisualization.getConfiguration({
         layerId,
         frame: props.framePublicAPI,
@@ -297,21 +322,24 @@ export function LayerPanels(
   }, [selectedLayerId, layerIds]);
 
   const renderTabs = useCallback(() => {
-    const layerTabs = layerConfigs
-      .filter((layer) => !layer.config.hidden)
-      .map((layerConfig, layerIndex) => {
-        return (
-          <EuiTab
-            key={layerIndex}
-            onClick={() => onSelectedTabChanged(layerConfig.layerId)}
-            isSelected={layerConfig.layerId === selectedLayerId}
-            disabled={false}
-            data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
-          >
-            Layer {layerIndex + 1}
-          </EuiTab>
-        );
-      });
+    const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
+
+    const layerTabs = visibleLayerConfigs.map((layerConfig, layerIndex) => {
+      const formattedLayerType = getLensLayerTypeDisplayName(layerConfig.layerType);
+      const layerCountByType = getLayerCountByType(visibleLayerConfigs, layerConfig.layerId);
+
+      return (
+        <EuiTab
+          key={layerIndex}
+          onClick={() => onSelectedTabChanged(layerConfig.layerId)}
+          isSelected={layerConfig.layerId === selectedLayerId}
+          disabled={false}
+          data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
+        >
+          {formattedLayerType} {layerCountByType}
+        </EuiTab>
+      );
+    });
 
     if (!hideAddLayerButton) {
       const addLayerButton = activeVisualization?.getAddLayerButtonComponent?.({
@@ -399,7 +427,7 @@ export function LayerPanels(
       `}
     >
       {/* Render layer tabs only if the chart type supports multiple layers */}
-      {!hideAddLayerButton && layerConfigs.length > 1 && <EuiTabs>{renderTabs()}</EuiTabs>}
+      {!hideAddLayerButton && <EuiTabs>{renderTabs()}</EuiTabs>}
 
       {/* Render the current layer panel */}
       {layerConfig && (
