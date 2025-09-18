@@ -32,6 +32,7 @@ import type { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
+import type { SystemClient } from './system/system_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -68,6 +69,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
+      systemClient: SystemClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
@@ -747,27 +749,24 @@ export class StreamsClient {
   private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
     const { dashboards, queries, rules } = request;
 
-    // sync dashboards as before
-    await this.dependencies.assetClient.syncAssetList(
-      name,
-      dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      'dashboard'
-    );
-
-    // sync rules
-    await this.dependencies.assetClient.syncAssetList(
-      name,
-      rules.map((rule) => ({
-        [ASSET_ID]: rule,
-        [ASSET_TYPE]: 'rule' as const,
-      })),
-      'rule'
-    );
-
-    // sync rules with asset links
-    await this.dependencies.queryClient.syncQueries(name, queries);
+    await Promise.all([
+      this.dependencies.assetClient.syncAssetList(
+        name,
+        dashboards.map((dashboard) => ({
+          [ASSET_ID]: dashboard,
+          [ASSET_TYPE]: 'dashboard' as const,
+        })),
+        'dashboard'
+      ),
+      this.dependencies.assetClient.syncAssetList(
+        name,
+        rules.map((rule) => ({
+          [ASSET_ID]: rule,
+          [ASSET_TYPE]: 'rule' as const,
+        })),
+        'rule'
+      ),
+      this.dependencies.queryClient.syncQueries(name, queries),
+    ]);
   }
 }
