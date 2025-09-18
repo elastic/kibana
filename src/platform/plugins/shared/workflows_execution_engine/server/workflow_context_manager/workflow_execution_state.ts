@@ -200,7 +200,8 @@ export class WorkflowExecutionState {
     const newStep: EsWorkflowStepExecution = {
       ...step,
       id: step.id,
-      executionIndex: stepExecutions.length,
+      globalExecutionIndex: this.stepExecutions.size,
+      stepExecutionIndex: stepExecutions.length,
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
@@ -241,7 +242,7 @@ export class WorkflowExecutionState {
         stepExecutionIds.sort((a, b) => {
           const aExecution = this.stepExecutions.get(a);
           const bExecution = this.stepExecutions.get(b);
-          return (aExecution?.executionIndex ?? 0) - (bExecution?.executionIndex ?? 0);
+          return (aExecution?.stepExecutionIndex ?? 0) - (bExecution?.stepExecutionIndex ?? 0);
         })
       );
     }

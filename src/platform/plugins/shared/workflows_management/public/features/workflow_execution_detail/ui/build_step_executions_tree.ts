@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
 export interface StepListTreeItem {
@@ -44,25 +44,63 @@ function getStepTreeType(
   return 'unknown';
 }
 
+/**
+ * Builds a deterministic step path from a stack of execution entries.
+ *
+ * This function is crucial for handling scoped operations like foreach, if, retry,
+ * continue, fallback, and other nested workflow constructs. It generates a consistent
+ * path representation that can be used to track execution flow and state across
+ * complex workflow hierarchies.
+ *
+ * The function processes the execution stack to create a flattened path array,
+ * ensuring deterministic results for the same input regardless of execution context.
+ * It handles deduplication of consecutive step IDs and properly incorporates
+ * sub-scope identifiers when present.
+ *
+ * @param stepId - The current step identifier being processed
+ * @param stackFrames - Array of stack frames representing the execution hierarchy
+ * @returns A string array representing the deterministic step path
+ */
+export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
+  return stackFrames.flatMap((stackFrame) => {
+    const scopeWithSubScope = stackFrame.nestedScopes
+      .filter((scopeEntry) => scopeEntry.scopeId)
+      .map((scopeEntry) => scopeEntry.scopeId!);
+
+    if (!scopeWithSubScope.length) {
+      return [];
+    }
+
+    return [stackFrame.stepId, ...scopeWithSubScope];
+  });
+}
+
 export function buildStepExecutionsTree(
   stepExecutions: WorkflowStepExecutionDto[]
 ): StepExecutionTreeItem[] {
   const root = {};
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
+  const computedPathsMap: Map<string, string[]> = new Map();
+
   stepExecutions.forEach((stepExecution) => {
-    const computedPath = [...stepExecution.path, stepExecution.stepId];
+    const computedPath = [
+      ...(stepExecution.scopeStack ? flattenStackFrames(stepExecution.scopeStack) : []),
+      stepExecution.stepId,
+    ];
     const key = computedPath.join('>');
+    computedPathsMap.set(stepExecution.id!, computedPath);
     stepExecutionsMap.set(key, {
       ...stepExecution,
-      path: computedPath,
     });
   });
 
-  for (const { path: pathParts } of stepExecutionsMap.values()) {
+  for (const { id } of stepExecutionsMap.values()) {
+    const computedPath = computedPathsMap.get(id!)!;
+
     let current: any = root;
     const fullPath: string[] = [];
 
-    for (const currentPart of pathParts) {
+    for (const currentPart of computedPath) {
       fullPath.push(currentPart);
 
       if (!current[currentPart as keyof typeof current]) {
@@ -73,7 +111,7 @@ export function buildStepExecutionsTree(
           result = {
             stepId: stepExecution.stepId,
             stepType: stepExecution.stepType!,
-            executionIndex: stepExecution.executionIndex!,
+            executionIndex: stepExecution.stepExecutionIndex!,
             stepExecutionId: stepExecution.id!,
             status: stepExecution.status!,
             children: [],

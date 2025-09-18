@@ -141,7 +141,7 @@ export class WorkflowContextManager {
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
     const scopePath: StackFrame[] = [];
 
-    for (const StackFrame of this.workflowExecutionState.getWorkflowExecution().stack) {
+    for (const StackFrame of this.workflowExecutionState.getWorkflowExecution().scopeStack) {
       const stepExecution = this.workflowExecutionState.getStepExecution(
         buildStepExecutionId(
           this.workflowExecutionState.getWorkflowExecution().id,

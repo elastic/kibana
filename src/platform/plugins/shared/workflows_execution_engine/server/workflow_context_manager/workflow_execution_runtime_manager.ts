@@ -15,7 +15,8 @@ import agent from 'elastic-apm-node';
 import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { buildStepExecutionId, buildStepPath } from '../utils';
+import { buildStepExecutionId } from '../utils';
+import { WorkflowScopeStack } from './workflow_call_stack';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -101,7 +102,7 @@ export class WorkflowExecutionRuntimeManager {
     return buildStepExecutionId(
       this.workflowExecution.id,
       this.getCurrentNode().stepId,
-      this.workflowExecution.stack
+      this.workflowExecution.scopeStack
     );
   }
 
@@ -131,75 +132,25 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return [...this.workflowExecution.stack];
+    return [...this.workflowExecution.scopeStack];
   }
 
   public enterScope(subScopeId?: string): void {
     const currentNode = this.getCurrentNode();
-
-    if (
-      this.workflowExecution.stack.length &&
-      this.workflowExecution.stack.at(-1)!.stepId === currentNode.stepId
-    ) {
-      // Path 1: Extend existing stack entry
-      const stackFrame = this.workflowExecution.stack.at(-1)!;
-      this.workflowExecutionState.updateWorkflowExecution({
-        stack: this.workflowExecution.stack.slice(0, -1).concat([
-          {
-            ...stackFrame,
-            nestedScopes: [
-              ...stackFrame.nestedScopes,
-              {
-                nodeId: currentNode.id,
-                scopeId: subScopeId,
-              },
-            ],
-          },
-        ]),
-      });
-      return;
-    }
-
-    // Path 2: Create new stack entry
     this.workflowExecutionState.updateWorkflowExecution({
-      stack: this.workflowExecution.stack.concat([
-        // ✅ FIXED: Don't remove last entry
-        {
-          stepId: currentNode.stepId,
-          nestedScopes: [
-            {
-              nodeId: currentNode.id,
-              scopeId: subScopeId,
-            },
-          ],
-        },
-      ]),
+      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
+        nodeId: currentNode.id,
+        nodeType: currentNode.type,
+        stepId: currentNode.stepId,
+        scopeId: subScopeId,
+      }).stackFrames,
     });
   }
 
   public exitScope(): void {
-    const currentNode = this.getCurrentNode();
-
-    if (
-      this.workflowExecution.stack.length &&
-      this.workflowExecution.stack.at(-1)!.stepId === currentNode.stepId &&
-      this.workflowExecution.stack.at(-1)!.nestedScopes.length > 1
-    ) {
-      const StackFrame = this.workflowExecution.stack.at(-1)!;
-
-      this.workflowExecutionState.updateWorkflowExecution({
-        stack: this.workflowExecution.stack.slice(0, -1).concat([
-          {
-            ...StackFrame,
-            nestedScopes: StackFrame.nestedScopes.slice(0, -1),
-          },
-        ]),
-      });
-      return;
-    }
-
     this.workflowExecutionState.updateWorkflowExecution({
-      stack: this.workflowExecution.stack.slice(0, -1),
+      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
+        .stackFrames,
     });
   }
 
@@ -234,7 +185,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
       stepId: currentNode.stepId,
-      path: this.buildCurrentStepPath(),
+      scopeStack: this.workflowExecution.scopeStack,
       input: result.input,
       output: result.output,
       error: result.error,
@@ -242,7 +193,6 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentStepState(): Record<string, any> | undefined {
-    const stepId = this.getCurrentNode().stepId;
     return this.workflowExecutionState.getStepExecution(this.getCurrentStepExecutionId())?.state;
   }
 
@@ -251,7 +201,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
       stepId,
-      path: this.buildCurrentStepPath(),
+      scopeStack: this.workflowExecution.scopeStack,
       state,
     });
   }
@@ -279,7 +229,7 @@ export class WorkflowExecutionRuntimeManager {
           id: this.getCurrentStepExecutionId(),
           stepId: currentNode.stepId,
           stepType: currentNode.stepType,
-          path: this.buildCurrentStepPath(),
+          scopeStack: this.workflowExecution.scopeStack,
           topologicalIndex: this.topologicalOrder.indexOf(currentNode.id),
           status: ExecutionStatus.RUNNING,
           startedAt: stepStartedAt.toISOString(),
@@ -358,7 +308,7 @@ export class WorkflowExecutionRuntimeManager {
         const stepExecutionUpdate = {
           id: this.getCurrentStepExecutionId(),
           stepId,
-          path: this.buildCurrentStepPath(),
+          scopeStack: this.workflowExecution.scopeStack,
           status: ExecutionStatus.FAILED,
           completedAt: new Date().toISOString(),
           output: null,
@@ -549,7 +499,7 @@ export class WorkflowExecutionRuntimeManager {
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       currentNodeId: this.topologicalOrder[0],
-      stack: [],
+      scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
     };
@@ -614,10 +564,6 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
     await this.workflowExecutionState.flush();
-  }
-
-  private buildCurrentStepPath(): string[] {
-    return buildStepPath(this.workflowExecution.stack);
   }
 
   private logWorkflowStart(): void {

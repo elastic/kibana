@@ -126,7 +126,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
       {
@@ -137,7 +137,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
       {
@@ -148,7 +148,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
       {
@@ -159,7 +159,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
       {
@@ -170,7 +170,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
       {
@@ -181,7 +181,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
       {
@@ -192,7 +192,7 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        stepExecutionIndex: 0,
         path: [],
       },
     ],

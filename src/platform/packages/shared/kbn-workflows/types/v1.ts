@@ -44,6 +44,7 @@ export interface ScopeEntry {
    * Examples: enterForeach_step1, enterRetry_step1, etc
    */
   nodeId: string;
+  nodeType: string;
   /**
    * Optional unique identifier for the scope instance.
    * For example, iteration identifier (0,1,2,3,etc), retry attempt identifier (attempt-1, attempt-2, etc), and so on
@@ -67,7 +68,7 @@ export interface EsWorkflowExecution {
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
-  stack: StackFrame[];
+  scopeStack: StackFrame[];
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -100,19 +101,31 @@ export interface EsWorkflowStepExecution {
   stepId: string;
   stepType?: string;
 
-  /** Current step's scope path */
-  path: string[];
+  /** Current step's stack frames. */
+  scopeStack: StackFrame[];
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
   startedAt: string;
   completedAt?: string;
   executionTimeMs?: number;
+
+  /** Topological index of step in workflow graph. */
   topologicalIndex: number;
-  executionIndex: number;
+
+  /** Overall execution index in the entire workflow. */
+  globalExecutionIndex: number;
+
+  /**
+   * Execution index within specific stepId.
+   * There might be several instances of the same stepId if it's inside loops, retries, etc.
+   */
+  stepExecutionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
+
+  /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, any>;
 }
 

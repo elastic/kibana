@@ -138,11 +138,14 @@ async function catchError(
     // This allows error handling to bubble up through the scope hierarchy.
     while (
       workflowRuntime.getWorkflowExecution().error &&
-      workflowRuntime.getWorkflowExecution().stack.length &&
-      workflowRuntime.getWorkflowExecution().stack.at(-1)!.nestedScopes.length
+      workflowRuntime.getWorkflowExecution().scopeStack.length &&
+      workflowRuntime.getWorkflowExecution().scopeStack.at(-1)!.nestedScopes.length
     ) {
       // exit the whole node scope
-      const scopeEntry = workflowRuntime.getWorkflowExecution().stack.at(-1)!.nestedScopes.at(-1)!;
+      const scopeEntry = workflowRuntime
+        .getWorkflowExecution()
+        .scopeStack.at(-1)!
+        .nestedScopes.at(-1)!;
       workflowRuntime.navigateToNode(scopeEntry.nodeId);
       workflowRuntime.exitScope();
 

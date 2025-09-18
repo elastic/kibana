@@ -51,7 +51,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     workflowExecution = {
       id: 'testWorkflowExecutionid',
       workflowId: 'test-workflow-id',
-      stack: [
+      scopeStack: [
         { nodeId: 'firstScope', stepId: 'firstScope' },
         { nodeId: 'secondScope', stepId: 'secondScope' },
       ] as StackFrame[],
@@ -341,7 +341,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
-        stack: [
+        scopeStack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
         ] as StackFrame[],
@@ -670,7 +670,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should update local stack', async () => {
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         currentNodeId: 'node3',
-        stack: [
+        scopeStack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
           { nodeId: 'thirdScope', stepId: 'thirdScope' },
@@ -771,7 +771,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should enter a new scope with step id when no name is provided', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         currentNodeId: 'node1',
-        stack: [
+        scopeStack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
         ] as StackFrame[],
@@ -791,7 +791,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should enter a new scope with the provided name', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         currentNodeId: 'node1',
-        stack: [
+        scopeStack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
         ] as StackFrame[],
@@ -817,7 +817,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should pop the last element', async () => {
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         currentNodeId: 'node1',
-        stack: [
+        scopeStack: [
           { nodeId: 'scope1', stepId: 'scope1' },
           { nodeId: 'scope2', stepId: 'scope2' },
         ] as StackFrame[],
@@ -835,7 +835,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should return current step execution id built from execution id, current scopes and current node', () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
-        stack: [
+        scopeStack: [
           { nodeId: 'node1', stepId: 'fakeStepId1' },
           { nodeId: 'node2', stepId: 'fakeStepId2' },
         ] as StackFrame[],
