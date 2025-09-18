@@ -788,6 +788,10 @@ const getStreamFields = async (
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
   }
 
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return { ...stream.ingest.classic.field_overrides };
+  }
+
   return {};
 };
 
