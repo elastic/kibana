@@ -116,6 +116,14 @@ export async function fetchLogRateAnalysisForAlert({
     windowParameters,
   });
 
+  // Return early if there are no keyword field candidates.
+  if (keywordFieldCandidates.length === 0) {
+    return {
+      logRateAnalysisType,
+      significantItems: [],
+    };
+  }
+
   // Just in case the log rate analysis type is 'dip', we need to swap
   // the window parameters for the analysis.
   const analysisWindowParameters =
