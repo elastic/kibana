@@ -78,6 +78,25 @@ export const registerIndexEditorAnalyticsEvents = (analytics: AnalyticsServiceSe
           description: 'The number of cells edited in the index editor before saving',
         },
       },
+      action: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The action taken when submitting the save. Possible values are: save|save_and_exit',
+        },
+      },
+      outcome: {
+        type: 'keyword',
+        _meta: {
+          description: 'The outcome of the save action. Possible values are: success|error',
+        },
+      },
+      exec_latency_bucket: {
+        type: 'keyword',
+        _meta: {
+          description: 'The latency of the save action in buckets',
+        },
+      },
     },
   });
 };

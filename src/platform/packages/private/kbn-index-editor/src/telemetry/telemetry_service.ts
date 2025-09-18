@@ -14,15 +14,6 @@ import {
 import { getBucket } from './utils';
 
 type FlyoutMode = 'create' | 'view' | 'edit';
-
-interface SaveSubmittedEventData {
-  flyout_mode: FlyoutMode;
-  pending_rows_added: number;
-  pending_rows_deleted: number;
-  pending_cols_added: number;
-  pending_cells_edited: number;
-}
-
 export class IndexEditorTelemetryService {
   private _analytics: AnalyticsServiceStart;
   private _flyoutMode: FlyoutMode;
@@ -63,8 +54,28 @@ export class IndexEditorTelemetryService {
     });
   }
 
-  public trackSaveSubmitted(eventData: SaveSubmittedEventData) {
-    this.reportEvent(INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE, eventData);
+  public trackSaveSubmitted(eventData: {
+    pendingRowsAdded: number;
+    pendingColsAdded: number;
+    pendingCellsEdited: number;
+    action: 'save' | 'save_and_exit';
+    outcome: 'success' | 'error';
+    latency: number;
+  }) {
+    console.log('latency', eventData.latency);
+    this.reportEvent(INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE, {
+      flyout_mode: this._flyoutMode,
+      pending_rows_added: eventData.pendingRowsAdded,
+      pending_cols_added: eventData.pendingColsAdded,
+      pending_cells_edited: eventData.pendingCellsEdited,
+      action: eventData.action,
+      outcome: eventData.outcome,
+      exec_latency_bucket: getBucket(eventData.latency, [
+        { label: '0-1s', to: 1000 },
+        { label: '1s-3s', to: 3000 },
+        { label: '3s-5s', to: 5000 },
+      ]),
+    });
   }
 
   private getFlyoutMode(canEditIndex: boolean, doesIndexExists: boolean): FlyoutMode {

@@ -33,10 +33,18 @@ export function createEditLookupIndexContentAction(
     async execute(context: EditLookupIndexContentContext) {
       const { coreStart, data, fileUpload } = dependencies;
 
+      const indexEditorTelemetryService = new IndexEditorTelemetryService(
+        coreStart.analytics,
+        context.canEditIndex,
+        context.doesIndexExist,
+        context.invocationSource
+      );
+
       const indexUpdateService = new IndexUpdateService(
         coreStart.http,
         data,
         coreStart.notifications,
+        indexEditorTelemetryService,
         context.canEditIndex
       );
 
@@ -55,13 +63,6 @@ export function createEditLookupIndexContentAction(
           return;
         }
       }
-
-      const indexEditorTelemetryService = new IndexEditorTelemetryService(
-        coreStart.analytics,
-        context.canEditIndex,
-        context.doesIndexExist,
-        context.invocationSource
-      );
 
       const existingIndexName = doesIndexExist ? indexName : null;
 
