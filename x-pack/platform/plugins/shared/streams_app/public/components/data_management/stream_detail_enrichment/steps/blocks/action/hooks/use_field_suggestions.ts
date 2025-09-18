@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { createFieldSuggestions, type FieldSuggestion } from '../utils/field_suggestions';
-import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
-import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
+import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
+import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 
 /**
  * Hook for providing field suggestions from simulation data for EuiComboBox

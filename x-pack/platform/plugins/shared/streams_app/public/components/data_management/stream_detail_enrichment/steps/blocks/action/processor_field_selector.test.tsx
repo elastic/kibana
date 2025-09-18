@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ProcessorFieldSelector } from './processor_field_selector';
 
-jest.mock('../state_management/stream_enrichment_state_machine', () => ({
+jest.mock('../../../state_management/stream_enrichment_state_machine', () => ({
   useSimulatorSelector: jest.fn(),
 }));
 
@@ -19,7 +19,7 @@ jest.mock('./hooks/use_field_suggestions', () => ({
   useFieldSuggestions: jest.fn(),
 }));
 
-import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
+import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { useFieldSuggestions } from './hooks/use_field_suggestions';
 
 const mockUseSimulatorSelector = jest.mocked(useSimulatorSelector);
