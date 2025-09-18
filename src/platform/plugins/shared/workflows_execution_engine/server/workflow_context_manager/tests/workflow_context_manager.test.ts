@@ -327,8 +327,14 @@ describe('WorkflowContextManager', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
         scopeStack: [
-          { nodeId: 'enterForeach_outerForeachStep', stepId: 'outerForeachStep' },
-          { nodeId: 'enterForeach_innerForeachStep', stepId: 'innerForeachStep' },
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          },
+          {
+            stepId: 'innerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
+          },
         ],
       } as EsWorkflowExecution);
       testContainer.workflowExecutionRuntime.getCurrentNode = jest

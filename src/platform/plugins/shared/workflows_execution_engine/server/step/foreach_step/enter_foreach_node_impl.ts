@@ -85,8 +85,8 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total,
     };
     // Enter a new scope for the new iteration
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 

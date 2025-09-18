@@ -15,6 +15,7 @@ import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runti
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
+import { WorkflowScopeStack } from './workflow_scope_stack';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -139,28 +140,30 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
-    const scopePath: StackFrame[] = [];
+    let scopeStack = WorkflowScopeStack.fromStackFrames(
+      this.workflowExecutionState.getWorkflowExecution().scopeStack
+    );
 
-    for (const StackFrame of this.workflowExecutionState.getWorkflowExecution().scopeStack) {
+    while (!scopeStack.isEmpty()) {
+      const topFrame = scopeStack.getCurrentScope()!;
+      scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
         buildStepExecutionId(
           this.workflowExecutionState.getWorkflowExecution().id,
-          StackFrame.stepId,
-          scopePath
+          topFrame.stepId,
+          scopeStack.stackFrames
         )
       );
 
-      if (!stepExecution) {
-        continue;
+      if (stepExecution) {
+        switch (stepExecution.stepType) {
+          case 'foreach':
+            if (!stepContext.foreach) {
+              stepContext.foreach = stepExecution.state as StepContext['foreach'];
+            }
+            break;
+        }
       }
-
-      switch (stepExecution.stepType) {
-        case 'foreach':
-          stepContext.foreach = stepExecution.state as StepContext['foreach'];
-          break;
-      }
-
-      scopePath.push(StackFrame);
     }
   }
 

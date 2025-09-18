@@ -8,7 +8,7 @@
  */
 
 import type { StackFrame } from '@kbn/workflows';
-import { WorkflowScopeStack, type EnterScopeData } from '../workflow_scope_stack';
+import { WorkflowScopeStack, type ScopeData } from '../workflow_scope_stack';
 
 describe('WorkflowScopeStack', () => {
   const createMockEnterScopeData = (
@@ -16,7 +16,7 @@ describe('WorkflowScopeStack', () => {
     stepId: string,
     nodeType: string = 'atomic',
     scopeId?: string
-  ): EnterScopeData => ({
+  ): ScopeData => ({
     nodeId,
     stepId,
     nodeType,
@@ -352,7 +352,7 @@ describe('WorkflowScopeStack', () => {
   describe('EnterScopeData interface', () => {
     it('should handle EnterScopeData with all properties', () => {
       const stack = new WorkflowScopeStack();
-      const enterData: EnterScopeData = {
+      const enterData: ScopeData = {
         nodeId: 'test-node',
         stepId: 'test-step',
         nodeType: 'elasticsearch',
@@ -370,7 +370,7 @@ describe('WorkflowScopeStack', () => {
 
     it('should handle EnterScopeData without optional scopeId', () => {
       const stack = new WorkflowScopeStack();
-      const enterData: EnterScopeData = {
+      const enterData: ScopeData = {
         nodeId: 'test-node',
         stepId: 'test-step',
         nodeType: 'kibana',
@@ -382,6 +382,205 @@ describe('WorkflowScopeStack', () => {
         nodeId: 'test-node',
         nodeType: 'kibana',
         scopeId: undefined,
+      });
+    });
+  });
+
+  describe('isEmpty', () => {
+    it('should return true for newly created empty stack', () => {
+      const stack = new WorkflowScopeStack();
+      expect(stack.isEmpty()).toBe(true);
+    });
+
+    it('should return true for stack created from empty frames array', () => {
+      const stack = WorkflowScopeStack.fromStackFrames([]);
+      expect(stack.isEmpty()).toBe(true);
+    });
+
+    it('should return false for stack with frames', () => {
+      const frames = [createMockStackFrame('step1', [{ nodeId: 'node1', nodeType: 'atomic' }])];
+      const stack = WorkflowScopeStack.fromStackFrames(frames);
+      expect(stack.isEmpty()).toBe(false);
+    });
+
+    it('should return false after entering a scope', () => {
+      const stack = new WorkflowScopeStack();
+      const enterData = createMockEnterScopeData('node1', 'step1', 'atomic');
+      const newStack = stack.enterScope(enterData);
+
+      expect(stack.isEmpty()).toBe(true); // Original stack remains empty
+      expect(newStack.isEmpty()).toBe(false); // New stack has frames
+    });
+
+    it('should return true after exiting all scopes', () => {
+      let stack = new WorkflowScopeStack();
+      const enterData = createMockEnterScopeData('node1', 'step1', 'atomic');
+
+      stack = stack.enterScope(enterData);
+      expect(stack.isEmpty()).toBe(false);
+
+      stack = stack.exitScope();
+      expect(stack.isEmpty()).toBe(true);
+    });
+  });
+
+  describe('getCurrentScope', () => {
+    it('should return null for empty stack', () => {
+      const stack = new WorkflowScopeStack();
+      expect(stack.getCurrentScope()).toBeNull();
+    });
+
+    it('should return null for stack created from empty frames', () => {
+      const stack = WorkflowScopeStack.fromStackFrames([]);
+      expect(stack.getCurrentScope()).toBeNull();
+    });
+
+    it('should return current scope data for single frame with single scope', () => {
+      const frames = [
+        createMockStackFrame('step1', [{ nodeId: 'node1', nodeType: 'atomic', scopeId: 'scope1' }]),
+      ];
+      const stack = WorkflowScopeStack.fromStackFrames(frames);
+      const currentScope = stack.getCurrentScope();
+
+      expect(currentScope).toEqual({
+        nodeId: 'node1',
+        nodeType: 'atomic',
+        scopeId: 'scope1',
+        stepId: 'step1',
+      });
+    });
+
+    it('should return current scope data without scopeId when not provided', () => {
+      const frames = [createMockStackFrame('step1', [{ nodeId: 'node1', nodeType: 'http' }])];
+      const stack = WorkflowScopeStack.fromStackFrames(frames);
+      const currentScope = stack.getCurrentScope();
+
+      expect(currentScope).toEqual({
+        nodeId: 'node1',
+        nodeType: 'http',
+        scopeId: undefined,
+        stepId: 'step1',
+      });
+    });
+
+    it('should return most recent scope from frame with multiple nested scopes', () => {
+      const frames = [
+        createMockStackFrame('step1', [
+          { nodeId: 'node1', nodeType: 'atomic', scopeId: 'scope1' },
+          { nodeId: 'node2', nodeType: 'http', scopeId: 'scope2' },
+          { nodeId: 'node3', nodeType: 'wait', scopeId: 'scope3' },
+        ]),
+      ];
+      const stack = WorkflowScopeStack.fromStackFrames(frames);
+      const currentScope = stack.getCurrentScope();
+
+      expect(currentScope).toEqual({
+        nodeId: 'node3',
+        nodeType: 'wait',
+        scopeId: 'scope3',
+        stepId: 'step1',
+      });
+    });
+
+    it('should return most recent scope from most recent frame with multiple frames', () => {
+      const frames = [
+        createMockStackFrame('step1', [
+          { nodeId: 'node1', nodeType: 'atomic', scopeId: 'scope1' },
+          { nodeId: 'node2', nodeType: 'http', scopeId: 'scope2' },
+        ]),
+        createMockStackFrame('step2', [
+          { nodeId: 'node3', nodeType: 'wait', scopeId: 'scope3' },
+          { nodeId: 'node4', nodeType: 'elasticsearch', scopeId: 'scope4' },
+        ]),
+      ];
+      const stack = WorkflowScopeStack.fromStackFrames(frames);
+      const currentScope = stack.getCurrentScope();
+
+      expect(currentScope).toEqual({
+        nodeId: 'node4',
+        nodeType: 'elasticsearch',
+        scopeId: 'scope4',
+        stepId: 'step2',
+      });
+    });
+
+    it('should track current scope correctly during enter/exit operations', () => {
+      let stack = new WorkflowScopeStack();
+
+      // Initially empty
+      expect(stack.getCurrentScope()).toBeNull();
+
+      // Enter first scope
+      const enterData1 = createMockEnterScopeData('node1', 'step1', 'atomic', 'scope1');
+      stack = stack.enterScope(enterData1);
+      expect(stack.getCurrentScope()).toEqual({
+        nodeId: 'node1',
+        nodeType: 'atomic',
+        scopeId: 'scope1',
+        stepId: 'step1',
+      });
+
+      // Enter second scope in same step
+      const enterData2 = createMockEnterScopeData('node2', 'step1', 'http', 'scope2');
+      stack = stack.enterScope(enterData2);
+      expect(stack.getCurrentScope()).toEqual({
+        nodeId: 'node2',
+        nodeType: 'http',
+        scopeId: 'scope2',
+        stepId: 'step1',
+      });
+
+      // Enter scope in different step
+      const enterData3 = createMockEnterScopeData('node3', 'step2', 'wait', 'scope3');
+      stack = stack.enterScope(enterData3);
+      expect(stack.getCurrentScope()).toEqual({
+        nodeId: 'node3',
+        nodeType: 'wait',
+        scopeId: 'scope3',
+        stepId: 'step2',
+      });
+
+      // Exit scope - should go back to step1
+      stack = stack.exitScope();
+      expect(stack.getCurrentScope()).toEqual({
+        nodeId: 'node2',
+        nodeType: 'http',
+        scopeId: 'scope2',
+        stepId: 'step1',
+      });
+
+      // Exit another scope
+      stack = stack.exitScope();
+      expect(stack.getCurrentScope()).toEqual({
+        nodeId: 'node1',
+        nodeType: 'atomic',
+        scopeId: 'scope1',
+        stepId: 'step1',
+      });
+
+      // Exit final scope - should become null
+      stack = stack.exitScope();
+      expect(stack.getCurrentScope()).toBeNull();
+    });
+
+    it('should handle different node types correctly', () => {
+      const testCases = [
+        { nodeType: 'atomic', expected: 'atomic' },
+        { nodeType: 'http', expected: 'http' },
+        { nodeType: 'wait', expected: 'wait' },
+        { nodeType: 'elasticsearch', expected: 'elasticsearch' },
+        { nodeType: 'kibana', expected: 'kibana' },
+        { nodeType: 'custom-type', expected: 'custom-type' },
+      ];
+
+      testCases.forEach(({ nodeType, expected }) => {
+        const frames = [
+          createMockStackFrame('step1', [{ nodeId: 'node1', nodeType, scopeId: 'scope1' }]),
+        ];
+        const stack = WorkflowScopeStack.fromStackFrames(frames);
+        const currentScope = stack.getCurrentScope();
+
+        expect(currentScope?.nodeType).toBe(expected);
       });
     });
   });

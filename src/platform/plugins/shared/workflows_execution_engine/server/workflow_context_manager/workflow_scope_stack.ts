@@ -9,7 +9,7 @@
 
 import type { StackFrame } from '@kbn/workflows';
 
-export interface EnterScopeData {
+export interface ScopeData {
   nodeId: string;
   stepId: string;
   nodeType: string;
@@ -58,6 +58,38 @@ export class WorkflowScopeStack {
   }
 
   /**
+   * Checks if the workflow scope stack is empty.
+   *
+   * @returns True if the stack contains no frames, false otherwise.
+   */
+  isEmpty(): boolean {
+    return this._stackFrames.length === 0;
+  }
+
+  /**
+   * Retrieves the current scope data from the top of the scope stack.
+   *
+   * This method returns the scope information for the most recently entered scope
+   * within the current step frame. If the stack is empty, it returns null.
+   *
+   * @returns The current scope data containing node ID, node type, scope ID, and step ID,
+   *          or null if the stack is empty
+   */
+  getCurrentScope(): ScopeData | null {
+    if (this.isEmpty()) {
+      return null;
+    }
+    const topFrame = this._stackFrames.at(-1)!;
+    const topScope = topFrame.nestedScopes.at(-1)!;
+    return {
+      nodeId: topScope.nodeId,
+      nodeType: topScope.nodeType,
+      scopeId: topScope.scopeId,
+      stepId: topFrame.stepId,
+    };
+  }
+
+  /**
    * Enters a new execution scope for the given graph node.
    *
    * If the node belongs to the same step as the current top frame, adds a new nested scope
@@ -67,7 +99,7 @@ export class WorkflowScopeStack {
    * @param enterScopeData - Data required to enter the new scope
    * @returns A new WorkflowScopeStack instance with the entered scope
    */
-  public enterScope(enterScopeData: EnterScopeData): WorkflowScopeStack {
+  public enterScope(enterScopeData: ScopeData): WorkflowScopeStack {
     if (this._stackFrames.length && this._stackFrames.at(-1)!.stepId === enterScopeData.stepId) {
       const clonedFrames = this.cloneFrames();
       const stackFrame = clonedFrames.at(-1)!;

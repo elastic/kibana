@@ -46,27 +46,6 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    // TODO: remove this random failure logic
-    // Generate a random value from 1 to 100 for potential use in steps
-    if (this.step.name.includes('random') && this.step.name.includes('fail')) {
-      const getRandomValue = () => Math.floor(Math.random() * 100) + 1;
-      const randomValue = getRandomValue();
-
-      if (randomValue > 60) {
-        throw new Error(`Failing step due to random value: ${randomValue}`);
-      }
-
-      if (!this.step.type) {
-        return {
-          input: withInputs,
-          output: {},
-          error: null,
-        };
-      }
-    } else if (this.step.name.includes('fail')) {
-      throw new Error('Fail always');
-    }
-
     try {
       const step = this.step;
 
