@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SecuritySolutionApiProvider } from '@kbn/security-test-api-clients';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-test-api-clients/src/security_solution_exceptions_api.gen';
+import { SecuritySolutionApiProvider } from '@kbn/test-api-clients/api/security_solution_api.gen';
+import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/test-api-clients/api/security_solution_exceptions_api.gen';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';

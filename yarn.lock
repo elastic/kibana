@@ -7676,7 +7676,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-test-api-clients@link:x-pack/solutions/security/packages/kbn-security-test-api-clients":
+"@kbn/test-api-clients@link:x-pack/solutions/security/packages/test-api-clients":
   version "0.0.0"
   uid ""
 

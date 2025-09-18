@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/security-test-api-clients",
+  "name": "@kbn/test-api-clients",
   "description": "Security Solution API clients for testing",
   "private": true,
   "version": "1.0.0",

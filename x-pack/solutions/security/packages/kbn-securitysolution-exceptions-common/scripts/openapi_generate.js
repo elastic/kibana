@@ -30,7 +30,7 @@ const ROOT = resolve(__dirname, '..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/packages/kbn-security-test-api-clients/src/security_solution_exceptions_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/api/security_solution_exceptions_api.gen.ts'
       ),
     },
   });
