@@ -73,7 +73,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickEditProcessor(0);
 
     // Verify save button is disabled
-    await expect(page.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeHidden();
     await pageObjects.streams.clickCancelProcessorChanges();
     // Verify save button is enabled
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();

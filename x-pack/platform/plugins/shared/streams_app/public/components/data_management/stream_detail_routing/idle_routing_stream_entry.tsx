@@ -16,14 +16,34 @@ import {
   EuiBadge,
   EuiButtonIcon,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
 import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
+import styled from '@emotion/styled';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { ConditionMessage } from '../condition_message';
 import type { RoutingDefinitionWithUIAttributes } from './types';
+
+const CentralizedContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Border = styled.div`
+  height: 20px;
+  border-right: ${({ theme }) => theme.euiTheme.border.thin};
+`;
+
+function VerticalRule() {
+  return (
+    <CentralizedContainer>
+      <Border />
+    </CentralizedContainer>
+  );
+}
 
 export function IdleRoutingStreamEntry({
   availableStreams,
@@ -101,19 +121,29 @@ export function IdleRoutingStreamEntry({
             responsive={false}
           >
             {!isRoutingEnabled(routingRule.status) && (
-              <EuiBadge color="subdued">
-                {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
-                  defaultMessage: 'Disabled',
-                })}
-              </EuiBadge>
+              <>
+                <EuiBadge color="subdued">
+                  {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
+                    defaultMessage: 'Disabled',
+                  })}
+                </EuiBadge>
+                <VerticalRule />
+              </>
             )}
             {childrenCount > 0 && (
-              <EuiBadge color="hollow">
-                {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
-                  defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
-                  values: { childrenCount },
-                })}
-              </EuiBadge>
+              <>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.streams.streamDetailRouting.numberChildrenTooltip',
+                    {
+                      defaultMessage: 'Number of child streams',
+                    }
+                  )}
+                >
+                  <EuiBadge color="hollow">{`+${childrenCount}`}</EuiBadge>
+                </EuiToolTip>
+                <VerticalRule />
+              </>
             )}
             <EuiButtonIcon
               data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
