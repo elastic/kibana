@@ -6,7 +6,7 @@
  */
 
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
-import type { PrivMonBulkUser, PrivMonOktaIntegrationsUser, PrivMonUserSource } from '../../types';
+import type { PrivMonBulkUser, PrivMonIntegrationsUser, PrivMonUserSource } from '../../types';
 import { UPDATE_SCRIPT_SOURCE } from '../sync/integrations/update_detection/queries';
 
 export const INDEX_SCRIPT = `
@@ -133,7 +133,7 @@ export const bulkUpsertOperationsFactoryShared =
 
 export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-  return (usersChunk: PrivMonOktaIntegrationsUser[]) =>
+  return (usersChunk: PrivMonIntegrationsUser[]) =>
     buildOps(usersChunk, 'entity_analytics_integration', UPDATE_SCRIPT_SOURCE, {
       buildUpdateParams: (user, sourceLabel) => ({
         new_privileged_status: user.isPrivileged,
@@ -152,7 +152,7 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
 export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
   return (usersChunk: PrivMonBulkUser[]) =>
-    buildOps(usersChunk, 'index', INDEX_SCRIPT, {
+    buildOps(usersChunk, 'index_sync', INDEX_SCRIPT, {
       buildUpdateParams: (user) => ({ source_id: user.sourceId }),
       buildCreateDoc: (user, sourceLabel) => ({
         user: { name: user.username, is_privileged: true },

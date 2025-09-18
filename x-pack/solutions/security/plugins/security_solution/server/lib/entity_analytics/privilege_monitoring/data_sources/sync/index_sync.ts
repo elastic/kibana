@@ -50,8 +50,8 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       soClient,
       namespace: deps.namespace,
     });
-    // get all monitoring index source saved objects of type 'index'
-    const indexSources = await monitoringIndexSourceClient.findSourcesByType('index');
+    // get all monitoring index source saved objects of type 'index_sync'
+    const indexSources = await monitoringIndexSourceClient.findSourcesByType('index_sync');
     if (indexSources.length === 0) {
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
