@@ -17,7 +17,7 @@ import {
   setDimensions,
   setValueFilters,
 } from '../store/slices';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
+import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 
 export const useMetricsGridState = () => {
   const dispatch = useAppDispatch();
