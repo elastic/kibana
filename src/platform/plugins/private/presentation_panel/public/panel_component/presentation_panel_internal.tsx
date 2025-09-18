@@ -127,7 +127,8 @@ export const PresentationPanelInternal = <
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
-          {...(api && ['image', 'lens', 'links'].includes((api as unknown as HasType).type)
+          {...(api &&
+          ['image', 'lens', 'links', 'visualization'].includes((api as unknown as HasType).type)
             ? reportingAttributes
             : {})}
           ref={(ref) => (reportingRef.current = ref as HTMLElement)}
