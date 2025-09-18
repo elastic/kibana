@@ -46,7 +46,7 @@ export const FullScreenWaterfall = ({
   serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
-  const [spanId, setSpanId] = useState<string | null>(null);
+  const [docId, setDocId] = useState<string | null>(null);
   const [activeFlyoutId, setActiveFlyoutId] = useState<
     typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
   >(null);
@@ -63,18 +63,24 @@ export const FullScreenWaterfall = ({
           rangeTo,
           serviceName,
           scrollElement: overlayMaskRef.current,
-          onErrorClick: (params: { traceId: string; docId: string; errorCount: number }) => {
+          onErrorClick: (params: {
+            traceId: string;
+            docId: string;
+            errorCount: number;
+            errorDocId?: string;
+          }) => {
             if (params.errorCount > 1) {
               setActiveFlyoutId(spanFlyoutId);
               setActiveSection('errors-table');
-            } else {
+              setDocId(params.docId);
+            } else if (params.errorDocId) {
               setActiveFlyoutId(logsFlyoutId);
+              setDocId(params.errorDocId);
             }
-            setSpanId(params.docId);
           },
           onNodeClick: (nodeSpanId: string) => {
             setActiveSection(undefined);
-            setSpanId(nodeSpanId);
+            setDocId(nodeSpanId);
             setActiveFlyoutId(spanFlyoutId);
           },
           mode: 'full',
@@ -87,7 +93,7 @@ export const FullScreenWaterfall = ({
   function handleCloseFlyout() {
     setActiveFlyoutId(null);
     setActiveSection(undefined);
-    setSpanId(null);
+    setDocId(null);
   }
 
   return (
@@ -150,21 +156,16 @@ export const FullScreenWaterfall = ({
           </EuiPanel>
         </EuiFocusTrap>
       </EuiOverlayMask>
-      {spanId && activeFlyoutId ? (
+      {docId && activeFlyoutId ? (
         activeFlyoutId === spanFlyoutId ? (
           <SpanFlyout
-            spanId={spanId}
+            spanId={docId}
             dataView={dataView}
             onCloseFlyout={handleCloseFlyout}
             activeSection={activeSection}
           />
         ) : (
-          <LogsFlyout
-            onCloseFlyout={handleCloseFlyout}
-            traceId={traceId}
-            docId={spanId}
-            dataView={dataView}
-          />
+          <LogsFlyout onCloseFlyout={handleCloseFlyout} errorDocId={docId} dataView={dataView} />
         )
       ) : null}
     </>

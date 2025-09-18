@@ -24,7 +24,7 @@ export type ScrollableSectionWrapperChildrenProps = Pick<
 
 export interface ScrollableSectionWrapperProps {
   children: (props: ScrollableSectionWrapperChildrenProps) => ReactElement;
-  defaultState?: 'closed' | 'open';
+  defaultState?: EuiAccordionProps['forceState'];
 }
 
 const SKIP_TRANSITION_CSS = css({
@@ -36,7 +36,7 @@ export const ScrollableSectionWrapper = forwardRef<
   ScrollableSectionWrapperProps
 >(({ children, defaultState = 'closed' }, ref) => {
   const [{ forceState, skipTransition }, setState] = useState<{
-    forceState: 'closed' | 'open';
+    forceState: NonNullable<EuiAccordionProps['forceState']>;
     skipTransition: boolean;
   }>({
     forceState: defaultState,

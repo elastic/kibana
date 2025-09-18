@@ -39,13 +39,14 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
   const theme = useEuiTheme();
   const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
+  const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
       defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {
-        count: item.errorCount,
+        count: errorCount,
       },
     }
   );
@@ -100,7 +101,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {item.errorCount > 0 ? (
+        {errorCount > 0 ? (
           <EuiFlexItem grow={false}>
             {getRelatedErrorsHref || onErrorClick ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
@@ -115,7 +116,8 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                     onErrorClick({
                       traceId: item.traceId,
                       docId: item.id,
-                      errorCount: item.errorCount,
+                      errorCount,
+                      errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
                     });
                   }
                 }}

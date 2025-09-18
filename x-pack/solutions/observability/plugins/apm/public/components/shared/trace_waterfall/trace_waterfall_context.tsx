@@ -51,7 +51,12 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
 });
 
 export type OnNodeClick = (id: string) => void;
-export type OnErrorClick = (params: { traceId: string; docId: string; errorCount: number }) => void;
+export type OnErrorClick = (params: {
+  traceId: string;
+  docId: string;
+  errorCount: number;
+  errorDocId?: string;
+}) => void;
 
 interface Props {
   children: React.ReactNode;

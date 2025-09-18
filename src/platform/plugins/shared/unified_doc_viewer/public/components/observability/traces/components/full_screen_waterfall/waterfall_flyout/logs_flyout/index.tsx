@@ -21,28 +21,27 @@ export const logsFlyoutId = 'logsFlyout' as const;
 
 export interface SpanFlyoutProps {
   onCloseFlyout: () => void;
-  traceId: string;
-  docId: string;
+  errorDocId: string;
   dataView: DocViewRenderProps['dataView'];
 }
 
-export function LogsFlyout({ onCloseFlyout, traceId, docId, dataView }: SpanFlyoutProps) {
-  const { loading, logDoc } = useFetchLog({ docId, traceId });
+export function LogsFlyout({ onCloseFlyout, errorDocId, dataView }: SpanFlyoutProps) {
+  const { loading, logDoc } = useFetchLog({ errorDocId });
   const { indexes } = useDataSourcesContext();
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
-    if (!logDoc || !docId) return null;
+    if (!logDoc || !errorDocId) return null;
 
     return {
-      id: docId,
+      id: errorDocId,
       raw: {
         _index: logDoc._index,
-        _id: docId,
+        _id: errorDocId,
         _source: logDoc,
       },
       flattened: flattenObject(logDoc),
     };
-  }, [docId, logDoc]);
+  }, [errorDocId, logDoc]);
 
   return (
     <WaterfallFlyout
@@ -53,7 +52,7 @@ export function LogsFlyout({ onCloseFlyout, traceId, docId, dataView }: SpanFlyo
       loading={loading}
       title={i18n.translate(
         'unifiedDocViewer.observability.traces.fullScreenWaterfall.logFlyout.title.log',
-        { defaultMessage: 'Log' }
+        { defaultMessage: 'Log document' }
       )}
     >
       {documentAsHit ? (

@@ -9,33 +9,23 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
-import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
-
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface Props {
-  traceId: string;
-  docId: string;
+  errorDocId: string;
 }
 
 interface GetTransactionParams {
-  traceId: string;
   docId: string;
   indexPattern: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
 }
 
-async function fetchLogDocument({
-  traceId,
-  docId,
-  indexPattern,
-  data,
-  signal,
-}: GetTransactionParams) {
+async function fetchLogDocument({ docId, indexPattern, data, signal }: GetTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -51,27 +41,8 @@ async function fetchLogDocument({
               },
             ],
             query: {
-              bool: {
-                filter: [
-                  {
-                    match: {
-                      [TRACE_ID_FIELD]: traceId,
-                    },
-                  },
-                ],
-                should: [
-                  {
-                    match: {
-                      [SPAN_ID_FIELD]: docId,
-                    },
-                  },
-                  {
-                    match: {
-                      [TRANSACTION_ID_FIELD]: docId,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
+              term: {
+                _id: docId,
               },
             },
           },
@@ -82,7 +53,7 @@ async function fetchLogDocument({
   );
 }
 
-export function useFetchLog({ traceId, docId }: Props) {
+export function useFetchLog({ errorDocId }: Props) {
   const { indexes } = useDataSourcesContext();
   const { data, core } = getUnifiedDocViewerServices();
   const [loading, setLoading] = useState(true);
@@ -97,7 +68,7 @@ export function useFetchLog({ traceId, docId }: Props) {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await fetchLogDocument({ traceId, docId, indexPattern, data, signal })
+          ? await fetchLogDocument({ docId: errorDocId, indexPattern, data, signal })
           : undefined;
         setLogDoc(result?.rawResponse.hits.hits[0]?.fields ?? null);
       } catch (err) {
@@ -121,7 +92,7 @@ export function useFetchLog({ traceId, docId }: Props) {
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, docId, indexPattern, traceId]);
+  }, [core.notifications.toasts, data, errorDocId, indexPattern]);
 
   return { loading, logDoc };
 }

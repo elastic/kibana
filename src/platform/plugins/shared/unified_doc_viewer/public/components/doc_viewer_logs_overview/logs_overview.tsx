@@ -64,7 +64,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
       indexes,
-      showTraceWaterfall,
+      showTraceWaterfall = true,
     },
     ref
   ) => {
