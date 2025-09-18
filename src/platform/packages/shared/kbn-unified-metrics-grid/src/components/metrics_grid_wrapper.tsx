@@ -7,108 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useEuiTheme, useGeneratedHtmlId, useMutationObserver, logicalCSS } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { css, cx } from '@emotion/css';
-import { useMetricsGridState } from '../hooks';
+import { useMetricsGridState, useFullScreenStyles, useMetricsGridFullScreen } from '../hooks';
+import {
+  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
+  METRICS_GRID_FULL_SCREEN_CLASS,
+  METRICS_GRID_RESTRICT_BODY_CLASS,
+} from '../common/constants';
 import { RightSideActions } from './toolbar/right_side_actions/right_side_actions';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
-
-const getFullScreenStyles = (euiTheme: EuiThemeComputed) => {
-  const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
-  return {
-    [METRICS_GRID_FULL_SCREEN_CLASS]: css`
-      z-index: ${fullScreenZIndex} !important;
-      position: fixed;
-      inset: 0;
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-    `,
-    [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
-      ${logicalCSS('height', '100vh')}
-      overflow: hidden;
-
-      .euiHeader[data-fixed-header] {
-        z-index: ${fullScreenZIndex - 1} !important;
-      }
-
-      .euiOverlayMask[data-relative-to-header='below'] {
-        ${logicalCSS('top', '0')}
-      }
-
-      .euiFlyout {
-        ${logicalCSS('top', '0')}
-        ${logicalCSS('height', '100%')}
-      }
-    `,
-  };
-};
-
-export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsExperienceGridWrapper--fullScreen';
-export const METRICS_GRID_FULL_SCREEN_CLASS = 'metricsExperienceGrid--fullScreen';
-export const METRICS_GRID_RESTRICT_BODY_CLASS = 'metricsExperienceGrid--restrictBody';
-// Ensure full screen metrics grids are not covered by elements with a z-index
-const fullScreenBodyStyles = css`
-  *:not(
-      .euiFlyout,
-      .${METRICS_GRID_FULL_SCREEN_CLASS}, .${METRICS_GRID_FULL_SCREEN_CLASS} *,
-      [data-euiportal='true'],
-      [data-euiportal='true'] *
-    ) {
-    z-index: unset !important;
-  }
-`;
-
-const bodyClassesToToggle = [fullScreenBodyStyles, METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS];
-const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
-  const hasFullScreenClass = metricsGrid.classList.contains(METRICS_GRID_FULL_SCREEN_CLASS);
-
-  if (hasFullScreenClass) {
-    document.body.classList.add(...bodyClassesToToggle);
-  } else {
-    document.body.classList.remove(...bodyClassesToToggle);
-  }
-};
-
-export const useMetricsGridFullScreen = () => {
-  const metricsGridId = useGeneratedHtmlId({ prefix: 'metricsExperienceGrid' });
-  const [metricsGridWrapper, setMetricsGridWrapper] = useState<HTMLElement | null>(null);
-  const [metricsGrid, setMetricsGrid] = useState<HTMLElement | null>(null);
-
-  const findMetricsGridElement = useCallback<MutationCallback>(
-    (_, observer) => {
-      const foundMetricsGrid = document.getElementById(metricsGridId);
-
-      if (foundMetricsGrid) {
-        setMetricsGrid(foundMetricsGrid);
-        observer.disconnect();
-      }
-    },
-    [metricsGridId]
-  );
-
-  const handleMetricsGridFullScreenToggle = useCallback<MutationCallback>(() => {
-    if (metricsGrid) {
-      toggleMetricsGridFullScreen(metricsGrid);
-    }
-  }, [metricsGrid]);
-
-  useMutationObserver(metricsGridWrapper, findMetricsGridElement, {
-    childList: true,
-    subtree: true,
-  });
-
-  useMutationObserver(metricsGrid, handleMetricsGridFullScreenToggle, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
-  return { metricsGridId, metricsGridWrapper, setMetricsGridWrapper };
-};
 
 export interface MetricsGridWrapperProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
@@ -132,11 +44,10 @@ export const MetricsGridWrapper = ({
     renderToggleActions,
     requestParams,
   });
-  const { euiTheme } = useEuiTheme();
   const { searchTerm, onSearchTermChange, isFullscreen } = useMetricsGridState();
 
   const { metricsGridId, setMetricsGridWrapper } = useMetricsGridFullScreen();
-  const styles = useMemo(() => getFullScreenStyles(euiTheme), [euiTheme]);
+  const styles = useFullScreenStyles();
 
   const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];
   const metricsGridFullScreenClass = styles[METRICS_GRID_FULL_SCREEN_CLASS];

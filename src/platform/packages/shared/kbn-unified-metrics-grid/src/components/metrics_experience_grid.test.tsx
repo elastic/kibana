@@ -37,6 +37,12 @@ const useMetricFieldsQueryMock = hooks.useMetricFieldsQuery as jest.MockedFuncti
 const useDimensionsQueryMock = hooks.useDimensionsQuery as jest.MockedFunction<
   typeof hooks.useDimensionsQuery
 >;
+const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.MockedFunction<
+  typeof hooks.useMetricsGridFullScreen
+>;
+const useFullScreenStylesMock = hooks.useFullScreenStyles as jest.MockedFunction<
+  typeof hooks.useFullScreenStyles
+>;
 
 const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
   typeof hooks.usePaginatedFields
@@ -118,6 +124,17 @@ describe('MetricsExperienceGrid', () => {
       data: allFields,
       status: 'success',
       isLoading: false,
+    });
+
+    useMetricsGridFullScreenMock.mockReturnValue({
+      metricsGridId: 'test-metrics-grid-id',
+      metricsGridWrapper: null,
+      setMetricsGridWrapper: jest.fn(),
+    });
+
+    useFullScreenStylesMock.mockReturnValue({
+      'metricsExperienceGrid--fullScreen': 'mock-fullscreen-class',
+      'metricsExperienceGrid--restrictBody': 'mock-restrict-body-class',
     });
   });
 
