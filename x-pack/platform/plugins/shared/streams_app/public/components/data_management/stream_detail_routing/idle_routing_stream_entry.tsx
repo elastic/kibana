@@ -27,17 +27,18 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { ConditionMessage } from '../condition_message';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
-const CentralizedContainer = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const Border = styled.div`
-  height: 20px;
-  border-right: ${({ theme }) => theme.euiTheme.border.thin};
-`;
-
 function VerticalRule() {
+  const { euiTheme } = useEuiTheme();
+  const CentralizedContainer = styled.div`
+    display: flex;
+    align-items: center;
+  `;
+
+  const Border = styled.div`
+    height: 20px;
+    border-right: ${euiTheme.border.thin};
+  `;
+
   return (
     <CentralizedContainer>
       <Border />
