@@ -8,29 +8,48 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
 import { ContentFrameworkSection } from '../..';
+import { LogsOverviewHighlights } from './logs_overview_highlights';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
 });
 
+interface LogsOverviewHeaderProps
+  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
+  formattedDoc: LogDocumentOverview;
+  doc: DataTableRecord;
+  dataView: DataView;
+  renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+}
+
 export function LogsOverviewHeader({
   doc,
   formattedDoc,
+  dataView,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
   renderFlyoutStreamProcessingLink,
-}: {
-  formattedDoc: LogDocumentOverview;
-  doc: DataTableRecord;
-  renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-}) {
+}: LogsOverviewHeaderProps) {
   const hasLogLevel = Boolean(formattedDoc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasTimestamp = Boolean(formattedDoc[fieldConstants.TIMESTAMP_FIELD]);
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
@@ -106,8 +125,21 @@ export function LogsOverviewHeader({
       id={accordionId}
       title={contentLabel}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
+      hasBorder={false}
+      hasPadding={false}
     >
-      {hasMessageField ? contentField : badges}
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+        {hasMessageField ? contentField : badges}
+      </EuiPanel>
+      <EuiSpacer size="m" />
+      <LogsOverviewHighlights
+        formattedDoc={formattedDoc}
+        doc={doc}
+        dataView={dataView}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
     </ContentFrameworkSection>
   ) : null;
 }

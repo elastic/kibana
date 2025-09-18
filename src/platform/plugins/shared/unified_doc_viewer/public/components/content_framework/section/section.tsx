@@ -44,6 +44,8 @@ export interface ContentFrameworkSectionProps {
   onToggle?: (isOpen: boolean) => void;
   forceState?: EuiAccordionProps['forceState'];
   isTechPreview?: boolean;
+  hasBorder?: boolean;
+  hasPadding?: boolean;
 }
 
 export function ContentFrameworkSection({
@@ -56,6 +58,8 @@ export function ContentFrameworkSection({
   forceState = 'open',
   'data-test-subj': accordionDataTestSubj,
   isTechPreview = false,
+  hasBorder = true,
+  hasPadding = true,
 }: ContentFrameworkSectionProps) {
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
 
@@ -126,6 +130,7 @@ export function ContentFrameworkSection({
                     color="hollow"
                     iconType="beaker"
                     title={title}
+                    data-test-subj="ContentFrameworkSectionEuiBetaBadge"
                   />
                 ) : (
                   <EuiIconTip
@@ -149,12 +154,12 @@ export function ContentFrameworkSection({
       >
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+          <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>
             {children}
           </EuiPanel>
         </>
       </EuiAccordion>
-      {accordionState ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
+      {accordionState === 'closed' ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
     </>
   );
 }

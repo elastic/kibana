@@ -10,8 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ContentFrameworkSectionProps } from './section';
-import { ContentFrameworkSection } from '../lazy_content_framework_section';
+import { ContentFrameworkSection, type ContentFrameworkSectionProps } from './section';
 
 const defaultProps: ContentFrameworkSectionProps = {
   title: 'Test Section',
@@ -42,6 +41,12 @@ describe('ContentFrameworkSection', () => {
     expect(screen.getByText('Test Section')).toBeInTheDocument();
   });
 
+  it('renders EuiBetaBadge when isTechPreview is true', () => {
+    const props = { ...defaultProps, isTechPreview: true };
+    render(<ContentFrameworkSection {...props} />);
+    expect(screen.getByTestId('ContentFrameworkSectionEuiBetaBadge')).toBeInTheDocument();
+  });
+
   it('renders the description as EuiIconTip', () => {
     render(<ContentFrameworkSection {...defaultProps} />);
     expect(screen.getByText('Section description')).toBeInTheDocument();
@@ -49,6 +54,7 @@ describe('ContentFrameworkSection', () => {
 
   it('renders actions as buttons', () => {
     render(<ContentFrameworkSection {...defaultProps} />);
+
     expect(screen.getByTestId('unifiedDocViewerSectionActionButton-expand')).toBeInTheDocument();
     expect(
       screen.getByTestId('unifiedDocViewerSectionActionButton-fullScreen')

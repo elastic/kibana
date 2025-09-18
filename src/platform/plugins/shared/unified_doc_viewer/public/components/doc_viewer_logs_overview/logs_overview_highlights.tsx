@@ -12,7 +12,7 @@ import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiBadge, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiPanel } from '@elastic/eui';
 import type { FieldConfiguration } from '../content_framework';
 import { ContentFrameworkTable } from '../content_framework';
 import { HighlightField } from '../observability/traces/components/highlight_field';
@@ -58,7 +58,6 @@ export function LogsOverviewHighlights({
           data-test-subj="unifiedDocViewLogsOverview"
         />
       </EuiPanel>
-      <EuiSpacer size="m" />
     </>
   );
 }

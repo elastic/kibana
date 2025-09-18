@@ -25,7 +25,6 @@ import type { LogDocument, TraceIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import { LogsOverviewHeader } from './logs_overview_header';
-import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
@@ -113,18 +112,14 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             }
           >
             <EuiSpacer size="m" />
-            <LogsOverviewHighlights
-              formattedDoc={parsedDoc}
-              doc={hit}
-              dataView={dataView}
-              filter={filter}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
-            />
             <LogsOverviewHeader
               formattedDoc={parsedDoc}
               doc={hit}
               renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              dataView={dataView}
             />
 
             <div>{renderFlyoutStreamField && renderFlyoutStreamField({ doc: hit })}</div>
