@@ -15,8 +15,7 @@ import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
 
-import type { ViewMode } from '@kbn/presentation-publishing';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import type { HasUniqueId, ViewMode } from '@kbn/presentation-publishing';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -150,7 +149,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       {isEnabled && floatingActions.length > 0 && (
         <div
           data-test-subj={`presentationUtil__floatingActions__${
-            apiHasUniqueId(api) ? api.uuid : v4()
+            (api as HasUniqueId)?.uuid ? (api as HasUniqueId).uuid : v4() // I cannot use `apiHasUniqueId(api)` because of import limitations for packages
           }`}
           className={classNames(
             'presentationUtil__floatingActions',

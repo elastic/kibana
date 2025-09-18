@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import { Subscription, of } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -28,6 +28,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
+  PublishesUnsavedChanges,
   apiPublishesDataLoading,
   apiPublishesTitle,
   useBatchedPublishingSubjects,
@@ -40,13 +41,17 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
+import {
+  type ControlPanelApi,
+  type ControlPanelState,
+  buildControlPanelApi,
+} from './build_control_panel_api';
 
 export const ControlPanel = ({
   parentApi,
   uuid,
   type,
-  grow,
-  width,
+  getInitialState,
   compressed,
   setControlPanelRef,
   uiActions,
@@ -59,16 +64,20 @@ export const ControlPanel = ({
     };
   uuid: string;
   type: string;
-  grow: ControlsGroupState['controls'][number]['grow'];
-  width: ControlsGroupState['controls'][number]['width'];
+  getInitialState: () => ControlPanelState;
   compressed?: boolean;
   uiActions: UiActionsStart;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
-  const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
+  const [api, setApi] = useState<ControlPanelApi | null>(null);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,
   });
+
+  const initialState = getInitialState();
+  const [grow, setGrow] = useState<ControlPanelState['grow']>(initialState.grow);
+  const [width, setWidth] = useState<ControlPanelState['width']>(initialState.width);
+  const [order, setOrder] = useState<ControlPanelState['order']>(initialState.order);
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
@@ -83,6 +92,22 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
+
+    subscriptions.add(
+      api.grow$.subscribe((result) => {
+        setGrow(result);
+      })
+    );
+    subscriptions.add(
+      api.width$.subscribe((result) => {
+        setWidth(result);
+      })
+    );
+    subscriptions.add(
+      api.order$.subscribe((result) => {
+        setOrder(result);
+      })
+    );
 
     if (apiPublishesDataLoading(api)) {
       subscriptions.add(
@@ -201,14 +226,9 @@ export const ControlPanel = ({
               type={type}
               getParentApi={() => parentApi}
               onApiAvailable={(panelApi) => {
-                const newPanelApi = {
-                  ...panelApi,
-                  serializeState: () => {
-                    return { rawState: { ...panelApi.serializeState().rawState, grow, width } };
-                  },
-                };
-                setApi(newPanelApi);
-                parentApi.registerChildApi(newPanelApi);
+                const newApi = buildControlPanelApi(uuid, initialState, panelApi);
+                setApi(newApi);
+                parentApi.registerChildApi(newApi);
               }}
               hidePanelChrome
             />

@@ -77,7 +77,6 @@ export const ControlsRenderer = ({
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const onDragEnd = useCallback(
     ({ over, active }: DragEndEvent) => {
-      console.log('HERE 2!!!');
       const oldIndex = active?.data.current?.sortable.index;
       const newIndex = over?.data.current?.sortable.index;
       if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
@@ -96,7 +95,6 @@ export const ControlsRenderer = ({
   return (
     <DndContext
       onDragStart={({ active }) => {
-        console.log('HERE!!!!', { active });
         setDraggingId(`${active.id}`);
       }}
       onDragEnd={onDragEnd}
@@ -121,14 +119,19 @@ export const ControlsRenderer = ({
           })}
           data-test-subj="controls-group-wrapper"
         >
-          {controlsInOrder.map(({ id, type, grow, width }) => (
+          {controlsInOrder.map(({ id, type, grow, width }, index) => (
             <ControlPanel
               uiActions={uiActions}
               key={id}
               type={type}
               uuid={id!}
-              grow={grow ?? DEFAULT_CONTROL_GROW}
-              width={width ?? DEFAULT_CONTROL_WIDTH}
+              getInitialState={() => {
+                return {
+                  grow,
+                  width,
+                  order: index,
+                };
+              }}
               parentApi={parentApi}
               compressed={getInitialState().compressed ?? true}
               setControlPanelRef={setControlPanelRef}
