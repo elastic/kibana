@@ -23,6 +23,7 @@ import { getViewInAppRelativeUrl } from '../create_security_rule_type_wrapper';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../../rule_actions_legacy/logic/notifications/schedule_notification_actions';
+import { errorAggregator } from './error_aggregator';
 
 export interface GenericAlert<T> {
   _id: string;
@@ -43,7 +44,6 @@ interface AlertWithPersistenceOpts<T, TParams extends RuleTypeParams> {
   ) => Promise<Array<GenericAlert<T>>>;
   logger: IRuleExecutionLogForExecutors;
   maxAlerts?: number;
-  refresh: boolean | 'wait_for';
   rule: SanitizedRuleConfig;
   ruleParams: TParams;
   spaceId: string;
@@ -52,34 +52,26 @@ interface AlertWithPersistenceOpts<T, TParams extends RuleTypeParams> {
 export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
   opts: AlertWithPersistenceOpts<T, TParams>
 ) => {
-  const {
-    alerts,
-    alertsClient,
-    enrichAlerts,
-    logger,
-    maxAlerts,
-    refresh,
-    rule,
-    ruleParams,
-    spaceId,
-  } = opts;
+  const { alerts, alertsClient, enrichAlerts, logger, maxAlerts, rule, ruleParams, spaceId } = opts;
 
   if (!alertsClient) {
     throw new AlertsClientError();
   }
+
+  logger.info(`alertWithPersistence rule: ${JSON.stringify(rule)}`);
+  logger.info(`alertWithPersistence ruleParams: ${JSON.stringify(ruleParams)}`);
 
   const numAlerts = alerts.length;
 
   logger.debug(`Found ${numAlerts} alerts.`);
 
   if (numAlerts > 0) {
-    console.log(`alerts ${JSON.stringify(alerts)}`);
+    logger.info(`alertWithPersistence alerts ${JSON.stringify(alerts)}`);
     const filteredAlerts: typeof alerts = await filterDuplicateAlerts({
       alerts,
       alertsClient,
-      spaceId,
     });
-    console.log(`filtered alerts ${JSON.stringify(filteredAlerts)}`);
+    logger.info(`alertWithPersistence filtered alerts ${JSON.stringify(filteredAlerts)}`);
 
     if (filteredAlerts.length === 0) {
       return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
@@ -93,7 +85,7 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
         enrichedAlerts = await enrichAlerts(filteredAlerts, {
           spaceId,
         });
-        console.log(`enriched alerts ${JSON.stringify(enrichedAlerts)}`);
+        logger.info(`alertWithPersistence enriched alerts ${JSON.stringify(enrichedAlerts)}`);
       } catch (e) {
         logger.debug('Enrichments failed');
       }
@@ -109,7 +101,7 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
       alerts: enrichedAlerts,
       currentTimeOverride: undefined,
     });
-    console.log(`augmented alerts ${JSON.stringify(augmentedAlerts)}`);
+    logger.info(`alertWithPersistence augmented alerts ${JSON.stringify(augmentedAlerts)}`);
 
     // const response = await ruleDataClientWriter.bulk({
     //   body: mapAlertsToBulkCreate(augmentedAlerts),
@@ -141,73 +133,57 @@ export const alertWithPersistence = async <T, TParams extends RuleTypeParams>(
     // return the created alerts
     // set the alert context, including the actual alert information
     augmentedAlerts.forEach((alert) => {
-      console.log(`reporting alert ${alert._id}`);
+      logger.info(`alertWithPersistence reporting alert ${alert._id}`);
       alertsClient.report({
         id: alert._id,
         uuid: alert._id,
         actionGroup: 'default',
+        state: { signals_count: 1 },
         payload: { ...alert._source },
       });
     });
 
-    const response = await alertsClient.flushAlerts();
+    const flushResponse = await alertsClient.flushAlerts();
 
-    console.log(`flush response ${JSON.stringify(response)}`);
+    if (!flushResponse) {
+      return { createdAlerts: [], errors: {}, alertsWereTruncated };
+    }
 
-    // augmentedAlerts.forEach((alert) => {
-    //   // TODO context.rule doesn't have the rule information
-    //   const context = {
-    //     rule: mapKeys(snakeCase, {
-    //       ...ruleParams,
-    //       name: rule.name,
-    //       id: rule.id,
-    //     }),
-    //     results_link: getViewInAppRelativeUrl({
-    //       rule: { ...rule.ruleConfig, params: ruleParams },
-    //       start: Date.parse(alert._source[TIMESTAMP]),
-    //       end: Date.parse(alert._source[TIMESTAMP]),
-    //     }),
-    //     // doesn't contain the full alert information because it's not yet populated.
-    //     // no id, index, and the stuff set in augment alert
-    //     alerts: [formatAlertForNotificationActions(alert._source) ?? alert._source],
-    //   };
-    //   console.log(`reporting alert ${alert._id} with context ${JSON.stringify(context)}`);
-    //   alertsClient.report({
-    //     id: alert._id,
-    //     uuid: alert._id,
-    //     actionGroup: 'default',
-    //     // context,
-    //     payload: { ...alert._source },
-    //   });
-    // });
+    const createdAlerts = (flushResponse ?? [])
+      .filter(({ response }) => response?.create?.status === 201)
+      .map(({ alert, response }) => ({
+        _id: response?.create?._id ?? '',
+        _index: response?.create?._index ?? '',
+        ...alert,
+      }));
 
-    // flush alerts, have to get the response
-    // iterate over the response and set the context for each alert
+    logger.info(`alertWithPersistence createdAlerts ${JSON.stringify(createdAlerts)}`);
 
-    // createdAlerts.forEach((alert) =>
-    //   options.services.alertFactory
-    //     .create(alert._id)
-    //     .replaceState({
-    //       signals_count: 1,
-    //     })
-    //     .scheduleActions(type.defaultActionGroupId, {
-    //       rule: mapKeys(snakeCase, {
-    //         ...options.params,
-    //         name: options.rule.name,
-    //         id: options.rule.id,
-    //       }),
-    //       results_link: type.getViewInAppRelativeUrl?.({
-    //         rule: { ...options.rule, params: options.params },
-    //         start: Date.parse(alert[TIMESTAMP]),
-    //         end: Date.parse(alert[TIMESTAMP]),
-    //       }),
-    //       alerts: [formatAlert?.(alert) ?? alert],
-    //     })
-    // );
+    createdAlerts.forEach((alert) => {
+      alertsClient.setAlertData({
+        id: alert._id,
+        context: {
+          rule: mapKeys(snakeCase, {
+            ...ruleParams,
+            name: rule.name,
+            id: rule.id,
+          }),
+          results_link: getViewInAppRelativeUrl({
+            rule: { ...rule, params: ruleParams },
+            start: Date.parse(alert[TIMESTAMP] as string),
+            end: Date.parse(alert[TIMESTAMP] as string),
+          }),
+          alerts: [formatAlertForNotificationActions(alert) ?? alert],
+        },
+      });
+    });
 
     return {
       createdAlerts,
-      errors: errorAggregator(response.body, [409]),
+      errors: errorAggregator(
+        flushResponse.map(({ response }) => response),
+        [409]
+      ),
       alertsWereTruncated,
     };
   } else {

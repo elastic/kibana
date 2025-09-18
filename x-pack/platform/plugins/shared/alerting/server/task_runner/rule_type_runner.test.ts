@@ -268,12 +268,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
@@ -379,12 +373,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
@@ -443,12 +431,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['abc']);
@@ -560,9 +542,6 @@ describe('RuleTypeRunner', () => {
         'limit exceeded'
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
-      expect(alertsClient.processAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -668,9 +647,6 @@ describe('RuleTypeRunner', () => {
         'executor error'
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
-      expect(alertsClient.processAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -817,12 +793,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
@@ -936,125 +906,12 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
-    });
-
-    test('should throw error if alertsClient.processAlerts throws error', async () => {
-      alertsClient.processAlerts.mockImplementationOnce(() => {
-        throw new Error('process alerts failed');
-      });
-
-      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
-
-      await expect(
-        ruleTypeRunner.run({
-          context: {
-            alertingEventLogger,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            queryDelaySec: 0,
-            logger,
-            request: fakeRequest,
-            maintenanceWindowsService,
-            ruleId: RULE_ID,
-            ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
-            ruleRunMetricsStore,
-            spaceId: 'default',
-            isServerless: false,
-          },
-          alertsClient,
-          executionId: 'abc',
-          executorServices: {
-            getDataViews,
-            ruleMonitoringService: publicRuleMonitoringService,
-            ruleResultService: publicRuleResultService,
-            savedObjectsClient,
-            uiSettingsClient,
-            wrappedScopedClusterClient,
-            getWrappedSearchSourceClient,
-          },
-          rule: mockedRule,
-          ruleType,
-          startedAt: new Date(DATE_1970),
-          state: mockTaskInstance().state,
-          validatedParams: mockedRuleParams,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"process alerts failed"`);
-
-      expect(ruleType.executor).toHaveBeenCalledWith({
-        executionId: 'abc',
-        ruleExecutionTimeout: '5m',
-        services: {
-          alertFactory: alertsClient.factory(),
-          alertsClient: alertsClient.client(),
-          getDataViews: expect.any(Function),
-          getMaintenanceWindowIds: expect.any(Function),
-          ruleMonitoringService: publicRuleMonitoringService,
-          ruleResultService: publicRuleResultService,
-          savedObjectsClient,
-          scopedClusterClient: wrappedScopedClusterClient.client(),
-          getSearchSourceClient: expect.any(Function),
-          share: {},
-          shouldStopExecution: expect.any(Function),
-          shouldWriteAlerts: expect.any(Function),
-          uiSettingsClient,
-        },
-        params: mockedRuleParams,
-        state: mockTaskInstance().state,
-        startedAt: new Date(DATE_1970),
-        startedAtOverridden: false,
-        previousStartedAt: null,
-        spaceId: 'default',
-        isServerless: false,
-        rule: {
-          id: RULE_ID,
-          name: mockedRule.name,
-          tags: mockedRule.tags,
-          consumer: mockedRule.consumer,
-          producer: ruleType.producer,
-          revision: mockedRule.revision,
-          ruleTypeId: mockedRule.alertTypeId,
-          ruleTypeName: ruleType.name,
-          enabled: mockedRule.enabled,
-          schedule: mockedRule.schedule,
-          actions: mockedRule.actions,
-          createdBy: mockedRule.createdBy,
-          updatedBy: mockedRule.updatedBy,
-          createdAt: mockedRule.createdAt,
-          updatedAt: mockedRule.updatedAt,
-          throttle: mockedRule.throttle,
-          notifyWhen: mockedRule.notifyWhen,
-          muteAll: mockedRule.muteAll,
-          snoozeSchedule: mockedRule.snoozeSchedule,
-          alertDelay: mockedRule.alertDelay,
-        },
-        logger,
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        getTimeRange: expect.any(Function),
-      });
-
-      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
-      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
-      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
-        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
-      );
-      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
-      expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
     test('should throw error if alertsClient.persistAlerts throws error', async () => {
@@ -1156,12 +1013,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
@@ -1268,12 +1119,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
@@ -1378,12 +1223,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
@@ -1480,12 +1319,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
@@ -1557,12 +1390,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
@@ -1616,12 +1443,6 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({

@@ -74,6 +74,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
 }
 
 export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
+  executionId: string;
   completeRule: CompleteRule<TParams>;
   tuple: {
     to: Moment;
@@ -120,7 +121,7 @@ export type SecurityExecutorOptions<
   sharedParams: SecuritySharedParams<TParams>;
 };
 
-export type SecurityRuleType<TParams extends RuleParams, TState extends RuleTypeState> = Omit<
+export type SecurityAlertType<TParams extends RuleParams, TState extends RuleTypeState> = Omit<
   RuleType<
     TParams,
     TParams,
@@ -162,7 +163,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <TParams extends RuleParams, TState extends RuleTypeState>(
-  type: SecurityRuleType<TParams, TState>
+  type: SecurityAlertType<TParams, TState>
 ) => RuleType<
   TParams,
   TParams,

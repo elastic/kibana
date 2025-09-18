@@ -13,6 +13,8 @@ import type {
   IndicesDataStream,
 } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
+import { TaskRunnerTimer } from '../task_runner/task_runner_timer';
 import { ReplaySubject, Subject, of } from 'rxjs';
 import { AlertsService } from './alerts_service';
 import type { IRuleTypeAlerts } from '../types';
@@ -34,6 +36,7 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 
 const fakeRequest = {
   headers: {},
@@ -1544,6 +1547,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1569,6 +1574,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             isServerless: true,
             rule: {
               consumer: 'bar',
@@ -1610,6 +1617,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1665,6 +1674,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1704,6 +1715,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             isServerless: false,
             rule: {
               consumer: 'bar',
@@ -1776,6 +1789,8 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
+              ruleRunMetricsStore,
+              timer: new TaskRunnerTimer({ logger }),
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1798,6 +1813,8 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
+              ruleRunMetricsStore,
+              timer: new TaskRunnerTimer({ logger }),
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1837,6 +1854,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             isServerless: false,
             rule: {
               consumer: 'bar',
@@ -1901,6 +1920,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1926,6 +1947,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             isServerless: false,
             rule: {
               consumer: 'bar',
@@ -1998,6 +2021,8 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
+              ruleRunMetricsStore,
+              timer: new TaskRunnerTimer({ logger }),
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2031,6 +2056,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             isServerless: false,
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2107,6 +2134,8 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
+              ruleRunMetricsStore,
+              timer: new TaskRunnerTimer({ logger }),
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2179,6 +2208,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2251,6 +2282,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2321,6 +2354,8 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            ruleRunMetricsStore,
+            timer: new TaskRunnerTimer({ logger }),
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

@@ -12,12 +12,12 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThreatRuleParams } from '../../rule_schema';
 import { indicatorMatchExecutor } from './indicator_match';
-import type { SecurityRuleType, SignalSourceHit } from '../types';
+import type { SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
-export const createIndicatorMatchAlertType = (): SecurityRuleType<ThreatRuleParams, {}> => {
+export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRuleParams, {}> => {
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',

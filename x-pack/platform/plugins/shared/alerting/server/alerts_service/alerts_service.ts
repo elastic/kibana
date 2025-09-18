@@ -253,6 +253,8 @@ export class AlertsService implements IAlertsService {
       kibanaVersion: this.options.kibanaVersion,
       dataStreamAdapter: this.dataStreamAdapter,
       isServerless: this.isServerless,
+      timer: opts.timer,
+      ruleRunMetricsStore: opts.ruleRunMetricsStore,
     });
   }
 

@@ -46,6 +46,28 @@ describe('createAlertFactory()', () => {
     expect(result.getId()).toEqual('1');
   });
 
+  test('creates new alerts with given UUID for ones not passed in', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+    const result = alertFactory.create('1', 'my-custom-uuid');
+    expect(result).toMatchObject({
+      meta: {
+        uuid: 'my-custom-uuid',
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '1',
+    });
+    // @ts-expect-error
+    expect(result.getId()).toEqual('1');
+    expect(result.getUuid()).toEqual('my-custom-uuid');
+  });
+
   test('reuses existing alerts', () => {
     const alert = new Alert('1', {
       state: { foo: true },

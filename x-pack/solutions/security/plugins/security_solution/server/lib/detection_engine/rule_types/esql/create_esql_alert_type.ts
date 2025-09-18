@@ -11,10 +11,10 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EsqlRuleParams } from '../../rule_schema';
 import { esqlExecutor } from './esql';
-import type { SecurityRuleType } from '../types';
+import type { SecurityAlertType } from '../types';
 import type { EsqlState } from './types';
 
-export const createEsqlAlertType = (): SecurityRuleType<EsqlRuleParams, EsqlState> => {
+export const createEsqlAlertType = (): SecurityAlertType<EsqlRuleParams, EsqlState> => {
   return {
     id: ESQL_RULE_TYPE_ID,
     name: 'ES|QL Rule',

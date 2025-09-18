@@ -43,12 +43,7 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
   sharedParams,
   maxAlerts,
 }: BulkCreateParams<T>): Promise<GenericBulkCreateResponse<T>> => {
-  const {
-    completeRule,
-    ruleExecutionLogger,
-    refreshOnIndexingAlerts: refreshForBulkCreate,
-    spaceId,
-  } = sharedParams;
+  const { completeRule, ruleExecutionLogger, spaceId } = sharedParams;
   const { alertsClient } = services;
   if (wrappedAlerts.length === 0) {
     return {
@@ -91,7 +86,6 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
       // `fields` should have already been merged into `doc._source`
       _source: doc._source,
     })),
-    refresh: refreshForBulkCreate,
     logger: sharedParams.ruleExecutionLogger,
     maxAlerts,
     rule: completeRule.ruleConfig,
@@ -112,7 +106,9 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount: createdAlerts.length,
-      createdItems: createdAlerts,
+      createdItems: createdAlerts as unknown as Array<
+        AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }
+      >,
       alertsWereTruncated,
     };
   } else {
@@ -122,7 +118,9 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
       bulkCreateDuration: makeFloatString(end - start),
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       createdItemsCount: createdAlerts.length,
-      createdItems: createdAlerts,
+      createdItems: createdAlerts as unknown as Array<
+        AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }
+      >,
       alertsWereTruncated,
     };
   }

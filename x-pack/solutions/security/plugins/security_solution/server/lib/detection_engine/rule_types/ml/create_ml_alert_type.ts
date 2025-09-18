@@ -13,13 +13,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { MachineLearningRuleParams } from '../../rule_schema';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { mlExecutor } from './ml';
-import type { SecurityRuleType, WrapSuppressedHits } from '../types';
+import type { SecurityAlertType, WrapSuppressedHits } from '../types';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { SetupPlugins } from '../../../../plugin';
 
 export const createMlAlertType = (
   ml: SetupPlugins['ml']
-): SecurityRuleType<MachineLearningRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
+): SecurityAlertType<MachineLearningRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',

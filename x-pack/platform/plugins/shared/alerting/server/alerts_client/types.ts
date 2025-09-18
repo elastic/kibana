@@ -8,9 +8,10 @@
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type {
-  BulkResponse,
   SearchRequest,
   SearchResponseBody,
+  BulkOperationType,
+  BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ALERT_RULE_CATEGORY,
@@ -78,7 +79,6 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'trackedActiveAlerts'
@@ -86,7 +86,10 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
-  persistAlerts(): Promise<BulkResponse | undefined>;
+  persistAlerts(): Promise<Array<{
+    alert: Alert & AlertData;
+    response: Partial<Record<BulkOperationType, BulkResponseItem>>;
+  }> | void>;
   updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
     alertIds: string[];
     maintenanceWindowIds: string[];
@@ -165,7 +168,10 @@ export interface PublicAlertsClient<
   setAlertLimitReached: (reached: boolean) => void;
   getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
   search: (queryBody: SearchRequest) => Promise<SearchResult<AlertData>>;
-  flushAlerts: () => Promise<BulkResponse | undefined>;
+  flushAlerts: () => Promise<Array<{
+    alert: Alert & AlertData;
+    response: Partial<Record<BulkOperationType, BulkResponseItem>>;
+  }> | void>;
 }
 
 export interface ReportedAlert<

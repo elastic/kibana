@@ -6,6 +6,7 @@
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys } from 'lodash';
+import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
@@ -33,14 +34,18 @@ import type { MaintenanceWindow } from '../application/maintenance_window/types'
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
 import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
+import type { TaskRunnerTimer } from '../task_runner/task_runner_timer';
+import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   request: KibanaRequest;
+  ruleRunMetricsStore: RuleRunMetricsStore;
   ruleType: UntypedNormalizedRuleType;
   spaceId: string;
+  timer: TaskRunnerTimer;
 }
 
 export class LegacyAlertsClient<
@@ -214,6 +219,13 @@ export class LegacyAlertsClient<
     return {};
   }
 
+  public async persistAlerts(): Promise<Array<{
+    alert: Alert & AlertData;
+    response: Partial<Record<BulkOperationType, BulkResponseItem>>;
+  }> | void> {
+    return;
+  }
+
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.options.logger,
@@ -282,10 +294,6 @@ export class LegacyAlertsClient<
 
   public client() {
     return null;
-  }
-
-  public async persistAlerts() {
-    return;
   }
 
   public async updatePersistedAlertsWithMaintenanceWindowIds() {

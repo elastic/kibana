@@ -150,11 +150,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
-    // const persistenceRuleType = createPersistenceRuleTypeWrapper({
-    //   ruleDataClient,
-    //   logger,
-    //   formatAlert: formatAlertForNotificationActions,
-    // });
 
     return {
       ...type,
@@ -481,6 +476,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   services,
                   state: runState,
                   sharedParams: {
+                    executionId,
                     completeRule,
                     inputIndex,
                     exceptionFilter,
@@ -649,6 +645,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         });
       },
       alerts: {
+        shouldWrite: true,
         context: 'security',
         mappings: { dynamic: false, fieldMap: securityRuleTypeFieldMap },
         useEcs: true,

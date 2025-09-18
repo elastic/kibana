@@ -11,13 +11,13 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { SecurityRuleType, SignalSourceHit } from '../types';
+import type { SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
-export const createEqlAlertType = (): SecurityRuleType<EqlRuleParams, {}> => {
+export const createEqlAlertType = (): SecurityAlertType<EqlRuleParams, {}> => {
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',

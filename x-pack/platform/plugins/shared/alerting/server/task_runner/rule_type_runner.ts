@@ -340,28 +340,13 @@ export class RuleTypeRunner<
       return { state: undefined, error, stackTrace };
     }
 
-    await withAlertingSpan('alerting:process-alerts', () =>
-      this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        await alertsClient.processAlerts();
-        alertsClient.determineFlappingAlerts();
-        alertsClient.determineDelayedAlerts({
-          alertDelay: alertDelay?.active ?? 0,
-          ruleRunMetricsStore: context.ruleRunMetricsStore,
-        });
-      })
-    );
-
-    await withAlertingSpan('alerting:index-alerts-as-data', () =>
-      this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-        if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
-          await alertsClient.persistAlerts();
-        } else {
-          context.logger.debug(
-            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
-          );
-        }
-      })
-    );
+    if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
+      await alertsClient.persistAlerts();
+    } else {
+      context.logger.debug(
+        `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
+      );
+    }
 
     await withAlertingSpan('alerting:updating-maintenance-windows', async () => {
       if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {

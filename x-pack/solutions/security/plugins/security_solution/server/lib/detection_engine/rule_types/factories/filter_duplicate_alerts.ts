@@ -25,7 +25,6 @@ interface FilterDuplicateAlertsOpts<T> {
     AlertInstanceContext,
     SecurityActionGroupId
   > | null;
-  spaceId: string;
 }
 
 /**
@@ -34,7 +33,6 @@ interface FilterDuplicateAlertsOpts<T> {
 export const filterDuplicateAlerts = async <T extends { _id: string }>({
   alerts,
   alertsClient,
-  spaceId,
 }: FilterDuplicateAlertsOpts<T>) => {
   if (!alertsClient) {
     throw new AlertsClientError();
