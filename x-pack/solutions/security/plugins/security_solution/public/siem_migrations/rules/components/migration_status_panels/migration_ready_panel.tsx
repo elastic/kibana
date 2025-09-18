@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiPanel,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
@@ -26,6 +19,7 @@ import { MigrationPanelTitle } from '../../../common/components/migration_panels
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { StartTranslationButton } from '../../../common/components/start_translation_button';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -36,6 +30,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { telemetry } = useKibana().services.siemMigrations.rules;
   const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
   const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
+  const { startMigration, isLoading: isStarting } = useStartMigration();
 
   useEffect(() => {
     getMissingResources(migrationStats.id);
@@ -101,7 +96,12 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <StartTranslationButton migrationId={migrationStats.id} isStopped={isStopped} />
+              <StartTranslationButton
+                migrationId={migrationStats.id}
+                isStopped={isStopped}
+                startMigration={startMigration}
+                isStarting={isStarting}
+              />
             </EuiFlexItem>
           </>
         )}
@@ -116,37 +116,3 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   );
 });
 MigrationReadyPanel.displayName = 'MigrationReadyPanel';
-
-const StartTranslationButton = React.memo<{ migrationId: string; isStopped: boolean }>(
-  ({ migrationId, isStopped }) => {
-    const { startMigration, isLoading } = useStartMigration();
-    const onStartMigration = useCallback(() => {
-      startMigration(migrationId);
-    }, [migrationId, startMigration]);
-
-    const text = useMemo(() => {
-      if (isStopped) {
-        return isLoading
-          ? i18n.RULE_MIGRATION_RESUMING_TRANSLATION_BUTTON
-          : i18n.RULE_MIGRATION_RESUME_TRANSLATION_BUTTON;
-      } else {
-        return isLoading
-          ? i18n.RULE_MIGRATION_STARTING_TRANSLATION_BUTTON
-          : i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON;
-      }
-    }, [isStopped, isLoading]);
-
-    return (
-      <EuiButton
-        data-test-subj={'startMigrationButton'}
-        fill={!isStopped}
-        onClick={onStartMigration}
-        isLoading={isLoading}
-        size="s"
-      >
-        {text}
-      </EuiButton>
-    );
-  }
-);
-StartTranslationButton.displayName = 'StartTranslationButton';

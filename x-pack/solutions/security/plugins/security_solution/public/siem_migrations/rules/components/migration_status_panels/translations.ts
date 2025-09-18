@@ -33,14 +33,6 @@ export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
   { defaultMessage: 'You can also upload the missing macros & lookups for more accurate results.' }
 );
 
-export const RULE_MIGRATION_START_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.startButton',
-  { defaultMessage: 'Start' }
-);
-export const RULE_MIGRATION_STARTING_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.startingButton',
-  { defaultMessage: 'Starting' }
-);
 export const RULE_MIGRATION_STOP_TRANSLATION_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.translate.stopButton',
   { defaultMessage: 'Stop' }
@@ -48,14 +40,6 @@ export const RULE_MIGRATION_STOP_TRANSLATION_BUTTON = i18n.translate(
 export const RULE_MIGRATION_STOPPING_TRANSLATION_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.translate.stoppingButton',
   { defaultMessage: 'Stopping' }
-);
-export const RULE_MIGRATION_RESUME_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.resumeButton',
-  { defaultMessage: 'Resume' }
-);
-export const RULE_MIGRATION_RESUMING_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.resumingButton',
-  { defaultMessage: 'Resuming' }
 );
 
 export const RULE_MIGRATION_PROGRESS_DESCRIPTION = (totalRules: number) =>

@@ -7,6 +7,39 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const DASHBOARD_MIGRATION_READY_DESCRIPTION = (totaldashboards: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.dashboards.panel.ready.description', {
+    defaultMessage: 'Migration of {totaldashboards} dashboards is created and ready to start.',
+    values: { totaldashboards },
+  });
+
+export const DASHBOARD_MIGRATION_ERROR_DESCRIPTION = (totaldashboards: number) => {
+  return i18n.translate(
+    'xpack.securitySolution.siemMigrations.dashboards.panel.error.description',
+    {
+      defaultMessage:
+        'Migration of {totaldashboards} dashboards failed. Please correct the below error and try again.',
+      values: { totaldashboards },
+    }
+  );
+};
+
+export const DASHBOARD_MIGRATION_STOPPED_DESCRIPTION = (totaldashboards: number) => {
+  return i18n.translate(
+    'xpack.securitySolution.siemMigrations.dashboards.panel.stopped.description',
+    {
+      defaultMessage:
+        'Migration of {totaldashboards} dashboards was stopped, you can resume it any time.',
+      values: { totaldashboards },
+    }
+  );
+};
+
+export const DASHBOARD_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.panel.ready.missingResources',
+  { defaultMessage: 'You can also upload the missing macros & lookups for more accurate results.' }
+);
+
 export const DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.panel.uploadMissingResources',
   { defaultMessage: 'Upload missing macros and lookup lists.' }
