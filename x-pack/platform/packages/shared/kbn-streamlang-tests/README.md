@@ -10,13 +10,16 @@ One such circular dependency chain is illustrated below:
 
 ```mermaid
 graph TD
-    A["@kbn/streamlang"] -->|needs for tests| B["@kbn/scout"]
-    B -->|imports| C["@kbn/apm-synthtrace"]
-    C -->|imports| D["@kbn/streams-schema"]
-    D -->|imports| A
+    A["@kbn/streamlang"] -->|_imports for co-living tests_| B["@kbn/scout"]
+    B -->|_imports_| C["@kbn/apm-synthtrace"]
+    C -->|_imports_| D["@kbn/streams-schema"]
+    D -->|_imports_| A
     
     style A fill:#555577
     style D fill:#555577
+
+    linkStyle 0 stroke-width: 2px, font-size: 8px;
+
     classDef circular stroke:#ff0000,stroke-width:2px,stroke-dasharray: 5 5
     class A,D circular
 ```
