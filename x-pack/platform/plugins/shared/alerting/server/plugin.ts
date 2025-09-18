@@ -455,6 +455,12 @@ export class AlertingPlugin {
       docLinks: core.docLinks,
       alertingConfig: this.config,
       core,
+      pluginsSetup: plugins,
+      pluginsStart: async () => {
+        const [, result] = await core.getStartServices();
+        return result;
+      },
+      alertingAuthorizationClientFactory: this.alertingAuthorizationClientFactory,
     });
 
     return {

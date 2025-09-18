@@ -52,6 +52,8 @@ import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
+import { findAlertsRoute } from './alert/apis/find/find_alerts_route';
+import type { AlertingAuthorizationClientFactory } from '../alerting_authorization_client_factory';
 
 import { createMaintenanceWindowRoute as createMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute as getMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/get/get_maintenance_window_route';
@@ -91,7 +93,7 @@ import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
-import type { AlertingPluginsStart } from '../plugin';
+import type { AlertingPluginsSetup, AlertingPluginsStart } from '../plugin';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -104,6 +106,9 @@ export interface RouteOptions {
   docLinks: DocLinksServiceSetup;
   alertingConfig: AlertingConfig;
   core: CoreSetup<AlertingPluginsStart, unknown>;
+  pluginsSetup: AlertingPluginsSetup;
+  pluginsStart: () => Promise<AlertingPluginsStart>;
+  alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -149,6 +154,14 @@ export function defineRoutes(opts: RouteOptions) {
   cloneRuleRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
   registerRulesValueSuggestionsRoute(router, licenseState, config$!);
+  findAlertsRoute(
+    router,
+    licenseState,
+    opts.pluginsSetup,
+    opts.pluginsStart,
+    opts.alertingAuthorizationClientFactory,
+    getAlertIndicesAlias
+  );
 
   // Alert APIs
   registerAlertsValueSuggestionsRoute(router, licenseState, config$!, getAlertIndicesAlias);
