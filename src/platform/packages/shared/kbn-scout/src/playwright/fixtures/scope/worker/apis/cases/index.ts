@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Attachment, Case, CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import type { Attachment, Case } from '@kbn/cases-plugin/common/types/domain';
 import type {
   AttachmentRequest,
   CasePostRequest,
@@ -36,7 +36,7 @@ export interface CasesApiService {
     spaceId?: string
   ) => Promise<ApiResponse<CasesFindResponse>>;
   connectors: {
-    get: (spaceId?: string) => Promise<ApiResponse<CaseConnector[]>>;
+    get: (spaceId?: string) => Promise<ApiResponse<any>>;
   };
   comments: {
     create: (
@@ -161,7 +161,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
             path: `${buildSpacePath(spaceId)}/api/cases/configure/connectors/_find`,
             retries: 3,
           });
-          return { data: response.data as CaseConnector[], status: response.status };
+          return { data: response.data, status: response.status };
         });
       },
     },
@@ -192,7 +192,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
               retries: 3,
               ignoreErrors: [404],
             });
-            return { data: response.data as Case, status: response.status };
+            return { data: response.data as Attachment, status: response.status };
           }
         );
       },
