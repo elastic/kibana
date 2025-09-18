@@ -236,6 +236,30 @@ describe('Discover url generator', () => {
     expect(path).toContain('__test__');
   });
 
+  test('can specify a tab id', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      tab: { id: '__test__' },
+    });
+
+    expect(path).toMatchInlineSnapshot(`"#/?_tab=(tabId:__test__)"`);
+  });
+
+  test('can specify to open in a new tab', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      tab: { id: 'new', label: 'My new tab' },
+      query: {
+        esql: 'SELECT * FROM test',
+      },
+      searchSessionId: '__test__',
+    });
+
+    expect(path).toMatchInlineSnapshot(
+      `"#/?searchSessionId=__test__&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(tabId:new,tabLabel:'My%20new%20tab')"`
+    );
+  });
+
   test('can specify columns, grid, interval, sort and savedQuery', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
