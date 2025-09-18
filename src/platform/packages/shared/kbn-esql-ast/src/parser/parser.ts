@@ -374,11 +374,6 @@ export class Parser {
 }
 
 /**
- * @deprecated Use `Parser.create` instead.
- */
-export const createParser = Parser.create;
-
-/**
  * @deprecated Use `Parser.parse` instead.
  */
 export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {
