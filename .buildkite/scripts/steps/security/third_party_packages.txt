@@ -1,3 +1,4 @@
+eslint-plugin-n
 @moonrepo/cli
 @langchain/langgraph-checkpoint
 dom-to-image-more
