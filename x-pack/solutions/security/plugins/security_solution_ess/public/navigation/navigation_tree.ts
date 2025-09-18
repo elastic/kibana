@@ -325,7 +325,10 @@ const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
     spaceBefore: null,
     sideNavVersion: 'v2',
     children: [
-      { link: 'monitoring' },
+      {
+        breadcrumbStatus: 'hidden',
+        children: [{ link: 'monitoring' }],
+      },
       {
         title: i18nStrings.stackManagementV2.alertsAndInsights.title,
         children: [
