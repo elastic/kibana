@@ -146,7 +146,7 @@
     "@emotion/serialize": "^1.1.2",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
-    "@faker-js/faker": "^9.7.0",
+    "@faker-js/faker": "^10.0.0",
     "@formatjs/icu-messageformat-parser": "^2.7.6",
     "@formatjs/intl": "^2.10.2",
     "@formatjs/intl-utils": "^3.8.4",
