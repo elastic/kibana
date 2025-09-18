@@ -260,15 +260,15 @@ Many Kibana APIs have extensive configuration options. Requiring users to specif
 
 [Our tests](https://github.com/elastic/kibana-team/issues/2001) show the following facts:
 
-* Excess fields that Terraform doesn't understand are not a problem: it dismisses them when comparing the resource.
-* When a resource attribute is defined as `Optional: true, Computed: true`, it allows external changes if the customer doesn't specify a value: Kibana can change the defaults, not return it, or a user can manually change that attribute without Terraform noticing.
-* Defining a resource attribute as `Optional: true, Default: <default value>` provides a more consistent behavior to the user (it identifies external changes), but can tighten the Terraform provider's version support matrix: if Kibana changes the default value, Terraform will still set its internal default instead. Bear in mind that our Terraform provider doesn't follow the Stack release cycle, so we can't guarantee that the default value will be the same as the one in the Stack.
+* The API can return fields that Terraform doesn't understand (e.g.: a new version of Kibana returns extra fields in the response, or it returns fields that Terraform users shouldn't be concerned about like `last_updated` or `created_by`): Terraform dismisses them when comparing the resource.
+* Resource attributes defined as `Optional: true, Computed: true`: Terraform won't detect changes. This means we can change the defaults, choose not to return it, and users can manually change that attribute without Terraform noticing the change.
+* Defining a resource attribute as `Optional: true, Default: <default value>` provides a more consistent behavior to the user (it identifies external changes), but can tighten the Terraform provider's version support matrix: if Kibana changes the default value, Terraform won't know about the change until the Terraform resource configuration gets updated. Keep in mind that our Terraform provider doesn't follow the Stack release cycle, so we can't guarantee that the default value will be the same as the one in the Stack.
 
 This is why the overall recommendation is to return as much information as possible and define the optional attributes in the [Terraform provider](https://github.com/elastic/terraform-provider-elasticstack/tree/main/internal/kibana) as `Optional: true, Default: <default value>`.
 
 **So can't I return slimmed-down information?**
 
-If you have a use case where you'd like your API to remove defaults from the response, you can do so, but we recommend that you add a query parameter to disable this behavior so that Terraform can always retrieve them.
+If you have a use case where you'd like your API to remove defaults from the response, you can do so, but we recommend that you add a query parameter to control stripping defaults so that Terraform can always retrieve them by requesting the full response.
 
 ### Be predictable
 
