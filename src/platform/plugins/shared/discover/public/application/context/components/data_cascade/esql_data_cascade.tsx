@@ -470,13 +470,13 @@ export const ESQLDataCascade = React.memo(
         >['rowHeaderActions']
       >
     >(
-      ({ row }) => {
+      ({ rowData }) => {
         return [
           {
             iconType: 'boxesVertical',
-            'aria-label': `${row.original.id}-row-actions`,
+            'aria-label': `${rowData.id}-row-actions`,
             'data-test-subj': 'dscCascadeRowContextActionButton',
-            onClick: rowContextActionClickHandler.bind(row.original),
+            onClick: rowContextActionClickHandler.bind(rowData),
           },
         ];
       },
@@ -490,7 +490,7 @@ export const ESQLDataCascade = React.memo(
         >['rowHeaderMetaSlots']
       >
     >(
-      ({ row }) =>
+      ({ rowData }) =>
         queryMeta.appliedFunctions.map(({ identifier, operator }) => {
           // maybe use operator to determine what meta component to render
           return (
@@ -500,9 +500,9 @@ export const ESQLDataCascade = React.memo(
                 defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
                 values={{
                   identifier,
-                  identifierValue: Number.isFinite(Number(row.original[identifier]))
-                    ? Math.round(Number(row.original[identifier])).toLocaleString()
-                    : (row.original[identifier] as string),
+                  identifierValue: Number.isFinite(Number(rowData[identifier]))
+                    ? Math.round(Number(rowData[identifier])).toLocaleString()
+                    : (rowData[identifier] as string),
                   bold: (chunks) => (
                     <EuiFlexItem grow={false}>
                       <EuiText size="s" textAlign="right">
@@ -530,18 +530,18 @@ export const ESQLDataCascade = React.memo(
         >['rowHeaderTitleSlot']
       >
     >(
-      ({ row, selectedCascadeGroups }) => {
-        const type = queryMeta.groupByFields.find(
-          (field) => field.field === selectedCascadeGroups[row.depth]
-        )!.type;
+      ({ rowData, nodePath }) => {
+        const rowGroup = nodePath[nodePath.length - 1];
+
+        const type = queryMeta.groupByFields.find((field) => field.field === rowGroup)!.type;
 
         if (/categorize/i.test(type)) {
           return (
             <React.Fragment>
               {getPatternCellRenderer(
                 // @ts-expect-error - necessary to match the data shape expectation
-                { flattened: row.original },
-                selectedCascadeGroups[row.depth],
+                { flattened: rowData },
+                rowGroup,
                 false,
                 48
               )}
@@ -551,10 +551,7 @@ export const ESQLDataCascade = React.memo(
 
         return (
           <EuiText size="s">
-            <EuiTextTruncate
-              text={row.original[selectedCascadeGroups[row.depth]] as string}
-              width={400}
-            >
+            <EuiTextTruncate text={rowData[rowGroup] as string} width={400}>
               {(truncatedText) => {
                 return <h4>{truncatedText}</h4>;
               }}
