@@ -497,6 +497,7 @@ export class StreamsClient {
    * include the dashboard links.
    */
   async getPrivileges(name: string) {
+    const isServerless = this.dependencies.isServerless;
     const REQUIRED_MANAGE_PRIVILEGES = [
       'manage_index_templates',
       'manage_ingest_pipelines',
@@ -504,23 +505,31 @@ export class StreamsClient {
       'read_pipeline',
     ];
 
+    if (!isServerless) {
+      REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
+    }
+
+    const REQUIRED_INDEX_PRIVILEGES = [
+      'read',
+      'write',
+      'create',
+      'manage',
+      'monitor',
+      'manage_data_stream_lifecycle',
+      'read_failure_store',
+      'manage_failure_store',
+    ];
+    if (!isServerless) {
+      REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
+    }
+
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
+        cluster: REQUIRED_MANAGE_PRIVILEGES,
         index: [
           {
             names: [name],
-            privileges: [
-              'read',
-              'write',
-              'create',
-              'manage',
-              'monitor',
-              'manage_data_stream_lifecycle',
-              'manage_ilm',
-              'read_failure_store',
-              'manage_failure_store',
-            ],
+            privileges: REQUIRED_INDEX_PRIVILEGES,
           },
         ],
       });
@@ -530,10 +539,13 @@ export class StreamsClient {
         REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
         Object.values(privileges.index[name]).every((privilege) => privilege === true),
       monitor: privileges.index[name].monitor,
-      lifecycle:
-        privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
+      // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
+      lifecycle: isServerless
+        ? privileges.index[name].manage_data_stream_lifecycle
+        : privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
-      text_structure: privileges.cluster.monitor_text_structure,
+      // text structure is always available for the internal user, but not for the current user
+      text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
       read_failure_store: privileges.index[name].read_failure_store,
       manage_failure_store: privileges.index[name].manage_failure_store,
     };
