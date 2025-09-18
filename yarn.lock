@@ -8588,43 +8588,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/wc-framework-types-browser@link:x-pack/solutions/chat/packages/wc-framework-types-browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wc-framework-types-common@link:x-pack/solutions/chat/packages/wc-framework-types-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wc-framework-types-server@link:x-pack/solutions/chat/packages/wc-framework-types-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wc-index-schema-builder@link:x-pack/solutions/chat/packages/wc-index-schema-builder":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wc-integration-utils@link:x-pack/solutions/chat/packages/wc-integration-utils":
-  version "0.0.0"
-  uid ""
-
 "@kbn/wci-browser@link:x-pack/solutions/chat/packages/wci-browser":
   version "0.0.0"
   uid ""
 
 "@kbn/wci-common@link:x-pack/solutions/chat/packages/wci-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wci-external-server@link:x-pack/solutions/chat/plugins/wci-external-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wci-index-source@link:x-pack/solutions/chat/plugins/wci-index-source":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wci-salesforce@link:x-pack/solutions/chat/plugins/wci-salesforce":
   version "0.0.0"
   uid ""
 
@@ -8640,11 +8608,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/workchat-app@link:x-pack/solutions/chat/plugins/workchat-app":
-  version "0.0.0"
-  uid ""
-
-"@kbn/workchat-framework-plugin@link:x-pack/solutions/chat/plugins/workchat-framework":
+"@kbn/workchat-app@link:x-pack/solutions/chat/plugins/workchat_app":
   version "0.0.0"
   uid ""
 

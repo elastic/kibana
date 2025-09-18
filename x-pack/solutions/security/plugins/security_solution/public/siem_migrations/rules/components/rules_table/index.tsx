@@ -38,11 +38,10 @@ import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import {
   MigrationTranslationResult,
-  SiemMigrationRetryFilter,
   SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
+  SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RulesFilterOptions, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
@@ -61,6 +60,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -213,7 +213,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         closeMissingIndexPatternFlyout();
       },
     });
-    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
+    const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
 
@@ -315,8 +315,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       );
     }, [enablePrebuiltRulesMatching]);
 
-    const isRulesLoading =
-      isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
+    const isRulesLoading = isPrebuiltRulesLoading || isDataLoading || isTableLoading || isStarting;
 
     const ruleActionsFactory = useCallback(
       (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => {
