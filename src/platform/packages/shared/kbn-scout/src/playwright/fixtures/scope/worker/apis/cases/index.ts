@@ -51,6 +51,12 @@ export interface UpdateCaseParams {
   category?: string;
 }
 
+export interface CreateCommentParams {
+  owner: 'cases' | 'observability' | 'securitySolution';
+  type: 'alert' | 'user';
+  comment?: string;
+}
+
 export interface CasesApiService {
   create: (params: CreateCaseParams, spaceId?: string) => Promise<any>;
   get: (caseId: string, spaceId?: string) => Promise<any>;
@@ -61,11 +67,7 @@ export interface CasesApiService {
     get: (spaceId?: string) => Promise<any>;
   };
   comments: {
-    create: (
-      caseId: string,
-      params: { comment: string; type: string },
-      spaceId?: string
-    ) => Promise<any>;
+    create: (caseId: string, params: CreateCommentParams, spaceId?: string) => Promise<any>;
     get: (caseId: string, commentId: string, spaceId?: string) => Promise<any>;
   };
   cleanup: {
@@ -81,11 +83,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
 
   return {
     comments: {
-      create: async (
-        caseId: string,
-        params: { comment: string; type: string },
-        spaceId?: string
-      ) => {
+      create: async (caseId: string, params: CreateCommentParams, spaceId?: string) => {
         return await measurePerformanceAsync(
           log,
           `casesApi.comments.create [${caseId}]`,
@@ -97,6 +95,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
               body: {
                 comment: params.comment,
                 type: params.type,
+                owner: params.owner,
               },
             });
           }

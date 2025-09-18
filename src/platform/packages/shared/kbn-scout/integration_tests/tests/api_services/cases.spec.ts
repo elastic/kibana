@@ -89,15 +89,36 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     expect(createdResponse1.status).toBe(200);
     expect(createdResponse2.status).toBe(200);
 
+    // delete all cases with tag "tag1"
     await apiServices.cases.cleanup.deleteCasesByTags(['tag1']);
 
     const fetchedResponse1 = await apiServices.cases.get(createdResponse1.data.id);
     const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
 
-    // this case should have been deleted because it had "tag1"
+    // this case should have been deleted because it was assigned "tag1"
     expect(fetchedResponse1.status).toBe(404);
 
-    // this case should have been deleted because it had "tag2"
+    // this case shouldn't been deleted because it was assigned "tag2"
     expect(fetchedResponse2.status).toBe(200);
+    caseId = createdResponse2.data.id;
+  });
+
+  apiTest.only('should add a comment', async ({ apiServices }) => {
+    const createdResponse = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+    });
+    caseId = createdResponse.data.id;
+    expect(createdResponse.status).toBe(200);
+
+    const createdComment = await apiServices.cases.comments.create(caseId, {
+      type: 'user',
+      comment: 'This is a test comment',
+      owner: 'cases',
+    });
+
+    expect(createdComment.status).toBe(200);
+    expect(createdComment.data.totalComment).toBe(1);
+    expect(createdComment.data.comments[0].comment).toBe('This is a test comment');
   });
 });
