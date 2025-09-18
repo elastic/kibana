@@ -1305,7 +1305,7 @@
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.6.0",
     "monaco-editor": "^0.44.0",
-    "monaco-yaml": "^5.1.0",
+    "monaco-yaml": "^5.4.0",
     "murmurhash": "^2.0.1",
     "mustache": "^4.2.0",
     "node-diff3": "^3.1.2",
