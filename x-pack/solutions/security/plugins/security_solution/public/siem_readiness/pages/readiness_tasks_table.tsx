@@ -12,6 +12,7 @@ import {
   EuiAccordion,
   EuiText,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -88,6 +89,7 @@ export const ReadinessTasksTable: React.FC = () => {
         action: () => handleLogTask({ task_id: 'lets-get-started', status: 'completed' }),
         actionButtonLabel: 'Complete Task',
         illustration: illustration_aerospace,
+        learnMoreLink: 'https://www.elastic.co/security-readiness',
       },
       'enable-endpoint-visibility': {
         action: () => handleLogTask({ task_id: 'enable-endpoint-visibility', status: 'completed' }),
@@ -264,7 +266,7 @@ export const ReadinessTasksTable: React.FC = () => {
               }}
               extraAction={
                 <div style={{ paddingRight: euiTheme.size.base }}>
-                  <EuiBadge color={taskData?.status === 'completed' ? 'success' : '#FDE9B5'}>
+                  <EuiBadge color={taskData?.status === 'completed' ? '#4DD2CA' : '#FDE9B5'}>
                     {taskData?.status || 'Incomplete'}
                   </EuiBadge>
                 </div>
@@ -272,21 +274,43 @@ export const ReadinessTasksTable: React.FC = () => {
             >
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiText size="s">
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{task.description}</p>
-                  </EuiText>
-                  {taskAddOn.actionButtonLabel && taskAddOn.action && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                      <EuiButton
-                        size="s"
-                        fill
-                        onClick={() => taskAddOn.action?.()}
-                        disabled={taskData?.status === 'completed'}
-                      >
-                        {taskAddOn.actionButtonLabel}
-                      </EuiButton>
-                    </div>
-                  )}
+                  <EuiFlexGroup direction="column">
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <p style={{ whiteSpace: 'pre-wrap' }}>{task.description}</p>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      style={{
+                        justifyContent: 'flex-start',
+                        alignItems: 'flex-end',
+                        flexDirection: 'row',
+                        gap: 8,
+                      }}
+                    >
+                      {taskAddOn.actionButtonLabel && taskAddOn.action && (
+                        <EuiButton
+                          size="s"
+                          fill
+                          onClick={() => taskAddOn.action?.()}
+                          disabled={taskData?.status === 'completed'}
+                        >
+                          {taskAddOn.actionButtonLabel}
+                        </EuiButton>
+                      )}
+                      {taskAddOn.learnMoreLink && (
+                        <EuiButtonEmpty
+                          iconType="popout"
+                          size="s"
+                          fill
+                          onClick={() => taskAddOn.action?.()}
+                          disabled={taskData?.status === 'completed'}
+                        >
+                          {'Learn More'}
+                        </EuiButtonEmpty>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ width: 128 }}>
                   <EuiIcon type={taskAddOn.illustration} style={{ width: 128, height: 128 }} />
