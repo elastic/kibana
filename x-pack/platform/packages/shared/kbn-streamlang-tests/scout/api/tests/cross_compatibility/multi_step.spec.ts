@@ -6,7 +6,14 @@
  */
 
 import { expect } from '@kbn/scout';
-import type { StreamlangDSL, SetProcessor, RenameProcessor } from '@kbn/streamlang';
+import type {
+  StreamlangDSL,
+  SetProcessor,
+  RenameProcessor,
+  AppendProcessor,
+  DateProcessor,
+  GrokProcessor,
+} from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest } from '../..';
 
