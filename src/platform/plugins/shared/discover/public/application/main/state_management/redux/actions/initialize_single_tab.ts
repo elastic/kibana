@@ -288,9 +288,9 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
 
-    // Begin syncing the state
+    // Begin syncing the state and trigger the initial fetch
     stateContainer.actions.initializeAndSync();
-
+    stateContainer.actions.fetchData(true);
     discoverTabLoadTracker.reportEvent();
 
     return { showNoDataPage: false };
