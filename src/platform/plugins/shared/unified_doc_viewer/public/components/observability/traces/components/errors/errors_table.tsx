@@ -20,7 +20,7 @@ import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { ContentFrameworkSection } from '../../../../content_framework/section';
+import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { getColumns } from './get_columns';
 import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
