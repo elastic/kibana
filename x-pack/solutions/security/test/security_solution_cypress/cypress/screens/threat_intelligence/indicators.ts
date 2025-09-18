@@ -36,7 +36,7 @@ export const INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER = getDataTestSubjectSelect
 export const INDICATORS_TABLE_INDICATOR_LAST_SEEN_CELL =
   '[data-gridcell-column-id="threat.indicator.last_seen"]';
 export const TABLE_CONTROLS = getDataTestSubjectSelector('dataGridControls');
-export const INDICATOR_TYPE_CELL = `[role="gridcell"][data-gridcell-column-id^="threat"]`;
+export const INDICATOR_TYPE_CELL = `[role="gridcell"][data-gridcell-column-id="threat.indicator.type"]`;
 export const INDICATORS_TABLE_CELL_FILTER_IN_BUTTON = `${getDataTestSubjectSelector(
   'tiIndicatorsTableCellFilterInButton'
 )} button`;
@@ -73,9 +73,8 @@ export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON = getDataTestSubjectSe
 export const FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE = getDataTestSubjectSelector(
   'tiFlyoutOverviewTableRow'
 );
-export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksPopoverButton'
-)} button`;
+export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON =
+  getDataTestSubjectSelector('showExtraActionsButton');
 export const FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterOut'
 );

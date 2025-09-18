@@ -89,14 +89,16 @@ export const filterOutFromFlyoutBlockItem = () => {
  * Filter in value from indicators flyout overview tab table
  */
 export const filterInFromFlyoutOverviewTable = () => {
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).first().click();
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).click();
 };
 
 /**
  * Filter out value from indicators flyout overview tab table
  */
 export const filterOutFromFlyoutOverviewTable = () => {
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).first().click();
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).click();
 };
 
 /**

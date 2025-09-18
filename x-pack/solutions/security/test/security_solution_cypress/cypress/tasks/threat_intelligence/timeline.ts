@@ -24,7 +24,15 @@ import {
  * Add data to timeline from barchart legend menu item
  */
 export const addToTimelineFromBarchartLegend = () => {
+  /**
+   * We need to wait for the JS chunk to load after opening the popover
+   * otherwise the click will not trigger any action
+   */
+  cy.intercept('GET', '**/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.chunk*.js').as(
+    'lazyChunk'
+  );
   openBarchartPopoverMenu();
+  cy.wait('@lazyChunk');
   cy.get(BARCHART_TIMELINE_BUTTON).first().click();
 };
 /**
@@ -51,9 +59,9 @@ export const closeTimeline = () => {
 /**
  * Add data to timeline from flyout overview tab table
  */
-export const addToTimelineFromFlyoutOverviewTabTable = () => {
-  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
-  cy.get(`[data-test-subj="showExtraActionsButton"]`).click();
+export const addToTimelineFromFlyoutOverviewTabTable = (fieldId?: string) => {
+  cy.get(`[data-test-subj^="cellActions-renderContent-${fieldId}"]`).first().trigger('mouseover');
+  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).click();
   cy.get(`[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]`).click();
 };
 
@@ -61,7 +69,9 @@ export const addToTimelineFromFlyoutOverviewTabTable = () => {
  * Add data to timeline from flyout overview tab block
  */
 export const addToTimelineFromFlyoutOverviewTabBlock = () => {
-  clickAction(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM, 0, FLYOUT_BLOCK_MORE_ACTIONS_BUTTON);
+  cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).first().trigger('mouseover');
+  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).click();
+  cy.get(`[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]`).click();
 };
 
 /**
