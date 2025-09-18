@@ -178,16 +178,17 @@ export async function getSuggestionsToRightOfOperatorExpression({
         // <COMMAND> expression AND/OR <suggest>
         // technically another boolean value should be suggested, but it is a better experience
         // to actually suggest a wider set of fields/functions
-        const typeToUse =
+        const typesToUse = (
           finalType === 'boolean' &&
           getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
-            ? ['any']
-            : (supportedTypes as string[]);
+            ? ['any' as const]
+            : supportedTypes
+        ) as SupportedDataType[];
 
         // TODO replace with fields callback + function suggestions
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
-            typeToUse,
+            typesToUse,
             location,
             getColumnsByType,
             {

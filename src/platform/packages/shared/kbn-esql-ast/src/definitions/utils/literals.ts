@@ -12,6 +12,7 @@ import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
+import type { FunctionParameterType, SupportedDataType } from '../types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
@@ -92,7 +93,7 @@ export function getUnitDuration(unit: number = 1) {
  * some literals that may make sense.
  */
 export function getCompatibleLiterals(
-  types: string[],
+  types: (FunctionParameterType | SupportedDataType | 'unknown')[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
@@ -118,6 +119,15 @@ export function getCompatibleLiterals(
     }
     // filter plural for now and suggest only unit + singular
     suggestions.push(...timeLiteralSuggestions); // i.e. 1 year
+  }
+
+  if (types.includes('date')) {
+    suggestions.push(
+      ...getDateLiterals({
+        addComma: options?.addComma,
+        advanceCursorAndOpenSuggestions: options?.advanceCursorAndOpenSuggestions,
+      })
+    );
   }
 
   return suggestions;

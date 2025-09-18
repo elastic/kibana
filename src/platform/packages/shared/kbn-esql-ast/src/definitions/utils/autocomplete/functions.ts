@@ -8,9 +8,8 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 
-import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { getLocationInfo } from '../../../commands_registry/location';
+import { uniq } from 'lodash';
 import {
   isAssignment,
   isColumn,
@@ -24,6 +23,7 @@ import {
   commaCompleteItem,
   listCompleteItem,
 } from '../../../commands_registry/complete_items';
+import { getLocationInfo } from '../../../commands_registry/location';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
@@ -36,7 +36,7 @@ import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
 import { comparisonFunctions } from '../../all_operators';
-import { FULL_TEXT_SEARCH_FUNCTIONS, timeUnitsToSuggest } from '../../constants';
+import { timeUnitsToSuggest } from '../../constants';
 import type { FunctionParameter, FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes, isNumericType } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../ast';
@@ -288,7 +288,7 @@ export async function getFunctionArgsSuggestions(
     // Literals
     suggestions.push(
       ...getCompatibleLiterals(
-        getTypesFromParamDefs(constantOnlyParamDefs) as string[],
+        getTypesFromParamDefs(constantOnlyParamDefs),
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
@@ -297,6 +297,14 @@ export async function getFunctionArgsSuggestions(
         variables
       )
     );
+
+    if (getTypesFromParamDefs(typesToSuggestNext).includes('date'))
+      suggestions.push(
+        ...getDateLiterals({
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+        })
+      );
 
     const ensureKeywordAndText = (types: FunctionParameterType[]) => {
       if (types.includes('keyword') && !types.includes('text')) {
@@ -368,22 +376,6 @@ export async function getFunctionArgsSuggestions(
         }))
       );
     }
-
-    // TODO shouldn't depend on command, only parameter type
-    if (
-      (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
-        ['where', 'eval'].includes(command.name) &&
-        !FULL_TEXT_SEARCH_FUNCTIONS.includes(fnDefinition.name)) ||
-      (['stats', 'inlinestats'].includes(command.name) &&
-        typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
-    )
-      // TODO merge with getCompatibleLiterals
-      suggestions.push(
-        ...getDateLiterals({
-          addComma: shouldAddComma,
-          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-        })
-      );
   }
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
@@ -472,7 +464,7 @@ async function getListArgsSuggestions(
           : node.args.filter(Array.isArray).flat().filter(isColumn);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
-            [argType as string],
+            [argType],
             getLocationInfo(offset, command, commands, false).id,
             getFieldsByType,
             {

@@ -6,36 +6,35 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
-import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLocation } from '../../../types';
+import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
 import type {
-  ISuggestionItem,
   GetColumnsByTypeFn,
   ICommandContext,
+  ISuggestionItem,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
-import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from '../literals';
+import type { ESQLAstItem, ESQLFunction, ESQLLocation, ESQLSingleAstItem } from '../../../types';
+import { Walker } from '../../../walker';
+import { logicalOperators } from '../../all_operators';
 import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
-import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
-import { getOverlapRange } from '../shared';
+import { FunctionDefinitionTypes, isParameterType, type SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
-import { getColumnByName, isParamExpressionType } from '../shared';
 import { getFunctionSuggestions } from '../functions';
-import { logicalOperators } from '../../all_operators';
+import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import {
   getOperatorSuggestion,
   getOperatorSuggestions,
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
-import { Walker } from '../../../walker';
+import { getColumnByName, getOverlapRange, isParamExpressionType } from '../shared';
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
   Boolean(location && location.min <= position && location.max >= position);
@@ -152,7 +151,7 @@ export function getFragmentData(innerText: string) {
  * TODO — split this into distinct functions, one for fields, one for functions, one for literals
  */
 export async function getFieldsOrFunctionsSuggestions(
-  types: string[],
+  types: (SupportedDataType | 'unknown')[],
   location: Location,
   getFieldsByType: GetColumnsByTypeFn,
   {
