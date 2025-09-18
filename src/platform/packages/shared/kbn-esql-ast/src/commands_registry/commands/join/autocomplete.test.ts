@@ -110,6 +110,7 @@ describe('JOIN Autocomplete', () => {
         },
         detail: 'Click to create',
         filterText: '',
+        incomplete: true,
         kind: 'Issue',
         label: 'Create lookup index',
         sortText: '1A',
@@ -168,6 +169,7 @@ describe('JOIN Autocomplete', () => {
         },
         detail: 'Click to create',
         filterText: 'new_join_index',
+        incomplete: true,
         kind: 'Issue',
         label: 'Create lookup index "new_join_index"',
         rangeToReplace: {

@@ -763,5 +763,7 @@ export function getLookupIndexCreateSuggestion(
     },
 
     rangeToReplace,
+
+    incomplete: true,
   } as ISuggestionItem;
 }
