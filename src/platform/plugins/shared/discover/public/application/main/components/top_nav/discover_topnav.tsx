@@ -285,6 +285,7 @@ export const DiscoverTopNav = ({
         onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
+        isNLToESQLConversionEnabled={true}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

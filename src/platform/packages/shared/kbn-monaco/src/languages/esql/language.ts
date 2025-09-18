@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  validateQuery,
+  type ESQLCallbacks,
+  suggest,
+  inlineSuggest,
+} from '@kbn/esql-validation-autocomplete';
+import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
-import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
-import { suggest, validateQuery, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
@@ -25,6 +30,11 @@ const removeKeywordSuffix = (name: string) => {
 };
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
+
+// Global state for LLM trigger tracking (outside provider instances)
+const globalLLMTriggerState = {
+  isTriggered: false,
+};
 
 export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
 
@@ -75,6 +85,46 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
         return getHoverItem(model, position, callbacks);
       },
     };
+  },
+  getInlineCompletionsProvider: (
+    callbacks?: ESQLCallbacks
+  ): monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void } => {
+    const provider = {
+      async provideInlineCompletions(model: monaco.editor.ITextModel, position: monaco.Position) {
+        const fullText = model.getValue();
+        // Get the text before the cursor
+        const textBeforeCursor = model.getValueInRange({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        const range = new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
+
+        const triggerKind = globalLLMTriggerState.isTriggered
+          ? ('manual' as const)
+          : ('automatic' as const);
+
+        // Reset flag after window expires naturally
+        if (globalLLMTriggerState.isTriggered) {
+          globalLLMTriggerState.isTriggered = false;
+        }
+
+        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks, triggerKind);
+      },
+      freeInlineCompletions: () => {},
+      triggerLLMSuggestions: () => {
+        globalLLMTriggerState.isTriggered = true;
+      },
+    };
+
+    return provider;
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
