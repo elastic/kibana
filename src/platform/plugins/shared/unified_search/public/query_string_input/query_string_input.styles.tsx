@@ -20,6 +20,27 @@ const queryStringInputStyles = {
       zIndex: euiThemeVars.euiZContentMenu,
       height: euiTheme.size.xxl,
       display: 'flex',
+      '&.kbnQueryBar__wrap--compact': {
+        height: euiTheme.size.xl,
+        '.kbnQueryBar__textareaWrap': {
+          '> .euiFormControlLayoutIcons': {
+            maxHeight: euiTheme.size.xl,
+          },
+        },
+        '.kbnQueryBar__textarea': {
+          height: euiTheme.size.xl,
+          minHeight: euiTheme.size.xl,
+          padding: euiTheme.size.xs,
+          paddingTop: `calc(${euiTheme.size.xs} + 2px)`,
+          paddingLeft: euiTheme.size.xl,
+          '~.euiFormControlLayoutIcons': {
+            top: euiTheme.size.xs,
+          },
+        },
+        '.kbnQueryBar__textarea.kbnQueryBar__textarea--autoHeight': {
+          minHeight: euiTheme.size.xl,
+        },
+      },
       '> [aria-expanded="true"]': {
         // Using filter allows it to adhere the children's bounds
         filter: `drop-shadow(0 ${euiTheme.size.s} ${euiTheme.size.base} rgba(${euiTheme.colors.shadow}, 0.05))`,

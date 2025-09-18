@@ -367,6 +367,7 @@ export function InternalDashboardTopNav({
         indexPatterns={allDataViews ?? []}
         allowSavingQueries
         appName={DASHBOARD_APP_ID}
+        controlSize="s"
         visible={viewMode !== 'print'}
         setMenuMountPoint={
           embedSettings || fullScreenMode

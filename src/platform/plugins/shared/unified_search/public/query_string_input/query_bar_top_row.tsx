@@ -185,6 +185,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableExternalPadding?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
   bubbleSubmitEvent?: boolean;
+  /**
+   * Global control size. Use 's' for a compact 32px height.
+   */
+  controlSize?: 'm' | 's';
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
@@ -550,7 +554,7 @@ export const QueryBarTopRow = React.memo(
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
-          compressed={shouldShowDatePickerAsBadge()}
+          compressed={props.controlSize === 's' || shouldShowDatePickerAsBadge()}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
@@ -571,7 +575,7 @@ export const QueryBarTopRow = React.memo(
             iconType="cross"
             aria-label={buttonLabelCancel}
             onClick={onClickCancelButton}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            size={props.controlSize === 's' || shouldShowDatePickerAsBadge() ? 's' : 'm'}
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
@@ -586,7 +590,7 @@ export const QueryBarTopRow = React.memo(
           iconType="cross"
           aria-label={buttonLabelCancel}
           onClick={onClickCancelButton}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          size={props.controlSize === 's' || shouldShowDatePickerAsBadge() ? 's' : 'm'}
           data-test-subj="queryCancelButton"
           color="text"
         >
@@ -620,7 +624,7 @@ export const QueryBarTopRow = React.memo(
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+              size={props.controlSize === 's' || shouldShowDatePickerAsBadge() ? 's' : 'm'}
               color={props.isDirty ? 'success' : 'primary'}
               fill={false}
               needsUpdate={props.isDirty}
@@ -660,7 +664,11 @@ export const QueryBarTopRow = React.memo(
           <EuiFlexItem css={{ maxWidth: '100%' }} grow={isMobile}>
             <DataViewPicker
               {...props.dataViewPickerComponentProps}
-              trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+              trigger={{
+                size: props.controlSize === 's' ? 's' : 'm',
+                fullWidth: isMobile,
+                ...props.dataViewPickerComponentProps.trigger,
+              }}
               isDisabled={props.isDisabled}
             />
           </EuiFlexItem>
@@ -679,7 +687,7 @@ export const QueryBarTopRow = React.memo(
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{
-                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                size: props.controlSize === 's' || shouldShowDatePickerAsBadge() ? 's' : 'm',
                 display: 'empty',
               }}
               isDisabled={props.isDisabled}
@@ -697,7 +705,7 @@ export const QueryBarTopRow = React.memo(
             <FilterButtonGroup
               items={[props.prepend, renderAddButton()]}
               attached={renderFilterMenuOnly()}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+              size={props.controlSize === 's' || shouldShowDatePickerAsBadge() ? 's' : 'm'}
             />
           </EuiFlexItem>
         )
@@ -709,6 +717,7 @@ export const QueryBarTopRow = React.memo(
       const queryInput = shouldRenderQueryInput() && (
         <EuiFlexItem data-test-subj="unifiedQueryInput">
           <QueryStringInput
+            className={props.controlSize === 's' ? 'kbnQueryBar__wrap--compact' : undefined}
             disableAutoFocus={props.disableAutoFocus}
             indexPatterns={props.indexPatterns!}
             query={props.query! as Query}
@@ -754,7 +763,7 @@ export const QueryBarTopRow = React.memo(
           grow={!shouldShowDatePickerAsBadge()}
           style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 300, maxWidth: '100%' }}
         >
-          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             {filterButtonGroup}
             {queryInput}
           </EuiFlexGroup>
