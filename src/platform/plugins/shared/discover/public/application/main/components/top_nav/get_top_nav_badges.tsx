@@ -68,6 +68,7 @@ export const getTopNavBadges = ({
               .dispatch(
                 internalStateActions.resetDiscoverSession({
                   discoverSession: persistedDiscoverSession,
+                  resetInitialFetchState: true,
                 })
               )
               .unwrap();

@@ -35,6 +35,12 @@ export interface TabStateGlobalState {
   filters?: Filter[];
 }
 
+export enum TabInitialFetchState {
+  firstTrigger = 'firstTrigger',
+  forceTrigger = 'forceTrigger',
+  triggered = 'triggered',
+}
+
 export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
@@ -51,6 +57,7 @@ export interface TabState extends TabItem {
    * ESQL query variables
    */
   esqlVariables: ESQLControlVariable[] | undefined;
+  initialFetchState: TabInitialFetchState;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving

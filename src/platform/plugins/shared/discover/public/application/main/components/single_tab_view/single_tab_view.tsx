@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import useMount from 'react-use/lib/useMount';
@@ -25,6 +25,7 @@ import {
   useCurrentTabRuntimeState,
   useCurrentTabSelector,
   useCurrentTabAction,
+  TabInitialFetchState,
 } from '../../state_management/redux';
 import type {
   CustomizationCallback,
@@ -73,6 +74,7 @@ export const SingleTabView = ({
 
   const initializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const currentTabInitialFetchState = useCurrentTabSelector((tab) => tab.initialFetchState);
   const currentStateContainer = useCurrentTabRuntimeState(
     runtimeStateManager,
     (tab) => tab.stateContainer$
@@ -139,6 +141,25 @@ export const SingleTabView = ({
       });
     }
   });
+
+  const setInitialFetchState = useCurrentTabAction(internalStateActions.setInitialFetchState);
+  const shouldTriggerInitialFetch =
+    currentStateContainer &&
+    initializeTabState.value?.showNoDataPage === false &&
+    currentTabInitialFetchState !== TabInitialFetchState.triggered;
+
+  useEffect(() => {
+    if (shouldTriggerInitialFetch) {
+      currentStateContainer.actions.fetchData(true);
+      dispatch(setInitialFetchState({ initialFetchState: TabInitialFetchState.triggered }));
+    }
+  }, [
+    currentStateContainer?.actions,
+    currentTabInitialFetchState,
+    dispatch,
+    setInitialFetchState,
+    shouldTriggerInitialFetch,
+  ]);
 
   if (initializeTabState.loading) {
     return <BrandedLoadingIndicator />;
