@@ -44,7 +44,7 @@ export abstract class NumeralFormat extends FieldFormat {
     if (typeof val === 'object') return JSON.stringify(val);
     if (typeof val === 'string') val = parseFloat(val);
 
-    if (Number.isNaN(val) && typeof originalVal === 'string') {
+    if (typeof originalVal === 'string' && !Number.isFinite(val)) {
       // if the value is a string that cannot be parsed as a number, try to parse it as a JSON object
       try {
         const parsedVal = JSON.parse(originalVal);
@@ -56,7 +56,7 @@ export abstract class NumeralFormat extends FieldFormat {
       }
     }
 
-    if (Number.isNaN(val)) return NAN_LABEL;
+    if (!Number.isFinite(val)) return NAN_LABEL;
 
     const previousLocale = numeral.language();
     const defaultLocale =
