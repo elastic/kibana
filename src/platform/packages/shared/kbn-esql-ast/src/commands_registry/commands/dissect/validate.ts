@@ -22,9 +22,9 @@ import { validateCommandArguments } from '../../../definitions/utils/validation'
 const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandContext) => {
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
-  const columnRef = context?.fields.get(astCol.name);
+  const columnRef = context?.columns.get(astCol.name);
 
-  if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type as FieldType)) {
     return [
       getMessageFromId({
         messageId: 'unsupportedColumnTypeForCommand',

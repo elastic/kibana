@@ -115,14 +115,15 @@ const useConditionalTabs = () => {
   const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   const { featureFlags } = usePluginConfig();
   const isProfilingPluginEnabled = useProfilingPluginSetting();
+  const { schema } = useAssetDetailsRenderPropsContext();
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled),
+      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled) && schema === 'ecs',
       [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
       [ContentTabIds.ANOMALIES]: isTopbarMenuVisible,
     }),
-    [featureFlags.osqueryEnabled, isProfilingPluginEnabled, isTopbarMenuVisible]
+    [featureFlags.osqueryEnabled, isProfilingPluginEnabled, isTopbarMenuVisible, schema]
   );
 
   const isTabEnabled = useCallback(

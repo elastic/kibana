@@ -24,25 +24,27 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const legacyComponentTemplateName = '.alerts-legacy-alert-mappings';
       const ecsComponentTemplateName = '.alerts-ecs-mappings';
 
-      const commonIlmPolicy = await es.ilm.getLifecycle({
-        name: ilmPolicyName,
-      });
+      await retry.try(async () => {
+        const commonIlmPolicy = await es.ilm.getLifecycle({
+          name: ilmPolicyName,
+        });
 
-      expect(commonIlmPolicy[ilmPolicyName].policy).to.eql({
-        _meta: {
-          managed: true,
-        },
-        phases: {
-          hot: {
-            min_age: '0ms',
-            actions: {
-              rollover: {
-                max_age: '30d',
-                max_primary_shard_size: '50gb',
+        expect(commonIlmPolicy[ilmPolicyName].policy).to.eql({
+          _meta: {
+            managed: true,
+          },
+          phases: {
+            hot: {
+              min_age: '0ms',
+              actions: {
+                rollover: {
+                  max_age: '30d',
+                  max_primary_shard_size: '50gb',
+                },
               },
             },
           },
-        },
+        });
       });
 
       const { component_templates: componentTemplates1 } = await es.cluster.getComponentTemplate({

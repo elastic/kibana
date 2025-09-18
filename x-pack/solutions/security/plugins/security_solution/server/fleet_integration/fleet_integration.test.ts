@@ -1285,6 +1285,31 @@ describe('Fleet integrations', () => {
       });
     });
 
+    it('should throw an error if the policy is invalid', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      licenseEmitter.next(Enterprise);
+
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextServiceMock,
+        cloudService,
+        productFeaturesService,
+        experimentalFeatures
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
+      delete policyConfig.inputs[0]!.config!.policy;
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
+      delete policyConfig.inputs[0]!.config!.artifact_manifest;
+
+      await expect(() =>
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow(
+        "Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required."
+      );
+    });
+
     it('should correctly set meta.billable', async () => {
       const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
 

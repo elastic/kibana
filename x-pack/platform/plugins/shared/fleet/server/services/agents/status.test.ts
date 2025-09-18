@@ -6,6 +6,7 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { AGENTS_INDEX } from '../../../common';
 
@@ -13,7 +14,7 @@ import { createAppContextStartContractMock } from '../../mocks';
 
 import { appContextService } from '../app_context';
 
-import { getAgentStatusForAgentPolicy } from './status';
+import { getAgentStatusForAgentPolicy, getIncomingDataByAgentsId } from './status';
 
 describe('getAgentStatusForAgentPolicy', () => {
   beforeEach(async () => {
@@ -232,5 +233,45 @@ describe('getAgentStatusForAgentPolicy', () => {
         }),
       })
     );
+  });
+});
+
+describe('getIncomingDataByAgentsId', () => {
+  it('should work with a large set of datastream patterns', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+
+    const agentsIds = ['agentId1', 'agentId2'];
+    const dataStreamPattern = [...Array(100)].map((_, i) => `test-${i}-*`).join(',');
+
+    esClient.search.mockReturnValueOnce({
+      hits: {},
+      aggregations: {
+        agent_ids: {
+          buckets: [{ key: 'agentId1', doc_count: 1 }],
+        },
+      },
+    } as any);
+
+    const result = await getIncomingDataByAgentsId({
+      esClient,
+      agentsIds,
+      dataStreamPattern,
+    });
+
+    expect(esClient.security.hasPrivileges).toBeCalledTimes(1);
+
+    expect(result).toEqual({
+      items: [
+        {
+          agentId1: { data: true },
+        },
+        {
+          agentId2: { data: false },
+        },
+      ],
+      dataPreview: [],
+    });
   });
 });

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ActionsClient, ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
+import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   createInferenceRequestError,
   connectorToInference,
@@ -17,13 +19,16 @@ import {
  */
 export const getConnectorById = async ({
   connectorId,
-  actionsClient,
+  actions,
+  request,
 }: {
-  actionsClient: ActionsClient;
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
   connectorId: string;
 }): Promise<InferenceConnector> => {
   let connector: ActionConnector;
   try {
+    const actionsClient = await actions.getActionsClientWithRequest(request);
     connector = await actionsClient.get({
       id: connectorId,
       throwIfSystemAction: true,

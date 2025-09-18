@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { DataStreamsResponseBodySchemaBody } from '@kbn/data-usage-plugin/common/rest_types';
+import type { DataStreamsResponseBodySchemaBody } from '@kbn/data-usage-plugin/server/routes/internal/data_streams';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '@kbn/data-usage-plugin/common';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {

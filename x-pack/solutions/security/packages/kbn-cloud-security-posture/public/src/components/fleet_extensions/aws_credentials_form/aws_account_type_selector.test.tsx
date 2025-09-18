@@ -8,8 +8,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import { AwsAccountTypeSelect } from './aws_account_type_selector';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import type {
   NewPackagePolicy,

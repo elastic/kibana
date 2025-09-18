@@ -152,7 +152,7 @@ describe('AddToCaseContextItem', () => {
           iconType: 'uptimeApp',
         },
         summary: '',
-        screenContext: undefined,
+        screenContext: [],
       },
       persistableStateAttachmentTypeId: '.page',
       type: 'persistableState',

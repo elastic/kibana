@@ -261,9 +261,10 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
-  const hasExportIntegration = Boolean(
-    shareService?.availableIntegrations('dashboard', 'export')?.length
-  );
+  const hasExportIntegration = useMemo(() => {
+    if (!shareService) return false;
+    return shareService.availableIntegrations('dashboard', 'export').length > 0;
+  }, []);
 
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();

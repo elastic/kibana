@@ -17,7 +17,7 @@ import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
-  effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
+  effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
 }
 
@@ -43,6 +43,11 @@ export const listStreamsRoute = createServerRoute({
     );
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
+      if (Streams.GroupStream.Definition.is(stream)) {
+        acc.push({ stream });
+        return acc;
+      }
+
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
       acc.push({
         stream,
@@ -83,12 +88,17 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
 
-    const indexPattern = Streams.GroupStream.Definition.is(streamEntity)
-      ? streamEntity.group.members.join(',')
-      : streamEntity.name;
+    if (Streams.GroupStream.Definition.is(streamEntity)) {
+      return {
+        details: {
+          count: 0,
+        },
+      };
+    }
+
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: indexPattern,
+      index: streamEntity.name,
       track_total_hits: true,
       ignore_unavailable: true,
       query: {

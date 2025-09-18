@@ -67,7 +67,7 @@ import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
 import type { GetPanelPlacementSettings } from './panel_placement';
-import { registerDashboardPanelPlacementSetting } from './panel_placement';
+import { registerDashboardPanelSettings } from './panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
@@ -119,7 +119,7 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
+  registerDashboardPanelSettings: <SerializedState extends object = object>(
     embeddableType: string,
     getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
@@ -295,7 +295,7 @@ export class DashboardPlugin
     untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
-      registerDashboardPanelPlacementSetting,
+      registerDashboardPanelSettings,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(
           './services/dashboard_content_management_service'

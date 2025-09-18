@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import { MigrationTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { deleteAllRules } from '../../../../../config/services/detections_response';
 import {
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
         return {
           migration_id: migrationId,
           elastic_rule: index < 2 ? { ...rest, prebuilt_rule_id: `rule-${index + 1}` } : undefined,
-          translation_result: index < 2 ? RuleTranslationResult.FULL : undefined,
+          translation_result: index < 2 ? MigrationTranslationResult.FULL : undefined,
         };
       };
       const migrationRuleDocuments = getMigrationRuleDocuments(4, overrideCallback);

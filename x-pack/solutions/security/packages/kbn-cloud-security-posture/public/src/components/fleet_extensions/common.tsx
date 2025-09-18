@@ -25,14 +25,17 @@ export const ReadDocumentation = ({ url }: { url: string }) => {
   return (
     <EuiText color="subdued" size="s">
       <FormattedMessage
-        id="securitySolutionPackages.awsIntegration.cloudFormationSetupNote"
+        id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupNote"
         defaultMessage="Read the {documentation} for more details"
         values={{
           documentation: (
             <Link url={url}>
-              {i18n.translate('securitySolutionPackages.awsIntegration.documentationLinkText', {
-                defaultMessage: 'documentation',
-              })}
+              {i18n.translate(
+                'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.documentationLinkText',
+                {
+                  defaultMessage: 'documentation',
+                }
+              )}
             </Link>
           ),
         }}

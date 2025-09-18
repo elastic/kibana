@@ -39,6 +39,7 @@ export const fieldTypes = [
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
+
 /**
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
@@ -85,7 +86,10 @@ export const dataTypes = [
   'null',
   'time_duration',
   'date_period',
-  'param', // Defines a named param such as ?value or ??field
+  'param', // Defines a named param such as ?value or ??field,
+  'geohash',
+  'geohex',
+  'geotile',
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
@@ -136,6 +140,9 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
+export const isFieldType = (str: string | undefined): str is FieldType =>
+  typeof str !== undefined && ([...fieldTypes] as string[]).includes(str as string);
+
 export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
   typeof str !== undefined &&
   str !== 'unsupported' &&
@@ -163,28 +170,10 @@ export interface FunctionParameter {
   fieldsOnly?: boolean;
 
   /**
-   * if provided this means that the value must be one
-   * of the options in the array iff the value is a literal.
-   *
-   * String values are case insensitive.
-   *
-   * If the value is not a literal, this field is ignored because
-   * we can't check the return value of a function to see if it
-   * matches one of the options prior to runtime.
+   * A list of suggested values for this parameter.
    */
-  acceptedValues?: string[];
+  suggestedValues?: string[];
 
-  /**
-   * Must only be included _in addition to_ acceptedValues.
-   *
-   * If provided this is the list of suggested values that
-   * will show up in the autocomplete. If omitted, the acceptedValues
-   * will be used as suggestions.
-   *
-   * This is useful for functions that accept
-   * values that we don't want to show as suggestions.
-   */
-  literalSuggestions?: string[];
   mapParams?: string;
 }
 
@@ -237,39 +226,36 @@ export interface Literals {
 }
 
 export interface ValidationErrors {
-  wrongArgumentType: {
-    message: string;
-    type: {
-      name: string;
-      argType: string;
-      value: string | number | Date;
-      givenType: string;
-    };
-  };
-  wrongArgumentNumber: {
+  wrongNumberArgsExact: {
     message: string;
     type: {
       fn: string;
-      numArgs: number;
-      passedArgs: number;
+      expected: number;
+      actual: number;
     };
   };
-  wrongArgumentNumberTooMany: {
+  wrongNumberArgsVariadic: {
     message: string;
     type: {
       fn: string;
-      numArgs: number;
-      passedArgs: number;
-      extraArgs: number;
+      validArgCounts: number[];
+      actual: number;
     };
   };
-  wrongArgumentNumberTooFew: {
+  wrongNumberArgsAtLeast: {
     message: string;
     type: {
       fn: string;
-      numArgs: number;
-      passedArgs: number;
-      missingArgs: number;
+      minArgs: number;
+      actual: number;
+    };
+  };
+  noMatchingCallSignature: {
+    message: string;
+    type: {
+      functionName: string;
+      argTypes: string;
+      validSignatures: string[];
     };
   };
   unknownColumn: {
@@ -284,21 +270,9 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  noNestedArgumentSupport: {
+  functionNotAllowedHere: {
     message: string;
-    type: { name: string; argType: string };
-  };
-  unsupportedFunctionForCommand: {
-    message: string;
-    type: { name: string; command: string };
-  };
-  unsupportedFunctionForCommandOption: {
-    message: string;
-    type: { name: string; command: string; option: string };
-  };
-  unsupportedLiteralOption: {
-    message: string;
-    type: { name: string; value: string; supportedOptions: string };
+    type: { name: string; locationName: string };
   };
   unsupportedColumnTypeForCommand: {
     message: string;
@@ -316,13 +290,13 @@ export interface ValidationErrors {
     message: string;
     type: { value: string };
   };
-  unsupportedTypeForCommand: {
-    message: string;
-    type: { command: string; value: string; type: string };
-  };
   unknownPolicy: {
     message: string;
     type: { name: string };
+  };
+  nestedAggFunction: {
+    message: string;
+    type: { parentName: string; name: string };
   };
   unknownAggregateFunction: {
     message: string;
@@ -336,14 +310,6 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string; expected: string };
   };
-  fnUnsupportedAfterCommand: {
-    message: string;
-    type: { function: string; command: string };
-  };
-  expectedConstant: {
-    message: string;
-    type: { fn: string; given: string };
-  };
   metadataBracketsDeprecation: {
     message: string;
     type: {};
@@ -355,30 +321,6 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
-  };
-  noAggFunction: {
-    message: string;
-    type: {
-      commandName: string;
-      expression: string;
-    };
-  };
-  expressionNotAggClosed: {
-    message: string;
-    type: {
-      commandName: string;
-      expression: string;
-    };
-  };
-  aggInAggFunction: {
-    message: string;
-    type: {
-      nestedAgg: string;
-    };
-  };
-  onlyWhereCommandSupported: {
-    message: string;
-    type: { fn: string };
   };
   invalidJoinIndex: {
     message: string;
@@ -402,6 +344,33 @@ export interface ValidationErrors {
       signatureDescription: string;
       requiredLicense: string;
     };
+  };
+  changePointWrongFieldType: {
+    message: string;
+    type: {
+      columnName: string;
+      givenType: string;
+    };
+  };
+  dropTimestampWarning: {
+    message: string;
+    type: {};
+  };
+  inferenceIdRequired: {
+    message: string;
+    type: {};
+  };
+  unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
+  forkTooManyBranches: {
+    message: string;
+    type: {};
+  };
+  forkTooFewBranches: {
+    message: string;
+    type: {};
   };
 }
 

@@ -25,13 +25,16 @@ export class EnterIfNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    this.wfExecutionRuntimeManager.enterScope();
     const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
 
-    if (successors.some((node) => node.type !== 'enter-condition-branch')) {
+    if (
+      successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))
+    ) {
       throw new Error(
         `EnterIfNode with id ${
           this.step.id
-        } must have only 'enter-condition-branch' successors, but found: ${successors
+        } must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: ${successors
           .map((node) => node.type)
           .join(', ')}.`
       );

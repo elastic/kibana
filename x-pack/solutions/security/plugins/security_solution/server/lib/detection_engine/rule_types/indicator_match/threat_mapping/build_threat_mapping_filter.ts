@@ -8,13 +8,12 @@
 import { get } from 'lodash/fp';
 import type { Filter } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 import type {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,
   BuildThreatMappingFilterOptions,
-  CreateAndOrClausesOptions,
+  CreateNamedAndClauseOptions,
   CreateInnerAndClausesOptions,
   FilterThreatMappingOptions,
   TermQuery,
@@ -26,13 +25,13 @@ import { encodeThreatMatchNamedQuery } from './utils';
 export const MAX_CHUNK_SIZE = 1024;
 
 export const buildThreatMappingFilter = ({
-  threatMapping,
+  threatMappings,
   threatList,
   entryKey = 'value',
   allowedFieldsForTermsQuery,
 }: BuildThreatMappingFilterOptions): Filter => {
   const query = buildEntriesMappingFilter({
-    threatMapping,
+    threatMappings,
     threatList,
     entryKey,
     allowedFieldsForTermsQuery,
@@ -52,28 +51,19 @@ export const buildThreatMappingFilter = ({
 /**
  * Filters out any combined "AND" entries which do not include all the threat list items.
  */
-export const filterThreatMapping = ({
-  threatMapping,
+export const threatMappingEntriesAreValid = ({
+  threatMappingEntries,
   threatListItem,
   entryKey,
-}: FilterThreatMappingOptions): ThreatMapping =>
-  threatMapping
-    .map((threatMap) => {
-      const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
-        // DOES NOT MATCH clause allows undefined values
-        if (entry.negate) {
-          return false;
-        }
-        const itemValue = get(entry[entryKey], threatListItem.fields);
-        return itemValue == null || itemValue.length !== 1;
-      });
-      if (atLeastOneItemMissingInThreatList) {
-        return { ...threatMap, entries: [] };
-      } else {
-        return { ...threatMap, entries: threatMap.entries };
-      }
-    })
-    .filter((threatMap) => threatMap.entries.length !== 0);
+}: FilterThreatMappingOptions): boolean =>
+  threatMappingEntries.every((entry) => {
+    // DOES NOT MATCH clause allows undefined values
+    if (entry.negate) {
+      return true;
+    }
+    const itemValue = get(entry[entryKey], threatListItem.fields);
+    return itemValue != null && itemValue.length === 1;
+  });
 
 export const createInnerAndClauses = ({
   threatMappingEntries,
@@ -82,18 +72,10 @@ export const createInnerAndClauses = ({
 }: CreateInnerAndClausesOptions): QueryDslQueryContainer[] => {
   return threatMappingEntries.reduce<QueryDslQueryContainer[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
-    const queryName = encodeThreatMatchNamedQuery({
-      id: threatListItem._id,
-      index: threatListItem._index,
-      field: threatMappingEntry.field,
-      value: threatMappingEntry.value,
-      queryType: ThreatMatchQueryType.match,
-      negate: threatMappingEntry.negate,
-    });
     const matchKey = threatMappingEntry[entryKey === 'field' ? 'value' : 'field'];
 
     if (threatMappingEntry.negate) {
-      const negateClause = buildNegateClause(value, matchKey, queryName);
+      const negateClause = buildNegateClause(value, matchKey);
       if (negateClause) {
         accum.push(negateClause);
       }
@@ -103,7 +85,6 @@ export const createInnerAndClauses = ({
         match: {
           [matchKey]: {
             query: value[0],
-            _name: queryName,
           },
         },
       });
@@ -115,14 +96,12 @@ export const createInnerAndClauses = ({
 
 const buildNegateClause = (
   value: unknown,
-  matchKey: string,
-  queryName: string
+  matchKey: string
 ): QueryDslQueryContainer | undefined => {
   if (value == null) {
     return {
       exists: {
         field: matchKey,
-        _name: queryName,
       },
     };
   }
@@ -137,7 +116,6 @@ const buildNegateClause = (
             },
           },
         },
-        _name: queryName,
       },
     };
   }
@@ -145,30 +123,35 @@ const buildNegateClause = (
   return undefined;
 };
 
-export const createAndOrClauses = ({
-  threatMapping,
+export const createNamedAndClause = ({
+  threatMappingEntries,
   threatListItem,
   entryKey,
-}: CreateAndOrClausesOptions): QueryDslQueryContainer[] => {
-  const should = threatMapping.reduce<QueryDslQueryContainer[]>((accum, threatMap) => {
-    const innerAndClauses = createInnerAndClauses({
-      threatMappingEntries: threatMap.entries,
-      threatListItem,
-      entryKey,
-    });
-    if (innerAndClauses.length !== 0) {
-      // These values could be potentially 10k+ large so mutating the array intentionally
-      accum.push({
-        bool: { filter: innerAndClauses },
-      });
-    }
-    return accum;
-  }, []);
-  return should;
+  threatMappingIndex,
+}: CreateNamedAndClauseOptions): QueryDslQueryContainer | undefined => {
+  const innerAndClauses = createInnerAndClauses({
+    threatMappingEntries,
+    threatListItem,
+    entryKey,
+  });
+  if (innerAndClauses.length !== 0) {
+    // These values could be potentially 10k+ large so mutating the array intentionally
+    return {
+      bool: {
+        _name: encodeThreatMatchNamedQuery({
+          id: threatListItem._id,
+          index: threatListItem._index,
+          threatMappingIndex,
+          queryType: ThreatMatchQueryType.match,
+        }),
+        filter: innerAndClauses,
+      },
+    };
+  }
 };
 
 export const buildEntriesMappingFilter = ({
-  threatMapping,
+  threatMappings,
   threatList,
   entryKey,
   allowedFieldsForTermsQuery,
@@ -179,27 +162,31 @@ export const buildEntriesMappingFilter = ({
         allowedFieldsForTermsQuery?.source?.[entry.field] &&
         allowedFieldsForTermsQuery?.threat?.[entry.value]
     );
-  const combinedShould = threatMapping.reduce<Array<QueryDslQueryContainer | TermQuery>>(
-    (acc, threatMap) => {
-      if (threatMap.entries.length > 1 || !allFieldAllowedForTermQuery(threatMap.entries)) {
+  const combinedShould = threatMappings.reduce<Array<QueryDslQueryContainer | TermQuery>>(
+    (acc, threatMapping, threatMappingIndex) => {
+      if (threatMapping.entries.length > 1 || !allFieldAllowedForTermQuery(threatMapping.entries)) {
         threatList.forEach((threatListItem) => {
-          const filteredEntries = filterThreatMapping({
-            threatMapping: [threatMap],
-            threatListItem,
-            entryKey,
-          });
-          const queryWithAndOrClause = createAndOrClauses({
-            threatMapping: filteredEntries,
-            threatListItem,
-            entryKey,
-          });
-          if (queryWithAndOrClause.length !== 0) {
-            // These values can be 10k+ large, so using a push here for performance
-            acc.push(...queryWithAndOrClause);
+          if (
+            threatMappingEntriesAreValid({
+              threatMappingEntries: threatMapping.entries,
+              threatListItem,
+              entryKey,
+            })
+          ) {
+            const queryWithAndOrClause = createNamedAndClause({
+              threatMappingEntries: threatMapping.entries,
+              threatListItem,
+              entryKey,
+              threatMappingIndex,
+            });
+            if (queryWithAndOrClause) {
+              // These values can be 10k+ large, so using a push here for performance
+              acc.push(queryWithAndOrClause);
+            }
           }
         });
       } else {
-        const threatMappingEntry = threatMap.entries[0];
+        const threatMappingEntry = threatMapping.entries[0];
         const threats: string[] = threatList
           .map((threatListItem) => get(threatMappingEntry[entryKey], threatListItem.fields))
           .filter((val) => val)
@@ -208,8 +195,7 @@ export const buildEntriesMappingFilter = ({
           acc.push({
             terms: {
               _name: encodeThreatMatchNamedQuery({
-                field: threatMappingEntry.field,
-                value: threatMappingEntry.value,
+                threatMappingIndex,
                 queryType: ThreatMatchQueryType.term,
               }),
               [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: threats,

@@ -74,6 +74,12 @@ export type GetDataStreamDetailsResponse =
 
 export type GetNonAggregatableDataStreamsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/non_aggregatable`>['params']['query'];
+type GetDataStreamNonAggregatablePathParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable`>['params']['path'];
+type GetDataStreamNonAggregatableQueryParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable`>['params']['query'];
+export type GetDataStreamNonAggregatableParams = GetDataStreamNonAggregatablePathParams &
+  GetDataStreamNonAggregatableQueryParams;
 
 export type GetIntegrationDashboardsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>['params']['path'];

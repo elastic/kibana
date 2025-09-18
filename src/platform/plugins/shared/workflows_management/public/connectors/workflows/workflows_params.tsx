@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHighlight,
   EuiIcon,
   EuiInputPopover,
@@ -32,7 +33,7 @@ interface WorkflowOption {
   id: string;
   name: string;
   description: string;
-  status: string;
+  enabled: boolean;
   tags: string[];
   label: string;
   disabled?: boolean;
@@ -167,7 +168,13 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       setLoadError(null);
 
       try {
-        const response = await http.post('/api/workflows/search');
+        const response = await http.post('/api/workflows/search', {
+          body: JSON.stringify({
+            limit: 1000,
+            page: 1,
+            query: '',
+          }),
+        });
         const workflowsMap = response as WorkflowListDto;
 
         // Check if the currently selected workflow is disabled
@@ -175,7 +182,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
         const workflowOptionsWithSortInfo = workflowsMap.results.map((workflow) => {
           // TODO: remove this once we have a way to disable workflows
-          const isDisabled = !workflow.definition.enabled;
+          const isDisabled = !workflow.enabled;
           const isSelected = workflow.id === workflowId;
           const wasSelectedButNowDisabled = isSelected && isDisabled;
           const hasAlertTriggerType = (workflow.definition?.triggers ?? []).some(
@@ -245,7 +252,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               id: workflow.id,
               name: workflow.name,
               description: workflow.description,
-              status: workflow.status,
+              enabled: workflow.enabled,
               tags: workflowTags,
               label: workflow.name,
               disabled: isDisabled,
@@ -325,19 +332,18 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const helpText = loadError || (isLoading ? i18n.LOADING_WORKFLOWS : undefined);
 
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <span>{i18n.WORKFLOW_ID_LABEL}</span>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={handleCreateNewWorkflow} external>
-            {/* Todo: add real icon from figma, doesn't exist in eui? */}
-            {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+    <EuiFormRow
+      label={i18n.WORKFLOW_ID_LABEL}
+      labelAppend={
+        <EuiLink onClick={handleCreateNewWorkflow} external>
+          {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
+        </EuiLink>
+      }
+      helpText={helpText}
+      error={displayError}
+      isInvalid={!!displayError}
+      fullWidth
+    >
       {isLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
@@ -392,13 +398,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           )}
         </EuiSelectable>
       )}
-
-      {(displayError || helpText) && (
-        <EuiText size="s" color={displayError ? 'danger' : 'subdued'}>
-          {displayError || helpText}
-        </EuiText>
-      )}
-    </>
+    </EuiFormRow>
   );
 };
 

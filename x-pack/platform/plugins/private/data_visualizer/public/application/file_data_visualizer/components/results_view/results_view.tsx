@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 
 import { FILE_FORMATS } from '@kbn/file-upload-common';
 import { FileContents } from '../file_contents';

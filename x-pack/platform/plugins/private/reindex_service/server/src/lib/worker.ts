@@ -14,10 +14,10 @@ import type {
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '../../../common';
+import type { ReindexSavedObject } from './types';
 import type { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import type { ReindexService } from './reindex_service';
@@ -74,7 +74,7 @@ export class ReindexWorker {
     credentialStore: CredentialStore,
     clusterClient: IClusterClient,
     log: Logger,
-    licensing: LicensingPluginSetup,
+    licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version
   ): ReindexWorker {
@@ -100,7 +100,7 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
     log: Logger,
-    private licensing: LicensingPluginSetup,
+    private licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version
   ) {
@@ -112,7 +112,7 @@ export class ReindexWorker {
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser, this.log, version),
+      reindexActionsFactory(this.client, callAsInternalUser, this.log),
       log,
       this.licensing,
       version
@@ -213,12 +213,7 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(
-      this.client,
-      callAsCurrentUser,
-      this.log,
-      ReindexWorker.version
-    );
+    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log);
     return reindexServiceFactory(
       callAsCurrentUser,
       actions,

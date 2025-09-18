@@ -38,13 +38,15 @@ function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersStat
 
 export const useWaffleFilters = () => {
   const { currentView } = useInventoryViewsContext();
-  const { inventoryPrefill } = useAlertPrefillContext();
   const { services } = useKibanaContextForPlugin();
   const {
     data: {
       query: { queryString: queryStringService },
     },
   } = services;
+  const {
+    inventoryPrefill: { setPrefillState },
+  } = useAlertPrefillContext();
 
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_FILTERS_STATE,
@@ -110,8 +112,8 @@ export const useWaffleFilters = () => {
   }, [queryStringService, applyFilterQuery]);
 
   useEffect(() => {
-    inventoryPrefill.setKuery(urlState.query);
-  }, [inventoryPrefill, urlState.query]);
+    setPrefillState({ kuery: urlState.query });
+  }, [setPrefillState, urlState.query]);
 
   return {
     filterQuery: urlState,

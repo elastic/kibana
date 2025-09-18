@@ -18,6 +18,8 @@ import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import type { UptimeCommonState } from '../../../../common/runtime_types';
@@ -131,9 +133,20 @@ export const setRecoveredAlertsContext = async <ActionGroupIds extends string>({
 
 export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
 
+const stringAsKeywords: MappingDynamicTemplate = {
+  path_match: `${ALERT_GROUPING}.*`,
+  match_mapping_type: 'string',
+  mapping: { type: 'keyword', ignore_above: 1024 },
+};
+const dynamicTemplates = [
+  {
+    strings_as_keywords: stringAsKeywords,
+  },
+];
+
 export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  mappings: { fieldMap: uptimeRuleTypeFieldMap, dynamicTemplates },
   useLegacyAlerts: true,
   shouldWrite: true,
 };

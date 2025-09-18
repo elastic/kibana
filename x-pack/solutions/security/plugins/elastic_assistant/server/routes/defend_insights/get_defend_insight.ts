@@ -15,14 +15,10 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { buildResponse } from '../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import { buildResponse } from '../../lib/build_response';
 import { CallbackIds } from '../../types';
-import {
-  isDefendInsightsEnabled,
-  runExternalCallbacks,
-  updateDefendInsightLastViewedAt,
-} from './helpers';
+import { runExternalCallbacks, updateDefendInsightLastViewedAt } from './helpers';
 
 export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -56,20 +52,11 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         try {
-          const isEnabled = isDefendInsightsEnabled({
-            request,
-            logger,
-            assistantContext,
-          });
-          if (!isEnabled) {
-            return response.notFound();
-          }
-
           if (!ctx.licensing.license.hasAtLeast('enterprise')) {
             return response.forbidden({
               body: {
                 message:
-                  'Your license does not support Defend Workflows. Please upgrade your license.',
+                  'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
               },
             });
           }

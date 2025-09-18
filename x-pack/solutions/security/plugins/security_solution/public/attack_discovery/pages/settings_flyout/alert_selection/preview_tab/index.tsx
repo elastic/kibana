@@ -29,7 +29,6 @@ import { sourcererActions } from '../../../../../sourcerer/store';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const ATTACK_DISCOVERY_SETTINGS_ALERTS_COUNT_ID = 'attack-discovery-settings-alerts-count';
 export const RESET_FIELD = 'kibana.alert.rule.name';
@@ -85,7 +84,6 @@ const PreviewTabComponent = ({
   tableStackBy0,
 }: Props) => {
   const { lens } = useKibana().services;
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const {
     euiTheme: { font },
@@ -193,7 +191,7 @@ const PreviewTabComponent = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiSpacer size={attackDiscoveryAlertsEnabled ? 'l' : 's'} />
+        <EuiSpacer size="l" />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -215,7 +213,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridRowCell {
-                  font-size: ${attackDiscoveryAlertsEnabled ? font.scale.xs : font.scale.s}${font.defaultUnits} !important;
+                  font-size: ${font.scale.xs}${font.defaultUnits} !important;
                 }
 
                 .expExpressionRenderer__expression {

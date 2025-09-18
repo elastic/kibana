@@ -26,14 +26,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('when Kibana project is created in Logs Essentials tier', function () {
-      it('POST /internal/streams/{name}/processing/_suggestions is not authorized', async () => {
+      it('POST /internal/streams/{name}/processing/_suggestions/grok is not authorized', async () => {
         await supertestAdminWithCookieCredentials
-          .post('/internal/streams/{name}/processing/_suggestions')
+          .post('/internal/streams/{name}/processing/_suggestions/grok')
           .set(svlCommonApi.getInternalRequestHeader())
           .send({
-            field: 'field',
-            connectorId: 'connectorId',
-            samples: [],
+            connector_id: 'connectorId',
+            sample_messages: [],
+            review_fields: {},
           })
           .expect(403);
       });

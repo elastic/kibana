@@ -103,6 +103,8 @@ export const useSystemPromptUpdater = ({
     http,
     isAssistantEnabled: isAssistantEnabled && filter.length > 0,
     filter,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
   useEffect(() => {
     const updateSystemPromptSettings = (prev: SystemPromptSettings[]) => {

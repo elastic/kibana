@@ -19,5 +19,6 @@
     "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/std",
+    "@kbn/es-query"
   ]
 }

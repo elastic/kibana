@@ -14,6 +14,5 @@ import { EchoRoute } from './route';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(Echo).toSelf().inRequestScope();
-  bind(EchoRoute).toSelf().inRequestScope();
   bind(Route).toConstantValue(EchoRoute);
 });
