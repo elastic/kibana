@@ -39,6 +39,9 @@ export const createSiemMigrationsMock = () => {
       getIntegrations: jest.fn(),
       addRuleToMigration: jest.fn(),
       telemetry: createTelemetryServiceMock(),
+      api: {
+        getMissingResources: jest.fn(),
+      },
     },
 
     dashboards: {
@@ -51,6 +54,9 @@ export const createSiemMigrationsMock = () => {
       getMigrationsStats: jest.fn(),
       getMissingResources: jest.fn(),
       deleteMigration: jest.fn(),
+      api: {
+        getDashboardMigrationMissingResources: jest.fn(),
+      },
     },
   };
 };
