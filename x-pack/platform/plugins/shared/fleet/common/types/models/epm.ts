@@ -602,6 +602,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
   packagePoliciesInfo?: { count: number };
+  supportsAgentless?: boolean;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

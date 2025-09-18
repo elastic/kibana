@@ -35,6 +35,7 @@ import {
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
+  isAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { IntegrationCardItem } from '..';
@@ -50,6 +51,7 @@ export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
+  onlyAgentless?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -118,19 +120,42 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 // Return filtered packages based on deployment mode,
 // Currently filters out agentless only packages and policy templates if agentless is not available
-const filterPackageListDeploymentModes = (packages: PackageList, isAgentlessEnabled: boolean) => {
-  return isAgentlessEnabled
-    ? packages
-    : packages
+// Also filters to only agentless packages if onlyAgentlessFilter is enabled
+const filterPackageListDeploymentModes = (
+  packages: PackageList,
+  isAgentlessEnabled: boolean,
+  onlyAgentlessFilter: boolean = false
+) => {
+  let filteredPackages = packages;
+
+  // If agentless is not enabled, filter out agentless-only packages
+  if (!isAgentlessEnabled) {
+    filteredPackages = packages
+      .filter((pkg) => {
+        return !isOnlyAgentlessIntegration(pkg);
+      })
+      .map((pkg) => {
+        pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
+          return !isOnlyAgentlessPolicyTemplate(policyTemplate);
+        });
+        return pkg;
+      });
+  } else {
+    // Otherwise if agentless is enabled and only agentless filter is applied,
+    // filter to show only packages that support agentless and mark it as such
+    if (onlyAgentlessFilter) {
+      filteredPackages = packages
         .filter((pkg) => {
-          return !isOnlyAgentlessIntegration(pkg);
+          return isAgentlessIntegration(pkg);
         })
         .map((pkg) => {
-          pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
-            return !isOnlyAgentlessPolicyTemplate(policyTemplate);
-          });
+          pkg.supportsAgentless = true;
           return pkg;
         });
+    }
+  }
+
+  return filteredPackages;
 };
 
 export type AvailablePackagesHookType = typeof useAvailablePackages;
@@ -149,6 +174,7 @@ export const useAvailablePackages = ({
   const {
     initialSelectedCategory,
     initialSubcategory,
+    initialOnlyAgentless,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -162,6 +188,7 @@ export const useAvailablePackages = ({
     initialSubcategory
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
+  const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
 
   const {
     data: eprPackages,
@@ -180,10 +207,14 @@ export const useAvailablePackages = ({
 
   const eprIntegrationList = useMemo(() => {
     const filteredPackageList =
-      filterPackageListDeploymentModes(eprPackages?.items || [], isAgentlessEnabled) || [];
+      filterPackageListDeploymentModes(
+        eprPackages?.items || [],
+        isAgentlessEnabled,
+        onlyAgentlessFilter
+      ) || [];
     const integrations = packageListToIntegrationsList(filteredPackageList);
     return integrations;
-  }, [eprPackages?.items, isAgentlessEnabled]);
+  }, [eprPackages?.items, isAgentlessEnabled, onlyAgentlessFilter]);
 
   const {
     data: replacementCustomIntegrations,
@@ -203,6 +234,9 @@ export const useAvailablePackages = ({
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
     return eprAndCustomPackages
+      .filter((item) => {
+        return onlyAgentlessFilter ? 'supportsAgentless' in item && item.supportsAgentless : true;
+      })
       .map((item) => {
         return mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId });
       })
@@ -213,6 +247,7 @@ export const useAvailablePackages = ({
     getAbsolutePath,
     getHref,
     mergedEprPackages,
+    onlyAgentlessFilter,
     packageVerificationKeyId,
   ]);
 
@@ -276,6 +311,9 @@ export const useAvailablePackages = ({
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    onlyAgentlessFilter,
+    setOnlyAgentlessFilter,
+    isAgentlessEnabled,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||
