@@ -62,8 +62,6 @@
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
   ]
 }
