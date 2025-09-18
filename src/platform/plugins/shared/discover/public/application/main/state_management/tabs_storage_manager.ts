@@ -293,22 +293,12 @@ export const createTabsStorageManager = ({
 
     await pushSelectedTabIdToUrl(selectedTabId);
 
-    const keptTabIds: Record<string, boolean> = {};
-
-    const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) => {
-      const tabStateInStorage = toTabStateInStorage(tab, getAppState, getInternalState);
-      keptTabIds[tab.id] = true;
-      return tabStateInStorage;
-    });
-    const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) => {
-      const tabStateInStorage = toRecentlyClosedTabStateInStorage(
-        tab,
-        getAppState,
-        getInternalState
-      );
-      keptTabIds[tab.id] = true;
-      return tabStateInStorage;
-    });
+    const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) =>
+      toTabStateInStorage(tab, getAppState, getInternalState)
+    );
+    const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) =>
+      toRecentlyClosedTabStateInStorage(tab, getAppState, getInternalState)
+    );
 
     const nextTabsInStorage: TabsStateInLocalStorage = {
       userId: sessionInfo.userId,
