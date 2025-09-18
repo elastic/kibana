@@ -48,7 +48,6 @@ export class ExtensionsService {
   private _emptyListContent: EmptyListContent | null = null;
   private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _indexOverviewContent: IndexContent | null = null;
-  private _indexMappingsContent: IndexContent | null = null;
   private _indexDetailsPageRoute: IndexDetailsPageRoute | null = null;
   private service?: ExtensionsSetup;
 
@@ -157,9 +156,6 @@ export class ExtensionsService {
     return this._indexOverviewContent;
   }
 
-  public get indexMappingsContent() {
-    return this._indexMappingsContent;
-  }
   public get indexDetailsPageRoute() {
     return this._indexDetailsPageRoute;
   }
