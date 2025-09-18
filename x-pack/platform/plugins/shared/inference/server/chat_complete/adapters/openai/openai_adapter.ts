@@ -26,7 +26,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     messages,
     toolChoice,
     tools,
-    temperature = 0,
+    temperature = undefined,
     functionCalling = 'auto',
     modelName: modelName,
     logger,

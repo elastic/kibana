@@ -10,6 +10,13 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_CONNECTOR = { type: InferenceConnectorType.OpenAI } as InferenceConnector;
 const GEMINI_CONNECTOR = { type: InferenceConnectorType.Gemini } as InferenceConnector;
+const AZURE_CONNECTOR = {
+  type: InferenceConnectorType.OpenAI,
+  config: {
+    apiProvider: 'Azure OpenAI',
+  } as Record<string, any>,
+} as InferenceConnector;
+
 describe('getTemperatureIfValid', () => {
   it('returns an empty object if temperature is undefined', () => {
     expect(
@@ -42,6 +49,10 @@ describe('getTemperatureIfValid', () => {
     ).toEqual({
       temperature: 0.7,
     });
+  });
+
+  it('returns an empty object for Azure ', () => {
+    expect(getTemperatureIfValid(1, { connector: AZURE_CONNECTOR })).toEqual({});
   });
 
   it("returns an empty object for OpenAI models that don't support temperature", () => {

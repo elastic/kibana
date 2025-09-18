@@ -7,20 +7,28 @@
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
-const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3'];
+const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
 export const getTemperatureIfValid = (
-  temperature?: number,
-  { connector, modelName }: { connector?: InferenceConnector; modelName?: string } = {}
+  temperature: number | undefined,
+  { connector, modelName }: { connector: InferenceConnector; modelName?: string }
 ) => {
   if (temperature === undefined) return {};
 
   const model =
-    modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
+    modelName ?? connector.config?.providerConfig?.model_id ?? connector.config?.defaultModel;
+
+  // can't guess model name for Azure - depends on deployment
+  if (
+    connector.type === InferenceConnectorType.OpenAI &&
+    connector.config?.apiProvider === 'Azure OpenAI'
+  ) {
+    return {};
+  }
 
   if (
-    (connector?.type === InferenceConnectorType.OpenAI ||
-      connector?.type === InferenceConnectorType.Inference) &&
+    (connector.type === InferenceConnectorType.OpenAI ||
+      connector.type === InferenceConnectorType.Inference) &&
     model
   ) {
     const normalizedModelName = model.toLowerCase();
