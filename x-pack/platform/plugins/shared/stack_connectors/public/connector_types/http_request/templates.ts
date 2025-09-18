@@ -7,17 +7,12 @@
 
 import type { HttpRequestConfig } from '.';
 
-export const TEMPLATES: Record<string, { name: string; templateValues: HttpRequestConfig }> = {
-  '': {
-    name: '',
-    templateValues: {
-      method: 'post',
-      url: '',
-      contentType: 'json',
-      paramFields: [],
-    },
-  },
+export const TEMPLATES: Record<
+  string,
+  { name: string; serviceId: string; templateValues: HttpRequestConfig }
+> = {
   'jira-create-incident': {
+    serviceId: 'jira',
     name: 'Jira - Create Incident',
     templateValues: {
       method: 'post',

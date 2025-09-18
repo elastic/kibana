@@ -19,6 +19,7 @@ import {
   JsonEditorField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpRequestConfig } from '.';
 import { TEMPLATES } from './templates';
 
 const HTTP_VERBS = ['get', 'put', 'post', 'delete', 'patch'];
@@ -38,6 +39,23 @@ const CONTENT_TYPES: Record<string, string> = {
   custom: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.custom', {
     defaultMessage: 'Custom',
   }),
+};
+
+const COMBINED_TEMPLATES: Record<
+  string,
+  { name: string; serviceId: string; templateValues: HttpRequestConfig }
+> = {
+  '': {
+    name: '',
+    serviceId: '',
+    templateValues: {
+      method: 'post',
+      url: '',
+      contentType: 'json',
+      paramFields: [],
+    },
+  },
+  ...TEMPLATES,
 };
 
 const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
@@ -68,21 +86,21 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         >
           <EuiSelect
             fullWidth={true}
-            options={Object.keys(TEMPLATES).map((key) => ({
-              text: TEMPLATES[key].name,
+            options={Object.keys(COMBINED_TEMPLATES).map((key) => ({
+              text: COMBINED_TEMPLATES[key].name,
               value: key,
             }))}
             value={selectedTemplate}
             onChange={(e) => {
               setSelectedTemplate(e.target.value);
-              const templateValues = TEMPLATES[e.target.value].templateValues;
-              setFieldValue('config.method', templateValues.method || '');
-              setFieldValue('config.url', templateValues.url || '');
-              setFieldValue('config.contentType', templateValues.contentType || '');
-              setFieldValue('config.customContentType', templateValues.customContentType || '');
+              const templateValues = COMBINED_TEMPLATES[e.target.value].templateValues;
+              setFieldValue('config.method', templateValues.method);
+              setFieldValue('config.url', templateValues.url);
+              setFieldValue('config.contentType', templateValues.contentType);
+              setFieldValue('config.customContentType', templateValues.customContentType);
               setFieldValue(
                 'config.paramFields',
-                JSON.stringify(templateValues.paramFields || [], null, 2)
+                JSON.stringify(templateValues.paramFields, null, 2)
               );
             }}
           />
