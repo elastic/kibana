@@ -86,6 +86,8 @@ export class SyncPrivateLocationMonitorsTask {
     const startedAt = taskInstance.startedAt || new Date();
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
+    let packagePoliciesRequireReformatting =
+      taskInstance.state.packagePoliciesRequireReformatting ?? true;
     try {
       this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
       const soClient = savedObjects.createInternalRepository([
@@ -98,8 +100,14 @@ export class SyncPrivateLocationMonitorsTask {
       });
       lastTotalParams = totalParams;
       lastTotalMWs = totalMWs;
-      if (hasDataChanged) {
-        this.debugLog(`Syncing private location monitors because data has changed`);
+      if (hasDataChanged || packagePoliciesRequireReformatting) {
+        if (packagePoliciesRequireReformatting) {
+          this.serverSetup.logger.info(`Reformatting synthetics package policies.`);
+          packagePoliciesRequireReformatting = false;
+        }
+        if (hasDataChanged) {
+          this.debugLog(`Syncing private location monitors because data has changed`);
+        }
 
         if (allPrivateLocations.length > 0) {
           await this.syncGlobalParams({
@@ -122,6 +130,7 @@ export class SyncPrivateLocationMonitorsTask {
           lastStartedAt: startedAt.toISOString(),
           lastTotalParams,
           lastTotalMWs,
+          packagePoliciesRequireReformatting,
         },
       };
     }
@@ -130,6 +139,7 @@ export class SyncPrivateLocationMonitorsTask {
         lastStartedAt: startedAt.toISOString(),
         lastTotalParams,
         lastTotalMWs,
+        packagePoliciesRequireReformatting,
       },
     };
   }
