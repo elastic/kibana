@@ -97,8 +97,15 @@ export const performCheckConflicts = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
+  // const authzObjects = ???
+  // const accessAuthz = securityExtension?.authorizeChangeAccessControl(
+  //   { objects: authzObjects, namespace },
+  //   'changeOwnership'
+  // );
+
   const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
   expectedBulkGetResults.forEach((expectedResult) => {
+    // Unsupported type
     if (isLeft(expectedResult)) {
       errors.push(expectedResult.value as any);
       return;
@@ -107,7 +114,7 @@ export const performCheckConflicts = async <T>(
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
     if (isMgetDoc(doc) && doc.found) {
-      // Check here for access control??
+      // Check here for access control did the object require manage access control?
       errors.push({
         id,
         type,
