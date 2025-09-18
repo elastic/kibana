@@ -39,12 +39,12 @@ export class Gap {
   readonly ruleId: string;
 
   constructor({
-    ruleId,
     timestamp,
     range,
     filledIntervals = [],
     inProgressIntervals = [],
     internalFields,
+    ruleId,
   }: GapConstructorParams) {
     this._range = normalizeInterval(range);
     this._filledIntervals = mergeIntervals(filledIntervals.map(normalizeInterval));
