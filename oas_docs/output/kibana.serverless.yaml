@@ -71944,12 +71944,12 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         - type: object
           properties:
-            '@timestamp':
-              format: date-time
-              type: string
             event:
               type: object
               properties:
+                '@timestamp':
+                  format: date-time
+                  type: string
                 ingested:
                   format: date-time
                   type: string
@@ -72293,28 +72293,28 @@ components:
       type: object
       properties:
         entity_analytics_monitoring:
-          type: object
           description: Entity analytics monitoring configuration for the user
+          type: object
           properties:
             labels:
-              type: array
               description: Array of labels associated with the user
               items:
                 type: object
                 properties:
                   field:
-                    type: string
                     description: The field name for the label
-                  value:
                     type: string
-                    description: The value of the label
                   source:
-                    type: string
                     description: The source where this label was created (api, csv, or index_sync)
                     enum:
                       - api
                       - csv
                       - index_sync
+                    type: string
+                  value:
+                    description: The value of the label
+                    type: string
+              type: array
         user:
           type: object
           properties:
