@@ -25,16 +25,17 @@ export class WorkChatAppPlugin
       WorkChatAppPluginStartDependencies
     >
 {
-  logger: Logger;
   private services?: WorkChatServices;
+  private readonly logger: Logger;
 
   constructor(context: PluginInitializerContext) {
     this.services = {};
-    this.logger = context.logger.get();
+    this.logger = context.logger.get('workchat.app.public');
   }
 
   public setup(
-    core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
+    core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>,
+    { chatDataRegistry }: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     registerApp({
       core,
@@ -53,6 +54,7 @@ export class WorkChatAppPlugin
     { http }: CoreStart,
     pluginsStart: WorkChatAppPluginStartDependencies
   ): WorkChatAppPluginStart {
+    this.logger.info('WorkChatAppPlugin started.');
     return {};
   }
 
