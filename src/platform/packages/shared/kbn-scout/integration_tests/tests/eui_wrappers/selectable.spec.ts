@@ -11,7 +11,7 @@ import { test, expect } from '../../../src/playwright';
 import { EuiSelectableWrapper } from '../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
-test.describe.only('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
+test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
   for (let i = 1; i <= 10; i++) {
     test(`selectable with search field, run #${i}`, async ({ page }) => {
       const selector = {

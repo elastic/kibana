@@ -11,7 +11,7 @@ import { test, expect } from '../../../src/playwright';
 import { EuiDataGridWrapper } from '../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
-test.describe.only('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'] }, () => {
+test.describe('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'] }, () => {
   for (let i = 1; i <= 10; i++) {
     test(`data grid, run #${i}`, async ({ page }) => {
       const selector = {
