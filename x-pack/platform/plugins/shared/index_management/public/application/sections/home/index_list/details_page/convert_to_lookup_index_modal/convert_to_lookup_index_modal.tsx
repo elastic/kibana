@@ -17,6 +17,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -106,16 +107,23 @@ export const ConvertToLookupIndexModal = ({
       </EuiModalHeader>
 
       <EuiModalBody>
+        <FormattedMessage
+          id="xpack.idxMgmt.convertToLookupIndexModal.modalBodyDescription"
+          defaultMessage="Converting an index to a Lookup index will create a new index with Lookup mode set. The old index will continue to exist."
+        />
+        <EuiSpacer />
         <Form form={form} data-test-subj="convertToLookupIndexForm">
           <EuiFormRow
             label={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.sourceIndexLabel', {
               defaultMessage: 'Source index',
             })}
+            fullWidth
           >
             <EuiFieldText
               defaultValue={sourceIndexName}
               disabled
               data-test-subj="sourceIndexName"
+              fullWidth
             />
           </EuiFormRow>
 
@@ -131,7 +139,7 @@ export const ConvertToLookupIndexModal = ({
             }}
           />
           {errorMessage && (
-            <EuiFormRow>
+            <EuiFormRow fullWidth>
               <EuiCallOut
                 title={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.errorCalloutTitle', {
                   defaultMessage: 'An error has occurred',

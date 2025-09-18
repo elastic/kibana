@@ -471,7 +471,7 @@ export class IndexActionsContextMenu extends Component {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
-            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups."
+            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups. Deleting an index will affect ongoing reindex operations."
           />
         </p>
       </Fragment>

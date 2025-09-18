@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useConvertIndexToLookup } from '../../../../../hooks/use_convert_index_to_lookup/use_convert_index_to_lookup';
 import { ConvertToLookupIndexModal } from './convert_to_lookup_index_modal';
+
+import { notificationService } from '../../../../../services/notification';
 
 export const ConvertToLookupIndexModalContainer = ({
   onCloseModal,
@@ -24,9 +27,31 @@ export const ConvertToLookupIndexModalContainer = ({
     onClose: onCloseModal,
   });
 
+  const onCloseModalWithInfoToast = () => {
+    if (isConverting) {
+      notificationService.showInfoToast(
+        i18n.translate(
+          'xpack.idxMgmt.convertToLookupIndexAction.indexConversionInProgressToastTitle',
+          {
+            defaultMessage: 'Index conversion in progress',
+          }
+        ),
+        i18n.translate(
+          'xpack.idxMgmt.convertToLookupIndexAction.indexConversionInProgressToastMessage',
+          {
+            defaultMessage: 'The conversion operation is still in progress for {sourceIndexName}.',
+            values: { sourceIndexName },
+          }
+        )
+      );
+    }
+
+    onCloseModal();
+  };
+
   return (
     <ConvertToLookupIndexModal
-      onCloseModal={onCloseModal}
+      onCloseModal={onCloseModalWithInfoToast}
       onConvert={convert}
       sourceIndexName={sourceIndexName}
       isConverting={isConverting}
