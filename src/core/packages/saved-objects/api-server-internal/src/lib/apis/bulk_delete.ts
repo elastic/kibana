@@ -53,7 +53,7 @@ export interface PerformBulkDeleteParams<T = unknown> {
 export function isGetGetResult<TDocument = unknown>(
   item: estypes.MgetResponseItem<TDocument> | undefined
 ): item is estypes.GetGetResult<TDocument> {
-  return (item as estypes.MgetMultiGetError).error === undefined;
+  return item !== undefined && (item as estypes.MgetMultiGetError).error === undefined;
 }
 
 export const performBulkDelete = async <T>(
