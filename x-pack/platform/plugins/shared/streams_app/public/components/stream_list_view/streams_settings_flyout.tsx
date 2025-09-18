@@ -144,42 +144,42 @@ export function StreamsSettingsFlyout({
     `${shipperButtonGroupPrefix}__otel`
   );
 
-  // Example config blocks
   const shipperConfigExamples: Record<string, string> = {
-    [`${shipperButtonGroupPrefix}__otel`]: `exporters:
-  elastic:
-    endpoint: https://<kibana-host>:443
-    api_key: <your-api-key>
-processors:
-    transform/logs-streams:
-        logs:
-            actions:
-              - key: attributes.index
-                value: logs
+    [`${shipperButtonGroupPrefix}__otel`]: `processors:
+  transform/logs-streams:
+    log_statements:
+      - context: resource
+        statements:
+          - set(attributes["elasticsearch.index"], "logs")
+
 service:
   pipelines:
     logs:
-      receivers: [otlp]
-        processors: [transform/logs-streams]
-      exporters: [elastic]`,
+      receivers: [myreceiver] # works with any logs receiver
+      processors: [transform/logs-streams]
+      exporters: [elasticsearch, otlp] # works with either`,
     [`${shipperButtonGroupPrefix}__filebeat`]: `filebeat.inputs:
-  - type: log
+  - type: filestream
+    id: my-filestream-id
+    index: logs
+    enabled: true  
     paths:
       - /var/log/*.log
+
+# No need to install templates for wired streams
+setup:
+  template:
+    enabled: false
+
 output.elasticsearch:
-  hosts: ["https://<kibana-host>:443"]
-  index: logs
+  hosts: ["<elasticsearch-host>"]
   api_key: "<your-api-key>"`,
-    [`${shipperButtonGroupPrefix}__logstash`]: `input {
-  beats {
-    port => 5044
-  }
-}
-output {
+    [`${shipperButtonGroupPrefix}__logstash`]: `output {
   elasticsearch {
-    hosts => ["https://<es-host>:443"]
-    index => "logs"
+    hosts => ["<elasticsearch-host>"]
     api_key => "<your-api-key>"
+    index => "logs"
+    action => "create"
   }
 }`,
   };
@@ -267,7 +267,8 @@ output {
             <EuiText color="subdued" size="s">
               <p>
                 {i18n.translate('xpack.streams.streamsListView.shipperConfigDescription', {
-                  defaultMessage: 'Send data into wired streams',
+                  defaultMessage:
+                    'Send logs data to wired streams. Check the documentation for more info.',
                 })}
               </p>
             </EuiText>
