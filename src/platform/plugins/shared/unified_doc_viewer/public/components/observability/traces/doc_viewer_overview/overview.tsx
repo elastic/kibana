@@ -37,6 +37,7 @@ import { SimilarSpans } from '../components/similar_spans';
 import { isTransaction } from '../helpers';
 import { TraceRootItemProvider } from './hooks/use_fetch_trace_root_item';
 import { TraceWaterfall } from '../components/trace_waterfall';
+import { ErrorsTable } from '../components/errors';
 
 export type OverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -104,6 +105,7 @@ export function Overview({
             isOtelSpan={isOtelSpan}
             duration={duration || 0}
           />
+          <EuiSpacer size="m" />
           {showWaterfall && docId ? (
             <TraceWaterfall
               dataView={dataView}
@@ -112,7 +114,11 @@ export function Overview({
               docId={docId}
             />
           ) : null}
+          <EuiSpacer size="m" />
           {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
+          <EuiSpacer size="m" />
+          <ErrorsTable traceId={traceId} docId={docId} />
+          <EuiSpacer size="m" />
           <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
         </div>
       </TraceRootItemProvider>
