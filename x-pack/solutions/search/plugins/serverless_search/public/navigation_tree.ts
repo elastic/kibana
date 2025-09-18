@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
@@ -105,6 +105,18 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             link: 'dashboards',
             getIsActive: ({ pathNameSerialized, prepend }) => {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+            },
+          },
+          {
+            link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.serverlessSearch.nav.workflowsBadgeTooltip', {
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
+              }),
             },
           },
           {
@@ -386,6 +398,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     title: 'AI',
                     children: [
                       { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+                      { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
                       {
                         link: 'management:observabilityAiAssistantManagement',
                         breadcrumbStatus: 'hidden',
