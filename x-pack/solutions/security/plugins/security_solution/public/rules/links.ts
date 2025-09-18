@@ -57,7 +57,7 @@ export const links: LinkItem = {
         }),
       ],
       // TODO Remove `${SECURITY_FEATURE_ID}.detections` ? Check if AI4SOC needs it
-      capabilities: [[RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`]],
+      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`],
       links: [
         {
           id: SecurityPageName.rulesAdd,
