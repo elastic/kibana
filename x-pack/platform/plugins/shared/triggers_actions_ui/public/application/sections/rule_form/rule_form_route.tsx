@@ -70,7 +70,7 @@ export const RuleFormRoute = () => {
       ]);
       chrome.docTitle.change(getCurrentDocTitle('editRule'));
     }
-    if (ruleTypeId) {
+    if (ruleTypeId || templateId) {
       setBreadcrumbs([
         getAlertingSectionBreadcrumb('rules', true),
         getAlertingSectionBreadcrumb('createRule'),
@@ -78,7 +78,7 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId]);
+  }, [ruleTypeId, templateId]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
