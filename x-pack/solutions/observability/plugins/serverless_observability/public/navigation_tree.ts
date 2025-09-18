@@ -212,6 +212,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
+            spaceBefore: null,
             iconV2: 'info',
             children: [
               {
