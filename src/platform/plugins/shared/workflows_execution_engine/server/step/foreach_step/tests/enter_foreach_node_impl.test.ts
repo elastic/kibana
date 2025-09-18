@@ -54,7 +54,7 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on the first enter', () => {
     beforeEach(() => {
-      (workflowExecutionRuntimeManager.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+      workflowExecutionRuntimeManager.getCurrentStepState = jest.fn().mockReturnValue(undefined);
     });
 
     it('should enter the iteration scope', async () => {

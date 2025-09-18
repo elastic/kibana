@@ -175,7 +175,7 @@ describe('EnterIfNodeImpl', () => {
   });
 
   it('should throw an error if condition evaluation fails', async () => {
-    (workflowGraph.getDirectSuccessors as jest.Mock).mockReturnValueOnce([
+    workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
       {
         id: 'thenNode',
         type: 'enter-then-branch',

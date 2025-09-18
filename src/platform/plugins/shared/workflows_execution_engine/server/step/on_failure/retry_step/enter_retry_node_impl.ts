@@ -54,7 +54,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, StepErrorCatcher 
     }
 
     await this.workflowRuntime.failStep(
-      new Error(`Retry step "${this.node.id}" has exceeded the maximum number of attempts.`)
+      new Error(`Retry step "${this.node.stepId}" has exceeded the maximum number of attempts.`)
     );
   }
 
@@ -73,7 +73,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, StepErrorCatcher 
   private async advanceRetryAttempt(): Promise<void> {
     const retryState = this.workflowRuntime.getCurrentStepState()!;
     const attempt = retryState.attempt + 1;
-    this.workflowLogger.logDebug(`Retrying "${this.node.id}" step. (attempt ${attempt}).`);
+    this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
     await this.workflowRuntime.setCurrentStepState({ attempt });
     // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
     this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
