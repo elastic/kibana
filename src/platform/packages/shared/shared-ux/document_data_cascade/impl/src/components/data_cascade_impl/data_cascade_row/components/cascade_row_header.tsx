@@ -62,20 +62,25 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     rowCanSelect,
   } = useAdaptedTableRows<G, L>({ rowInstance });
 
+  const nodePath = useMemo(
+    () => getCascadeRowNodePath(currentGroupByColumns, rowInstance),
+    [currentGroupByColumns, rowInstance]
+  );
+
   const headerMetaSlots = useMemo(
-    () => rowHeaderMetaSlots?.({ row: rowInstance }),
-    [rowHeaderMetaSlots, rowInstance]
+    () => rowHeaderMetaSlots?.({ rowData: rowInstance.original, nodePath }),
+    [rowHeaderMetaSlots, rowInstance, nodePath]
   );
 
   const headerActions = useMemo(
-    () => rowHeaderActions?.({ row: rowInstance }),
-    [rowHeaderActions, rowInstance]
+    () => rowHeaderActions?.({ rowData: rowInstance.original, nodePath }),
+    [rowHeaderActions, rowInstance, nodePath]
   );
 
   const fetchGroupNodeData = useCallback(() => {
     const dataFetchFn = async () => {
       const groupNodeData = await onCascadeGroupNodeExpanded({
-        row: rowInstance,
+        row: rowInstance.original,
         nodePath: getCascadeRowNodePath(currentGroupByColumns, rowInstance),
         nodePathMap: getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance),
       });
@@ -169,7 +174,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         <EuiFlexItem css={{ minWidth: 0, maxWidth: '100%' }}>
           <EuiFlexGroup justifyContent="spaceBetween" direction="row">
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
-              <RowTitleSlot row={rowInstance} selectedCascadeGroups={currentGroupByColumns} />
+              <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>
             <EuiFlexItem
               grow={6}
