@@ -118,7 +118,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   position="top"
                   content={i18n.translate(
                     'xpack.snapshotRestore.policyList.table.lastSnapshotFailedTooltip',
@@ -126,9 +126,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       defaultMessage: 'Last snapshot failed',
                     }
                   )}
-                >
-                  <EuiIcon type="warning" color="danger" />
-                </EuiToolTip>
+                  type="warning"
+                  color="danger"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <EuiText size="s">{snapshotName}</EuiText>
