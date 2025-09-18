@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import type { MatrixHistogramComponentProps } from '.';
 import { MatrixHistogram } from '.';
@@ -22,7 +22,7 @@ jest.mock('../../containers/query_toggle');
 jest.mock('../visualization_actions/actions');
 jest.mock('../visualization_actions/visualization_embeddable');
 
-jest.mock('../../hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

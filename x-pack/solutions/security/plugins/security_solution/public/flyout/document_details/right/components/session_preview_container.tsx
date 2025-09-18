@@ -7,6 +7,7 @@
 
 import React, { type FC, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
@@ -15,7 +16,6 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 /**
  * Checks if the SessionView component is available, if so render it or else render an error message

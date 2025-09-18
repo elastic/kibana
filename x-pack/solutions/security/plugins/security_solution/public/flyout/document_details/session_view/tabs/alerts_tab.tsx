@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { DetailPanelAlertTab, useFetchSessionViewAlerts } from '@kbn/session-view-plugin/public';
 import type { ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { LeftPanelVisualizeTab } from '../../left';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import {
   DocumentDetailsLeftPanelKey,

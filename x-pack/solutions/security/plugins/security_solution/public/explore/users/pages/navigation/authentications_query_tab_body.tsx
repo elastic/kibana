@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';

@@ -11,9 +11,8 @@ import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { useKnowledgeBaseStatus } from '@kbn/elastic-assistant/impl/assistant/api/knowledge_base/use_knowledge_base_status';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';

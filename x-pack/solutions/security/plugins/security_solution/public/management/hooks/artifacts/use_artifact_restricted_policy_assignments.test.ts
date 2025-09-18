@@ -17,6 +17,10 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { waitFor } from '@testing-library/dom';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { RenderHookResult } from '@testing-library/react';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('useArtifactRestrictedPolicyAssignments()', () => {
   let testContext: AppContextTestRender;
@@ -32,7 +36,10 @@ describe('useArtifactRestrictedPolicyAssignments()', () => {
       });
     };
 
-    testContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      endpointManagementSpaceAwarenessEnabled: true,
+    });
 
     item = new ExceptionsListItemGenerator('seed').generateTrustedApp({
       tags: [buildPerPolicyTag('1'), buildPerPolicyTag('2'), buildPerPolicyTag('3')],
@@ -49,7 +56,10 @@ describe('useArtifactRestrictedPolicyAssignments()', () => {
   });
 
   it('should return empty array when feature flag is disabled', () => {
-    testContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      endpointManagementSpaceAwarenessEnabled: false,
+    });
     const { result } = renderHook();
 
     expect(result.current).toEqual({ isLoading: false, policyIds: [] });

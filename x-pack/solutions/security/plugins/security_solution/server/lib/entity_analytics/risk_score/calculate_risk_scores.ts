@@ -16,9 +16,9 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
-import type { ExperimentalFeatures } from '../../../../common';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type {
   AfterKeys,
@@ -40,7 +40,7 @@ import type {
   CalculateScoresParams,
   RiskScoreBucket,
 } from '../types';
-import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
+import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 

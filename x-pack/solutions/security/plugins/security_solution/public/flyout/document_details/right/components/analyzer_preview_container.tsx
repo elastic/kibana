@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import { EuiLink, EuiMark } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 /**
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.

@@ -1024,6 +1024,8 @@
       "@kbn/expandable-flyout/*": ["x-pack/solutions/security/packages/expandable-flyout/*"],
       "@kbn/expect": ["src/platform/packages/shared/kbn-expect"],
       "@kbn/expect/*": ["src/platform/packages/shared/kbn-expect/*"],
+      "@kbn/experimental-features": ["x-pack/solutions/security/packages/experimental-features"],
+      "@kbn/experimental-features/*": ["x-pack/solutions/security/packages/experimental-features/*"],
       "@kbn/exploratory-view-example-plugin": ["x-pack/examples/exploratory_view_example"],
       "@kbn/exploratory-view-example-plugin/*": ["x-pack/examples/exploratory_view_example/*"],
       "@kbn/exploratory-view-plugin": ["x-pack/solutions/observability/plugins/exploratory_view"],
@@ -2395,7 +2397,7 @@
       ],
       "@a2a-js/sdk/server": [
         "typings/@a2a-js-sdk/server"
-      ],
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

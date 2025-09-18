@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TrustedDevicesApiClient } from '../service/api_client';
 import { TrustedDevicesForm } from './components/form';
 import { useHttp } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { TrustedDevicesArtifactsDocsLink } from './components/artifacts_docs_link';
 

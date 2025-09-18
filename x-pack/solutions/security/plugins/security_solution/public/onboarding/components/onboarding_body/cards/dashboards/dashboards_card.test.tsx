@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { OnboardingContextProvider } from '../../../onboarding_context';
 import DashboardsCard from './dashboards_card';
-import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 
-jest.mock('../../../../../common/experimental_features_service', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   ExperimentalFeaturesService: { get: jest.fn() },
 }));
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;

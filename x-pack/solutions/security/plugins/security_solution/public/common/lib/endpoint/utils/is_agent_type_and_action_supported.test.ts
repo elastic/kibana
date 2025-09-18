@@ -11,11 +11,10 @@ import type {
   ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { isAgentTypeAndActionSupported } from './is_agent_type_and_action_supported';
-import { ExperimentalFeaturesService } from '../../../experimental_features_service';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { allowedExperimentalValues } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
-jest.mock('../../../experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 describe('isAgentTypeAndActionSupported() util', () => {
   const enableFeatures = (overrides: Partial<ExperimentalFeatures> = {}): void => {

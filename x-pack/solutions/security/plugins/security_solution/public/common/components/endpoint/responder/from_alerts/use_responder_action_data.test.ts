@@ -6,9 +6,9 @@
  */
 
 import type {
-  UseWithResponderActionDataFromAlertProps,
   ResponderActionData,
   UseResponderActionDataProps,
+  UseWithResponderActionDataFromAlertProps,
 } from './use_responder_action_data';
 import {
   useResponderActionData,
@@ -26,7 +26,7 @@ import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mo
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../../common/endpoint/constants';
 import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpoint_hosts/mocks';
 import type { RenderHookResult } from '@testing-library/react';
-import { waitFor, act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
@@ -35,6 +35,14 @@ import {
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getAgentTypeName } from '../../../../translations';
 import { ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD } from '../../../../hooks/endpoint/use_alert_response_actions_support';
+
+jest.mock('@kbn/experimental-features', () => ({
+  ExperimentalFeaturesService: {
+    get: jest.fn().mockReturnValue({
+      responseActionsSentinelOneRunScriptEnabled: true,
+    }),
+  },
+}));
 
 describe('use responder action data hooks', () => {
   let appContextMock: AppContextTestRender;

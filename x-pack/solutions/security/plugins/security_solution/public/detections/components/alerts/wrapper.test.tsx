@@ -14,14 +14,14 @@ import {
   Wrapper,
 } from './wrapper';
 import { TestProviders } from '../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../../sourcerer/containers');
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('./content', () => ({
   AlertsPageContent: () => <div data-test-subj={'alerts-page-content'} />,

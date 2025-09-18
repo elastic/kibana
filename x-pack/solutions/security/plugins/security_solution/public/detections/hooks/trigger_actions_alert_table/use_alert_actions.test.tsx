@@ -15,10 +15,6 @@ jest.mock('../../../common/hooks/use_app_toasts');
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
 }));
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-  useEnableExperimental: jest.fn(() => jest.fn()),
-}));
 (useAppToasts as jest.Mock).mockReturnValue({
   addSuccess: jest.fn(),
   addError: jest.fn(),

@@ -25,6 +25,7 @@ import {
   type CloudSecurityUiCounters,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { PreviewLink } from '../../../shared/components/preview_link';
@@ -33,7 +34,6 @@ import {
   EntityDetailsLeftPanelTab,
   CspInsightLeftPanelSubTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
 
 interface VulnerabilitiesInsightProps {

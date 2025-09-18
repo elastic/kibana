@@ -9,14 +9,18 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { IsolateHostPanelContext } from './context';
 import { useIsolateHostPanelContext } from './context';
-import { PanelHeader, IsolateHostPanelHeader } from './header';
+import { IsolateHostPanelHeader, PanelHeader } from './header';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('./context');
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('Isolation Flyout PanelHeader', () => {
   let renderComponent: () => ReturnType<AppContextTestRender['render']>;
@@ -37,7 +41,8 @@ describe('Isolation Flyout PanelHeader', () => {
   beforeEach(() => {
     const appContextMock = createAppRootMockRenderer();
 
-    appContextMock.setExperimentalFlag({
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
 

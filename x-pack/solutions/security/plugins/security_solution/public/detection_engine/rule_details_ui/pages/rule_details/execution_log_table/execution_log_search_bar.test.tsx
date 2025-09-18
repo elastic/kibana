@@ -10,7 +10,7 @@ import React from 'react';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { noop } from 'lodash/fp';
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

@@ -9,9 +9,9 @@ import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import {
+  type ElasticsearchClient,
   type Logger,
   type SavedObjectsClientContract,
-  type ElasticsearchClient,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -22,12 +22,12 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { PolicyData, PromiseResolvedValue } from '../../../../../common/endpoint/types';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
-import type { ExperimentalFeatures } from '../../../../../common';
 import type { LicenseService } from '../../../../../common/license';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
@@ -46,12 +46,12 @@ import {
 } from '../../../lib/artifacts';
 
 import {
-  type InternalUnifiedManifestBaseSchema,
-  type InternalUnifiedManifestSchema,
-  type InternalUnifiedManifestUpdateSchema,
   internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
   type InternalManifestSchema,
+  type InternalUnifiedManifestBaseSchema,
+  type InternalUnifiedManifestSchema,
+  type InternalUnifiedManifestUpdateSchema,
   type WrappedTranslatedExceptionList,
 } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';

@@ -22,7 +22,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
 jest.mock(
@@ -32,7 +32,7 @@ jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const mockNavigateToAnalyzer = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_analyzer', () => {

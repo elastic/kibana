@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExperimentalFeatures } from '../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';

@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
-import type { ExperimentalFeatures } from '../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import {
+  SecurityPageName,
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
-  SecurityPageName,
 } from '../../common/constants';
 import { MigrationDashboardsPage } from './dashboards/pages';
 import { MigrationRulesPage } from './rules/pages';

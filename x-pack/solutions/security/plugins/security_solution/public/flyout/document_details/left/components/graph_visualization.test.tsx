@@ -70,7 +70,7 @@ jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({ dataView: { id: 'experimental-data-view' } }),
 }));
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 

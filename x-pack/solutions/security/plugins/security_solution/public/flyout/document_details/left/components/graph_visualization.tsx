@@ -12,6 +12,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import {
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
@@ -29,7 +30,6 @@ import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import {
   ALERT_PREVIEW_BANNER,

@@ -6,8 +6,8 @@
  */
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useKibana } from '../../lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import { inputsSelectors } from '../../store/inputs';
 import { useUpdateUrlParam } from '../../utils/global_query_string';

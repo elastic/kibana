@@ -14,7 +14,7 @@ import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { EntityType } from '../../../../common/search_strategy';
-import { allowedExperimentalValues } from '../../../../common';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];

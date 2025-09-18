@@ -8,18 +8,16 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-
 import { EmbeddedMapComponent } from './embedded_map';
 import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
-
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('./map_config');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../containers/fields');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('./index_patterns_missing_prompt', () => ({
   IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
 }));

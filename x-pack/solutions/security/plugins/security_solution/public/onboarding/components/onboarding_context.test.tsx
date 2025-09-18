@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import { OnboardingContextProvider, useOnboardingContext } from './onboarding_context';
 import { useLicense } from '../../common/hooks/use_license';
 import { hasCapabilities } from '../../common/lib/capabilities';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn().mockReturnValue({ services: { application: { capabilities: {} } } }),
@@ -21,7 +21,7 @@ const mockHasCapabilities = hasCapabilities as jest.Mock;
 jest.mock('../../common/hooks/use_license', () => ({ useLicense: jest.fn() }));
 const mockUseLicense = useLicense as jest.Mock;
 
-jest.mock('../../common/experimental_features_service', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   ExperimentalFeaturesService: { get: jest.fn() },
 }));
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;

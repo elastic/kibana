@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { ExperimentalFeatures } from '../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type {
   EntityType,
   RiskScoresCalculationResponse,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
@@ -14,9 +14,9 @@ import type { PendingActionsSelectorState } from './pending_actions_selector';
 import { PendingActionsSelector } from './pending_actions_selector';
 import { useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import {
-  useGenericErrorToast,
   useBaseSelectorHandlers,
   useFocusManagement,
+  useGenericErrorToast,
   usePendingActionsOptions,
 } from '../shared/hooks';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -24,9 +24,9 @@ import type { ActionDetails, ActionListApiResponse } from '../../../../../common
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import type {
-  CommandArgumentValueSelectorProps,
   Command,
   CommandArgDefinition,
+  CommandArgumentValueSelectorProps,
 } from '../../console/types';
 import type { ParsedCommandInterface } from '../../console/service/types';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
@@ -51,7 +51,7 @@ jest.mock('../shared/hooks', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 jest.useFakeTimers();
 

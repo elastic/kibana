@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import {
-  type Logger,
   type AnalyticsServiceSetup,
   type AuditLogger,
+  type Logger,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type {
@@ -17,15 +17,15 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { EntityStoreConfig } from '../../types';
 import { EntityStoreDataClient } from '../../entity_store_data_client';
 import { getApiKeyManager } from '../../auth/api_key';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
-  stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreDataViewRefreshTaskState,
+  stateSchemaByVersion,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -155,7 +155,6 @@ export const registerEntityStoreDataViewRefreshTask = ({
         logger,
         telemetry,
         refreshDataViews,
-        experimentalFeatures,
       }),
     },
   });
@@ -221,14 +220,12 @@ export const runEntityStoreDataViewRefreshTask = async ({
   logger,
   taskInstance,
   telemetry,
-  experimentalFeatures,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
   refreshDataViews: (namespace: string) => Promise<void>;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
-  experimentalFeatures: ExperimentalFeatures;
 }): Promise<{
   state: EntityStoreDataViewRefreshTaskState;
 }> => {
@@ -283,12 +280,10 @@ const createEntityStoreDataViewRefreshTaskRunnerFactory =
     logger,
     telemetry,
     refreshDataViews,
-    experimentalFeatures,
   }: {
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     refreshDataViews: (namespace: string) => Promise<void>;
-    experimentalFeatures: ExperimentalFeatures;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
@@ -301,7 +296,6 @@ const createEntityStoreDataViewRefreshTaskRunnerFactory =
           logger,
           taskInstance,
           telemetry,
-          experimentalFeatures,
         }),
       cancel: async () => {
         cancelled = true;

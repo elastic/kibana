@@ -13,7 +13,7 @@ import { rawEventData, TestProviders } from '../../../../common/mock';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
 
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {

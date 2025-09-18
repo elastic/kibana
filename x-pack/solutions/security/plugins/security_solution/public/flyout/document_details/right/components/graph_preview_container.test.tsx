@@ -26,7 +26,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: {
@@ -45,7 +45,7 @@ jest.mock('../../shared/hooks/use_navigate_to_graph_visualization', () => {
 
 const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

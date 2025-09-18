@@ -11,7 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';

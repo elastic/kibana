@@ -9,10 +9,10 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsInvestigateInResolverActionEnabled } from './investigate_in_resolver';
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import * as useExperimentalFeatures from '../../../../common/hooks/use_experimental_features';
+import * as useExperimentalFeatures from '@kbn/experimental-features';
 
 // Mock the experimental features hook
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
 
 describe('InvestigateInResolverAction', () => {

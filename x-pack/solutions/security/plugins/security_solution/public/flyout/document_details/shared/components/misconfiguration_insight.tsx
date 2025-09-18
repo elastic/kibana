@@ -23,13 +23,13 @@ import {
   type CloudSecurityUiCounters,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { useDocumentDetailsContext } from '../context';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,

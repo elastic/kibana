@@ -15,7 +15,7 @@ import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolutio
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { HeaderPage } from '../../../common/components/header_page';

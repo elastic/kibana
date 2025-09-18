@@ -14,17 +14,17 @@ import type { ParsedAlertsData } from '../../../../overview/components/detection
 import { useEuiTheme } from '@elastic/eui';
 import {
   INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
-  INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
   INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
 } from './test_ids';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

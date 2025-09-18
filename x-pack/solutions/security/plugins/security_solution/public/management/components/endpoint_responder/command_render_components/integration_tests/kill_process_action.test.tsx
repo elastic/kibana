@@ -30,6 +30,10 @@ import type {
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 import type { CommandDefinition } from '../../../console';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 // TODO This tests need revisting, there are problems with `enterComment` after the
 // upgrade to user-event v14 https://github.com/elastic/kibana/pull/189949
@@ -410,7 +414,8 @@ describe.skip('When using the kill-process action from response actions console'
 
   describe('and the agent type is `SentinelOne`', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
         responseActionsSentinelOneKillProcessEnabled: true,
       });
       setConsoleCommands(undefined, 'sentinel_one');
@@ -490,7 +495,10 @@ describe.skip('When using the kill-process action from response actions console'
 
     describe('and `responseActionsSentinelOneKillProcessEnabled` feature flag is disabled', () => {
       beforeEach(() => {
-        mockedContext.setExperimentalFlag({ responseActionsSentinelOneKillProcessEnabled: false });
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
+          responseActionsSentinelOneKillProcessEnabled: false,
+        });
         setConsoleCommands(undefined, 'sentinel_one');
       });
 

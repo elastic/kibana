@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useNavigateToUserDetails } from './use_navigate_to_user_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   CspInsightLeftPanelSubTab,
@@ -18,7 +18,7 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 import { UserPanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {

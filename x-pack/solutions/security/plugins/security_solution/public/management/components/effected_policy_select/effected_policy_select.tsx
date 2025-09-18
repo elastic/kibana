@@ -23,6 +23,7 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { PolicySelectorProps } from '../policy_selector';
 import { PolicySelector } from '../policy_selector';
 import { useArtifactRestrictedPolicyAssignments } from '../../hooks/artifacts/use_artifact_restricted_policy_assignments';
@@ -32,7 +33,6 @@ import {
   ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE,
   NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE,
 } from '../../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -259,7 +259,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {artifactRestrictedPolicyIds.policyIds.length > 0 && !isGlobal && (
           <>
             <EuiSpacer />
-            <EuiCallOut size="s" data-test-subj={getTestId('unAccessiblePoliciesCallout')}>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              data-test-subj={getTestId('unAccessiblePoliciesCallout')}
+            >
               {ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(
                 artifactRestrictedPolicyIds.policyIds.length
               )}

@@ -9,9 +9,9 @@ import { AlertsCard } from './alerts_card';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { render } from '@testing-library/react';
 import { OnboardingContextProvider } from '../../../onboarding_context';
-import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 
-jest.mock('../../../../../common/experimental_features_service', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   ExperimentalFeaturesService: { get: jest.fn() },
 }));
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;

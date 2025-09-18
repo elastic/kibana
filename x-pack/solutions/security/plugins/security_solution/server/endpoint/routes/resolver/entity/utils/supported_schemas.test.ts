@@ -6,7 +6,7 @@
  */
 
 import { getSupportedSchemas } from './supported_schemas';
-import type { ExperimentalFeatures } from '../../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import * as securityModules from './security_modules';
 
 const actualSecurityModules = jest.requireActual('./security_modules');

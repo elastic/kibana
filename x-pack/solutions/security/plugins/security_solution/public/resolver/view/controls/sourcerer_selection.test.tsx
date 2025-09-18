@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { SourcererButton } from './sourcerer_selection';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -32,7 +32,7 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(),
 }));

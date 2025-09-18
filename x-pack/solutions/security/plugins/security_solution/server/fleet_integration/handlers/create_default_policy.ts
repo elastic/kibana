@@ -8,7 +8,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
 import {
   policyFactory as policyConfigFactory,
@@ -18,10 +18,10 @@ import type { LicenseService } from '../../../common/license/license';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
-  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import {
   disableProtections,

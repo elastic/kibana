@@ -27,7 +27,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../overview/components/events_by_dataset');
 jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/user_privileges');
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 describe('TimelinesPage', () => {
   let wrapper: ShallowWrapper;

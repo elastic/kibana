@@ -21,9 +21,9 @@ import type { getEndpointAuthzInitialState } from '../../../../../../common/endp
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { PendingActionsResponse } from '../../../../../../common/endpoint/types';
-import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 
-jest.mock('../../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 const mockedExperimentalFeaturesService = ExperimentalFeaturesService as jest.Mocked<
   typeof ExperimentalFeaturesService
@@ -98,9 +98,6 @@ describe('When using cancel action from response actions console', () => {
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
-
-    // Set default experimental flags
-    mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
 
     // Reset the ExperimentalFeaturesService mock to default enabled state
     // @ts-expect-error - we do not need to specify whole object for testing purposes
@@ -244,7 +241,6 @@ describe('When using cancel action from response actions console', () => {
         responseActionsMSDefenderEndpointEnabled: true,
         microsoftDefenderEndpointRunScriptEnabled: true,
       });
-      mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: false });
 
       const renderResult = await renderConsole('microsoft_defender_endpoint');
 

@@ -18,7 +18,7 @@ import { mockFlyoutApi } from '../document_details/shared/mocks/mock_flyout_cont
 import { TestProviders } from '../../common/mock';
 
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const ip = 'ip';
 const flowTarget = FlowTargetSourceDest.destination;

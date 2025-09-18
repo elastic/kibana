@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useKibana } from '../../lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 /**
  * This hook combines the checks for esql availability within the security solution

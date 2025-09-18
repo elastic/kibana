@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { EndpointAuthz } from '../../types/authz';
-import type { ExperimentalFeatures } from '../../../experimental_features';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../response_actions/constants';
 import {
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../response_actions/constants';
 import { isActionSupportedByAgentType } from '../response_actions/is_response_action_supported';
 

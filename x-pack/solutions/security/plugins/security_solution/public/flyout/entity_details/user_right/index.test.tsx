@@ -48,7 +48,7 @@ jest.mock('./hooks/use_observed_user', () => ({
 }));
 
 const mockedUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
 }));
 

@@ -9,11 +9,11 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type {
-  ProductFeatureKeyType,
   ProductFeatureKeys,
+  ProductFeatureKeyType,
 } from '@kbn/security-solution-features/src/types';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
-import type { ExperimentalFeatures } from '../common/experimental_features';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import { OnboardingService } from './onboarding/service';

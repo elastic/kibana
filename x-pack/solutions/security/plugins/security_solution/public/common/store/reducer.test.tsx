@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
-import { mockIndexPattern, mockSourcererState, TestProviders, createMockStore } from '../mock';
+import { createMockStore, mockIndexPattern, mockSourcererState, TestProviders } from '../mock';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { renderHook } from '@testing-library/react';
 import { initialGroupingState } from './grouping/reducer';
@@ -54,7 +53,6 @@ describe('createInitialState', () => {
     >;
     const defaultState = {
       defaultDataView: mockSourcererState.defaultDataView,
-      enableExperimental: parseExperimentalConfigValue([]).features,
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
       signalIndexMappingOutdated: false,

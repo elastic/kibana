@@ -16,28 +16,28 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import type {
+  AlertInstanceContext,
+  AlertInstanceState,
   RuleExecutorOptions,
+  RuleExecutorServices,
   RuleType,
   RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { PersistenceServices, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient, PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { DocLinksServiceSetup } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
 import type { RefreshTypes } from '../types';
@@ -46,8 +46,8 @@ import type { Status } from '../../../../common/api/detection_engine';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
-  DetectionAlertLatest,
   DetectionAlert800,
+  DetectionAlertLatest,
   WrappedAlert,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {

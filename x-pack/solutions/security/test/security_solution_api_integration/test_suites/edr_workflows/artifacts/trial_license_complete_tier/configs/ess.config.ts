@@ -6,7 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
-import type { ExperimentalFeatures as SecuritySolutionExperimentalFeatures } from '@kbn/security-solution-plugin/common';
+import type { ExperimentalFeatures as SecuritySolutionExperimentalFeatures } from '@kbn/experimental-features';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(

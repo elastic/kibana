@@ -19,16 +19,16 @@ import { getDashboardsLandingCallout } from './components/dashboards_landing_cal
 import type { ServerlessSecurityPublicConfig } from '../common/config';
 import type {
   SecuritySolutionServerlessPluginSetup,
-  SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { startNavigation } from './navigation';
 import {
-  parseExperimentalConfigValue,
   type ExperimentalFeatures,
+  parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';

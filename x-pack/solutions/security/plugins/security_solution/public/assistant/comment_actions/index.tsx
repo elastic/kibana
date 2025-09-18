@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useAssistantAvailability } from '../use_assistant_availability';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
@@ -21,7 +22,6 @@ import { TimelineId } from '../../../common/types';
 import { updateAndAssociateNode } from '../../timelines/components/notes/helpers';
 import { timelineActions } from '../../timelines/store';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface Props {
   message: ClientMessage;

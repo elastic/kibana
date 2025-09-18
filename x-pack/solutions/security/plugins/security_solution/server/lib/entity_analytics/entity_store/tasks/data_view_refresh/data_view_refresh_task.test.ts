@@ -14,7 +14,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { allowedExperimentalValues } from '../../../../../../common';
 
 const mockLog = jest.fn();
 jest.mock('../utils', () => ({
@@ -35,7 +34,6 @@ describe('data_view_refresh_task', () => {
   const telemetry = coreMock.createSetup().analytics;
 
   const taskManager = taskManagerMock.createStart();
-  const experimentalFeatures = allowedExperimentalValues;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -73,7 +71,6 @@ describe('data_view_refresh_task', () => {
         logger,
         taskInstance,
         telemetry,
-        experimentalFeatures,
       });
 
       expect(refreshDataViews).toHaveBeenCalledWith('default');
@@ -89,7 +86,6 @@ describe('data_view_refresh_task', () => {
         logger,
         taskInstance,
         telemetry,
-        experimentalFeatures,
       });
 
       expect(mockLog).toHaveBeenCalledWith('Error executing data view refresh: Execution failed');

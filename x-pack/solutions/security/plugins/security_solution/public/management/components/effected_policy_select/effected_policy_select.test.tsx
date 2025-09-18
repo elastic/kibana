@@ -9,7 +9,7 @@ import type { EffectedPolicySelectProps } from './effected_policy_select';
 import { EffectedPolicySelect } from './effected_policy_select';
 import React from 'react';
 import { forceHTMLElementOffsetWidth } from './test_utils';
-import { fireEvent, act, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -22,11 +22,14 @@ import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts
 import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../common/translations';
 import { allFleetHttpMocks } from '../../mocks';
 import { policySelectorMocks } from '../policy_selector/mocks';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/hooks/use_license');
-
 const useLicenseMock = _useLicense as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
 describe('when using EffectedPolicySelect component', () => {
   let mockedContext: AppContextTestRender;
@@ -220,7 +223,7 @@ describe('when using EffectedPolicySelect component', () => {
     const unAccessiblePolicyId = 'policy-321-not-in-space';
 
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       componentProps.item.tags = [buildPerPolicyTag(unAccessiblePolicyId)];
       apiMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
         items: [],

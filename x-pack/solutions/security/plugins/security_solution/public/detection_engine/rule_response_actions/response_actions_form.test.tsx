@@ -14,7 +14,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
+import * as rules from '../rule_management/logic/use_rule';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
@@ -36,11 +37,10 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-import * as rules from '../rule_management/logic/use_rule';
 // @ts-expect-error we don't really care about thr useRule return value
 jest.spyOn(rules, 'useRule').mockReturnValue({});
 

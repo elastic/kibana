@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 import { TestProviders } from '../../common/mock';
 
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 
 jest.mock('../../sourcerer/containers', () => ({
@@ -24,8 +24,8 @@ jest.mock('../../sourcerer/containers', () => ({
   })),
 }));
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
+jest.mock('@kbn/experimental-features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn((flag) => {
     if (flag === 'newDataViewPickerEnabled') return false;
     if (flag === 'entityStoreDisabled') return false;
     return false;
@@ -85,7 +85,7 @@ describe('EntityAnalyticsPage', () => {
       sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
     });
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag: string) => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag) => {
       if (flag === 'newDataViewPickerEnabled') return false;
       if (flag === 'entityStoreDisabled') return false;
       return false;
@@ -148,7 +148,7 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('renders risk score panels when entityStore feature flag is disabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag: string) => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag) => {
       if (flag === 'entityStoreDisabled') return true;
       return false;
     });
@@ -207,7 +207,7 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('renders only enabled entity types in risk score panels', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag: string) => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag) => {
       if (flag === 'entityStoreDisabled') return true;
       return false;
     });

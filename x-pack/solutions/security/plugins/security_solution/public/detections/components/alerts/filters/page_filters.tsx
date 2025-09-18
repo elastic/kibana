@@ -14,7 +14,7 @@ import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_cont
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';

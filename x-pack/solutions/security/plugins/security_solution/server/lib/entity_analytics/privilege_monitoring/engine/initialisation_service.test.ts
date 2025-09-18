@@ -5,21 +5,20 @@
  * 2.0.
  */
 import {
+  analyticsServiceMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-  analyticsServiceMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core/server';
-import { PrivilegeMonitoringDataClient } from './data_client';
 import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
+import { PrivilegeMonitoringDataClient } from './data_client';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { InitialisationService } from './initialisation_service';
 import { createInitialisationService } from './initialisation_service';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
-import { allowedExperimentalValues } from '../../../../../common';
 
 const mockUpsertSources = jest.fn();
 jest.mock('./initialisation_sources_service', () => {
@@ -71,7 +70,6 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
     auditLogger: auditMock,
     telemetry: telemetryMock,
     savedObjects: savedObjectServiceMock,
-    experimentalFeatures: allowedExperimentalValues,
   };
 
   let initService: InitialisationService;

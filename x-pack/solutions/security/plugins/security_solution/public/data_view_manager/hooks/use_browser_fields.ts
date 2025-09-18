@@ -8,10 +8,10 @@
 import { useMemo } from 'react';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 import { buildBrowserFields } from '../utils/build_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const emptyFields = {};
 

@@ -26,10 +26,13 @@ import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 import type { CommandDefinition } from '../../../console';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../../common/components/user_privileges');
-
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using processes action from response actions console', () => {
   let user: UserEvent;
@@ -266,7 +269,10 @@ describe('When using processes action from response actions console', () => {
 
   describe('and when agent type is SentinelOne', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: true });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        responseActionsSentinelOneProcessesEnabled: true,
+      });
       setConsoleCommands([], 'sentinel_one');
 
       const processesResponse = apiMocks.responseProvider.processes();
@@ -338,7 +344,10 @@ describe('When using processes action from response actions console', () => {
 
     describe('and `responseActionsSentinelOneProcessesEnabled` feature flag is disabled', () => {
       beforeEach(() => {
-        mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: false });
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
+          responseActionsSentinelOneProcessesEnabled: false,
+        });
         setConsoleCommands([], 'sentinel_one');
       });
 

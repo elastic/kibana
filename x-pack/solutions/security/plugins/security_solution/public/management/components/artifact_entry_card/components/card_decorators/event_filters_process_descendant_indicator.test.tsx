@@ -16,6 +16,10 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('EventFiltersProcessDescendantIndicator', () => {
   let appTestContext: AppContextTestRender;
@@ -45,7 +49,10 @@ describe('EventFiltersProcessDescendantIndicator', () => {
   });
 
   it('should not display anything if feature flag is disabled', () => {
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: false });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      filterProcessDescendantsForEventFiltersEnabled: false,
+    });
 
     render({ item: getProcessDescendantEventFilter() });
 
@@ -53,7 +60,10 @@ describe('EventFiltersProcessDescendantIndicator', () => {
   });
 
   it('should not display anything if Event Filter is not for process descendants', () => {
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      filterProcessDescendantsForEventFiltersEnabled: true,
+    });
 
     render({ item: getStandardEventFilter() });
 
@@ -61,7 +71,10 @@ describe('EventFiltersProcessDescendantIndicator', () => {
   });
 
   it('should display indication if Event Filter is for process descendants', () => {
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      filterProcessDescendantsForEventFiltersEnabled: true,
+    });
 
     render({ item: getProcessDescendantEventFilter() });
 
@@ -70,7 +83,11 @@ describe('EventFiltersProcessDescendantIndicator', () => {
 
   it('should mention additional `event.category is process` entry in tooltip', async () => {
     const prefix = 'test-processDescendantIndicationTooltip';
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      filterProcessDescendantsForEventFiltersEnabled: true,
+    });
+
     render({ item: getProcessDescendantEventFilter() });
 
     expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();

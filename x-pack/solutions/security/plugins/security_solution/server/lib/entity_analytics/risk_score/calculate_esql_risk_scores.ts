@@ -14,20 +14,16 @@ import {
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
-
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
-import type { ExperimentalFeatures } from '../../../../common';
-
 import type {
   EntityAfterKey,
   EntityRiskScoreRecord,
 } from '../../../../common/api/entity_analytics/common';
-
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-
 import type {
   CalculateResults,
   CalculateScoresParams,

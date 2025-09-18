@@ -13,7 +13,7 @@ import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../timelines/components/open_timeline/helpers');
 jest.mock('../../common/components/user_privileges');
 

@@ -8,6 +8,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
@@ -26,7 +27,6 @@ import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer'
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { type BrowserFields } from '../../common/containers/source';
 
 interface HomePageProps {

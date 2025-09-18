@@ -52,10 +52,7 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
     .useVisualizationResponseMock.create(),
 }));
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-  useEnableExperimental: jest.fn(() => jest.fn()),
-}));
+jest.mock('@kbn/experimental-features', () => ({ useIsExperimentalFeatureEnabled: jest.fn() }));
 const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as jest.Mock;
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 

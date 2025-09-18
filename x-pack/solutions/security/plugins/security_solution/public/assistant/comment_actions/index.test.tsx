@@ -13,9 +13,9 @@ import { CommentActions } from '.';
 import { updateAndAssociateNode } from '../../timelines/components/notes/helpers';
 import { useKibana } from '../../common/lib/kibana';
 import { useAssistantAvailability } from '../use_assistant_availability';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../use_assistant_availability');
 jest.mock('../../timelines/components/notes/helpers', () => ({
   ...jest.requireActual('../../timelines/components/notes/helpers'),

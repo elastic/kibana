@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import type { ExperimentalFeatures } from '../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { AssetCriticalityUpsertForBulkUpload } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
-  parseAssetCriticalityCsvRow,
   isErrorResult,
+  parseAssetCriticalityCsvRow,
 } from '../../../../common/entity_analytics/asset_criticality';
 
 class TransformCSVToUpsertRecords extends Transform {

@@ -18,9 +18,13 @@ import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When on the trusted devices page', () => {
   let user: UserEvent;
@@ -43,7 +47,10 @@ describe('When on the trusted devices page', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
-    mockedContext.setExperimentalFlag({ trustedDevices: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      trustedDevices: true,
+    });
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<TrustedDevicesList />));
 
@@ -90,7 +97,10 @@ describe('When on the trusted devices page', () => {
   });
 
   it('should not render when feature flag is disabled', async () => {
-    mockedContext.setExperimentalFlag({ trustedDevices: false });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      trustedDevices: false,
+    });
     const { queryByTestId } = render();
     await waitFor(() => {
       expect(queryByTestId('trustedDevicesList')).toBeNull();

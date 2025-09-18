@@ -7,10 +7,10 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { OnboardingTopicId } from '../constants';
 import { useLicense } from '../../common/hooks/use_license';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { hasCapabilities } from '../../common/lib/capabilities';
 import type {
   OnboardingConfigAvailabilityProps,
@@ -18,7 +18,7 @@ import type {
   TopicConfig,
 } from '../types';
 import { onboardingConfig } from '../config';
-import { useOnboardingTelemetry, type OnboardingTelemetry } from './onboarding_telemetry';
+import { type OnboardingTelemetry, useOnboardingTelemetry } from './onboarding_telemetry';
 
 export type OnboardingConfig = Map<OnboardingTopicId, TopicConfig>;
 export interface OnboardingContextValue {

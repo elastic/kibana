@@ -24,7 +24,7 @@ import {
 import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { parseExperimentalConfigValue } from '@kbn/experimental-features';
 import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSavedObjectsClientFactoryMock } from '../../saved_objects/saved_objects_client_factory.mocks';

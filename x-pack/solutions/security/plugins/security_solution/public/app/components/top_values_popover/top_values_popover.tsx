@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { StatefulTopN } from '../../../common/components/top_n';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';

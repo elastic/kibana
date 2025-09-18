@@ -9,8 +9,8 @@ import type React from 'react';
 import type { EuiBadgeProps, IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import type { ExperimentalFeatures } from '../../common';
-import type { OnboardingTopicId, OnboardingCardId } from './constants';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import type { OnboardingCardId, OnboardingTopicId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 import type { StartServices } from '../types';
 
