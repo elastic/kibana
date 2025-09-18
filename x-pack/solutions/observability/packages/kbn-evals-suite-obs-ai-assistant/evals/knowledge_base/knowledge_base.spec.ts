@@ -8,8 +8,7 @@
 import type { EvaluateKnowledgeBaseDataset } from './evaluate_knowledge_base_dataset';
 import { createEvaluateKnowledgeBaseDataset } from './evaluate_knowledge_base_dataset';
 import { evaluate as base } from '../../src/evaluate';
-import { clearConversations } from '../utils/conversation';
-import { testDocs } from '../utils/knowledge_base';
+import { testDocs } from '../../src/sample_data/knowledge_base';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -37,9 +36,9 @@ const evaluate = base.extend<{
 
 evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
   evaluate.describe('kb functions', () => {
-    evaluate.afterEach(async ({ esClient, knowledgeBaseClient }) => {
-      await knowledgeBaseClient.clear(esClient);
-      await clearConversations(esClient);
+    evaluate.afterEach(async ({ esClient, knowledgeBaseClient, conversationsClient }) => {
+      await knowledgeBaseClient.clear();
+      await conversationsClient.clear();
     });
 
     evaluate('summarizes information', async ({ evaluateKnowledgeBase }) => {
@@ -106,9 +105,9 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       await knowledgeBaseClient.importEntries({ entries: testDocs });
     });
 
-    evaluate.afterAll(async ({ esClient, knowledgeBaseClient }) => {
-      await knowledgeBaseClient.clear(esClient);
-      await clearConversations(esClient);
+    evaluate.afterAll(async ({ esClient, knowledgeBaseClient, conversationsClient }) => {
+      await knowledgeBaseClient.clear();
+      await conversationsClient.clear();
     });
 
     evaluate('retrieves one entry from the KB without LLM', async ({ chatClient }) => {

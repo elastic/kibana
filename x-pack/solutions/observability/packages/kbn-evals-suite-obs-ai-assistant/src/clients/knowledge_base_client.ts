@@ -11,7 +11,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { EsClient } from '@kbn/scout-oblt';
 
 export class KnowledgeBaseClient {
-  constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog,
+    private readonly esClient: EsClient
+  ) {}
 
   async ensureInstalled(): Promise<void> {
     this.log.info('Checking whether the knowledge base is installed');
@@ -55,10 +59,10 @@ export class KnowledgeBaseClient {
     });
   }
 
-  async clear(esClient: EsClient) {
+  async clear() {
     return pRetry(
       () => {
-        return esClient.deleteByQuery({
+        return this.esClient.deleteByQuery({
           index: '.kibana-observability-ai-assistant-kb-*',
           conflicts: 'proceed',
           query: { match_all: {} },

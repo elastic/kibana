@@ -9,7 +9,7 @@ import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
-import type { KnowledgeBaseClient } from '../../src/knowledge_base_client';
+import type { KnowledgeBaseClient } from '../../src/clients/knowledge_base_client';
 
 interface KnowledgeBaseExample extends Example {
   input: {
