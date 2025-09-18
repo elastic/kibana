@@ -9,7 +9,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiButton, useEuiTheme } from '@elastic/eui';
-import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import type { DashboardApi } from '../dashboard_api/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
@@ -27,7 +26,6 @@ export const ExitEditButton = ({
   setIsResetting: (isResetting: boolean) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isMounted = useMountedState();
 
   const switchToViewMode = useCallback(() => {
     dashboardApi.clearOverlays();
@@ -36,31 +34,28 @@ export const ExitEditButton = ({
       getDashboardBackupService().storeViewMode('view');
       return;
     }
+
     confirmDiscardOrSaveUnsavedChanges({
       discardCallback: async () => {
         setIsResetting(true);
         await dashboardApi.asyncResetToLastSavedState();
-        if (isMounted()) {
-          dashboardApi.setViewMode('view');
-          getDashboardBackupService().storeViewMode('view');
-        }
+        dashboardApi.clearOverlays();
+        dashboardApi.setViewMode('view');
+        getDashboardBackupService().storeViewMode('view');
         setIsResetting(false);
       },
       saveCallback: async () => {
         await dashboardApi.runQuickSave();
         dashboardApi.clearOverlays();
 
-        if (isMounted()) {
-          dashboardApi.setViewMode('view');
-          getDashboardBackupService().storeViewMode('view');
-        }
+        dashboardApi.setViewMode('view');
+        getDashboardBackupService().storeViewMode('view');
       },
       cancelCallback: () => {
-        setIsResetting(false);
         dashboardApi.clearOverlays();
       },
     });
-  }, [dashboardApi, hasUnsavedChanges, isMounted, setIsResetting]);
+  }, [dashboardApi, hasUnsavedChanges, setIsResetting]);
 
   return (
     <EuiButton
