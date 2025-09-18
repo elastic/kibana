@@ -91,7 +91,7 @@ export const setTabs: InternalStateThunkActionCreator<
   };
 
 export const updateTabs: InternalStateThunkActionCreator<
-  [{ items: TabState[] | TabItem[]; selectedItem: TabState | TabItem | undefined }],
+  [{ items: TabState[] | TabItem[]; selectedItem: TabState | TabItem | null }],
   Promise<void>
 > = ({ items, selectedItem }) =>
   async function updateTabsThunkFn(
