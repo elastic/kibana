@@ -46,9 +46,6 @@ export const useMisconfigurationPreview = (options: UseCspOptions) => {
         throw new Error('expected aggregations to be defined');
       return {
         count: getMisconfigurationAggregationCount(aggregations?.count?.buckets),
-        data_stream: Array.isArray(aggregations?.by_datastream_dataset?.buckets)
-          ? aggregations.by_datastream_dataset.buckets.map((bucket) => bucket.key)
-          : [],
       };
     },
     {

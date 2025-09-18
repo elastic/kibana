@@ -28,7 +28,7 @@ import type {
   FleetServerHost,
   NewFleetServerHost,
   AgentPolicy,
-  PolicySecretReference,
+  SecretReference,
 } from '../types';
 import {
   FleetServerHostUnauthorizedError,
@@ -233,7 +233,7 @@ class FleetServerHostService {
     data: Partial<FleetServerHost>,
     options?: { fromPreconfiguration?: boolean; secretHashes?: Record<string, any> }
   ) {
-    let secretsToDelete: PolicySecretReference[] = [];
+    let secretsToDelete: SecretReference[] = [];
 
     const logger = appContextService.getLogger();
     logger.debug(`Updating fleet server host ${id}`);

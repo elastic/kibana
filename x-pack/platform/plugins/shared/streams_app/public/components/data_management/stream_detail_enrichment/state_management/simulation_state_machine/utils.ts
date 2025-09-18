@@ -7,14 +7,16 @@
 
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { DetectedField, Simulation, SimulationContext } from './types';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {
+export function getSourceField(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string | undefined {
   const processorSourceField = (() => {
     switch (processor.action) {
       case 'append':

@@ -57,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: { steps: [] },
             classic: {},
           },
-        });
+        } satisfies Streams.ClassicStream.Definition);
       });
 
       it('Allows setting processing on classic streams', async () => {
@@ -136,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             classic: {},
           },
-        });
+        } satisfies Streams.ClassicStream.Definition);
 
         expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 

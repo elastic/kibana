@@ -16,6 +16,11 @@ export const DOCUMENTS_COLUMN_HEADER = i18n.translate(
   { defaultMessage: 'Documents' }
 );
 
+export const DATA_QUALITY_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityColumnName',
+  { defaultMessage: 'Data Quality' }
+);
+
 export const RETENTION_COLUMN_HEADER = i18n.translate(
   'xpack.streams.streamsTreeTable.retentionColumnName',
   { defaultMessage: 'Retention' }

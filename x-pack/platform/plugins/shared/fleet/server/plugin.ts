@@ -93,6 +93,7 @@ import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -103,6 +104,7 @@ import type {
   AgentService,
   ArtifactsClientInterface,
   PackageService,
+  CloudConnectorServiceInterface,
 } from './services';
 import {
   agentPolicyService,
@@ -112,6 +114,7 @@ import {
   licenseService,
   packagePolicyService,
   PackageServiceImpl,
+  cloudConnectorService,
 } from './services';
 import {
   fetchAgentsUsage,
@@ -227,6 +230,7 @@ const allSavedObjectTypes = [
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -252,6 +256,7 @@ export interface FleetStartContract {
    */
   packagePolicyService: typeof packagePolicyService;
   agentPolicyService: AgentPolicyServiceInterface;
+  cloudConnectorService: CloudConnectorServiceInterface;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args
@@ -917,6 +922,7 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         return new OutputClient(soClient, authz);
       },
+      cloudConnectorService,
     };
   }
 

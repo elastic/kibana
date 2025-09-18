@@ -29,6 +29,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -47,6 +53,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       );
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.savedObjects.cleanStandardList();

@@ -17,6 +17,9 @@ import {
   merge,
   catchError,
   throwError,
+  map,
+  take,
+  EMPTY,
 } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -43,6 +46,7 @@ import {
   updateConversation$,
   createConversation$,
 } from './utils';
+import { createConversationIdSetEvent } from './utils/events';
 import { resolveSelectedConnectorId } from './utils/resolve_selected_connector_id';
 
 interface ChatServiceOptions {
@@ -185,6 +189,18 @@ class ChatServiceImpl implements ChatService {
             conversationClient,
           });
 
+          // Extract the ID from the conversation and emit the event ONLY for new conversations
+          const conversationIdSetEvent$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? conversation$.pipe(
+                    map((conversation) => createConversationIdSetEvent(conversation.id)),
+                    take(1)
+                  )
+                : EMPTY
+            )
+          );
+
           const agentEvents$ = executeAgent$({
             agentId,
             request,
@@ -212,13 +228,17 @@ class ChatServiceImpl implements ChatService {
           const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
             switchMap((shouldCreate) =>
               shouldCreate
-                ? createConversation$({
-                    agentId,
-                    conversationClient,
-                    conversationId,
-                    title$,
-                    roundCompletedEvents$,
-                  })
+                ? conversation$.pipe(
+                    switchMap((conversation) =>
+                      createConversation$({
+                        agentId,
+                        conversationClient,
+                        conversationId: conversationId || conversation.id,
+                        title$,
+                        roundCompletedEvents$,
+                      })
+                    )
+                  )
                 : updateConversation$({
                     conversationClient,
                     conversation$,
@@ -228,7 +248,7 @@ class ChatServiceImpl implements ChatService {
             )
           );
 
-          return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+          return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
             handleCancellation(abortSignal),
             catchError((err) => {
               this.logger.error(`Error executing agent: ${err.stack}`);

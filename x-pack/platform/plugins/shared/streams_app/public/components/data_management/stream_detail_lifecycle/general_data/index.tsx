@@ -7,12 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
 import { IlmSummary } from './ilm_summary';
@@ -36,6 +38,7 @@ export const StreamDetailGeneralData = ({
         streams: { streamsRepositoryClient },
       },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -76,6 +79,10 @@ export const StreamDetailGeneralData = ({
       refreshDefinition();
       setIsEditModalOpen(false);
 
+      telemetryClient.trackRetentionChanged(
+        lifecycle,
+        getStreamTypeFromDefinition(definition.stream)
+      );
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
           defaultMessage: 'Stream lifecycle updated',

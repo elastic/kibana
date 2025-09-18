@@ -70,6 +70,8 @@ export const getShareAppMenuItem = ({
       timeRange,
       refreshInterval,
     };
+
+    // TODO: for a persisted saved search, add the current tab ID to the params
     const relativeUrl = locator.getRedirectUrl(params);
 
     // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be

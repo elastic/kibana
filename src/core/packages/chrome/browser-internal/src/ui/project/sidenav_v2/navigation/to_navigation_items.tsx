@@ -274,6 +274,11 @@ export const toNavigationItems = (
           })
         ).filter((section) => section.items.length > 0); // Filter out empty sections;
       }
+
+      // If after all filtering there are no sections, we skip this menu item
+      if (secondarySections.length === 0) {
+        return null;
+      }
     }
 
     warnUnsupportedNavNodeOptions(navNode);
@@ -473,9 +478,13 @@ const findItemByLastActive = (
  * @returns The first available href, or undefined if none found
  */
 const findFirstAvailableHref = (sections: SecondaryMenuSection[]): string | undefined => {
-  const firstSectionWithItems = sections.find((section) => section.items.length > 0);
-  const firstItemWithHref = firstSectionWithItems?.items.find((item) => item.href);
-  return firstItemWithHref?.href;
+  for (const section of sections) {
+    for (const item of section.items) {
+      if (item.href && !item.isExternal) {
+        return item.href;
+      }
+    }
+  }
 };
 
 /**

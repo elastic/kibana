@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { ProcessorStatus } from '../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './shared';
 
@@ -82,14 +82,16 @@ export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ process
   const { icon, iconColor, label } = processorStatusToIconMap[processorStatus] || unknownStatus;
 
   return (
-    <EuiToolTip position="top" content={<p>{label}</p>}>
-      <EuiIcon
-        color={iconColor}
-        type={icon}
-        aria-label={label}
-        size="s"
-        data-test-subj="processorStatusIcon"
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      content={<p>{label}</p>}
+      position="top"
+      type={icon}
+      color={iconColor}
+      aria-label={label}
+      size="s"
+      iconProps={{
+        'data-test-subj': 'processorStatusIcon',
+      }}
+    />
   );
 };

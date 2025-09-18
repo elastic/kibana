@@ -35,7 +35,7 @@ import type {
   AgentPolicy,
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
-  PolicySecretReference,
+  SecretReference,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -905,7 +905,7 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Updating output ${id}`);
 
-    let secretsToDelete: PolicySecretReference[] = [];
+    let secretsToDelete: SecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);

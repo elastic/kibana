@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  DEFAULT_APP_CATEGORIES,
+  type AppMountParameters,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+} from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 // Lazy import to avoid bundling connector dependencies in main plugin
 import type {
@@ -52,11 +58,22 @@ export class WorkflowsPlugin
         title: PLUGIN_NAME,
         appRoute: '/app/workflows',
         visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        category: DEFAULT_APP_CATEGORIES.management,
+        order: 9015,
         async mount(params: AppMountParameters) {
           // Load application bundle
           const { renderApp } = await import('./application');
           // Get start services as specified in kibana.json
           const [coreStart, depsStart] = await core.getStartServices();
+
+          // Set badge for classic navbar
+          coreStart.chrome.setBadge({
+            text: 'Technical preview',
+            tooltip:
+              'This functionality is in technical preview. It may change or be removed in a future release.',
+            iconType: 'beaker',
+          });
+
           // Render the application
           return renderApp(
             coreStart,

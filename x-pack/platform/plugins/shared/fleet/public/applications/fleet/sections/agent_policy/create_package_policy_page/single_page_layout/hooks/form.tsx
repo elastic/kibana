@@ -140,7 +140,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void,
+  setPackagePolicy: (policy: NewPackagePolicy) => void
 ) => {
   const input = packagePolicy.inputs?.filter(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
@@ -170,6 +171,11 @@ export const updateAgentlessCloudConnectorConfig = (
           cloud_connectors: undefined,
         },
       });
+
+      setPackagePolicy({
+        ...packagePolicy,
+        supports_cloud_connector: false,
+      });
       return;
     }
 
@@ -183,6 +189,11 @@ export const updateAgentlessCloudConnectorConfig = (
             target_csp: targetCsp,
           },
         },
+      });
+
+      setPackagePolicy({
+        ...packagePolicy,
+        supports_cloud_connector: true,
       });
     }
   }
@@ -430,7 +441,12 @@ export function useOnSubmit({
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
-  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
+  updateAgentlessCloudConnectorConfig(
+    packagePolicy,
+    newAgentPolicy,
+    setNewAgentPolicy,
+    setPackagePolicy
+  );
 
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,

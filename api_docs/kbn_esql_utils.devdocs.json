@@ -1596,6 +1596,39 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getKqlSearchQueries",
+        "type": "Function",
+        "tags": [],
+        "label": "getKqlSearchQueries",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getKqlSearchQueries.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getLimitFromESQLQuery",
         "type": "Function",
         "tags": [],

@@ -106,6 +106,42 @@ describe('LabelNode', () => {
     });
   });
 
+  test('renders ips when present', () => {
+    const props = {
+      ...baseProps,
+      data: {
+        ...baseProps.data,
+        ips: ['127.0.0.1'],
+      },
+    };
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
+
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).not.toBeInTheDocument();
+  });
+
+  test('renders country flags when present', () => {
+    const props = {
+      ...baseProps,
+      data: {
+        ...baseProps.data,
+        countryCodes: ['us'],
+      },
+    };
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
+
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+  });
+
   test('renders ips and country flags when present', () => {
     const props = {
       ...baseProps,
@@ -121,8 +157,8 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
   });
 
   describe('Shape colors', () => {

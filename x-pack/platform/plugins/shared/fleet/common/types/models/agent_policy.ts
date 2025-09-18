@@ -8,7 +8,7 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { BaseSSLSecrets, MonitoringType, PolicySecretReference, ValueOf } from '..';
+import type { BaseSSLSecrets, MonitoringType, SecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -226,7 +226,7 @@ export interface FullAgentPolicy {
       go_max_procs?: number;
     };
   };
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   signed?: {
     data: string;
     signature: string;

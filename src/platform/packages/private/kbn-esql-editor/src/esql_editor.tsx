@@ -553,7 +553,9 @@ const ESQLEditorInternal = function ESQLEditor({
       getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
-        if (activeSolutionId) {
+        // Only fetch recommendations if there's an active solutionId and a non-empty query
+        // Otherwise the route will return an error
+        if (activeSolutionId && queryString.trim() !== '') {
           return (
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
               queryString,

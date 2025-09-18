@@ -48,6 +48,7 @@ const getToolsTableSearchConfig = ({
         name: tag,
         view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
       })),
+      autoSortOptions: false,
       searchThreshold: 1,
     },
   ],

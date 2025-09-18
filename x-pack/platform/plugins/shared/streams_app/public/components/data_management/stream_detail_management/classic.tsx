@@ -54,7 +54,7 @@ export function ClassicStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const { processing, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -79,6 +79,7 @@ export function ClassicStreamDetailManagement({
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
               defaultMessage: 'Data stream missing',
             })}
@@ -178,6 +179,9 @@ export function ClassicStreamDetailManagement({
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;
   }
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  }
 
   const redirectConfig = tabRedirects[tab];
   if (redirectConfig) {
@@ -188,11 +192,8 @@ export function ClassicStreamDetailManagement({
       />
     );
   }
-
-  if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'processing' } }} />
-    );
+  if (isLoading) {
+    return null;
   }
 
   return <Wrapper tabs={tabs} streamId={key} tab={tab} />;

@@ -34,8 +34,34 @@ export const PrivMonUtils = (
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const retry = getService('retry');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const roleScopedSupertest = isServerless ? getService('roleScopedSupertest') : null;
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
+
+  const _callInitAsAdmin = async () => {
+    // we have to use cookie auth to call this API because the init route creates an API key
+    // and Kibana does not allow this with API key auth (which is the default in @serverless tests)
+    if (!isServerless || !roleScopedSupertest) {
+      // In ESS, use regular supertest with admin privileges
+      return supertest
+        .post(routeWithNamespace(MONITORING_ENGINE_INIT_URL, namespace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+    }
+    const supertestCookieAuth = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      useCookieHeader: true,
+    });
+
+    return supertestCookieAuth
+      .post(routeWithNamespace(MONITORING_ENGINE_INIT_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  };
 
   const _expectDateToBeGreaterThan = (
     bigDate: string | undefined,
@@ -57,14 +83,15 @@ export const PrivMonUtils = (
 
   const initPrivMonEngine = async () => {
     log.info(`Initializing Privilege Monitoring engine in namespace ${namespace || 'default'}`);
-    const res = await api.initMonitoringEngine(namespace);
+    const res = await _callInitAsAdmin();
 
-    if (res.status !== 200) {
-      log.error(`Failed to initialize engine`);
+    if (res.status !== 200 || res.body.status !== 'started') {
+      log.error(`Failed to initialize engine in namespace ${namespace}. Status: ${res.status}`);
       log.error(JSON.stringify(res.body));
     }
 
     expect(res.status).toEqual(200);
+    expect(res.body.status).toEqual('started');
   };
 
   const initPrivMonEngineWithoutAuth = async ({
@@ -174,7 +201,9 @@ export const PrivMonUtils = (
       const currentLength = res.body.length;
 
       if (currentLength !== lastSeenLength) {
-        log.info(`PrivMon users sync check: found ${currentLength} users`);
+        log.info(
+          `PrivMon users sync check: found ${currentLength} users (expected: ${expectedLength})`
+        );
         lastSeenLength = currentLength;
       }
 
@@ -184,11 +213,12 @@ export const PrivMonUtils = (
 
   const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
     log.info(`Scheduling engine and waiting for user count: ${expectedCount}`);
+
     await scheduleMonitoringEngineNow({ ignoreConflict: true });
     await waitForSyncTaskRun();
     await _waitForPrivMonUsersToBeSynced(expectedCount);
-    const res = await api.listPrivMonUsers({ query: {} });
 
+    const res = await api.listPrivMonUsers({ query: {} });
     return res.body;
   };
 

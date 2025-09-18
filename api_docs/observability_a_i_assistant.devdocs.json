@@ -296,7 +296,13 @@
         "description": [],
         "signature": [
           "(props: ",
-          "UseGenAIConnectorsResult",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseGenAIConnectorsResult",
+            "text": "UseGenAIConnectorsResult"
+          },
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
@@ -311,7 +317,13 @@
             "label": "props",
             "description": [],
             "signature": [
-              "UseGenAIConnectorsResult"
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.UseGenAIConnectorsResult",
+                "text": "UseGenAIConnectorsResult"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
             "deprecated": false,
@@ -1104,7 +1116,13 @@
             "text": "ObservabilityAIAssistantService"
           },
           ") => ",
-          "UseGenAIConnectorsResult"
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseGenAIConnectorsResult",
+            "text": "UseGenAIConnectorsResult"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
         "deprecated": false,
@@ -5226,6 +5244,162 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.UseGenAIConnectorsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseGenAIConnectorsResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.connectors",
+            "type": "Array",
+            "tags": [],
+            "label": "connectors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ConnectorWithExtraFindData",
+                "text": "ConnectorWithExtraFindData"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.selectedConnector",
+            "type": "string",
+            "tags": [],
+            "label": "selectedConnector",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.loading",
+            "type": "boolean",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.selectConnector",
+            "type": "Function",
+            "tags": [],
+            "label": "selectConnector",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.UseGenAIConnectorsResult.selectConnector.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.reloadConnectors",
+            "type": "Function",
+            "tags": [],
+            "label": "reloadConnectors",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.getConnector",
+            "type": "Function",
+            "tags": [],
+            "label": "getConnector",
+            "description": [],
+            "signature": [
+              "(id: string) => ",
+              "InferenceConnector",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.UseGenAIConnectorsResult.getConnector.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -8284,7 +8458,13 @@
           "description": [],
           "signature": [
             "() => ",
-            "UseGenAIConnectorsResult"
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.UseGenAIConnectorsResult",
+              "text": "UseGenAIConnectorsResult"
+            }
           ],
           "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
           "deprecated": false,

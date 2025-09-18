@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MAX_TAB_LABEL_LENGTH = 500;
+export const MAX_TAB_LABEL_LENGTH = 120;
 
 export const MAX_TAB_WIDTH = 280;
 export const MIN_TAB_WIDTH = 112;

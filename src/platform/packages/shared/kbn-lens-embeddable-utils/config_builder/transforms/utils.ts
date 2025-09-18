@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   FormBasedLayer,
@@ -20,6 +20,7 @@ import type {
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -82,23 +83,77 @@ function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
+const getAdhocDataView = (dataView: { index: string; timeFieldName: string }) => {
+  const id = uuidv4();
+  return {
+    [id]: {
+      id,
+      title: dataView.index,
+      name: dataView.index,
+      timeFieldName: dataView.timeFieldName,
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      fieldAttrs: {},
+      allowNoIndex: false,
+      allowHidden: false,
+    },
+  };
+};
+
+export const getAdhocDataviews = (
+  dataviews: Record<string, { index: string; timeFieldName: string }>
+) => {
+  let adHocDataViews: Record<string, { id: string; timeFieldName: string }> = {};
+  [...new Set(Object.values(dataviews))].forEach((d) => {
+    adHocDataViews = {
+      ...adHocDataViews,
+      ...getAdhocDataView(d),
+    };
+  });
+
+  return adHocDataViews;
+};
+
 /**
  * Builds dataset state from the layer configuration
  *
  * @param layer Lens State Layer
  * @returns Lens API Dataset configuration
  */
-export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
+export const buildDatasetState = (
+  layer: FormBasedLayer | TextBasedLayer,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[],
+  layerId: string
+) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
       query: layer.query?.esql ?? '',
     };
   }
+
+  const reference = (references ?? []).find(
+    (ref) => ref.name === `indexpattern-datasource-${layerId}`
+  );
+  if (reference) {
+    if (adHocDataViews?.[reference.id]) {
+      return {
+        type: 'index',
+        index: adHocDataViews[reference.id].title!,
+        time_field: adHocDataViews[reference.id].timeFieldName,
+      };
+    }
+    return {
+      type: 'dataView',
+      name: reference.id,
+    };
+  }
+
   return {
-    type: 'index',
-    index: layer.indexPatternId,
-    time_field: '@timestamp',
+    type: 'dataView',
+    name: layer.indexPatternId,
   };
 };
 

@@ -12,5 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./dataset_quality'));
     loadTestFile(require.resolve('./privileges'));
+    loadTestFile(require.resolve('./navigation_streams'));
+    loadTestFile(require.resolve('./landing/redirects'));
+    loadTestFile(require.resolve('./disabled_features'));
   });
 }

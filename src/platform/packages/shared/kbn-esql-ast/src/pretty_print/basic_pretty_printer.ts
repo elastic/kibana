@@ -13,6 +13,7 @@ import {
   isDoubleLiteral,
   isIntegerLiteral,
   isLiteral,
+  isParamLiteral,
   isProperNode,
 } from '../ast/is';
 import {
@@ -394,7 +395,10 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
         default: {
-          if (opts.lowercaseFunctions) {
+          // Check if function name is a parameter stored in node.operator
+          if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+            operator = LeafPrinter.param(ctx.node.operator);
+          } else if (opts.lowercaseFunctions) {
             operator = operator.toLowerCase();
           }
 

@@ -60,6 +60,7 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
+  RecommendedFields = 'RecommendedFields',
 }
 
 export interface FieldsGroupDetails {
@@ -83,6 +84,10 @@ export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails
 export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
+
+export interface AdditionalFieldGroups {
+  recommendedFields?: Array<DataViewField['name']>;
+}
 
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 

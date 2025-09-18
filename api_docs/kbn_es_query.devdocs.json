@@ -2750,6 +2750,88 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getIsKqlFreeText",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsKqlFreeText",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.KueryNode",
+            "text": "KueryNode"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getIsKqlFreeText.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getIsKqlFreeTextExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsKqlFreeTextExpression",
+        "description": [
+          "\nReturns true whether the given expression contains at least one free text expression (e.g. `foo: \"bar\" AND my_free_text_query`)"
+        ],
+        "signature": [
+          "(expression: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getIsKqlFreeTextExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.getKqlFieldNames",
         "type": "Function",
         "tags": [],

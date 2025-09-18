@@ -43,14 +43,17 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
 
   test('should not let edit other processors while one is in progress', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeDisabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeDisabled();
 
     await pageObjects.streams.clickCancelProcessorChanges();
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeEnabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeEnabled();
   });
 
   test('should cancel editing a processor', async ({ page, pageObjects }) => {
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeVisible();
+    // An nth selector is used here as 2 elements will exist with the same text.
+    // This is due to the truncation component creating a duplicate element for measuring purposes.
+    // eslint-disable-next-line playwright/no-nth-methods
+    await expect(page.getByText('%{WORD:attributes.method}').first()).toBeVisible();
     await pageObjects.streams.clickEditProcessor(0);
 
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');

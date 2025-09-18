@@ -65,6 +65,17 @@ export interface GraphProps extends CommonProps {
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
+  /**
+   * Callback invoked when the graph is updated with new nodes.
+   * Receives one argument with the list of newly added nodes.
+   * When callback is undefined, graph will center on new nodes (default behavior).
+   * Based on the return value of this callback:
+   * - Returning undefined will center the graph on new nodes (default behavior)
+   * - Returning "fit-view" will fit entire graph into view
+   * - Returning empty array or list of non-existent node ids will keep the graph with its current position
+   * - Returning list of existent node ids will center the graph on those nodes
+   */
+  onCenterGraphAfterRefresh?: (newNodes: NodeViewModel[]) => 'fit-view' | string[] | void;
 }
 
 const nodeTypes = {
@@ -107,12 +118,14 @@ export const Graph = memo<GraphProps>(
     isLocked = false,
     showMinimap = false,
     children,
+    onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
+    const isInitialRenderRef = useRef(true);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
@@ -129,6 +142,12 @@ export const Graph = memo<GraphProps>(
         !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
         !isArrayOfObjectsEqual(edges, currEdgesRef.current)
       ) {
+        // Identify new nodes by comparing node IDs
+        const previousNodeIds = new Set<NodeViewModel['id']>(
+          currNodesRef.current.map((node) => node.id)
+        );
+        const newNodes = nodes.filter((node) => !previousNodeIds.has(node.id));
+
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
@@ -136,11 +155,71 @@ export const Graph = memo<GraphProps>(
         setEdges(initialEdges);
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
+
+        const fitIntoView = () => {
+          fitViewRef.current?.(fitViewOptions);
+        };
+
+        const centerGraphOn = async (nodeIds: string[]) => {
+          await fitViewRef.current?.({
+            ...fitViewOptions,
+            nodes: nodeIds.map((nodeId) => ({ id: nodeId })),
+          });
+        };
+
+        const filterExistingNodeIds = (nodeIds: string[]) => {
+          const existingNodeIds = new Set(nodes.map((node) => node.id));
+          return nodeIds.filter((nodeId) => existingNodeIds.has(nodeId));
+        };
+
         setTimeout(() => {
-          fitViewRef.current?.();
+          // If this is the initial render, skip centering behavior
+          if (isInitialRenderRef.current) {
+            isInitialRenderRef.current = false;
+            return;
+          }
+
+          // If nodes haven't changed, do nothing
+          if (newNodes.length === 0) {
+            return;
+          }
+
+          // If nodes have changed but callback is undefined, default to center on new nodes
+          if (!onCenterGraphAfterRefresh) {
+            centerGraphOn(newNodes.map((node) => node.id));
+            return;
+          }
+
+          // Get node IDs given by consumer to center the graph on
+          const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
+
+          // If callback returns undefined, default to center on new nodes
+          if (callbackRetValue === undefined) {
+            centerGraphOn(newNodes.map((node) => node.id));
+            return;
+          }
+
+          if (callbackRetValue === 'fit-view') {
+            fitIntoView();
+            return;
+          }
+
+          if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
+            // With empty array or non-array return value, do nothing
+            return;
+          }
+
+          const nodeIdsToCenterOn = filterExistingNodeIds(callbackRetValue);
+
+          // if client specified only node ids that do not exist, do nothing
+          // Otherwise, center graph on given nodes
+          if (nodeIdsToCenterOn.length > 0) {
+            // Center graph on specified nodes by client
+            centerGraphOn(nodeIdsToCenterOn);
+          }
         }, 30);
       }
-    }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
+    }, [nodes, edges, setNodes, setEdges, isGraphInteractive, onCenterGraphAfterRefresh]);
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -41,5 +42,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
     testFiles: [require.resolve('.')],
+    screenshots: { directory: resolve(__dirname, 'screenshots') },
   };
 }

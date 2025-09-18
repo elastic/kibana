@@ -132,6 +132,20 @@ export interface DeleteQueriesAction {
   };
 }
 
+export interface UnlinkAssetsAction {
+  type: 'unlink_assets';
+  request: {
+    name: string;
+  };
+}
+
+export interface UnlinkSystemsAction {
+  type: 'unlink_systems';
+  request: {
+    name: string;
+  };
+}
+
 export interface UpdateIngestSettingsAction {
   type: 'update_ingest_settings';
   request: {
@@ -162,6 +176,8 @@ export type ElasticsearchAction =
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
   | DeleteQueriesAction
+  | UnlinkAssetsAction
+  | UnlinkSystemsAction
   | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
@@ -182,5 +198,7 @@ export interface ActionsByType {
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  unlink_assets: UnlinkAssetsAction[];
+  unlink_systems: UnlinkSystemsAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
 }

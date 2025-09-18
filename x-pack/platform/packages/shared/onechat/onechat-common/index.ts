@@ -101,6 +101,8 @@ export {
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
+  type ConversationIdSetEvent,
+  type ConversationIdSetEventData,
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,

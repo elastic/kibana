@@ -254,7 +254,7 @@ export class IndexUpdateService {
       : esql`FROM ${indexName}`;
 
     if (qstr) {
-      query.pipe`WHERE qstr(${`*${qstr}*`})`;
+      query.pipe`WHERE qstr(${`*${qstr}* OR ${qstr}`})`;
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;
@@ -444,7 +444,9 @@ export class IndexUpdateService {
 
     const esqlQuery = esql`FROM ${indexName}`.print();
 
-    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, true);
+    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
+      allowNoIndex: true,
+    });
 
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
@@ -457,9 +459,13 @@ export class IndexUpdateService {
       this.bufferState$
         .pipe(
           map((actions) =>
-            actions.some((action) =>
-              (['add-doc', 'delete-doc'] as Array<keyof ActionMap>).includes(action.type)
-            )
+            actions.some((action) => {
+              if (action.type === 'add-doc') {
+                // Only consider rows with at least one value
+                return Object.keys(action.payload.value).length > 0;
+              }
+              return action.type === 'delete-doc';
+            })
           )
         )
         .subscribe(this._hasUnsavedChanges$)
@@ -554,7 +560,7 @@ export class IndexUpdateService {
                 this.destroy();
               }
             } else {
-              const errorDetail = response.items
+              const errorDetail = response?.items
                 .map((item) => Object.values(item)[0])
                 .filter((res) => res.error)
                 .map((res) => `- ${res.error?.type}: ${res.error?.reason}`)
