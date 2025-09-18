@@ -9,8 +9,12 @@ import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/sav
 import type { Agent as SupertestAgent } from 'supertest';
 
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { Superuser } from '../../security_and_spaces/scenarios';
 
-export async function createRuleTemplateSO(ftrProvider: FtrProviderContext) {
+export async function createRuleTemplateSO(
+  ftrProvider: FtrProviderContext,
+  { space = 'default' }: { space?: string } = {}
+) {
   return await ftrProvider.getService('es').index({
     index: '.kibana_alerting_cases',
     id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:sample-alerting-rule`,
@@ -18,16 +22,20 @@ export async function createRuleTemplateSO(ftrProvider: FtrProviderContext) {
       alerting_rule_template: {
         name: 'Sample alerting rule template v2',
         tags: ['Testing'],
-        ruleTypeId: 'apm.anomaly',
+        ruleTypeId: '.index-threshold',
         schedule: {
           interval: '1m',
         },
         params: {
-          windowSize: 30,
-          windowUnit: 'm',
-          anomalySeverityType: 'critical',
-          anomalyDetectorTypes: ['txLatency', 'txThroughput', 'txFailureRate'],
-          environment: 'ENVIRONMENT_ALL',
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000],
+          index: ['logs-test-default'],
+          timeField: '@timestamp',
         },
         alertDelay: {
           active: 1,
@@ -36,7 +44,7 @@ export async function createRuleTemplateSO(ftrProvider: FtrProviderContext) {
       type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       references: [],
       managed: false,
-      namespaces: ['default', 'space1', 'space2'],
+      namespaces: [space],
       coreMigrationVersion: '8.8.0',
       typeMigrationVersion: '10.1.0',
       updated_at: '2025-09-09T09:57:45.733Z',
@@ -79,13 +87,17 @@ export function getRuleTemplateResponse(id: string) {
     id,
     name: 'Sample alerting rule template v2',
     params: {
-      windowSize: 30,
-      windowUnit: 'm',
-      anomalySeverityType: 'critical',
-      anomalyDetectorTypes: ['txLatency', 'txThroughput', 'txFailureRate'],
-      environment: 'ENVIRONMENT_ALL',
+      aggType: 'count',
+      termSize: 5,
+      thresholdComparator: '>',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      groupBy: 'all',
+      threshold: [1000],
+      index: ['logs-test-default'],
+      timeField: '@timestamp',
     },
-    rule_type_id: 'apm.anomaly',
+    rule_type_id: '.index-threshold',
     schedule: { interval: '1m' },
     tags: ['Testing'],
     alert_delay: { active: 1 },

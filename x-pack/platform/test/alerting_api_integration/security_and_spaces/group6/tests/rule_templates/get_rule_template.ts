@@ -19,14 +19,13 @@ import {
   GlobalRead,
   GlobalReadAtSpace1,
   NoKibanaPrivilegesAtSpace1,
+  Space1AllAtSpace1,
 } from '../../../scenarios';
 
 export default (ftrProvider: FtrProviderContext): void => {
   const supertest = ftrProvider.getService('supertest');
 
   const supertestWithoutAuth = ftrProvider.getService('supertestWithoutAuth');
-  const es = ftrProvider.getService('es');
-  const kibanaServer = ftrProvider.getService('kibanaServer');
 
   describe('get_rule_template', () => {
     afterEach(async () => {
@@ -54,21 +53,26 @@ export default (ftrProvider: FtrProviderContext): void => {
 
     describe('rbac', () => {
       it('should get a rule template when user has access', async () => {
-        await createRuleTemplateSO(ftrProvider);
+        await createRuleTemplateSO(ftrProvider, { space: 'space1' });
 
-        for (const user of [Superuser, GlobalRead, GlobalReadAtSpace1]) {
+        for (const user of [
+          Superuser,
+          GlobalRead,
+          GlobalReadAtSpace1.user,
+          Space1AllAtSpace1.user,
+        ]) {
           const ruleTemplate = await getRuleTemplate({
             supertest: supertestWithoutAuth,
             templateId: 'sample-alerting-rule',
             auth: { user, space: 'space1' },
           });
-
+          console.log(user, ruleTemplate.body);
           expect(ruleTemplate.status).to.eql(200);
         }
       });
 
       it('should not get a rule template when no user has access', async () => {
-        await createRuleTemplateSO(ftrProvider);
+        await createRuleTemplateSO(ftrProvider, { space: 'space1' });
 
         for (const user of [NoKibanaPrivilegesAtSpace1.user]) {
           const ruleTemplate = await getRuleTemplate({
@@ -82,9 +86,9 @@ export default (ftrProvider: FtrProviderContext): void => {
       });
 
       it('should NOT get a rule template in a space with no permissions', async () => {
-        await createRuleTemplateSO(ftrProvider);
+        await createRuleTemplateSO(ftrProvider, { space: 'space2' });
 
-        for (const user of [GlobalReadAtSpace1.user]) {
+        for (const user of [Space1AllAtSpace1.user]) {
           const ruleTemplate = await getRuleTemplate({
             supertest: supertestWithoutAuth,
             templateId: 'sample-alerting-rule',
