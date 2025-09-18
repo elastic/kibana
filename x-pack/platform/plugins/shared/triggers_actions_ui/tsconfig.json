@@ -89,6 +89,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/ebt-tools",
     "@kbn/presentation-util",
+    "@kbn/stack-connectors-plugin",
   ],
   "exclude": ["target/**/*"]
 }
