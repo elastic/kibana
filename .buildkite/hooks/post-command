@@ -1,3 +1,146 @@
 #!/usr/bin/env bash
+# FWIW Buildkite uses bash no matter what the shebang line says
 
-source .buildkite/scripts/lifecycle/post_command.sh
+set -euo pipefail
+
+# set metadata for buildkite stats
+METADATA_KEY="${BUILDKITE_JOB_ID}.hooks.global"
+buildkite-agent meta-data set "${METADATA_KEY}" "2"
+
+# public Google Sheet with known compromised npm packages. EngProd has edit access.
+SHEET_ID="1tXJJQaJSkrmes5OdcyKCbXkMxls7ItO7iAo3u4GnUXg"
+COMPROMISED_PKG_URL="https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv"
+MALICIOUS_SHA_URL="https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1354230876"
+
+
+found_compromised=false
+scan_results=()
+
+# Ensure required commands are available
+required_commands() {
+  REQUIRED_CMDS=(curl grep find sha256sum xargs pushd popd mapfile)
+  for cmd in "${REQUIRED_CMDS[@]}"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      echo "Required command '$cmd' not found. Skipping scan."
+      # a bit hackish but we want to skip the scan without failing the build and
+      # have a way to find those in buildkite-stats.
+      buildkite-agent meta-data set "${METADATA_KEY}" "5"
+      exit 0
+    fi
+  done
+}
+
+log_and_exit() {
+  # Report results
+  if [[ "$found_compromised" = true ]]; then
+    echo ""
+    echo "SECURITY SCAN FAILED - Compromised dependencies detected!"
+    echo "=========================================================="
+    for result in "${scan_results[@]}"; do
+      echo "  * $result"
+    done
+    buildkite-agent meta-data set "${METADATA_KEY}" "2"
+    exit 0
+  else
+    echo "NPM dependency security scan passed"
+    buildkite-agent meta-data set "${METADATA_KEY}" "0"
+    exit 0
+  fi
+}
+
+main_scan() {
+  # Fetch list of compromised SHA256 hashes from Sheet2 (first column, no header)
+  echo "Fetching compromised JS file hashes from $MALICIOUS_SHA_URL..."
+  SHA="$(curl -fsSL "$MALICIOUS_SHA_URL" 2>/dev/null || true)"
+  if [ -z "$SHA" ]; then
+    echo "Warning: Compromised JS hash list is empty or could not be fetched. Skipping JS hash check."
+  else
+    # Get all sha256s from first column, no header, skip empty lines
+  mapfile -t COMPROMISED_SHAS < <(echo "$SHA" | cut -d, -f1 | grep -v '^$')
+    if [ "${#COMPROMISED_SHAS[@]}" -eq 0 ]; then
+      echo "Warning: No hashes found in Sheet2. Skipping JS hash check."
+    else
+      echo "Scanning for compromised JS file hashes..."
+      local found_any_hash=false
+      # Hash all JS files using find and xargs to avoid argument list too long errors
+      if ! find . -type f -name "*.js" | grep -q .; then
+        echo "No JS files found."
+      else
+        while IFS= read -r line; do
+          file_hash=$(echo "$line" | awk '{print $1}')
+          file_path=$(echo "$line" | awk '{print $2}')
+          for bad_sha in "${COMPROMISED_SHAS[@]}"; do
+            if [ "$file_hash" = "$bad_sha" ]; then
+              echo "Compromised JS file detected: $file_path (sha256: $bad_sha)"
+              scan_results+=("js-file-sha256:$file_path:$bad_sha")
+              found_compromised=true
+              found_any_hash=true
+            fi
+          done
+        done < <(find . -type f -name "*.js" -print0 | xargs -0 sha256sum)
+        if [ "$found_any_hash" = false ]; then
+          echo "No compromised JS file found."
+        fi
+      fi
+    fi
+  fi
+
+  # Exit early if npm is not installed
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "npm not found, skipping npm audit and compromised package checks."
+    return
+  fi
+
+  # Skip the remaining npm-related checks if there are no npm projects (no package.json found outside node_modules)
+  if ! find . -type d -name node_modules -prune -o -type f -name "package.json" -print | grep -q .; then
+    echo "No npm projects found (no package.json outside node_modules). Exiting now."
+    return
+  fi
+
+  # Download the list of compromised packages from the Google sheet as CSV (one package per line) and process in memory
+  echo "Fetching compromised package list as CSV from $COMPROMISED_PKG_URL..."
+  PKG_CONTENT="$(curl -fsSL "$COMPROMISED_PKG_URL" 2>/dev/null || true)"
+  if [ -z "$PKG_CONTENT" ]; then
+    echo "Warning: Compromised package list is empty or could not be fetched. Skipping package check."
+    return
+  fi
+  # Get all package names from first column, no header, skip empty lines
+  mapfile -t COMPROMISED_PKGS < <(echo "$PKG_CONTENT" | cut -d, -f1 | grep -v '^$')
+
+  # Find all directories containing package.json, excluding node_modules and plugins, deduplicate with awk
+  mapfile -t NPM_PROJECT_DIRS < <(find . -type d -name node_modules -prune -false -o -type f -name "package.json" -print0 | xargs -0 -n1 dirname | awk '!seen[$0]++')
+
+  # Aggregate all npm list --all output
+  ALL_NPM_LIST_OUTPUT=""
+  for dir in "${NPM_PROJECT_DIRS[@]}"; do
+    if [ -f "$dir/package.json" ]; then
+      pushd "$dir" > /dev/null
+      # Only run if node_modules exists to avoid npm errors
+      if [ -d node_modules ]; then
+        NPM_LIST_OUTPUT="$(npm list --all 2>/dev/null || true)"
+        ALL_NPM_LIST_OUTPUT+="$NPM_LIST_OUTPUT\n"
+      fi
+      popd > /dev/null
+    fi
+  done
+
+  for pkg in "${COMPROMISED_PKGS[@]}"; do
+    [ -z "$pkg" ] && continue
+    if echo -e "$ALL_NPM_LIST_OUTPUT" | grep -qw -- "$pkg"; then
+      echo "Compromised package detected: $pkg"
+      scan_results+=("$pkg")
+      found_compromised=true
+    fi
+  done
+}
+
+echo ""
+echo "Starting NPM dependency security scan..."
+echo "Please reach out to EngProd in #platform-engineering-productivity if you have any questions."
+echo ""
+
+# Run main scan and report
+required_commands
+main_scan
+log_and_exit
+
