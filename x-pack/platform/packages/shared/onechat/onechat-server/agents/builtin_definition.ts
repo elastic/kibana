@@ -15,7 +15,7 @@ export type BuiltInAgentConfiguration = AgentConfiguration;
  */
 export type BuiltInAgentDefinition = Pick<
   AgentDefinition,
-  'id' | 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'
+  'id' | 'name' | 'description' | 'labels' | 'avatar_icon' | 'avatar_symbol' | 'avatar_color'
 > & {
   configuration: BuiltInAgentConfiguration;
 };

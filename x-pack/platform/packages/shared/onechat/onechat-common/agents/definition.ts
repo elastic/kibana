@@ -50,6 +50,10 @@ export interface AgentDefinition {
    */
   labels?: string[];
   /**
+   * Optional avatar eui icon for built-in agents
+   */
+  avatar_icon?: string;
+  /**
    * Optional color used to represent the agent in the UI
    */
   avatar_color?: string;

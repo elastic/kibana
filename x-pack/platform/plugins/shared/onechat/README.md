@@ -210,6 +210,7 @@ class MyPlugin {
       id: 'platform.core.dashboard',
       name: 'Dashboard agent',
       description: 'Agent specialized in dashboard related tasks',
+      avatar_icon: 'dashboardApp',
       configuration: {
         instructions: 'You are a dashboard specialist [...]',
         tools: [
