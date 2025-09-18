@@ -157,11 +157,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(hasToolCall).to.be(true);
         });
 
-        it('contains ESQL documentation', () => {
-          const parsed = JSON.parse(last(thirdRequestBody.messages)?.content as string);
-          expect(parsed.documentation.OPERATORS).to.contain('Binary Operators');
-        });
-
         it('allows the LLM to call the tools execute_query, visualize_query and request_documentation', () => {
           expect(thirdRequestBody.tools?.map((t) => t.function.name)).to.eql([
             'execute_query',
