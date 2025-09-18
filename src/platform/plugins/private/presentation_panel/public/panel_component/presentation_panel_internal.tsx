@@ -193,6 +193,7 @@ const styles = {
     overflow: 'hidden',
   }),
   embVisibilityTracker: css({
+    pointerEvents: 'none',
     position: 'absolute',
     height: '100%',
     width: '100%',
