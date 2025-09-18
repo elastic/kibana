@@ -7,7 +7,8 @@
 
 import React, { createContext, useMemo } from 'react';
 import type { Capabilities } from '@kbn/core/types';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { RULES_UI_EDIT, RULES_UI_READ } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID, RULES_FEATURE_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
@@ -19,18 +20,20 @@ export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
   endpointPrivileges: EndpointPrivileges;
-  kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
+  siemPrivileges: { crud: boolean; read: boolean };
   timelinePrivileges: { crud: boolean; read: boolean };
   notesPrivileges: { crud: boolean; read: boolean };
+  rulesPrivileges: { read: boolean; edit: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
   endpointPrivileges: getEndpointPrivilegesInitialState(),
-  kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
+  siemPrivileges: { crud: false, read: false },
   timelinePrivileges: { crud: false, read: false },
   notesPrivileges: { crud: false, read: false },
+  rulesPrivileges: { read: false, edit: false },
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -49,10 +52,10 @@ export const UserPrivilegesProvider = ({
   const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
 
   const listPrivileges = useFetchListPrivileges(read);
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
   const endpointPrivileges = useEndpointPrivileges();
 
-  const kibanaSecuritySolutionsPrivileges = useMemo(
+  const siemPrivileges = useMemo(
     () => ({
       crud,
       read,
@@ -70,22 +73,32 @@ export const UserPrivilegesProvider = ({
     [kibanaCapabilities]
   );
 
+  const rulesPrivileges = useMemo(() => {
+    const rulesCapabilities = kibanaCapabilities[RULES_FEATURE_ID];
+    return {
+      read: rulesCapabilities?.[RULES_UI_READ] === true,
+      edit: rulesCapabilities?.[RULES_UI_EDIT] === true,
+    };
+  }, [kibanaCapabilities]);
+
   const contextValue = useMemo(
     () => ({
       listPrivileges,
       detectionEnginePrivileges,
       endpointPrivileges,
-      kibanaSecuritySolutionsPrivileges,
+      siemPrivileges,
       timelinePrivileges,
       notesPrivileges,
+      rulesPrivileges,
     }),
     [
       listPrivileges,
       detectionEnginePrivileges,
       endpointPrivileges,
-      kibanaSecuritySolutionsPrivileges,
+      siemPrivileges,
       timelinePrivileges,
       notesPrivileges,
+      rulesPrivileges,
     ]
   );
 

@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_wo
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const DEPRECATED_SIEM_VERSIONS = ['siem', 'siemV2'];
+  const DEPRECATED_SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3'] as const;
 
   // these artifact privileges are shared between ESS and Serverless, while Endpoint Exceptions privilege exists only on Serverless
   const ARTIFACTS = [
