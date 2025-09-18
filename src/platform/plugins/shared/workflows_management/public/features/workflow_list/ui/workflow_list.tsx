@@ -171,9 +171,12 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Triggers',
-        render: (value: any, item: WorkflowListItemDto) => (
-          <WorkflowsTriggersList triggers={item.definition.triggers} />
-        ),
+        render: (value: any, item: WorkflowListItemDto) =>
+          item.definition?.triggers ? (
+            <WorkflowsTriggersList triggers={item.definition.triggers} />
+          ) : (
+            <EuiText size="s">No triggers</EuiText>
+          ),
       },
       {
         name: 'Last run',
