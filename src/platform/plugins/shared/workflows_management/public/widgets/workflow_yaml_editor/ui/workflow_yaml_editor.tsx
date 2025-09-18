@@ -411,15 +411,6 @@ export const WorkflowYAMLEditor = ({
         try {
           const value = model.getValue();
           const parsedDocument = YAML.parseDocument(value ?? '');
-
-          if (isTypingChange) {
-            // If it's because of typing - skip clearing decorations entirely
-            // Let the decoration hooks handle updates naturally
-          } else {
-            // If not typing - continue with the original logic (always clear)
-            clearAllDecorations();
-          }
-
           setYamlDocument(parsedDocument);
           yamlDocumentRef.current = parsedDocument;
         } catch (error) {
