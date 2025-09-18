@@ -113,13 +113,14 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       <SecuritySolutionPageWrapper>
         <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} isBeta={true} />} border>
           <HeaderButtons
+            migrationType="dashboard"
             migrationsStats={dashboardMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
           />
         </HeaderPage>
         <EuiSkeletonLoading
-          data-test-subj="migrationRulesPageLoading"
+          data-test-subj="migrationDashboardsPageLoading"
           isLoading={isLoading}
           loadingContent={
             <>
