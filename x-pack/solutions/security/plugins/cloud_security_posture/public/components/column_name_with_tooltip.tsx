@@ -6,7 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiToolTipProps } from '@elastic/eui';
-import React, { ReactNode } from 'react';'react';
+import React, { ReactNode } from 'react';
+('react');
 import React from 'react';
 
 export const ColumnNameWithTooltip = ({

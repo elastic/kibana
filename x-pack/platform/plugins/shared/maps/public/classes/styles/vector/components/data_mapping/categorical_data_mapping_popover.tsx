@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
-
 interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   onChange: (updatedOptions: DynamicOptions) => void;

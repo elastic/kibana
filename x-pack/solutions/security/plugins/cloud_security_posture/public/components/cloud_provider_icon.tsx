@@ -11,7 +11,6 @@ import { CSSInterpolation } from '@emotion/serialize';
 import { getCloudProviderNameFromAbbreviation } from '../../common/utils/helpers';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
-
 interface Props {
   cloudProvider: string;
   style?: CSSInterpolation;
