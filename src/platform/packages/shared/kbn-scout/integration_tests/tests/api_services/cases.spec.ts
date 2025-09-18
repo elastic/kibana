@@ -59,7 +59,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     }
   );
 
-  apiTest.only('should add a new connector to a case', async ({ apiServices }) => {
+  apiTest('should add a new connector to a case', async ({ apiServices }) => {
     const createdResponse = await apiServices.cases.create({
       ...createCasePayload,
       owner: caseOwner,
