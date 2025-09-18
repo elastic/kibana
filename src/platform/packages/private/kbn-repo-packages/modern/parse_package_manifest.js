@@ -67,6 +67,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     enabledOnAnonymousPages,
     type,
     service,
+    remoteServices,
     __category__,
   } = plugin;
 
@@ -138,6 +139,11 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     throw err(`plugin.service`, service, `must be undefined for preboot plugins`);
   }
 
+  // TODO: Better validation
+  if (remoteServices !== undefined && !Array.isArray(remoteServices)) {
+    throw err(`plugin.remoteServices`, remoteServices, `must be an array`);
+  }
+
   const segs = path.split(Path.sep);
   const gitRepoRoot = getGitRepoRootSync(repoRoot);
   const isBuild =
@@ -177,6 +183,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     enabledOnAnonymousPages,
     extraPublicDirs,
     service,
+    remoteServices,
     [PLUGIN_CATEGORY]: __category__,
   };
 }

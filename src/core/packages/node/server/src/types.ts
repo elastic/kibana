@@ -15,8 +15,6 @@
 export interface NodeInfo {
   /** A list of roles this node has been configured with. */
   roles: NodeRoles;
-
-  service?: string;
 }
 
 /**
@@ -45,4 +43,10 @@ export interface NodeRoles {
    * @remark This role is special as it precludes the use of other roles.
    */
   migrator: boolean;
+}
+
+export interface NodeRemoteService {
+  name: string;
+
+  url: string;
 }

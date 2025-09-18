@@ -36,6 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { NodeRemoteService } from '@kbn/core/packages/node/server';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -113,13 +114,12 @@ export class PluginsService
         uuid: environment.instanceUuid,
       },
       nodeInfo: {
-        roles: node.roles,
-        service: node.service
+        roles: node.roles
       },
     });
 
     await this.handleDiscoveryErrors(error$);
-    await this.handleDiscoveredPlugins(plugin$, node.service);
+    await this.handleDiscoveredPlugins(plugin$, node.service, node.remoteServices);
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
@@ -259,7 +259,7 @@ export class PluginsService
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>, service?: string) {
+  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>, service?: string, remoteServices?: NodeRemoteService[]) {
     const pluginEnableStatuses = new Map<
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
@@ -267,7 +267,11 @@ export class PluginsService
     let plugins = await firstValueFrom(plugin$.pipe(toArray()));
     
     if (service != null) {
-      plugins = filterServiceAndDependencies(plugins, service);
+      plugins = onlyServiceAndDependencies(plugins, service);
+    }
+
+    if (remoteServices != null) {
+      plugins = excludeServices(plugins, remoteServices.map(rs => rs.name));
     }
 
     // Register config descriptors and deprecations
@@ -480,7 +484,7 @@ function allDependenciesAvailable({
   return result;
 }
 
-function filterServiceAndDependencies(allPlugins: PluginWrapper[], service: string) : PluginWrapper[] {
+function onlyServiceAndDependencies(allPlugins: PluginWrapper[], service: string) : PluginWrapper[] {
   // start with only the plugins that are explicit for this service
   const servicePlugins = new Set(allPlugins.filter(p => p.manifest.service == service));
 
@@ -505,4 +509,8 @@ function filterServiceAndDependencies(allPlugins: PluginWrapper[], service: stri
   }
 
   return Array.from(servicePlugins);
+}
+
+function excludeServices(allPlugins: PluginWrapper[], services: string[]) {
+  return allPlugins.filter(p => !services.includes(p.name) );
 }

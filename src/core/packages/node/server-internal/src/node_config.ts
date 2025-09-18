@@ -65,15 +65,24 @@ export const serviceConfig = schema.maybe(schema.oneOf([schema.literal('screensh
 /** @internal */
 export type NodeServiceConfig = TypeOf<typeof serviceConfig>;
 
+export const remoteServicesConfig = schema.maybe(schema.arrayOf(schema.object({
+  name: schema.string(),
+  url: schema.uri()
+})));
+
+export type NodeRemoteServicesConfig = TypeOf<typeof remoteServicesConfig>;
+
 /** @internal */
 export interface NodeConfigType {
   roles: NodeRolesConfig;
   service?: NodeServiceConfig;
+  remoteServices?: NodeRemoteServicesConfig;
 }
 
 const configSchema = schema.object({
   roles: rolesConfig,
-  service: serviceConfig
+  service: serviceConfig,
+  remoteServices: remoteServicesConfig,
 });
 
 /** @internal */

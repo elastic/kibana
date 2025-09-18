@@ -12,7 +12,7 @@ import { camelCase } from 'lodash';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import type { NodeRoles } from '@kbn/core-node-server';
+import type { NodeRoles, NodeRemoteService } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import {
   type NodeConfigType,
@@ -22,6 +22,7 @@ import {
   NODE_WILDCARD_CHAR,
   NODE_DEFAULT_ROLES,
   NodeServiceConfig,
+  NodeRemoteServicesConfig,
 } from './node_config';
 
 const DEFAULT_ROLES = [...NODE_DEFAULT_ROLES];
@@ -40,6 +41,8 @@ export interface InternalNodeServicePreboot {
   roles: NodeRoles;
 
   service?: string;
+
+  remoteServices?: NodeRemoteService[];
 }
 
 export interface InternalNodeServiceStart {
@@ -62,6 +65,7 @@ export class NodeService {
   private readonly log: Logger;
   private roles?: NodeRoles;
   private service?: NodeServiceConfig;
+  private remoteServices?: NodeRemoteServicesConfig;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -71,10 +75,16 @@ export class NodeService {
   public async preboot({ loggingSystem }: PrebootDeps): Promise<InternalNodeServicePreboot> {
     const roles = await this.getNodeRoles();
     this.service = await this.getNodeService();
+    this.remoteServices = await this.getNodeRemoteServices();
+
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
     if (this.service != null) {
       this.log.info(`Kibana process configured with service: [${this.service}]`);
+    }
+
+    if (this.remoteServices != null) {
+      this.log.info(`Kibana process configured with remote services: [${this.remoteServices.map(rs => rs.name).join(',')}]`);
     }
 
     // We assume the combination of node roles has been validated and avoid doing additional checks here.
@@ -86,6 +96,7 @@ export class NodeService {
     return {
       roles: this.roles,
       service: this.service,
+      remoteServices: this.remoteServices,
     };
   }
 
@@ -114,6 +125,12 @@ export class NodeService {
     const { service } = await this.getNodeConfig();
 
     return service;
+  }
+
+  private async getNodeRemoteServices(): Promise<NodeRemoteServicesConfig> {
+    const { remoteServices } = await this.getNodeConfig();
+
+    return remoteServices;
   }
 
   private async getNodeConfig() : Promise<NodeConfigType> {

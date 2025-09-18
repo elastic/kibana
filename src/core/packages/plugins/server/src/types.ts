@@ -24,6 +24,7 @@ import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-int
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
+import { PluginRemoteService } from '@kbn/repo-packages/modern/types';
 type Maybe<T> = T | undefined;
 
 /**
@@ -248,6 +249,8 @@ export interface PluginManifest {
   readonly serviceFolders?: readonly string[];
 
   readonly service?: string;
+
+  readonly remoteServices?: PluginRemoteService[]
 
   readonly owner: {
     /**
