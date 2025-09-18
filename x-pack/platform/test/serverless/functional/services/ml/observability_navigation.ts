@@ -26,12 +26,18 @@ export function MachineLearningNavigationProviderObservability({
     });
   }
 
+  async function navigateViaPanel(linkId: string, expectedTestSubject: string) {
+    await svlCommonNavigation.sidenav.openPanel('project_settings_project_nav');
+    await svlCommonNavigation.sidenav.clickPanelLink(linkId);
+    await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
+  }
+
   return {
     async navigateToAnomalyDetection() {
-      await navigateToArea('management:anomaly_detection', 'ml-jobs-list');
+      await navigateViaPanel('management:anomaly_detection', 'ml-jobs-list');
     },
     async navigateToDataFrameAnalytics() {
-      await navigateToArea('management:analytics', 'mlAnalyticsJobList');
+      await navigateViaPanel('management:analytics', 'mlAnalyticsJobList');
     },
     async navigateToTrainedModels() {
       await navigateToArea('management:trained_models', 'mlTrainedModelsList');
