@@ -20,7 +20,13 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
-import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import {
+  createSAMLResponse,
+  getSAMLRequestId,
+  MOCK_IDP_LOGIN_PATH,
+  MOCK_IDP_LOGOUT_PATH,
+} from '@kbn/mock-idp-utils';
+
 
 export interface PluginSetupDependencies {
   cloud: CloudSetup;
@@ -31,6 +37,7 @@ const createSAMLResponseSchema = schema.object({
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
+  urlWithSAMLRequest: schema.maybe(schema.string()),
 });
 
 // BOOKMARK - List of Kibana project types
@@ -147,6 +154,9 @@ export const plugin: PluginInitializer<
               full_name: request.body.full_name ?? undefined,
               email: request.body.email ?? undefined,
               roles: request.body.roles,
+              authnRequestId: request.body.urlWithSAMLRequest
+                ? await getSAMLRequestId(request.body.urlWithSAMLRequest)
+                : undefined,
             }),
           },
         });
