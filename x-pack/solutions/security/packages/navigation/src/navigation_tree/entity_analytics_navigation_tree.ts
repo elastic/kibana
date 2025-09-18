@@ -17,6 +17,7 @@ export const createEntityAnalyticsNavigationTree = ({
   sideNavVersion: SideNavVersion;
 }): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
+  iconV2: 'anomalyChart',
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
   renderAs: 'panelOpener',
   sideNavVersion,
