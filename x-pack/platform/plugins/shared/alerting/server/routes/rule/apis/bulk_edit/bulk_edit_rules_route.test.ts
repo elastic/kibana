@@ -474,5 +474,37 @@ describe('bulkEditRulesRoute', () => {
         `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
       );
     });
+
+    it('throws 400 if the rule type is not registered', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.getRuleTypesByQuery.mockResolvedValue({
+        ruleTypes: ['test.internal-rule-type'],
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          listTypes: new Map([]),
+        },
+        {
+          body: bulkEditRequest,
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"unknown\\" because it is internally managed."`
+      );
+    });
   });
 });

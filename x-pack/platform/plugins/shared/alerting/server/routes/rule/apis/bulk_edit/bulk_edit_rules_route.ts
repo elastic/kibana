@@ -143,10 +143,14 @@ const validateInternalRuleTypes = async ({
   const ruleTypesByQuery = await rulesClient.getRuleTypesByQuery({ filter, ids });
   const ruleTypeIds = new Set(ruleTypesByQuery.ruleTypes);
 
-  for (const [_, ruleType] of ruleTypes) {
-    if (ruleTypeIds.has(ruleType.id) && ruleType.internallyManaged) {
+  for (const ruleTypeId of ruleTypeIds) {
+    const ruleType = ruleTypes.get(ruleTypeId);
+
+    if (!ruleType || ruleType.internallyManaged) {
       throw Boom.badRequest(
-        `Cannot update rule of type "${ruleType.id}" because it is internally managed.`
+        `Cannot update rule of type "${
+          ruleType?.id ?? 'unknown'
+        }" because it is internally managed.`
       );
     }
   }
