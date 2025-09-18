@@ -1744,7 +1744,7 @@
     "@types/http-proxy": "^1.17.4",
     "@types/inquirer": "^7.3.1",
     "@types/jest": "^29.5.3",
-    "@types/jquery": "^3.5.32",
+    "@types/jquery": "^3.5.33",
     "@types/js-search": "^1.4.0",
     "@types/js-yaml": "^4.0.9",
     "@types/jsdom": "^20.0.1",
