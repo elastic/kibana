@@ -38,6 +38,8 @@ export interface InternalNodeServicePreboot {
    * on the way the Kibana process has been configured.
    */
   roles: NodeRoles;
+
+  service?: string;
 }
 
 export interface InternalNodeServiceStart {
@@ -59,6 +61,7 @@ export class NodeService {
   private readonly configService: IConfigService;
   private readonly log: Logger;
   private roles?: NodeRoles;
+  private service?: NodeServiceConfig;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -67,11 +70,11 @@ export class NodeService {
 
   public async preboot({ loggingSystem }: PrebootDeps): Promise<InternalNodeServicePreboot> {
     const roles = await this.getNodeRoles();
-    const service = await this.getNodeService();
+    this.service = await this.getNodeService();
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
-    if (service != null) {
-      this.log.info(`Kibana process configured with service: [${service}]`);
+    if (this.service != null) {
+      this.log.info(`Kibana process configured with service: [${this.service}]`);
     }
 
     // We assume the combination of node roles has been validated and avoid doing additional checks here.
@@ -82,6 +85,7 @@ export class NodeService {
 
     return {
       roles: this.roles,
+      service: this.service,
     };
   }
 

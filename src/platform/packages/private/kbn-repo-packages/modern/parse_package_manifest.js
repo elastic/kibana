@@ -66,6 +66,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     runtimePluginDependencies,
     enabledOnAnonymousPages,
     type,
+    service,
     __category__,
   } = plugin;
 
@@ -129,6 +130,14 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);
   }
 
+  if (service !== undefined && typeof service !== 'string') {
+    throw err(`plugin.service`, service, `must be a string`);
+  }
+
+  if (service !== undefined && type === 'preboot') {
+    throw err(`plugin.service`, service, `must be undefined for preboot plugins`);
+  }
+
   const segs = path.split(Path.sep);
   const gitRepoRoot = getGitRepoRootSync(repoRoot);
   const isBuild =
@@ -167,6 +176,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     runtimePluginDependencies,
     enabledOnAnonymousPages,
     extraPublicDirs,
+    service,
     [PLUGIN_CATEGORY]: __category__,
   };
 }

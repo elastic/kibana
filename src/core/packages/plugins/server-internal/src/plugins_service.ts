@@ -114,11 +114,12 @@ export class PluginsService
       },
       nodeInfo: {
         roles: node.roles,
+        service: node.service
       },
     });
 
     await this.handleDiscoveryErrors(error$);
-    await this.handleDiscoveredPlugins(plugin$);
+    await this.handleDiscoveredPlugins(plugin$, node.service);
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
@@ -258,12 +259,16 @@ export class PluginsService
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
+  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>, service?: string) {
     const pluginEnableStatuses = new Map<
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
+    let plugins = await firstValueFrom(plugin$.pipe(toArray()));
+    
+    if (service != null) {
+      plugins = filterServiceAndDependencies(plugins, service);
+    }
 
     // Register config descriptors and deprecations
     for (const plugin of plugins) {
@@ -473,4 +478,31 @@ function allDependenciesAvailable({
 
   cache.set(pluginName, result);
   return result;
+}
+
+function filterServiceAndDependencies(allPlugins: PluginWrapper[], service: string) : PluginWrapper[] {
+  // start with only the plugins that are explicit for this service
+  const servicePlugins = new Set(allPlugins.filter(p => p.manifest.service == service));
+
+  // prepare a map, so we can lookup a plugin by just its name
+  const map = allPlugins.reduce((m, p) => { m.set(p.name, p); return m; }, new Map<string, PluginWrapper>());
+
+  // we're going to iterate over the set of servicePlugins. for each plugin, we are going to add its
+  // dependencies to the servicePlugins set using the map. by the end of this process, we'll
+  // have just the plugins and the dependencies
+  for (const servicePlugin of servicePlugins) {
+    for (const dep of servicePlugin.optionalPlugins) {
+      servicePlugins.add(map.get(dep)!);
+    }
+
+    for (const dep of servicePlugin.requiredPlugins) {
+      servicePlugins.add(map.get(dep)!);
+    }
+
+    for (const dep of servicePlugin.requiredBundles) {
+      servicePlugins.add(map.get(dep)!);
+    }
+  }
+
+  return Array.from(servicePlugins);
 }

@@ -247,6 +247,8 @@ export interface PluginManifest {
    */
   readonly serviceFolders?: readonly string[];
 
+  readonly service?: string;
+
   readonly owner: {
     /**
      * The name of the team that currently owns this plugin.

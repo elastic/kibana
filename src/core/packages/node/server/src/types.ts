@@ -15,6 +15,8 @@
 export interface NodeInfo {
   /** A list of roles this node has been configured with. */
   roles: NodeRoles;
+
+  service?: string;
 }
 
 /**

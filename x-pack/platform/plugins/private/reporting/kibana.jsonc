@@ -11,6 +11,7 @@
     "id": "reporting",
     "browser": true,
     "server": true,
+    "service": "reporting",
     "configPath": [
       "xpack",
       "reporting"

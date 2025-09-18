@@ -128,6 +128,7 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     enabledOnAnonymousPages?: boolean;
     type?: 'preboot';
     extraPublicDirs?: string[];
+    service?: string;
     [PLUGIN_CATEGORY]?: PluginCategoryInfo;
   };
 }
