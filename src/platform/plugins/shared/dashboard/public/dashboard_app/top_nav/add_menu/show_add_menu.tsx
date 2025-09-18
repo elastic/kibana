@@ -258,7 +258,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
   );
 };
 
-export function ShowAddMenu({ dashboardApi, anchorElement, coreServices }: AddMenuProps) {
+export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMenuProps) {
   if (isOpen) {
     cleanup();
     return;
