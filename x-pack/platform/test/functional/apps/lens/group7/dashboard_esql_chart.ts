@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +12,12 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, header } = getPageObjects(['dashboard', 'timePicker', 'header']);
+  const { dashboard, timePicker, header, lens } = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'header',
+    'lens',
+  ]);
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -41,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await timePicker.setDefaultDataRange();
+      await timePicker.setHistoricalDataRange();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectEditorMenuClosed();
@@ -163,35 +166,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await monacoEditor.setCodeEditorValue(
-        'from logstash-* | stats maxB = max(bytes), minB = min(bytes) BY BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
+        'FROM logstash-* | STATS maxB = MAX(bytes), minB = MIN(bytes) BY BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
       );
       await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-
       // rename maxB to MAX B
-      await dimensions[1].click();
-      await testSubjects.setValue('name-input', 'MAX B', { clearWithKeyboard: true });
-      await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
-      });
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel', 0, 0);
+      await lens.editDimensionLabel('MAX B');
+      await lens.closeDimensionEditor();
 
       // rename minB to MIN B
-      await dimensions[2].click();
-      await testSubjects.setValue('name-input', 'MIN B', { clearWithKeyboard: true });
-      await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
-      });
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel', 0, 1);
+      await lens.editDimensionLabel('MIN B');
+      await lens.closeDimensionEditor();
 
       // validate on editor
-      const dimensionElements = await testSubjects.findAll(`lns-dimensionTrigger-textBased`);
-      const dimensionTexts = await Promise.all(
-        await dimensionElements.map(async (el) => await el.getVisibleText())
-      );
-      expect(dimensionTexts).to.eql(['BUCKET(@timestamp, 50, ?_tstart, ?_tend)', 'MAX B', 'MIN B']);
+
+      const xDimemsionsText = await lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel', true);
+      expect(xDimemsionsText).to.eql(['BUCKET(@timestamp, 50, ?_tstart, ?_tend)']);
+
+      const yDimemsionsText = await lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel', true);
+      expect(yDimemsionsText).to.eql(['MAX B', 'MIN B']);
 
       // validate on chart
       const chartData = await elasticChart.getChartDebugData(undefined, 1);
