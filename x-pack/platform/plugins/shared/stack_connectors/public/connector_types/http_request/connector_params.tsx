@@ -6,47 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { HttpRequestActionParams } from '.';
-
-/*
-const sampleForm = [
-  {
-    "name": "summary",
-    "label": "Summary",
-    "type": "text",
-    "required": true,
-    "placeholder": "Enter a short summary"
-  },
-  {
-    "name": "description",
-    "label": "Description",
-    "type": "textarea",
-    "required": false,
-    "placeholder": "Enter detailed description"
-  },
-  {
-    "name": "priority",
-    "label": "Priority",
-    "type": "select",
-    "required": true,
-    "options": [
-      { "value": "high", "text": "High" },
-      { "value": "medium", "text": "Medium" },
-      { "value": "low", "text": "Low" }
-    ]
-  },
-  {
-    "name": "assignee",
-    "label": "Assignee",
-    "type": "text",
-    "required": false,
-    "placeholder": "Assign to user"
-  }
-];
-*/
 
 interface FieldDefinition {
   name: string;
@@ -64,21 +31,28 @@ interface JsonFormGeneratorProps {
   form: FormDefinition;
   values: Record<string, any>;
   onChange: (field: string, value: any) => void;
+  messageVariables: ActionParamsProps<HttpRequestActionParams>['messageVariables'];
+  index: number;
 }
 
 function getCompoent(
   field: FieldDefinition,
   value: string | number | undefined,
-  onChange: JsonFormGeneratorProps['onChange']
+  onChange: JsonFormGeneratorProps['onChange'],
+  messageVariables: ActionParamsProps<HttpRequestActionParams>['messageVariables'],
+  index: number
 ) {
   switch (field.type) {
     case 'textarea':
       return (
-        <EuiTextArea
-          fullWidth={true}
-          value={value}
-          placeholder={field.placeholder}
-          onChange={(e) => onChange(field.name, e.target.value)}
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={onChange}
+          label={field.label}
+          messageVariables={messageVariables}
+          paramsProperty={field.name}
+          inputTargetValue={value?.toString()}
+          isOptionalField={true}
         />
       );
     case 'select':
@@ -93,25 +67,32 @@ function getCompoent(
     case 'text':
     default:
       return (
-        <EuiFieldText
-          fullWidth={true}
-          value={value}
-          placeholder={field.placeholder}
-          onChange={(e) => onChange(field.name, e.target.value)}
+        <TextFieldWithMessageVariables
+          index={0}
+          editAction={onChange}
+          messageVariables={messageVariables}
+          paramsProperty={field.name}
+          inputTargetValue={value?.toString()}
         />
       );
   }
 }
 
-export const jsonFormGenerator: React.FC<JsonFormGeneratorProps> = ({ form, values, onChange }) => {
+export const jsonFormGenerator: React.FC<JsonFormGeneratorProps> = ({
+  form,
+  values,
+  onChange,
+  messageVariables,
+  index,
+}) => {
   return (
     <>
       {form.fields.map((field) => {
         const value = values[field.name] ?? '';
 
         return (
-          <EuiFormRow fullWidth label={field.label}>
-            {getCompoent(field, value, onChange)}
+          <EuiFormRow fullWidth label={field.type === 'textarea' ? '' : field.label}>
+            {getCompoent(field, value, onChange, messageVariables, index)}
           </EuiFormRow>
         );
       })}
@@ -122,14 +103,14 @@ export const jsonFormGenerator: React.FC<JsonFormGeneratorProps> = ({ form, valu
 const HttpRequestParamsFields: React.FunctionComponent<
   ActionParamsProps<HttpRequestActionParams>
 > = ({ actionParams, editAction, index, messageVariables, errors, actionConnector }) => {
-  const { body } = actionParams;
-
   return jsonFormGenerator({
     form: {
-      fields: actionConnector.config.paramFields,
+      fields: actionConnector!.config.paramFields,
     },
-    values: body ? JSON.parse(body) : {},
+    values: actionParams,
     onChange: (name, val) => editAction(name, val, 0),
+    messageVariables,
+    index,
   });
 };
 
