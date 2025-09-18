@@ -131,7 +131,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
       });
     },
     onSettled: () => {
-      conversationActions.invalidateConversation();
+      conversationActions.removeNewConversationQuery();
       messageControllerRef.current = null;
       setAgentReasoning(null);
     },

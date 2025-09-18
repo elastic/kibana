@@ -62,10 +62,7 @@ export const useConversationActions = () => {
   };
 
   return {
-    invalidateConversation: () => {
-      removeNewConversationQuery();
-      queryClient.invalidateQueries({ queryKey });
-    },
+    removeNewConversationQuery,
     addConversationRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
         produce((draft) => {
@@ -159,6 +156,7 @@ export const useConversationActions = () => {
       if (!current) {
         throw new Error('Conversation not created');
       }
+      // 1. Update individual conversation cache (with rounds)
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(id),
         produce(current, (draft) => {
@@ -166,9 +164,12 @@ export const useConversationActions = () => {
           draft.title = title;
         })
       );
-      removeNewConversationQuery();
-      // Invalidate all conversations to refresh conversation history
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+      // 2. Refetch conversation list to get updated data from server - this updates the conversations view in the sidebar
+      queryClient.refetchQueries({
+        queryKey: queryKeys.conversations.all,
+        exact: true,
+        type: 'active',
+      });
       navigateToConversation({ nextConversationId: id });
     },
   };
