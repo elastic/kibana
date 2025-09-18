@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
@@ -43,10 +44,13 @@ export function useUpdateSiemMigration<T extends MigrationType>(
   const { addSuccess, addError } = useAppToasts();
   const { siemMigrations } = useKibana().services;
 
-  const updateMigration =
-    migrationType === 'rule'
-      ? siemMigrations?.rules?.api?.updateMigration
-      : siemMigrations?.dashboards?.api?.updateDashboardMigration;
+  const updateMigration = useMemo(
+    () =>
+      migrationType === 'rule'
+        ? siemMigrations?.rules?.api?.updateMigration
+        : siemMigrations?.dashboards?.api?.updateDashboardMigration,
+    [siemMigrations, migrationType]
+  );
 
   return useMutation<void, Error, UpdateMigrationArgs<T>>({
     mutationKey: ['siemMigration', migrationType, 'update'],

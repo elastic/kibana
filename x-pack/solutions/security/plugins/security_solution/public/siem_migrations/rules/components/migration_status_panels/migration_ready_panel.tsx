@@ -86,6 +86,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="ruleMigrationMissingResourcesButton"
+                  aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
                   iconType="download"
                   iconSide="right"
                   onClick={onOpenFlyout}

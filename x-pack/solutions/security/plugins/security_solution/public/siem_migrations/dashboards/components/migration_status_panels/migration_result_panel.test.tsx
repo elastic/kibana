@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DashboardMigrationResultPanel } from './migration_result_panel';
 import { TestProviders } from '../../../../common/mock';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import type { DashboardMigrationStats } from '../../types';
+import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-// Only mock the hook that makes a network request
 jest.mock('../../logic/use_get_migration_translation_stats', () => ({
-  useGetMigrationTranslationStats: jest.fn(() => ({
+  useGetMigrationTranslationStats: jest.fn().mockReturnValue({
     data: {
       dashboards: {
         success: { result: { full: 1, partial: 2, untranslatable: 3 } },
@@ -25,7 +25,7 @@ jest.mock('../../logic/use_get_migration_translation_stats', () => ({
       },
     },
     isLoading: false,
-  })),
+  }),
 }));
 
 const baseProps = {
@@ -39,6 +39,20 @@ const baseProps = {
   onToggleCollapsed: jest.fn(),
 };
 
+const mockGetMissingResources = jest.fn();
+
+const mockUseGetMissingResources = jest.spyOn(
+  useGetMissingResourcesModule,
+  'useGetMissingResources'
+);
+mockUseGetMissingResources.mockImplementation(() => {
+  return {
+    getMissingResources: mockGetMissingResources,
+    isLoading: false,
+    error: null,
+  };
+});
+
 const renderTestComponent = (
   props: Partial<React.ComponentProps<typeof DashboardMigrationResultPanel>> = {}
 ) => {
@@ -48,9 +62,9 @@ const renderTestComponent = (
 };
 
 describe('DashboardMigrationResultPanel', () => {
-  it('renders panel with title, badge, and button', () => {
+  it('renders panel with title, badge, and button', async () => {
     renderTestComponent();
-    expect(screen.getByTestId('migrationPanelTitle')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('migrationPanelTitle')).toBeInTheDocument());
     const badge = screen.getByTestId('migrationCompleteBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('Translation complete');
@@ -62,8 +76,9 @@ describe('DashboardMigrationResultPanel', () => {
     );
   });
 
-  it('calls onToggleCollapsed when button is clicked', () => {
+  it('calls onToggleCollapsed when button is clicked', async () => {
     renderTestComponent();
+    await waitFor(() => expect(screen.getByTestId('collapseButton')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('collapseButton'));
     expect(baseProps.onToggleCollapsed).toHaveBeenCalled();
   });
@@ -87,9 +102,9 @@ describe('DashboardMigrationResultPanel', () => {
     expect(screen.getByTestId('centeredLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders  table when translation stats are loaded', () => {
+  it('renders  table when translation stats are loaded', async () => {
     renderTestComponent();
-    expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument());
   });
 
   it('renders upload missing panel', () => {

@@ -135,14 +135,14 @@ describe('MigrationReadyPanel', () => {
   });
 
   describe('Stopped Migration', () => {
-    it('should render aborted migration message', () => {
+    it('should render stopped migration message', () => {
       renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
         'Migration of 6 rules was stopped, you can resume it any time.'
       );
     });
 
-    it('should render correct start migration button for aborted migration', () => {
+    it('should render correct start migration button for stopped migration', () => {
       renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume');
     });

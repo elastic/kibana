@@ -80,6 +80,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
             {missingResources.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  aria-label={i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
                   data-test-subj="dashboardMigrationMissingResourcesButton"
                   iconType="download"
                   iconSide="right"

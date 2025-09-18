@@ -72,11 +72,7 @@ export const DashboardMigrationResultPanel = React.memo<DashboardMigrationResult
             <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <MigrationPanelTitle
-                    migrationStats={migrationStats}
-                    migrationType="dashboard"
-                    data-test-subj="migrationPanelTitle"
-                  />
+                  <MigrationPanelTitle migrationStats={migrationStats} migrationType="dashboard" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued data-test-subj="migrationPanelDescription">

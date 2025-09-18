@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useReducer } from 'react';
+import { useCallback, useReducer, useMemo } from 'react';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import type { SiemMigrationResourceBase } from '../../../../common/siem_migrations/model/common.gen';
@@ -24,24 +24,20 @@ export const useGetMissingResources = (migrationType: MigrationType, onSuccess: 
   const { siemMigrations, notifications } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const getMissingResourcesFn = useMemo(
+    () =>
+      migrationType === 'rule'
+        ? siemMigrations.rules.api.getMissingResources
+        : siemMigrations.dashboards.api.getDashboardMigrationMissingResources,
+    [siemMigrations, migrationType]
+  );
+
   const getMissingResources = useCallback<GetMissingResources>(
     (migrationId) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          let missingResources: SiemMigrationResourceBase[] = [];
-
-          if (migrationType === 'rule') {
-            missingResources = await siemMigrations.rules.api.getMissingResources({
-              migrationId,
-            });
-          } else {
-            missingResources =
-              await siemMigrations.dashboards.api.getDashboardMigrationMissingResources({
-                migrationId,
-              });
-          }
-
+          const missingResources = await getMissingResourcesFn({ migrationId });
           onSuccess(missingResources);
           dispatch({ type: 'success' });
         } catch (err) {
@@ -53,14 +49,12 @@ export const useGetMissingResources = (migrationType: MigrationType, onSuccess: 
         }
       })();
     },
-    [
-      siemMigrations.rules.api,
-      notifications.toasts,
-      onSuccess,
-      migrationType,
-      siemMigrations.dashboards.api,
-    ]
+    [notifications.toasts, onSuccess, getMissingResourcesFn]
   );
 
-  return { isLoading: state.loading, error: state.error, getMissingResources };
+  return {
+    isLoading: state.loading,
+    error: state.error,
+    getMissingResources,
+  };
 };

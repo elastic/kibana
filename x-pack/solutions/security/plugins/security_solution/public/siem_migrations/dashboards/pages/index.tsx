@@ -25,6 +25,7 @@ import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migr
 import { PageTitle } from '../../common/components/page_title';
 import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { DashboardMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -101,9 +102,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
             SiemMigrationTaskStatus.INTERRUPTED,
             SiemMigrationTaskStatus.STOPPED,
           ].includes(migrationStats.status) && (
-            // TODO: uncomment once panels are merged
-            // <MigrationReadyPanel migrationStats={migrationStats} />
-            <>{'Migration read panel...'}</>
+            <MigrationReadyPanel migrationStats={migrationStats} />
           )}
         </>
       );
