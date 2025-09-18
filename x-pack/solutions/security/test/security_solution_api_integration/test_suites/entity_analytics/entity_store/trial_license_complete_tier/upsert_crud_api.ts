@@ -60,9 +60,7 @@ export default function (providerContext: FtrProviderContext) {
         log.info('Creating user as test subject...');
         const date = new Date().toISOString();
         const userName = 'test-user-1';
-        const testDocs = [
-          { user: { name: userName, domain: 'domain.com', entity: { type: 'user' } } },
-        ];
+        const testDocs = [{ user: { name: userName, domain: 'domain.com' } }];
 
         await createDocumentsAndTriggerUserTransform(providerContext, testDocs, DATASTREAM_NAME);
 
@@ -74,7 +72,6 @@ export default function (providerContext: FtrProviderContext) {
               expect(hit._source?.user?.name).toEqual(userName);
               expect(hit._source?.user?.domain).toEqual(['domain.com']);
               expect(hit._source?.entity?.id).toEqual(userName);
-              expect(hit._source?.entity?.type).toEqual('user');
             });
 
             return true;
@@ -109,7 +106,6 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.user?.name).toEqual(userName);
             expect(hit._source?.user?.domain).toEqual(['domain.com']);
             expect(hit._source?.entity?.id).toEqual(userName);
-            expect(hit._source?.entity?.type).toEqual('user');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
             expect(hit._source?.entity?.lifecycle?.First_seen).toEqual(date);
           });
@@ -122,7 +118,6 @@ export default function (providerContext: FtrProviderContext) {
             user: {
               name: userName,
               domain: 'domain.com updated',
-              entity: { type: 'user updated' },
             },
           },
         ];
@@ -137,7 +132,6 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.user?.domain).toContain('domain.com');
             expect(hit._source?.user?.domain).toContain('domain.com updated');
             expect(hit._source?.entity?.id).toEqual(userName);
-            expect(hit._source?.entity?.type).toEqual('user updated');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
             expect(hit._source?.entity?.lifecycle?.First_seen).toEqual(date);
           });
