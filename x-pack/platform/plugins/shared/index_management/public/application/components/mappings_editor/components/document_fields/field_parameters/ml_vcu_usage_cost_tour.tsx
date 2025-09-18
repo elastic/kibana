@@ -31,13 +31,13 @@ export const MlVcuUsageCostTour = ({
       title={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.title"
-          defaultMessage="Machine Learning Usage"
+          defaultMessage="Machine learning usage"
         />
       }
       subtitle={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.subtitle"
-          defaultMessage="VCU Consumption"
+          defaultMessage="VCU consumption"
         />
       }
       maxWidth="500px"
@@ -55,7 +55,7 @@ export const MlVcuUsageCostTour = ({
                   >
                     <FormattedMessage
                       id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.additionalCosts"
-                      defaultMessage="additional Costs"
+                      defaultMessage="additional costs"
                     />
                   </EuiLink>
                 ),
