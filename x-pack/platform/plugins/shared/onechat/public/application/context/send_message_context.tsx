@@ -29,9 +29,6 @@ interface UseSendMessageMutationProps {
   connectorId?: string;
 }
 
-// TODO: remove
-let eventTimings: { eventMessage: string; timestamp: string }[] = [];
-
 const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
@@ -62,9 +59,6 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
         next: (event) => {
           // chunk received, we append it to the chunk buffer
           if (isMessageChunkEvent(event)) {
-            // Track event count and timing
-            const timestamp = new Date().toISOString();
-            eventTimings.push({ eventMessage: event.data.text_chunk, timestamp });
             conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
           }
           // full message received, override chunk buffer
@@ -99,11 +93,6 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
             const { tool_call_id: toolCallId, results } = event.data;
             conversationActions.setToolCallResult({ results, toolCallId });
           } else if (isRoundCompleteEvent(event)) {
-            // eslint-disable-next-line no-console
-            console.log(`Round Complete - Total Events Received: ${eventTimings.length}`);
-            // eslint-disable-next-line no-console
-            console.log('Event Timings:', eventTimings);
-
             // Now we have the full response and can stop the loading indicators
             setIsResponseLoading(false);
           } else if (isConversationCreatedEvent(event)) {
@@ -133,8 +122,6 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     onMutate: ({ message }) => {
       setPendingMessage(message);
       messageControllerRef.current = new AbortController();
-      // Reset event tracking for new message
-      eventTimings = [];
 
       // Batch state changes to prevent multiple renders in legacy React
       // This prevents loading indicator flickering in new round
