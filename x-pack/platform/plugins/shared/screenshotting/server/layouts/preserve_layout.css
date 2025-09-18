@@ -34,3 +34,12 @@
   padding: 0 !important;
   border: 0 !important;
 }
+
+/* Text rendering screenshot fixes for better kerning in all visualization types */
+.dashboardViewport *,
+.lnsWorkspacePanelWrapper *,
+.tvbEditorVisualization,
+.visEditor__visualization__wrapper,
+.vislib__wrapper {
+  text-rendering: geometricPrecision !important;
+}
