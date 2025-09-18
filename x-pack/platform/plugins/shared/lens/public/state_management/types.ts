@@ -28,6 +28,7 @@ import type {
 import type { StructuredDatasourceStates } from '../react_embeddable/types';
 export interface VisualizationState {
   activeId: string | null;
+  selectedLayerId: string | null;
   state: unknown;
 }
 
