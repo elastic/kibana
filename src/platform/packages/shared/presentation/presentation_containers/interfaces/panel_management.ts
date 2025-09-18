@@ -33,7 +33,7 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
 // Disable duplication or expansions on panels with a control type
 // TypeScript lacks support for negated types as https://github.com/microsoft/TypeScript/pull/29317 was never merged
 // Therefore, we can't define types like IsDuplicable { type: string not ControlType }
-interface IsNotDuplicable {
+export interface IsNotDuplicable {
   type: ControlType;
 }
 
@@ -43,7 +43,12 @@ export const apiCannotBeDuplicated = (
   return apiIsOneOfType(unknownApi as IsNotDuplicable, CONTROL_TYPES);
 };
 
-// Control panels cannot be expanded or duplicated, so copy the logic for duplicate to expand
-type IsNotExpandable = IsNotDuplicable;
+// Control panels cannot be expanded , customized, or duplicated, so copy the logic for duplicate to expand
+export type IsNotExpandable = IsNotDuplicable;
 export const apiCannotBeExpanded = (unknownApi: unknown | null): unknownApi is IsNotExpandable =>
   apiCannotBeDuplicated(unknownApi);
+
+export type IsNotCustomizable = IsNotDuplicable;
+export const apiCannotBeCustomized = (
+  unknownApi: unknown | null
+): unknownApi is IsNotCustomizable => apiCannotBeDuplicated(unknownApi);
