@@ -169,7 +169,7 @@ export function StreamsTreeTable({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [streams, searchQuery, sortField, sortDirection]);
 
-  // Expand/Collapse all button for the search bar
+  // Expand/Collapse all button for the name column header
   const expandCollapseAllButton =
     shouldComposeTree(sortField, searchQuery) && hasExpandable ? (
       <EuiButtonIcon
@@ -179,7 +179,7 @@ export function StreamsTreeTable({
           e.stopPropagation();
           handleExpandCollapseAll();
         }}
-        data-test-subj="streamsAppExpandCollapseAllButton"
+        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
         aria-label={
           allExpanded
             ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
@@ -195,6 +195,7 @@ export function StreamsTreeTable({
   return (
     <EuiInMemoryTable<TableRow>
       loading={loading}
+      data-test-subj="streamsTable"
       columns={[
         {
           field: 'nameSortKey',
@@ -226,6 +227,9 @@ export function StreamsTreeTable({
                       type={isCollapsed ? 'arrowRight' : 'arrowDown'}
                       color="text"
                       size="m"
+                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
+                        item.stream.name
+                      }`}
                       aria-label={i18n.translate(
                         isCollapsed
                           ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
@@ -249,7 +253,6 @@ export function StreamsTreeTable({
                           handleToggleCollapse(item.stream.name);
                         }
                       }}
-                      data-test-subj="streamsAppStreamNodeToggle"
                       style={{ cursor: 'pointer' }}
                     />
                   </EuiFlexItem>
@@ -261,7 +264,7 @@ export function StreamsTreeTable({
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiLink
-                    data-test-subj="streamsAppStreamNodeLink"
+                    data-test-subj={`streamsNameLink-${item.stream.name}`}
                     href={router.link('/{key}', { path: { key: item.stream.name } })}
                   >
                     <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
