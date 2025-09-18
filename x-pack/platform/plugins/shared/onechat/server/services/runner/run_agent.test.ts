@@ -13,7 +13,7 @@ import type { CreateScopedRunnerDepsMock, MockedAgent, AgentRegistryMock } from 
 import {
   createScopedRunnerDepsMock,
   createMockedAgent,
-  createMockedAgentClient,
+  createMockedAgentRegistry,
 } from '../../test_utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 
@@ -33,13 +33,13 @@ describe('runAgent', () => {
     runnerManager = new RunnerManager(runnerDeps);
     agent = createMockedAgent();
 
-    agentClient = createMockedAgentClient();
+    agentClient = createMockedAgentRegistry();
     agentClient.get.mockResolvedValue(agent);
 
     const {
-      agentsService: { getScopedClient },
+      agentsService: { getRegistry },
     } = runnerDeps;
-    getScopedClient.mockResolvedValue(agentClient);
+    getRegistry.mockResolvedValue(agentClient);
 
     agentHandler = jest.fn();
     agentHandler.mockResolvedValue({

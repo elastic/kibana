@@ -13,7 +13,7 @@ export type MockedAgent = jest.Mocked<AgentDefinition>;
 export type AgentsServiceStartMock = jest.Mocked<AgentsServiceStart>;
 export type AgentRegistryMock = jest.Mocked<AgentRegistry>;
 
-export const createMockedAgentClient = (): AgentRegistryMock => {
+export const createMockedAgentRegistry = (): AgentRegistryMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
@@ -41,6 +41,6 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
 export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     execute: jest.fn(),
-    getRegistry: jest.fn().mockImplementation(() => createMockedAgentClient()),
+    getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
   };
 };
