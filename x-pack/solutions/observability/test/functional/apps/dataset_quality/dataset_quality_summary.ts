@@ -56,21 +56,21 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await synthtrace.clean();
     });
 
-    it('shows poor, warning and good count as 0 and all dataset as healthy', async () => {
+    it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();
 
       const summary = await PageObjects.datasetQuality.parseSummaryPanel();
       expect(summary).to.eql({
         datasetHealthPoor: '0',
-        datasetHealthWarning: '0',
+        datasetHealthDegraded: '0',
         datasetHealthGood: '3',
         activeDatasets: '0 of 3',
         estimatedData: '0.0 B',
       });
     });
 
-    it('shows updated count for poor, warning and good datasets, estimated size and updates active datasets', async () => {
+    it('shows updated count for poor, degraded and good datasets, estimated size and updates active datasets', async () => {
       await ingestDataForSummary();
       await PageObjects.datasetQuality.navigateTo();
 
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const { estimatedData, ...restOfSummary } = summary;
       expect(restOfSummary).to.eql({
         datasetHealthPoor: '1',
-        datasetHealthWarning: '1',
+        datasetHealthDegraded: '1',
         datasetHealthGood: '1',
         activeDatasets: '2 of 3',
       });

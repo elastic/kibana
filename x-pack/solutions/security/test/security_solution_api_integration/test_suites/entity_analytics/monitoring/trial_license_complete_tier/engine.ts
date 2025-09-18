@@ -10,56 +10,23 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
-import { PrivMonUtils } from './privileged_users/utils';
-
+import {
+  PrivMonUtils,
+  PlainIndexSyncUtils,
+  createIndexEntitySource,
+  createIntegrationEntitySource,
+} from './utils';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const kibanaServer = getService('kibanaServer');
-  const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
-  const es = getService('es');
-  const retry = getService('retry');
   const spaces = getService('spaces');
-  const customSpace = 'privmontestspace';
   const supertest = getService('supertest');
 
-  const createUserIndex = async (indexName: string) =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-                fields: {
-                  text: { type: 'text' },
-                },
-              },
-              role: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    });
+  const customSpace = 'privmontestspace';
 
-  const waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
-    let lastSeenLength = -1;
-
-    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
-      const res = await api.listPrivMonUsers({ query: {} });
-      const currentLength = res.body.length;
-
-      if (currentLength !== lastSeenLength) {
-        log.info(`PrivMon users sync check: found ${currentLength} users`);
-        lastSeenLength = currentLength;
-      }
-
-      return currentLength >= expectedLength;
-    });
-  };
+  const privMonUtils = PrivMonUtils(getService);
+  const privMonUtilsCustomSpace = PrivMonUtils(getService, customSpace);
 
   async function getPrivMonSoStatus(space: string = 'default') {
     return kibanaServer.savedObjects.find({
@@ -68,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  describe('@ess Entity Privilege Monitoring APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const dataViewWithNamespace = dataViewRouteHelpersFactory(supertest, customSpace);
 
@@ -124,8 +91,8 @@ export default ({ getService }: FtrProviderContext) => {
         // Initialize engines for both default and custom spaces
         await enablePrivmonSetting(kibanaServer);
         await enablePrivmonSetting(kibanaServer, customSpace);
-        await api.initMonitoringEngine();
-        await api.initMonitoringEngine(customSpace);
+        await privMonUtils.initPrivMonEngine();
+        await privMonUtilsCustomSpace.initPrivMonEngine();
       });
 
       after(async () => {
@@ -153,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
         log.info('Disabling privilege monitoring engine in custom space');
 
         // Re-initialize for this test since previous test disabled it
-        await api.initMonitoringEngine(customSpace);
+        await privMonUtils.initPrivMonEngine();
         const res = await api.disableMonitoringEngine(customSpace);
 
         if (res.status !== 200) {
@@ -201,10 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should handle complete init-disable-reinit cycle', async () => {
         // Initialize engine
         log.info('Initializing privilege monitoring engine');
-        const initRes = await api.initMonitoringEngine();
-        expect(initRes.status).toBe(200);
-        expect(initRes.body.status).toBe('started');
-
+        await privMonUtils.initPrivMonEngine();
         const soStatus = await getPrivMonSoStatus();
         expect(soStatus.saved_objects[0].attributes.status).toBe('started');
 
@@ -228,18 +192,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Re-initialize after disable
         log.info('Initializing privilege monitoring engine after disable');
-        const initResAfterDisable = await api.initMonitoringEngine();
-        expect(initResAfterDisable.status).toBe(200);
-        expect(initResAfterDisable.body.status).toBe('started');
+        await privMonUtils.initPrivMonEngine();
 
         const soStatusOnInitAfterDisable = await getPrivMonSoStatus();
         expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).toBe('started');
 
         // Test re-initializing (should be idempotent)
         log.info('Re-initializing privilege monitoring engine after disable');
-        const reInitRes = await api.initMonitoringEngine();
-        expect(reInitRes.status).toBe(200);
-        expect(reInitRes.body.status).toBe('started');
+        await privMonUtils.initPrivMonEngine();
 
         const soStatusAfterReInit = await getPrivMonSoStatus();
         expect(soStatusAfterReInit.saved_objects[0].attributes.status).toBe('started');
@@ -265,9 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should handle complete init-disable-reinit cycle in custom space', async () => {
         // Initialize engine in custom space
         log.info('Initializing privilege monitoring engine in custom space');
-        const initRes = await api.initMonitoringEngine(customSpace);
-        expect(initRes.status).toBe(200);
-        expect(initRes.body.status).toBe('started');
+        await privMonUtilsCustomSpace.initPrivMonEngine();
 
         const soStatus = await getPrivMonSoStatus(customSpace);
         expect(soStatus.saved_objects[0].attributes.status).toBe('started');
@@ -292,18 +250,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Re-initialize after disable
         log.info('Initializing privilege monitoring engine after disable in custom space');
-        const initResAfterDisable = await api.initMonitoringEngine(customSpace);
-        expect(initResAfterDisable.status).toBe(200);
-        expect(initResAfterDisable.body.status).toBe('started');
+        await privMonUtilsCustomSpace.initPrivMonEngine();
 
         const soStatusOnInitAfterDisable = await getPrivMonSoStatus(customSpace);
         expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).toBe('started');
 
         // Test re-initializing (should be idempotent)
         log.info('Re-initializing privilege monitoring engine after disable in custom space');
-        const reInitRes = await api.initMonitoringEngine(customSpace);
-        expect(reInitRes.status).toBe(200);
-        expect(reInitRes.body.status).toBe('started');
+        await privMonUtilsCustomSpace.initPrivMonEngine();
 
         const soStatusAfterReInit = await getPrivMonSoStatus(customSpace);
         expect(soStatusAfterReInit.saved_objects[0].attributes.status).toBe('started');
@@ -311,38 +265,53 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('init', () => {
+      const indexName = 'privileged-users-index-pattern';
+      const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
+      const entitySourceIntegration = createIntegrationEntitySource({
+        name: '.entity_analytics.monitoring.sources.okta-default', // if you need that exact name
+      });
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
       });
+
+      it('should not create duplicate monitoring data sources', async () => {
+        const response = await api.createEntitySource({ body: entitySource });
+        const integrationResponse = await api.createEntitySource({ body: entitySourceIntegration });
+        expect(response.status).toBe(200);
+        expect(integrationResponse.status).toBe(200);
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        // confirm sources have been created
+        expect(names).toEqual(
+          expect.arrayContaining([
+            'PrivilegedUsers',
+            '.entity_analytics.monitoring.sources.okta-default',
+          ])
+        );
+        // Try to create the same entity sources again
+        await api.createEntitySource({ body: entitySource });
+        await api.createEntitySource({ body: entitySourceIntegration });
+        const nonDuplicateSources = await api.listEntitySources({ query: {} });
+        const nonDuplicateNames = nonDuplicateSources.body.map((s: any) => s.name);
+        // confirm duplicates have not been created
+        expect(names.length).toBe(nonDuplicateNames.length);
+      });
+
       it('should be able to be called multiple times', async () => {
         log.info(`Initializing Privilege Monitoring engine`);
-        const res1 = await api.initMonitoringEngine();
-
-        if (res1.status !== 200) {
-          log.error(`Failed to initialize engine`);
-          log.error(JSON.stringify(res1.body));
-        }
-
-        expect(res1.status).toEqual(200);
-
+        await privMonUtils.initPrivMonEngine();
         log.info(`Re-initializing Privilege Monitoring engine`);
-        const res2 = await api.initMonitoringEngine();
-        if (res2.status !== 200) {
-          log.error(`Failed to re-initialize engine`);
-          log.error(JSON.stringify(res2.body));
-        }
-
-        expect(res2.status).toEqual(200);
+        await privMonUtils.initPrivMonEngine();
       });
     });
 
     describe('schedule now', () => {
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
-        await api.initMonitoringEngine();
+        await privMonUtils.initPrivMonEngine();
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
@@ -354,40 +323,23 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('plain index sync', () => {
+    describe('Plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
-      const entitySource = {
-        type: 'index',
-        name: 'StarWars',
-        managed: true,
-        indexPattern: indexName,
-        enabled: true,
-        matchers: [
-          {
-            fields: ['user.role'],
-            values: ['admin'],
-          },
-        ],
-        filter: {},
-      };
+      const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
 
       beforeEach(async () => {
-        await createUserIndex(indexName);
+        await indexSyncUtils.createIndex();
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
-        try {
-          await es.indices.delete({ index: indexName }, { ignore: [404] });
-        } catch (err) {
-          log.warning(`Failed to clean up in afterEach: ${err.message}`);
-        }
+        await indexSyncUtils.deleteIndex();
         await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
       });
 
-      it('should sync plain index', async () => {
+      it('should not create duplicate users', async () => {
         const uniqueUsernames = [
           'Luke Skywalker',
           'Leia Organa',
@@ -400,34 +352,95 @@ export default ({ getService }: FtrProviderContext) => {
           'Darth Vader',
         ];
 
-        const nameToOp = (name: string) => [{ index: {} }, { user: { name, role: 'admin' } }];
+        const repeatedUsers = Array.from({ length: 150 }).map(() => 'C-3PO');
 
-        const uniqueUserOps = uniqueUsernames.flatMap(nameToOp);
-        const repeatedUserOps = Array.from({ length: 150 }).flatMap(() => nameToOp('C-3PO'));
+        await indexSyncUtils.addUsersToIndex([...uniqueUsernames, ...repeatedUsers]);
+        await indexSyncUtils.createEntitySourceForIndex();
 
-        await es.bulk({
-          index: indexName,
-          body: [...uniqueUserOps, ...repeatedUserOps],
-          refresh: true,
-        });
+        const users = await privMonUtils.scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
 
-        // register entity source
-        const response = await api.createEntitySource({ body: entitySource });
-        expect(response.status).toBe(200);
-
-        // default-monitoring-index should exist now
-        const sources = await api.listEntitySources({ query: {} });
-        const names = sources.body.map((s: any) => s.name);
-        expect(names).toContain('StarWars');
-        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-        await privMonUtils.waitForSyncTaskRun();
-        await waitForPrivMonUsersToBeSynced(uniqueUsernames.length);
         // Check if the users are indexed
-        const res = await api.listPrivMonUsers({ query: {} });
-        const userNames = res.body.map((u: any) => u.user.name);
+        const userNames = users.map((u: any) => u.user.name);
         expect(userNames).toContain('Luke Skywalker');
         expect(userNames).toContain('C-3PO');
         expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
+      });
+
+      it('should soft delete user when they are removed', async () => {
+        await indexSyncUtils.addUsersToIndex(['user1', 'user2']);
+
+        await indexSyncUtils.createEntitySourceForIndex();
+
+        const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
+
+        const user1Before = privMonUtils.findUser(usersBefore, 'user1');
+        log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
+        await indexSyncUtils.deleteUserFromIndex('user1');
+        // add a new user so we know when the task completes
+        await indexSyncUtils.addUsersToIndex(['user3']);
+
+        const usersAfter = await privMonUtils.scheduleEngineAndWaitForUserCount(3);
+        const user1After = privMonUtils.findUser(usersAfter, 'user1');
+        log.info(`User 1 after: ${JSON.stringify(user1After)}`);
+        privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
+        privMonUtils.assertIsPrivileged(user1After, false);
+      });
+
+      it('should update a user when it was already added by the API', async () => {
+        const user1 = { name: 'user1' };
+        await api.createPrivMonUser({
+          body: { user: user1 },
+        });
+
+        const { body: usersBeforeSync } = await api.listPrivMonUsers({ query: {} });
+        const user1Before = privMonUtils.findUser(usersBeforeSync, user1.name);
+        log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
+
+        await indexSyncUtils.addUsersToIndex([user1.name]);
+        await indexSyncUtils.createEntitySourceForIndex();
+
+        const usersAfterSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1After = privMonUtils.findUser(usersAfterSync, user1.name);
+        log.info(`User 1 after: ${JSON.stringify(user1After)}`);
+
+        privMonUtils.assertIsPrivileged(user1After, true);
+        expect(user1After?.user?.name).toEqual(user1.name);
+        expect(user1After?.labels?.sources).toEqual(['api', 'index']);
+        privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
+      });
+
+      it('should not update timestamps when re-syncing the same user', async () => {
+        const user1 = { name: 'user1' };
+        await indexSyncUtils.addUsersToIndex([user1.name]);
+        await indexSyncUtils.createEntitySourceForIndex();
+
+        const usersAfterFirstSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1AfterFirstSync = privMonUtils.findUser(usersAfterFirstSync, user1.name);
+        log.info(`User 1 after first sync: ${JSON.stringify(user1AfterFirstSync)}`);
+
+        const usersAfterSecondSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1AfterSecondSync = privMonUtils.findUser(usersAfterSecondSync, user1.name);
+        log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
+
+        expect(user1AfterSecondSync?.['@timestamp']).toEqual(user1AfterFirstSync?.['@timestamp']);
+        expect(user1AfterSecondSync?.event?.ingested).toEqual(user1AfterFirstSync?.event?.ingested);
+      });
+    });
+
+    describe('default entity sources', () => {
+      it('should create default entity sources on privileged monitoring engine initialization', async () => {
+        await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
+
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        expect(names).toEqual(
+          expect.arrayContaining([
+            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.ad-default',
+            '.entity_analytics.monitoring.users-default',
+          ])
+        );
       });
     });
   });

@@ -88,7 +88,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneRunScriptEnabled: false,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
    * Space awareness for Elastic Defend management.
@@ -124,6 +124,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: true,
+
+  /**
+   * Enables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -243,14 +248,14 @@ export const allowedExperimentalValues = Object.freeze({
   privilegedUserMonitoringDisabled: false,
 
   /**
+   * Enables Integrations Sync for Privileged User Monitoring
+   */
+  integrationsSyncEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
-
-  /**
-   * Enables the Defend Insights feature
-   */
-  defendInsights: true,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
@@ -313,6 +318,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: false,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

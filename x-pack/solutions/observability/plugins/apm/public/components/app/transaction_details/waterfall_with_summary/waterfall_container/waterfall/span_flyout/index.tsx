@@ -27,10 +27,10 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { OpenSpanInDiscoverLink } from '../../../../../../shared/links/discover_links/open_span_in_discover_link';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
@@ -133,7 +133,7 @@ export function SpanFlyout({
     <EuiPortal>
       <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2>
@@ -145,12 +145,10 @@ export function SpanFlyout({
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <DiscoverSpanLink spanId={span.span.id}>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
-                  )}
-                </DiscoverSpanLink>
+                <OpenSpanInDiscoverLink
+                  dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+                  spanId={spanId}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

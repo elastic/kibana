@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { CancelLoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import type { StepProgressStep } from '../../../../../common/step_progress';

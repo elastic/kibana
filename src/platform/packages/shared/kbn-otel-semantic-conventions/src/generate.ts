@@ -12,29 +12,46 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { processSemconvYaml } from './lib/generate_semconv';
+import { createSortedEntries } from './lib/sorting_utils';
+import type { SemconvStructuredFieldDefinitions, ProcessingResult } from './types/semconv_types';
 
-function generateTypeScriptFile(result: any, outputPath: string): void {
+function generateTypeScriptFile(result: ProcessingResult, outputPath: string): void {
   const { totalFields, stats } = result;
 
   // Convert structured object to string representation with single quotes (for Prettier compliance)
-  function structuredObjectToString(obj: Record<string, any>): string {
-    const entries = Object.entries(obj);
+  function structuredObjectToString(obj: SemconvStructuredFieldDefinitions): string {
+    // Use deterministic sorting to ensure consistent field ordering across builds
+    const entries = createSortedEntries(obj);
     if (entries.length === 0) {
       return '{}';
+    }
+
+    // Enhanced string escaping function to handle all JavaScript string literals safely
+    function escapeForJavaScriptString(str: string): string {
+      return str
+        .replace(/\\/g, '\\\\') // Escape backslashes first
+        .replace(/'/g, "\\'") // Escape single quotes
+        .replace(/"/g, '\\"') // Escape double quotes for safety
+        .replace(/\n/g, '\\n') // Escape newlines
+        .replace(/\r/g, '\\r') // Escape carriage returns
+        .replace(/\t/g, '\\t') // Escape tabs
+        .replace(
+          /[\u0000-\u001F]/g,
+          (match) => `\\u${match.charCodeAt(0).toString(16).padStart(4, '0')}`
+        ); // Escape control characters
     }
 
     const lines = entries.map(([key, value]) => {
       const { name, description, type, example } = value;
 
-      // Properly escape both backslashes and single quotes in strings
-      const escapedName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      const escapedDescription = description.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      const escapedType = type.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const escapedName = escapeForJavaScriptString(name);
+      const escapedDescription = escapeForJavaScriptString(description);
+      const escapedType = escapeForJavaScriptString(type);
 
       let fieldObject = `    name: '${escapedName}',\n    description: '${escapedDescription}',\n    type: '${escapedType}',`;
 
       if (example !== undefined) {
-        const escapedExample = String(example).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const escapedExample = escapeForJavaScriptString(String(example));
         fieldObject += `\n    example: '${escapedExample}',`;
       }
 

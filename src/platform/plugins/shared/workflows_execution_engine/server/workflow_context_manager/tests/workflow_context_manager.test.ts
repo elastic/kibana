@@ -24,15 +24,27 @@ describe('WorkflowContextManager', () => {
       workflowDefinition: workflow,
     } as EsWorkflowExecution);
 
+    // Provide a dummy esClient as required by ContextManagerInit
+    const esClient = {
+      // Add only the minimal mock implementation needed for tests
+      search: jest.fn(),
+      index: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    } as any;
+
     const underTest = new WorkflowContextManager({
       workflowExecutionGraph,
       workflowExecutionRuntime,
+      esClient,
     });
 
     return {
       workflowExecutionGraph,
       workflowExecutionRuntime,
       underTest,
+      esClient,
     };
   }
 
@@ -84,6 +96,41 @@ describe('WorkflowContextManager', () => {
     expect(stepContext.event).toEqual({
       name: 'alert',
       severity: 'high',
+    });
+  });
+
+  it('should have inputs from execution context', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+      inputs: [
+        {
+          name: 'name',
+          type: 'string',
+          required: false,
+          default: '',
+        },
+      ],
+    };
+
+    const { underTest, workflowExecutionRuntime } = createTestContainer(workflow);
+    workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+      stack: [] as string[],
+      workflowDefinition: workflow,
+      context: {
+        inputs: {
+          name: 'test',
+        },
+      } as Record<string, any>,
+    } as EsWorkflowExecution);
+    const stepContext = underTest.getContext();
+    expect(stepContext.inputs).toEqual({
+      name: 'test',
     });
   });
 

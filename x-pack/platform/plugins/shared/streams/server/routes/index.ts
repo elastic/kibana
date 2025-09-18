@@ -19,8 +19,10 @@ import { contentRoutes } from './content/route';
 import { internalDashboardRoutes } from './internal/dashboards/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
+import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
+import { ruleRoutes } from './rules/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -31,6 +33,7 @@ export const streamsRouteRepository = {
   ...internalSchemaRoutes,
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
+  ...internalSystemsRoutes,
   // public APIs
   ...dashboardRoutes,
   ...crudRoutes,
@@ -41,6 +44,7 @@ export const streamsRouteRepository = {
   ...contentRoutes,
   ...significantEventsRoutes,
   ...queryRoutes,
+  ...ruleRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

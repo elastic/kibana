@@ -12,9 +12,9 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
 interface WorkflowVisualEditorStatefulProps {
   workflowYaml: string;
@@ -31,7 +31,7 @@ export function WorkflowVisualEditorStateful({
     if (!workflowYaml) {
       return null;
     }
-    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const result = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
     if (result.error) {
       return null;
     }
