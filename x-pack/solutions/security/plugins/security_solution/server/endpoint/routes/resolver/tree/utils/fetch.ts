@@ -334,32 +334,8 @@ export function getNameField(obj: FieldsObject, schema: ResolverSchema): string 
     return undefined;
   }
 
-  // Try the primary name field (usually process.name)
-  let name: ECSField<string | number> = obj[schema.name];
-  if (name && firstNonNullValue(name) !== undefined) {
-    return String(firstNonNullValue(name));
-  }
-
-  // Fallback: try process.executable
-  name = obj['process.executable'];
-  if (name && firstNonNullValue(name) !== undefined) {
-    const executable = String(firstNonNullValue(name));
-    // Extract just the filename from the path
-    const filename = executable.split(/[/\\]/).pop();
-    return filename || executable;
-  }
-
-  // Fallback: try to extract from process.command_line
-  const commandLine = obj['process.command_line'];
-  if (commandLine && firstNonNullValue(commandLine) !== undefined) {
-    const cmd = String(firstNonNullValue(commandLine));
-    // Extract the first word (executable name) from command line
-    const executable = cmd.split(/\s+/)[0];
-    const filename = executable.split(/[/\\]/).pop();
-    return filename || executable;
-  }
-
-  return undefined;
+  const name: ECSField<string | number> = obj[schema.name];
+  return String(firstNonNullValue(name));
 }
 
 /**
