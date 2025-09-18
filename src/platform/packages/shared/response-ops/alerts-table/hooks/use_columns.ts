@@ -162,25 +162,14 @@ export const useColumns = ({
       ? columns
       : populateColumns(columns, alertsFields, columns);
     const lastVisibleColumn = visibleColumns[visibleColumns.length - 1];
-    return (
-      populatedColumns
-        .map((col) => {
-          if (col.id !== lastVisibleColumn) {
-            return col;
-          }
+    return populatedColumns.map((col) => {
+      if (col.id !== lastVisibleColumn) {
+        return col;
+      }
 
-          const { initialWidth, ...rest } = col;
-          return rest;
-        })
-        // This shouldn't be necessary and is a temporary mitigation for
-        // https://github.com/elastic/kibana/issues/221757
-        // https://github.com/elastic/kibana/issues/229352
-        .toSorted((a, b) => {
-          const indexA = visibleColumns.indexOf(a.id);
-          const indexB = visibleColumns.indexOf(b.id);
-          return indexA - indexB;
-        })
-    );
+      const { initialWidth, ...rest } = col;
+      return rest;
+    });
   }, [columns, alertsFields, visibleColumns]);
 
   const onResetColumns = useCallback(() => {
