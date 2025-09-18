@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiTitle,
   EuiSuperSelect,
@@ -19,10 +19,14 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiIcon,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
 import { useReadinessTasks, READINESS_TASKS } from '@kbn/siem-readiness';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { usePillarsProps } from '../hooks/use_pillar_props';
 
 import illustration_aerospace from '../assets/illustration_aerospace.svg';
@@ -53,7 +57,14 @@ const PANEL_HEIGHT = 600;
 const ILLUSTRATION_SIZE = 128;
 
 export const ReadinessTasksTable: React.FC = () => {
-  const [selectedPillar, setSelectedPillar] = useState<string>('');
+  const [selectedPillar, setSelectedPillar] = useLocalStorage<string>(
+    'readiness-tasks-selected-pillar',
+    ''
+  );
+  const [statusFilter, setStatusFilter] = useLocalStorage<'completed' | 'incomplete' | null>(
+    'readiness-tasks-status-filter',
+    null
+  );
 
   const { pillarsProps } = usePillarsProps();
   const { euiTheme } = useEuiTheme();
@@ -86,9 +97,39 @@ export const ReadinessTasksTable: React.FC = () => {
     () =>
       READINESS_TASKS.filter(
         (task: ReadinessTaskConfig) => !selectedPillar || task.pillar === selectedPillar
-      ).sort((a: ReadinessTaskConfig, b: ReadinessTaskConfig) => a.order - b.order),
-    [selectedPillar]
+      )
+        .filter((task: ReadinessTaskConfig) => {
+          const taskData = getLatestTasks.data?.find(
+            (latestTaskData) => latestTaskData.task_id === task.id
+          );
+          if (statusFilter === 'completed') {
+            return taskData?.status === 'completed';
+          }
+          if (statusFilter === 'incomplete') {
+            return taskData?.status !== 'completed';
+          }
+          return true;
+        })
+        .sort((a: ReadinessTaskConfig, b: ReadinessTaskConfig) => a.order - b.order),
+    [selectedPillar, statusFilter, getLatestTasks.data]
   );
+
+  const taskCounts = useMemo(() => {
+    const allTasks = READINESS_TASKS.filter(
+      (task: ReadinessTaskConfig) => !selectedPillar || task.pillar === selectedPillar
+    );
+
+    const completedCount = allTasks.filter((task) => {
+      const taskData = getLatestTasks.data?.find(
+        (latestTaskData) => latestTaskData.task_id === task.id
+      );
+      return taskData?.status === 'completed';
+    }).length;
+
+    const incompleteCount = allTasks.length - completedCount;
+
+    return { completed: completedCount, incomplete: incompleteCount };
+  }, [selectedPillar, getLatestTasks.data]);
 
   const readinessTasksAddOnsMap: Record<
     ReadinessTaskId,
@@ -203,6 +244,36 @@ export const ReadinessTasksTable: React.FC = () => {
     [handleLogTask]
   );
 
+  const taskStatusFilters = useMemo(
+    () => [
+      {
+        key: 'incomplete',
+        label: i18n.translate('xpack.securitySolution.siemReadiness.incompleteFilter', {
+          defaultMessage: 'Incomplete',
+        }),
+        count: taskCounts.incomplete,
+        isActive: statusFilter === 'incomplete',
+        onClick: () => {
+          setStatusFilter(statusFilter === 'incomplete' ? null : 'incomplete');
+        },
+        withNext: true,
+      },
+      {
+        key: 'completed',
+        label: i18n.translate('xpack.securitySolution.siemReadiness.completeFilter', {
+          defaultMessage: 'Complete',
+        }),
+        count: taskCounts.completed,
+        isActive: statusFilter === 'completed',
+        onClick: () => {
+          setStatusFilter(statusFilter === 'completed' ? null : 'completed');
+        },
+        withNext: false,
+      },
+    ],
+    [statusFilter, taskCounts.completed, taskCounts.incomplete, setStatusFilter]
+  );
+
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ height: PANEL_HEIGHT }}>
       <EuiSplitPanel.Inner grow={false} css={{ width: '100%' }}>
@@ -217,18 +288,45 @@ export const ReadinessTasksTable: React.FC = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSuperSelect
-              options={selectOptions}
-              valueOfSelected={selectedPillar}
-              onChange={(value) => setSelectedPillar(value)}
-              placeholder={i18n.translate(
-                'xpack.securitySolution.siemReadiness.categoriesPlaceholder',
-                {
-                  defaultMessage: 'Categories',
-                }
-              )}
-              compressed
-            />
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  {taskStatusFilters.map((filter) => (
+                    <EuiFilterButton
+                      key={filter.key}
+                      withNext={filter.withNext}
+                      hasActiveFilters={filter.isActive}
+                      isSelected={filter.isActive}
+                      onClick={filter.onClick}
+                      isToggle
+                      data-test-subj={`${filter.key}FilterButton`}
+                    >
+                      <EuiFlexGroup gutterSize="xs" alignItems="center">
+                        <EuiFlexItem grow={false}>{filter.label}</EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiNotificationBadge color="subdued">
+                            {filter.count}
+                          </EuiNotificationBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFilterButton>
+                  ))}
+                </EuiFilterGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSuperSelect
+                  options={selectOptions}
+                  valueOfSelected={selectedPillar}
+                  onChange={(value) => setSelectedPillar(value)}
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.siemReadiness.categoriesPlaceholder',
+                    {
+                      defaultMessage: 'Categories',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
