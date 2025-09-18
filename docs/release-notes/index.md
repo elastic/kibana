@@ -24,6 +24,32 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.1.4 [kibana-9.1.4-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.4-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Stack management**
+* Adds IPv6 support to remote clusters address fields [#233415]({{kib-pull}}233415).
+
+
+### Fixes [kibana-9.1.4-fixes]
+
+**Dashboards and Visualizations**:
+* Fixes an issue with the Save modal that allowed duplicate saves of dashboards, visualizations, and other objects when clicking the **Save** button multiple times [#233933]({{kib-pull}}233933).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* The **Run** button is now properly disabled in Elastic Managed LLM tests when the action's JSON body isn't valid [#231873]({{kib-pull}}231873).
+
 ## 9.1.3 [kibana-9.1.3-release-notes]
 
 :::{important}

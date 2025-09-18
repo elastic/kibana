@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -13,6 +13,9 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const es = getService('es');
+  let policy1: any;
+  let policy2: any;
+  let policy3: any;
 
   describe('fleet_agents_migrate', () => {
     before(async () => {
@@ -31,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const policy1 = policy1Response.body.item;
+      policy1 = policy1Response.body.item;
 
       // Policy 2 - with tamper protection
       const policy2Response = await supertest
@@ -45,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const policy2 = policy2Response.body.item;
+      policy2 = policy2Response.body.item;
 
       // First, install the endpoint package which is required for the endpoint package policy
       await supertest
@@ -143,6 +146,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent1',
         document: {
           policy_id: policy1.id,
+          enrolled_at: new Date().toISOString(),
         },
       });
 
@@ -154,12 +158,27 @@ export default function (providerContext: FtrProviderContext) {
           policy_id: policy2.id, // Policy 2 is tamper protected
         },
       });
+
+      const policy3Response = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          name: 'Policy 3',
+          namespace: 'default',
+          description: 'Test policy 3',
+          monitoring_enabled: ['logs', 'metrics'],
+        })
+        .expect(200);
+
+      policy3 = policy3Response.body.item;
+
       await es.index({
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         id: 'agent3',
         document: {
-          policy_id: policy1.id,
+          policy_id: policy3.id,
+          enrolled_at: new Date().toISOString(),
           components: [
             {
               type: 'fleet-server',
@@ -167,6 +186,25 @@ export default function (providerContext: FtrProviderContext) {
               revision: 1,
             },
           ],
+        },
+      });
+
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        id: 'agent4',
+        document: {
+          policy_id: policy1.id,
+          enrolled_at: new Date().toISOString(),
+        },
+      });
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        id: 'agent5',
+        document: {
+          policy_id: policy1.id,
+          enrolled_at: new Date().toISOString(),
         },
       });
     });
@@ -236,7 +274,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return a 403 if any agent is tamper protected', async () => {
+      it('should return a 200 if any agent is tamper protected', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
@@ -245,10 +283,19 @@ export default function (providerContext: FtrProviderContext) {
             uri: 'https://example.com',
             enrollment_token: '1234',
           })
-          .expect(403);
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
+        expect(actionStatus.latestErrors[0].error).to.eql(
+          'Agent agent2 cannot be migrated because it is protected.'
+        );
       });
 
-      it('should return a 403 if any agent is a fleet-agent', async () => {
+      it('should return a 200 if any agent is a fleet-agent', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
@@ -257,19 +304,75 @@ export default function (providerContext: FtrProviderContext) {
             uri: 'https://example.com',
             enrollment_token: '1234',
           })
-          .expect(403);
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
+        expect(actionStatus.latestErrors[0].error).to.eql(
+          'Agent agent3 cannot be migrated because it is a fleet-server.'
+        );
       });
 
-      it('should return a 404 when any agent does not exist', async () => {
+      async function verifyActionResult(agentCount: number) {
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+
+        expect(actionStatus.nbAgentsActionCreated).to.eql(agentCount);
+      }
+
+      it('/agents/bulk_migrate should work for multiple agents by kuery', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_migrate`)
-          .set('kbn-xsrf', 'xx')
+          .set('kbn-xsrf', 'xxx')
           .send({
-            agents: ['agent100', 'agent400', 'agent1'],
+            agents: `policy_id: "${policy1.id}"`,
             uri: 'https://example.com',
             enrollment_token: '1234',
           })
-          .expect(404);
+          .expect(200);
+
+        await verifyActionResult(3);
+      });
+
+      it('/agents/bulk_migrate should work for multiple agents by kuery in batches async', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: `policy_id: "${policy1.id}"`,
+            batchSize: 2,
+            uri: 'https://example.com',
+            enrollment_token: '1234',
+          })
+          .expect(200);
+
+        const actionId = body.actionId;
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 5) {
+              clearInterval(intervalId);
+              reject(new Error('action timed out'));
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+            const action = actionStatuses?.find((a: any) => a.actionId === actionId);
+            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+              clearInterval(intervalId);
+              resolve({});
+            }
+          }, 3000);
+        }).catch((e) => {
+          throw e;
+        });
       });
     });
   });
