@@ -70,7 +70,7 @@ export const Overview = () => {
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      {asset.type === 'host' ? (
+      {asset.type === 'host' && hasApmPermissions ? (
         <EuiFlexItem grow={false}>
           <ServicesContent hostName={asset.id} dateRange={dateRange} />
           <SectionSeparator />
