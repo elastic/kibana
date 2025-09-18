@@ -80,7 +80,6 @@ export const DynamicMappingSection = () => (
                     euiFieldProps: {
                       options: ALL_DATE_FORMAT_OPTIONS,
                       noSuggestions: false,
-                      inputPopoverProps: { repositionOnScroll: true },
                     },
                   }}
                 />

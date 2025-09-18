@@ -54,9 +54,6 @@ export const SeveritySelector: React.FC<Props> = ({
       onChange={onSeverityChange}
       data-test-subj="case-severity-selection"
       aria-label={i18n.SEVERITY_TITLE}
-      popoverProps={{
-        repositionOnScroll: true,
-      }}
     />
   );
 };
