@@ -663,7 +663,10 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
-    { defaultMessage: 'Manage Endpoint Exceptions.' }
+    {
+      defaultMessage:
+        'Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.',
+    }
   ),
   privilegeGroups: [
     {
