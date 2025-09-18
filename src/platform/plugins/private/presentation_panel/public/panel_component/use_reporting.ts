@@ -8,41 +8,29 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  apiPublishesRendered,
-  useBatchedOptionalPublishingSubjects,
-} from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from './types';
 
-export function useReportingItem<
-  SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
->(api?: Api) {
+export function useReporting({
+  apiReady,
+  blockingError,
+  dataLoading,
+  description,
+  rendered,
+  title,
+}: {
+  apiReady: boolean;
+  blockingError?: Error;
+  dataLoading: boolean;
+  description?: string;
+  rendered: boolean;
+  title?: string;
+}) {
   const reportingRef = useRef<HTMLElement>();
   const prevRenderComplete = useRef(false);
   const [renderedCount, setRenderedCount] = useState(0);
 
-  const [
-    dataLoading,
-    rendered,
-    blockingError,
-    title,
-    description,
-    defaultTitle,
-    defaultDescription,
-  ] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading$,
-    apiPublishesRendered(api) ? api.rendered$ : undefined,
-    api?.blockingError$,
-    api?.title$,
-    api?.description$,
-    api?.defaultTitle$,
-    api?.defaultDescription$
-  );
-
   const renderComplete = useMemo(
-    () => Boolean(api) && !(dataLoading ?? false) && (rendered ?? true),
-    [api, dataLoading, rendered]
+    () => apiReady && !dataLoading && rendered,
+    [apiReady, dataLoading, rendered]
   );
 
   useEffect(() => {
@@ -62,20 +50,11 @@ export function useReportingItem<
       'data-shared-item': '',
     };
 
-    if (title || defaultTitle) attributes['data-title'] = title ?? defaultTitle;
-    if (description || defaultDescription)
-      attributes['data-description'] = description ?? defaultDescription;
+    if (title) attributes['data-title'] = title;
+    if (description) attributes['data-description'] = description;
 
     return attributes;
-  }, [
-    blockingError,
-    defaultDescription,
-    defaultTitle,
-    description,
-    renderComplete,
-    renderedCount,
-    title,
-  ]);
+  }, [blockingError, description, renderComplete, renderedCount, title]);
 
   return {
     reportingAttributes,
