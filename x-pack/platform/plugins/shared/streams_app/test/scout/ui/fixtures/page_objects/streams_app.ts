@@ -222,7 +222,10 @@ export class StreamsApp {
    * Utility for data processing
    */
   async clickAddProcessor() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+      .click();
   }
 
   async clickSaveProcessor() {
@@ -254,7 +257,14 @@ export class StreamsApp {
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
-    return targetProcessor.getByRole('button', { name: 'Edit' });
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorContextMenuButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Step context menu' });
   }
 
   async confirmDiscardInModal() {
@@ -296,7 +306,7 @@ export class StreamsApp {
 
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
-    await this.page.getByRole('button', { name: 'Delete' }).click();
+    await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
   async saveProcessorsListChanges() {
@@ -305,14 +315,14 @@ export class StreamsApp {
 
   async getProcessorsListItems() {
     try {
-      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
+      await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
         timeout: 15_000,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+    return this.page.getByTestId('streamsAppProcessorBlock').all();
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {

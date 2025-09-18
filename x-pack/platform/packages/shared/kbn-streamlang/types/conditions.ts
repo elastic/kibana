@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
@@ -51,6 +52,23 @@ export interface ShorthandBinaryFilterCondition {
   endsWith?: StringOrNumberOrBoolean;
   range?: RangeCondition;
 }
+
+export const operatorToHumanReadableNameMap = {
+  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
+  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
+  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
+  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
+    defaultMessage: 'less than or equals',
+  }),
+  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
+  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
+    defaultMessage: 'greater than or equals',
+  }),
+  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
+  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
+  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
+  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
+};
 
 export const rangeConditionSchema = z.object({
   gt: stringOrNumberOrBoolean.optional(),
