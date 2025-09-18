@@ -86,7 +86,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.description.cloudConnectors"
-                defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below.  You’ll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
+                defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below. You’ll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
                 values={{
                   learnMore: (
                     <EuiLink
