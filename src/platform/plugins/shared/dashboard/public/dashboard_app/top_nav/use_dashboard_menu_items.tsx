@@ -174,7 +174,7 @@ export const useDashboardMenuItems = ({
         label:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.label
-            : isCreatingNewDashboard
+            : Boolean(lastSavedId)
             ? topNavStrings.editModeInteractiveSave.label
             : topNavStrings.quickSave.label,
         description:
