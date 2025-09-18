@@ -15,6 +15,7 @@ import type { TableFieldConfiguration } from '..';
 const defaultFieldConfig: TableFieldConfiguration = {
   value: 'fieldValue',
   name: 'fieldName',
+  valueCellContent: () => <span>Default Cell Value</span>,
 };
 
 describe('ValuePopoverContent', () => {
