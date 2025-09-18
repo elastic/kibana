@@ -21,7 +21,7 @@ import type { SelectionDropdownProps } from './data_cascade_header/group_selecti
 export type CascadeSizing = keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 
 interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
-  row: Row<G>;
+  row: G;
   /**
    * The path of the row that was expanded in the group by hierarchy.
    */
@@ -49,7 +49,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
 }
 
 interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
-  row: Row<G>;
+  row: G;
   /**
    * @description The path of the row that was expanded in the group by hierarchy.
    */
@@ -101,15 +101,18 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
   /**
    * @description The row header title slot for the cascade row.
    */
-  rowHeaderTitleSlot: React.FC<{ row: Row<G>; selectedCascadeGroups: string[] }>;
+  rowHeaderTitleSlot: React.FC<{ rowData: G; nodePath: string[] }>;
   /**
    * @description The row header meta slots for the cascade row.
    */
-  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
+  rowHeaderMetaSlots?: (props: { rowData: G; nodePath: string[] }) => React.ReactNode[];
   /**
    * @description The row header actions slot for the cascade row.
    */
-  rowHeaderActions?: (params: { row: Row<G> }) => CascadeRowActionProps['headerRowActions'];
+  rowHeaderActions?: (params: {
+    rowData: G;
+    nodePath: string[];
+  }) => CascadeRowActionProps['headerRowActions'];
   /**
    * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
@@ -168,7 +171,7 @@ export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
   /**
    * Slot for the table title.
    */
-  tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
+  tableTitleSlot: React.FC<{ rows: Array<G> }>;
 }
 
 /**
