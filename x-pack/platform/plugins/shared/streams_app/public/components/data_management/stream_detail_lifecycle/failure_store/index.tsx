@@ -12,7 +12,6 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
-import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
 import { useFailureStoreStats } from '../hooks/use_failure_store_stats';
@@ -30,7 +29,6 @@ export const StreamDetailFailureStore = ({
   definition: Streams.ingest.all.GetResponse;
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
-  const { refresh } = useStreamDetail();
   const { updateFailureStore } = useUpdateFailureStore();
   const {
     core: { notifications },
@@ -47,14 +45,21 @@ export const StreamDetailFailureStore = ({
     setIsFailureStoreModalOpen(false);
   };
 
-  const handleSaveModal = async (data: {
+  const {
+    data,
+    isLoading: isLoadingStats,
+    error: statsError,
+    refresh,
+  } = useFailureStoreStats({ definition });
+
+  const handleSaveModal = async (update: {
     failureStoreEnabled: boolean;
     customRetentionPeriod?: string;
   }) => {
     try {
       await updateFailureStore(definition.stream.name, {
-        failureStoreEnabled: data.failureStoreEnabled,
-        customRetentionPeriod: data.customRetentionPeriod,
+        failureStoreEnabled: update.failureStoreEnabled,
+        customRetentionPeriod: update.customRetentionPeriod,
       });
 
       notifications.toasts.addSuccess({
@@ -75,17 +80,11 @@ export const StreamDetailFailureStore = ({
     closeModal();
   };
 
-  const {
-    data,
-    isLoading: isLoadingStats,
-    error: statsError,
-  } = useFailureStoreStats({ definition });
-
   return (
     <>
-      {readFailureStorePrivilege && data?.config ? (
+      {readFailureStorePrivilege ? (
         <>
-          {isFailureStoreModalOpen && manageFailureStorePrivilege && (
+          {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.config && (
             <FailureStoreModal
               onCloseModal={closeModal}
               onSaveModal={handleSaveModal}
@@ -96,14 +95,14 @@ export const StreamDetailFailureStore = ({
               }}
             />
           )}
-          {data?.config.enabled ? (
+          {isLoadingStats || data?.config.enabled ? (
             <FailureStoreInfo
               openModal={setIsFailureStoreModalOpen}
               definition={definition}
               statsError={statsError}
               isLoadingStats={isLoadingStats}
-              stats={data.stats}
-              config={data.config}
+              stats={data?.stats}
+              config={data?.config}
             />
           ) : (
             <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} />

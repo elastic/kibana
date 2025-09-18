@@ -28,7 +28,7 @@ export const FailureStoreInfo = ({
   statsError: Error | undefined;
   isLoadingStats: boolean;
   stats?: FailureStoreStats;
-  config: FailureStore;
+  config?: FailureStore;
 }) => {
   return (
     <>

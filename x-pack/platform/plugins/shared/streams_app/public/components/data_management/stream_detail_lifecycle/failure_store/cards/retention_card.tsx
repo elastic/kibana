@@ -19,7 +19,7 @@ export const RetentionCard = ({
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
-  failureStore: FailureStore;
+  failureStore?: FailureStore;
 }) => {
   const { href } = useFailureStoreRedirectLink({ definition });
 
