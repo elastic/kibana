@@ -17,6 +17,7 @@ import type {
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { WithRequiredProperty } from '@kbn/utility-types';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type {
   dashboardItemSchema,
   panelGridDataSchema,
@@ -48,8 +49,14 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
 };
 export type DashboardSection = TypeOf<typeof sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
-export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
+export type DashboardAttributes = Omit<
+  TypeOf<typeof dashboardAttributesSchema>,
+  'panels' | 'controlGroupInput'
+> & {
   panels: Array<DashboardPanel | DashboardSection>;
+  controlGroupInput: Omit<ControlsGroupState, 'controls'> & {
+    controls: Array<WithRequiredProperty<ControlsGroupState['controls'][number], 'id'>>;
+  };
 };
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;

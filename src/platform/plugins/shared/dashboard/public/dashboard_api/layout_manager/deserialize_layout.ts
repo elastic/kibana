@@ -19,25 +19,18 @@ export function deserializeLayout(
   references: Reference[],
   getReferences: (id: string) => Reference[]
 ) {
+  const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
     controls: Object.values((initialControls ?? { controls: {} }).controls).reduce(
       (prev, control, index) => {
-        return { ...prev, [control.id ?? v4()]: { ...control, order: index } };
+        const controlState = { ...control, order: index };
+        childState[control.id] = { rawState: controlState }; // push to child state
+        return { ...prev, [control.id]: controlState };
       },
       {}
     ),
-  };
-  const childState: DashboardChildState = {
-    ...Object.values((initialControls ?? { controls: {} }).controls).reduce((prev, control) => {
-      return {
-        ...prev,
-        [control.id ?? v4()]: {
-          rawState: control,
-        },
-      };
-    }, {}),
   };
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {

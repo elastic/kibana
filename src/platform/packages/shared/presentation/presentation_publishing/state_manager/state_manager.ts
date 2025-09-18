@@ -101,7 +101,6 @@ export const initializeStateManager = <StateType extends object>(
           ) // reset CHANGED keys when comparators are provided
         : true; // reset ALL keys when comparators are not provided
 
-      console.log({ shouldReset, latestState, newState });
       if (shouldReset) {
         subject.next(newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]);
       }

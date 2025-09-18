@@ -51,6 +51,7 @@ export const ControlPanel = ({
   parentApi,
   uuid,
   type,
+  order,
   getInitialState,
   compressed,
   setControlPanelRef,
@@ -64,6 +65,7 @@ export const ControlPanel = ({
     };
   uuid: string;
   type: string;
+  order: number;
   getInitialState: () => ControlPanelState;
   compressed?: boolean;
   uiActions: UiActionsStart;
@@ -77,7 +79,6 @@ export const ControlPanel = ({
   const initialState = getInitialState();
   const [grow, setGrow] = useState<ControlPanelState['grow']>(initialState.grow);
   const [width, setWidth] = useState<ControlPanelState['width']>(initialState.width);
-  const [order, setOrder] = useState<ControlPanelState['order']>(initialState.order);
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
@@ -86,6 +87,11 @@ export const ControlPanel = ({
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
   const [dataLoading, setDataLoading] = useState<boolean | undefined>();
+
+  useEffect(() => {
+    if (!api) return;
+    if (api.order$.getValue() !== order) api.setOrder(order);
+  }, [api, order]);
 
   useEffect(() => {
     if (!api) return;
@@ -101,11 +107,6 @@ export const ControlPanel = ({
     subscriptions.add(
       api.width$.subscribe((result) => {
         setWidth(result);
-      })
-    );
-    subscriptions.add(
-      api.order$.subscribe((result) => {
-        setOrder(result);
       })
     );
 

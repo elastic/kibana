@@ -18,6 +18,7 @@ import {
 import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { pick } from 'lodash';
 import { map, merge } from 'rxjs';
 
 type ControlState = ControlsGroupState['controls'][number];
@@ -38,6 +39,8 @@ export const buildControlPanelApi = (
     panelStateComparators
   );
 
+  console.log({ originalPanelState });
+
   const unsavedChangesApi = initializeUnsavedChanges<ControlPanelState>({
     uuid,
     parentApi: originalApi.parentApi,
@@ -46,8 +49,19 @@ export const buildControlPanelApi = (
     getComparators: () => panelStateComparators,
     defaultState: defaultPanelState,
     onReset: (lastSaved) => {
-      panelStateManager.reinitializeState(lastSaved.rawState);
+      console.log({
+        lastSaved: pick(lastSaved.rawState, ['width', 'grow', 'order']),
+        current: panelStateManager.getLatestState(),
+      });
+      panelStateManager.reinitializeState(
+        pick(lastSaved.rawState, ['width', 'grow', 'order']),
+        panelStateComparators
+      );
     },
+  });
+
+  panelStateManager.anyStateChange$.subscribe(() => {
+    console.log({ latest: panelStateManager.getLatestState() });
   });
 
   return {
@@ -86,5 +100,5 @@ const panelStateComparators: StateComparators<ControlPanelState> = {
 const defaultPanelState = {
   width: DEFAULT_CONTROL_WIDTH as ControlPanelState['width'],
   grow: DEFAULT_CONTROL_GROW,
-  order: 0,
+  order: undefined,
 };

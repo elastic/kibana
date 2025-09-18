@@ -41,6 +41,7 @@ import { ControlPanel } from './components/control_panel';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { pick } from 'lodash';
 
 export const ControlsRenderer = ({
   uiActions,
@@ -69,6 +70,14 @@ export const ControlsRenderer = ({
       return controlA.order - controlB.order;
     })
   );
+  console.log({ initialState: getInitialState() });
+  const getInitialPanelState = useCallback(
+    (id: string) => {
+      return pick(getInitialState().controls[id], ['grow', 'width', 'order']);
+    },
+    [getInitialState]
+  );
+
   /** Handle drag and drop */
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -125,13 +134,8 @@ export const ControlsRenderer = ({
               key={id}
               type={type}
               uuid={id!}
-              getInitialState={() => {
-                return {
-                  grow,
-                  width,
-                  order: index,
-                };
-              }}
+              order={index}
+              getInitialState={() => getInitialPanelState(id!)}
               parentApi={parentApi}
               compressed={getInitialState().compressed ?? true}
               setControlPanelRef={setControlPanelRef}

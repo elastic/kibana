@@ -52,7 +52,6 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState();
-      // console.log({ currentState, lastSavedState });
       // check ref equality
       if (checkRefEquality) {
         const lastSavedRefs = sortBy(lastSavedState?.references ?? [], 'id');
@@ -82,7 +81,6 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
 
   const resetUnsavedChanges = async () => {
     const lastSavedState = parentApi.getLastSavedStateForChild(uuid);
-    console.log({ lastSavedState });
     await onReset(lastSavedState);
   };
 
