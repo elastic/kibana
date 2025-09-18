@@ -206,7 +206,12 @@ const QuickNavigationCards: React.FC<{}> = () => {
     border-radius: ${euiTheme.border.radius.medium};
   `;
   return (
-    <EuiFlexGroup data-test-subj="newConversationPromptLinks" gutterSize="s" component="ul">
+    <EuiFlexGroup
+      data-test-subj="newConversationPromptLinks"
+      gutterSize="s"
+      component="ul"
+      aria-label="Quick navigation links"
+    >
       {cards.map(({ key, title, description, iconType, link }) => {
         return (
           <EuiFlexItem key={key} component="li">
