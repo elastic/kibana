@@ -9,7 +9,7 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, StackEntry } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import type { GraphNode } from '@kbn/workflows/graph';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -19,7 +19,7 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
     // Simulate the hashing behavior but return a predictable string for testing
-    const pathParts = path.flatMap((x: StackEntry) => [x.stepId, x.subScopeId]).filter(Boolean);
+    const pathParts = path.flatMap((x: StackFrame) => [x.stepId, x.subScopeId]).filter(Boolean);
     return `${executionId}_${pathParts.join('_')}_${stepId}`;
   }),
 }));
@@ -54,7 +54,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       stack: [
         { nodeId: 'firstScope', stepId: 'firstScope' },
         { nodeId: 'secondScope', stepId: 'secondScope' },
-      ] as StackEntry[],
+      ] as StackFrame[],
       status: ExecutionStatus.RUNNING,
       createdAt: new Date('2025-08-05T19:00:00.000Z').toISOString(),
       startedAt: new Date('2025-08-05T20:00:00.000Z').toISOString(),
@@ -161,7 +161,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
         currentNodeId: 'node1',
       });
     });
@@ -224,7 +224,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
         currentNodeId: 'node1',
       });
     });
@@ -344,7 +344,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
         currentNodeId: 'node1',
       } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
@@ -430,7 +430,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
       });
     });
 
@@ -588,7 +588,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
         currentNodeId: 'node1',
       });
     });
@@ -674,7 +674,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
           { nodeId: 'thirdScope', stepId: 'thirdScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
       } as EsWorkflowExecution);
       await underTest.saveState();
       expect(underTest.getCurrentNodeScope()).toEqual([
@@ -774,7 +774,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
       } as Partial<EsWorkflowExecution>);
       underTest.enterScope();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -794,7 +794,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'firstScope', stepId: 'firstScope' },
           { nodeId: 'secondScope', stepId: 'secondScope' },
-        ] as StackEntry[],
+        ] as StackFrame[],
       } as Partial<EsWorkflowExecution>);
       underTest.enterScope('my-scope');
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -820,7 +820,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'scope1', stepId: 'scope1' },
           { nodeId: 'scope2', stepId: 'scope2' },
-        ] as StackEntry[],
+        ] as StackFrame[],
       } as Partial<EsWorkflowExecution>);
       underTest.exitScope();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -838,7 +838,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         stack: [
           { nodeId: 'node1', stepId: 'fakeStepId1' },
           { nodeId: 'node2', stepId: 'fakeStepId2' },
-        ] as StackEntry[],
+        ] as StackFrame[],
         currentNodeId: 'node3',
       } as Partial<EsWorkflowExecution>);
 

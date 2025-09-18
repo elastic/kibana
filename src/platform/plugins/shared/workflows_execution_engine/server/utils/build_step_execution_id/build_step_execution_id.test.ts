@@ -8,7 +8,7 @@
  */
 
 import crypto from 'crypto';
-import type { StackEntry } from '@kbn/workflows';
+import type { StackFrame } from '@kbn/workflows';
 import { buildStepExecutionId } from './build_step_execution_id';
 
 describe('buildStepExecutionId', () => {
@@ -16,7 +16,7 @@ describe('buildStepExecutionId', () => {
     it('should generate a deterministic SHA-256 hash', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [];
+      const path: StackFrame[] = [];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -28,7 +28,7 @@ describe('buildStepExecutionId', () => {
     it('should generate the same hash for identical inputs', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
+      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
 
       const result1 = buildStepExecutionId(executionId, stepId, path);
       const result2 = buildStepExecutionId(executionId, stepId, path);
@@ -39,7 +39,7 @@ describe('buildStepExecutionId', () => {
     it('should generate different hashes for different inputs', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [];
+      const path: StackFrame[] = [];
 
       const result1 = buildStepExecutionId(executionId, stepId, path);
       const result2 = buildStepExecutionId('exec-456', stepId, path);
@@ -52,7 +52,7 @@ describe('buildStepExecutionId', () => {
     it('should handle empty path array', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [];
+      const path: StackFrame[] = [];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -68,7 +68,7 @@ describe('buildStepExecutionId', () => {
     it('should include single path entry in hash computation', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
+      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -82,7 +82,7 @@ describe('buildStepExecutionId', () => {
     it('should handle path entry with empty subScopeId', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '' }];
+      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '' }];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -98,7 +98,7 @@ describe('buildStepExecutionId', () => {
     it('should include all path entries in order', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path: StackEntry[] = [
+      const path: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'foreach-step', subScopeId: '1' },
         { nodeId: 'node-2', stepId: 'nested-step', subScopeId: '2' },
         { nodeId: 'node-3', stepId: 'deep-step', subScopeId: '3' },
@@ -116,11 +116,11 @@ describe('buildStepExecutionId', () => {
     it('should be sensitive to path order', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
-      const path1: StackEntry[] = [
+      const path1: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a', subScopeId: '1' },
         { nodeId: 'node-2', stepId: 'step-b', subScopeId: '2' },
       ];
-      const path2: StackEntry[] = [
+      const path2: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-b', subScopeId: '2' },
         { nodeId: 'node-2', stepId: 'step-a', subScopeId: '1' },
       ];
@@ -136,7 +136,7 @@ describe('buildStepExecutionId', () => {
     it('should handle special characters in IDs', () => {
       const executionId = 'exec-123!@#$%';
       const stepId = 'step_456-789.test';
-      const path: StackEntry[] = [
+      const path: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'parent@step', subScopeId: 'scope#1' },
       ];
 
@@ -149,7 +149,7 @@ describe('buildStepExecutionId', () => {
     it('should handle very long IDs', () => {
       const executionId = 'a'.repeat(1000);
       const stepId = 'b'.repeat(1000);
-      const path: StackEntry[] = [
+      const path: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'c'.repeat(1000), subScopeId: 'd'.repeat(1000) },
       ];
 
@@ -162,7 +162,7 @@ describe('buildStepExecutionId', () => {
     it('should handle empty string IDs', () => {
       const executionId = '';
       const stepId = '';
-      const path: StackEntry[] = [{ nodeId: '', stepId: '', subScopeId: '' }];
+      const path: StackFrame[] = [{ nodeId: '', stepId: '', subScopeId: '' }];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -181,7 +181,7 @@ describe('buildStepExecutionId', () => {
     it('should handle Unicode characters', () => {
       const executionId = 'exec-🚀';
       const stepId = 'step-✨';
-      const path: StackEntry[] = [{ nodeId: 'node-🎯', stepId: 'parent-🎯', subScopeId: '流程' }];
+      const path: StackFrame[] = [{ nodeId: 'node-🎯', stepId: 'parent-🎯', subScopeId: '流程' }];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -193,7 +193,7 @@ describe('buildStepExecutionId', () => {
   describe('hash collision resistance', () => {
     it('should generate different hashes for similar but different execution IDs', () => {
       const stepId = 'step-456';
-      const path: StackEntry[] = [];
+      const path: StackFrame[] = [];
 
       const result1 = buildStepExecutionId('exec-123', stepId, path);
       const result2 = buildStepExecutionId('exec-124', stepId, path);
@@ -203,7 +203,7 @@ describe('buildStepExecutionId', () => {
 
     it('should generate different hashes for similar but different step IDs', () => {
       const executionId = 'exec-123';
-      const path: StackEntry[] = [];
+      const path: StackFrame[] = [];
 
       const result1 = buildStepExecutionId(executionId, 'step-456', path);
       const result2 = buildStepExecutionId(executionId, 'step-457', path);
@@ -215,8 +215,8 @@ describe('buildStepExecutionId', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
 
-      const path1: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-1', subScopeId: '1' }];
-      const path2: StackEntry[] = [{ nodeId: 'node-2', stepId: 'parent-2', subScopeId: '1' }];
+      const path1: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-1', subScopeId: '1' }];
+      const path2: StackFrame[] = [{ nodeId: 'node-2', stepId: 'parent-2', subScopeId: '1' }];
 
       const result1 = buildStepExecutionId(executionId, stepId, path1);
       const result2 = buildStepExecutionId(executionId, stepId, path2);
@@ -228,8 +228,8 @@ describe('buildStepExecutionId', () => {
       const executionId = 'exec-123';
       const stepId = 'step-456';
 
-      const path1: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
-      const path2: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '2' }];
+      const path1: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '1' }];
+      const path2: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step', subScopeId: '2' }];
 
       const result1 = buildStepExecutionId(executionId, stepId, path1);
       const result2 = buildStepExecutionId(executionId, stepId, path2);
@@ -242,7 +242,7 @@ describe('buildStepExecutionId', () => {
     it('should match the example from the JSDoc', () => {
       const executionId = 'exec-123';
       const stepId = 'some-connector-step';
-      const path: StackEntry[] = [{ nodeId: 'node-1', stepId: 'foreachstep', subScopeId: '1' }];
+      const path: StackFrame[] = [{ nodeId: 'node-1', stepId: 'foreachstep', subScopeId: '1' }];
 
       const result = buildStepExecutionId(executionId, stepId, path);
 
@@ -258,7 +258,7 @@ describe('buildStepExecutionId', () => {
     it('should handle complex nested workflow paths', () => {
       const executionId = 'workflow-execution-abc123';
       const stepId = 'http-request-connector';
-      const path: StackEntry[] = [
+      const path: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'main-workflow', subScopeId: '0' },
         { nodeId: 'node-2', stepId: 'parallel-branch', subScopeId: '2' },
         { nodeId: 'node-3', stepId: 'foreach-loop', subScopeId: '5' },
@@ -271,7 +271,7 @@ describe('buildStepExecutionId', () => {
       expect(result.length).toBe(64);
 
       // Verify it's different from a simpler path
-      const simplePath: StackEntry[] = [
+      const simplePath: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'main-workflow', subScopeId: '0' },
       ];
       const simpleResult = buildStepExecutionId(executionId, stepId, simplePath);

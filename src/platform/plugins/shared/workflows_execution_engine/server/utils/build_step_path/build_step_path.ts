@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StackEntry } from '@kbn/workflows';
+import type { StackFrame } from '@kbn/workflows';
 
 /**
  * Builds a deterministic step path from a stack of execution entries.
@@ -23,14 +23,14 @@ import type { StackEntry } from '@kbn/workflows';
  * sub-scope identifiers when present.
  *
  * @param stepId - The current step identifier being processed
- * @param stack - Array of stack entries representing the execution hierarchy
+ * @param stackFrames - Array of stack entries representing the execution hierarchy
  * @returns A string array representing the deterministic step path
  */
-export function buildStepPath(stepId: string, stack: StackEntry[]): string[] {
-  return stack
-    .filter((stackEntry) => !stackEntry.scope.every((x) => !x.scopeId))
-    .flatMap((stackEntry) => {
-      const scopeWithSubScope = stackEntry.scope
+export function buildStepPath(stackFrames: StackFrame[]): string[] {
+  return stackFrames
+    .filter((StackFrame) => !StackFrame.scope.every((x) => !x.scopeId))
+    .flatMap((StackFrame) => {
+      const scopeWithSubScope = StackFrame.scope
         .filter((scope) => scope.scopeId)
         .map((scope) => scope.scopeId!);
 
@@ -38,6 +38,6 @@ export function buildStepPath(stepId: string, stack: StackEntry[]): string[] {
         return [];
       }
 
-      return [stackEntry.stepId, ...scopeWithSubScope];
+      return [StackFrame.stepId, ...scopeWithSubScope];
     });
 }

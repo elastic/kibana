@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StackEntry } from '@kbn/workflows';
+import type { StackFrame } from '@kbn/workflows';
 import crypto from 'crypto';
+import { buildStepPath } from '../build_step_path/build_step_path';
 /**
  * Generates a unique identifier for a step execution by combining execution ID, path, and step ID,
  * then hashing the result with SHA-256.
@@ -19,7 +20,7 @@ import crypto from 'crypto';
  *
  * @param executionId - The unique identifier of the workflow execution
  * @param stepId - The unique identifier of the step within the workflow
- * @param path - An array of StackEntry objects representing the hierarchical path to the step
+ * @param stackFrames - An array of StackFrame objects representing the hierarchical path to the step
  * @returns A SHA-256 hash string representing the unique step execution identifier
  *
  * @example
@@ -35,16 +36,10 @@ import crypto from 'crypto';
 export function buildStepExecutionId(
   executionId: string,
   stepId: string,
-  path: StackEntry[]
+  stackFrames: StackFrame[]
 ): string {
-  const generatedId = [
-    executionId,
-    ...path.flatMap((stackEntry) => [
-      stackEntry.stepId,
-      ...stackEntry.scope.map((x) => x.scopeId).filter((x) => !!x),
-    ]),
-    stepId,
-  ].join('_');
+  const stepPath = buildStepPath(stackFrames);
+  const generatedId = [executionId, ...stepPath, stepId].join('_');
   const hashedId = crypto.createHash('sha256').update(generatedId).digest('hex');
   return hashedId;
 }

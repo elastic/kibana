@@ -19,7 +19,7 @@ export type {
   ProviderInput,
   RunWorkflowCommand,
   RunWorkflowResponseDto,
-  StackEntry,
+  StackFrame,
   UpdatedWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,

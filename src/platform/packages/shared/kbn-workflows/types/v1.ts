@@ -37,16 +37,16 @@ export const ExecutionTypeValues = Object.values(ExecutionType);
 /**
  * An interface representing the state of a step scope during workflow execution.
  */
-export interface StackEntry {
-  /** Node id that entered the scope */
-  // nodeId: string;
+
+export interface ScopeEntry {
+  nodeId: string;
+  scopeId?: string; // Optional scope identifier for nested scopes
+}
+export interface StackFrame {
+  /** Step that created this frame */
   stepId: string;
-  // /** Custom scope id that each node might additionally enter */
-  // subScopeId?: string;
-  scope: {
-    nodeId: string;
-    scopeId?: string;
-  }[];
+  /** Scope entries within this frame */
+  scope: ScopeEntry[];
 }
 
 export interface EsWorkflowExecution {
@@ -59,7 +59,7 @@ export interface EsWorkflowExecution {
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
-  stack: StackEntry[];
+  stack: StackFrame[];
   createdAt: string;
   error: string | null;
   createdBy: string;

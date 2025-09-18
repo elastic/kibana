@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StackEntry } from '@kbn/workflows';
+import type { StackFrame } from '@kbn/workflows';
 import { buildStepPath } from './build_step_path';
 
 describe('buildStepPath', () => {
@@ -18,19 +18,19 @@ describe('buildStepPath', () => {
     });
 
     it('should return path from single stack entry without subScopeId', () => {
-      const stack: StackEntry[] = [{ nodeId: 'node-1', stepId: 'parent-step' }];
+      const stack: StackFrame[] = [{ nodeId: 'node-1', stepId: 'parent-step' }];
       const result = buildStepPath('current-step', stack);
       expect(result).toEqual(['parent-step']);
     });
 
     it('should return path from single stack entry with subScopeId', () => {
-      const stack: StackEntry[] = [{ nodeId: 'node-1', stepId: 'foreach-step', subScopeId: '1' }];
+      const stack: StackFrame[] = [{ nodeId: 'node-1', stepId: 'foreach-step', subScopeId: '1' }];
       const result = buildStepPath('current-step', stack);
       expect(result).toEqual(['foreach-step', '1']);
     });
 
     it('should return path from multiple stack entries', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'parent-step' },
         { nodeId: 'node-2', stepId: 'child-step', subScopeId: '2' },
         { nodeId: 'node-3', stepId: 'grandchild-step' },
@@ -42,7 +42,7 @@ describe('buildStepPath', () => {
 
   describe('duplicate step ID handling', () => {
     it('should deduplicate consecutive step IDs without subScopeId', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a' },
         { nodeId: 'node-2', stepId: 'step-a' }, // duplicate
         { nodeId: 'node-3', stepId: 'step-b' },
@@ -52,7 +52,7 @@ describe('buildStepPath', () => {
     });
 
     it('should not deduplicate consecutive step IDs when they have subScopeId', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a', subScopeId: '1' },
         { nodeId: 'node-2', stepId: 'step-a', subScopeId: '2' }, // different subScopeId
         { nodeId: 'node-3', stepId: 'step-b' },
@@ -62,7 +62,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle non-consecutive duplicate step IDs', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a' },
         { nodeId: 'node-2', stepId: 'step-b' },
         { nodeId: 'node-3', stepId: 'step-a' }, // non-consecutive duplicate
@@ -75,7 +75,7 @@ describe('buildStepPath', () => {
   describe('last stack entry optimization', () => {
     it('should remove last stack entry if stepId matches current stepId and no subScopeId', () => {
       const currentStepId = 'current-step';
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'parent-step' },
         { nodeId: 'node-2', stepId: currentStepId }, // should be removed
       ];
@@ -85,7 +85,7 @@ describe('buildStepPath', () => {
 
     it('should not remove last stack entry if stepId matches but has subScopeId', () => {
       const currentStepId = 'current-step';
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'parent-step' },
         { nodeId: 'node-2', stepId: currentStepId, subScopeId: '1' }, // should not be removed
       ];
@@ -95,7 +95,7 @@ describe('buildStepPath', () => {
 
     it('should not remove last stack entry if stepId does not match', () => {
       const currentStepId = 'current-step';
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'parent-step' },
         { nodeId: 'node-2', stepId: 'different-step' }, // should not be removed
       ];
@@ -105,7 +105,7 @@ describe('buildStepPath', () => {
 
     it('should handle empty stack after removing last entry', () => {
       const currentStepId = 'current-step';
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: currentStepId }, // should be removed, leaving empty stack
       ];
       const result = buildStepPath(currentStepId, stack);
@@ -115,7 +115,7 @@ describe('buildStepPath', () => {
 
   describe('complex workflow scenarios', () => {
     it('should handle nested foreach loops', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'outer-foreach', subScopeId: '0' },
         { nodeId: 'node-2', stepId: 'middle-foreach', subScopeId: '1' },
         { nodeId: 'node-3', stepId: 'inner-foreach', subScopeId: '2' },
@@ -125,7 +125,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle nested if conditions', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'outer-if' },
         { nodeId: 'node-2', stepId: 'inner-if' },
         { nodeId: 'node-3', stepId: 'nested-if' },
@@ -135,7 +135,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle mixed nested constructs', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'foreach-step', subScopeId: '0' },
         { nodeId: 'node-2', stepId: 'if-step' },
         { nodeId: 'node-3', stepId: 'retry-step', subScopeId: 'attempt-1' },
@@ -154,7 +154,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle fallback and continue scenarios', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'main-step' },
         { nodeId: 'node-2', stepId: 'fallback-step', subScopeId: 'fallback' },
         { nodeId: 'node-3', stepId: 'continue-step', subScopeId: 'continue' },
@@ -172,7 +172,7 @@ describe('buildStepPath', () => {
 
   describe('immutability', () => {
     it('should not modify the original stack array', () => {
-      const originalStack: StackEntry[] = [
+      const originalStack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a' },
         { nodeId: 'node-2', stepId: 'step-b', subScopeId: '1' },
       ];
@@ -185,7 +185,7 @@ describe('buildStepPath', () => {
 
     it('should not modify original stack when removing last entry', () => {
       const currentStepId = 'current-step';
-      const originalStack: StackEntry[] = [
+      const originalStack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'parent-step' },
         { nodeId: 'node-2', stepId: currentStepId },
       ];
@@ -200,7 +200,7 @@ describe('buildStepPath', () => {
 
   describe('edge cases', () => {
     it('should handle empty stepId', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: '' },
         { nodeId: 'node-2', stepId: 'valid-step' },
       ];
@@ -209,7 +209,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle empty subScopeId', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a', subScopeId: '' },
         { nodeId: 'node-2', stepId: 'step-b' },
       ];
@@ -218,7 +218,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle special characters in stepId and subScopeId', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         {
           nodeId: 'node-1',
           stepId: 'step@with-special#chars',
@@ -237,7 +237,7 @@ describe('buildStepPath', () => {
     it('should handle very long stepId and subScopeId', () => {
       const longStepId = 'a'.repeat(1000);
       const longSubScopeId = 'b'.repeat(1000);
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: longStepId, subScopeId: longSubScopeId },
       ];
       const result = buildStepPath('current-step', stack);
@@ -247,7 +247,7 @@ describe('buildStepPath', () => {
 
   describe('deterministic behavior', () => {
     it('should produce consistent results for identical inputs', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'foreach-step', subScopeId: '1' },
         { nodeId: 'node-2', stepId: 'if-step' },
         { nodeId: 'node-3', stepId: 'connector-step', subScopeId: '2' },
@@ -261,11 +261,11 @@ describe('buildStepPath', () => {
     });
 
     it('should produce different results for different stack orders', () => {
-      const stack1: StackEntry[] = [
+      const stack1: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-a', subScopeId: '1' },
         { nodeId: 'node-2', stepId: 'step-b', subScopeId: '2' },
       ];
-      const stack2: StackEntry[] = [
+      const stack2: StackFrame[] = [
         { nodeId: 'node-1', stepId: 'step-b', subScopeId: '2' },
         { nodeId: 'node-2', stepId: 'step-a', subScopeId: '1' },
       ];
@@ -281,7 +281,7 @@ describe('buildStepPath', () => {
 
   describe('realistic workflow examples', () => {
     it('should handle a realistic security workflow path', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'enter_main_workflow', stepId: 'main-security-workflow' },
         {
           nodeId: 'enter_incident_response',
@@ -305,7 +305,7 @@ describe('buildStepPath', () => {
     });
 
     it('should handle a realistic data processing workflow path', () => {
-      const stack: StackEntry[] = [
+      const stack: StackFrame[] = [
         { nodeId: 'enter_data_pipeline', stepId: 'data-ingestion-pipeline' },
         {
           nodeId: 'enter_validation_loop',

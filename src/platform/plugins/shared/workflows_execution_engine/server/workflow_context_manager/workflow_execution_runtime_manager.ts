@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, StackEntry } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
@@ -130,7 +130,7 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public getCurrentNodeScope(): StackEntry[] {
+  public getCurrentNodeScope(): StackFrame[] {
     return [...this.workflowExecution.stack];
   }
 
@@ -143,13 +143,13 @@ export class WorkflowExecutionRuntimeManager {
         currentNode.stepId
     ) {
       // Path 1: Extend existing stack entry (correct)
-      const stackEntry = this.workflowExecution.stack[this.workflowExecution.stack.length - 1];
+      const StackFrame = this.workflowExecution.stack[this.workflowExecution.stack.length - 1];
       this.workflowExecutionState.updateWorkflowExecution({
         stack: this.workflowExecution.stack.slice(0, -1).concat([
           {
-            ...stackEntry,
+            ...StackFrame,
             scope: [
-              ...stackEntry.scope,
+              ...StackFrame.scope,
               {
                 nodeId: currentNode.id,
                 scopeId: subScopeId,
@@ -186,13 +186,13 @@ export class WorkflowExecutionRuntimeManager {
       this.workflowExecution.stack.at(-1)!.stepId === currentNode.stepId &&
       this.workflowExecution.stack.at(-1)!.scope.length > 1
     ) {
-      const stackEntry = this.workflowExecution.stack.at(-1)!;
+      const StackFrame = this.workflowExecution.stack.at(-1)!;
 
       this.workflowExecutionState.updateWorkflowExecution({
         stack: this.workflowExecution.stack.slice(0, -1).concat([
           {
-            ...stackEntry,
-            scope: stackEntry.scope.slice(0, -1),
+            ...StackFrame,
+            scope: StackFrame.scope.slice(0, -1),
           },
         ]),
       });
@@ -618,9 +618,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private buildCurrentStepPath(): string[] {
-    const path = buildStepPath(this.getCurrentNode().stepId, this.workflowExecution.stack);
-
-    return path;
+    return buildStepPath(this.workflowExecution.stack);
   }
 
   private logWorkflowStart(): void {
