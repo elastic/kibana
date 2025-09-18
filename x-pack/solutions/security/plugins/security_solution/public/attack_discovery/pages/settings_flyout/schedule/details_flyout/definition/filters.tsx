@@ -11,11 +11,11 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../../sourcerer/containers';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 interface FiltersProps {
   filters: Filter[];

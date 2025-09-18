@@ -11,7 +11,6 @@ import { useCreateDataView } from './use_create_data_view';
 import { useKibana } from '../lib/kibana';
 
 jest.mock('../lib/kibana');
-jest.mock('./use_experimental_features');
 
 describe('useCreateDataView', () => {
   const dataViewSpec = { title: 'test' };

@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { PageLoader } from '../../../common/components/page_loader';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';

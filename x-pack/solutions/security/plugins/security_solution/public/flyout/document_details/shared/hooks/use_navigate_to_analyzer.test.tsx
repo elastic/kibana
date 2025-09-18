@@ -12,14 +12,14 @@ import { mockFlyoutApi } from '../mocks/mock_flyout_context';
 import { useWhichFlyout } from './use_which_flyout';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';
+import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_which_flyout');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const mockedUseKibana = mockUseKibana();
 (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);

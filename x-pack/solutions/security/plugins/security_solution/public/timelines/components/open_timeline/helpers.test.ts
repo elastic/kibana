@@ -34,7 +34,7 @@ import {
 import { resolveTimeline } from '../../containers/api';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');

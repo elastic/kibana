@@ -16,13 +16,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
 import { firstValueFrom } from 'rxjs';
 import {
+  addRulesToMigration,
   createRuleMigration,
-  upsertMigrationResources,
+  getRuleMigrationsStatsAll,
+  getRuleMigrationStats,
   startRuleMigration as startRuleMigrationAPI,
   stopRuleMigration as stopRuleMigrationAPI,
-  getRuleMigrationStats,
-  getRuleMigrationsStatsAll,
-  addRulesToMigration,
+  upsertMigrationResources,
 } from '../api';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import {
@@ -54,7 +54,7 @@ jest.mock('../../common/service/capabilities', () => ({
   getMissingCapabilitiesChecker: jest.fn(() => []),
 }));
 
-jest.mock('../../../common/experimental_features_service', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn(() => ({ siemMigrationsDisabled: false })),
   },

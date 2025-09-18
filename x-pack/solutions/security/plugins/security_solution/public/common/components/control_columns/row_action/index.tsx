@@ -8,6 +8,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import {
@@ -15,14 +16,13 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
+  ControlColumnProps,
   SetEventsDeleted,
   SetEventsLoading,
-  ControlColumnProps,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { NotesEventTypes, DocumentEventTypes } from '../../../lib/telemetry';
+import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 

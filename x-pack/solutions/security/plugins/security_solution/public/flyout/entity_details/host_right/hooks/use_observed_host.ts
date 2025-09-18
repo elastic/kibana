@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors, sourcererSelectors } from '../../../../common/store';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
@@ -19,7 +20,6 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 
 export const useObservedHost = (
   hostName: string,
@@ -33,7 +33,7 @@ export const useObservedHost = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
     useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
   const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();

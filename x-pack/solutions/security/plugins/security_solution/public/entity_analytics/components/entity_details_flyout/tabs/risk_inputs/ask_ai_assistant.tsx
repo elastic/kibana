@@ -13,7 +13,7 @@ import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_ano
 import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
 import type { AnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityType } from '../../../../../../common/search_strategy';
 import { useAskAiAssistant } from './use_ask_ai_assistant';

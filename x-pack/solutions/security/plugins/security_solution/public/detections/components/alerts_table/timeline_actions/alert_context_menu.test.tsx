@@ -26,7 +26,7 @@ jest.mock('../../../../common/components/links', () => ({
   useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
 }));
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 

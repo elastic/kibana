@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable dot-notation */
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { TelemetryEventsSender } from './sender';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';

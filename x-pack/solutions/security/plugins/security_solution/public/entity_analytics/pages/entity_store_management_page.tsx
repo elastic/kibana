@@ -33,8 +33,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { type StoreStatus } from '../../../common/api/entity_analytics';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
 import { useKibana } from '../../common/lib/kibana';
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
@@ -223,6 +223,7 @@ export const EntityStoreManagementPage = () => {
           <EuiFlexGroup direction="column">
             {enableStoreMutation.isError && (
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
@@ -237,6 +238,7 @@ export const EntityStoreManagementPage = () => {
             )}
             {deleteEntityEngineMutation.isError && (
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"

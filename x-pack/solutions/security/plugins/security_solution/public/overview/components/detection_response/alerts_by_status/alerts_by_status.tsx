@@ -21,6 +21,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 
 import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
@@ -57,7 +58,6 @@ import { Legend } from '../../../../common/components/charts/legend';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';

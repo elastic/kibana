@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -41,7 +42,6 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
 
 const OverviewComponent = () => {

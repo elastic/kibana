@@ -7,9 +7,9 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SocTrends } from '../components/detection_response/soc_trends';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';

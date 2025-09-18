@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { ExperimentalFeatures } from '../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';

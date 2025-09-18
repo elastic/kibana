@@ -6,13 +6,14 @@
  */
 
 import {
-  applicationLinksUpdater,
   type ApplicationLinksUpdateParams,
+  applicationLinksUpdater,
 } from './application_links_updater';
 import type { AppLinkItems, LinkItem } from '../../common/links/types';
-import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
+import { existCapabilities, hasCapabilities } from '../../common/lib/capabilities';
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
-import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
+import type { SecurityPageName } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { ILicense } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 

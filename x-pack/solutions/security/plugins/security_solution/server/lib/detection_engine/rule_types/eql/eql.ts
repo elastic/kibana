@@ -8,23 +8,23 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 
-import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   SearchAfterAndBulkCreateReturnType,
+  SecurityRuleServices,
+  SecuritySharedParams,
   SignalSource,
   WrapSuppressedHits,
-  SecuritySharedParams,
-  SecurityRuleServices,
 } from '../types';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
-  makeFloatString,
-  getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
+  getUnprocessedExceptionsWarnings,
+  makeFloatString,
 } from '../utils/utils';
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { EqlRuleParams } from '../../rule_schema';

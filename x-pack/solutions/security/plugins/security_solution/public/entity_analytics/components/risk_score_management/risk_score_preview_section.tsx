@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
@@ -34,7 +35,6 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../../common';
 import { EntityIconByType } from '../entity_store/helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
 interface IRiskScorePreviewPanel {
@@ -172,6 +172,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         data-test-subj="risk-preview-error"
         title={i18n.PREVIEW_ERROR_TITLE}
         color="danger"

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointCommandDefinitionMeta } from '../types';
@@ -19,7 +20,6 @@ import { getRbacControl } from '../../../../../common/endpoint/service/response_
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
-import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   ConsoleResponseActionCommands,
   EndpointCapabilities,

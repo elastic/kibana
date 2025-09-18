@@ -9,32 +9,33 @@ import os from 'os';
 import { cloneDeep } from 'lodash';
 
 import type {
+  CoreStart,
+  ElasticsearchClient,
+  IScopedClusterClient,
   Logger,
   LogMeta,
-  CoreStart,
-  IScopedClusterClient,
-  ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
+  Duration,
   IlmExplainLifecycleRequest,
+  IlmGetLifecycleRequest,
+  IndicesGetDataStreamRequest,
+  IndicesGetIndexTemplateRequest,
+  IndicesGetRequest,
+  IndicesStatsRequest,
+  NodesStatsRequest,
   OpenPointInTimeResponse,
   SearchRequest,
-  SearchResponse,
   SearchRequest as ESSearchRequest,
+  SearchResponse,
   SortResults,
-  IndicesGetDataStreamRequest,
-  IndicesStatsRequest,
-  IlmGetLifecycleRequest,
-  IndicesGetRequest,
-  NodesStatsRequest,
-  Duration,
-  IndicesGetIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
@@ -42,7 +43,6 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
-  ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
@@ -55,41 +55,41 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
 
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
-import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
-  trustedApplicationToTelemetryEntry,
+  newTelemetryLogger,
   ruleExceptionListItemToTelemetryEvent,
   setClusterInfo,
-  newTelemetryLogger,
+  trustedApplicationToTelemetryEntry,
 } from './helpers';
-import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type { SafeEndpointEvent, ResolverSchema } from '../../../common/endpoint/types';
+import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { ResolverSchema, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type {
-  TelemetryEvent,
-  EnhancedAlertEvent,
-  EndpointMetricDocument,
-  ESLicense,
-  ESClusterInfo,
-  GetEndpointListResponse,
-  RuleSearchResult,
-  ExceptionListItem,
-  ValueListResponse,
-  ValueListResponseAggregation,
-  ValueListItemsResponseAggregation,
-  ValueListExceptionListResponseAggregation,
-  ValueListIndicatorMatchResponseAggregation,
-  Nullable,
-  EndpointMetricsAggregation,
-  EndpointMetricsAbstract,
-  EndpointPolicyResponseDocument,
-  EndpointPolicyResponseAggregation,
   EndpointMetadataAggregation,
   EndpointMetadataDocument,
+  EndpointMetricDocument,
+  EndpointMetricsAbstract,
+  EndpointMetricsAggregation,
+  EndpointPolicyResponseAggregation,
+  EndpointPolicyResponseDocument,
+  EnhancedAlertEvent,
+  ESClusterInfo,
+  ESLicense,
+  ExceptionListItem,
+  GetEndpointListResponse,
+  Nullable,
+  RuleSearchResult,
+  TelemetryEvent,
   TelemetryQueryConfiguration,
+  ValueListExceptionListResponseAggregation,
+  ValueListIndicatorMatchResponseAggregation,
+  ValueListItemsResponseAggregation,
+  ValueListResponse,
+  ValueListResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';

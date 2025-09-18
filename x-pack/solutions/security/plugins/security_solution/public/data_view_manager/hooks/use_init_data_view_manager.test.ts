@@ -11,7 +11,7 @@ import { useInitDataViewManager } from './use_init_data_view_manager';
 import { useDispatch } from 'react-redux';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 

@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -42,7 +43,6 @@ import {
   INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,

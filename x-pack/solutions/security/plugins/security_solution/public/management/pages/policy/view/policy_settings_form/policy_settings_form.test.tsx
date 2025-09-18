@@ -24,8 +24,12 @@ import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/ty
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../../common/hooks/use_license');
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('Endpoint Policy Settings Form', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
@@ -51,18 +55,27 @@ describe('Endpoint Policy Settings Form', () => {
       'data-test-subj': 'test',
     };
 
-    mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      eventCollectionDataReductionBannerEnabled: false,
+    });
 
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
   describe('event merging banner', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: true });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        eventCollectionDataReductionBannerEnabled: true,
+      });
     });
 
     it('should hide the banner if its not allowed to be displayed', () => {
-      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        eventCollectionDataReductionBannerEnabled: false,
+      });
 
       render();
 

@@ -10,9 +10,11 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
+  ExperimentalFeaturesService,
+  useIsExperimentalFeatureEnabled,
+} from '@kbn/experimental-features';
 import { getAgentTypeName } from '../../../../common/translations';
-import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,

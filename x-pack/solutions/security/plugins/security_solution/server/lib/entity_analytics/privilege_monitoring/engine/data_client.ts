@@ -7,21 +7,21 @@
 
 import type {
   AnalyticsServiceSetup,
-  IScopedClusterClient,
-  AuditLogger,
-  Logger,
   AuditEvent,
-  SavedObjectsServiceStart,
-  SavedObjectsClientProviderOptions,
+  AuditLogger,
+  IScopedClusterClient,
   KibanaRequest,
+  Logger,
+  SavedObjectsClientProviderOptions,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { MonitoringEngineComponentResource } from '../../../../../common/api/entity_analytics';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
-import { AUDIT_OUTCOME, AUDIT_TYPE, AUDIT_CATEGORY } from '../../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { monitoringEntitySourceType } from '../saved_objects';
 
 export interface PrivilegeMonitoringGlobalDependencies {

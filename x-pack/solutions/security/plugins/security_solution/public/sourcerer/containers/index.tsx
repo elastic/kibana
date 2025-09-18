@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { sourcererSelectors } from '../store';
 import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
 import { SourcererScopeName } from '../store/model';
@@ -16,7 +17,6 @@ import { getDataViewStateFromIndexFields } from '../../common/containers/source/
 import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default

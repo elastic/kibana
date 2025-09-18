@@ -9,13 +9,13 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import usePrevious from 'react-use/lib/usePrevious';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { createOrNewEntryItem } from '../../../../common/components/threat_match/helpers';
 import type { ThreatMapping } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import * as i18n from '../../../../common/components/threat_match/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const DEFAULT_THREAT_MAPPING_VALUE = [createOrNewEntryItem()];
 

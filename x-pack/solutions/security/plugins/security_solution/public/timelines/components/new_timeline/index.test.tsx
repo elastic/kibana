@@ -30,7 +30,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const renderNewTimelineButton = (type: TimelineType) =>
   render(<NewTimelineButton type={type} />, { wrapper: TestProviders });

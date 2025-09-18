@@ -22,6 +22,10 @@ import {
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using `useAlertResponseActionsSupport()` hook', () => {
   let appContextMock: AppContextTestRender;
@@ -64,7 +68,8 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     appContextMock = createAppRootMockRenderer();
 
     // Enable feature flags by default
-    appContextMock.setExperimentalFlag({
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
       responseActionsSentinelOneV1Enabled: true,
       responseActionsSentinelOneGetFileEnabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
@@ -182,15 +187,20 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
   )('should set `isSupported` to `false` for [%s] if feature flag is disabled', (agentType) => {
     switch (agentType) {
       case 'sentinel_one':
-        appContextMock.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: false });
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
+          responseActionsSentinelOneV1Enabled: false,
+        });
         break;
       case 'crowdstrike':
-        appContextMock.setExperimentalFlag({
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
           responseActionsCrowdstrikeManualHostIsolationEnabled: false,
         });
         break;
       case 'microsoft_defender_endpoint':
-        appContextMock.setExperimentalFlag({
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
           responseActionsMSDefenderEndpointEnabled: false,
         });
         break;

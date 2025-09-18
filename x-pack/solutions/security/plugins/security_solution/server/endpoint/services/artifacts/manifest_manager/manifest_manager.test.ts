@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
@@ -44,8 +44,8 @@ import {
   createFetchAllArtifactsIterableMock,
   generateArtifactMock,
 } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { allowedExperimentalValues } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 

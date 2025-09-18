@@ -12,10 +12,13 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../common/components/user_privileges');
-
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -26,7 +29,10 @@ describe('when in the Administration tab', () => {
     render = () => mockedContext.render(<ManagementContainer />);
     mockedContext.history.push('/administration/endpoints');
 
-    mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      endpointExceptionsMovedUnderManagement: true,
+    });
   });
 
   afterEach(() => {
@@ -172,7 +178,10 @@ describe('when in the Administration tab', () => {
 
   describe('when `endpointExceptionsMovedUnderManagement` feature flag is disabled', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        endpointExceptionsMovedUnderManagement: false,
+      });
     });
 
     it('should display `notFoundPage` for the endpoint exceptions page with read privilege', async () => {

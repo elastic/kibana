@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 import type { validateEntities } from '../../../../../common/endpoint/schema/resolver';
 import type { ResolverEntityIndex } from '../../../../../common/endpoint/types';

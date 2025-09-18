@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from 'react-redux';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../types';
 import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 
 jest.mock('react-redux');

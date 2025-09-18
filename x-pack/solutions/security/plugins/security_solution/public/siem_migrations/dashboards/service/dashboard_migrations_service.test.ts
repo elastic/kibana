@@ -24,9 +24,9 @@ import {
 } from './dashboard_migrations_service';
 import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import { licenseService } from '../../../common/hooks/use_license';
-import type { ExperimentalFeatures } from '../../../../common';
 
 jest.mock('../api', () => ({
   createDashboardMigration: jest.fn(),
@@ -49,7 +49,7 @@ const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.
   typeof getMissingCapabilitiesChecker
 >;
 
-jest.mock('../../../common/experimental_features_service', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn(() => ({ automaticDashboardsMigration: true, siemMigrationsDisabled: false })),
   },

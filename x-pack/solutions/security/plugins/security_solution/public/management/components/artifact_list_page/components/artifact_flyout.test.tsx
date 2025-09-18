@@ -20,9 +20,13 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../common/comp
 import { entriesToConditionEntries } from '../../../../common/utils/exception_list_items/mappers';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getDeferred } from '../../../mocks/utils';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When the flyout is opened in the ArtifactListPage component', () => {
   let render: (
@@ -36,19 +40,11 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   let getLastFormComponentProps: ReturnType<
     typeof getFormComponentMock
   >['getLastFormComponentProps'];
-  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({
-      history,
-      coreStart,
-      mockedApi,
-      FormComponentMock,
-      getLastFormComponentProps,
-      setExperimentalFlag,
-    } = renderSetup);
+    ({ history, coreStart, mockedApi, FormComponentMock, getLastFormComponentProps } = renderSetup);
 
     history.push('somepage?show=create');
 
@@ -123,7 +119,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   });
 
   it('should initialize form with a per-policy artifact when user does not have global artifact privilege and spaces is enabeld', async () => {
-    setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      endpointManagementSpaceAwarenessEnabled: true,
+    });
     useUserPrivileges.mockReturnValue({
       ...useUserPrivileges(),
       endpointPrivileges: getEndpointPrivilegesInitialStateMock({

@@ -14,7 +14,7 @@ import { CustomHttpRequestError } from '../../../utils/custom_http_request_error
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
-import type { ExperimentalFeatures } from '../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { agentServiceMocks as mockAgentService } from '../../services/agent/mocks';
 import { getAgentStatusClient as _getAgentStatusClient } from '../../services';
 import type { DeepMutable } from '../../../../common/endpoint/types';

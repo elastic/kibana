@@ -11,9 +11,9 @@ import type { Capabilities } from '@kbn/core/types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { AppLinkItems, LinkItem, NormalizedLinks } from '../../common/links/types';
-import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
+import { existCapabilities, hasCapabilities } from '../../common/lib/capabilities';
 
 /**
  * Dependencies to update the application links

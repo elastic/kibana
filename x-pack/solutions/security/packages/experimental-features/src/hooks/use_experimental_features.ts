@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-import type { State } from '../store';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { getExperimentalAllowedValues } from '../../../common/experimental_features';
+import { selectExperimentalFeature, useSelector } from '../store/redux';
+import type { ExperimentalFeatures } from '../types';
+import { getExperimentalAllowedValues } from '../utils/helpers';
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
+
+const useEnableExperimental = (): ExperimentalFeatures => useSelector(selectExperimentalFeature());
 
 export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
   const enableExperimental = useEnableExperimental();
@@ -22,6 +23,3 @@ export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatu
   }
   return enableExperimental[feature];
 };
-
-export const useEnableExperimental = (): ExperimentalFeatures =>
-  useSelector(({ app: { enableExperimental } }: State) => enableExperimental);

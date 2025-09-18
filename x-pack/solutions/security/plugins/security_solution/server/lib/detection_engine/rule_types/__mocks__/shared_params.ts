@@ -13,7 +13,7 @@ import type { SecuritySharedParams } from '../types';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 import { getCompleteRuleMock } from '../../rule_schema/mocks';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 

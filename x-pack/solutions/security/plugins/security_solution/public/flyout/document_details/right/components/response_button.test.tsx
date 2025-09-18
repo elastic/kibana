@@ -14,9 +14,9 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseButton } from './response_button';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const mockValidSearchHit = {
   fields: {

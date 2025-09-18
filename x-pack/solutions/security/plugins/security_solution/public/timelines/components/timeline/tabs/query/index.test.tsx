@@ -21,17 +21,19 @@ import {
   TestProviders,
 } from '../../../../../common/mock';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, fireEvent, within, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDispatch } from 'react-redux';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { allowedExperimentalValues } from '../../../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import {
-  defaultUdtHeaders,
+  allowedExperimentalValues,
+  useIsExperimentalFeatureEnabled,
+} from '@kbn/experimental-features';
+import {
   defaultColumnHeaderType,
+  defaultUdtHeaders,
 } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
@@ -73,7 +75,7 @@ jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

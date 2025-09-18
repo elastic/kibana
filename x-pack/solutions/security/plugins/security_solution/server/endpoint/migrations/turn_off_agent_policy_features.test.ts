@@ -14,7 +14,7 @@ import { createProductFeaturesServiceMock } from '../../lib/product_features_ser
 import { turnOffAgentPolicyFeatures } from './turn_off_agent_policy_features';
 import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { allowedExperimentalValues } from '../../../common';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 
 describe('Turn Off Agent Policy Features Migration', () => {
   let fleetServices: EndpointInternalFleetServicesInterface;

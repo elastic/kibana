@@ -20,8 +20,8 @@ import {
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
-  policyFactoryWithoutPaidFeatures,
   policyFactoryWithoutPaidEnterpriseFeatures,
+  policyFactoryWithoutPaidFeatures,
 } from '../../common/endpoint/models/policy_config';
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
@@ -89,7 +89,7 @@ import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generato
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../common/endpoint/service/response_actions/constants';
 import { pick } from 'lodash';
 import { ENDPOINT_ACTIONS_INDEX } from '../../common/endpoint/constants';
-import type { ExperimentalFeatures } from '../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',

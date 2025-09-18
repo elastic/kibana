@@ -23,9 +23,11 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { allowedExperimentalValues } from '../../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import {
+  allowedExperimentalValues,
+  useIsExperimentalFeatureEnabled,
+} from '@kbn/experimental-features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 
@@ -41,7 +43,7 @@ jest.mock('../../../fields_browser', () => ({
 
 jest.mock('../../../../../sourcerer/containers');
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;

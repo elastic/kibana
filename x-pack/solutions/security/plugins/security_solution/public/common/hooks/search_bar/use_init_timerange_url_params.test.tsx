@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useInitTimerangeFromUrlParam } from './use_init_timerange_url_params';
 import * as redux from 'react-redux';
-import * as experimentalFeatures from '../use_experimental_features';
+import * as experimentalFeatures from '@kbn/experimental-features';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
 import { useKibana } from '../../lib/kibana';
@@ -18,7 +18,7 @@ jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
 jest.mock('../../lib/kibana');
-jest.mock('../use_experimental_features', () => ({ useIsExperimentalFeatureEnabled: jest.fn() }));
+jest.mock('@kbn/experimental-features', () => ({ useIsExperimentalFeatureEnabled: jest.fn() }));
 jest.mock('../../utils/global_query_string', () => ({ useInitializeUrlParam: jest.fn() }));
 
 describe('useInitTimerangeFromUrlParam', () => {

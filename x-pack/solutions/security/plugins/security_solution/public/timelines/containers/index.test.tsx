@@ -6,12 +6,12 @@
  */
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import * as useTimelineEventsModule from '.';
 import { SecurityPageName } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { useKibana } from '../../common/lib/kibana';
@@ -34,7 +34,7 @@ const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
 
 jest.mock('../../common/lib/apm/use_track_http_request');
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../common/lib/kibana', () => ({

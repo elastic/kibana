@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ResponseButton } from './response_button';
 import { ExpandableSection } from './expandable_section';
@@ -16,7 +17,6 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const KEY = 'response';
 
@@ -37,6 +37,7 @@ export const ResponseSection = memo(() => {
     if (isRulePreview) {
       return (
         <EuiCallOut
+          announceOnMount
           iconType="documentation"
           size="s"
           title={
@@ -61,6 +62,7 @@ export const ResponseSection = memo(() => {
     if (!isNewNavigationEnabled && isPreviewMode) {
       return (
         <EuiCallOut
+          announceOnMount
           iconType="documentation"
           size="s"
           title={

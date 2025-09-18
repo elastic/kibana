@@ -9,9 +9,10 @@ import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useKibana } from '../../lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { TimeRangeKinds } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 import type {
   AbsoluteTimeRange,
   LinkTo,
@@ -23,7 +24,6 @@ import { inputsActions } from '../../store/inputs';
 import { formatDate } from '../../components/super_date_picker';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { InputsModelId } from '../../store/inputs/constants';
 
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();

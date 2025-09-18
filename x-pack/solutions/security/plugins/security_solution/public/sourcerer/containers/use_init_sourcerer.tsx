@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { sourcererActions, sourcererSelectors } from '../store';
 import { SourcererScopeName } from '../store/model';
 import { useUserInfo } from '../../detections/components/user_info';
@@ -22,7 +23,6 @@ import type { State } from '../../common/store/types';
 import { useKibana } from '../../common/lib/kibana';
 import { useSourcererDataView } from '.';
 import { useSyncSourcererUrlState } from '../../data_view_manager/hooks/use_sync_url_state';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const defaultInitResult = { browserFields: {} };
 

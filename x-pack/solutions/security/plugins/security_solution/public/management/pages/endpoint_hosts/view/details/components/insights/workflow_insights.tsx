@@ -10,8 +10,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';

@@ -6,11 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { FlexItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import type { FieldConfigs } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface MetricEmbeddableProps {
   fields: FieldConfigs[];

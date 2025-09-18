@@ -7,11 +7,11 @@
 import React, { useCallback, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
 import { Sourcerer } from '../../../sourcerer/components';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const nodeLegendButtonTitle = i18n.translate(

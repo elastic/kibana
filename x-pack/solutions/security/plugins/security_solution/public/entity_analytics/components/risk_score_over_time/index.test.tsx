@@ -10,7 +10,7 @@ import React from 'react';
 import { RiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 jest.mock('@elastic/charts', () => {
@@ -21,7 +21,7 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');

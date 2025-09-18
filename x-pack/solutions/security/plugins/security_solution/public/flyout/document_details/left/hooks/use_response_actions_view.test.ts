@@ -10,12 +10,12 @@ import { useResponseActionsView } from './use_response_actions_view';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 const ecsData = mockDataAsNestedObject;
 const rawEventData = mockSearchHit;
 
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../../management/hooks/response_actions/use_get_automated_action_list');
 
 describe('useResponseActionsView', () => {

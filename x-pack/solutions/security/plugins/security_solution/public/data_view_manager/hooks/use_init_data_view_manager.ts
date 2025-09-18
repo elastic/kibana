@@ -12,6 +12,7 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
@@ -19,7 +20,6 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];

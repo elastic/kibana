@@ -25,6 +25,7 @@ import {
   EuiSuperDatePicker,
   EuiTextColor,
 } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -39,7 +40,6 @@ import { GapStatusFilter } from './status_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
 import { FillRuleGapsButton } from './fill_rule_gaps_button';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;

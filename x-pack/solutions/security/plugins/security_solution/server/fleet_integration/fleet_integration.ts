@@ -9,9 +9,9 @@ import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
   PostPackagePolicyPostDeleteCallback,
   PutPackagePolicyUpdateCallback,
-  PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 
 import type {
@@ -30,7 +30,7 @@ import type {
   PostAgentPolicyUpdateCallback,
   PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
-import type { ExperimentalFeatures } from '../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { updateDeletedPolicyResponseActions } from './handlers/update_deleted_policy_response_actions';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import type { EndpointInternalFleetServicesInterface } from '../endpoint/services/fleet';
@@ -40,9 +40,9 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
-  isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isPolicySetToEventCollectionOnly,
   removeDeviceControl,
 } from '../../common/endpoint/models/policy_config_helpers';
 import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpoint/types';

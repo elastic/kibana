@@ -16,11 +16,11 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { mockContextValue } from '../mocks/mock_context';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const hostName = 'test host';
 const testId = 'test';

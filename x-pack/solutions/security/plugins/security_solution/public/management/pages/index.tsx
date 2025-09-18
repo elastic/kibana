@@ -11,7 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { NotesContainer } from './notes';
 import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
