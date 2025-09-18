@@ -388,10 +388,15 @@ export const createStreamRoutingMachineImplementations = ({
   data,
   timeState$,
   forkSuccessNofitier,
+  telemetryClient,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
-    forkStream: createForkStreamActor({ streamsRepositoryClient, forkSuccessNofitier }),
+    forkStream: createForkStreamActor({
+      streamsRepositoryClient,
+      forkSuccessNofitier,
+      telemetryClient,
+    }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     routingSamplesMachine: routingSamplesMachine.provide(
       createRoutingSamplesMachineImplementations({
