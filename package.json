@@ -1989,7 +1989,7 @@
     "swagger-ui-express": "^5.0.1",
     "table": "^6.8.2",
     "tape": "^5.9.0",
-    "terser": "^5.40.0",
+    "terser": "^5.44.0",
     "terser-webpack-plugin": "^5.3.14",
     "tough-cookie": "^6.0.0",
     "trace": "^3.2.0",
