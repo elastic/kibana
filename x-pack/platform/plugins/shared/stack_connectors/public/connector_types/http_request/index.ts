@@ -13,6 +13,8 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
+import { SERVICE_PROVIDERS } from './templates';
+
 interface DynamicField {
   name: string;
   label: string;
@@ -66,4 +68,26 @@ export function getHttpRequestConnectorType(): HttpRequestConnectorTypeModel {
     actionConnectorFields: lazy(() => import('./connector_fields')),
     actionParamsFields: lazy(() => import('./connector_params')),
   };
+}
+
+export function getTemplatedConnectorTypes(): HttpRequestConnectorTypeModel[] {
+  const result: HttpRequestConnectorTypeModel[] = [];
+  for (const provider of Object.keys(SERVICE_PROVIDERS)) {
+    const providerDef = SERVICE_PROVIDERS[provider];
+    result.push({
+      id: provider,
+      aliasFor: 'http_request',
+      aliasName: providerDef.name,
+      iconClass: providerDef.iconClass,
+      selectMessage: providerDef.selectMessage,
+      validateParams: async (
+        actionParams: HttpRequestActionParams
+      ): Promise<GenericValidationResult<HttpRequestActionParams>> => {
+        return { errors: { body: [] } };
+      },
+      actionConnectorFields: lazy(() => import('./connector_fields')),
+      actionParamsFields: lazy(() => import('./connector_params')),
+    });
+  }
+  return result;
 }

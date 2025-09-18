@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
+import type { IconType } from '@elastic/eui';
 import type { HttpRequestConfig } from '.';
+
+export const SERVICE_PROVIDERS: Record<
+  string,
+  { name: string; iconClass: IconType; selectMessage: string }
+> = {
+  jira_templated: {
+    name: 'Jira (Templated)',
+    iconClass: lazy(() => import('./logos/jira')),
+    selectMessage: 'Send a request to Jira',
+  },
+};
 
 export const TEMPLATES: Record<
   string,
