@@ -164,12 +164,8 @@ export const useConversationActions = () => {
           draft.title = title;
         })
       );
-      // 2. Refetch conversation list to get updated data from server - this updates the conversations view in the sidebar
-      queryClient.refetchQueries({
-        queryKey: queryKeys.conversations.all,
-        exact: true,
-        type: 'active',
-      });
+      // 2. Invalidate conversation list to get updated data from server - this updates the conversations view in the sidebar
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
     },
   };
