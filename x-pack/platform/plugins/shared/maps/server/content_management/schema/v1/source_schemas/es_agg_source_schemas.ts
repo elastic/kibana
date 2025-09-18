@@ -100,10 +100,6 @@ export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extends(
   }
 );
 
-{
-  geoField: 'foo'
-}
-
 export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extends(
   {
     geoField: schema.string({
@@ -111,7 +107,14 @@ export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extends(
         description: 'Field containing indexed geo-point values.',
       },
     }),
-    
+    groupByTimeseries: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
+        },
+      })
+    ),
     lineSimplificationSize: schema.maybe(
       schema.number({
         max: 10000,
