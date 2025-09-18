@@ -374,6 +374,7 @@ const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
         children: [
           { link: 'management:cross_cluster_replication' },
           { link: 'management:remote_clusters' },
+          { link: 'management:migrate_data' },
         ],
       },
       {
