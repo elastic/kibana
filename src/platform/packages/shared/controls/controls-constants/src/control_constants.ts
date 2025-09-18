@@ -19,4 +19,4 @@ export const CONTROL_TYPES = [
   ESQL_CONTROL,
 ] as const;
 
-export type ControlType = (typeof CONTROL_TYPES)[number];
+export type ControlType = (typeof CONTROL_TYPES)[number]; // This is typescript syntax for "string literal inside this array"
