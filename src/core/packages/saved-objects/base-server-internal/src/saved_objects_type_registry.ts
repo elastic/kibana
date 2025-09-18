@@ -72,11 +72,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type ${type.name}: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'.`
       );
     }
-    const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
+    const supportsAccessControl = (this.accessControlEnabled && type.supportsAccessControl) ?? false;
 
     const typeWithAccessControl = { ...type, supportsAccessControl };
 
-    validateType(type);
+    validateType(type, supportsAccessControl);
 
     if (process.env.NODE_ENV !== 'production') {
       deepFreeze(typeWithAccessControl);
@@ -165,7 +165,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 }
 
-const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
+const validateType = (
+  { name, management, hidden, hiddenFromHttpApis, supportsAccessControl }: SavedObjectsType,
+  accessControlEnabled: boolean
+) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -182,6 +185,12 @@ const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObj
   if (hidden === true && hiddenFromHttpApis === false) {
     throw new Error(
       `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
+    );
+  }
+
+  if (supportsAccessControl === true && accessControlEnabled === false) {
+    throw new Error(
+      `Type ${name}: 'supportsAccessControl' cannot be 'true' when 'enableAccessControl' is disabled in configuration`
     );
   }
 };

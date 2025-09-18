@@ -745,6 +745,20 @@ describe('#rawToSavedObject', () => {
         expect(actual).not.toHaveProperty('accessControl');
       });
     });
+
+    test('it strips the accessControl property if the feature is disabled', () => {
+      const actual = accessControlDisabledSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          accessControl: {
+            owner: 'my_user_id',
+            accessMode: 'read_only',
+          },
+        },
+      });
+      expect(actual).not.toHaveProperty('accessControl');
+    });
   });
 });
 
