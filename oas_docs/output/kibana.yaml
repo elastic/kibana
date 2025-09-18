@@ -46566,7 +46566,7 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  data:
+                  maintenanceWindows:
                     items:
                       additionalProperties: false
                       type: object
@@ -46694,7 +46694,7 @@ paths:
                   - page
                   - per_page
                   - total
-                  - data
+                  - maintenanceWindows
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
