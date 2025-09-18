@@ -7,7 +7,7 @@
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
-const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3'];
+const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
 export const getTemperatureIfValid = (
   temperature?: number,
