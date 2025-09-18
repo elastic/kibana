@@ -61,6 +61,7 @@ const secrets = {
   crt: null,
   key: null,
   pfx: null,
+  secretHeaders: null,
 };
 const defaultSSLOverrides = {};
 const actionId = '1234';
@@ -72,7 +73,14 @@ const sslConfig: CasesWebhookPublicConfigurationType = {
   certType: SSLCertType.CRT,
   hasAuth: true,
 };
-const sslSecrets = { crt: CRT_FILE, key: KEY_FILE, password: 'foobar', user: null, pfx: null };
+const sslSecrets = {
+  crt: CRT_FILE,
+  key: KEY_FILE,
+  password: 'foobar',
+  user: null,
+  pfx: null,
+  secretHeaders: null,
+};
 let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('Cases webhook service', () => {
@@ -183,6 +191,59 @@ describe('Cases webhook service', () => {
       expect(axios.create).toHaveBeenCalledWith({
         headers: {
           ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('adds the secret headers correctly', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { secretKey: 'secretValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+          secretKey: 'secretValue',
+        },
+      });
+    });
+
+    it('secretHeaders should override configHeaders when keys overlap', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { Authorization: 'secretAuthorizationValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          Authorization: 'secretAuthorizationValue',
           'content-type': 'application/json',
           foo: 'bar',
         },
