@@ -4852,9 +4852,7 @@
             "signature": [
               "() => { getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
               "MetricField",
-              "[]; total: number; page: number; }>; postData: (params: { esql: string; filters: { value: string; field: string; }[]; from: string; to: string; }, signal?: AbortSignal | null | undefined) => Promise<{ data: { key: Record<string, string>; data: { x: number; y: number; }[]; }[] | { x: number; y: ",
-              "FieldValue",
-              "; }[]; esql: string; hasDimensions: boolean; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined"
+              "[]; total: number; page: number; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from: string; to: string; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
             "deprecated": false,

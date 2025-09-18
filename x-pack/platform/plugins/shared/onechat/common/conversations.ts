@@ -24,3 +24,7 @@ export interface ConversationListOptions {
 export interface ConversationGetOptions {
   conversationId: string;
 }
+
+export interface ConversationDeleteOptions {
+  conversationId: string;
+}
