@@ -202,7 +202,7 @@ describe('extractTokensDangerouslySlow', () => {
       generators = await client.getLogGenerators({
         rpm: 16 * 2000,
         distribution: 'uniform',
-        allowedSystems: [
+        systems: [
           'HealthApp',
           'Android',
           'Thunderbird',
