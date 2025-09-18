@@ -17,6 +17,7 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
   withCompleteItem,
+  assignCompletionItem,
 } from '../../complete_items';
 import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
@@ -184,17 +185,17 @@ describe('RERANK Autocomplete', () => {
     });
 
     test('suggests field continuations after selecting a field', async () => {
-      const query = buildRerankQuery({ query: '"search query"', onClause: 'textField' });
+      const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' });
 
       await expectRerankSuggestions(query, [
-        'textField, ',
-        'textField WITH { $0 } ',
-        'textField | ',
+        'keywordField, ',
+        'keywordField WITH { $0 } ',
+        'keywordField | ',
       ]);
     });
 
     test('suggests continuations after field with more trailing spaces', async () => {
-      const query = buildRerankQuery({ query: '"search query"', onClause: 'textField' }) + ' ';
+      const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' }) + ' ';
 
       await expectRerankSuggestions(query, NEXT_ACTIONS);
     });
@@ -222,6 +223,17 @@ describe('RERANK Autocomplete', () => {
         notContains: addPlaceholder(OPERATOR_SUGGESTIONS.LOGICAL),
         contains: addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON),
       });
+    });
+
+    test('handles assign item after a list with boolean expressions (this check the quality of our regex)', async () => {
+      const complexExpression = 'textField = NOT (keywordField LIKE "a*"), customField';
+      const query =
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: complexExpression + ' ',
+        }) + ' ';
+
+      await expectRerankSuggestions(query, [assignCompletionItem.text]);
     });
 
     test('handles complex nested boolean expressions', async () => {

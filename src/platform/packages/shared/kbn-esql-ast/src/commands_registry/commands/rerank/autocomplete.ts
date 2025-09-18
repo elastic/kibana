@@ -104,7 +104,7 @@ export async function autocomplete(
       });
     }
 
-    case CaretPosition.ON_KEEP_OPERATOR_AFTER_TRAILING_SPACE: {
+    case CaretPosition.ON_KEEP_SUGGESTIONS_AFTER_TRAILING_SPACE: {
       const lastOnField = rerankCommand.fields?.[rerankCommand.fields.length - 1];
       const isAssignmentContext = !!(lastOnField && !context?.columns?.has(lastOnField.name));
       // ON col0␣ → '=' suggestion using lastField from the ON clause

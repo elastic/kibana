@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLAstRerankCommand, ESQLMap, ESQLSingleAstItem } from '../../../types';
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment } from '../../../ast/is';
 import {
   extractValidExpressionRoot,
   getBinaryExpressionOperand,
 } from '../../../definitions/utils/expressions';
-import { getExpressionPosition } from '../../../definitions/utils/autocomplete/helpers';
-import { isMarkerNode } from '../../../definitions/utils/ast';
 
 export interface RerankPosition {
   position: CaretPosition;
@@ -28,7 +26,7 @@ export enum CaretPosition {
   RERANK_AFTER_TARGET_ASSIGNMENT, // After "target_field ="
   ON_KEYWORD, // Should suggest "ON"
   ON_WITHIN_FIELD_LIST, // After "ON": suggest field names
-  ON_KEEP_OPERATOR_AFTER_TRAILING_SPACE, // Special case: After a complete field with space, suggest next actions or assignment
+  ON_KEEP_SUGGESTIONS_AFTER_TRAILING_SPACE, // Special case: After a complete field with space, suggest next actions or assignment
   ON_EXPRESSION, // After "ON": handle all field list expressions like EVAL
   WITHIN_MAP_EXPRESSION, // After "WITH": suggest a json of params
   AFTER_COMMAND, // Command is complete, suggest pipe
@@ -37,8 +35,9 @@ export enum CaretPosition {
 /**
  * Determines caret position in RERANK command
  */
-export function getPosition(innerText: string, command: ESQLCommand): RerankPosition {
+export function getPosition(query: string, command: ESQLCommand): RerankPosition {
   const rerankCommand = command as ESQLAstRerankCommand;
+  const innerText = query.substring(rerankCommand.location.min);
   const onMap = rerankCommand.args[1];
   const withMap = rerankCommand.args[2] as ESQLMap | undefined;
 
@@ -64,14 +63,8 @@ export function getPosition(innerText: string, command: ESQLCommand): RerankPosi
       };
     }
 
-    // If the last ON item is a column and the caret is after a completed column + space,
-    if (lastField && isColumn(lastField)) {
-      const pos = getExpressionPosition(innerText, lastField);
-      const hasCommaMarker = rerankCommand.fields.some((field) => isMarkerNode(field));
-
-      if (pos === 'after_column' && !hasCommaMarker) {
-        return { position: CaretPosition.ON_KEEP_OPERATOR_AFTER_TRAILING_SPACE };
-      }
+    if (!lastField.incomplete && isAfterCompleteFieldWithSpace(innerText)) {
+      return { position: CaretPosition.ON_KEEP_SUGGESTIONS_AFTER_TRAILING_SPACE };
     }
 
     return { position: CaretPosition.ON_WITHIN_FIELD_LIST };
@@ -86,20 +79,24 @@ export function getPosition(innerText: string, command: ESQLCommand): RerankPosi
     return { position: CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT };
   }
 
-  if (isAfterPotentialTargetField(innerText, rerankCommand)) {
+  if (isAfterPotentialTargetFieldWithSpace(innerText)) {
     return { position: CaretPosition.RERANK_AFTER_TARGET_FIELD };
   }
 
   return { position: CaretPosition.RERANK_KEYWORD };
 }
 
-export function isAfterPotentialTargetField(
-  innerText: string,
-  rerankCommand: ESQLAstRerankCommand
-): boolean {
-  const commandText = innerText.substring(rerankCommand.location.min);
+export function isAfterPotentialTargetFieldWithSpace(innerText: string): boolean {
   // Pattern: must have at least one non-quote word followed by space
-  return (
-    commandText.endsWith(' ') && !commandText.includes('"') && /rerank\s+\w+\s+$/i.test(commandText)
-  );
+  // !commandText.includes('"') is covered by 'withinQuotes' function in autocomplete.ts
+  // However, we keep this extra safety check if it will be accidentally removed
+  return innerText.endsWith(' ') && !innerText.includes('"') && /rerank\s+\w+\s+$/i.test(innerText);
+}
+
+function isAfterCompleteFieldWithSpace(innerText: string): boolean {
+  // Matches "ON" followed by any content ending with non-comma/non-space character + space
+  const completeWithSpace = /\bon\s+.*[^,\s]\s+$/i;
+  const endsWithCommaSpace = /,\s+$/i;
+
+  return completeWithSpace.test(innerText) && !endsWithCommaSpace.test(innerText);
 }
