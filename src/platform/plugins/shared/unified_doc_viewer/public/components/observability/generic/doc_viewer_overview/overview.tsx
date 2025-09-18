@@ -22,6 +22,8 @@ import {
 import { About } from '../../traces/components/about';
 import { TraceRootItemProvider } from '../../traces/doc_viewer_overview/hooks/use_fetch_trace_root_item';
 import { TraceWaterfall } from '../../traces/components/trace_waterfall';
+import { ErrorsTable } from '../../traces/components/errors';
+import { TraceContextLogEvents } from '../../traces/components/trace_context_log_events';
 import { isTransaction } from '../../traces/helpers';
 
 export type OverviewProps = DocViewRenderProps & {
@@ -86,6 +88,10 @@ export function Overview({
               serviceName={serviceName}
             />
           ) : null}
+          <EuiSpacer size="m" />
+          <ErrorsTable traceId={traceId} docId={docId} />
+          <EuiSpacer size="m" />
+          <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
         </div>
       </TraceRootItemProvider>
     </DataSourcesProvider>
