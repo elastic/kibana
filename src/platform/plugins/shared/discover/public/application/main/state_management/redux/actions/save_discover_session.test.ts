@@ -271,9 +271,8 @@ describe('saveDiscoverSession', () => {
     expect(createdSpec.name).toBe('Adhoc Name');
 
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    expect(tabs.length).toBe(2);
-    const savedTab = tabs[1];
-    expect(savedTab.id).not.toBe('adhoc-replace-tab');
+    const savedTab = tabs.find((t) => t.id === 'adhoc-replace-tab');
+
     expect((savedTab?.serializedSearchSource?.index as DataViewSpec).id).toBe('test-uuid');
     expect(savedTab?.serializedSearchSource?.filter?.[0].meta.index).toBe('test-uuid');
   });
@@ -354,9 +353,8 @@ describe('saveDiscoverSession', () => {
     expect(dataViewsClearCacheSpy).not.toHaveBeenCalled();
 
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    expect(tabs.length).toBe(2);
-    const savedTab = tabs[1];
-    expect(savedTab.id).not.toBe('esql-tab');
+    const savedTab = tabs.find((t) => t.id === 'esql-tab');
+
     expect((savedTab?.serializedSearchSource.index as DataViewSpec).id).toBe(esqlId);
   });
 
