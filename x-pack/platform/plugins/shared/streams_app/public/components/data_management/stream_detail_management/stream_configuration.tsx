@@ -15,7 +15,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
+import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
 
 interface StreamConfigurationProps {
   definition: Streams.ClassicStream.GetResponse;
@@ -57,6 +59,8 @@ export function StreamConfiguration({ definition }: StreamConfigurationProps) {
             <EuiButton iconType="sparkles">System detection</EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <StreamSystemsAccordion definition={definition} />
       </EuiFlexGroup>
     </EuiPanel>
   );

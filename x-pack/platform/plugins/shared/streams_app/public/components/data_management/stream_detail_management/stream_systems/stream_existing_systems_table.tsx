@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { SystemEventsSparkline } from './system_events_sparkline';
-import { SystemDetailExpanded } from './system_detail_expanded';
 import { TableTitle } from './table_title';
 
 const columns: Array<EuiBasicTableColumn<System>> = [
@@ -30,7 +29,6 @@ const columns: Array<EuiBasicTableColumn<System>> = [
     name: i18n.translate('xpack.streams.streamSystemsTable.columns.description', {
       defaultMessage: 'Description',
     }),
-
     truncateText: true,
   },
   {
@@ -93,20 +91,11 @@ const columns: Array<EuiBasicTableColumn<System>> = [
   },
 ];
 
-export function StreamSystemsTable({ systems }: { systems: System[] }) {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
-    {}
-  );
+export function StreamExistingSystemsTable({ systems }: { systems: System[] }) {
+  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
 
   const toggleDetails = (system: System) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-
-    if (itemIdToExpandedRowMapValues[system.name]) {
-      delete itemIdToExpandedRowMapValues[system.name];
-    } else {
-      itemIdToExpandedRowMapValues[system.name] = <SystemDetailExpanded system={system} />;
-    }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    setIsDetailFlyoutOpen(system);
   };
 
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<System>> = [
@@ -116,18 +105,27 @@ export function StreamSystemsTable({ systems }: { systems: System[] }) {
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>Expand row</span>
+          <span>
+            {i18n.translate('xpack.streams.streamSystemsTable.columns.openDetails', {
+              defaultMessage: 'Open details',
+            })}
+          </span>
         </EuiScreenReaderOnly>
       ),
-      mobileOptions: { header: false },
       render: (system: System) => {
-        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(system)}
-            aria-label={itemIdToExpandedRowMapValues[system.name] ? 'Collapse' : 'Expand'}
-            iconType={itemIdToExpandedRowMapValues[system.name] ? 'arrowDown' : 'arrowRight'}
+            aria-label={
+              isDetailFlyoutOpen
+                ? i18n.translate('xpack.streams.streamSystemsTable.columns.collapseDetails', {
+                    defaultMessage: 'Collapse details',
+                  })
+                : i18n.translate('xpack.streams.streamSystemsTable.columns.expandDetails', {
+                    defaultMessage: 'Expand details',
+                  })
+            }
+            iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
           />
         );
       },
@@ -137,15 +135,31 @@ export function StreamSystemsTable({ systems }: { systems: System[] }) {
 
   return (
     <>
-      <TableTitle pageIndex={0} pageSize={10} total={systems.length} label="Systems" />
+      <TableTitle
+        pageIndex={0}
+        pageSize={10}
+        total={systems.length}
+        label={i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
+          defaultMessage: 'Systems',
+        })}
+      />
       <EuiBasicTable
-        tableCaption="Demo of EuiBasicTable with expanding rows"
+        tableCaption={i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
+          defaultMessage: 'List of systems',
+        })}
         items={systems}
         itemId="name"
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         columns={columnsWithExpandingRowToggle}
         selection={{ initialSelected: [] }}
       />
+      {isDetailFlyoutOpen && (
+        <StreamSystemDetailsFlyout
+          system={isDetailFlyoutOpen}
+          closeFlyout={() => {
+            setIsDetailFlyoutOpen(undefined);
+          }}
+        />
+      )}
     </>
   );
 }

@@ -9,11 +9,11 @@ import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import type { System } from '@kbn/streams-schema';
 import { faker } from '@faker-js/faker';
-import { StreamSystemsFlyout } from './stream_systems_flyout';
+import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 
 const stories: Meta<{}> = {
-  title: 'Streams/StreamSystemFlyout',
-  component: StreamSystemsFlyout,
+  title: 'Streams/StreamExistingSystemsTable',
+  component: StreamExistingSystemsTable,
 };
 
 const systems: System[] = [];
@@ -44,5 +44,5 @@ The editor also ships with some built in plugins. For example it can handle chec
 It can also handle emojis! :smile:
 And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip content!)}
 `;
-  return <StreamSystemsFlyout systems={systems} closeFlyout={() => {}} isLoading={false} />;
+  return <StreamExistingSystemsTable systems={systems} />;
 };
