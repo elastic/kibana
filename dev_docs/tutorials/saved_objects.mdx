@@ -400,9 +400,9 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 ❌ The SO type '<soType>' is defining two (or more) new model versions.
 ```
 **Problem:** To ensure seamless rollouts, and safe rollbacks, some features need to be rolled out as several incremental changes where each incremental change is guaranteed to be released before the next. See more details in [this document](https://docs.google.com/document/d/1e1vZldfwqUXEdbspSSO3C3ltGQTErp7oKhzUDNSG01Y/edit?tab=t.0).
-**Scenario 1:** I am developing a large feature and including multiple changes in my SO type. If changes are unrelated, you should be able to condense them into a single `modelVersion`.
+**Scenario 1:** I am developing a large feature and including multiple changes in my SO type. If changes are unrelated (in the sense that they don't require a 2-step rollout), you should be able to condense them into a single `modelVersion`.
 **Scenario 2:** I have only defined 1 new `modelVersion`. My PR was green before and all of a sudden it started failing :shrug:. The sanity checks on SO changes are performed against 2 baselines:
 * Your PR merge base commit (or one of its ancestors). This should not change, so likely not the culprit.
 * The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, _"from the current serverless standpoint, your PR is not releasable at the moment"_ . This should only happen exceptionally. Please take a look at the `#kibana-mission-control` channel to see if something is going on.
   * **Scenario 2.1**: Kibana has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and Kibana gets to a normal release state.
-  * **Scenario 2.2**: Reach out to `#kibana-core` and we will help you figure out what's going on.
+  * **Scenario 2.2**: Kibana has NOT been rolled back. Reach out to `#kibana-core` and we will help you figure out what's going on.
