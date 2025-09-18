@@ -9,7 +9,7 @@ import type { ScopedRunnerRunAgentParams } from '@kbn/onechat-server';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';
-import type { CreateScopedRunnerDepsMock, MockedAgent, AgentClientMock } from '../../test_utils';
+import type { CreateScopedRunnerDepsMock, MockedAgent, AgentRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedAgent,
@@ -25,7 +25,7 @@ describe('runAgent', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
   let agent: MockedAgent;
-  let agentClient: AgentClientMock;
+  let agentClient: AgentRegistryMock;
   let agentHandler: jest.MockedFn<any>;
 
   beforeEach(() => {

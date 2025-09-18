@@ -16,7 +16,7 @@ import type {
   CreateScopedRunnerDepsMock,
   MockedTool,
   MockedAgent,
-  AgentClientMock,
+  AgentRegistryMock,
   ToolRegistryMock,
 } from '../../test_utils';
 import {
@@ -108,7 +108,7 @@ describe('Onechat runner', () => {
 
   describe('runAgent', () => {
     let agent: MockedAgent;
-    let agentClient: AgentClientMock;
+    let agentClient: AgentRegistryMock;
     let agentHandler: jest.MockedFn<any>;
 
     beforeEach(() => {

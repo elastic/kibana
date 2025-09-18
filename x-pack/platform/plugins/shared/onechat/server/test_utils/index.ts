@@ -29,7 +29,7 @@ export {
   createMockedAgentClient,
   createMockedAgent,
   type AgentsServiceStartMock,
-  type AgentClientMock,
+  type AgentRegistryMock,
   type MockedAgent,
 } from './agents';
 export {
