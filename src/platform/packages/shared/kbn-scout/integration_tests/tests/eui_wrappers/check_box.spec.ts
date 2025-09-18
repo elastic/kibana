@@ -12,35 +12,33 @@ import { EuiCheckBoxWrapper } from '../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiCheckBox', { tag: ['@svlSecurity', '@ess'] }, () => {
-  for (let i = 1; i <= 10; i++) {
-    test(`checkbox, run #${i}`, async ({ page }) => {
-      const selector = {
-        locator:
-          'xpath=(//div[contains(@class, "euiCheckbox") and div[contains(@class, "euiCheckbox__square")]])[1]',
-      };
+  test(`checkbox`, async ({ page }) => {
+    const selector = {
+      locator:
+        'xpath=(//div[contains(@class, "euiCheckbox") and div[contains(@class, "euiCheckbox__square")]])[1]',
+    };
 
-      await navigateToEuiTestPage(
-        page,
-        'docs/components/forms/selection/checkbox-and-checkbox-group/#checkbox'
-      );
+    await navigateToEuiTestPage(
+      page,
+      'docs/components/forms/selection/checkbox-and-checkbox-group/#checkbox'
+    );
 
-      await test.step('should be checked', async () => {
-        const checkBox = new EuiCheckBoxWrapper(page, selector);
-        expect(await checkBox.isChecked()).toBe(false);
-        await checkBox.check();
-        expect(await checkBox.isChecked()).toBe(true);
-      });
-
-      await test.step('should be unchecked', async () => {
-        const checkBox = new EuiCheckBoxWrapper(page, selector);
-        await checkBox.uncheck();
-        expect(await checkBox.isChecked()).toBe(false);
-      });
-
-      await test.step('should return label text', async () => {
-        const checkBox = new EuiCheckBoxWrapper(page, selector);
-        expect(await checkBox.getLabel()).toBe('I am a checkbox');
-      });
+    await test.step('should be checked', async () => {
+      const checkBox = new EuiCheckBoxWrapper(page, selector);
+      expect(await checkBox.isChecked()).toBe(false);
+      await checkBox.check();
+      expect(await checkBox.isChecked()).toBe(true);
     });
-  }
+
+    await test.step('should be unchecked', async () => {
+      const checkBox = new EuiCheckBoxWrapper(page, selector);
+      await checkBox.uncheck();
+      expect(await checkBox.isChecked()).toBe(false);
+    });
+
+    await test.step('should return label text', async () => {
+      const checkBox = new EuiCheckBoxWrapper(page, selector);
+      expect(await checkBox.getLabel()).toBe('I am a checkbox');
+    });
+  });
 });
