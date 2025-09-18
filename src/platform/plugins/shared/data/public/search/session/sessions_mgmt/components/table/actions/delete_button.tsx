@@ -16,14 +16,16 @@ import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import type { IClickActionDescriptor } from './types';
 import type { OnActionDismiss } from './types';
 import type { UISession } from '../../../types';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;
   searchSession: UISession;
+  hasBackgroundSearchEnabled: boolean;
 }
 
 const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { searchSession, api, onActionDismiss } = props;
+  const { searchSession, api, onActionDismiss, hasBackgroundSearchEnabled } = props;
   const { name, id } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
@@ -31,6 +33,10 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
   const title = i18n.translate('data.mgmt.searchSessions.cancelModal.title', {
     defaultMessage: 'Delete search session',
   });
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.cancelModal.backgroundSearchTitle', {
+    defaultMessage: 'Delete background search',
+  });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.cancelModal.deleteButton', {
     defaultMessage: 'Delete',
   });
@@ -43,12 +49,21 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       name,
     },
   });
+  const bgsMessage = i18n.translate(
+    'data.mgmt.searchSessions.cancelModal.backgroundSearchMessage',
+    {
+      defaultMessage: `Deleting the background search ''{name}'' deletes all cached results.`,
+      values: {
+        name,
+      },
+    }
+  );
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
-      title={title}
+      title={hasBackgroundSearchEnabled ? bgsTitle : title}
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
@@ -61,7 +76,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      {message}
+      {hasBackgroundSearchEnabled ? bgsMessage : message}
     </EuiConfirmModal>
   );
 };
@@ -76,7 +91,15 @@ export const createDeleteActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <DeleteConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
+        <DeleteConfirm
+          hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
+            BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+            false
+          )}
+          onActionDismiss={() => ref?.close()}
+          searchSession={uiSession}
+          api={api}
+        />,
         core
       )
     );

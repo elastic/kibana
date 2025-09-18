@@ -20,11 +20,13 @@ export const getColumns: GetColumnsFn = ({
   api,
   timezone,
   onActionComplete,
+  onBackgroundSearchOpened,
 }) => [
   columns.nameColumn({
     core,
     kibanaVersion,
     searchUsageCollector,
+    onBackgroundSearchOpened,
   }),
   columns.statusColumn(timezone),
   columns.actionsColumn({

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates APM data with a predictable, time-based variance in throughput and latency.
+ */
+
 import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

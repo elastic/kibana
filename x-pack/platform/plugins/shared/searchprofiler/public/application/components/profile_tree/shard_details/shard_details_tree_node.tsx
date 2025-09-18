@@ -59,7 +59,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
       <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__time euiTextAlign--center">
         <EuiBadge
           className="prfDevTool__profileTree__badge euiTextAlign--center"
-          style={{ backgroundColor: op.absoluteColor }}
+          color={op.absoluteColor}
         >
           {msToPretty(op.selfTime || 0, 1)}
         </EuiBadge>
@@ -68,7 +68,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
       <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__totalTime">
         <EuiBadge
           className="prfDevTool__profileTree__badge euiTextAlign--center"
-          style={{ backgroundColor: op.absoluteColor }}
+          color={op.absoluteColor}
         >
           {msToPretty(op.time, 1)}
         </EuiBadge>

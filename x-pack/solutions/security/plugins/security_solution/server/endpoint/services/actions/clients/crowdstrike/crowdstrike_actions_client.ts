@@ -23,7 +23,6 @@ import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -31,6 +30,7 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
+  ResponseActionScriptsApiResponse,
   EndpointActionData,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
@@ -146,8 +146,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          _source: ['agent', 'device.id', 'event.created'],
-          sort: [{ 'event.created': 'desc' }],
+          _source: ['agent', 'device.id', '@timestamp'],
+          sort: [{ '@timestamp': 'desc' }],
         },
       },
       _source: false,
@@ -573,7 +573,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     await this.sendActionResponseTelemetry([responseDoc]);
   }
 
-  async getCustomScripts(): Promise<CustomScriptsResponse> {
+  async getCustomScripts(): Promise<ResponseActionScriptsApiResponse> {
     try {
       const customScriptsResponse = (await this.sendAction(
         SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
@@ -581,14 +581,14 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       )) as ActionTypeExecutorResult<CrowdstrikeGetScriptsResponse>;
 
       const resources = customScriptsResponse.data?.resources || [];
-      // Transform CrowdStrike script resources to CustomScriptsResponse format
+      // Transform CrowdStrike script resources to ResponseActionScriptsApiResponse format
       const data = resources.map((script) => ({
         // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
         id: script.id || '',
         name: script.name || '',
         description: script.description || '',
       }));
-      return { data } as CustomScriptsResponse;
+      return { data } as ResponseActionScriptsApiResponse;
     } catch (err) {
       const error = new ResponseActionsClientError(
         `Failed to fetch Crowdstrike scripts, failed with: ${err.message}`,

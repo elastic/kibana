@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoutingDefinition, Streams } from '@kbn/streams-schema';
+import type { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
 import type { ErrorActorEvent } from 'xstate5';
 import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
@@ -13,6 +13,7 @@ import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamRoutingServiceDependencies } from './types';
 
@@ -58,13 +59,16 @@ export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
   where: Condition;
+  status: RoutingStatus;
   destination: string;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
   forkSuccessNofitier,
+  telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
   forkSuccessNofitier: (streamName: string) => void;
+  telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
     const response = await streamsRepositoryClient.fetch(
@@ -77,6 +81,7 @@ export function createForkStreamActor({
           },
           body: {
             where: input.where,
+            status: input.status,
             stream: {
               name: input.destination,
             },
@@ -86,6 +91,9 @@ export function createForkStreamActor({
     );
 
     forkSuccessNofitier(input.destination);
+    telemetryClient.trackChildStreamCreated({
+      name: input.destination,
+    });
 
     return response;
   });

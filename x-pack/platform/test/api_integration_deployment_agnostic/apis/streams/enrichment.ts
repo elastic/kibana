@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import type { Streams } from '@kbn/streams-schema';
+import type { RoutingStatus, Streams } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -37,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           field: 'resource.attributes.host.name',
           eq: 'routeme',
         },
+        status: 'enabled' as RoutingStatus,
       };
       // We use a forked stream as processing changes cannot be made to the root stream
       await forkStream(apiClient, 'logs', body);
@@ -48,12 +50,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Place processing steps', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [
                 {
@@ -172,128 +174,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
       expect((response.hits.total as SearchTotalHits).value).to.eql(0);
-    });
-
-    describe('Elasticsearch ingest pipeline enrichment', () => {
-      before(async () => {
-        const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: {
-                steps: [
-                  {
-                    action: 'manual_ingest_pipeline',
-                    processors: [
-                      {
-                        // apply custom processor
-                        uppercase: {
-                          field: 'attributes.abc',
-                        },
-                      },
-                      {
-                        // apply condition
-                        lowercase: {
-                          field: 'attributes.def',
-                          if: "ctx.attributes.def == 'yes'",
-                        },
-                      },
-                      {
-                        fail: {
-                          message: 'Failing',
-                          on_failure: [
-                            // execute on failure pipeline
-                            {
-                              set: {
-                                field: 'attributes.fail_failed',
-                                value: 'yes',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                    where: { always: {} },
-                  },
-                ],
-              },
-              wired: {
-                routing: [],
-                fields: {},
-              },
-            },
-          },
-        };
-        const response = await putStream(apiClient, 'logs.nginx', body);
-        expect(response).to.have.property('acknowledged', true);
-      });
-
-      it('Transforms doc on index', async () => {
-        const doc = {
-          '@timestamp': '2024-01-01T00:00:11.000Z',
-          abc: 'should become uppercase',
-          def: 'SHOULD NOT BECOME LOWERCASE',
-          ['host.name']: 'routeme',
-        };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
-        expect(result._source).to.eql({
-          '@timestamp': '2024-01-01T00:00:11.000Z',
-          attributes: {
-            abc: 'SHOULD BECOME UPPERCASE',
-            def: 'SHOULD NOT BECOME LOWERCASE',
-            fail_failed: 'yes',
-          },
-          resource: {
-            attributes: {
-              'host.name': 'routeme',
-            },
-          },
-          stream: {
-            name: 'logs.nginx',
-          },
-        });
-      });
-
-      it('fails to store non-existing processor', async () => {
-        const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: {
-                steps: [
-                  {
-                    action: 'manual_ingest_pipeline',
-                    processors: [
-                      {
-                        // apply custom processor
-                        non_existing_processor: {
-                          field: 'abc',
-                        },
-                      } as any,
-                    ],
-                    where: { always: {} },
-                  },
-                ],
-              },
-
-              wired: {
-                routing: [],
-                fields: {},
-              },
-            },
-          },
-        };
-        await putStream(apiClient, 'logs.nginx', body, 400);
-      });
     });
   });
 }

@@ -219,6 +219,7 @@ describe('Infra Locators', () => {
       legend: { palette: 'cool', reverseColors: false, steps: 10 },
       metric: '(type:cpu)',
       nodeType: 'host',
+      preferredSchema: undefined,
       region: '',
       sort: { by: 'name', direction: 'desc' as const },
       timelineOpen: false,

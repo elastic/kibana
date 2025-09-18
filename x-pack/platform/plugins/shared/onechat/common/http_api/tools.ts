@@ -10,6 +10,7 @@ import type {
   ToolDefinitionWithSchema,
   SerializedOnechatError,
 } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export interface ListToolsResponse {
   results: ToolDefinitionWithSchema[];
@@ -21,7 +22,7 @@ export interface DeleteToolResponse {
   success: boolean;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags'> &
+export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
 export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
@@ -49,4 +50,22 @@ export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolF
 
 export interface BulkDeleteToolResponse {
   results: BulkDeleteToolResult[];
+}
+
+export interface ExecuteToolResponse {
+  results: ToolResult[];
+}
+
+export interface ResolveSearchSourcesRequest {
+  pattern: string;
+}
+
+export interface ResolveSearchSourceItem {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
+}
+
+export interface ResolveSearchSourcesResponse {
+  results: ResolveSearchSourceItem[];
+  total: number;
 }

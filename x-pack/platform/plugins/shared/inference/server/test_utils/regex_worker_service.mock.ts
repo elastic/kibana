@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
+import type { AnonymizationRegexWorkerTaskPayload } from '../chat_complete/anonymization/types';
 import type { AnonymizationState } from '../chat_complete/anonymization/types';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 

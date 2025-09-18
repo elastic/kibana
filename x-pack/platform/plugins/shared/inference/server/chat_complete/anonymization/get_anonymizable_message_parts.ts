@@ -33,7 +33,5 @@ export function getAnonymizableMessageParts(message: Message) {
     };
   }
 
-  return {
-    content: message.content,
-  };
+  return { content: message.content };
 }

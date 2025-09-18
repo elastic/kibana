@@ -28,6 +28,7 @@ import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { LicenseService } from '../../../../../common/license';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,
@@ -97,6 +98,7 @@ export interface ManifestManagerContext {
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
+  licenseService: LicenseService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -119,6 +121,7 @@ export class ManifestManager {
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
   protected productFeaturesService: ProductFeaturesService;
+  protected licenseService: LicenseService;
   protected savedObjectsClientFactory: SavedObjectsClientFactory;
 
   constructor(context: ManifestManagerContext) {
@@ -136,6 +139,7 @@ export class ManifestManager {
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
     this.productFeaturesService = context.productFeaturesService;
+    this.licenseService = context.licenseService;
   }
 
   /**
@@ -145,6 +149,39 @@ export class ManifestManager {
    */
   protected getManifestClient(): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
+  }
+
+  /**
+   * Determines if exceptions should be retrieved based on licensing conditions
+   * @private
+   */
+  private shouldRetrieveExceptions(listId: ArtifactListId): boolean {
+    // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
+    // Host Isolation Exceptions require feature enablement (serverless).
+    const isHostIsolationWithFeatureEnabled =
+      listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointHostIsolationExceptions);
+
+    // Trusted Devices requires enterprise license (ess) or feature enablement (serverless).
+    // In serverless .isEnterprise() will always yield true, in ESS feature check .isEnabled() will also always yield true.
+    // Therefore both conditions must be met in both environments.
+    const isTrustedDevicesWithFeatureAndEnterpriseLicense =
+      listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      this.experimentalFeatures.trustedDevices &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
+      this.licenseService.isEnterprise();
+
+    // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
+    const isOtherArtifactWithFeatureEnabled =
+      listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+      listId !== ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement);
+
+    return (
+      isHostIsolationWithFeatureEnabled ||
+      isTrustedDevicesWithFeatureAndEnterpriseLicense ||
+      isOtherArtifactWithFeatureEnabled
+    );
   }
 
   /**
@@ -167,17 +204,9 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
-      // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
-      // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
-      // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
-      if (
-        (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(
-            ProductFeatureKey.endpointHostIsolationExceptions
-          )) ||
-        (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
-      ) {
+      // If there are host isolation exceptions in place but there is a downgrade scenario (serverless), those shouldn't be taken into account when generating artifacts.
+      // If there are trusted devices in place but there is a downgrade scenario (ess/serverless), those shouldn't be taken into account when generating artifacts.
+      if (this.shouldRetrieveExceptions(listId)) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
           os,
@@ -324,6 +353,34 @@ export class ManifestManager {
       await this.buildArtifactsByPolicy(
         allPolicyIds,
         ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an array of artifacts (one per supported OS) based on the current state of the
+   * Trusted Devices list
+   * @protected
+   */
+  protected async buildTrustedDevicesArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      name: ArtifactConstants.GLOBAL_TRUSTED_DEVICES_NAME,
+    };
+
+    for (const os of ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    }
+
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS,
         buildArtifactsForOsOptions
       );
 
@@ -629,6 +686,9 @@ export class ManifestManager {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(allPolicyIds),
       this.buildTrustedAppsArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),

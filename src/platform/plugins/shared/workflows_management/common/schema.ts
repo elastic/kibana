@@ -11,9 +11,8 @@ import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
-// TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
-
-const connectors: ConnectorContract[] = [
+// Static connectors used for schema generation
+const staticConnectors: ConnectorContract[] = [
   {
     type: 'console',
     paramsSchema: z
@@ -75,14 +74,128 @@ const connectors: ConnectorContract[] = [
       })
     ),
   },
+  // Generic request types for raw API calls
+  {
+    type: 'elasticsearch.request',
+    connectorIdRequired: false,
+    paramsSchema: z.object({
+      method: z.string(),
+      path: z.string(),
+      body: z.any().optional(),
+      params: z.any().optional(),
+    }),
+    outputSchema: z.any(),
+  },
+  {
+    type: 'kibana.request',
+    connectorIdRequired: false,
+    paramsSchema: z.object({
+      method: z.string(),
+      path: z.string(),
+      body: z.any().optional(),
+      headers: z.any().optional(),
+    }),
+    outputSchema: z.any(),
+  },
 ];
 
+/**
+ * Elasticsearch Connector Generation
+ *
+ * This system provides ConnectorContract[] for all Elasticsearch APIs
+ * by using pre-generated definitions from Console's API specifications.
+ *
+ * Benefits:
+ * 1. **Schema Validation**: Zod schemas for all ES API parameters
+ * 2. **Autocomplete**: Monaco YAML editor gets full autocomplete via JSON Schema
+ * 3. **Comprehensive Coverage**: 568 Elasticsearch APIs supported
+ * 4. **Browser Compatible**: No file system access required
+ * 5. **Lazy Loading**: Large generated files are only loaded when needed, reducing main bundle size
+ *
+ * The generated connectors include:
+ * - All Console API definitions converted to Zod schemas
+ * - Path parameters extracted from patterns (e.g., {index}, {id})
+ * - URL parameters with proper types (flags, enums, strings, numbers)
+ * - Proper ConnectorContract format for workflow execution
+ *
+ * To regenerate: run `npm run generate:es-connectors` from @kbn/workflows package
+ */
+function generateElasticsearchConnectors(): ConnectorContract[] {
+  // Lazy load the large generated files to keep them out of the main bundle
+  const {
+    GENERATED_ELASTICSEARCH_CONNECTORS,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('@kbn/workflows/common/generated_es_connectors');
+
+  const {
+    ENHANCED_ELASTICSEARCH_CONNECTORS,
+    mergeEnhancedConnectors,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('./enhanced_es_connectors');
+
+  // Return enhanced connectors (merge generated with enhanced definitions)
+  return mergeEnhancedConnectors(
+    GENERATED_ELASTICSEARCH_CONNECTORS,
+    ENHANCED_ELASTICSEARCH_CONNECTORS
+  );
+}
+
+function generateKibanaConnectors(): ConnectorContract[] {
+  // Lazy load the generated Kibana connectors
+
+  const {
+    GENERATED_KIBANA_CONNECTORS,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('@kbn/workflows/common/generated_kibana_connectors');
+
+  // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
+  return GENERATED_KIBANA_CONNECTORS;
+}
+
+// Combine static connectors with dynamic Elasticsearch and Kibana connectors
+export function getAllConnectors(): ConnectorContract[] {
+  const elasticsearchConnectors = generateElasticsearchConnectors();
+  const kibanaConnectors = generateKibanaConnectors();
+  return [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
+}
+
 export const getOutputSchemaForStepType = (stepType: string) => {
-  return connectors.find((c) => c.type === stepType)?.outputSchema ?? z.any();
+  const allConnectors = getAllConnectors();
+  const connector = allConnectors.find((c) => c.type === stepType);
+  if (connector) {
+    return connector.outputSchema;
+  }
+
+  // Handle internal actions with pattern matching
+  // TODO: add output schema support for elasticsearch.request and kibana.request connectors
+  if (stepType.startsWith('elasticsearch.')) {
+    return z.any();
+  }
+
+  if (stepType.startsWith('kibana.')) {
+    return z.any();
+  }
+
+  // Fallback to any if not found
+  return z.any();
 };
 
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
+// Dynamic schemas that include all connectors (static + Elasticsearch)
+// These use lazy loading to keep large generated files out of the main bundle
+export const getWorkflowZodSchema = () => {
+  const allConnectors = getAllConnectors();
+  return generateYamlSchemaFromConnectors(allConnectors);
+};
+
+export const getWorkflowZodSchemaLoose = () => {
+  const allConnectors = getAllConnectors();
+  return generateYamlSchemaFromConnectors(allConnectors, true);
+};
+
+// Legacy exports for backward compatibility - these will be deprecated
+// TODO: Remove these once all consumers are updated to use the lazy-loaded versions
+export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors);
+export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, true);
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema
@@ -99,7 +212,7 @@ const AlertSchema = z.object({
 
 const SummarizedAlertsChunkSchema = z.object({
   count: z.number(),
-  data: z.array(AlertSchema),
+  data: z.array(z.union([AlertSchema, z.any()])),
 });
 
 const RuleSchema = z.object({

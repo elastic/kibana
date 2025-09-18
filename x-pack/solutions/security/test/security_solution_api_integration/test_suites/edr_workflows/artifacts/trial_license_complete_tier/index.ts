@@ -53,8 +53,10 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
     // Remember to make sure the suite is enabled in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml when adding new tests without @skipInServerlessMKI
     loadTestFile(require.resolve('./trusted_apps'));
+    loadTestFile(require.resolve('./trusted_devices'));
     loadTestFile(require.resolve('./event_filters'));
     loadTestFile(require.resolve('./host_isolation_exceptions'));
     loadTestFile(require.resolve('./blocklists'));
+    loadTestFile(require.resolve('./endpoint_exceptions'));
   });
 }

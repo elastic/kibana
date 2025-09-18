@@ -55,7 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(stats.stack_stats.kibana.plugins.spaces.disabledFeatures).to.eql({
-        guidedOnboardingFeature: 0,
         actions: 0,
         observabilityAIAssistant: 0,
         aiAssistantManagementSelection: 0,
@@ -80,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         observabilityCases: 0,
         observabilityCasesV2: 0,
         observabilityCasesV3: 0,
-        onechat: 0,
+        agentBuilder: 0,
         uptime: 0,
         slo: 0,
         infrastructure: 0,

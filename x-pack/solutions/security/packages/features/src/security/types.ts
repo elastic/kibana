@@ -6,7 +6,7 @@
  */
 
 import type { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 export interface SecurityFeatureParams {
   /**
@@ -20,9 +20,7 @@ export interface SecurityFeatureParams {
   savedObjects: string[];
 }
 
-export type DefaultSecurityProductFeaturesConfig = Omit<
-  Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
-  | ProductFeatureSecurityKey.endpointExceptions
-  | ProductFeatureSecurityKey.endpointArtifactManagement
-  // | add not generic security app features here
+export type SecurityProductFeaturesConfig = ProductFeaturesConfig<
+  ProductFeatureSecurityKey,
+  SecuritySubFeatureId
 >;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
+import { chunk } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
@@ -14,16 +16,19 @@ import type { GapStatus } from '../../../common/constants';
 import { gapStatus } from '../../../common/constants';
 
 interface ProcessAllRuleGapsParams<T> {
-  ruleId: string;
+  ruleIds: string[];
   start?: string;
   end?: string;
   statuses?: GapStatus[];
   options?: {
-    maxFetchedGaps?: number;
+    maxProcessedGapsPerRule?: number;
   };
   eventLogClient: IEventLogClient;
   logger: Logger;
-  processGapsBatch: (gaps: Gap[]) => Promise<T>;
+  processGapsBatch: (
+    gaps: Gap[],
+    processingLimitsByRuleId: Record<string, number>
+  ) => Promise<Record<string, number>>;
 }
 
 export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
@@ -32,11 +37,43 @@ export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
 // 10000 * 500 = 5,000,000 million gaps
 const DEFAULT_MAX_ITERATIONS = 10000;
 
+const getProcessingLimitsByRuleId = (
+  countsByRuleId: Record<string, number>,
+  maxProcessedGapsPerRule?: number
+) => {
+  const limits: Record<string, number> = {};
+  if (!maxProcessedGapsPerRule) {
+    return {};
+  }
+
+  Object.keys(countsByRuleId).forEach((ruleId) => {
+    limits[ruleId] = maxProcessedGapsPerRule - countsByRuleId[ruleId];
+  });
+
+  return limits;
+};
+
+const getNextRuleIdsToProcess = (
+  overallProcessedCountsByRuleId: Record<string, number>,
+  maxProcessedGapsPerRule?: number
+) => {
+  if (!maxProcessedGapsPerRule) {
+    return Object.keys(overallProcessedCountsByRuleId);
+  }
+
+  return Object.entries(overallProcessedCountsByRuleId)
+    .filter(([_, count]) => count < maxProcessedGapsPerRule)
+    .map(([ruleId]) => ruleId);
+};
+
+const PROCESS_ALL_RULE_GAPS_CONCURRENCY = 10;
+const PROCESS_ALL_RULE_GAPS_CHUNK_SIZE = 10;
+
 /**
  * Fetches all gaps using search_after pagination to process more than 10,000 gaps with stable sorting
  */
 export const processAllRuleGaps = async <T>({
-  ruleId,
+  ruleIds,
   start,
   end,
   statuses = [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
@@ -44,69 +81,89 @@ export const processAllRuleGaps = async <T>({
   logger,
   eventLogClient,
   processGapsBatch,
-}: ProcessAllRuleGapsParams<T>): Promise<T[]> => {
-  let searchAfter: SortResults[] | undefined;
-  let pitId: string | undefined;
-  let iterationCount = 0;
-  let gapsCount = 0;
-  const processingResults: T[] = [];
+}: ProcessAllRuleGapsParams<T>): Promise<void> => {
+  const processChunk = async (ruleIdsToProcess: string[]) => {
+    let searchAfter: SortResults[] | undefined;
+    let pitId: string | undefined;
+    let iterationCount = 0;
 
-  const { maxFetchedGaps } = options ?? {};
+    const { maxProcessedGapsPerRule } = options ?? {};
 
-  try {
-    while (true) {
-      if (iterationCount >= DEFAULT_MAX_ITERATIONS) {
-        logger.warn(
-          `Circuit breaker triggered: Reached maximum number of iterations (${DEFAULT_MAX_ITERATIONS}) while processing gaps for rule ${ruleId}`
-        );
-        break;
+    const overallProcessedCountsByRuleId = ruleIdsToProcess.reduce<Record<string, number>>(
+      (acc, ruleId) => {
+        acc[ruleId] = 0;
+        return acc;
+      },
+      {}
+    );
+
+    try {
+      while (true) {
+        if (iterationCount >= DEFAULT_MAX_ITERATIONS) {
+          logger.warn(
+            `Circuit breaker triggered: Reached maximum number of iterations (${DEFAULT_MAX_ITERATIONS}) while processing gaps for rules ${ruleIdsToProcess.join(
+              ', '
+            )}`
+          );
+          break;
+        }
+        iterationCount++;
+
+        const gapsResponse = await findGapsSearchAfter({
+          eventLogClient,
+          logger,
+          params: {
+            ruleIds: ruleIdsToProcess,
+            start,
+            end,
+            perPage: PROCESS_GAPS_DEFAULT_PAGE_SIZE,
+            statuses,
+            sortField: '@timestamp',
+            sortOrder: 'asc',
+            searchAfter,
+            pitId,
+          },
+        });
+
+        const {
+          data: gapsToProcess,
+          searchAfter: nextSearchAfter,
+          pitId: nextPitId,
+        } = gapsResponse;
+        pitId = nextPitId;
+
+        if (gapsToProcess.length > 0) {
+          const limitsByRuleId = getProcessingLimitsByRuleId(
+            overallProcessedCountsByRuleId,
+            maxProcessedGapsPerRule
+          );
+
+          const processedCountsByRuleId = await processGapsBatch(gapsToProcess, limitsByRuleId);
+
+          Object.entries(processedCountsByRuleId).forEach(([ruleId, processedCount]) => {
+            overallProcessedCountsByRuleId[ruleId] += processedCount;
+          });
+
+          ruleIdsToProcess = getNextRuleIdsToProcess(
+            overallProcessedCountsByRuleId,
+            maxProcessedGapsPerRule
+          );
+        }
+
+        if (gapsToProcess.length === 0 || ruleIdsToProcess.length === 0 || !nextSearchAfter) {
+          break;
+        }
+
+        searchAfter = nextSearchAfter;
       }
-      iterationCount++;
-
-      const gapsResponse = await findGapsSearchAfter({
-        eventLogClient,
-        logger,
-        params: {
-          ruleId,
-          start,
-          end,
-          perPage: PROCESS_GAPS_DEFAULT_PAGE_SIZE,
-          statuses,
-          sortField: '@timestamp',
-          sortOrder: 'asc',
-          searchAfter,
-          pitId,
-        },
-      });
-
-      const { data: gaps, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
-      pitId = nextPitId;
-
-      gapsCount += gaps.length;
-
-      let gapsToProcess = gaps;
-      if (maxFetchedGaps && gapsCount > maxFetchedGaps) {
-        const offset = gapsCount - maxFetchedGaps;
-        gapsToProcess = gapsToProcess.slice(0, gaps.length - offset);
+    } finally {
+      if (pitId) {
+        await eventLogClient.closePointInTime(pitId);
       }
-
-      if (gapsToProcess.length > 0) {
-        processingResults.push(await processGapsBatch(gapsToProcess));
-      }
-
-      // Exit conditions: no more results or no next search_after or maxFetchedGaps reached
-      const maxGapsReached = maxFetchedGaps !== undefined && gapsCount >= maxFetchedGaps;
-      if (gapsToProcess.length === 0 || !nextSearchAfter || maxGapsReached) {
-        break;
-      }
-
-      searchAfter = nextSearchAfter;
     }
-  } finally {
-    if (pitId) {
-      await eventLogClient.closePointInTime(pitId);
-    }
-  }
+  };
 
-  return processingResults;
+  await pMap(chunk(ruleIds, PROCESS_ALL_RULE_GAPS_CHUNK_SIZE), processChunk, {
+    concurrency: PROCESS_ALL_RULE_GAPS_CONCURRENCY,
+  });
 };

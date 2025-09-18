@@ -16,8 +16,6 @@ xpack.fleet.internal.registry.spec.max: '3.4'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
-  onechat:
-    hidden: true
   dashboard:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
@@ -163,7 +161,7 @@ management.deeplinks.navLinkStatus: visible
 
 # Onboarding team UI configurations
 xpack.cloud_integrations.data_migration.enabled: false
-guided_onboarding.enabled: false
+
 
 # Other disabled plugins
 xpack.canvas.enabled: false
@@ -274,6 +272,7 @@ xpack.reporting.csv.maxConcurrentShardRequests: 0
 # Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
+monitoring_collection.enabled: false
 
 ## Enable uiSettings validations
 data.enableUiSettingsValidations: true

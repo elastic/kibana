@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -27,15 +28,24 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash';
-import type { ChangeEvent, FC, PropsWithChildren } from 'react';
+import type { ChangeEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { findInventoryModel, SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  InventoryItemType,
+  SnapshotMetricType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
+import {
+  DataSchemaFormatEnum,
+  findInventoryModel,
+  SnapshotMetricTypeRT,
+} from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
+import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
@@ -50,8 +60,8 @@ import {
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
-import { MetricExpression } from './metric';
-import { NodeTypeExpression } from './node_type';
+import { MetricExpression } from './metrics_expression';
+import { ExpressionDropDown } from './expression_dropdown';
 
 export interface AlertContextMeta {
   accountId?: string;
@@ -60,20 +70,24 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
   filter?: string;
   customMetrics?: SnapshotCustomMetricInput[];
+  schema?: DataSchemaFormat;
 }
 
 type Criteria = InventoryMetricConditions[];
-type Props = Omit<
+export type ExpressionsProps = Omit<
   RuleTypeParamsExpressionProps<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
+      // query DSL
       filterQuery?: FilterQuery;
+      // kuery
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
       accountId?: string;
       region?: string;
+      schema?: DataSchemaFormat | null;
     },
     AlertContextMeta
   >,
@@ -81,7 +95,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression = {
-  metric: 'cpuV2' as SnapshotMetricType,
+  metric: 'cpuV2',
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
@@ -94,7 +108,7 @@ export const defaultExpression = {
   },
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = (props) => {
+export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source } = useSourceContext();
 
@@ -182,8 +196,15 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const updateNodeType = useCallback(
-    (nt: any) => {
+    (nt: InventoryItemType) => {
       setRuleParams('nodeType', nt);
+    },
+    [setRuleParams]
+  );
+
+  const updateSchema = useCallback(
+    (nt: DataSchemaFormat) => {
+      setRuleParams('schema', nt);
     },
     [setRuleParams]
   );
@@ -224,11 +245,19 @@ export const Expressions: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const md = metadata;
+    const isHost = ruleParams.nodeType === 'host' || (md && md.nodeType === 'host');
+
     if (!ruleParams.nodeType) {
       if (md && md.nodeType) {
         setRuleParams('nodeType', md.nodeType);
       } else {
         setRuleParams('nodeType', 'host');
+      }
+    }
+
+    if (!ruleParams.schema) {
+      if (md && md.schema && isHost) {
+        setRuleParams('schema', md.schema);
       }
     }
 
@@ -262,14 +291,66 @@ export const Expressions: React.FC<Props> = (props) => {
       <div css={StyledExpressionCss}>
         <EuiFlexGroup css={StyledExpressionRowCss}>
           <div css={NonCollapsibleExpressionCss}>
-            <NodeTypeExpression
-              options={nodeTypes}
+            <ExpressionDropDown
+              options={nodeTypeOptions}
               value={ruleParams.nodeType || 'host'}
               onChange={updateNodeType}
+              description={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.expression.for.descriptionLabel',
+                {
+                  defaultMessage: 'For',
+                }
+              )}
+              popoverTitle={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.expression.for.popoverTitle',
+                {
+                  defaultMessage: 'Node type',
+                }
+              )}
+              data-test-subj="forExpressionSelect"
+              aria-label={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
+                {
+                  defaultMessage: 'Select a node type',
+                }
+              )}
             />
           </div>
         </EuiFlexGroup>
       </div>
+      {ruleParams.nodeType === 'host' && (
+        <div css={StyledExpressionCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss}>
+            <div css={NonCollapsibleExpressionCss}>
+              <ExpressionDropDown
+                options={schemaOptions}
+                value={ruleParams.schema ?? 'ecs'}
+                onChange={updateSchema}
+                description={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
+                  {
+                    defaultMessage: 'Schema',
+                  }
+                )}
+                popoverTitle={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.popoverTitle',
+                  {
+                    defaultMessage: 'Schema',
+                  }
+                )}
+                data-test-subj="forExpressionSelect"
+                aria-label={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
+                  {
+                    defaultMessage: 'Select a schema',
+                  }
+                )}
+              />
+            </div>
+          </EuiFlexGroup>
+        </div>
+      )}
+
       <EuiSpacer size="xs" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
@@ -292,6 +373,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
+                schema={ruleParams.schema}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
@@ -387,7 +469,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default withSourceProvider<Props>(Expressions)('default');
+export default withSourceProvider<ExpressionsProps>(Expressions)('default');
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;
@@ -420,7 +502,7 @@ const StyledHealthCss = css`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
+export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, nodeType } =
@@ -706,7 +788,7 @@ const getDisplayNameForType = (type: InventoryItemType) => {
   return inventoryModel.displayName;
 };
 
-export const nodeTypes: { [key: string]: any } = {
+const nodeTypeOptions: Record<InventoryItemType, EuiSelectOption> = {
   host: {
     text: getDisplayNameForType('host'),
     value: 'host',
@@ -734,6 +816,17 @@ export const nodeTypes: { [key: string]: any } = {
   awsSQS: {
     text: getDisplayNameForType('awsSQS'),
     value: 'awsSQS',
+  },
+};
+
+const schemaOptions: Record<DataSchemaFormat, EuiSelectOption> = {
+  ecs: {
+    text: schemaTranslationMap.ecs,
+    value: DataSchemaFormatEnum.ECS,
+  },
+  semconv: {
+    text: schemaTranslationMap.semconv,
+    value: DataSchemaFormatEnum.SEMCONV,
   },
 };
 

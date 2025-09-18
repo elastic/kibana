@@ -10,7 +10,7 @@
 import React from 'react';
 
 export const WorkflowExecutionLazy = React.lazy(() =>
-  import('./workflow_execution').then((module) => ({
-    default: module.WorkflowExecution,
+  import('./workflow_execution_detail').then((module) => ({
+    default: module.WorkflowExecutionDetail,
   }))
 );

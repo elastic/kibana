@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { POOR_QUALITY_MINIMUM_PERCENTAGE, WARNING_QUALITY_MINIMUM_PERCENTAGE } from '../constants';
+import { POOR_QUALITY_MINIMUM_PERCENTAGE, DEGRADED_QUALITY_MINIMUM_PERCENTAGE } from '../constants';
 import type { QualityIndicators } from '../types';
 
 export const mapPercentageToQuality = (percentages: number[]): QualityIndicators => {
@@ -13,8 +13,8 @@ export const mapPercentageToQuality = (percentages: number[]): QualityIndicators
     return 'poor';
   }
 
-  if (percentages.some((percentage) => percentage > WARNING_QUALITY_MINIMUM_PERCENTAGE)) {
-    return 'warning';
+  if (percentages.some((percentage) => percentage > DEGRADED_QUALITY_MINIMUM_PERCENTAGE)) {
+    return 'degraded';
   }
 
   return 'good';

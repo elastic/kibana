@@ -27,10 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the index templates tab
-      await pageObjects.indexManagement.changeTabs('templatesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
     });
 
     after(async () => {

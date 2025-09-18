@@ -140,6 +140,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
     // The old processing array is migrated to Streamlang DSL.
     // Old processor definitions are migrated to a single manual_ingest_pipeline processor.
     processing: migratedProcessing,
+    settings: {},
     classic: {},
   },
 };
@@ -156,6 +157,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
     // The old processing array is migrated to Streamlang DSL.
     // Old processor definitions are migrated to a single manual_ingest_pipeline processor.
     processing: migratedProcessing,
+    settings: {},
     wired: {
       routing: [
         {
@@ -164,6 +166,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
             field: 'resource.attributes.host.name',
             eq: 'myHost',
           },
+          status: 'enabled',
         },
       ],
       fields: {

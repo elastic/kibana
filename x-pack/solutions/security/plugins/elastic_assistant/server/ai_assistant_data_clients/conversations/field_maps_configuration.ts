@@ -47,9 +47,29 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  created_by: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'created_by.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'created_by.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   messages: {
     type: 'nested',
     array: true,
+    required: false,
+  },
+  'messages.id': {
+    type: 'keyword',
+    array: false,
     required: false,
   },
   'messages.@timestamp': {

@@ -385,7 +385,10 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       const taskDefinition =
         taskManager.registerTaskDefinitions.mock.calls[0][0]['IndicesMetadata:IndicesMetadataTask'];
       taskInstance = { state: { lastRun: '2023-01-01' } } as unknown as ConcreteTaskInstance;
-      taskRunner = taskDefinition.createTaskRunner({ taskInstance });
+      taskRunner = taskDefinition.createTaskRunner({
+        taskInstance,
+        abortController: new AbortController(),
+      });
 
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
         subscribe: jest.fn().mockImplementation((callback) => {
@@ -580,8 +583,72 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     it('should handle receiver errors during publishIndicesMetadata', async () => {
       const error = new Error('Elasticsearch error');
       receiver.getIndices.mockRejectedValue(error);
+      receiver.getDataStreams.mockResolvedValue(mockDataStreams);
+      receiver.getIndexTemplatesStats.mockResolvedValue(mockIndexTemplates);
 
-      await expect(service['publishIndicesMetadata']()).rejects.toThrow('Elasticsearch error'); // eslint-disable-line dot-notation
+      await service['publishIndicesMetadata'](); // eslint-disable-line dot-notation
+
+      expect(logger.error).toHaveBeenCalledWith('Error fetching indices metadata', { error });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping indices metadata publish due to fetch errors'
+      );
+      expect(sender.reportEBT).not.toHaveBeenCalled();
+    });
+
+    it('should handle partial receiver errors during publishIndicesMetadata', async () => {
+      const error = new Error('DataStream error');
+      receiver.getIndices.mockResolvedValue(mockIndexSettings);
+      receiver.getDataStreams.mockRejectedValue(error);
+      receiver.getIndexTemplatesStats.mockResolvedValue(mockIndexTemplates);
+
+      await service['publishIndicesMetadata'](); // eslint-disable-line dot-notation
+
+      expect(logger.error).toHaveBeenCalledWith('Error fetching indices metadata', { error });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping indices metadata publish due to fetch errors'
+      );
+      expect(sender.reportEBT).not.toHaveBeenCalled();
+    });
+
+    it('should handle all receiver methods failing during publishIndicesMetadata', async () => {
+      const indicesError = new Error('Indices error');
+      const dataStreamError = new Error('DataStream error');
+      const templatesError = new Error('Templates error');
+
+      receiver.getIndices.mockRejectedValue(indicesError);
+      receiver.getDataStreams.mockRejectedValue(dataStreamError);
+      receiver.getIndexTemplatesStats.mockRejectedValue(templatesError);
+
+      await service['publishIndicesMetadata'](); // eslint-disable-line dot-notation
+
+      expect(logger.error).toHaveBeenCalledWith('Error fetching indices metadata', {
+        error: indicesError,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping indices metadata publish due to fetch errors'
+      );
+      expect(sender.reportEBT).not.toHaveBeenCalled();
+    });
+
+    it('should continue processing when receiver methods return empty results', async () => {
+      receiver.getIndices.mockResolvedValue([]);
+      receiver.getDataStreams.mockResolvedValue([]);
+      receiver.getIndexTemplatesStats.mockResolvedValue([]);
+      receiver.getIndicesStats.mockImplementation(async function* () {
+        // yield nothing
+      });
+      receiver.isIlmStatsAvailable.mockResolvedValue(false);
+      receiver.getIlmsPolicies.mockImplementation(async function* () {
+        // yield nothing
+      });
+
+      await service['publishIndicesMetadata'](); // eslint-disable-line dot-notation
+
+      expect(receiver.getIndices).toHaveBeenCalled();
+      expect(receiver.getDataStreams).toHaveBeenCalled();
+      expect(receiver.getIndexTemplatesStats).toHaveBeenCalled();
+      expect(sender.reportEBT).toHaveBeenCalledTimes(5); // datastreams, indices settings, indices stats, ILM policies (empty), templates
+      expect(logger.debug).toHaveBeenCalledWith('ILM explain API is not available');
     });
 
     it('should handle sender errors during publishDatastreamsStats', () => {

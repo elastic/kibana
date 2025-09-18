@@ -8,14 +8,10 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import {
-  convertToSerializableGraph,
-  convertToWorkflowGraph,
-} from '../../common/lib/build_execution_graph/build_execution_graph';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
@@ -42,7 +38,13 @@ export function createWorkflowTaskRunner({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actionsClient: IUnsecuredActionsClient;
 }) {
-  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+  return ({
+    taskInstance,
+    fakeRequest,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    fakeRequest?: KibanaRequest;
+  }) => {
     const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 
@@ -57,31 +59,47 @@ export function createWorkflowTaskRunner({
             throw new Error(`Workflow ${workflowId} not found`);
           }
 
+          if (!workflow.definition) {
+            throw new Error(`Workflow definition not found: ${workflowId}`);
+          }
+
+          if (!workflow.valid) {
+            throw new Error(`Workflow is not valid: ${workflowId}`);
+          }
+
           // Convert to execution model
-          const executionGraph = convertToWorkflowGraph(workflow.definition);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
-            status: workflow.status,
+            enabled: workflow.enabled,
             definition: workflow.definition,
-            executionGraph: convertToSerializableGraph(executionGraph),
+            yaml: workflow.yaml,
           };
 
-          // Execute the workflow
-          const executionId = await workflowsExecutionEngine.executeWorkflow(
-            workflowExecutionModel,
-            {
-              workflowRunId: `scheduled-${Date.now()}`,
-              spaceId,
-              inputs: {},
-              event: {
-                type: 'scheduled',
-                timestamp: new Date().toISOString(),
-                source: 'task-manager',
-              },
-              triggeredBy: 'scheduled', // <-- mark as scheduled
-            }
-          );
+          // Execute the workflow with user context from fakeRequest if available
+          const executionContext = {
+            workflowRunId: `scheduled-${Date.now()}`,
+            spaceId,
+            inputs: {},
+            event: {
+              type: 'scheduled',
+              timestamp: new Date().toISOString(),
+              source: 'task-manager',
+            },
+            triggeredBy: 'scheduled', // <-- mark as scheduled
+          };
+
+          const executionId = fakeRequest
+            ? await workflowsExecutionEngine.executeWorkflow(
+                workflowExecutionModel,
+                executionContext,
+                fakeRequest // Pass the fakeRequest for user context
+              )
+            : await workflowsExecutionEngine.executeWorkflow(
+                workflowExecutionModel,
+                executionContext,
+                {} as any // Fallback when no user context is available
+              );
 
           logger.info(
             `Successfully executed scheduled workflow ${workflowId}, execution ID: ${executionId}`

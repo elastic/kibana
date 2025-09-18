@@ -25,6 +25,9 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  CaseSummaryResponse,
+  InferenceConnectorsResponse,
+  FindCasesContainingAllAlertsResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -41,6 +44,7 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
+  InferenceConnectors,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -59,6 +63,8 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
+  getCaseSummaryUrl,
+  getInferenceConnectorsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -67,6 +73,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -91,6 +98,7 @@ import type {
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   UserActionUI,
+  CaseSummary,
 } from './types';
 
 import {
@@ -103,6 +111,9 @@ import {
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
+  decodeCaseSummaryResponse,
+  decodeInferenceConnectorsResponse,
+  decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
@@ -182,6 +193,49 @@ export const getSingleCaseMetrics = async (
   return convertToCamelCase<SingleCaseMetricsResponse, SingleCaseMetrics>(
     decodeSingleCaseMetricsResponse(response)
   );
+};
+
+export const getCaseSummary = async (
+  caseId: string,
+  connectorId: string,
+  signal?: AbortSignal
+): Promise<CaseSummary> => {
+  const response = await KibanaServices.get().http.fetch<CaseSummaryResponse>(
+    getCaseSummaryUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+      query: { connectorId },
+    }
+  );
+  return decodeCaseSummaryResponse(response);
+};
+
+export const getInferenceConnectors = async (
+  signal?: AbortSignal
+): Promise<InferenceConnectors> => {
+  const response = await KibanaServices.get().http.fetch<InferenceConnectorsResponse>(
+    getInferenceConnectorsUrl(),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return decodeInferenceConnectorsResponse(response);
+};
+
+export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+  const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
+    `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        alertIds,
+        caseIds,
+      }),
+    }
+  );
+  return decodeFindAllAttachedAlertsResponse(response);
 };
 
 export const findCaseUserActions = async (

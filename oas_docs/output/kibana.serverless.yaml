@@ -66,7 +66,6 @@ tags:
       Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
       For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -84,6 +83,7 @@ tags:
   - name: Elastic Agent status
   - name: Elastic Agents
   - name: Elastic Package Manager (EPM)
+  - name: Fleet cloud connectors
   - name: Fleet enrollment API keys
   - name: Fleet internals
   - name: Fleet outputs
@@ -6367,7 +6367,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -11073,9 +11073,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  example:
+                    - alert-id-1
+                    - alert-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 case_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                  description: The IDs of cases where the action taken will be logged.
+                  example:
+                    - case-id-1
+                    - case-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 comment:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
                 endpoint_ids:
@@ -11146,11 +11162,32 @@ paths:
           name: product_name
   /api/endpoint/action/runscript:
     post:
-      description: Run a shell command on an endpoint.
+      description: Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
       requestBody:
         content:
           application/json:
+            examples:
+              MDE:
+                description: Microsoft Defender Endpoint runscript
+                summary: Run a script against a Microsoft Defender Endpoint agent
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    args: '-param1 value1 -param2 value2'
+                    scriptName: my-script.ps1
+              SentinelOne:
+                description: SentinelOne runscript
+                summary: Run a script against a SentinelOne agent
+                value:
+                  agent_type: sentinel_one
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
         required: true
@@ -11159,8 +11196,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
-          description: OK
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
       summary: Run a script
       tags:
         - Security Endpoint Management API
@@ -11266,9 +11303,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  example:
+                    - alert-id-1
+                    - alert-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 case_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                  description: The IDs of cases where the action taken will be logged.
+                  example:
+                    - case-id-1
+                    - case-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 comment:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
                 endpoint_ids:
@@ -11516,7 +11569,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
           description: Successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Internal Server Error
       summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
       x-metaTags:
@@ -11688,7 +11777,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         required: true
       responses:
         '200':
@@ -15288,6 +15377,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -15337,6 +15428,8 @@ paths:
                         download_source_id:
                           nullable: true
                           type: string
+                        fips_agents:
+                          type: number
                         fleet_server_host_id:
                           nullable: true
                           type: string
@@ -15463,6 +15556,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -15732,6 +15829,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -15774,6 +15873,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -15972,6 +16076,8 @@ paths:
                     agent_logging_metrics_period:
                       nullable: true
                     agent_logging_to_files:
+                      nullable: true
+                    agent_monitoring_runtime_experimental:
                       nullable: true
                 agent_features:
                   items:
@@ -16194,6 +16300,8 @@ paths:
                             nullable: true
                           agent_logging_to_files:
                             nullable: true
+                          agent_monitoring_runtime_experimental:
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -16243,6 +16351,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -16369,6 +16479,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -16638,6 +16752,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -16680,6 +16796,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -16898,6 +17019,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -16947,6 +17070,8 @@ paths:
                         download_source_id:
                           nullable: true
                           type: string
+                        fips_agents:
+                          type: number
                         fleet_server_host_id:
                           nullable: true
                           type: string
@@ -17073,6 +17198,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -17342,6 +17471,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -17384,6 +17515,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -17581,6 +17717,8 @@ paths:
                             nullable: true
                           agent_logging_to_files:
                             nullable: true
+                          agent_monitoring_runtime_experimental:
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -17630,6 +17768,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -17756,6 +17896,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -18025,6 +18169,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -18067,6 +18213,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -18263,6 +18414,8 @@ paths:
                     agent_logging_metrics_period:
                       nullable: true
                     agent_logging_to_files:
+                      nullable: true
+                    agent_monitoring_runtime_experimental:
                       nullable: true
                 agent_features:
                   items:
@@ -18487,6 +18640,8 @@ paths:
                             nullable: true
                           agent_logging_to_files:
                             nullable: true
+                          agent_monitoring_runtime_experimental:
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -18536,6 +18691,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -18662,6 +18819,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -18931,6 +19092,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -18973,6 +19136,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -19255,6 +19423,8 @@ paths:
                             nullable: true
                           agent_logging_to_files:
                             nullable: true
+                          agent_monitoring_runtime_experimental:
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -19304,6 +19474,8 @@ paths:
                       download_source_id:
                         nullable: true
                         type: string
+                      fips_agents:
+                        type: number
                       fleet_server_host_id:
                         nullable: true
                         type: string
@@ -19430,6 +19602,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -19699,6 +19875,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -19741,6 +19919,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -20043,6 +20226,10 @@ paths:
                                         type: string
                                       verification_mode:
                                         type: string
+                                  target_directory:
+                                    type: string
+                                  timeout:
+                                    type: string
                                 required:
                                   - sourceURI
                               features:
@@ -20077,12 +20264,20 @@ paths:
                                         type: number
                                   level:
                                     type: string
+                                  metrics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      period:
+                                        type: string
                                   to_files:
                                     type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  _runtime_experimental:
+                                    type: string
                                   apm: {}
                                   enabled:
                                     type: boolean
@@ -22717,6 +22912,7 @@ paths:
                             - POLICY_CHANGE
                             - INPUT_ACTION
                             - MIGRATE
+                            - PRIVILEGE_LEVEL_CHANGE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -23629,6 +23825,211 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/cloud_connectors:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.'
+      operationId: get-fleet-cloud-connectors
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: perPage
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cloudProvider:
+                      type: string
+                    created_at:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                    packagePolicyCount:
+                      type: number
+                    updated_at:
+                      type: string
+                    vars:
+                      additionalProperties: {}
+                      type: object
+                  required:
+                    - id
+                    - name
+                    - cloudProvider
+                    - vars
+                    - packagePolicyCount
+                    - created_at
+                    - updated_at
+                type: array
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connectors
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: post-fleet-cloud-connectors
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                cloudProvider:
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+              required:
+                - name
+                - cloudProvider
+                - vars
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  cloudProvider:
+                    type: string
+                  created_at:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  packagePolicyCount:
+                    type: number
+                  updated_at:
+                    type: string
+                  vars:
+                    additionalProperties: {}
+                    type: object
+                required:
+                  - id
+                  - name
+                  - cloudProvider
+                  - vars
+                  - packagePolicyCount
+                  - created_at
+                  - updated_at
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Create cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/data_streams:
     get:
       description: '[Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.'
@@ -24379,6 +24780,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -24771,6 +25173,7 @@ paths:
                                       - data_stream_ilm_policy
                                       - transform
                                       - ml_model
+                                      - knowledge_base
                                     type: string
                                   version:
                                     type: string
@@ -24853,6 +25256,9 @@ paths:
                               items:
                                 type: string
                               type: array
+                            previous_version:
+                              nullable: true
+                              type: string
                             type:
                               type: string
                             updated_at:
@@ -25074,6 +25480,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -25224,6 +25631,7 @@ paths:
                                               - data_stream_ilm_policy
                                               - transform
                                               - ml_model
+                                              - knowledge_base
                                             type: string
                                           version:
                                             type: string
@@ -25686,6 +26094,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -25975,6 +26384,7 @@ paths:
                                     - data_stream_ilm_policy
                                     - transform
                                     - ml_model
+                                    - knowledge_base
                                   type: string
                                 version:
                                   type: string
@@ -26057,6 +26467,9 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            nullable: true
+                            type: string
                           type:
                             type: string
                           updated_at:
@@ -26334,6 +26747,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -26622,6 +27036,7 @@ paths:
                                     - data_stream_ilm_policy
                                     - transform
                                     - ml_model
+                                    - knowledge_base
                                   type: string
                                 version:
                                   type: string
@@ -26704,6 +27119,9 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            nullable: true
+                            type: string
                           type:
                             type: string
                           updated_at:
@@ -28841,6 +29259,8 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29003,6 +29423,8 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29133,6 +29555,8 @@ paths:
                               enum:
                                 - logstash
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29418,6 +29842,8 @@ paths:
                                 - not: {}
                             version:
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29616,6 +30042,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -29778,6 +30206,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -29908,6 +30338,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30193,6 +30625,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30347,6 +30781,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30509,6 +30945,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30639,6 +31077,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30924,6 +31364,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31190,6 +31632,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31352,6 +31796,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31482,6 +31928,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31767,6 +32215,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31958,6 +32408,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32114,6 +32566,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32238,6 +32692,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32519,6 +32975,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -32670,6 +33128,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32832,6 +33292,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32962,6 +33424,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -33247,6 +33711,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -33412,6 +33878,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -33681,6 +34151,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -33723,6 +34195,11 @@ paths:
                         supports_agentless:
                           default: false
                           description: Indicates whether the package policy belongs to an agentless agent policy.
+                          nullable: true
+                          type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
                           nullable: true
                           type: boolean
                         updated_at:
@@ -33851,6 +34328,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -34034,6 +34515,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -34064,6 +34547,11 @@ paths:
                     supports_agentless:
                       default: false
                       description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
                       nullable: true
                       type: boolean
                     vars:
@@ -34202,6 +34690,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -34276,6 +34766,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -34545,6 +35039,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -34587,6 +35083,11 @@ paths:
                       supports_agentless:
                         default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -34749,6 +35250,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -35018,6 +35523,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -35060,6 +35567,11 @@ paths:
                         supports_agentless:
                           default: false
                           description: Indicates whether the package policy belongs to an agentless agent policy.
+                          nullable: true
+                          type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
                           nullable: true
                           type: boolean
                         updated_at:
@@ -35255,6 +35767,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -35524,6 +36040,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -35566,6 +36084,11 @@ paths:
                       supports_agentless:
                         default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -35701,6 +36224,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -35879,6 +36406,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -35909,6 +36438,11 @@ paths:
                     supports_agentless:
                       default: false
                       description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
                       nullable: true
                       type: boolean
                     vars:
@@ -36046,6 +36580,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -36119,6 +36655,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -36388,6 +36928,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -36430,6 +36972,11 @@ paths:
                       supports_agentless:
                         default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -36614,6 +37161,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -36906,6 +37455,10 @@ paths:
                                 type: array
                               agents:
                                 type: number
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -37175,6 +37728,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
@@ -37217,6 +37772,11 @@ paths:
                               supports_agentless:
                                 default: false
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
                                 nullable: true
                                 type: boolean
                               updated_at:
@@ -37283,6 +37843,10 @@ paths:
                                   type: string
                                 nullable: true
                                 type: array
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -37499,6 +38063,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
@@ -37537,6 +38103,11 @@ paths:
                               supports_agentless:
                                 default: false
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
                                 nullable: true
                                 type: boolean
                               updated_at:
@@ -38055,271 +38626,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
-    get:
-      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
-      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
-      parameters:
-        - in: path
-          name: outputId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  custom_assets:
-                    additionalProperties:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        is_deleted:
-                          type: boolean
-                        name:
-                          type: string
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        type:
-                          type: string
-                      required:
-                        - type
-                        - name
-                        - package_name
-                        - package_version
-                        - sync_status
-                    type: object
-                  error:
-                    type: string
-                  integrations:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        id:
-                          type: string
-                        install_status:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            main:
-                              type: string
-                            remote:
-                              type: string
-                          required:
-                            - main
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        updated_at:
-                          type: string
-                        warning:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            message:
-                              type: string
-                            title:
-                              type: string
-                          required:
-                            - title
-                      required:
-                        - sync_status
-                        - install_status
-                    type: array
-                  warning:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                      title:
-                        type: string
-                    required:
-                      - title
-                required:
-                  - integrations
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Get CCR Remote synced integrations status by outputId
-      tags:
-        - CCR Remote synced integrations
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/fleet/remote_synced_integrations/status:
-    get:
-      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
-      operationId: get-fleet-remote-synced-integrations-status
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  custom_assets:
-                    additionalProperties:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        is_deleted:
-                          type: boolean
-                        name:
-                          type: string
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        type:
-                          type: string
-                      required:
-                        - type
-                        - name
-                        - package_name
-                        - package_version
-                        - sync_status
-                    type: object
-                  error:
-                    type: string
-                  integrations:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        id:
-                          type: string
-                        install_status:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            main:
-                              type: string
-                            remote:
-                              type: string
-                          required:
-                            - main
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        updated_at:
-                          type: string
-                        warning:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            message:
-                              type: string
-                            title:
-                              type: string
-                          required:
-                            - title
-                      required:
-                        - sync_status
-                        - install_status
-                    type: array
-                  warning:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                      title:
-                        type: string
-                    required:
-                      - title
-                required:
-                  - integrations
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Get CCR Remote synced integrations status
-      tags:
-        - CCR Remote synced integrations
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/fleet/settings:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read.'
@@ -38337,6 +38643,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      action_secret_storage_requirements_met:
+                        type: boolean
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
@@ -38470,6 +38778,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      action_secret_storage_requirements_met:
+                        type: boolean
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
@@ -43757,6 +44067,14 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -45796,8 +46114,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -47078,6 +47401,8 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
+                                                          customIdentifier:
+                                                            type: string
                                                           where:
                                                             allOf:
                                                               - anyOf:
@@ -47221,9 +47546,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -47297,6 +47655,11 @@ paths:
                                                     properties:
                                                       destination:
                                                         minLength: 1
+                                                        type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
                                                         type: string
                                                       where:
                                                         anyOf:
@@ -47497,8 +47860,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -48768,6 +49136,8 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      customIdentifier:
+                                                        type: string
                                                       where:
                                                         allOf:
                                                           - anyOf:
@@ -48911,9 +49281,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -48979,8 +49382,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -50261,6 +50669,8 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
+                                                          customIdentifier:
+                                                            type: string
                                                           where:
                                                             allOf:
                                                               - anyOf:
@@ -50404,9 +50814,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -50418,7 +50861,61 @@ paths:
                                             classic:
                                               additionalProperties: false
                                               type: object
-                                              properties: {}
+                                              properties:
+                                                field_overrides:
+                                                  additionalProperties:
+                                                    allOf:
+                                                      - additionalProperties:
+                                                          anyOf:
+                                                            - anyOf:
+                                                                - type: string
+                                                                - type: number
+                                                                - type: boolean
+                                                                - enum:
+                                                                    - 'null'
+                                                                  nullable: true
+                                                                - not: {}
+                                                            - items:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                  - enum:
+                                                                      - 'null'
+                                                                    nullable: true
+                                                                  - not: {}
+                                                              type: array
+                                                            - {}
+                                                        type: object
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              format:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - keyword
+                                                                  - match_only_text
+                                                                  - long
+                                                                  - double
+                                                                  - date
+                                                                  - boolean
+                                                                  - ip
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              type:
+                                                                enum:
+                                                                  - system
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                  type: object
                                           required:
                                             - classic
                                       required:
@@ -50481,8 +50978,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -51752,6 +52254,8 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      customIdentifier:
+                                                        type: string
                                                       where:
                                                         allOf:
                                                           - anyOf:
@@ -51895,9 +52399,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -51963,8 +52500,13 @@ paths:
                                 required:
                                   - kql
                           type: array
+                        rules:
+                          items:
+                            type: string
+                          type: array
                       required:
                         - dashboards
+                        - rules
                         - queries
                     - type: object
                       properties:
@@ -51986,7 +52528,17 @@ paths:
                                       items:
                                         type: string
                                       type: array
+                                    metadata:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    tags:
+                                      items:
+                                        type: string
+                                      type: array
                                   required:
+                                    - metadata
+                                    - tags
                                     - members
                               required:
                                 - group
@@ -52026,6 +52578,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -52236,7 +52793,17 @@ paths:
                       items:
                         type: string
                       type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    tags:
+                      items:
+                        type: string
+                      type: array
                   required:
+                    - metadata
+                    - tags
                     - members
               required:
                 - group
@@ -53558,6 +54125,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          customIdentifier:
+                                            type: string
                                           where:
                                             allOf:
                                               - anyOf:
@@ -53701,9 +54270,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             wired:
@@ -53771,6 +54373,11 @@ paths:
                                     properties:
                                       destination:
                                         minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
                                         type: string
                                       where:
                                         anyOf:
@@ -55166,6 +55773,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          customIdentifier:
+                                            type: string
                                           where:
                                             allOf:
                                               - anyOf:
@@ -55309,15 +55918,102 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             classic:
                               additionalProperties: false
                               type: object
-                              properties: {}
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
                           required:
                             - classic
               required:
@@ -55833,6 +56529,119 @@ paths:
                 - kql
       responses: {}
       summary: Upsert a query to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/streams/{name}/rules:
+    get:
+      description: 'Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: get-streams-name-rules
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream rules
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/streams/{name}/rules/{ruleId}:
+    delete:
+      description: 'Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      operationId: delete-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Unlink a rule from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: 'Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      operationId: put-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Link a rule to a stream
       tags:
         - streams
       x-state: Technical Preview
@@ -61544,14 +62353,6 @@ components:
         - insights
       example: assistant
       type: string
-    Security_AI_Assistant_API_ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     Security_AI_Assistant_API_ConversationCreateProps:
       type: object
       properties:
@@ -61596,6 +62397,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -61612,8 +62416,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         title:
@@ -61632,28 +62434,10 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
-    Security_AI_Assistant_API_ConversationSummary:
-      type: object
-      properties:
-        confidence:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationConfidence'
-          description: How confident you are about this being a correct and useful learning.
-          example: high
-        content:
-          description: Summary text of the conversation over time.
-          example: This conversation covered how to configure the Security AI Assistant.
-          type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -61676,12 +62460,14 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          type: array
       required:
         - id
     Security_AI_Assistant_API_DeleteResponseFields:
@@ -62259,6 +63045,7 @@ components:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
@@ -62278,6 +63065,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false
@@ -62299,6 +63089,9 @@ components:
         traceData:
           $ref: '#/components/schemas/Security_AI_Assistant_API_TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content
@@ -69047,6 +69840,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -69196,24 +69990,6 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
-    Security_Endpoint_Management_API_AlertIds:
-      description: A list of alerts `id`s.
-      items:
-        format: nonempty
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
-    Security_Endpoint_Management_API_CaseIds:
-      description: Case IDs to be updated (cannot contain empty strings)
-      example:
-        - case-id-1
-        - case-id-2
-      items:
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
     Security_Endpoint_Management_API_CloudFileScriptParameters:
       type: object
       properties:
@@ -69364,9 +70140,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -69517,9 +70309,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -69580,9 +70388,25 @@ components:
         agent_type:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
         alert_ids:
-          $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          example:
+            - alert-id-1
+            - alert-id-2
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
         case_ids:
-          $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+          description: The IDs of cases where the action taken will be logged.
+          example:
+            - case-id-1
+            - case-id-2
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
         comment:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
         endpoint_ids:
@@ -69679,9 +70503,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -69752,6 +70592,28 @@ components:
       description: A KQL string.
       example: 'united.endpoint.host.os.name : ''Windows'''
       type: string
+    Security_Endpoint_Management_API_MDERunScriptParameters:
+      description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
+      example:
+        agent_type: microsoft_defender_endpoint
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          args: '-param1 value1 -param2 value2'
+          scriptName: my-script.ps1
+      properties:
+        args:
+          description: Optional command line arguments for the script.
+          minLength: 1
+          type: string
+        scriptName:
+          description: The name of the script to execute from the cloud storage.
+          minLength: 1
+          type: string
+      required:
+        - scriptName
+      title: Microsoft Defender Endpoint Run Script Parameters
+      type: object
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
         data:
@@ -69990,17 +70852,158 @@ components:
           type: integer
       required:
         - raw
-    Security_Endpoint_Management_API_RunScriptRouteRequestBody:
+    Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse:
+      example:
+        data:
+          agents:
+            - ed518850-681a-4d60-bb98-e22640cae2a8
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          agentType: __agent__type__here_
+          command: __command__name__here__
+          createdBy: elastic
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: gke-node-1235412
+          id: 233db9ea-6733-4849-9226-5a7039c7161d
+          isCompleted: false
+          isExpired: false
+          outputs: {}
+          parameters: {}
+          startedAt: '2022-07-29T19:08:49.126Z'
+          status: pending
+          wasSuccessful: false
       type: object
       properties:
-        parameters:
-          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
-          oneOf:
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
-      required:
-        - parameters
+        data:
+          description: The created response action details
+          type: object
+          properties:
+            agents:
+              description: The agent IDs for the hosts that the response action was sent to
+              type: object
+            agentState:
+              additionalProperties:
+                type: object
+                properties:
+                  completedAt:
+                    description: The date and time the response action was completed for the agent ID
+                    type: string
+                  isCompleted:
+                    description: Whether the response action is completed for the agent ID
+                    type: boolean
+                  wasSuccessful:
+                    description: Whether the response action was successful for the agent ID
+                    type: boolean
+              description: The state of the response action for each agent ID that it was sent to
+              type: object
+            agentType:
+              description: The response action agent type
+              type: string
+            command:
+              description: The response action command
+              type: string
+            createdBy:
+              description: The user who created the response action
+              type: string
+            hosts:
+              additionalProperties:
+                type: object
+                properties:
+                  name:
+                    description: The host name
+                    type: string
+              description: An object containing the host names associated with the agent IDs the response action was sent to
+              type: object
+            id:
+              description: The response action ID
+              type: string
+            isComplete:
+              description: Whether the response action is complete
+              type: boolean
+            isExpired:
+              description: Whether the response action is expired
+              type: boolean
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    description: The response action output content for the agent ID. Exact format depends on the response action command.
+                    oneOf:
+                      - type: object
+                      - type: string
+                  type:
+                    enum:
+                      - json
+                      - text
+                    type: string
+                required:
+                  - type
+                  - content
+              description: The outputs of the response action for each agent ID that it was sent to
+              type: object
+            parameters:
+              description: The parameters of the response action. Content different depending on the response action command
+              type: object
+            startedAt:
+              description: The response action start time
+              type: string
+            status:
+              description: The response action status
+              type: string
+            wasSuccessful:
+              description: Whether the response action was successful
+              type: boolean
+    Security_Endpoint_Management_API_RunScriptRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+            alert_ids:
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              description: |
+                One of the following set of parameters must be provided
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_SentinelOneRunScriptParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDERunScriptParameters'
+          required:
+            - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -70008,9 +71011,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70064,6 +71083,28 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
+    Security_Endpoint_Management_API_SentinelOneRunScriptParameters:
+      description: Parameters for Run Script response action against SentinelOne agent type.
+      example:
+        agent_type: sentinel_one
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          script: 1111-2222-3333-4444-5555-6666-7777-8888
+      properties:
+        inputParams:
+          description: The input parameter arguments for the script that was selected.
+          minLength: 1
+          type: string
+        script:
+          description: The script ID from SentinelOne scripts library that will be executed.
+          minLength: 1
+          type: string
+      required:
+        - script
+      title: SentinelOne Run Script Parameters
+      type: object
     Security_Endpoint_Management_API_SortDirection:
       description: Determines the sort order.
       enum:
@@ -70099,9 +71140,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70214,9 +71271,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70694,15 +71767,13 @@ components:
           type: number
         category_1_count:
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number
@@ -70885,11 +71956,22 @@ components:
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_MonitoredUserDoc:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
+        - type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            event:
+              type: object
+              properties:
+                ingested:
+                  format: date-time
+                  type: string
+    Security_Entity_Analytics_API_MonitoredUserUpdateDoc:
       type: object
       properties:
-        '@timestamp':
-          format: date-time
-          type: string
         entity_analytics_monitoring:
           type: object
           properties:
@@ -70904,12 +71986,6 @@ components:
                   value:
                     type: string
               type: array
-        event:
-          type: object
-          properties:
-            ingested:
-              format: date-time
-              type: string
         id:
           type: string
         labels:
@@ -70941,12 +72017,18 @@ components:
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+          properties:
+            message:
+              description: Error message typically only present if the engine is in error state
+              type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
-        - type
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
+      description: The status of the Privilege Monitoring Engine
       enum:
         - started
         - error
@@ -71699,6 +72781,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -76119,10 +77202,6 @@ components:
       required:
         - message
         - subject
-        - anyOf:
-            - to
-            - cc
-            - bcc
       properties:
         bcc:
           type: array

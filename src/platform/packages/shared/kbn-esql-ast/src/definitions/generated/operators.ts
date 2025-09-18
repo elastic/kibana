@@ -751,6 +751,51 @@ const equalsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'integer',
           optional: false,
         },
@@ -2145,6 +2190,36 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'integer',
           optional: false,
         },
@@ -2338,6 +2413,36 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
           optional: false,
         },
       ],
@@ -4474,7 +4579,7 @@ const notRlikeDefinition: FunctionDefinition = {
   name: 'not rlike',
   description: i18n.translate('kbn-esql-ast.esql.definitions.not_rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
   preview: false,
   alias: undefined,
@@ -4709,6 +4814,51 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geotile',
           optional: false,
         },
       ],
@@ -4985,7 +5135,7 @@ const rlikeDefinition: FunctionDefinition = {
   name: 'rlike',
   description: i18n.translate('kbn-esql-ast.esql.definitions.rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
   preview: false,
   alias: undefined,
