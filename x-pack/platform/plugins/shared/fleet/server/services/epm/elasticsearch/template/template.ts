@@ -22,10 +22,7 @@ import {
   OTEL_TRACES_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
-import {
-  MAX_CONCURRENT_DATASTREAM_OPERATIONS,
-  OTEL_BASE_COMPONENT_TEMPLATES,
-} from '../../../../constants';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {

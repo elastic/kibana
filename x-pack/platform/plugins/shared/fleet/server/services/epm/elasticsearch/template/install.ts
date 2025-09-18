@@ -416,7 +416,6 @@ export function buildComponentTemplates(params: {
     concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
-
   const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
 
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
@@ -462,6 +461,7 @@ export function buildComponentTemplates(params: {
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
         ...(isOtelInputType ? { dynamic: true } : {}),
+        ...(isOtelInputType && type === 'traces' ? { subobjects: undefined } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
