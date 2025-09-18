@@ -8,9 +8,7 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import apm from 'elastic-apm-node';
 import type { EluMetrics } from '@kbn/core-metrics-server';
-import { metrics, ValueType } from '@opentelemetry/api';
 
 interface ELUHistoryResponse {
   /**
@@ -26,29 +24,6 @@ interface ELUHistoryResponse {
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
 export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
-  // Report the same metrics to APM
-  apm.registerMetric('elu.history.short', () => elu().short);
-  apm.registerMetric('elu.history.medium', () => elu().medium);
-  apm.registerMetric('elu.history.long', () => elu().long);
-
-  // Report the same metrics to OpenTelemetry
-  const meter = metrics.getMeter('kibana.process');
-  meter
-    // Not calling it 'nodejs.eventloop.utilization.history' to avoid potential issues with the existing metric `nodejs.eventloop.utilization`.
-    .createObservableGauge('nodejs.eventloop.history.utilization', {
-      description:
-        'The event loop utilization averaged over a set of sample buckets: short (3 samples), medium (6), long (12). Use `nodejs.eventloop.history.window` to select the correct window.',
-      unit: '1',
-      valueType: ValueType.DOUBLE,
-    })
-    .addCallback((result) => {
-      const { short, medium, long } = elu();
-      // They categories defined by these attributes are subsets of each other, but since it's a gauge, we won't ever sum them.
-      result.observe(short, { 'nodejs.eventloop.history.window': 'short' });
-      result.observe(medium, { 'nodejs.eventloop.history.window': 'medium' });
-      result.observe(long, { 'nodejs.eventloop.history.window': 'long' });
-    });
-
   router.versioned
     .get({
       access: 'internal',
