@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CaseOwner } from '../../../src/playwright/fixtures/scope/worker/apis/cases';
 import { apiTest, expect } from '../../../src/playwright';
 import { createCasePayload } from '../../fixtures/constants';
 
 apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   let caseId: string;
-  let caseOwner: 'cases' | 'securitySolution' | 'observability';
+  let caseOwner: CaseOwner;
 
   apiTest.beforeEach(async ({ apiServices, config }) => {
     caseOwner =
@@ -39,20 +40,48 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     expect(fetchedResponse.status).toBe(200);
   });
 
-  apiTest(`should update case with 'cases.update'`, async ({ apiServices, log }) => {
-    // First get the case to obtain its current version
-    const currentCase = await apiServices.cases.get(caseId);
+  apiTest(
+    `should update case with a new severity with 'cases.update'`,
+    async ({ apiServices, log }) => {
+      // First get the case to obtain its current version
+      const currentCase = await apiServices.cases.get(caseId);
 
+      const updatedResponse = await apiServices.cases.update([
+        {
+          id: caseId,
+          version: currentCase.data.version,
+          severity: 'medium',
+        },
+      ]);
+      expect(updatedResponse.status).toBe(200);
+      expect(updatedResponse.data.length).toBe(1);
+      expect(updatedResponse.data[0].severity).toBe('medium');
+    }
+  );
+
+  apiTest.only('should add a new connector to a case', async ({ apiServices }) => {
+    const createdResponse = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+    });
+    caseId = createdResponse.data.id;
+    expect(createdResponse.status).toBe(200);
+
+    // patch the case with a new connector
     const updatedResponse = await apiServices.cases.update([
       {
         id: caseId,
-        version: currentCase.data.version,
-        severity: 'medium',
+        version: createdResponse.data.version,
+        connector: {
+          id: 'jira',
+          name: 'Jira',
+          type: '.jira',
+          fields: { issueType: 'Task', priority: null, parent: null },
+        },
       },
     ]);
+
     expect(updatedResponse.status).toBe(200);
-    expect(updatedResponse.data.length).toBe(1);
-    expect(updatedResponse.data[0].severity).toBe('medium');
   });
 
   apiTest('should delete multiple cases', async ({ apiServices }) => {
@@ -145,5 +174,19 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
 
     expect(createdAlert.status).toBe(200);
     expect(createdAlert.data.totalAlerts).toBe(1);
+  });
+
+  apiTest('should search for a case by category', async ({ apiServices }) => {
+    const createdResponse = await apiServices.cases.create({
+      ...createCasePayload,
+      owner: caseOwner,
+      category: 'test',
+    });
+    caseId = createdResponse.data.id;
+    expect(createdResponse.status).toBe(200);
+
+    const fetchedResponse = await apiServices.cases.find({ category: 'test' });
+    expect(fetchedResponse.status).toBe(200);
+    expect(fetchedResponse.data.total).toBe(1);
   });
 });

@@ -10,11 +10,14 @@
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 
+export type CaseSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type CaseOwner = 'cases' | 'observability' | 'securitySolution';
+
 export interface CreateCaseParams {
   title: string;
   description: string;
   tags?: string[];
-  severity?: 'low' | 'medium' | 'high' | 'critical';
+  severity?: CaseSeverity;
   assignees?: Array<{ uid: string }>;
   connector?: {
     id: string;
@@ -37,7 +40,7 @@ export interface UpdateCaseParams {
   description?: string;
   status?: 'open' | 'in-progress' | 'closed';
   tags?: string[];
-  severity?: 'low' | 'medium' | 'high' | 'critical';
+  severity?: CaseSeverity;
   assignees?: Array<{ uid: string }>;
   connector?: {
     id: string;
@@ -52,15 +55,16 @@ export interface UpdateCaseParams {
 }
 
 export interface CreateCommentParams {
-  owner: 'cases' | 'observability' | 'securitySolution';
   type: 'user';
+  owner: CaseOwner;
   comment: string;
 }
 
 export interface CreateAlertParams {
   type: 'alert';
-  owner: 'cases' | 'observability' | 'securitySolution';
+  owner: CaseOwner;
   comment?: string;
+  index: string | string[];
   alertId: string | string[];
   rule: { id: string; name: string };
 }
@@ -234,13 +238,12 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
 
     find: async (searchParams?: Record<string, any>, spaceId?: string) => {
       return await measurePerformanceAsync(log, 'casesApi.cases.find', async () => {
-        const response = await kbnClient.request({
+        return await kbnClient.request({
           method: 'GET',
           path: `${buildSpacePath(spaceId)}/api/cases/_find`,
           retries: 3,
           query: searchParams,
         });
-        return response.data;
       });
     },
 
