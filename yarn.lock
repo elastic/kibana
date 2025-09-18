@@ -4256,6 +4256,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chat-data-registry-plugin@link:x-pack/platform/plugins/shared/chat_data_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
@@ -5609,6 +5613,10 @@
   uid ""
 
 "@kbn/deeplinks-shared@link:src/platform/packages/shared/deeplinks/shared":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-workflows@link:src/platform/packages/shared/deeplinks/workflows":
   version "0.0.0"
   uid ""
 
