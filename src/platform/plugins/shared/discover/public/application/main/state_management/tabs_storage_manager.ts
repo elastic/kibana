@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy, pick } from 'lodash';
+import { isEqual, orderBy, pick } from 'lodash';
 import {
   createStateContainer,
   type IKbnUrlStateStorage,
@@ -380,13 +380,31 @@ export const createTabsStorageManager = ({
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab })
     );
+
+    const locallyLoadedTabs = storedTabsState.openTabs.map((tab) =>
+      toTabState(tab, defaultTabState)
+    );
+
     const openTabs =
       persistedDiscoverSession?.id === storedTabsState.discoverSessionId
-        ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
+        ? locallyLoadedTabs
         : persistedTabs ?? [];
+
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
+
+    const defaultTabStateWithNewTab = {
+      ...defaultTabState,
+      ...createTabItem([]),
+    };
+
+    if (persistedTabs && !isEqual(persistedTabs, openTabs)) {
+      console.log('restored on load, persisted');
+    } else if (!isEqual(locallyLoadedTabs, [defaultTabStateWithNewTab])) {
+      console.log({ locallyLoadedTabs, defaultTabStateWithNewTab });
+      console.log('restored on load, not persisted');
+    }
 
     if (enabled && selectedTabId) {
       // restore previously opened tabs
@@ -414,14 +432,10 @@ export const createTabsStorageManager = ({
       }
     }
 
-    const defaultTab = persistedTabs
-      ? persistedTabs[0]
-      : {
-          ...defaultTabState,
-          ...createTabItem([]),
-        };
+    const defaultTab = persistedTabs ? persistedTabs[0] : defaultTabStateWithNewTab;
     const allTabs = persistedTabs ?? [defaultTab];
 
+    console.log({ allTabs, persistedTabs, defaultTab });
     return {
       allTabs,
       selectedTabId: defaultTab.id,

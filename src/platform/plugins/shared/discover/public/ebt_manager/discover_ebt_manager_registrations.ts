@@ -35,7 +35,11 @@ export const CONTEXTUAL_PROFILE_ID = 'profileId';
  */
 export const TABS_EVENT_TYPE = 'discover_tabs';
 export const TABS_EVENT_NAME = 'eventName';
+export const TAB_ID = 'tabId';
+export const TOTAL_TABS_OPEN = 'totalTabsOpen';
 export const REMAINING_TABS_COUNT = 'remainingTabsCount';
+export const FROM_INDEX = 'fromIndex';
+export const TO_INDEX = 'toIndex';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -144,10 +148,37 @@ export const registerDiscoverEBTManagerAnalytics = (
             'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
         },
       },
+      [TOTAL_TABS_OPEN]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of total tabs open at the time of an event',
+        },
+      },
       [REMAINING_TABS_COUNT]: {
         type: 'integer',
         _meta: {
-          description: 'The number of remaining tabs after the event',
+          description: 'The number of remaining tabs after an event',
+          optional: true,
+        },
+      },
+      [TAB_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The unique identifier of the tab',
+          optional: true,
+        },
+      },
+      [FROM_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The original index of the tab being moved',
+          optional: true,
+        },
+      },
+      [TO_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The new index of the tab being moved',
           optional: true,
         },
       },

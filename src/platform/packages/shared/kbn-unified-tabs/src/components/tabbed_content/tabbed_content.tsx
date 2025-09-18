@@ -116,7 +116,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
         }
 
-        onEvent('tabClosed', { remainingTabsCount: nextState.items.length });
+        onEvent('tabClosed', {
+          totalTabsOpen: prevState.items.length,
+          remainingTabsCount: nextState.items.length,
+          tabId: item.id,
+        });
 
         return nextState;
       });
@@ -126,12 +130,27 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onReorder = useCallback(
     (reorderedItems: TabItem[]) => {
-      changeState((prevState) => ({
-        ...prevState,
-        items: reorderedItems,
-      }));
+      changeState((prevState) => {
+        const prevItems = prevState.items;
+        const movedItem = prevItems.find((item, index) => item.id !== reorderedItems[index]?.id);
+        const nextState = { ...prevState, items: reorderedItems };
 
-      onEvent('tabReordered');
+        if (!movedItem) {
+          return nextState;
+        }
+
+        const fromIndex = prevItems.findIndex((item) => item.id === movedItem.id);
+        const toIndex = reorderedItems.findIndex((item) => item.id === movedItem.id);
+
+        onEvent('tabReordered', {
+          fromIndex,
+          toIndex,
+          totalTabsOpen: prevState.items.length,
+          tabId: movedItem.id,
+        });
+
+        return nextState;
+      });
     },
     [changeState, onEvent]
   );
@@ -139,9 +158,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onAdd = useCallback(async () => {
     const newItem = createItem();
     tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
-    changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
+    changeState((prevState) => {
+      const nextState = addTab(prevState, newItem, maxItemsCount);
 
-    onEvent('tabCreated');
+      onEvent('tabCreated', {
+        totalTabsOpen: prevState.items.length,
+        tabId: newItem.id,
+      });
+
+      return nextState;
+    });
   }, [changeState, createItem, maxItemsCount, onEvent]);
 
   const onDuplicate = useCallback(
