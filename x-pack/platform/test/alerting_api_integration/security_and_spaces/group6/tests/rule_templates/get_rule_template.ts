@@ -66,7 +66,6 @@ export default (ftrProvider: FtrProviderContext): void => {
             templateId: 'sample-alerting-rule',
             auth: { user, space: 'space1' },
           });
-          console.log(user, ruleTemplate.body);
           expect(ruleTemplate.status).to.eql(200);
         }
       });
