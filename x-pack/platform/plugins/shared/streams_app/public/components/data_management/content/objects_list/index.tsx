@@ -28,8 +28,7 @@ export function ContentPackObjectsList({
   significantEventsAvailable: boolean;
 }) {
   const [includeAssets, setIncludeAssets] = useState<boolean>(
-    significantEventsAvailable &&
-      containsAssets(objects.filter((entry): entry is ContentPackStream => entry.type === 'stream'))
+    containsAssets(objects.filter((entry): entry is ContentPackStream => entry.type === 'stream'))
   );
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
     ...objects
@@ -64,7 +63,7 @@ export function ContentPackObjectsList({
         {significantEventsAvailable ? (
           <EuiCheckbox
             id="include-all-assets"
-            disabled={!significantEventsAvailable || !containsAssets([rootEntry, ...descendants])}
+            disabled={!containsAssets([rootEntry, ...descendants])}
             checked={includeAssets}
             label={i18n.translate('xpack.streams.contentPackObjectsList.includeAllAssets', {
               defaultMessage:
