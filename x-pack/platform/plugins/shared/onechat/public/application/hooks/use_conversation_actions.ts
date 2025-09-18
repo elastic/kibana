@@ -62,7 +62,10 @@ export const useConversationActions = () => {
   };
 
   return {
-    removeNewConversationQuery,
+    invalidateConversation: () => {
+      removeNewConversationQuery();
+      queryClient.invalidateQueries({ queryKey });
+    },
     addConversationRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
         produce((draft) => {
