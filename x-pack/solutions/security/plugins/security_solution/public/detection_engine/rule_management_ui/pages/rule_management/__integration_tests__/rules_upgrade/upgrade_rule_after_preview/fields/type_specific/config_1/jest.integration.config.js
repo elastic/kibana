@@ -8,7 +8,7 @@
 import { createFieldTestingConfig } from '../../base.jest.integration.config';
 
 export default createFieldTestingConfig({
-  testsDirectory: 'common_fields',
+  testsDirectory: 'type_specific',
   groupNumber: 1,
   totalGroups: 2,
 });
