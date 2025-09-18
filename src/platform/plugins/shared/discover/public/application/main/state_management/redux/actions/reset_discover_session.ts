@@ -10,7 +10,7 @@
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
-import { selectRecentlyClosedTabs, selectTab } from '../selectors';
+import { selectHasUnsavedChanges, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   fromSavedObjectTabToSavedSearch,
   fromSavedObjectTabToTabState,
@@ -18,47 +18,60 @@ import {
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
 import { setTabs } from './tabs';
+import { TabInitialFetchState } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
   async (
-    { discoverSession }: { discoverSession: DiscoverSession },
+    {
+      discoverSession,
+      resetInitialFetchState,
+    }: {
+      discoverSession: DiscoverSession;
+      resetInitialFetchState?: boolean;
+    },
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
     const state = getState();
 
-    await Promise.all(
+    const { unsavedTabIds } = resetInitialFetchState
+      ? selectHasUnsavedChanges(state, { runtimeStateManager, services })
+      : { unsavedTabIds: new Set<string>() };
+
+    const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
         dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
 
-        if (!tabStateContainer) {
-          return;
+        if (tabStateContainer) {
+          const savedSearch = await fromSavedObjectTabToSavedSearch({
+            tab,
+            discoverSession,
+            services,
+          });
+          const dataView = savedSearch.searchSource.getField('index');
+
+          if (dataView) {
+            dispatch(setDataView({ tabId: tab.id, dataView }));
+          }
+
+          tabStateContainer.savedSearchState.set(savedSearch);
+          tabStateContainer.actions.undoSavedSearchChanges();
+          tabStateContainer.appState.resetInitialState();
         }
 
-        const savedSearch = await fromSavedObjectTabToSavedSearch({
+        const tabState = fromSavedObjectTabToTabState({
           tab,
-          discoverSession,
-          services,
+          existingTab: selectTab(state, tab.id),
         });
-        const dataView = savedSearch.searchSource.getField('index');
 
-        if (dataView) {
-          dispatch(setDataView({ tabId: tab.id, dataView }));
+        if (tab.id !== state.tabs.unsafeCurrentId && unsavedTabIds.has(tab.id)) {
+          tabState.initialFetchState = TabInitialFetchState.forceTrigger;
         }
 
-        tabStateContainer.savedSearchState.set(savedSearch);
-        tabStateContainer.actions.undoSavedSearchChanges();
-        tabStateContainer.appState.resetInitialState();
-      })
-    );
-
-    const allTabs = discoverSession.tabs.map((tab) =>
-      fromSavedObjectTabToTabState({
-        tab,
-        existingTab: selectTab(state, tab.id),
+        return tabState;
       })
     );
 
