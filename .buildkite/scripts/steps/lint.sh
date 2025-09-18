@@ -15,11 +15,11 @@ echo '--- Lint: eslint'
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  desc="node scripts/eslint_all_files --no-cache --fix"
-  node scripts/eslint_all_files --no-cache --fix
+  desc="yarn moon ci :eslint-fix"
+  yarn moon ci :eslint-fix
 else
-  desc="node scripts/eslint_all_files --no-cache"
-  node scripts/eslint_all_files --no-cache
+  desc="yarn moon ci :eslint"
+  yarn moon ci :eslint
 fi
 
 eslint_exit=$?
