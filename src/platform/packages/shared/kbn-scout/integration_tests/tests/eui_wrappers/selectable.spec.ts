@@ -11,34 +11,53 @@ import { test, expect } from '../../../src/playwright';
 import { EuiSelectableWrapper } from '../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
-test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test('selectable with search field', async ({ page }) => {
-    const selector = {
-      locator: 'xpath=//h2[@id="searchable"]/following::div[contains(@class, "euiSelectable")][1]',
-    };
-    await navigateToEuiTestPage(page, 'docs/components/forms/selection/selectable/#searchable');
+test.describe.only('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
+  for (let i = 1; i <= 10; i++) {
+    test(`selectable with search field, run #${i}`, async ({ page }) => {
+      const selector = {
+        locator:
+          'xpath=//h2[@id="searchable"]/following::div[contains(@class, "euiSelectable")][1]',
+      };
+      await navigateToEuiTestPage(page, 'docs/components/forms/selection/selectable/#searchable');
 
-    await test.step('read selected options', async () => {
-      const selectable = new EuiSelectableWrapper(page, selector);
-      expect(await selectable.getSelectedOptions()).toEqual(['Mimas', 'Iapetus']);
-    });
+      await test.step('read selected options', async () => {
+        const selectable = new EuiSelectableWrapper(page, selector);
+        const selectedOptions = await selectable.getSelectedOptions();
+        expect(selectedOptions, 'Default selected options do not match').toEqual([
+          'Mimas',
+          'Iapetus',
+        ]);
+      });
 
-    await test.step('should search and select option', async () => {
-      const selectable = new EuiSelectableWrapper(page, selector);
-      await selectable.searchAndSelectFirst('Rhea');
-      expect(await selectable.getSelectedOptions()).toEqual(['Mimas', 'Iapetus', 'Rhea']);
-    });
+      await test.step('should search and select option', async () => {
+        const selectable = new EuiSelectableWrapper(page, selector);
+        await selectable.searchAndSelectFirst('Rhea');
+        const selectedOptions = await selectable.getSelectedOptions();
+        expect(
+          selectedOptions,
+          'Selected options do not match after the new one was searched and added'
+        ).toEqual(['Mimas', 'Iapetus', 'Rhea']);
+      });
 
-    await test.step('should unselect option', async () => {
-      const selectable = new EuiSelectableWrapper(page, selector);
-      await selectable.unselect('Mimas');
-      expect(await selectable.getSelectedOptions()).toEqual(['Iapetus', 'Rhea']);
-    });
+      await test.step('should unselect option', async () => {
+        const selectable = new EuiSelectableWrapper(page, selector);
+        await selectable.unselect('Mimas');
+        const selectedOptions = await selectable.getSelectedOptions();
+        expect(
+          selectedOptions,
+          'Selected options do not match after the option was unselected'
+        ).toEqual(['Iapetus', 'Rhea']);
+      });
 
-    await test.step('should select option', async () => {
-      const selectable = new EuiSelectableWrapper(page, selector);
-      await selectable.select('Titan');
-      expect(await selectable.getSelectedOptions()).toEqual(['Titan', 'Iapetus', 'Rhea']);
+      await test.step('should select option', async () => {
+        const selectable = new EuiSelectableWrapper(page, selector);
+        await selectable.select('Titan');
+        const selectedOptions = await selectable.getSelectedOptions();
+        expect(
+          selectedOptions,
+          'Selected options do not match after the option was selected'
+        ).toEqual(['Titan', 'Iapetus', 'Rhea']);
+      });
     });
-  });
+  }
 });
