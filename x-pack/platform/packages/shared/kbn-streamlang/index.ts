@@ -8,6 +8,7 @@
 export type { StreamlangDSL } from './types/streamlang';
 export { streamlangDSLSchema, isActionBlock } from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
+export { transpile as transpileEsql } from './src/transpilers/esql';
 export * from './types/processors';
 export * from './types/conditions';
 export * from './src/conditions/helpers';

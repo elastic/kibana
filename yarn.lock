@@ -8128,6 +8128,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streamlang-tests@link:x-pack/platform/packages/shared/kbn-streamlang-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streams-app-plugin@link:x-pack/platform/plugins/shared/streams_app":
   version "0.0.0"
   uid ""
