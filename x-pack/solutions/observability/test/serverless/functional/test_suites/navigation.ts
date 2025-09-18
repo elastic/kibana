@@ -32,8 +32,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
-      await svlCommonNavigation.sidenav.expectSectionClosed(
-        'observability_project_nav_footer.project_settings_project_nav'
+      expect(await svlCommonNavigation.sidenav.isPanelOpen('project_settings_project_nav')).to.be(
+        false
       );
 
       // navigate to the logs explorer tab by default
@@ -50,22 +50,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
       // navigate to a different section
-      await svlCommonNavigation.sidenav.openSection(
-        'observability_project_nav_footer.project_settings_project_nav'
+      await svlCommonNavigation.sidenav.openPanel('project_settings_project_nav');
+      expect(await svlCommonNavigation.sidenav.isPanelOpen('project_settings_project_nav')).to.be(
+        true
       );
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Tags']);
 
       // navigate back to serverless oblt overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
-      await svlCommonNavigation.sidenav.expectSectionOpen(
-        'observability_project_nav_footer.project_settings_project_nav'
-      ); // remains open
 
       await expectNoPageReload();
     });
