@@ -166,6 +166,8 @@
       "@kbn/charts-plugin/*": ["src/platform/plugins/shared/charts/*"],
       "@kbn/charts-theme": ["src/platform/packages/shared/kbn-charts-theme"],
       "@kbn/charts-theme/*": ["src/platform/packages/shared/kbn-charts-theme/*"],
+      "@kbn/chat-data-registry-plugin": ["x-pack/platform/plugins/shared/chat_data_registry"],
+      "@kbn/chat-data-registry-plugin/*": ["x-pack/platform/plugins/shared/chat_data_registry/*"],
       "@kbn/check-prod-native-modules-cli": ["packages/kbn-check-prod-native-modules-cli"],
       "@kbn/check-prod-native-modules-cli/*": ["packages/kbn-check-prod-native-modules-cli/*"],
       "@kbn/check-saved-objects-cli": ["packages/kbn-check-saved-objects-cli"],
