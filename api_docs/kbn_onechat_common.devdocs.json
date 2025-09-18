@@ -515,7 +515,7 @@
         "tags": [],
         "label": "filterToolsBySelection",
         "description": [
-          "\nReturns all tools matching ay least one of the provided tool selection."
+          "\nReturns all tools matching at least one of the provided tool selections."
         ],
         "signature": [
           "<TType extends ",
@@ -2051,35 +2051,12 @@
         "tags": [],
         "label": "ByIdsToolSelection",
         "description": [
-          "\nRepresents a tool selection based on individual tool IDs, and optionally a provider ID.\n\nThe '*' wildcard can be used for ID selection, to inform that all tools should be selected.\n"
+          "\nRepresents a tool selection based on individual tool IDs\n\nThe '*' wildcard can be used for ID selection, to inform that all tools should be selected.\n"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ByIdsToolSelection.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nThe id of the provider to select tools from"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolType",
-                "text": "ToolType"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ByIdsToolSelection.tool_ids",
@@ -3594,7 +3571,7 @@
         "tags": [],
         "label": "allToolsSelectionWildcard",
         "description": [
-          "\n\"all tools\" wildcard which can be used for {@link ByIdsToolSelection}"
+          "\n\"all tools\" wildcard which can be used for tool selection"
         ],
         "signature": [
           "\"*\""
@@ -4209,7 +4186,7 @@
           "\nID of the onechat default conversational agent"
         ],
         "signature": [
-          "\"default\""
+          "\"elastic-ai-agent\""
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
@@ -4719,15 +4696,7 @@
         "label": "ToolSelectionRelevantFields",
         "description": [],
         "signature": [
-          "{ id: string; type: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolType",
-            "text": "ToolType"
-          },
-          "; tags: string[]; }"
+          "{ id: string; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
         "deprecated": false,
