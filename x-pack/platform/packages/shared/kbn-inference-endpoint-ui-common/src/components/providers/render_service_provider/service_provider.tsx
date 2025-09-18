@@ -33,7 +33,7 @@ import voyageAIIcon from '../assets/images/voyageai.svg';
 import deepSeekIcon from '../assets/images/deepseek.svg';
 import ai21Icon from '../assets/images/ai21_labs_default.svg';
 import llamaIcon from '../assets/images/llama_stack_default.svg';
-import default_icon from '../assets/images/default_connector_icon.svg';
+import defaultIcon from '../assets/images/default_connector_icon.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -163,7 +163,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
 
 export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKey }) => {
   const provider = SERVICE_PROVIDERS[providerKey];
-  const iconType = provider ? provider.icon : default_icon;
+  const iconType = provider ? provider.icon : defaultIcon;
 
   return (
     <EuiAvatar
