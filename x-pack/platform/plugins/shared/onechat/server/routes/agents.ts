@@ -23,15 +23,21 @@ import { getTechnicalPreviewWarning } from './utils';
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
-  schema.object({
-    tool_ids: schema.arrayOf(schema.string({
-      meta: { description: 'Tool ID to be available to the agent.' }
-    }), {
-      meta: { description: 'Array of tool IDs that the agent can use.' }
-    }),
-  }, {
-    meta: { description: 'Tool selection configuration for the agent.' }
-  })
+  schema.object(
+    {
+      tool_ids: schema.arrayOf(
+        schema.string({
+          meta: { description: 'Tool ID to be available to the agent.' },
+        }),
+        {
+          meta: { description: 'Array of tool IDs that the agent can use.' },
+        }
+      ),
+    },
+    {
+      meta: { description: 'Tool selection configuration for the agent.' },
+    }
+  )
 );
 
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
@@ -59,7 +65,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: false,
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_list.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_list.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -91,14 +97,16 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       {
         version: '2023-10-31',
         validate: {
-          request: { params: schema.object({ 
-            id: schema.string({
-              meta: { description: 'The unique identifier of the agent to retrieve.' }
-            }) 
-          }) },
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent to retrieve.' },
+              }),
+            }),
+          },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_get_by_id.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -134,38 +142,56 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
           request: {
             body: schema.object({
               id: schema.string({
-                meta: { description: 'Unique identifier for the agent.' }
+                meta: { description: 'Unique identifier for the agent.' },
               }),
               name: schema.string({
-                meta: { description: 'Display name for the agent.' }
+                meta: { description: 'Display name for the agent.' },
               }),
               description: schema.string({
-                meta: { description: 'Description of what the agent does.' }
+                meta: { description: 'Description of what the agent does.' },
               }),
-              avatar_color: schema.maybe(schema.string({
-                meta: { description: 'Optional hex color code for the agent avatar.' }
-              })),
-              avatar_symbol: schema.maybe(schema.string({
-                meta: { description: 'Optional symbol/initials for the agent avatar.' }
-              })),
-              labels: schema.maybe(schema.arrayOf(schema.string({
-                meta: { description: 'Label for categorizing the agent.' }
-              }), {
-                meta: { description: 'Optional labels for categorizing and organizing agents.' }
-              })),
-              configuration: schema.object({
-                instructions: schema.maybe(schema.string({
-                  meta: { description: 'Optional system instructions that define the agent behavior.' }
-                })),
-                tools: TOOL_SELECTION_SCHEMA,
-              }, {
-                meta: { description: 'Configuration settings for the agent.' }
-              }),
+              avatar_color: schema.maybe(
+                schema.string({
+                  meta: { description: 'Optional hex color code for the agent avatar.' },
+                })
+              ),
+              avatar_symbol: schema.maybe(
+                schema.string({
+                  meta: { description: 'Optional symbol/initials for the agent avatar.' },
+                })
+              ),
+              labels: schema.maybe(
+                schema.arrayOf(
+                  schema.string({
+                    meta: { description: 'Label for categorizing the agent.' },
+                  }),
+                  {
+                    meta: {
+                      description: 'Optional labels for categorizing and organizing agents.',
+                    },
+                  }
+                )
+              ),
+              configuration: schema.object(
+                {
+                  instructions: schema.maybe(
+                    schema.string({
+                      meta: {
+                        description: 'Optional system instructions that define the agent behavior.',
+                      },
+                    })
+                  ),
+                  tools: TOOL_SELECTION_SCHEMA,
+                },
+                {
+                  meta: { description: 'Configuration settings for the agent.' },
+                }
+              ),
             }),
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_create.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_create.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -198,44 +224,65 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: {
           request: {
-            params: schema.object({ 
+            params: schema.object({
               id: schema.string({
-                meta: { description: 'The unique identifier of the agent to update.' }
-              }) 
+                meta: { description: 'The unique identifier of the agent to update.' },
+              }),
             }),
             body: schema.object({
-              name: schema.maybe(schema.string({
-                meta: { description: 'Updated display name for the agent.' }
-              })),
-              description: schema.maybe(schema.string({
-                meta: { description: 'Updated description of what the agent does.' }
-              })),
-              avatar_color: schema.maybe(schema.string({
-                meta: { description: 'Updated hex color code for the agent avatar.' }
-              })),
-              avatar_symbol: schema.maybe(schema.string({
-                meta: { description: 'Updated symbol/initials for the agent avatar.' }
-              })),
-              labels: schema.maybe(schema.arrayOf(schema.string({
-                meta: { description: 'Updated label for categorizing the agent.' }
-              }), {
-                meta: { description: 'Updated labels for categorizing and organizing agents.' }
-              })),
-              configuration: schema.maybe(
-                schema.object({
-                  instructions: schema.maybe(schema.string({
-                    meta: { description: 'Updated system instructions that define the agent behavior.' }
-                  })),
-                  tools: schema.maybe(TOOL_SELECTION_SCHEMA),
-                }, {
-                  meta: { description: 'Updated configuration settings for the agent.' }
+              name: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated display name for the agent.' },
                 })
+              ),
+              description: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated description of what the agent does.' },
+                })
+              ),
+              avatar_color: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated hex color code for the agent avatar.' },
+                })
+              ),
+              avatar_symbol: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated symbol/initials for the agent avatar.' },
+                })
+              ),
+              labels: schema.maybe(
+                schema.arrayOf(
+                  schema.string({
+                    meta: { description: 'Updated label for categorizing the agent.' },
+                  }),
+                  {
+                    meta: { description: 'Updated labels for categorizing and organizing agents.' },
+                  }
+                )
+              ),
+              configuration: schema.maybe(
+                schema.object(
+                  {
+                    instructions: schema.maybe(
+                      schema.string({
+                        meta: {
+                          description:
+                            'Updated system instructions that define the agent behavior.',
+                        },
+                      })
+                    ),
+                    tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                  },
+                  {
+                    meta: { description: 'Updated configuration settings for the agent.' },
+                  }
+                )
               ),
             }),
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_update.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -267,14 +314,16 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       {
         version: '2023-10-31',
         validate: {
-          request: { params: schema.object({ 
-            id: schema.string({
-              meta: { description: 'The unique identifier of the agent to delete.' }
-            }) 
-          }) },
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent to delete.' },
+              }),
+            }),
+          },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_delete.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

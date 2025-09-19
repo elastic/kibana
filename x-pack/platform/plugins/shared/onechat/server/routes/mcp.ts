@@ -46,13 +46,18 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       {
         version: '2023-10-31',
         validate: {
-          request: { body: schema.object({}, { 
-            unknowns: 'allow',
-            meta: { description: 'JSON-RPC 2.0 request payload for MCP server communication.' }
-          }) },
+          request: {
+            body: schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: { description: 'JSON-RPC 2.0 request payload for MCP server communication.' },
+              }
+            ),
+          },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_initialize_request.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_initialize_request.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -156,7 +161,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml'),
         },
       },
       wrapHandler(async (ctx, _, response) => {
@@ -194,7 +199,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml'),
         },
       },
       wrapHandler(async (ctx, _, response) => {

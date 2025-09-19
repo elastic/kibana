@@ -38,18 +38,29 @@ export function registerChatRoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
-    agent_id: schema.string({ 
+    agent_id: schema.string({
       defaultValue: oneChatDefaultAgentId,
-      meta: { description: 'The ID of the agent to converse with. Defaults to the default Elastic AI agent.' }
+      meta: {
+        description:
+          'The ID of the agent to converse with. Defaults to the default Elastic AI agent.',
+      },
     }),
-    connector_id: schema.maybe(schema.string({
-      meta: { description: 'Optional connector ID for the agent to use for external integrations.' }
-    })),
-    conversation_id: schema.maybe(schema.string({
-      meta: { description: 'Optional existing conversation ID to continue a previous conversation.' }
-    })),
+    connector_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional connector ID for the agent to use for external integrations.',
+        },
+      })
+    ),
+    conversation_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional existing conversation ID to continue a previous conversation.',
+        },
+      })
+    ),
     input: schema.string({
-      meta: { description: 'The user input message to send to the agent.' }
+      meta: { description: 'The user input message to send to the agent.' },
     }),
   });
 
@@ -103,7 +114,7 @@ export function registerChatRoutes({
           request: { body: conversePayloadSchema },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_request.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_request.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -166,7 +177,8 @@ export function registerChatRoutes({
           request: { body: conversePayloadSchema },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_async_request.yaml')
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/chat_converse_async_request.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
