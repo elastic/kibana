@@ -17,7 +17,7 @@ import type { FormatSelectorProps } from '../../dimension_panel/format_selector'
 import { FormatSelector } from '../../dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
-import type { TextBasedPrivateState } from '../types';
+import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
 import type { TextBasedLayer } from '../types';
 
@@ -130,12 +130,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           selectedField={selectedField}
           onChoose={(choice) => {
             const column = allColumns?.find((f) => f.name === choice.field);
-            const newColumn = {
+            const newColumn: TextBasedLayerColumn = {
               columnId: props.columnId,
               fieldName: choice.field,
               meta: column?.meta,
               variable: column?.variable,
               label: choice.field,
+              customLabel: true,
             };
             return props.setState(
               !selectedField
