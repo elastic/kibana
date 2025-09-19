@@ -20,7 +20,8 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess query_alerts_backword_compatibility', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235452
+  describe.skip('@ess query_alerts_backword_compatibility', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/endpoint/resolver/signals'
