@@ -456,16 +456,14 @@ describe('File HTTP API', () => {
         .expect(200);
 
       // Public download without extension should work (no validation performed)
-      const { body: buffer, header } = await request
+      const response = await request
         .get(root, `/api/files/public/blob/README?token=${token}`)
         .set('x-elastic-internal-origin', 'files-test')
         .buffer()
         .expect(200);
 
-      expect(['text/plain', 'text/plain; charset=utf-8', 'application/octet-stream']).toContain(
-        header['content-type']
-      );
-      expect(buffer.toString('utf8')).toEqual('readme content');
+      expect(response.header['content-type']).toEqual('text/plain; charset=utf-8');
+      expect(response.text).toEqual('readme content');
     });
 
     test('handles case insensitive extensions in public download', async () => {
