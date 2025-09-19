@@ -34,7 +34,10 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
 
   // Track telemetry event when flyout is opened
   if (props.doesIndexExist) {
-    combineLatest([indexUpdateService.totalHits$, indexUpdateService.dataTableColumns$])
+    combineLatest([
+      indexUpdateService.totalHits$.pipe(skip(1)), // skip initial value
+      indexUpdateService.dataTableColumns$,
+    ])
       .pipe(first())
       .subscribe(([docCount, columns]) => {
         deps.indexEditorTelemetryService.trackFlyoutOpened({
