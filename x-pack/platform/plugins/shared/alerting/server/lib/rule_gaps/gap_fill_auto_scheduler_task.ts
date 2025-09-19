@@ -8,12 +8,13 @@
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import dateMath from '@kbn/datemath';
 import { getRuleIdsWithGaps } from '../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
-import { findGaps } from './find_gaps';
+import { findGapsSearchAfter } from './find_gaps';
 import { processGapsBatchFromRules } from '../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch_from_rules';
 
 import type { RulesClient } from '../../rules_client/rules_client';
@@ -21,6 +22,7 @@ import { gapStatus } from '../../../common/constants';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { Gap } from './gap';
 import type { BackfillClient } from '../../backfill_client/backfill_client';
+import type { RulesClientContext } from '../../rules_client/types';
 
 interface GapFillTaskState {
   config: {
@@ -113,11 +115,11 @@ function createGapFillAutoSchedulerEventLogger({
             duration_ms: duration,
             config: {
               name: config.name,
-              maxAmountOfGapsToProcessPerRun: config.maxAmountOfGapsToProcessPerRun,
-              maxAmountOfRulesToProcessPerRun: config.maxAmountOfRulesToProcessPerRun,
-              amountOfRetries: config.amountOfRetries,
-              rulesFilter: config.rulesFilter,
-              gapFillRange: config.gapFillRange,
+              max_amount_of_gaps_to_process_per_run: config.maxAmountOfGapsToProcessPerRun,
+              max_amount_of_rules_to_process_per_run: config.maxAmountOfRulesToProcessPerRun,
+              amount_of_retries: config.amountOfRetries,
+              rules_filter: config.rulesFilter,
+              gap_fill_range: config.gapFillRange,
               schedule: config.schedule,
             },
             results: results?.map((result) => ({
@@ -127,10 +129,10 @@ function createGapFillAutoSchedulerEventLogger({
               error: result.error,
             })),
             summary: {
-              totalRules: summary.totalRules,
-              successfulRules: summary.successfulRules,
-              failedRules: summary.failedRules,
-              totalGapsProcessed: summary.totalGapsProcessed,
+              total_rules: summary.totalRules,
+              successful_rules: summary.successfulRules,
+              failed_rules: summary.failedRules,
+              total_gaps_processed: summary.totalGapsProcessed,
             },
           },
         },
@@ -138,6 +140,269 @@ function createGapFillAutoSchedulerEventLogger({
       message,
     });
   };
+}
+
+// Helper types and utilities to improve readability/maintainability
+interface SchedulerSoAttributes {
+  name?: string;
+  maxAmountOfGapsToProcessPerRun?: number;
+  maxAmountOfRulesToProcessPerRun?: number;
+  amountOfRetries?: number;
+  rulesFilter?: string;
+  gapFillRange?: string;
+  schedule?: { interval: string };
+  enabled?: boolean;
+}
+
+interface AggregatedByRuleEntry {
+  ruleId: string;
+  processedGaps: number;
+  status: 'success' | 'error';
+  error?: string;
+}
+
+interface RunSummary {
+  totalRules: number;
+  successfulRules: number;
+  failedRules: number;
+  totalGapsProcessed: number;
+}
+
+function makeRunSummary(results: AggregatedByRuleEntry[]): RunSummary {
+  return {
+    totalRules: results.length,
+    successfulRules: results.filter((r) => r.status === 'success').length,
+    failedRules: results.filter((r) => r.status === 'error').length,
+    totalGapsProcessed: results.reduce((sum, r) => sum + (r.processedGaps || 0), 0),
+  };
+}
+
+function overallStatusFromResults(results: AggregatedByRuleEntry[]): 'success' | 'error' {
+  return results.some((r) => r.status === 'error') ? 'error' : 'success';
+}
+
+function resultsFromMap(
+  aggregatedByRule: Map<string, AggregatedByRuleEntry>
+): AggregatedByRuleEntry[] {
+  return Array.from(aggregatedByRule.values());
+}
+
+async function updateSchedulerSO({
+  soClient,
+  schedulerSo,
+  payload,
+}: {
+  soClient: SavedObjectsClientContract;
+  schedulerSo: { id: string } | null;
+  payload: Record<string, unknown>;
+}) {
+  if (!schedulerSo) return;
+  await soClient.update('gap_fill_auto_scheduler', schedulerSo.id, payload);
+}
+
+async function logExecution({
+  logEvent,
+  status,
+  results,
+  summary,
+  message,
+}: {
+  logEvent: ReturnType<typeof createGapFillAutoSchedulerEventLogger>;
+  status: 'success' | 'error';
+  results?: AggregatedByRuleEntry[];
+  summary: RunSummary;
+  message: string;
+}) {
+  logEvent({ status, results, summary, message });
+}
+
+async function earlySuccess({
+  logEvent,
+  soClient,
+  schedulerSo,
+  message,
+}: {
+  logEvent: ReturnType<typeof createGapFillAutoSchedulerEventLogger>;
+  soClient: SavedObjectsClientContract;
+  schedulerSo: { id: string } | null;
+  message: string;
+}) {
+  const summary: RunSummary = {
+    totalRules: 0,
+    successfulRules: 0,
+    failedRules: 0,
+    totalGapsProcessed: 0,
+  };
+  await logExecution({ logEvent, status: 'success', summary, message });
+  await updateSchedulerSO({
+    soClient,
+    schedulerSo,
+    payload: {
+      lastRun: {
+        status: 'success',
+        message,
+        metrics: summary,
+      },
+      running: false,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+}
+
+async function handleCancellation({
+  wasCancelled,
+  abortController,
+  aggregatedByRule,
+  logEvent,
+  soClient,
+  schedulerSo,
+}: {
+  wasCancelled: boolean;
+  abortController?: AbortController;
+  aggregatedByRule: Map<string, AggregatedByRuleEntry>;
+  logEvent: ReturnType<typeof createGapFillAutoSchedulerEventLogger>;
+  soClient: SavedObjectsClientContract;
+  schedulerSo: { id: string } | null;
+}): Promise<boolean> {
+  if (!wasCancelled && !abortController?.signal.aborted) return false;
+
+  const consolidated = resultsFromMap(aggregatedByRule);
+  const partialSummary = makeRunSummary(consolidated);
+
+  await logExecution({
+    logEvent,
+    status: 'success',
+    results: consolidated,
+    summary: partialSummary,
+    message: `Gap fill execution cancelled - processed ${partialSummary.totalGapsProcessed} gaps so far`,
+  });
+
+  await updateSchedulerSO({
+    soClient,
+    schedulerSo,
+    payload: {
+      lastRun: {
+        status: 'success',
+        message: `Cancelled: ${partialSummary.successfulRules}/${partialSummary.totalRules} rules processed; ${partialSummary.totalGapsProcessed} gaps`,
+        metrics: partialSummary,
+      },
+      running: false,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+
+  return true;
+}
+
+// Cohesive phase helpers
+function resolveStartDate(gapFillRange: string, logger: Logger): Date {
+  try {
+    const parsedStart = dateMath.parse(gapFillRange);
+    if (!parsedStart) {
+      throw new Error(`Invalid gapFillRange: ${gapFillRange}`);
+    }
+    return parsedStart.toDate();
+  } catch (error) {
+    logger.warn(`Invalid gapFillRange "${gapFillRange}", using default "now-7d"`);
+    return dateMath.parse('now-7d')!.toDate();
+  }
+}
+
+async function fetchRuleIdsWithGapsPhase(
+  rulesClientContext: RulesClientContext,
+  startDate: Date,
+  now: Date
+): Promise<string[]> {
+  let ruleIds: string[] = [];
+  await withSpan(
+    { name: 'getRuleIdsWithGaps', type: 'rule run', labels: { plugin: 'alerting' } },
+    async () => {
+      const { ruleIds: ruleIdsFromGetRuleIdsWithGaps } = await getRuleIdsWithGaps(
+        rulesClientContext,
+        {
+          start: startDate.toISOString(),
+          end: now.toISOString(),
+          statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+          hasUnfilledIntervals: true,
+        }
+      );
+      ruleIds = ruleIdsFromGetRuleIdsWithGaps;
+    }
+  );
+  return ruleIds;
+}
+
+async function findEnabledRules(
+  rulesClient: RulesClient,
+  currentRuleIds: string[]
+): Promise<RuleInfo[]> {
+  let rules: RuleInfo[] = [];
+  await withSpan(
+    { name: 'findRules', type: 'rule run', labels: { plugin: 'alerting' } },
+    async () => {
+      const { data: rulesFromFindRules } = await rulesClient.find({
+        options: {
+          page: 1,
+          perPage: currentRuleIds.length,
+          filter: `alert.attributes.enabled:true AND (${currentRuleIds
+            .map((id) => `alert.id: ("alert:${id}")`)
+            .join(' OR ')})`,
+        },
+      });
+      rules = rulesFromFindRules;
+    }
+  );
+  return rules;
+}
+
+async function findGapsSearchPage({
+  rulesClientContext,
+  enabledRuleIds,
+  startDate,
+  now,
+  perPage,
+  logger,
+  searchAfter,
+  pitId,
+}: {
+  rulesClientContext: RulesClientContext;
+  enabledRuleIds: string[];
+  startDate: Date;
+  now: Date;
+  perPage: number;
+  logger: Logger;
+  searchAfter?: SortResults[];
+  pitId?: string;
+}): Promise<{
+  data: Gap[];
+  searchAfter?: SortResults[];
+  pitId?: string;
+}> {
+  return withSpan(
+    {
+      name: 'findGapsSearchAfter',
+      type: 'rule run',
+      labels: { plugin: 'alerting' },
+    },
+    async () => {
+      const res = await findGapsSearchAfter({
+        eventLogClient: await rulesClientContext.getEventLogClient(),
+        logger,
+        params: {
+          ruleIds: enabledRuleIds,
+          start: startDate.toISOString(),
+          end: now.toISOString(),
+          perPage,
+          sortField: '@timestamp',
+          sortOrder: 'asc',
+          statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+          searchAfter,
+          pitId,
+        },
+      });
+      return res;
+    }
+  );
 }
 
 // Register the gap fill processor task
@@ -161,7 +426,7 @@ export function registerGapFillAutoSchedulerTask({
   taskManager.registerTaskDefinitions({
     'gap-fill-auto-scheduler-task': {
       title: 'Gap Fill Auto Scheduler',
-      timeout: '10s',
+      timeout: '1m',
       createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
         // POC runner: simulate async batching work, support cancellation, and persist progress periodically
         let wasCancelled = false;
@@ -177,26 +442,19 @@ export function registerGapFillAutoSchedulerTask({
             const startTime = new Date();
             // Get the RulesClient using the fake request
             const rulesClient = await getRulesClientWithRequest(fakeRequest!);
-            const context = rulesClient.context as any;
+            const rulesClientWithContext = rulesClient as unknown as {
+              context: RulesClientContext;
+            };
+            const rulesClientContext = rulesClientWithContext.context;
             const { configId } =
               (taskInstance.params as { configId?: string; spaceId?: string }) || {};
             // Load scheduler SO for config
-            const soClient = rulesClient.context.unsecuredSavedObjectsClient;
+            const soClient = rulesClientContext.unsecuredSavedObjectsClient;
 
             const schedulerSo = configId
               ? await soClient.get('gap_fill_auto_scheduler', configId)
               : null;
 
-            interface SchedulerSoAttributes {
-              name?: string;
-              maxAmountOfGapsToProcessPerRun?: number;
-              maxAmountOfRulesToProcessPerRun?: number;
-              amountOfRetries?: number;
-              rulesFilter?: string;
-              gapFillRange?: string;
-              schedule?: { interval: string };
-              enabled?: boolean;
-            }
             const soAttrs: SchedulerSoAttributes =
               (schedulerSo?.attributes as SchedulerSoAttributes) || {};
             const config = {
@@ -209,7 +467,7 @@ export function registerGapFillAutoSchedulerTask({
               schedule: soAttrs.schedule ?? { interval: '1h' },
             };
 
-            if (!context) {
+            if (!rulesClientContext) {
               return {
                 state: {},
               };
@@ -223,7 +481,7 @@ export function registerGapFillAutoSchedulerTask({
                 overlappingBackfills: number;
               }> = [];
 
-              const actionsClient = await context.getActionsClient();
+              const actionsClient = await rulesClientContext.getActionsClient();
 
               for (const gap of gaps) {
                 try {
@@ -231,7 +489,8 @@ export function registerGapFillAutoSchedulerTask({
                     ruleId: gap.ruleId,
                     start: gap.range.gte,
                     end: gap.range.lte,
-                    savedObjectsRepository: context.internalSavedObjectsRepository,
+                    savedObjectsRepository:
+                      rulesClientContext.internalSavedObjectsRepository as import('@kbn/core/server').ISavedObjectsRepository,
                     actionsClient,
                   });
 
@@ -269,231 +528,194 @@ export function registerGapFillAutoSchedulerTask({
               // Create the event logger function once
               const logEvent = createGapFillAutoSchedulerEventLogger({
                 eventLogger,
-                context,
+                context: rulesClientContext,
                 taskInstance,
 
                 startTime,
                 config,
               });
-
-              const earlySuccessReturn = (message: string) => {
-                const endTime = new Date();
-                logEvent({
-                  status: 'success',
-                  summary: {
-                    totalRules: 0,
-                    successfulRules: 0,
-                    failedRules: 0,
-                    totalGapsProcessed: 0,
-                  },
-                  message,
-                });
-                if (schedulerSo) {
-                  soClient
-                    .update('gap_fill_auto_scheduler', schedulerSo.id, {
-                      lastRun: {
-                        status: 'success',
-                        message,
-                        metrics: {
-                          totalRules: 0,
-                          successfulRules: 0,
-                          failedRules: 0,
-                          totalGapsProcessed: 0,
-                        },
-                      },
-                      running: false,
-                      updatedAt: endTime.toISOString(),
-                    })
-                    .catch(() => {});
-                }
-                return {
-                  state: {},
-                };
-              };
-
               const now = new Date();
-              // Parse the gapFillRange using dateMath
-              let startDate: Date;
-              try {
-                const parsedStart = dateMath.parse(config.gapFillRange);
-                if (!parsedStart) {
-                  throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
-                }
-                startDate = parsedStart.toDate();
-              } catch (error) {
-                logger.warn(
-                  `Invalid gapFillRange "${config.gapFillRange}", using default "now-7d"`
-                );
-                startDate = dateMath.parse('now-7d')!.toDate();
-              }
+              // Parse the gapFillRange using helper
+              const startDate: Date = resolveStartDate(config.gapFillRange, logger);
 
               // Step 1: Get all rule IDs with gaps, we get the rule ids sorted from rule which has the oldest gap
               // allow us to process the rules with the oldest gap first
-              let ruleIds: string[] = [];
-              await withSpan(
-                { name: 'getRuleIdsWithGaps', type: 'rule run', labels: { plugin: 'alerting' } },
-                async () => {
-                  const { ruleIds: ruleIdsFromGetRuleIdsWithGaps } = await getRuleIdsWithGaps(
-                    context,
-                    {
-                      start: startDate.toISOString(),
-                      end: now.toISOString(),
-                      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-                      hasUnfilledIntervals: true,
-                    }
-                  );
-                  ruleIds = ruleIdsFromGetRuleIdsWithGaps;
-                }
+              const ruleIds: string[] = await fetchRuleIdsWithGapsPhase(
+                rulesClientContext,
+                startDate,
+                now
               );
 
               if (!ruleIds.length) {
-                return earlySuccessReturn(
-                  'Gap fill execution completed - no rules with gaps found'
-                );
+                await earlySuccess({
+                  logEvent,
+                  soClient,
+                  schedulerSo,
+                  message: 'Gap fill execution completed - no rules with gaps found',
+                });
+                return { state: {} };
               }
 
-              // Step 2: Fetch rules and filter to only enabled ones
-              // TODO: Implement rules filter if provided
-              // for now we use all rule ids
-
-              let rules: RuleInfo[] = [];
-              await withSpan(
-                { name: 'findRules', type: 'rule run', labels: { plugin: 'alerting' } },
-                async () => {
-                  const { data: rulesFromFindRules } = await rulesClient.find({
-                    options: {
-                      page: 1,
-                      perPage: Math.min(config.maxAmountOfRulesToProcessPerRun, 9999),
-                      filter: `alert.attributes.enabled:true AND (${ruleIds
-                        .map((id) => `alert.id: ("alert:${id}")`)
-                        .join(' OR ')})`,
-                    },
-                  });
-                  rules = rulesFromFindRules;
+              // Step 2-5: Iterate enabled rules in batches (100 per run by default), and for each
+              // batch page through gaps in chunks of 1000 until exhausted or cancelled.
+              const aggregatedByRule = new Map<
+                string,
+                {
+                  ruleId: string;
+                  processedGaps: number;
+                  status: 'success' | 'error';
+                  error?: string;
                 }
-              );
+              >();
+              const rulesBatchSize = Math.max(1, config.maxAmountOfRulesToProcessPerRun ?? 100);
+              const gapsPerPage = 1000;
 
-              // Filter to only enabled rules
-              const enabledRuleIds = rules.map((rule: RuleInfo) => rule.id);
+              for (let startIdx = 0; startIdx < ruleIds.length; startIdx += rulesBatchSize) {
+                if (
+                  await handleCancellation({
+                    wasCancelled,
+                    abortController,
+                    aggregatedByRule,
+                    logEvent,
+                    soClient,
+                    schedulerSo,
+                  })
+                ) {
+                  return { state: {} };
+                }
 
+                const currentRuleIds = ruleIds.slice(startIdx, startIdx + rulesBatchSize);
 
-              console.log('enabledRuleIds', JSON.stringify(enabledRuleIds));
+                const rules: RuleInfo[] = await findEnabledRules(rulesClient, currentRuleIds);
 
-              if (!enabledRuleIds.length) {
-                return earlySuccessReturn(
-                  'Gap fill execution completed - no enabled rules with gaps found'
-                );
-              }
+                const enabledRuleIds = rules.map((rule: RuleInfo) => rule.id);
+                if (!enabledRuleIds.length) {
+                  continue; // no enabled rules in this batch; move to next batch
+                }
 
-              // Step 3: Fetch gaps for these enabled rule IDs (limit by maxAmountOfRulesToProcessPerRun)
-              let gaps: Gap[] = [];
-              await withSpan(
-                { name: 'findGaps', type: 'rule run', labels: { plugin: 'alerting' } },
-                async () => {
-                  const { data: gapsFromFindGaps } = await findGaps({
-                    eventLogClient: await context.getEventLogClient(),
+                let searchAfter: SortResults[] | undefined;
+                let pitId: string | undefined;
+
+                while (true) {
+                  if (
+                    await handleCancellation({
+                      wasCancelled,
+                      abortController,
+                      aggregatedByRule,
+                      logEvent,
+                      soClient,
+                      schedulerSo,
+                    })
+                  ) {
+                    return { state: {} };
+                  }
+
+                  const {
+                    data,
+                    searchAfter: nextSearchAfter,
+                    pitId: nextPitId,
+                  } = await findGapsSearchPage({
+                    rulesClientContext,
+                    enabledRuleIds,
+                    startDate,
+                    now,
+                    perPage: gapsPerPage,
                     logger,
-                    params: {
-                      ruleIds: enabledRuleIds,
-                      ruleId: '',
-                      start: startDate.toISOString(),
-                      end: now.toISOString(),
-                      page: 1,
-                      perPage: Math.max(config.maxAmountOfGapsToProcessPerRun, 9999),
-                      sortField: '@timestamp',
-                      sortOrder: 'asc',
-                      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-                    },
+                    searchAfter,
+                    pitId,
                   });
-                  gaps = gapsFromFindGaps;
+
+                  pitId = nextPitId ?? pitId;
+                  searchAfter = nextSearchAfter;
+
+                  if (!data.length) {
+                    break; // all gaps for this batch processed
+                  }
+
+                  const filteredGaps = await withSpan(
+                    {
+                      name: 'filterGapsWithOverlappingBackfills',
+                      type: 'rule run',
+                      labels: { plugin: 'alerting' },
+                    },
+                    async () => filterGapsWithOverlappingBackfills(data)
+                  );
+
+                  if (!filteredGaps.length) {
+                    // nothing to process in this page
+                    if (data.length < gapsPerPage) {
+                      break;
+                    }
+                    continue;
+                  }
+
+                  const { results: chunkResults } = await withSpan(
+                    {
+                      name: 'processGapsBatchFromRules',
+                      type: 'rule run',
+                      labels: { plugin: 'alerting' },
+                    },
+                    async () =>
+                      processGapsBatchFromRules(rulesClientContext, {
+                        gaps: filteredGaps,
+                        range: { start: startDate.toISOString(), end: now.toISOString() },
+                      })
+                  );
+
+                  for (const r of chunkResults) {
+                    const existing = aggregatedByRule.get(r.ruleId);
+                    if (!existing) {
+                      aggregatedByRule.set(r.ruleId, {
+                        ruleId: r.ruleId,
+                        processedGaps: r.processedGaps,
+                        status: r.status,
+                        error: r.error,
+                      });
+                    } else {
+                      const combinedStatus =
+                        existing.status === 'error' || r.status === 'error' ? 'error' : 'success';
+                      aggregatedByRule.set(r.ruleId, {
+                        ruleId: r.ruleId,
+                        processedGaps: existing.processedGaps + (r.processedGaps || 0),
+                        status: combinedStatus,
+                        error: existing.error || r.error,
+                      });
+                    }
+                  }
+
+                  // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
+                  if (data.length < gapsPerPage) {
+                    break;
+                  }
                 }
-              );
-
-              console.log('gaps', JSON.stringify(gaps.length));
-
-              if (gaps.length === 0) {
-                return earlySuccessReturn('Gap fill execution completed - no gaps found');
               }
 
-              // Step 4: Filter out gaps that already have overlapping backfills
-              let filteredGaps: Gap[] = [];
-              await withSpan(
-                {
-                  name: 'filterGapsWithOverlappingBackfills',
-                  type: 'rule run',
-                  labels: { plugin: 'alerting' },
-                },
-                async () => {
-                  filteredGaps = await filterGapsWithOverlappingBackfills(gaps);
-                }
-              );
-
-              if (filteredGaps.length === 0) {
-                return earlySuccessReturn(
-                  `Gap fill execution completed - all ${gaps.length} gaps already have overlapping backfills`
-                );
+              const consolidated = Array.from(aggregatedByRule.values());
+              if (consolidated.length === 0) {
+                await earlySuccess({
+                  logEvent,
+                  soClient,
+                  schedulerSo,
+                  message: 'Gap fill execution completed - no gaps found',
+                });
+                return { state: {} };
               }
 
-              logger.info(
-                `Filtered gaps: ${filteredGaps.length} gaps remaining after filtering out ${
-                  gaps.length - filteredGaps.length
-                } gaps with overlapping backfills`
-              );
+              const summary = makeRunSummary(consolidated);
+              const overallStatus = overallStatusFromResults(consolidated);
 
-              // Step 5: Bulk schedule backfills for all rules at once
-              let results: Array<{
-                ruleId: string;
-                processedGaps: number;
-                status: 'success' | 'error';
-                error?: string;
-              }> = [];
-              await withSpan(
-                {
-                  name: 'processGapsBatchFromRules',
-                  type: 'rule run',
-                  labels: { plugin: 'alerting' },
-                },
-                async () => {
-                  const { results: resultsFromProcessGapsBatchFromRules } =
-                    await processGapsBatchFromRules(context, {
-                      gaps: filteredGaps,
-                      range: {
-                        start: startDate.toISOString(),
-                        end: now.toISOString(),
-                      },
-                    });
-                  results = resultsFromProcessGapsBatchFromRules;
-                }
-              );
-              // TODO: think about status etc.'
-
-              let overallStatus: 'success' | 'error' = 'success';
-              const allSuccess = results.every((r) => r.status === 'success');
-              const allError = results.every((r) => r.status === 'error');
-              if (allSuccess) {
-                overallStatus = 'success';
-              } else if (allError) {
-                overallStatus = 'error';
-              } else {
-                overallStatus = 'error';
-              }
-              const summary = {
-                totalRules: results.length,
-                successfulRules: results.filter((r) => r.status === 'success').length,
-                failedRules: results.filter((r) => r.status === 'error').length,
-                totalGapsProcessed: results.reduce((sum, r) => sum + r.processedGaps, 0),
-              };
-
-              // Log execution completion
-              logEvent({
+              await logExecution({
+                logEvent,
                 status: overallStatus,
-                results,
+                results: consolidated,
                 summary,
                 message: `Gap fill execution completed - ${summary.successfulRules}/${summary.totalRules} rules processed successfully`,
               });
 
-              if (schedulerSo) {
-                await soClient.update('gap_fill_auto_scheduler', schedulerSo.id, {
+              await updateSchedulerSO({
+                soClient,
+                schedulerSo,
+                payload: {
                   lastRun: {
                     status: overallStatus,
                     message: `Processed ${summary.successfulRules}/${summary.totalRules}, ${summary.failedRules} failed; ${summary.totalGapsProcessed} gaps`,
@@ -501,15 +723,15 @@ export function registerGapFillAutoSchedulerTask({
                   },
                   running: false,
                   updatedAt: new Date().toISOString(),
-                });
-              }
+                },
+              });
 
               return { state: {} };
             } catch (error) {
               const endTime = new Date();
               const logEvent = createGapFillAutoSchedulerEventLogger({
                 eventLogger,
-                context,
+                context: rulesClientContext,
                 taskInstance,
 
                 startTime,
