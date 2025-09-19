@@ -10,17 +10,21 @@
 import type { LensAttributes } from '../../types';
 
 /**
- * Simple metric generated from kibana
+ * Complex metric generated from kibana
  */
-export const simpleMetricAttributes: LensAttributes = {
-  title: 'Lens Metric - By Ref',
-  description: '',
+export const complexMetricAttributes: LensAttributes = {
+  title: 'Metric - Complex',
+  description: 'Complex Lens Metric',
   visualizationType: 'lnsMetric',
   state: {
     visualization: {
-      layerId: '2821bd27-b805-4dea-a7d4-123c248e63b1',
+      layerId: '73144967-199a-451f-a407-e5e5e543cb9e',
       layerType: 'data',
-      metricAccessor: '812a7944-731e-4967-8b84-1c8bba4ff04b',
+      metricAccessor: '594aa5e9-9163-4b22-a19d-89b3546561d9',
+      secondaryMetricAccessor: 'c6c134aa-e1eb-4484-a5da-f864b2ed5095',
+      maxAccessor: 'f041d9d0-db1d-4648-8320-a58449159841',
+      color: '#FFf',
+      showBar: true,
       secondaryTrend: {
         type: 'none',
       },
@@ -34,9 +38,9 @@ export const simpleMetricAttributes: LensAttributes = {
     datasourceStates: {
       formBased: {
         layers: {
-          '2821bd27-b805-4dea-a7d4-123c248e63b1': {
+          '73144967-199a-451f-a407-e5e5e543cb9e': {
             columns: {
-              '812a7944-731e-4967-8b84-1c8bba4ff04b': {
+              '594aa5e9-9163-4b22-a19d-89b3546561d9': {
                 label: 'Count of records',
                 dataType: 'number',
                 operationType: 'count',
@@ -47,8 +51,34 @@ export const simpleMetricAttributes: LensAttributes = {
                   emptyAsNull: true,
                 },
               },
+              'c6c134aa-e1eb-4484-a5da-f864b2ed5095': {
+                label: 'Average of bytes',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error why is this type erroring?
+                  emptyAsNull: true,
+                },
+              },
+              'f041d9d0-db1d-4648-8320-a58449159841': {
+                label: 'Maximum of bytes',
+                dataType: 'number',
+                operationType: 'max',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error why is this type erroring?
+                  emptyAsNull: true,
+                },
+              },
             },
-            columnOrder: ['812a7944-731e-4967-8b84-1c8bba4ff04b'],
+            columnOrder: [
+              '594aa5e9-9163-4b22-a19d-89b3546561d9',
+              'c6c134aa-e1eb-4484-a5da-f864b2ed5095',
+              'f041d9d0-db1d-4648-8320-a58449159841',
+            ],
             incompleteColumns: {},
             sampling: 1,
           },
@@ -70,7 +100,7 @@ export const simpleMetricAttributes: LensAttributes = {
     {
       type: 'index-pattern',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      name: 'indexpattern-datasource-layer-2821bd27-b805-4dea-a7d4-123c248e63b1',
+      name: 'indexpattern-datasource-layer-73144967-199a-451f-a407-e5e5e543cb9e',
     },
   ],
 } satisfies LensAttributes;

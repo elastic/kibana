@@ -11,10 +11,15 @@ import { metricStateSchema } from '../../schema/charts/metric';
 import { validateConverter } from '../validate';
 import { simpleMetricAttributes } from './simple.mock';
 import { breakdownMetricAttributes } from './breakdown.mock';
+import { complexMetricAttributes } from './complex.mock';
 
 describe('Metric', () => {
   it('should convert a simple metric', () => {
     validateConverter(simpleMetricAttributes, metricStateSchema);
+  });
+
+  it('should convert a complex metric', () => {
+    validateConverter(complexMetricAttributes, metricStateSchema);
   });
 
   it('should convert a breakdown-by metric', () => {
