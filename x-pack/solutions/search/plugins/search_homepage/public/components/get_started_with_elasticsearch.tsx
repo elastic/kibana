@@ -28,6 +28,7 @@ import { SampleDataActionButton } from './sample_data_action_button';
 interface GettingStartedCardMetadata {
   title: string | NonNullable<React.ReactNode>;
   dataTestSubj: string;
+  _id: string;
   description: string | React.ReactNode;
   buttonComponent: React.ReactNode;
   badgeText?: string;
@@ -54,11 +55,11 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
   });
 
   return filteredCards.map((card) => (
-    <EuiFlexItem key={card.dataTestSubj}>
+    <EuiFlexItem key={card._id}>
       <EuiCard
-        hasBorder={hoveredCard === card.dataTestSubj}
-        display={hoveredCard === card.dataTestSubj ? 'plain' : 'subdued'}
-        onMouseEnter={() => onCardHover(card.dataTestSubj)}
+        hasBorder={hoveredCard === card._id}
+        display={hoveredCard === card._id ? 'plain' : 'subdued'}
+        onMouseEnter={() => onCardHover(card._id)}
         onMouseLeave={() => onCardHover(null)}
         paddingSize="s"
         textAlign="left"
@@ -129,6 +130,7 @@ export const GetStartedWithElasticsearch = () => {
         defaultMessage: 'Upload a file',
       }),
       dataTestSubj: 'uploadFileButton',
+      _id: 'uploadFileButton',
       description: (
         <FormattedMessage
           id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
@@ -151,6 +153,7 @@ export const GetStartedWithElasticsearch = () => {
     },
     // Sample data card (conditional)
     {
+      _id: 'sampleDataSection',
       title: (
         <FormattedMessage
           id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
@@ -170,6 +173,7 @@ export const GetStartedWithElasticsearch = () => {
     },
     // Create index card
     {
+      _id: 'createIndexButton',
       title: i18n.translate('xpack.searchHomepage.createIndexTitle', {
         defaultMessage: 'Create an index',
       }),
@@ -196,6 +200,7 @@ export const GetStartedWithElasticsearch = () => {
     },
     // Tutorial cards
     {
+      _id: 'console_tutorials_search_basics',
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.basicsTitle', {
         defaultMessage: 'Search basics',
       }),
@@ -220,6 +225,7 @@ export const GetStartedWithElasticsearch = () => {
       }),
     },
     {
+      _id: 'console_tutorials_semantic_search',
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticTitle', {
         defaultMessage: 'Semantic search',
       }),
@@ -245,6 +251,7 @@ export const GetStartedWithElasticsearch = () => {
       }),
     },
     {
+      _id: 'console_tutorials_esql',
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlTitle', {
         defaultMessage: 'ES|QL',
       }),
