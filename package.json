@@ -1853,7 +1853,7 @@
     "css-loader": "^7.1.2",
     "cssnano": "^7.0.7",
     "cssnano-preset-default": "^7.0.7",
-    "cssstyle": "^4.1.0",
+    "cssstyle": "^5.2.1",
     "csstype": "^3.0.2",
     "cypress": "13.17.0",
     "cypress-axe": "^1.5.0",
