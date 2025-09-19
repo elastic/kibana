@@ -96,6 +96,7 @@ describe('Agent migration', () => {
 
       const result = await migrateSingleAgent(
         esClientMock,
+        soClientMock,
         agentId,
         mockedPolicy,
         mockedAgent,
@@ -104,15 +105,17 @@ describe('Agent migration', () => {
 
       // Verify createAgentAction was called with correct params
       expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
-      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
         agents: [agentId],
         created_at: expect.any(String),
         type: 'MIGRATE',
         policyId: options.policyId,
         data: {
-          enrollment_token: options.enrollment_token,
           target_uri: options.uri,
           settings: options.settings,
+        },
+        secrets: {
+          enrollment_token: options.enrollment_token,
         },
       });
 
@@ -128,16 +131,26 @@ describe('Agent migration', () => {
         uri: 'https://test-fleet-server.example.com',
       };
 
-      await migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options);
+      await migrateSingleAgent(
+        esClientMock,
+        soClientMock,
+        agentId,
+        mockedPolicy,
+        mockedAgent,
+        options
+      );
 
       // Verify createAgentAction was called with correct params and undefined additionalSettings
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
+        soClientMock,
         expect.objectContaining({
           data: {
-            enrollment_token: options.enrollment_token,
             target_uri: options.uri,
             settings: undefined,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
           },
         })
       );
@@ -152,7 +165,7 @@ describe('Agent migration', () => {
       };
       mockedPolicy.is_protected = true;
       await expect(
-        migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options)
+        migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
       ).rejects.toThrowError('Agent is protected and cannot be migrated');
     });
   });
@@ -177,13 +190,16 @@ describe('Agent migration', () => {
       expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
+        soClientMock,
         expect.objectContaining({
           agents: [mockedAgent.id, mockedAgent.id],
           type: 'MIGRATE',
           data: {
-            enrollment_token: options.enrollment_token,
             target_uri: options.uri,
             settings: options.settings,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
           },
           total: 2,
           namespaces: ['default'],
@@ -206,11 +222,14 @@ describe('Agent migration', () => {
       // Verify createAgentAction was called with correct params and undefined additionalSettings
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
+        soClientMock,
         expect.objectContaining({
           data: {
-            enrollment_token: options.enrollment_token,
             target_uri: options.uri,
             settings: undefined,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
           },
         })
       );

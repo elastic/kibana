@@ -44,7 +44,6 @@ const DEFAULT_PAGE_SIZE = 10;
 interface SetupInterface {
   kibanaVersion: string;
   logger: Logger;
-  isFeatureEnabled: boolean;
   endpointContext: EndpointAppContextService;
 }
 
@@ -64,7 +63,6 @@ class SecurityWorkflowInsightsService {
   private _isInitialized: Promise<[void, void]> = firstValueFrom(
     combineLatest<[void, void]>([this.setup$, this.start$])
   );
-  private isFeatureEnabled = false;
 
   /**
    * Lifecycle
@@ -74,12 +72,7 @@ class SecurityWorkflowInsightsService {
     return this._isInitialized;
   }
 
-  public setup({ kibanaVersion, logger, isFeatureEnabled, endpointContext }: SetupInterface) {
-    this.isFeatureEnabled = isFeatureEnabled;
-    if (!isFeatureEnabled) {
-      return;
-    }
-
+  public setup({ kibanaVersion, logger, endpointContext }: SetupInterface) {
     this._logger = logger;
     this._endpointContext = endpointContext;
 
@@ -94,10 +87,6 @@ class SecurityWorkflowInsightsService {
   }
 
   public async start({ esClient, registerDefendInsightsCallback }: StartInterface) {
-    if (!this.isFeatureEnabled) {
-      return;
-    }
-
     this._esClient = esClient;
     await firstValueFrom(this.setup$);
 
