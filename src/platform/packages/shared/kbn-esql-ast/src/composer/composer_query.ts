@@ -734,6 +734,16 @@ export class ComposerQuery {
     return this;
   }
 
+  /**
+   * Inlines a parameter by replacing its placeholder with its actual value.
+   * This operation modifies the query AST to include the literal value
+   * instead of the parameter reference. See {@linkcode inlineParams} for
+   * more details.
+   *
+   * @param name The name of the parameter to inline.
+   * @returns The updated ComposerQuery instance.
+   * @throws Error if the parameter does not exist or has an unsupported type.
+   */
   public inlineParam(name: string): this {
     const value = this.params.get(name);
 
