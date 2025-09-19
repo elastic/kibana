@@ -38,13 +38,41 @@ import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
 import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
 
+type MetricApiCompareType = Extract<
+  Required<MetricState['secondary_metric']>,
+  { compare: any }
+>['compare'];
+
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
+const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
+const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
 function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
+
+function convertToCompareToLensState(compareToConfig: MetricApiCompareType): {
+  secondaryTrend: Extract<MetricVisualizationState['secondaryTrend'], { type: 'dynamic' }>;
+} {
+  return {
+    secondaryTrend: {
+      type: 'dynamic',
+      baselineValue:
+        compareToConfig.to === 'primary' ? compareToConfig.to : compareToConfig.baseline,
+      visuals:
+        compareToConfig.icon && compareToConfig.value
+          ? 'both'
+          : compareToConfig.icon
+          ? 'icon'
+          : 'value',
+      reversed: compareToConfig.palette?.includes('reversed') ?? LENS_METRIC_COMPARE_TO_REVERSED,
+      paletteId: compareToConfig.palette ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+    },
+  };
+}
+
 function buildVisualizationState(config: MetricState): MetricVisualizationState {
   const layer = config;
 
@@ -79,9 +107,11 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           secondaryAlign: layer.metric.alignments.value,
           // secondaryLabelPosition: layer.metric.alignments.labels,
           // secondaryLabel: '',
+          ...(layer.secondary_metric.compare
+            ? convertToCompareToLensState(layer.secondary_metric.compare)
+            : {}),
         }
       : {}),
-
     ...(layer.breakdown_by
       ? {
           breakdownByAccessor: getAccessorName('breakdown'),
@@ -116,6 +146,27 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
             : {}),
         }
       : {}),
+  };
+}
+
+function getCompareToApi(
+  compare: Extract<MetricVisualizationState['secondaryTrend'], { type: 'dynamic' }>
+): MetricApiCompareType {
+  const sharedProps = {
+    palette: `${compare.paletteId}${compare.reversed ? '_reversed' : ''}`,
+    icon: compare.visuals === 'icon' || compare.visuals === 'both',
+    value: compare.visuals === 'value' || compare.visuals === 'both',
+  };
+  if (compare.baselineValue === 'primary') {
+    return {
+      to: 'primary',
+      ...sharedProps,
+    };
+  }
+  return {
+    to: 'baseline',
+    baseline: compare.baselineValue,
+    ...sharedProps,
   };
 }
 
@@ -223,7 +274,9 @@ function reverseBuildVisualizationState(
   }
 
   if (props.secondary_metric) {
-    // props.secondary_metric.compare_to
+    if (visualization.secondaryTrend?.type === 'dynamic') {
+      props.secondary_metric.compare = getCompareToApi(visualization.secondaryTrend);
+    }
 
     if (visualization.secondaryPrefix) {
       props.secondary_metric.prefix = visualization.secondaryPrefix;

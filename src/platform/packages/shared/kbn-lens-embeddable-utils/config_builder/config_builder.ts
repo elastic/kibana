@@ -97,7 +97,9 @@ export class LensConfigBuilder {
     const chartType = config.type;
     if (chartType === 'metric') {
       const converter = this.apiConvertersByChart[chartType];
-      return converter.fromAPItoLensState(config);
+      const result = converter.fromAPItoLensState(config);
+      // console.log({ type: 'API -> SO State', config, result: JSON.stringify(result, null, 2) });
+      return result;
     }
     throw new Error(`No attributes converter found for chart type: ${chartType}`);
   }
@@ -106,7 +108,9 @@ export class LensConfigBuilder {
     const chartType = config.visualizationType;
     if (chartType === 'lnsMetric') {
       const converter = this.apiConvertersByChart.metric;
-      return converter.fromLensStateToAPI(config);
+      const result = converter.fromLensStateToAPI(config);
+      // console.log({ type: 'SO State -> API', config: JSON.stringify(config, null, 2), result });
+      return result;
     }
     throw new Error(`No API converter found for chart type: ${chartType}`);
   }
