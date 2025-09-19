@@ -355,9 +355,11 @@ const AlertsTableContent = typedForwardRef(
 
     const fieldWithSortingError = useMemo(
       () =>
-        queryParams.sort.find((sortField) =>
-          alertsError?.message?.includes(Object.keys(sortField)[0])
-        ),
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
       [alertsError, queryParams]
     );
 
@@ -447,8 +449,8 @@ const AlertsTableContent = typedForwardRef(
       [id, visibleColumns]
     );
 
-    // allow to reset to previous set in case of sorting error
-    const handleResetToPreviousState = useCallback(() => {
+    // allow to reset to previous sort state in case of sorting error
+    const handleResetSortToPreviousState = useCallback(() => {
       if (fieldWithSortingError) {
         const newSort = queryParams.sort.filter(
           (sortField) => !deepEqual(sortField, fieldWithSortingError)
@@ -653,9 +655,9 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
-              error={alertsError as Error}
-              onResetToPreviousState={
-                fieldWithSortingError ? handleResetToPreviousState : undefined
+              error={alertsError}
+              onResetSortToPreviousState={
+                fieldWithSortingError ? handleResetSortToPreviousState : undefined
               }
             />
           </InspectButtonContainer>

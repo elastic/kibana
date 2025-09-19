@@ -51,7 +51,7 @@ export const EmptyState: React.FC<
     alertsQuerySnapshot?: EsQuerySnapshot;
     showInspectButton?: boolean;
     error?: Error;
-    onResetToPreviousState?: () => void;
+    onResetSortToPreviousState?: () => void;
   } & EmptyStateMessage
 > = ({
   height = 'tall',
@@ -62,7 +62,7 @@ export const EmptyState: React.FC<
   alertsQuerySnapshot,
   showInspectButton,
   error,
-  onResetToPreviousState,
+  onResetSortToPreviousState,
 }) => {
   const renderErrorState = () => (
     <EuiFlexItem>
@@ -71,13 +71,13 @@ export const EmptyState: React.FC<
       </EuiText>
       <EuiSpacer size="m" />
 
-      {onResetToPreviousState ? (
+      {onResetSortToPreviousState ? (
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={onResetToPreviousState}
+              onClick={onResetSortToPreviousState}
               size="m"
-              data-test-subj="resetToPreviousStateButton"
+              data-test-subj="resetSortToPreviousStateButton"
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.empty.resetButton"

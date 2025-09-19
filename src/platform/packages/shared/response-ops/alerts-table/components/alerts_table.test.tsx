@@ -983,6 +983,21 @@ describe('AlertsTable', () => {
       expect(screen.queryByTestId('resetToPreviousStateButton')).not.toBeInTheDocument();
     });
 
+    it('should not show reset button if it is not a sorting error', async () => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Error while fetching alerts with field [kibana.alert.time_range]'),
+      });
+
+      render(<TestComponent {...tableProps} />);
+
+      expect(screen.queryByTestId('resetToPreviousStateButton')).not.toBeInTheDocument();
+    });
+
     it('should go back to previous state when reset button is clicked', async () => {
       const storageSetSpy = jest.spyOn(Storage.prototype, 'setItem');
       mockSearchAlerts.mockResolvedValue({
@@ -1015,7 +1030,7 @@ describe('AlertsTable', () => {
         })
       );
 
-      const resetButton = await screen.findByTestId('resetToPreviousStateButton');
+      const resetButton = await screen.findByTestId('resetSortToPreviousStateButton');
       expect(resetButton).toBeInTheDocument();
 
       await userEvent.click(resetButton);

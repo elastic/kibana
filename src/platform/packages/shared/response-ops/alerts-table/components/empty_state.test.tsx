@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EmptyState } from './empty_state';
+import userEvent from '@testing-library/user-event';
 
 describe('EmptyState', () => {
   it('renders the empty state with default props', async () => {
@@ -58,17 +59,22 @@ describe('EmptyState', () => {
     expect(screen.queryByText('There are currently no alerts to display.')).not.toBeInTheDocument();
   });
 
-  it('renders the reset button when onResetToPreviousState is provided', async () => {
+  it('renders the reset button when onResetSortToPreviousState is provided', async () => {
     const mockReset = jest.fn();
     const error = new Error('Test error message');
     render(
       <IntlProvider locale="en">
-        <EmptyState error={error} onResetToPreviousState={mockReset} />
+        <EmptyState error={error} onResetSortToPreviousState={mockReset} />
       </IntlProvider>
     );
 
     expect(await screen.findByText('Test error message')).toBeInTheDocument();
-    expect(await screen.findByTestId('resetToPreviousStateButton')).toBeInTheDocument();
+
+    const resetButton = await screen.findByTestId('resetSortToPreviousStateButton');
+    expect(resetButton).toBeInTheDocument();
+
+    userEvent.click(resetButton);
+    await waitFor(() => expect(mockReset).toHaveBeenCalled());
   });
 
   it('does not show reset button when it is not error', async () => {
@@ -78,15 +84,15 @@ describe('EmptyState', () => {
         <EmptyState
           messageTitle="No Alerts"
           messageBody="There are currently no alerts to display."
-          onResetToPreviousState={mockReset}
+          onResetSortToPreviousState={mockReset}
         />
       </IntlProvider>
     );
 
-    expect(screen.queryByTestId('resetToPreviousStateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('resetSortToPreviousStateButton')).not.toBeInTheDocument();
   });
 
-  it('does not render the reset button when onResetToPreviousState is not provided', async () => {
+  it('does not render the reset button when onResetSortToPreviousState is not provided', async () => {
     const error = new Error('Test error message');
     render(
       <IntlProvider locale="en">
@@ -94,6 +100,6 @@ describe('EmptyState', () => {
       </IntlProvider>
     );
 
-    expect(screen.queryByTestId('resetToPreviousStateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('resetSortToPreviousStateButton')).not.toBeInTheDocument();
   });
 });

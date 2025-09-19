@@ -353,7 +353,7 @@ describe('useColumns', () => {
       await waitFor(() => expect(result.current.columns).toMatchObject(resultColumns));
     });
 
-    test('should update columns with isSortable', async () => {
+    test('should update columns with isSortable when a new column is added', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns([
         ...defaultColumns,
         { id: 'test', displayAsText: 'test' },
