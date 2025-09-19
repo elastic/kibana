@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import type { MlPutJobRequest } from '@elastic/elasticsearch/lib/api/types';
-import { chatClient, esClient } from '../../services';
+import { chatClient, esClient, logger } from '../../services';
 
 /**
  * NOTE: This scenario has been migrated to the new evaluation framework.
@@ -144,10 +144,14 @@ describe('Elasticsearch function', () => {
   });
 
   describe('ML jobs', () => {
+    const TEST_INDEX = 'ml-test-logs';
+    const TEST_JOB_ID = 'test-job-anomaly-detection';
+    const TEST_DATAFEED_ID = `datafeed-${TEST_JOB_ID}`;
+
     before(async () => {
       // Create test index with sample data
       await esClient.indices.create({
-        index: 'logs-test',
+        index: TEST_INDEX,
         mappings: {
           properties: {
             '@timestamp': { type: 'date' },
@@ -156,23 +160,37 @@ describe('Elasticsearch function', () => {
         },
       });
 
-      // Index some sample documents
       const now = new Date();
       const bulkBody: any[] = [];
-      for (let i = 0; i < 50; i++) {
-        bulkBody.push({ index: { _index: 'logs-test' } });
+
+      // Normal data points
+      for (let i = 0; i < 45; i++) {
+        bulkBody.push({ index: { _index: TEST_INDEX } });
         bulkBody.push({
-          '@timestamp': new Date(now.getTime() - i * 60000).toISOString(), // 1 min apart
-          response_time: Math.random() * 100,
+          '@timestamp': new Date(now.getTime() - i * 60000).toISOString(),
+          response_time: 50 + Math.random() * 20, // Normal: 50-70ms
+          service: 'web-api',
         });
       }
+
+      // Anomalous data points
+      for (let i = 0; i < 5; i++) {
+        bulkBody.push({ index: { _index: TEST_INDEX } });
+        bulkBody.push({
+          '@timestamp': new Date(now.getTime() - (i + 10) * 60000).toISOString(),
+          response_time: 300 + Math.random() * 100, // Anomalous: 300-400ms
+          service: 'web-api',
+        });
+      }
+
       await esClient.bulk({ refresh: true, body: bulkBody });
 
+      // Create ML job
       const mlJobRequest: MlPutJobRequest = {
-        job_id: 'job_1',
+        job_id: TEST_JOB_ID,
         description: 'Detect anomalies in average response_time',
         analysis_config: {
-          bucket_span: '15m',
+          bucket_span: '5m',
           detectors: [
             {
               function: 'mean',
@@ -184,26 +202,41 @@ describe('Elasticsearch function', () => {
           time_field: '@timestamp',
         },
         datafeed_config: {
-          datafeed_id: 'datafeed-job_1',
-          indices: ['logs-test'],
+          datafeed_id: TEST_DATAFEED_ID,
+          indices: [TEST_INDEX],
           query: { match_all: {} },
         },
       };
 
       await esClient.ml.putJob(mlJobRequest);
 
-      await esClient.ml.openJob({ job_id: 'job_1' });
+      await esClient.ml.openJob({ job_id: TEST_JOB_ID });
+
+      // Start datafeed and wait for processing
+      await esClient.ml.startDatafeed({
+        datafeed_id: TEST_DATAFEED_ID,
+        start: 'now-1h',
+      });
+
+      // Wait for job to process data
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     });
 
     after(async () => {
-      await esClient.ml.closeJob({ job_id: 'job_1', force: true });
-      await esClient.ml.deleteJob({ job_id: 'job_1' });
-      await esClient.indices.delete({ index: 'logs-test' });
+      try {
+        await esClient.ml.stopDatafeed({ datafeed_id: TEST_DATAFEED_ID, force: true });
+        await esClient.ml.closeJob({ job_id: TEST_JOB_ID, force: true });
+        await esClient.ml.deleteDatafeed({ datafeed_id: TEST_DATAFEED_ID });
+        await esClient.ml.deleteJob({ job_id: TEST_JOB_ID });
+      } catch (error) {
+        logger.info('Cleanup warning:', error);
+      }
+      await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
     });
 
     it('returns a list of ML jobs', async () => {
       const conversation = await chatClient.complete({
-        messages: 'List all ML jobs',
+        messages: 'List all Machine Learning (ML) jobs',
         scope: 'all',
       });
 
@@ -211,14 +244,14 @@ describe('Elasticsearch function', () => {
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
         'no error calling the Elasticsearch function',
         'Returns the list of ML jobs based on the response from the Elasticsearch function',
-        'Includes job_1 in the list of ML jobs',
+        `Includes ${TEST_JOB_ID} in the list of ML jobs`,
       ]);
 
       expect(result.passed).to.be(true);
     });
     it('returns the ML job stats', async () => {
       const conversation = await chatClient.complete({
-        messages: 'What is the ML job stats?',
+        messages: 'List all the Machine Learning (ML) job statistics?',
         scope: 'all',
       });
 
@@ -226,14 +259,14 @@ describe('Elasticsearch function', () => {
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or ml/anomaly_detectors/_all/_stats',
         'no error calling the Elasticsearch function',
         'Returns the ML job stats based on the response from the Elasticsearch function',
-        'Includes job_1 in the ML job stats',
+        `Includes ${TEST_JOB_ID} in the ML job stats`,
       ]);
 
       expect(result.passed).to.be(true);
     });
     it('returns open ML jobs', async () => {
       const conversation = await chatClient.complete({
-        messages: 'Which ML jobs are open?',
+        messages: 'Which Machine Learning (ML) jobs are open?',
         scope: 'all',
       });
 
@@ -241,14 +274,14 @@ describe('Elasticsearch function', () => {
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or ml/anomaly_detectors/_all',
         'no error calling the Elasticsearch function',
         'Returns the open ML jobs based on the response from the Elasticsearch function',
-        'Includes job_1 in the list of open ML jobs',
+        `Includes ${TEST_JOB_ID} in the list of open ML jobs`,
       ]);
 
       expect(result.passed).to.be(true);
     });
     it('returns closed ML jobs', async () => {
       const conversation = await chatClient.complete({
-        messages: 'Which ML jobs are closed?',
+        messages: 'Which Machine Learning (ML) jobs are closed?',
         scope: 'all',
       });
 
@@ -256,44 +289,29 @@ describe('Elasticsearch function', () => {
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or ml/anomaly_detectors/_all',
         'no error calling the Elasticsearch function',
         'Returns the closed ML jobs based on the response from the Elasticsearch function',
-        'Does not include job_1 in the list of closed ML jobs',
+        `Does not include ${TEST_JOB_ID} in the list of closed ML jobs`,
       ]);
 
       expect(result.passed).to.be(true);
     });
-    it('returns specific ML job', async () => {
+    it('returns specific ML job status', async () => {
       const conversation = await chatClient.complete({
-        messages: 'Can you tell me about job_1?',
+        messages: `What is the status of Machine Learning (ML) job id: ${TEST_JOB_ID}?`,
         scope: 'all',
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/job_1',
+        `Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/${TEST_JOB_ID}`,
         'no error calling the Elasticsearch function',
-        'Returns the details of job_1 based on the response from the Elasticsearch function',
-        'Includes job_1 in the response',
+        `Returns the details of ML job id ${TEST_JOB_ID} based on the response from the Elasticsearch function`,
       ]);
 
       expect(result.passed).to.be(true);
     });
-    it('return ML job running status', async () => {
-      const conversation = await chatClient.complete({
-        messages: 'Is job_1 running?',
-        scope: 'all',
-      });
 
-      const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/job_1',
-        'Determines if job_1 is open or closed based on the response from the Elasticsearch function',
-        'Informs the user that job_1 is running',
-      ]);
-
-      expect(result.passed).to.be(true);
-    });
     it('Can you check if there is any anomalies in index in the last 3 hours? and explain what the anomaly is about?', async () => {
       const conversation = await chatClient.complete({
-        messages:
-          'Can you check if there is any anomalies in logs-test index in the last 3 hours? and explain what the anomaly is about?',
+        messages: `Can you check if there is any anomalies in ${TEST_INDEX} index in the last 3 hours? and explain what the anomaly is about?`,
         scope: 'all',
       });
 
@@ -301,7 +319,63 @@ describe('Elasticsearch function', () => {
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/_stats',
         'no error calling the Elasticsearch function',
         'Returns the anomalies found in the last 3 hours based on the response from the Elasticsearch function',
-        'Includes job_1 in the anomalies',
+        `Includes ${TEST_JOB_ID} in the anomalies`,
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+
+    it(`reports whether ${TEST_JOB_ID} is running and the last time it ran`, async () => {
+      const conversation = await chatClient.complete({
+        messages: `Is the Machine Learning (ML) job ${TEST_JOB_ID} running now? When was the last time it ran?`,
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        `Checks ml/anomaly_detectors/${TEST_JOB_ID}/_stats for state=open/closed`,
+        'Reads data_counts.latest_record_timestamp or timing stats for last run time',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+
+    it('lists anomalies in past 1 hour with score > 50 and links them to jobs', async () => {
+      const conversation = await chatClient.complete({
+        messages: 'Any anomalies in the past 1 hour with anomaly score > 50?',
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        'Queries ml/anomaly_detectors/_all/results/records with time filter and score>50',
+        'Returns timestamp, job_id, and score',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+
+    it('summarizes alerts links to ML jobs', async () => {
+      const conversation = await chatClient.complete({
+        messages: 'Summarize alerts and link to ML jobs if possible',
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        'Executes a query on the alerts',
+        'Correlates alerts back to ML job_id where possible',
+      ]);
+
+      expect(result.passed).to.be(true);
+    });
+
+    it('explains anomalies for a job id in the last 3 hours with cause analysis', async () => {
+      const conversation = await chatClient.complete({
+        messages: `Explain ${TEST_JOB_ID} anomaly alerts for the past 3 hours where anomaly score is > 50 and indicate probable cause.`,
+        scope: 'all',
+      });
+
+      const result = await chatClient.evaluate(conversation, [
+        `Fetches ml/anomaly_detectors/${TEST_JOB_ID}/results/records with score>50 and last 3h range`,
+        'Provides summary and probable causes based on influencers/fields',
       ]);
 
       expect(result.passed).to.be(true);
