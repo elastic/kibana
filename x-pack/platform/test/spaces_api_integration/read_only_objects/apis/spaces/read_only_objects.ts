@@ -643,7 +643,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it.only('should throw when trying to change access mode on locked objects when not owner', async () => {
+      it('should throw when trying to change access mode on locked objects when not owner', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
