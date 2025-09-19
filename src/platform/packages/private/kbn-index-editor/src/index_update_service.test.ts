@@ -21,6 +21,11 @@ import {
 } from '@kbn/core/public/mocks';
 import { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLAdHocDataview: jest.fn(),
+}));
 
 describe('IndexUpdateService', () => {
   let http: HttpStart;
@@ -41,6 +46,14 @@ describe('IndexUpdateService', () => {
       true,
       'esql_hover'
     );
+
+    (getESQLAdHocDataview as jest.Mock).mockResolvedValue({
+      fields: {
+        getByName: () => {},
+        create: () => ({}),
+        concat: () => [],
+      },
+    });
 
     service = new IndexUpdateService(http, data, notifications, indexEditorTelemetryService, true);
   });
@@ -193,5 +206,53 @@ describe('IndexUpdateService', () => {
     const rowsAfterDeletion = await firstValueFrom(service.rows$);
     expect(rowsAfterDeletion.length).toBe(1); // An empty placeholder row should always be visible
     expect(rowsAfterDeletion[0].raw).toMatchObject({ _id: expect.anything() });
+  });
+
+  describe('flush operations', () => {
+    // mock success response
+    (http.post as jest.Mock).mockResolvedValue({
+      errors: false,
+      items: [],
+      took: 0,
+    } satisfies BulkResponse);
+    it('should call telemetry on successful flush', async () => {
+      const telemetrySpy = jest.spyOn(indexEditorTelemetryService, 'trackSaveSubmitted');
+
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+      await firstValueFrom(service.dataView$);
+
+      // Adding and modifying a new row counts as 1 row added and 0 cells edited
+      service.addEmptyRow();
+      const placeholderRow = (await firstValueFrom(service.rows$))[0];
+      service.updateDoc(placeholderRow.id, { field: 'value' });
+
+      // Adding a column and editing its name counts as 1 col added
+      service.addNewColumn();
+      const newColumn = (await firstValueFrom(service.pendingColumnsToBeSaved$))[0];
+      service.editColumn('newColumn', newColumn.name);
+
+      // Counts as 2 cell edited
+      service.updateDoc('123', { field: 'value' });
+      service.updateDoc('123', { newColumn: 'value' });
+
+      // Wait for the changes to be registered
+      await firstValueFrom(service.hasUnsavedChanges$);
+
+      // Save the changes
+      service.flush();
+
+      // wait for async operations to complete
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      expect(telemetrySpy).toHaveBeenCalledWith({
+        pendingRowsAdded: 1,
+        pendingColsAdded: 1,
+        pendingCellsEdited: 2,
+        action: 'save',
+        outcome: 'success',
+        latency: expect.any(Number),
+      });
+    });
   });
 });

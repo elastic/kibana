@@ -573,7 +573,9 @@ export class IndexUpdateService {
             const newRowsCount = Array.from(savingDocs.keys()).filter((id) =>
               id.startsWith(ROW_PLACEHOLDER_PREFIX)
             ).length;
-            const newColumnsCount = this._pendingColumnsToBeSaved$.getValue().length;
+            const newColumnsCount = this._pendingColumnsToBeSaved$
+              .getValue()
+              .filter((col) => !isPlaceholderColumn(col.name)).length;
             const cellsEditedCount = updates.filter(
               (update) =>
                 isDocUpdate(update) && !update.payload.id.startsWith(ROW_PLACEHOLDER_PREFIX)
