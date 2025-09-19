@@ -10,12 +10,18 @@ import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/serv
 import type { WorkflowToolConfig } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import { ToolType } from '@kbn/onechat-common';
-import type { ToolPersistedDefinition } from '../../client';
 import type { InternalToolDefinition } from '../../../tool_provider';
+import type { ToolPersistedDefinition } from '../../client';
+import type { ToolTypConversionContext } from '../types';
 
-export const toToolDefinitionFactory = ({}: { workflowsManagement: WorkflowsPluginSetup }) => {
+export const toToolDefinitionFactory = ({
+  workflowsManagement,
+}: {
+  workflowsManagement: WorkflowsPluginSetup;
+}) => {
   return function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<any>>(
-    workflowTool: ToolPersistedDefinition<WorkflowToolConfig>
+    workflowTool: ToolPersistedDefinition<WorkflowToolConfig>,
+    context: ToolTypConversionContext
   ): InternalToolDefinition<WorkflowToolConfig, TSchema> {
     const { id, description, tags, configuration } = workflowTool;
     return {
@@ -27,7 +33,13 @@ export const toToolDefinitionFactory = ({}: { workflowsManagement: WorkflowsPlug
       readonly: false,
       schema: z.object({}) as TSchema, // we will handle schema gen later
       handler: async (params, { esClient }) => {
-        const workflowId = configuration.workflow_id;
+        const { management: workflowApi } = workflowsManagement;
+
+        // TODO: space
+        const workflow = await workflowApi.getWorkflow(configuration.workflow_id, 'default');
+
+        // TODO: execute/handle
+        const workflowId = workflow?.id ?? configuration.workflow_id;
 
         return {
           results: [

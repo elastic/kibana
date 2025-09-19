@@ -22,7 +22,11 @@ import {
   createIndexSearchToolType,
   createWorkflowToolType,
 } from './tool_types';
-import type { PersistedToolTypeDefinition, ToolTypeValidatorContext } from './tool_types/types';
+import type {
+  PersistedToolTypeDefinition,
+  ToolTypeValidatorContext,
+  ToolTypConversionContext,
+} from './tool_types/types';
 
 export const createPersistedToolSource = ({
   logger,
@@ -78,7 +82,14 @@ export const createPersistedToolClient = ({
     return map;
   }, {} as Record<ToolType, PersistedToolTypeDefinition>);
 
-  const createContext = (): ToolTypeValidatorContext => {
+  const validationContext = (): ToolTypeValidatorContext => {
+    return {
+      esClient,
+      request,
+    };
+  };
+
+  const conversionContext = (): ToolTypConversionContext => {
     return {
       esClient,
       request,
@@ -104,18 +115,19 @@ export const createPersistedToolClient = ({
       if (!definition) {
         throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
       }
-      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>, conversionContext());
     },
 
     async list() {
       const tools = await toolClient.list();
+      const context = conversionContext();
       return Promise.all(
         tools.map((tool) => {
           const definition = definitionMap[tool.type];
           if (!definition) {
             throw createBadRequestError(`Unknown tool type: '${tool.type}'`);
           }
-          return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+          return definition.toToolDefinition(tool as ToolPersistedDefinition<any>, context);
         })
       );
     },
@@ -138,7 +150,7 @@ export const createPersistedToolClient = ({
       try {
         updatedConfig = await definition.validateForCreate({
           config: createRequest.configuration,
-          context: createContext(),
+          context: validationContext(),
         });
       } catch (e) {
         throw createBadRequestError(
@@ -153,7 +165,7 @@ export const createPersistedToolClient = ({
 
       const tool = await toolClient.create(mergedRequest);
 
-      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>, conversionContext());
     },
 
     async update(toolId, updateRequest) {
@@ -176,7 +188,7 @@ export const createPersistedToolClient = ({
         updatedConfig = await definition.validateForUpdate({
           update: updateRequest.configuration ?? {},
           current: existingTool.configuration,
-          context: createContext(),
+          context: validationContext(),
         });
       } catch (e) {
         throw createBadRequestError(
@@ -189,7 +201,7 @@ export const createPersistedToolClient = ({
         configuration: updatedConfig,
       };
       const tool = await toolClient.update(toolId, mergedConfig);
-      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>, conversionContext());
     },
 
     async delete(toolId: string) {
