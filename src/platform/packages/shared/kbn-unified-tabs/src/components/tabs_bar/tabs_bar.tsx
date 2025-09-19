@@ -19,6 +19,7 @@ import React, {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
+import type { TabsEventPayload } from '@kbn/discover-plugin/public';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
@@ -62,7 +63,7 @@ export type TabsBarProps = Pick<
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
-  onEvent: (eventName: string, payload?: any) => void;
+  onEvent: (eventName: string, payload?: TabsEventPayload) => void;
 };
 
 export interface TabsBarApi {
