@@ -254,11 +254,6 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the Defend Insights feature
-   */
-  defendInsights: true,
-
-  /**
    * Enables the Defend Insights Policy Response Failure feature
    */
   defendInsightsPolicyResponseFailure: false,

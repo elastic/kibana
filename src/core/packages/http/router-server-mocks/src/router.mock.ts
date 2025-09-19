@@ -78,6 +78,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   kibanaRequestState = {
     requestId: '123',
     requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+    startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
   },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
