@@ -36,7 +36,6 @@ const oauthClientCredentialsBodySchema = schema.object({
   scope: schema.string(),
   config: schema.object({
     clientId: schema.string(),
-    tenantId: schema.string(),
   }),
   secrets: schema.object({
     clientSecret: schema.string(),
