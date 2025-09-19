@@ -1193,7 +1193,7 @@
     "immer": "^9.0.21",
     "inquirer": "^8.2.7",
     "io-ts": "^2.2.22",
-    "ipaddr.js": "2.0.0",
+    "ipaddr.js": "2.2.0",
     "isbinaryfile": "4.0.2",
     "jest-diff": "^29.7.0",
     "joi": "^17.13.3",
