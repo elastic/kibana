@@ -562,6 +562,59 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('partial bulk transfer ownership of read only objects', () => {
+      it('should allow bulk transfer ownership of allowed objects', async () => {
+        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
+        const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const firstCreate = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const firstObjectId = firstCreate.body.id;
+
+        const secondCreate = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: 'non_read_only_type' })
+          .expect(200);
+        const secondObjectId = secondCreate.body.id;
+
+        const transferResponse = await supertestWithoutAuth
+          .put('/read_only_objects/transfer')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({
+            objects: [
+              { id: firstObjectId, type: firstCreate.body.type },
+              { id: secondObjectId, type: secondCreate.body.type },
+            ],
+            newOwnerProfileUid: simpleUserProfileUid,
+          })
+          .expect(200);
+        expect(transferResponse.body.objects).to.have.length(2);
+        transferResponse.body.objects.forEach(
+          (object: { id: string; type: string; error?: any }) => {
+            if (object.type === 'read_only_type') {
+              expect(object).to.have.property('id', firstObjectId);
+            }
+            if (object.type === 'non_read_only_type') {
+              expect(object).to.have.property('id', secondObjectId);
+              expect(object).to.have.property('error');
+              expect(object.error).to.have.property('output');
+              expect(object.error.output).to.have.property('payload');
+              expect(object.error.output.payload).to.have.property('message');
+              expect(object.error.output.payload.message).to.contain(
+                `The type non_read_only_type does not support access control: Bad Request`
+              );
+            }
+          }
+        );
+      });
+    });
+
     describe('change access mode of read only objects', () => {
       it('should allow admins to change access mode of any object', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
