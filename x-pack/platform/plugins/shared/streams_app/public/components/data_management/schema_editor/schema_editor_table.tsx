@@ -208,7 +208,7 @@ const createFieldSelectionCellRenderer = (
   rowCellRender: ({ rowIndex }) => {
     const field = fields[rowIndex];
 
-    if (!field || field.parent !== streamName) return null;
+    if (!field || field.parent !== streamName || field.alias_for) return null;
 
     return (
       <EuiCheckbox

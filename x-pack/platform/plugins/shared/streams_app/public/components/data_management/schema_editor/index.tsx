@@ -31,6 +31,7 @@ export function SchemaEditor({
   withToolbar = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = React.useState(false);
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
   const {
     dependencies: {
@@ -39,24 +40,33 @@ export function SchemaEditor({
   } = useKibana();
 
   const getRecommendations = React.useCallback(async () => {
+    setIsLoadingRecommendations(true);
     const client = await fieldsMetadata.getClient();
     const ecsToOriginalField = selectedFields.reduce((acc, name) => {
       acc[getRegularEcsField(name)] = name;
       return acc;
     }, {} as Record<string, string>);
 
-    const response = await client.find({
-      attributes: ['type'],
-      fieldNames: Object.keys(ecsToOriginalField),
-    });
+    try {
+      const response = await client.find({
+        attributes: ['type'],
+        fieldNames: Object.keys(ecsToOriginalField),
+      });
 
-    Object.entries(response.fields).forEach(([key, value]) => {
-      const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
-      onFieldUpdate({
-        ...originalField,
-        type: value.type ?? originalField.type,
-      } as SchemaField);
-    });
+      Object.entries(response.fields).forEach(([key, value]) => {
+        const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
+        const type = value.type ?? originalField.type;
+        onFieldUpdate({
+          ...originalField,
+          type,
+          status: type ? 'mapped' : 'unmapped',
+        } as SchemaField);
+      });
+      setSelectedFields([]);
+    } catch (err) {
+    } finally {
+      setIsLoadingRecommendations(false);
+    }
   }, [selectedFields]);
 
   return (
@@ -100,6 +110,7 @@ export function SchemaEditor({
                   label: i18n.translate('dataManagement.schemaEditor.guessType', {
                     defaultMessage: 'Guess type',
                   }),
+                  isLoading: isLoadingRecommendations,
                 },
                 {
                   id: 'unmap',
