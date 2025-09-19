@@ -183,7 +183,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     if (isAxiosError(initialError)) {
       const error = await this.getErrorWithResponse(initialError);
 
-      // Here we overwirte the message without creating a new Error to preserve the user/framework
+      // Here we overwrite the message without creating a new Error to preserve the user/framework
       // categorization
       initialError.message = `Status code: ${
         error.status ?? error.response?.status
