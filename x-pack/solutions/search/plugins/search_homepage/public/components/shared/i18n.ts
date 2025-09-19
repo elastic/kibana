@@ -13,10 +13,3 @@ export const ELASTICSEARCH_ENDPOINT_LABEL = i18n.translate(
     defaultMessage: 'Elasticsearch endpoint',
   }
 );
-
-export const API_KEYS_TITLE = i18n.translate(
-  'xpack.searchHomepage.connectToElasticsearch.apiKeysLabel',
-  {
-    defaultMessage: 'API keys',
-  }
-);
