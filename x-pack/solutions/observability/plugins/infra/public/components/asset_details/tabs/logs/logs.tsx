@@ -31,8 +31,6 @@ export const Logs = () => {
   const { asset } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsContext();
 
-  const { reference: logViewReference } = logs ?? {};
-
   const {
     services: {
       logsDataAccess: {
