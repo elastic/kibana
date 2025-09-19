@@ -8,7 +8,6 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   KibanaFeatureConfig,
-  KibanaFeatureScope,
   ElasticsearchFeatureConfig,
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
