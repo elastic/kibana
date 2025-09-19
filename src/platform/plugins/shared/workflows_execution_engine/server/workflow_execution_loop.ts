@@ -9,10 +9,10 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { StepFactory } from './step/step_factory';
+import type { NodesFactory } from './step/nodes_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
-import type { StepErrorCatcher } from './step/step_base';
+import type { StepErrorCatcher } from './step/node_implementation';
 import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 
 /**
@@ -42,7 +42,7 @@ export async function workflowExecutionLoop(
   workflowRuntime: WorkflowExecutionRuntimeManager,
   workflowExecutionState: WorkflowExecutionState,
   workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory,
+  nodesFactory: NodesFactory,
   workflowGraph: WorkflowGraph
 ) {
   while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
@@ -61,18 +61,18 @@ export async function workflowExecutionLoop(
 
 async function runStep(
   workflowRuntime: WorkflowExecutionRuntimeManager,
-  nodesFactory: StepFactory,
+  nodesFactory: NodesFactory,
   workflowLogger: WorkflowEventLogger,
   workflowGraph: WorkflowGraph
 ): Promise<void> {
-  const currentNode = workflowRuntime.getCurrentStep();
-  const step = nodesFactory.create(currentNode as any);
+  const currentNode = workflowRuntime.getCurrentNode();
+  const nodeImplementation = nodesFactory.create(currentNode as any);
 
   try {
-    await step.run();
+    await nodeImplementation.run();
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
-    await workflowRuntime.failStep(currentNode.id, error);
+    await workflowRuntime.failStep(error);
   } finally {
     await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
     await workflowRuntime.saveState(); // Ensure state is updated after each step
@@ -126,34 +126,48 @@ async function markWorkflowCancelled(
 async function catchError(
   workflowRuntime: WorkflowExecutionRuntimeManager,
   workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory,
+  nodesFactory: NodesFactory,
   workflowGraph: WorkflowGraph
 ) {
   try {
+    // Loop through nested scopes in reverse order to handle errors at each level.
+    // The loop continues while:
+    // 1. There's an active error in the workflow execution
+    // 2. There are items in the execution stack
+    // 3. The top stack entry has nested scopes to process
+    // This allows error handling to bubble up through the scope hierarchy.
     while (
       workflowRuntime.getWorkflowExecution().error &&
-      workflowRuntime.getWorkflowExecution().stack.length > 0
+      workflowRuntime.getWorkflowExecution().scopeStack.length
     ) {
-      const stack = workflowRuntime.getWorkflowExecution().stack;
-      const nodeId = stack[stack.length - 1];
-      const node = workflowGraph.getNode(nodeId);
-      const stepImplementation = nodesFactory.create(node as any);
+      // exit the whole node scope
+      const scopeEntry = workflowRuntime
+        .getWorkflowExecution()
+        .scopeStack.at(-1)!
+        .nestedScopes.at(-1)!;
+      workflowRuntime.navigateToNode(scopeEntry.nodeId);
+      workflowRuntime.exitScope();
 
-      if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
-        const stepErrorCatcher = stepImplementation as unknown as StepErrorCatcher;
+      const node = workflowGraph.getNode(scopeEntry.nodeId);
 
-        try {
-          await stepErrorCatcher.catchError();
-        } catch (error) {
-          workflowRuntime.setWorkflowError(error);
+      if (node) {
+        workflowRuntime.navigateToNode(node.id);
+        const stepImplementation = nodesFactory.create(node as any);
+
+        if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
+          const stepErrorCatcher = stepImplementation as unknown as StepErrorCatcher;
+
+          try {
+            await stepErrorCatcher.catchError();
+          } catch (error) {
+            workflowRuntime.setWorkflowError(error);
+          }
+        }
+
+        if (workflowRuntime.getWorkflowExecution().error) {
+          await workflowRuntime.failStep(workflowRuntime.getWorkflowExecution().error!);
         }
       }
-
-      if (workflowRuntime.getWorkflowExecution().error) {
-        await workflowRuntime.failStep(nodeId, workflowRuntime.getWorkflowExecution().error!);
-      }
-
-      workflowRuntime.exitScope();
     }
   } catch (error) {
     workflowRuntime.setWorkflowError(error);

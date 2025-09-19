@@ -30,7 +30,7 @@ import type {
   WaitGraphNode,
   ElasticsearchGraphNode,
   KibanaGraphNode,
-} from '../../../types/execution';
+} from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
 describe('convertToWorkflowGraph', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpGraphNode } from '@kbn/workflows';
+import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios from 'axios';
 import { UrlValidator } from '../../lib/url_validator';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
@@ -34,8 +34,8 @@ describe('HttpStepImpl', () => {
     mockWorkflowRuntime = {
       startStep: jest.fn(),
       finishStep: jest.fn(),
-      setStepResult: jest.fn(),
-      goToNextStep: jest.fn(),
+      setCurrentStepResult: jest.fn(),
+      navigateToNextNode: jest.fn(),
     } as any;
 
     mockWorkflowLogger = {
@@ -49,6 +49,8 @@ describe('HttpStepImpl', () => {
     mockStep = {
       id: 'test-http-step',
       type: 'http',
+      stepId: 'test-http-step',
+      stepType: 'http',
       configuration: {
         name: 'test-http-step',
         type: 'http',
@@ -238,10 +240,10 @@ describe('HttpStepImpl', () => {
 
       await httpStep.run();
 
-      expect(mockWorkflowRuntime.startStep).toHaveBeenCalledWith('test-http-step');
-      expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith('test-http-step');
-      expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.startStep).toHaveBeenCalledWith();
+      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith();
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
   });
 
@@ -317,7 +319,7 @@ describe('HttpStepImpl', () => {
 
       // Should start the step, set the error result, finish the step, but not go to next step
       expect(mockWorkflowRuntime.startStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.setStepResult).toHaveBeenCalledWith({
+      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalledWith({
         input: {
           url: 'https://malicious.com/test',
           method: 'GET',
@@ -330,7 +332,7 @@ describe('HttpStepImpl', () => {
           'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
       });
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
     it('should allow all hosts when wildcard is configured', async () => {

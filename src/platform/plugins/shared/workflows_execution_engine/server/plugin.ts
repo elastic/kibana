@@ -38,7 +38,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { StepFactory } from './step/step_factory';
+import { NodesFactory } from './step/nodes_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
@@ -462,6 +462,7 @@ async function createContainer(
   const contextManager = new WorkflowContextManager({
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
+    workflowExecutionState,
     esClient: clientToUse, // Either user-scoped or fallback client
     fakeRequest, // Will be undefined if no API key provided
     coreStart, // For accessing Kibana's internal services
@@ -473,7 +474,7 @@ async function createContainer(
     allowedHosts: config.http.allowedHosts,
   });
 
-  const nodesFactory = new StepFactory(
+  const nodesFactory = new NodesFactory(
     contextManager,
     connectorExecutor,
     workflowRuntime,

@@ -142,31 +142,31 @@ describe('WorkflowGraph.getStepGraph', () => {
   });
 
   it('should return subgraph for if condition defined on step-level', () => {
-    const stepGraph = underTest.getStepGraph('ifStepLevel');
+    const stepGraph = underTest.getStepGraph('if_ifStepLevel');
     const edges = stepGraph.getEdges();
     expect(stepGraph.topologicalOrder).toEqual([
-      'enterCondition_ifStepLevel',
-      'enterThen_ifStepLevel',
+      'enterCondition_if_ifStepLevel',
+      'enterThen_if_ifStepLevel',
       'ifStepLevel',
-      'exitThen_ifStepLevel',
-      'exitCondition_ifStepLevel',
+      'exitThen_if_ifStepLevel',
+      'exitCondition_if_ifStepLevel',
     ]);
     expect(edges).toEqual([
       {
-        v: 'enterCondition_ifStepLevel',
-        w: 'enterThen_ifStepLevel',
+        v: 'enterCondition_if_ifStepLevel',
+        w: 'enterThen_if_ifStepLevel',
       },
       {
-        v: 'enterThen_ifStepLevel',
+        v: 'enterThen_if_ifStepLevel',
         w: 'ifStepLevel',
       },
       {
         v: 'ifStepLevel',
-        w: 'exitThen_ifStepLevel',
+        w: 'exitThen_if_ifStepLevel',
       },
       {
-        v: 'exitThen_ifStepLevel',
-        w: 'exitCondition_ifStepLevel',
+        v: 'exitThen_if_ifStepLevel',
+        w: 'exitCondition_if_ifStepLevel',
       },
     ]);
   });

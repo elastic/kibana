@@ -8,12 +8,27 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { GraphNode } from '../../types/execution';
+import type { GraphNode } from '../types';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 
+/**
+ * A class that encapsulates the logic of workflow graph operations and provides
+ * a specific API to work with directed graphs representing workflow definitions.
+ *
+ * This class wraps the graphlib.Graph functionality and provides workflow-specific
+ * methods for traversing, analyzing, and extracting subgraphs from workflow definitions.
+ *
+ * @example
+ * ```typescript
+ * const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDef);
+ * const nodes = workflowGraph.getAllNodes();
+ * const stepGraph = workflowGraph.getStepGraph('step-id');
+ * ```
+ */
 export class WorkflowGraph {
   private graph: graphlib.Graph | null = null;
   private __topologicalOrder: string[] | null = null;
+  private stepIdsSet: Set<string> | null = null;
 
   public static fromWorkflowDefinition(workflowDefinition: any): WorkflowGraph {
     const workflowGraph = new WorkflowGraph();
@@ -54,6 +69,14 @@ export class WorkflowGraph {
 
   public getEdges(): Array<{ v: string; w: string }> {
     return this.graph!.edges().map((edge) => ({ v: edge.v, w: edge.w }));
+  }
+
+  public hasStep(stepId: string): boolean {
+    if (!this.stepIdsSet) {
+      this.stepIdsSet = new Set(this.getAllNodes().map((node) => node.stepId));
+    }
+
+    return this.stepIdsSet.has(stepId);
   }
 
   public getStepGraph(stepId: string): WorkflowGraph {

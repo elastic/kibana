@@ -11,38 +11,38 @@
 import { jsx } from '@emotion/react';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
+import YAML, { isMap, isPair, isScalar, visit } from 'yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
-import { useYamlValidation } from '../lib/use_yaml_validation';
-import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
-import type { YamlValidationError } from '../model/types';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import {
-  registerUnifiedHoverProvider,
-  createUnifiedActionsProvider,
-  createStepExecutionProvider,
-  registerMonacoConnectorHandler,
-} from '../lib/monaco_providers';
 import {
   ElasticsearchMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
+import {
+  createStepExecutionProvider,
+  createUnifiedActionsProvider,
+  registerMonacoConnectorHandler,
+  registerUnifiedHoverProvider,
+} from '../lib/monaco_providers';
+import { useYamlValidation } from '../lib/use_yaml_validation';
+import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
+import type { YamlValidationError } from '../model/types';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
+import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
@@ -1288,7 +1288,7 @@ export const WorkflowYAMLEditor = ({
       lineNumbersMinChars: 2,
       insertSpaces: true,
       fontSize: 14,
-      renderWhitespace: 'all',
+      renderWhitespace: 'none',
       wordWrap: 'on',
       wordWrapColumn: 80,
       wrappingIndent: 'indent',

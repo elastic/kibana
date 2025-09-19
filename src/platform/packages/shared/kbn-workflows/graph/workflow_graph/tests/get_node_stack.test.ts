@@ -86,7 +86,7 @@ describe('getNodeStack', () => {
   it('should return the correct stack for ifStepLevel', () => {
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
     const nodeStack = workflowGraph.getNodeStack('ifStepLevel');
-    expect(nodeStack).toEqual(['enterCondition_ifStepLevel', 'enterThen_ifStepLevel']);
+    expect(nodeStack).toEqual(['enterCondition_if_ifStepLevel', 'enterThen_if_ifStepLevel']);
   });
 
   it('should return empty stack for ifStepLevel', () => {
