@@ -2,6 +2,7 @@
 
 exports[`getUnitedEntityDefinition generic entityManagerDefinition 1`] = `
 Object {
+  "capabilities": Array [],
   "displayNameTemplate": "{{entity.id}}",
   "filter": "",
   "id": "security_generic_test",
@@ -860,6 +861,7 @@ Object {
 
 exports[`getUnitedEntityDefinition host entityManagerDefinition 1`] = `
 Object {
+  "capabilities": Array [],
   "displayNameTemplate": "{{host.name}}",
   "filter": "",
   "id": "security_host_test",
@@ -1080,6 +1082,7 @@ Object {
 
 exports[`getUnitedEntityDefinition service entityManagerDefinition 1`] = `
 Object {
+  "capabilities": Array [],
   "displayNameTemplate": "{{service.name}}",
   "filter": "",
   "id": "security_service_test",
@@ -1310,6 +1313,7 @@ Object {
 
 exports[`getUnitedEntityDefinition user entityManagerDefinition 1`] = `
 Object {
+  "capabilities": Array [],
   "displayNameTemplate": "{{user.name}}",
   "filter": "",
   "id": "security_user_test",

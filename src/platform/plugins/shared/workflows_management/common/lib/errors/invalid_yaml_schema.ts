@@ -7,14 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodError } from '@kbn/zod';
+import type { ZodIssue } from '@kbn/zod';
+
+export interface MockZodIssue {
+  code: 'invalid_literal' | 'unknown';
+  message: string;
+  path: string[];
+  received: string;
+}
+
+export interface MockZodError {
+  message: string;
+  issues: MockZodIssue[];
+}
+
+export interface FormattedZodError {
+  message: string;
+  issues: ZodIssue[] | MockZodIssue[];
+}
 
 export class InvalidYamlSchemaError extends Error {
-  public zodError?: ZodError;
+  public formattedZodError?: FormattedZodError;
 
-  constructor(message: string, zodError?: ZodError) {
+  constructor(message: string, formattedZodError?: FormattedZodError) {
     super(message);
     this.name = 'InvalidYamlSchemaError';
-    this.zodError = zodError;
+    this.formattedZodError = formattedZodError;
   }
 }
