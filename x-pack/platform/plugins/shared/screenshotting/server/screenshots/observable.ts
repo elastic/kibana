@@ -206,8 +206,6 @@ export class ScreenshotObservableHandler {
       // allows for them to be displayed properly in many cases
       await injectCustomCss(driver, eventLogger, layout);
 
-      await injectCanvasRenderingProps(driver, eventLogger, layout);
-
       const spanEnd = this.eventLogger.logScreenshottingEvent(
         'get positions of visualization elements',
         Actions.GET_ELEMENT_POSITION_DATA,
@@ -239,8 +237,15 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  private getCanvasRenderingProps() {
+    return defer(async () => {
+      await injectCanvasRenderingProps(this.driver, this.eventLogger, this.layout);
+    });
+  }
+
   public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
+      switchMapTo(this.getCanvasRenderingProps()),
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender())
     );
