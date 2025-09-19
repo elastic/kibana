@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   // Failing: See https://github.com/elastic/kibana/issues/235451
   // Failing: See https://github.com/elastic/kibana/issues/235456
+  // Failing: See https://github.com/elastic/kibana/issues/235696
   describe.skip('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Trusted Applications', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let t1AnalystSupertest: TestAgent;
