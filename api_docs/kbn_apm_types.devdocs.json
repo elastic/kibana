@@ -413,6 +413,152 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.Error",
+        "type": "Interface",
+        "tags": [],
+        "label": "Error",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.ErrorData",
+                "text": "ErrorData"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.timestamp",
+            "type": "Object",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.TimestampUs",
+                "text": "TimestampUs"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ErrorData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorData",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorData.exception",
+            "type": "Object",
+            "tags": [],
+            "label": "exception",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.Exception",
+                "text": "Exception"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorData.grouping_key",
+            "type": "string",
+            "tags": [],
+            "label": "grouping_key",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorData.culprit",
+            "type": "string",
+            "tags": [],
+            "label": "culprit",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorData.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              "{ message?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ErrorRaw",
         "type": "Interface",
         "tags": [],
@@ -710,6 +856,55 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/error_raw.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ErrorsByTraceId",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorsByTraceId",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorsByTraceId.traceErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "traceErrors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.Error",
+                "text": "Error"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.ErrorsByTraceId.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"apm\" | \"unprocessedOtel\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false
           }
