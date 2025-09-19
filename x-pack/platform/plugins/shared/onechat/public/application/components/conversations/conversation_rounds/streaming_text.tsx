@@ -20,17 +20,17 @@ export const StreamingText = ({ content, steps, tokenDelay = TOKEN_DELAY }: Stre
   const [displayedText, setDisplayedText] = useState('');
   const tokenQueueRef = useRef<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const previousContentRef = useRef('');
+  const previousContentLengthRef = useRef(0);
 
   useEffect(() => {
-    const previousContent = previousContentRef.current;
-    const newContent = content.slice(previousContent.length);
+    const previousContentLength = previousContentLengthRef.current;
+    const newContent = content.slice(previousContentLength);
 
     if (newContent.length > 0) {
       // Split the new content into tokens, preserving spaces
       const tokens = newContent.split(/(\s+)/).filter((token) => token.length > 0);
       tokenQueueRef.current.push(...tokens);
-      previousContentRef.current = content;
+      previousContentLengthRef.current = content.length;
     }
 
     if (!intervalRef.current && tokenQueueRef.current.length > 0) {
