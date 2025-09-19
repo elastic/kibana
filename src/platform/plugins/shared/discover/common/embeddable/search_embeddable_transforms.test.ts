@@ -34,7 +34,6 @@ describe('searchEmbeddableTransforms', () => {
       const expectedAttributes = {
         title: 'Test Title',
         description: 'Test Description',
-        columns: ['column1', 'column2'],
         tabs: [
           {
             id: expect.any(String),
