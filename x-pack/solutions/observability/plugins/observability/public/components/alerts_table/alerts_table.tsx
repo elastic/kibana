@@ -54,7 +54,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
         config,
       }}
       renderCellValue={AlertsTableCellValue}
-      renderActionsCell={props.renderActionsCell ?? AlertActions}
+      renderActionsCell={AlertActions}
       actionsColumnWidth={120}
       renderExpandedAlertView={AlertsTableExpandedAlertView}
       showAlertStatusWithFlapping
