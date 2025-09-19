@@ -22,6 +22,7 @@ export function useWorkflowActions() {
   const { http } = useKibana().services;
 
   const createWorkflow = useMutation<WorkflowDetailDto, Error, CreateWorkflowCommand>({
+    networkMode: 'always',
     mutationKey: ['POST', 'workflows'],
     mutationFn: (workflow) => {
       return http!.post('/api/workflows', {

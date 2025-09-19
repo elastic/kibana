@@ -49,6 +49,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('index details page - search solution', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/233476
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await createIndices();
     });
@@ -201,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('page loading error', () => {
+        describe.skip('page loading error', () => {
           before(async () => {
             // manually navigate to index detail page for an index that doesn't exist
             await pageObjects.common.navigateToApp(

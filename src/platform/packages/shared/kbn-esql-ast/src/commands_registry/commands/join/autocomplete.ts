@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import {
+  getLookupIndexCreateSuggestion,
+  handleFragment,
+} from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -54,6 +58,7 @@ export async function autocomplete(
           ({
             label: mnemonic,
             text: mnemonic + ' $0',
+            asSnippet: true,
             detail: description,
             kind: 'Keyword',
             sortText: `${i}-MNEMONIC`,
@@ -64,13 +69,40 @@ export async function autocomplete(
 
     case 'after_mnemonic':
     case 'index': {
+      const indexNameInput = commandText.split(' ').pop() ?? '';
       const joinSources = context?.joinSources;
+      const suggestions: ISuggestionItem[] = [];
 
-      if (!joinSources || !joinSources.length) {
-        return [];
+      const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+
+      const indexAlreadyExists = joinSources?.some(
+        (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
+      );
+      if (canCreate && !indexAlreadyExists) {
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(
+          innerText,
+          indexNameInput
+        );
+        suggestions.push(createIndexCommandSuggestion);
       }
 
-      return specialIndicesToSuggestions(joinSources);
+      if (joinSources?.length) {
+        const joinIndexesSuggestions = specialIndicesToSuggestions(joinSources);
+        suggestions.push(
+          ...(await handleFragment(
+            innerText,
+            (fragment) =>
+              specialIndicesToSuggestions(joinSources).some(
+                ({ label }) => label.toLocaleLowerCase() === fragment.toLocaleLowerCase()
+              ),
+            (_fragment, rangeToReplace?: { start: number; end: number }) =>
+              joinIndexesSuggestions.map((suggestion) => ({ ...suggestion, rangeToReplace })),
+            () => []
+          ))
+        );
+      }
+
+      return suggestions;
     }
 
     case 'after_index': {

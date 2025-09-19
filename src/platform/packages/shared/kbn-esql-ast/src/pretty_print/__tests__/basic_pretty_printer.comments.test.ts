@@ -259,6 +259,12 @@ describe('commands', () => {
     });
   });
 
+  describe('DISSECT', () => {
+    test('prints basic DISSECT command', () => {
+      assertPrint('FROM index | DISSECT foo.bar "asdf"');
+    });
+  });
+
   describe('RERANK', () => {
     test('comments around all elements', () => {
       assertPrint(

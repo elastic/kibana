@@ -5,17 +5,10 @@
  * 2.0.
  */
 import { RelatedDashboardsClient } from './related_dashboards_client';
-<<<<<<< HEAD
-import { Logger } from '@kbn/core/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import { InvestigateAlertsClient } from './investigate_alerts_client';
-import { AlertData } from './alert_data';
-=======
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
->>>>>>> origin
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ReferencedPanelManager } from './referenced_panel_manager';

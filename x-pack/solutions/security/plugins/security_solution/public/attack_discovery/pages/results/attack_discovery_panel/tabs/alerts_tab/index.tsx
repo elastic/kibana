@@ -14,7 +14,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { AiForSOCAlertsTab } from './ai_for_soc/wrapper';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
-import { DetectionEngineAlertsTable } from '../../../../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../../../../detections/components/alerts_table';
 import { getColumns } from '../../../../../../detections/configurations/security_solution_detections/columns';
 
 interface Props {
@@ -70,7 +70,7 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
         </div>
       ) : (
         <div data-test-subj="detection-engine-alerts-table">
-          <DetectionEngineAlertsTable
+          <AlertsTable
             columns={columns}
             id={id}
             tableType={TableId.alertsOnCasePage}

@@ -225,7 +225,9 @@
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
+          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; getAttachments?: ",
+          "GetAttachments",
+          " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
@@ -762,25 +764,11 @@
             },
             " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: ({ successToaster, noAttachmentsToaster, onSuccess, onClose, onCreateCaseClicked, }?: ",
             "AddToExistingCaseModalProps",
-            ") => { open: ({ getAttachments, }?: { getAttachments?: (({ theCase }: { theCase?: ",
-            {
-              "pluginId": "cases",
-              "scope": "common",
-              "docId": "kibCasesPluginApi",
-              "section": "def-common.CaseUI",
-              "text": "CaseUI"
-            },
-            " | undefined; }) => ",
-            {
-              "pluginId": "cases",
-              "scope": "public",
-              "docId": "kibCasesPluginApi",
-              "section": "def-public.CaseAttachmentsWithoutOwner",
-              "text": "CaseAttachmentsWithoutOwner"
-            },
-            ") | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
+            ") => { open: ({ getAttachments, }?: { getAttachments?: ",
+            "GetAttachments",
+            " | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
             "UseIsAddToCaseOpen",
-            "; useRemoveAlertFromCaseModal: ({ alertId, caseId, onClose, onSuccess, }: { alertId: string[]; caseId: string; onClose: () => void; onSuccess: () => void; }) => { open: () => void; close: () => void; onSuccess: () => void; onClose: () => void; }; }"
+            "; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
           "deprecated": false,
@@ -3245,67 +3233,6 @@
           ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | any | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | any | null; } | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; }; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; pushedAt: string | null; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
           "AttachmentUI",
           "[]; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.CaseViewAlertsTableProps",
-        "type": "Type",
-        "tags": [],
-        "label": "CaseViewAlertsTableProps",
-        "description": [],
-        "signature": [
-          "Pick<",
-          "AlertsTableProps",
-          "<",
-          "AdditionalContext",
-          ">, \"id\" | \"ruleTypeIds\" | \"consumers\" | \"query\" | \"showAlertStatusWithFlapping\" | \"onLoaded\"> & { services?: { data: ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataPluginApi",
-            "section": "def-public.DataPublicPluginStart",
-            "text": "DataPublicPluginStart"
-          },
-          "; http: ",
-          "HttpSetup",
-          "; notifications: ",
-          "NotificationsStart",
-          "; fieldFormats: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "public",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-public.FieldFormatsStart",
-            "text": "FieldFormatsStart"
-          },
-          "; application: ",
-          "ApplicationStart",
-          "; licensing: ",
-          {
-            "pluginId": "licensing",
-            "scope": "public",
-            "docId": "kibLicensingPluginApi",
-            "section": "def-public.LicensingPluginStart",
-            "text": "LicensingPluginStart"
-          },
-          "; settings: ",
-          "SettingsStart",
-          "; cases?: ",
-          "CasesService",
-          " | undefined; } | undefined; caseData: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseUI",
-            "text": "CaseUI"
-          },
-          "; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
         "deprecated": false,

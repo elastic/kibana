@@ -24,6 +24,39 @@ export enum ExecutionStatus {
   CANCELLED = 'cancelled',
   SKIPPED = 'skipped',
 }
+export type ExecutionStatusUnion = `${ExecutionStatus}`;
+export const ExecutionStatusValues = Object.values(ExecutionStatus);
+
+export enum ExecutionType {
+  TEST = 'test',
+  PRODUCTION = 'production',
+}
+export type ExecutionTypeUnion = `${ExecutionType}`;
+export const ExecutionTypeValues = Object.values(ExecutionType);
+
+/**
+ * An interface representing the state of a step scope during workflow execution.
+ */
+
+export interface ScopeEntry {
+  /**
+   * Node that entered this scope.
+   * Examples: enterForeach_step1, enterRetry_step1, etc
+   */
+  nodeId: string;
+  nodeType: string;
+  /**
+   * Optional unique identifier for the scope instance.
+   * For example, iteration identifier (0,1,2,3,etc), retry attempt identifier (attempt-1, attempt-2, etc), and so on
+   */
+  scopeId?: string;
+}
+export interface StackFrame {
+  /** Step that created this frame */
+  stepId: string;
+  /** Scope entries within this frame */
+  nestedScopes: ScopeEntry[];
+}
 
 export interface EsWorkflowExecution {
   spaceId: string;
@@ -35,12 +68,15 @@ export interface EsWorkflowExecution {
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
-  stack: string[];
+  scopeStack: StackFrame[];
   createdAt: string;
   error: string | null;
   createdBy: string;
   startedAt: string;
   finishedAt: string;
+  cancelRequested: boolean;
+  cancelledAt?: string;
+  cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
@@ -63,19 +99,37 @@ export interface EsWorkflowStepExecution {
   spaceId: string;
   id: string;
   stepId: string;
+  stepType?: string;
+
+  /** Current step's stack frames. */
+  scopeStack: StackFrame[];
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
   startedAt: string;
   completedAt?: string;
   executionTimeMs?: number;
+
+  /** Topological index of step in workflow graph. */
   topologicalIndex: number;
-  executionIndex: number;
+
+  /** Overall execution index in the entire workflow. */
+  globalExecutionIndex: number;
+
+  /**
+   * Execution index within specific stepId.
+   * There might be several instances of the same stepId if it's inside loops, retries, etc.
+   */
+  stepExecutionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
+
+  /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, any>;
 }
+
+export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;
@@ -102,13 +156,17 @@ export interface WorkflowExecutionDto {
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
-  stepExecutions: EsWorkflowStepExecution[];
+  workflowDefinition: WorkflowYaml;
+  stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
 }
 
-export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions' | 'yaml'>;
+export type WorkflowExecutionListItemDto = Omit<
+  WorkflowExecutionDto,
+  'stepExecutions' | 'yaml' | 'workflowDefinition'
+>;
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
@@ -136,6 +194,7 @@ export const EsWorkflowSchema = z.object({
   definition: WorkflowSchema,
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
+  valid: z.boolean().readonly(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
@@ -157,7 +216,8 @@ export const SearchWorkflowCommandSchema = z.object({
   limit: z.number().default(100),
   page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
-  enabled: z.array(z.boolean()).optional(),
+  // bool or number transformed to boolean
+  enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -178,6 +238,9 @@ export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: Date;
   lastUpdatedBy: string | undefined;
+  enabled: boolean;
+  valid: boolean;
+  validationErrors: string[];
 }
 
 export interface WorkflowDetailDto {
@@ -189,8 +252,9 @@ export interface WorkflowDetailDto {
   createdBy: string;
   lastUpdatedAt: Date;
   lastUpdatedBy: string;
-  definition: WorkflowYaml;
+  definition: WorkflowYaml | null;
   yaml: string;
+  valid: boolean;
 }
 
 export interface WorkflowListItemDto {
@@ -198,10 +262,11 @@ export interface WorkflowListItemDto {
   name: string;
   description: string;
   enabled: boolean;
-  definition: WorkflowYaml;
+  definition: WorkflowYaml | null;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];
+  valid: boolean;
 }
 
 export interface WorkflowListDto {

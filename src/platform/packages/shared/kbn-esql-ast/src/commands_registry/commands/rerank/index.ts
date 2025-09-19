@@ -8,20 +8,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../../registry';
+import type { ICommand, ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../../types';
+import { columnsAfter } from './columns_after';
 
 const rerankCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
+  columnsAfter,
 };
 
-export const rerankCommand = {
+export const rerankCommand: ICommand = {
   name: 'rerank',
   methods: rerankCommandMethods,
-  hidden: true,
   metadata: {
     description: i18n.translate('kbn-esql-ast.esql.definitions.rerankDoc', {
       defaultMessage:
@@ -34,5 +35,6 @@ export const rerankCommand = {
       'FROM books | RERANK rerank_score = "hobbit" ON title, description WITH { "inference_id": "my_reranker" }',
     ],
     preview: true,
+    hidden: false,
   },
 };

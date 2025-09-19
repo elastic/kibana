@@ -43,6 +43,7 @@ const createConversationsDataClientMock = () => {
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
     deleteAllConversations: jest.fn(),
+    conversationExists: jest.fn(),
     getConversation: jest.fn(),
     updateConversation: jest.fn(),
     getReader: jest.fn(),
@@ -139,11 +140,13 @@ const createKnowledgeBaseDataClientMock = () => {
     isInferenceEndpointExists: jest.fn(),
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
+    isDefendInsightsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),
     isSetupInProgress: jest.fn().mockReturnValue(false)(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
     getLoadedSecurityLabsDocsCount: jest.fn(),
+    getLoadedDefendInsightsDocsCount: jest.fn(),
     getProductDocumentationStatus: jest.fn(),
   };
 

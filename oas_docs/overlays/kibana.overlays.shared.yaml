@@ -1,7 +1,7 @@
 # overlays.yaml
 overlay: 1.0.0
 info:
-  title: Overlays that are applicable to both serverless and non-serverless documentas
+  title: Overlays that are applicable to both serverless and non-serverless documents
   version: 0.0.1
 actions:
   # Add some tag descriptions and displayNames

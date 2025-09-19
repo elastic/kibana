@@ -45,7 +45,7 @@ export default function searchSolutionNavigation({
         { id: 'Home', label: 'Home' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
-        { id: 'Playground', label: 'RAG Playground' },
+        { id: 'Playground', label: 'Playground' },
         { id: 'Connectors', label: 'Connectors' },
         { id: 'SearchApplications', label: 'Search applications' },
         { id: 'Relevance', label: 'Relevance' },
@@ -76,7 +76,7 @@ export default function searchSolutionNavigation({
         },
         {
           navItem: 'Playground',
-          breadcrumbs: ['Build', 'RAG Playground'],
+          breadcrumbs: ['Build', 'Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {

@@ -16,7 +16,7 @@ export {
 } from './autocomplete/helpers';
 export { getSuggestionsToRightOfOperatorExpression } from './operators';
 export {
-  buildFieldsDefinitionsWithMetadata,
+  buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
   getFunctionSignatures,
   getFunctionDefinition,

@@ -316,7 +316,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; width?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; render?: ((value: any, item: ",
               {
@@ -328,7 +328,7 @@
               },
               ") => React.ReactNode) | undefined; align?: ",
               "HorizontalAlignment",
-              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
+              " | undefined; height?: string | number | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
@@ -1344,7 +1344,7 @@
           "label": "getRelationships",
           "description": [],
           "signature": [
-            "(type: string, id: string, savedObjectTypes: string[]) => Promise<",
+            "(type: string, id: string, savedObjectTypes: string[], size?: number | undefined) => Promise<",
             "RelationshipsResponseHTTP",
             ">"
           ],
@@ -1396,6 +1396,21 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "savedObjectsManagement",
+              "id": "def-public.SavedObjectsManagementPluginStart.getRelationships.$4",
+              "type": "number",
+              "tags": [],
+              "label": "size",
+              "description": [],
+              "signature": [
+                "number | undefined"
+              ],
+              "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []

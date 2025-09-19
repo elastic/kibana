@@ -40,8 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  // Failing: See https://github.com/elastic/kibana/issues/230153
-  describe.skip('Processing Simulation', () => {
+  describe('Processing Simulation', () => {
     const TEST_TIMESTAMP = '2025-01-01T00:00:10.000Z';
     const TEST_MESSAGE = `${TEST_TIMESTAMP} error test`;
     const TEST_HOST = 'test-host';
@@ -534,7 +533,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(detectedFieldsFailureResponse.body.documents[0].errors).to.eql([
           {
             type: 'field_mapping_failure',
-            message: `Some field types might not be compatible with this document: [1:98] failed to parse field [attributes.parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
+            message: `Some field types might not be compatible with this document: [1:66] failed to parse field [attributes.parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
           },
         ]);
         expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');

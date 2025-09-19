@@ -25,19 +25,19 @@ export class StreamsApp {
   }
 
   async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'route');
+    await this.gotoStreamManagementTab(streamName, 'partitioning');
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+    await this.gotoStreamManagementTab(streamName, 'retention');
   }
 
   async gotoProcessingTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'enrich');
+    await this.gotoStreamManagementTab(streamName, 'processing');
   }
 
   async gotoSchemaEditorTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+    await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
   async gotoSignificantEventsTab(streamName: string) {
@@ -82,6 +82,14 @@ export class StreamsApp {
   }
 
   async confirmDeleteInModal() {
+    await this.getModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getModal()).toBeHidden();
+  }
+
+  async confirmStreamDeleteInModal(streamName: string) {
+    await this.getModal()
+      .getByTestId('streamsAppDeleteStreamModalStreamNameInput')
+      .fill(streamName);
     await this.getModal().getByRole('button', { name: 'Delete' }).click();
     await expect(this.getModal()).toBeHidden();
   }
@@ -214,7 +222,10 @@ export class StreamsApp {
    * Utility for data processing
    */
   async clickAddProcessor() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+      .click();
   }
 
   async clickSaveProcessor() {
@@ -246,7 +257,14 @@ export class StreamsApp {
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
-    return targetProcessor.getByRole('button', { name: 'Edit' });
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorContextMenuButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Step context menu' });
   }
 
   async confirmDiscardInModal() {
@@ -260,7 +278,9 @@ export class StreamsApp {
   }
 
   async fillFieldInput(value: string) {
-    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+    const comboBoxInput = this.page.getByTestId('streamsAppProcessorFieldSelectorComboFieldText');
+    await comboBoxInput.click();
+    await comboBoxInput.pressSequentially(value, { delay: 50 });
   }
 
   async fillGrokPatternInput(value: string) {
@@ -286,7 +306,7 @@ export class StreamsApp {
 
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
-    await this.page.getByRole('button', { name: 'Delete' }).click();
+    await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
   async saveProcessorsListChanges() {
@@ -295,14 +315,14 @@ export class StreamsApp {
 
   async getProcessorsListItems() {
     try {
-      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
+      await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
         timeout: 15_000,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+    return this.page.getByTestId('streamsAppProcessorBlock').all();
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {
@@ -339,15 +359,22 @@ export class StreamsApp {
     columnName,
     rowIndex,
     value,
+    invertCondition = false,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
+    invertCondition?: boolean;
   }) {
     const cellContent = this.page.locator(
       `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
     );
-    await expect(cellContent).toContainText(value);
+
+    if (invertCondition) {
+      await expect(cellContent).not.toContainText(value);
+    } else {
+      await expect(cellContent).toContainText(value);
+    }
   }
 
   /**
@@ -407,14 +434,29 @@ export class StreamsApp {
     await typeSelector.selectOption(type);
   }
 
-  async saveFieldMappingChanges() {
-    await this.page.getByTestId('streamsAppSchemaEditorFieldSaveButton').click();
+  async stageFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
   }
 
   async unmapField() {
     await this.openFieldActionsMenu();
     await this.clickFieldAction('Unmap field');
-    await this.getModal().getByRole('button', { name: 'Unmap field' }).click();
+  }
+
+  async discardStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorDiscardChangesButton').click();
+  }
+
+  async reviewStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorReviewStagedChangesButton').click();
+  }
+
+  async closeSchemaReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalCancelButton').click();
+  }
+
+  async submitSchemaChanges() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
   /**

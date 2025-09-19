@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
 import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
-import { ReindexStatus } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import { DeprecationBadge } from '../../../../shared';

@@ -101,6 +101,36 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // add settings
+  if (isObject(migratedDefinition.ingest) && !('settings' in migratedDefinition.ingest)) {
+    set(migratedDefinition, 'ingest.settings', {});
+    hasBeenMigrated = true;
+  }
+
+  // Add metadata to Group stream if missing
+  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      group: {
+        ...migratedDefinition.group,
+        metadata: {},
+      },
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add tags to Group stream if missing
+  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      group: {
+        ...migratedDefinition.group,
+        tags: [],
+      },
+    };
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }
