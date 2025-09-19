@@ -119,7 +119,7 @@ export const JobDetailsFlyout = () => {
             <EuiLoadingSpinner size="m" />
           </EuiText>
         ) : (
-          <EuiText>
+          <>
             {jobDetails ? (
               <JobDetails
                 mode="flyout"
@@ -132,7 +132,7 @@ export const JobDetailsFlyout = () => {
                 showClearButton={false}
               />
             ) : null}
-          </EuiText>
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
