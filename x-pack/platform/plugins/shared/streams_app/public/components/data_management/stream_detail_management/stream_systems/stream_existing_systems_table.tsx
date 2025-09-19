@@ -33,7 +33,9 @@ const columns: Array<EuiBasicTableColumn<System>> = [
   },
   {
     field: 'filter',
-    name: 'Filter',
+    name: i18n.translate('xpack.streams.streamSystemsTable.columns.filter', {
+      defaultMessage: 'Filter',
+    }),
     render: (filter: System['filter']) => {
       return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
     },

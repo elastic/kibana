@@ -93,7 +93,15 @@ const columns: Array<EuiBasicTableColumn<System>> = [
   },
 ];
 
-export function StreamSystemsTable({ systems }: { systems: System[] }) {
+export function StreamSystemsTable({
+  systems,
+  selectedSystems,
+  setSelectedSystems,
+}: {
+  systems: System[];
+  selectedSystems: System[];
+  setSelectedSystems: React.Dispatch<React.SetStateAction<System[]>>;
+}) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -116,7 +124,11 @@ export function StreamSystemsTable({ systems }: { systems: System[] }) {
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>Expand row</span>
+          <span>
+            {i18n.translate('xpack.streams.streamSystemsTable.columns.expand', {
+              defaultMessage: 'Expand row',
+            })}
+          </span>
         </EuiScreenReaderOnly>
       ),
       mobileOptions: { header: false },
@@ -126,7 +138,15 @@ export function StreamSystemsTable({ systems }: { systems: System[] }) {
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(system)}
-            aria-label={itemIdToExpandedRowMapValues[system.name] ? 'Collapse' : 'Expand'}
+            aria-label={
+              itemIdToExpandedRowMapValues[system.name]
+                ? i18n.translate('xpack.streams.streamSystemsTable.columns.collapseDetails', {
+                    defaultMessage: 'Collapse details',
+                  })
+                : i18n.translate('xpack.streams.streamSystemsTable.columns.expandDetails', {
+                    defaultMessage: 'Expand details',
+                  })
+            }
             iconType={itemIdToExpandedRowMapValues[system.name] ? 'arrowDown' : 'arrowRight'}
           />
         );
@@ -137,14 +157,23 @@ export function StreamSystemsTable({ systems }: { systems: System[] }) {
 
   return (
     <>
-      <TableTitle pageIndex={0} pageSize={10} total={systems.length} label="Systems" />
+      <TableTitle
+        pageIndex={0}
+        pageSize={10}
+        total={systems.length}
+        label={i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
+          defaultMessage: 'Systems',
+        })}
+      />
       <EuiBasicTable
-        tableCaption="Demo of EuiBasicTable with expanding rows"
+        tableCaption={i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
+          defaultMessage: 'List of systems',
+        })}
         items={systems}
         itemId="name"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         columns={columnsWithExpandingRowToggle}
-        selection={{ initialSelected: [] }}
+        selection={{ initialSelected: selectedSystems, onSelectionChange: setSelectedSystems }}
       />
     </>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -33,6 +33,7 @@ export const StreamSystemsFlyout = ({
   systems: System[];
   closeFlyout: () => void;
 }) => {
+  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const addToStream = () => {};
   return (
     <EuiFlyout
@@ -65,7 +66,11 @@ export const StreamSystemsFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {!isLoading ? (
-          <StreamSystemsTable systems={systems} />
+          <StreamSystemsTable
+            systems={systems}
+            selectedSystems={selectedSystems}
+            setSelectedSystems={setSelectedSystems}
+          />
         ) : (
           <p>
             <FormattedMessage
@@ -93,7 +98,7 @@ export const StreamSystemsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={addToStream} fill>
+            <EuiButton onClick={addToStream} fill isDisabled={selectedSystems.length === 0}>
               <FormattedMessage
                 id="xpack.streams.streamSystemsFlyout.addToStreamButton"
                 defaultMessage="Add to stream"
