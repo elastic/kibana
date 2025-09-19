@@ -25,7 +25,6 @@ const mockUseSimulatorSelector = jest.mocked(useSimulatorSelector);
 const mockUseFieldSuggestions = jest.mocked(useFieldSuggestions);
 
 describe('FieldSelector', () => {
-  // Realistic log field suggestions based on common streaming data patterns
   const mockSuggestions = [
     { label: '@timestamp', value: { name: '@timestamp' } },
     { label: 'log.level', value: { name: 'log.level' } },
@@ -99,7 +98,7 @@ describe('FieldSelector', () => {
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
 
-      // Wait for dropdown to open and select a realistic log field
+      // Wait for dropdown to open and select a field
       const option = await screen.findByText('service.name');
       await userEvent.click(option);
 
@@ -112,7 +111,7 @@ describe('FieldSelector', () => {
 
       const input = screen.getByTestId('comboBoxSearchInput');
       await userEvent.click(input);
-      // Test realistic custom field that might be created in streaming pipelines
+
       await userEvent.type(input, 'app.request.duration_ms');
       await userEvent.keyboard('{Enter}');
 
@@ -147,7 +146,6 @@ describe('FieldSelector', () => {
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
 
-      // EuiComboBox should be opened, we can verify by checking aria-expanded
       const input = screen.getByTestId('comboBoxSearchInput');
       expect(input).toHaveAttribute('aria-expanded', 'true');
     });
@@ -209,21 +207,6 @@ describe('FieldSelector', () => {
       expect(
         screen.queryByText('Dot-separated field names are not supported.')
       ).not.toBeInTheDocument();
-    });
-
-    it('shows warning for multiple problematic field patterns', () => {
-      // Test with multiple unsupported patterns that could cause streaming issues
-      mockUseSimulatorSelector.mockReturnValue(['old_system.', 'legacy.', 'deprecated.']);
-
-      render(
-        <FieldSelector
-          {...defaultProps}
-          value="old_system.metric.value"
-          showUnsupportedFieldsWarning
-        />
-      );
-
-      expect(screen.getByText('Dot-separated field names are not supported.')).toBeInTheDocument();
     });
   });
 

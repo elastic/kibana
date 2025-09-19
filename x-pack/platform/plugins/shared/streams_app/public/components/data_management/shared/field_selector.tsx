@@ -89,7 +89,6 @@ export const FieldSelector = ({
     [value, unsupportedFields, showUnsupportedFieldsWarning]
   );
 
-  // Default labels
   const defaultLabel = i18n.translate('xpack.streams.fieldSelector.defaultLabel', {
     defaultMessage: 'Field',
   });

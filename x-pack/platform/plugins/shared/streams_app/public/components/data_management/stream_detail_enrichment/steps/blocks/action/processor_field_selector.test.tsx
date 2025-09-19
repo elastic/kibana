@@ -26,7 +26,6 @@ jest.mock('../../../../shared/field_selector', () => ({
       placeholder,
       disabled,
       compressed,
-      // Exclude non-DOM props
       processorType,
       fullWidth,
       showUnsupportedFieldsWarning,
@@ -124,8 +123,6 @@ describe('ProcessorFieldSelector', () => {
     });
 
     it('displays validation errors', () => {
-      // This would require more complex form state setup
-      // For now, verify the structure is correct
       renderComponent();
 
       const input = screen.getByTestId('streamsAppProcessorFieldSelectorComboFieldText');
