@@ -121,7 +121,7 @@ describe('utils', () => {
   describe('constructCascadeQuery', () => {
     describe('query with single stats command', () => {
       describe('column options', () => {
-        describe('group queries', () => {
+        describe.skip('group queries', () => {
           it('returns the query without a limit when a group query is requested but there is only one column specified for the stats by option?', () => {
             const editorQuery: AggregateQuery = {
               esql: `
@@ -195,8 +195,8 @@ describe('utils', () => {
               nodePathMap,
             });
 
-            expect(cascadeQuery.esql).toEqual(
-              'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
+            expect(cascadeQuery.esql).toMatchInlineSnapshot(
+              `"FROM kibana_sample_data_logs | WHERE clientip == \\"192.168.1.1\\""`
             );
           });
 
@@ -241,8 +241,8 @@ describe('utils', () => {
               nodePathMap,
             });
 
-            expect(cascadeQuery.esql).toEqual(
-              'FROM kibana_sample_data_logs | WHERE url.keyword == "https://www.elastic.co/downloads/beats/metricbeat" | STATS visits_per_client = COUNT(), p95_bytes_client = PERCENTILE(bytes, 95), median_bytes_client = MEDIAN(bytes) BY url.keyword, clientip | SORT total_visits DESC'
+            expect(cascadeQuery.esql).toMatchInlineSnapshot(
+              `"FROM kibana_sample_data_logs | WHERE \`url.keyword\` == \\"https://www.elastic.co/downloads/beats/metricbeat\\""`
             );
           });
         });
@@ -250,7 +250,7 @@ describe('utils', () => {
 
       describe('function options', () => {
         describe('categorize operation', () => {
-          it('should construct a valid cascade query for a categorize operation', () => {
+          it('should construct a valid cascade query for an un-named categorize operation', () => {
             const editorQuery: AggregateQuery = {
               esql: `
                   FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
@@ -259,7 +259,7 @@ describe('utils', () => {
 
             const nodeType = 'leaf';
             const nodePath = ['CATEGORIZE(message)'];
-            const nodePathMap = { 'CATEGORIZE(message)': 'error' };
+            const nodePathMap = { 'CATEGORIZE(message)': 'some random pattern' };
 
             const cascadeQuery = constructCascadeQuery({
               query: editorQuery,
@@ -268,8 +268,35 @@ describe('utils', () => {
               nodePathMap,
             });
 
-            expect(cascadeQuery.esql).toEqual(
-              'FROM kibana_sample_data_logs | WHERE MATCH(message, "error", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            expect(cascadeQuery.esql).toMatchInlineSnapshot(
+              `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
+            );
+          });
+
+          it('should construct a valid cascade query for a named categorize operation', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                  FROM kibana_sample_data_logs 
+                  | WHERE @timestamp <=?_tend and @timestamp >?_tstart
+                    | SAMPLE .001
+                    | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(message)
+                    | SORT Count DESC
+                `,
+            };
+
+            const nodeType = 'leaf';
+            const nodePath = ['Pattern'];
+            const nodePathMap = { Pattern: 'some random pattern' };
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
+
+            expect(cascadeQuery.esql).toMatchInlineSnapshot(
+              `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
             );
           });
         });

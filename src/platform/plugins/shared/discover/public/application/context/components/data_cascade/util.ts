@@ -14,28 +14,27 @@ import {
   Builder,
   EsqlQuery,
   isColumn,
-  isOptionNode,
   mutate,
-  synth,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLAstItem,
 } from '@kbn/esql-ast';
-import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
+import type {
+  StatsCommandSummary,
+  StatsFieldSummary,
+} from '@kbn/esql-ast/src/mutate/commands/stats';
 import { type ESQLColumn, isESQLFunction } from '@kbn/esql-ast/src/types';
 
 type NodeType = 'group' | 'leaf';
 
 type StatsCommand = ESQLCommand<'stats'>;
 
-type CategorizeESQLFunction = ESQLFunction<'variadic-call', 'categorize'>;
-
 export interface AppliedStatsFunction {
   identifier: string;
   operator: string;
 }
 
-const supportedStatsFunctions = new Set(['categorize']);
+const supportedStatsFunctions = new Set(['categorize', 'bucket']);
 
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
@@ -106,7 +105,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
     appliedFunctions.push({
-      identifier: removeBackticks(aggregate.field),
+      identifier: removeBackticks(aggregate.field), // we remove backticks to have a clean identifier that gets displayed in the UI
       operator: (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
     });
   });
@@ -142,9 +141,18 @@ export const constructCascadeQuery = ({
   nodePath,
   nodePathMap,
 }: CascadeQueryArgs): AggregateQuery => {
-  const ESQLQuery = EsqlQuery.fromSrc(query.esql);
+  const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
 
-  const statsCommands = Array.from(mutate.commands.stats.list(ESQLQuery.ast));
+  const dataSourceCommand = mutate.generic.commands.find(
+    EditorESQLQuery.ast,
+    (cmd) => cmd.name === 'from'
+  ) as ESQLCommand<'from'> | undefined;
+
+  if (!dataSourceCommand) {
+    throw new Error('Query does not have a data source');
+  }
+
+  const statsCommands = Array.from(mutate.commands.stats.list(EditorESQLQuery.ast));
 
   if (statsCommands.length === 0) {
     throw new Error(`Query does not include a "stats" command`);
@@ -152,10 +160,10 @@ export const constructCascadeQuery = ({
 
   let statsCommandToOperateOn: StatsCommand | null = null;
 
-  // we always want to operate on the last stats command that has valid grouping options,
-  // but allow for the possibility of multiple stats commands in the query
+  // accounting for the possibility of multiple stats commands in the query,
+  // we always want to operate on the last stats command that has valid grouping options
   for (let i = statsCommands.length - 1; i >= 0; i--) {
-    const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommands[i]);
+    const { grouping } = mutate.commands.stats.summarizeCommand(EditorESQLQuery, statsCommands[i]);
 
     if (grouping && Object.keys(grouping).length) {
       statsCommandToOperateOn = statsCommands[i] as StatsCommand;
@@ -167,79 +175,37 @@ export const constructCascadeQuery = ({
     throw new Error(`No valid "stats" command was found in the query`);
   }
 
-  let handled = false;
-  let hasMultipleColumns: boolean;
-  const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommandToOperateOn);
+  const { grouping } = mutate.commands.stats.summarizeCommand(
+    EditorESQLQuery,
+    statsCommandToOperateOn
+  );
 
-  Object.entries(grouping).forEach(([groupName, groupValue], _, groupingArr) => {
-    if (isColumn(groupValue.definition) && nodePath.includes(groupName) && nodePathMap[groupName]) {
-      switch (nodeType) {
-        case 'leaf': {
-          handleStatsByColumnLeafOperation(ESQLQuery, {
-            [groupName]: nodePathMap[groupName],
-          });
-          handled = true;
-          break;
-        }
-        case 'group': {
-          if (
-            groupingArr.length > 1 &&
-            // it's not enough to check that we have multiple args for the stats by options
-            (typeof hasMultipleColumns === 'undefined'
-              ? (hasMultipleColumns =
-                  groupingArr.filter((arg) => isColumn(arg[1].definition)).length > 1)
-              : hasMultipleColumns)
-          ) {
-            handleStatsByColumnGroupOperation(ESQLQuery, statsCommandToOperateOn as StatsCommand, {
-              [groupName]: nodePathMap[groupName],
-            });
-            handled = true;
-          }
-          break;
-        }
-        default: {
-          // nothing to do for anything other than group or leaf nodes
-          break;
-        }
-      }
-    } else if (isESQLFunction(groupValue.definition)) {
+  if (nodeType === 'leaf') {
+    const pathSegment = nodePath[nodePath.length - 1];
+
+    // when column name is not assigned, one is created automatically that includes backticks
+    const groupValue = grouping[pathSegment] ?? grouping[`\`${pathSegment}\``];
+    const isOperable = groupValue && nodePathMap[pathSegment];
+
+    if (isOperable && isColumn(groupValue.definition)) {
+      return handleStatsByColumnLeafOperation(dataSourceCommand, {
+        [pathSegment]: nodePathMap[pathSegment],
+      });
+    } else if (isOperable && isESQLFunction(groupValue.definition)) {
       switch (groupValue.definition.name) {
         case 'categorize': {
-          if (nodeType === 'leaf') {
-            handleStatsByCategorizeLeafOperation(
-              ESQLQuery,
-              groupValue.definition as CategorizeESQLFunction,
-              nodePathMap
-            );
-            handled = true;
-          }
-          break;
+          return handleStatsByCategorizeLeafOperation(dataSourceCommand, groupValue, nodePathMap);
         }
         default: {
-          // unsupported by function, nothing to do here
-          break;
+          throw new Error(
+            `The "${groupValue.definition.name}" function is not supported for leaf node operations`
+          );
         }
       }
     }
-  });
-
-  if (handled) {
-    // remove the stats command if it has been fully handled,
-    // TODO: explore the possibility of scenarios where it might not be necessary to remove the command
-    mutate.generic.commands.remove(ESQLQuery.ast, statsCommandToOperateOn);
+  } else if (nodeType === 'group') {
+    throw new Error('Group node operations are not yet supported');
   }
-
-  // open question: should we remove the limit command as well, seems a little naive to assume it's always safe?
-  const limitCommands = Array.from(mutate.commands.limit.list(ESQLQuery.ast));
-
-  // ideally we only want to remove limit commands that are after the stats command we operated on,
-  limitCommands.forEach((cmd) => {
-    mutate.generic.commands.remove(ESQLQuery.ast, cmd);
-  });
-
-  return {
-    esql: BasicPrettyPrinter.print(ESQLQuery.ast),
-  };
 };
 
 /**
@@ -247,9 +213,15 @@ export const constructCascadeQuery = ({
  * helps us with fetching leaf node data for stats operation in the data cascade experience.
  */
 function handleStatsByColumnLeafOperation(
-  query: EsqlQuery,
+  dataSourceCommand: ESQLCommand<'from'>,
   columnInterpolationRecord: Record<string, string>
 ) {
+  // create new query which we will modify to contain the valid query for the cascade experience
+  const cascadeOperationQuery = EsqlQuery.fromSrc('');
+
+  // append data source to to new query
+  mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
+
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
     return Builder.command({
       name: 'where',
@@ -264,93 +236,37 @@ function handleStatsByColumnLeafOperation(
     });
   });
 
-  newCommands.forEach((command, idx) => {
-    mutate.generic.commands.insert(query.ast, command, 1 + idx);
-  });
-}
-
-/**
- * Handles the stats command for a group operation that purely contained of column definitions by modifying the query and adding necessary commands.
- * @param query The ESQL query to modify.
- * @param statsCommand The original stats command to modify.
- * @param columnInterpolationRecord A record of column names and their interpolated values.
- */
-function handleStatsByColumnGroupOperation(
-  query: EsqlQuery,
-  statsCommand: StatsCommand,
-  columnInterpolationRecord: Record<string, string>
-) {
-  // Get the column names to exclude from the stats command
-  const columnsToExclude = Object.keys(columnInterpolationRecord);
-
-  // Create a modified stats command without the excluded columns as args
-  const modifiedStatsCommand = Builder.command({
-    name: 'stats',
-    args: statsCommand.args.map((statsCommandArg) => {
-      if (isOptionNode(statsCommandArg) && statsCommandArg.name === 'by') {
-        return Builder.option({
-          name: statsCommandArg.name,
-          args: statsCommandArg.args.reduce<Array<ESQLAstItem>>((acc, cur) => {
-            if (isColumn(cur) && !columnsToExclude.includes(cur.text)) {
-              acc.push(
-                Builder.expression.column({
-                  args: [Builder.identifier({ name: cur.name })],
-                })
-              );
-            }
-            return acc;
-          }, []),
-        });
-      }
-
-      // @ts-expect-error -- hack to avoid building any other args that the stats command has since we don't need to modify them
-      return synth.exp`${statsCommandArg?.text}`;
-    }),
+  newCommands.forEach((command) => {
+    mutate.generic.commands.append(cascadeOperationQuery.ast, command);
   });
 
-  // Get the position of the original stats command
-  const statsCommandIndex = query.ast.commands.findIndex((cmd) => cmd === statsCommand);
-
-  // remove stats command
-  mutate.generic.commands.remove(query.ast, statsCommand);
-
-  // insert modified stats command at same position previous one was at
-  mutate.generic.commands.insert(query.ast, modifiedStatsCommand, statsCommandIndex);
-
-  // Add where command with current value
-  const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
-    return Builder.command({
-      name: 'where',
-      args: [
-        Builder.expression.func.binary('==', [
-          Builder.expression.column({
-            args: [Builder.identifier({ name: key })],
-          }),
-          Builder.expression.literal.string(value),
-        ]),
-      ],
-    });
-  });
-
-  newCommands.forEach((command, idx) => {
-    mutate.generic.commands.insert(query.ast, command, 1 + idx);
-  });
+  return {
+    esql: BasicPrettyPrinter.print(cascadeOperationQuery.ast),
+  };
 }
 
 /**
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
 function handleStatsByCategorizeLeafOperation(
-  query: EsqlQuery,
-  categorizeFunction: CategorizeESQLFunction,
+  dataSourceCommand: ESQLCommand<'from'>,
+  categorizeCommand: StatsFieldSummary,
   nodePathMap: Record<string, string>
 ) {
+  // create new query which we will modify to contain the valid query for the cascade experience
+  const cascadeOperationQuery = EsqlQuery.fromSrc('');
+
+  // append data source to to new query
+  mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
+
   // build a where command with match expressions for the selected categorize function
-  const whereCommand = Builder.command({
+  const categorizeWhereCommand = Builder.command({
     name: 'where',
-    args: categorizeFunction.args
+    args: (categorizeCommand.definition as ESQLFunction<'variadic-call', 'categorize'>).args
       .map((arg) => {
-        const matchValue = nodePathMap[categorizeFunction.text];
+        const namedColumn = categorizeCommand.column.name;
+
+        const matchValue = nodePathMap[removeBackticks(namedColumn)];
 
         if (!matchValue) {
           return null;
@@ -374,5 +290,9 @@ function handleStatsByCategorizeLeafOperation(
       .filter(Boolean) as ESQLAstItem[],
   });
 
-  mutate.generic.commands.insert(query.ast, whereCommand, 1);
+  mutate.generic.commands.append(cascadeOperationQuery.ast, categorizeWhereCommand);
+
+  return {
+    esql: BasicPrettyPrinter.print(cascadeOperationQuery.ast),
+  };
 }
