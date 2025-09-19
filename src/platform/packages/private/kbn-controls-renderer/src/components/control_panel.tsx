@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription, distinctUntilChanged, map, of, type BehaviorSubject } from 'rxjs';
+import { Subscription, distinctUntilChanged, map, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -26,20 +26,14 @@ import {
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import {
-  apiPublishesDataLoading,
   apiPublishesTitle,
   useBatchedPublishingSubjects,
-  type PublishesDisabledActionIds,
-  type PublishesViewMode,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { ControlPanelState } from '../types';
+import type { ControlPanelState, ControlsRendererParentApi } from '../types';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
@@ -50,18 +44,11 @@ export const ControlPanel = ({
   type,
   compressed,
   setControlPanelRef,
-  uiActions,
 }: {
-  parentApi: PublishesViewMode &
-    HasSerializedChildState<object> &
-    Partial<PublishesDisabledActionIds> & {
-      registerChildApi: (api: DefaultEmbeddableApi) => void;
-      layout$: BehaviorSubject<DashboardLayout>;
-    };
+  parentApi: ControlsRendererParentApi;
   uuid: string;
   type: string;
   compressed?: boolean;
-  uiActions: UiActionsStart;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
   const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
@@ -159,7 +146,6 @@ export const ControlPanel = ({
         viewMode={viewMode}
         disabledActions={disabledActionIds}
         isEnabled={true}
-        uiActions={uiActions}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"

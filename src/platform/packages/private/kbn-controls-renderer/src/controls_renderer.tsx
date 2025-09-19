@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { distinctUntilChanged, map, type BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
 
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -29,28 +29,13 @@ import {
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
-import type { PublishesDisabledActionIds, PublishesViewMode } from '@kbn/presentation-publishing';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
+import { ControlsRendererParentApi } from './types';
 
-export const ControlsRenderer = ({
-  uiActions,
-  parentApi,
-}: {
-  parentApi: PublishesViewMode &
-    HasSerializedChildState<ControlsGroupState['controls'][number] & { order: number }> &
-    Partial<PublishesDisabledActionIds> & {
-      registerChildApi: (api: DefaultEmbeddableApi) => void;
-      layout$: BehaviorSubject<DashboardLayout>;
-    };
-  uiActions: UiActionsStart;
-}) => {
+export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
@@ -141,7 +126,6 @@ export const ControlsRenderer = ({
         >
           {controlsInOrder.map(({ id, type }) => (
             <ControlPanel
-              uiActions={uiActions}
               key={id}
               type={type}
               uuid={id!}

@@ -11,14 +11,15 @@ import classNames from 'classnames';
 import { omit } from 'lodash';
 import React, { useEffect, useState, type FC, type ReactElement } from 'react';
 import { Subscription, switchMap } from 'rxjs';
-import { v4 } from 'uuid';
 
 import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
-import type { EmbeddableApiContext, HasUniqueId, ViewMode } from '@kbn/presentation-publishing';
-import type { Action, ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
   children: ReactElement;
@@ -29,7 +30,6 @@ export interface FloatingActionsProps {
   uuid: string;
   viewMode?: ViewMode;
   disabledActions?: string[];
-  uiActions: UiActionsStart;
 }
 
 export type FloatingActionItem = Omit<AnyApiAction, 'MenuItem'> & {
@@ -73,8 +73,11 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   uuid,
   className = '',
   disabledActions,
-  uiActions,
 }) => {
+  const {
+    services: { uiActions },
+  } = useKibana<ControlRendererServices>();
+
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
   useEffect(() => {

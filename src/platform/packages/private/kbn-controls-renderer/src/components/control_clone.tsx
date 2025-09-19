@@ -12,7 +12,6 @@ import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 
@@ -27,10 +26,11 @@ export const ControlClone = ({
   state,
   width,
 }: {
-  state: SerializedPanelState<ControlsGroupState['controls'][number]> | undefined;
+  state: SerializedPanelState<object> | undefined;
   width: number | undefined;
 }) => {
   const styles = useMemoCss(controlCloneStyles);
+  const panelTitle = (state?.rawState as { title?: string }).title;
 
   return !state ? null : (
     <EuiFlexItem css={(styles.container, width !== undefined && css({ width: `${width}px` }))}>
@@ -38,9 +38,11 @@ export const ControlClone = ({
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <label>{state.rawState.title}</label>
-        </EuiFlexItem>
+        {panelTitle?.length && (
+          <EuiFlexItem>
+            <label>{panelTitle}</label>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

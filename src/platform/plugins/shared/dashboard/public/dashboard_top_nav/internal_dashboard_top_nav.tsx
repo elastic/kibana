@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
-import deepEqual from 'fast-deep-equal';
 
 import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -21,6 +21,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
@@ -30,7 +31,6 @@ import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plug
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
-import { ControlsRenderer } from '@kbn/controls-renderer';
 
 import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -53,7 +53,6 @@ import {
   dataService,
   navigationService,
   serverlessService,
-  uiActionsService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
@@ -405,7 +404,7 @@ export function InternalDashboardTopNav({
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
 
-      <ControlsRenderer uiActions={uiActionsService} parentApi={dashboardApi} />
+      <ControlsRenderer parentApi={dashboardApi} />
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
