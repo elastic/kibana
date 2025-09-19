@@ -12,6 +12,7 @@ import {
   EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiIconTip,
@@ -33,7 +34,9 @@ import {
 import { isPlainObject } from 'lodash';
 import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
+
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
+import { FieldSelector } from '../shared/field_selector';
 
 type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
 
@@ -213,74 +216,79 @@ function FilterForm(props: {
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
-      <EuiFieldText
-        data-test-subj="streamsAppConditionEditorFieldText"
-        aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
-        compressed
-        placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
-          defaultMessage: 'Field',
-        })}
-        value={condition.field}
-        onChange={(e) => {
-          handleConditionChange({ field: e.target.value });
-        }}
-        disabled={disabled}
-      />
-      <EuiSelect
-        aria-label={i18n.translate('xpack.streams.filter.operator', {
-          defaultMessage: 'Operator',
-        })}
-        data-test-subj="streamsAppConditionEditorOperator"
-        options={operatorOptions}
-        value={operator}
-        compressed
-        onChange={handleOperatorChange}
-        disabled={disabled}
-      />
-      {typeof value === 'string' ? (
-        <EuiFieldText
-          aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
-          placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
-            defaultMessage: 'Value',
+    <EuiFlexGroup gutterSize="s" alignItems="flexEnd" data-test-subj="streamsAppConditionEditor">
+      <EuiFlexItem>
+        <FieldSelector
+          value={condition.field}
+          onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
+          label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
+          placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
+            defaultMessage: 'Field',
           })}
           compressed
-          value={value}
-          data-test-subj="streamsAppConditionEditorValueText"
-          onChange={(e) => {
-            handleValueChange(e.target.value);
-          }}
           disabled={disabled}
+          showUnsupportedFieldsWarning={false}
+          dataTestSubj="streamsAppConditionEditorFieldText"
         />
-      ) : typeof value === 'boolean' ? (
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiSelect
-          aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
-            defaultMessage: 'Value',
+          aria-label={i18n.translate('xpack.streams.filter.operator', {
+            defaultMessage: 'Operator',
           })}
+          data-test-subj="streamsAppConditionEditorOperator"
+          options={operatorOptions}
+          value={operator}
           compressed
-          options={[
-            {
-              value: 'true',
-              text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
-                defaultMessage: 'True',
-              }),
-            },
-            {
-              value: 'false',
-              text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
-                defaultMessage: 'False',
-              }),
-            },
-          ]}
-          value={String(value)}
-          data-test-subj="streamsAppFilterFormValueBoolean"
-          onChange={(e) => {
-            const nextValue = e.target.value === 'true' ? true : false;
-            handleValueChange(nextValue);
-          }}
+          onChange={handleOperatorChange}
           disabled={disabled}
         />
-      ) : null}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {typeof value === 'string' ? (
+          <EuiFieldText
+            aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
+            placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
+              defaultMessage: 'Value',
+            })}
+            compressed
+            value={value}
+            data-test-subj="streamsAppConditionEditorValueText"
+            onChange={(e) => {
+              handleValueChange(e.target.value);
+            }}
+            disabled={disabled}
+          />
+        ) : typeof value === 'boolean' ? (
+          <EuiSelect
+            aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
+              defaultMessage: 'Value',
+            })}
+            compressed
+            options={[
+              {
+                value: 'true',
+                text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
+                  defaultMessage: 'True',
+                }),
+              },
+              {
+                value: 'false',
+                text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
+                  defaultMessage: 'False',
+                }),
+              },
+            ]}
+            value={String(value)}
+            data-test-subj="streamsAppFilterFormValueBoolean"
+            onChange={(e) => {
+              const nextValue = e.target.value === 'true' ? true : false;
+              handleValueChange(nextValue);
+            }}
+            disabled={disabled}
+          />
+        ) : null}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
