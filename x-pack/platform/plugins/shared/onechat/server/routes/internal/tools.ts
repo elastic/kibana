@@ -117,7 +117,7 @@ export function registerInternalToolsRoutes({
     })
   );
 
-  // resolve search sources (internal)
+  // list workflows (internal)
   router.get(
     {
       path: `${internalApiPath}/tools/_list_workflows`,
