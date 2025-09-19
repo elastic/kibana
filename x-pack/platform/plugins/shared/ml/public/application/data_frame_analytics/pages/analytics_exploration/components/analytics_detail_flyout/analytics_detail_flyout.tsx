@@ -103,7 +103,7 @@ export const AnalyticsDetailFlyout = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={redirectToAnalyticsList}>
               <FormattedMessage
-                id="xpack.apm.settings.anomalyDetection.jobList.mlJobLink"
+                id="xpack.ml.jobDetailsFlyout.manageJobButton"
                 defaultMessage="Manage job"
               />
             </EuiButtonEmpty>
