@@ -217,22 +217,22 @@ const AlertsTableContent = typedForwardRef(
     ) as Partial<AlertsTablePersistedConfiguration>;
 
     const [pageIndex, setPageIndex] = useControllableState({
-      prop: pageIndexProp,
+      value: pageIndexProp,
       onChange: onPageIndexChange,
       defaultValue: pageIndexProp ?? 0,
     });
     const [pageSize, setPageSize] = useControllableState({
-      prop: pageSizeProp,
+      value: pageSizeProp,
       onChange: onPageSizeChange,
       defaultValue: pageSizeProp ?? DEFAULT_ALERTS_PAGE_SIZE,
     });
     const [sort, setSort] = useControllableState({
-      prop: sortProp,
+      value: sortProp,
       onChange: onSortChange,
       defaultValue: localStorageAlertsTableConfig?.sort ?? sortProp ?? DEFAULT_SORT,
     });
     const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
-      prop: expandedAlertIndexProp,
+      value: expandedAlertIndexProp,
       onChange: onExpandedAlertIndexChange,
       defaultValue: expandedAlertIndexProp ?? null,
     });

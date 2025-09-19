@@ -29,7 +29,7 @@ describe('useControllableState', () => {
 
     const { result } = renderHook(() =>
       useControllableState({
-        prop: controlledState,
+        value: controlledState,
         onChange,
         defaultValue: 'defaultValue',
       })
@@ -64,7 +64,7 @@ describe('useControllableState', () => {
     const onChange = jest.fn();
     renderHook(() =>
       useControllableState({
-        prop: 'propValue',
+        value: 'propValue',
         onChange,
         defaultValue: 'defaultValue',
       })
