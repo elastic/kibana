@@ -169,12 +169,14 @@ export function visitHttpStep(currentStep: HttpStep, context: GraphBuildContext)
 }
 
 export function visitElasticsearchStep(
-  currentStep: any,
+  currentStep: ElasticsearchStep,
   context: GraphBuildContext
 ): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const elasticsearchNode: ElasticsearchGraphNode = {
     id: getStepId(currentStep, context),
+    stepId: getStepId(currentStep, context),
+    stepType: currentStep.type,
     type: currentStep.type, // e.g., 'elasticsearch.search.query'
     configuration: {
       ...currentStep,
@@ -185,10 +187,15 @@ export function visitElasticsearchStep(
   return graph;
 }
 
-export function visitKibanaStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+export function visitKibanaStep(
+  currentStep: KibanaStep,
+  context: GraphBuildContext
+): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const kibanaNode: KibanaGraphNode = {
     id: getStepId(currentStep, context),
+    stepId: getStepId(currentStep, context),
+    stepType: currentStep.type,
     type: currentStep.type, // e.g., 'kibana.cases.create'
     configuration: {
       ...currentStep,
