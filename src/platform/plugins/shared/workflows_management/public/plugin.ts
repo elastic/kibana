@@ -15,7 +15,6 @@ import {
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 // Lazy import to avoid bundling connector dependencies in main plugin
 import type {
