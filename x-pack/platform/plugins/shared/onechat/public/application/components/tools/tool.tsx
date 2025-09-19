@@ -45,6 +45,7 @@ import {
   getToolTypeConfig,
   getCreatePayloadFromData,
   getUpdatePayloadFromData,
+  getToolTypeDefaultValues,
 } from './form/registry/tools_form_registry';
 import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
 import { ToolTestFlyout } from './execute/test_tools';
@@ -107,7 +108,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
-  const { reset, formState, watch, handleSubmit } = form;
+  const { reset, formState, watch, handleSubmit, getValues } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -184,6 +185,23 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       }
     }
   }, [tool, reset]);
+
+  // Switching tool types clears tool-specific fields
+  useEffect(() => {
+    if (!urlToolType) return;
+    if (mode !== ToolFormMode.Create) return;
+    const currentValues = getValues();
+    const newDefaultValues = getToolTypeDefaultValues(urlToolType);
+
+    const mergedValues: ToolFormData = {
+      ...newDefaultValues,
+      toolId: currentValues.toolId,
+      description: currentValues.description,
+      labels: currentValues.labels,
+    };
+
+    reset(mergedValues);
+  }, [urlToolType, initialToolType, mode, getValues, reset]);
 
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
