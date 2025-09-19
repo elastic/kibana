@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.18.7",
+  "version": "8.18.8",
   "branch": "8.18",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -1787,7 +1787,7 @@
     "jsondiffpatch": "0.4.1",
     "license-checker": "^25.0.1",
     "listr2": "^8.2.5",
-    "lmdb": "^3.4.0",
+    "lmdb": "^3.4.2",
     "marge": "^1.0.1",
     "micromatch": "^4.0.8",
     "mini-css-extract-plugin": "2.9.1",
