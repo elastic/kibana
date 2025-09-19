@@ -75,7 +75,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || READ_ONLY_TYPE;
         const { isReadOnly } = request.body;
-
         const options = {
           overwrite: request.query.overwrite ?? false,
           ...(request.body.id ? { id: request.body.id } : {}),
