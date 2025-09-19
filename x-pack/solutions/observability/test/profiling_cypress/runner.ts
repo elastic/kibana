@@ -42,7 +42,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   await axios.post(`${kibanaUrlWithAuth}/api/fleet/setup`, {}, { headers: DEFAULT_HEADERS });
 
   const profilingResources = await axios.get<{ has_setup: boolean; has_data: boolean }>(
-    `${kibanaUrlWithAuth}/internal/profiling/setup/es_resources`,
+    `${kibanaUrlWithAuth}/api/profiling/setup/es_resources`,
     { headers: DEFAULT_HEADERS }
   );
 
