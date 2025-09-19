@@ -47,10 +47,13 @@ export const useConversationStatus = () => {
 };
 
 export const useAgentId = () => {
-  const { conversation, isLoading } = useConversation();
+  const { conversation } = useConversation();
   const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
   const agentId = conversation?.agent_id;
-  if (!agentId && !isLoading && agentIdStorage) {
+  const conversationId = useConversationId();
+  const isNewConversation = !conversationId;
+  // We only use the local storage value when creating a new converation and an agent id isn't already set
+  if (isNewConversation && !agentId && agentIdStorage) {
     return agentIdStorage;
   }
   return agentId;
