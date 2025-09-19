@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
@@ -38,6 +39,7 @@ export interface HistogramProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export function Histogram({
@@ -56,6 +58,7 @@ export function Histogram({
   onBrushEnd,
   withDefaultActions,
   abortController,
+  esqlVariables,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
@@ -98,7 +101,6 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
-
   return (
     <>
       <div
@@ -119,6 +121,7 @@ export function Histogram({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           withDefaultActions={withDefaultActions}
+          esqlVariables={esqlVariables}
         />
       </div>
       {timeRangeDisplay}

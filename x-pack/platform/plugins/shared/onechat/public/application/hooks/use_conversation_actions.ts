@@ -159,6 +159,7 @@ export const useConversationActions = () => {
       if (!current) {
         throw new Error('Conversation not created');
       }
+      // 1. Update individual conversation cache (with rounds)
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(id),
         produce(current, (draft) => {
@@ -166,8 +167,7 @@ export const useConversationActions = () => {
           draft.title = title;
         })
       );
-      removeNewConversationQuery();
-      // Invalidate all conversations to refresh conversation history
+      // 2. Invalidate conversation list to get updated data from server - this updates the conversations view in the sidebar
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
     },
