@@ -15,7 +15,7 @@ describe('Metric Schema', () => {
     type: 'metric' as const,
     dataset: {
       type: 'dataView' as const,
-      name: 'test-data-view',
+      id: 'test-data-view',
     },
   };
 

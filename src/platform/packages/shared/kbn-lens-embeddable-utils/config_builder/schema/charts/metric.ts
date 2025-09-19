@@ -171,6 +171,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
 });
 
 export const metricStateSchemaNoESQL = schema.object({
+  id: schema.maybe(schema.string({ meta: { description: 'The chart identifier.' } })),
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
