@@ -54,7 +54,11 @@ const continueSuppressionMessageComponent = (
   />
 );
 
-const hasAlertsInSuppressionWindow = async (params: { query?: string; ids?: string[] }) => {
+/**
+ * Given a query or a list of ids used to search through alerts, return true if any of the matching alerts
+ * have a suppression window configured in their alert properties
+ */
+export const hasAlertsInSuppressionWindow = async (params: { query?: string; ids?: string[] }) => {
   let query;
   if (params.ids && params.ids.length > 0) {
     query = {
@@ -75,7 +79,7 @@ const hasAlertsInSuppressionWindow = async (params: { query?: string; ids?: stri
   }
 
   const boolFilters = get(query, 'bool.filter', []);
-  query.bool?.filter.push({
+  boolFilters.push({
     exists: {
       field: 'kibana.alert.rule.parameters.alert_suppression.duration.value',
     },
@@ -115,13 +119,13 @@ const AlertCloseConfirmationModal = ({
   const { title, message } =
     currentSettingValue === SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
       ? {
-          title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
-          message: continueSuppressionMessageComponent,
-        }
+        title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
+        message: continueSuppressionMessageComponent,
+      }
       : {
-          title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
-          message: restartSuppressionMessageComponent,
-        };
+        title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
+        message: restartSuppressionMessageComponent,
+      };
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
@@ -147,6 +151,15 @@ const AlertCloseConfirmationModal = ({
   );
 };
 
+/**
+ * This hook returns an async function `promptAlertCloseConfirmation` that determines whether to display a confirmation modal when closing an alert.
+ *
+ * It queries the signals search endpoint to check if the alerts were generated while a suppression window was active in the rule. If so, it shows a modal
+ * explaining whether new signals will be suppressed, based on the advanced setting `securitySolution:suppressionBehaviorOnAlertClosure`.
+ *
+ * If an error occurs during this check, `promptAlertCloseConfirmation` will resolve its promise without blocking alert closure — ensuring the closure process
+ * continues even in failure scenarios.
+ */
 export const useAlertCloseInfoModal = () => {
   const experimentalFeatureEnabled = useIsExperimentalFeatureEnabled(
     'continueSuppressionWindowAdvancedSettingEnabled'
