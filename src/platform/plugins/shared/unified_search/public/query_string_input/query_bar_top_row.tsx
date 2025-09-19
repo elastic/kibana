@@ -286,7 +286,6 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
-    const isBackgroundSearchEnabled = data.search.isBackgroundSearchEnabled;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
