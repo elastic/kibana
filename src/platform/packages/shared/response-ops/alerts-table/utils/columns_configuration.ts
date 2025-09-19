@@ -11,25 +11,25 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import type { AlertsTableConfiguration } from '../schemas/alerts_table_configuration_schema';
 
 interface ApplyColumnsConfigurationParams {
-  columns: EuiDataGridColumn[];
+  defaultColumns: EuiDataGridColumn[];
   configuredColumns?: AlertsTableConfiguration['columns'];
   visibleColumns?: AlertsTableConfiguration['visibleColumns'];
 }
 
 /**
- * Merges the configured columns with the default/initial columns.
+ * Merges the configured columns with the default columns.
  */
 export const applyColumnsConfiguration = ({
-  columns,
+  defaultColumns,
   configuredColumns,
 }: ApplyColumnsConfigurationParams) => {
   if (!configuredColumns?.length) {
     // User didn't customize the columns, return the original ones
-    return columns;
+    return defaultColumns;
   }
   // Enrich the configured columns with the properties from the original columns
   return configuredColumns.map((columnOverrides) => {
-    const column = columns.find((o) => o.id === columnOverrides.id) ?? {};
+    const column = defaultColumns.find((o) => o.id === columnOverrides.id) ?? {};
     return { ...column, ...columnOverrides };
   });
 };

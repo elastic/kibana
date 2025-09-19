@@ -219,21 +219,20 @@ const AlertsTableContent = typedForwardRef(
       notifications,
     });
 
+    const [defaultColumns] = useState(columnsProp ?? defaultAlertsTableColumns);
     const [columns, setColumns] = useControllableState({
       prop: columnsProp,
       onChange: onColumnsChange,
       defaultValue: applyColumnsConfiguration({
-        columns: columnsProp ?? defaultAlertsTableColumns,
+        defaultColumns,
         configuredColumns: configuration?.columns,
       }),
     });
-    const [defaultVisibleColumns] = useState(
-      configuration?.visibleColumns ?? columns.map((c) => c.id)
-    );
+    const [defaultVisibleColumns] = useState(visibleColumnsProp ?? columns.map((c) => c.id));
     const [visibleColumns, setVisibleColumns] = useControllableState({
       prop: visibleColumnsProp,
       onChange: onVisibleColumnsChange,
-      defaultValue: defaultVisibleColumns,
+      defaultValue: configuration?.visibleColumns ?? defaultVisibleColumns,
     });
     const [sort, setSort] = useState<AlertsTableSortCombinations[]>(
       configuration?.sort ?? initialSort
@@ -269,7 +268,7 @@ const AlertsTableContent = typedForwardRef(
       useColumns({
         columns,
         setColumns,
-        defaultColumns: defaultAlertsTableColumns,
+        defaultColumns,
         visibleColumns,
         setVisibleColumns,
         defaultVisibleColumns,
