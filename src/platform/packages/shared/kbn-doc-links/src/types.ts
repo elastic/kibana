@@ -678,7 +678,7 @@ export interface DocLinks {
   readonly datasetQuality: {
     readonly failureStore: string;
   };
-  readonly onechat: {
+  readonly agentBuilder: {
     readonly agentBuilder: string;
     readonly getStarted: string;
     readonly chat: string;

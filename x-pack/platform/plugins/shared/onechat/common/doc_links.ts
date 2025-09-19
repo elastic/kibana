@@ -7,7 +7,7 @@
 
 import type { DocLinks } from '@kbn/doc-links';
 
-class OnechatDocLinks {
+class AgentBuilderDocLinks {
   public agentBuilder: string = '';
   public getStarted: string = '';
   public chat: string = '';
@@ -22,17 +22,17 @@ class OnechatDocLinks {
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
-    this.agentBuilder = newDocLinks.onechat.agentBuilder;
-    this.getStarted = newDocLinks.onechat.getStarted;
-    this.chat = newDocLinks.onechat.chat;
-    this.agentBuilderAgents = newDocLinks.onechat.agentBuilderAgents;
-    this.tools = newDocLinks.onechat.tools;
-    this.programmaticAccess = newDocLinks.onechat.programmaticAccess;
-    this.kibanaApi = newDocLinks.onechat.kibanaApi;
-    this.mcpServer = newDocLinks.onechat.mcpServer;
-    this.a2aServer = newDocLinks.onechat.a2aServer;
-    this.limitationsKnownIssues = newDocLinks.onechat.limitationsKnownIssues;
+    this.agentBuilder = newDocLinks.agentBuilder.agentBuilder;
+    this.getStarted = newDocLinks.agentBuilder.getStarted;
+    this.chat = newDocLinks.agentBuilder.chat;
+    this.agentBuilderAgents = newDocLinks.agentBuilder.agentBuilderAgents;
+    this.tools = newDocLinks.agentBuilder.tools;
+    this.programmaticAccess = newDocLinks.agentBuilder.programmaticAccess;
+    this.kibanaApi = newDocLinks.agentBuilder.kibanaApi;
+    this.mcpServer = newDocLinks.agentBuilder.mcpServer;
+    this.a2aServer = newDocLinks.agentBuilder.a2aServer;
+    this.limitationsKnownIssues = newDocLinks.agentBuilder.limitationsKnownIssues;
   }
 }
 
-export const docLinks = new OnechatDocLinks();
+export const docLinks = new AgentBuilderDocLinks();
