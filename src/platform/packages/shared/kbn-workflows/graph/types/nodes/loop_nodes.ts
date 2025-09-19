@@ -9,8 +9,9 @@
 
 import { z } from '@kbn/zod';
 import { ForEachStepSchema } from '../../../spec/schema';
+import { GraphNodeSchema } from './base';
 
-export const EnterForeachNodeSchema = z.object({
+export const EnterForeachNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-foreach'),
   exitNodeId: z.string(),
@@ -21,7 +22,7 @@ export const EnterForeachNodeSchema = z.object({
 
 export type EnterForeachNode = z.infer<typeof EnterForeachNodeSchema>;
 
-export const ExitForeachNodeSchema = z.object({
+export const ExitForeachNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-foreach'),
   startNodeId: z.string(),
