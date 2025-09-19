@@ -2224,6 +2224,31 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ConversationIdSetEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationIdSetEventData",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ConversationIdSetEventData.conversation_id",
+            "type": "string",
+            "tags": [],
+            "label": "conversation_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ConversationRound",
         "type": "Interface",
         "tags": [],
@@ -3684,6 +3709,14 @@
             "docId": "kibKbnOnechatCommonPluginApi",
             "section": "def-common.ConversationUpdatedEvent",
             "text": "ConversationUpdatedEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ConversationIdSetEvent",
+            "text": "ConversationIdSetEvent"
           }
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
@@ -3743,6 +3776,44 @@
             "docId": "kibKbnOnechatCommonPluginApi",
             "section": "def-common.ConversationCreatedEventData",
             "text": "ConversationCreatedEventData"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ConversationIdSetEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationIdSetEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatEvent",
+            "text": "OnechatEvent"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
+          },
+          ".conversationIdSet, ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ConversationIdSetEventData",
+            "text": "ConversationIdSetEventData"
           },
           ">"
         ],
