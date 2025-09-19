@@ -74,7 +74,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           alignItems="center"
           className={css`
             padding: ${euiTheme.size.l};
-            padding-bottom: ${euiTheme.size.xxxxl};
+            padding-bottom: ${euiTheme.size.xxxl};
             flex-grow: 1;
             min-height: 120px;
           `}

@@ -138,7 +138,7 @@ export function StreamDetailRoutingImpl() {
               <>
                 <EuiResizablePanel
                   initialSize={40}
-                  minSize="150px"
+                  minSize="300px"
                   tabIndex={0}
                   paddingSize="l"
                   color="subdued"
