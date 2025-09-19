@@ -52,6 +52,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       summary: 'Create cloud connector',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '1.0.0',
+          stability: 'experimental',
+        },
       },
     })
     .addVersion(
@@ -93,6 +97,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       summary: 'Get cloud connectors',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '1.0.0',
+          stability: 'experimental',
+        },
       },
     })
     .addVersion(
@@ -134,6 +142,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       summary: 'Get cloud connector',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '1.0.0',
+          stability: 'experimental',
+        },
       },
     })
     .addVersion(
@@ -175,6 +187,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       summary: 'Update cloud connector',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '1.0.0',
+          stability: 'experimental',
+        },
       },
     })
     .addVersion(
@@ -216,6 +232,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       summary: 'Delete cloud connector (supports force deletion)',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '1.0.0',
+          stability: 'experimental',
+        },
       },
     })
     .addVersion(
