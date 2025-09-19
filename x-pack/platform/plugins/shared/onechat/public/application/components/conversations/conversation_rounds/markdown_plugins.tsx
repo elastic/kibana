@@ -71,7 +71,7 @@ export function getVisualizationHandler({
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
-  return (props: any) => {
+  return (props: { toolResultId?: string; chartType?: ChartType }) => {
     const { toolResultId, chartType } = props;
 
     if (!toolResultId) {
@@ -103,7 +103,7 @@ export function getVisualizationHandler({
         dataViews={startDependencies.dataViews}
         esqlQuery={query}
         esqlColumns={columns}
-        preferredChartType={chartType as ChartType | undefined}
+        preferredChartType={chartType}
       />
     );
   };
