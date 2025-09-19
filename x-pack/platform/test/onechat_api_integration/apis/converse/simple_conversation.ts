@@ -66,6 +66,11 @@ export default function ({ getService }: OneChatFtrProviderContext) {
         const conversation = await oneChatApiClient.getConversation(body.conversation_id);
         expect(conversation.title).to.eql(MOCKED_LLM_TITLE);
       });
+
+      it('persists the conversation with the LLM response', async () => {
+        const conversation = await oneChatApiClient.getConversation(body.conversation_id);
+        expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE);
+      });
     });
 
     it('returns 400 when payload is invalid', async () => {
