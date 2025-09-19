@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type {
   ExceptionListItemIdentifiers,
   GetExceptionItemProps,
@@ -59,23 +59,20 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   onPaginationChange,
   onCreateExceptionListItem,
 }) => {
-  const editButtonText = useMemo(() => {
-    return listType === ExceptionListTypeEnum.ENDPOINT
+  const editButtonText =
+    listType === ExceptionListTypeEnum.ENDPOINT
       ? i18n.EXCEPTION_ITEM_CARD_EDIT_ENDPOINT_LABEL
       : i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL;
-  }, [listType]);
 
-  const deleteButtonText = useMemo(() => {
-    return listType === ExceptionListTypeEnum.ENDPOINT
+  const deleteButtonText =
+    listType === ExceptionListTypeEnum.ENDPOINT
       ? i18n.EXCEPTION_ITEM_CARD_DELETE_ENDPOINT_LABEL
       : i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL;
-  }, [listType]);
 
-  const exceptionsTitle = useMemo(() => {
-    return listType === ExceptionListTypeEnum.ENDPOINT
+  const exceptionsTitle =
+    listType === ExceptionListTypeEnum.ENDPOINT
       ? i18n.EXCEPTION_UTILITY_ENDPOINT_TITLE
       : i18n.EXCEPTION_UTILITY_TITLE;
-  }, [listType]);
 
   return (
     <>
