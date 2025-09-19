@@ -175,8 +175,8 @@ const buildEsqlQuery = ({
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 ${
   isEnrichPolicyExists
-    ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type
+    ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type
+| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type
 // Contact actor and target entities data
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actor.entity.id, "\\"",
@@ -184,6 +184,7 @@ ${
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", actorEntityName, "\\"",
       ",\\"type\\":\\"", actorEntityType, "\\"",
+      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
@@ -192,6 +193,7 @@ ${
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", targetEntityName, "\\"",
       ",\\"type\\":\\"", targetEntityType, "\\"",
+      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
     "}",
   "}")`
     : `| EVAL actorDocData = TO_STRING(null)
@@ -227,18 +229,64 @@ ${
         : ''
     }
   "}")
+// Group entity types for proper entity grouping
+| EVAL actorEntityGroup = CASE(
+    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
+    CONCAT(actorEntityType, ":", actorEntitySubType),
+    actorEntityType IS NOT NULL,
+    actorEntityType,
+    actor.entity.id
+  )
+| EVAL targetEntityGroup = CASE(
+    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
+    CONCAT(targetEntityType, ":", targetEntitySubType),
+    targetEntityType IS NOT NULL,
+    targetEntityType,
+    target.entity.id
+  )
+| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actor.entity.id)
+| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, target.entity.id)
+| EVAL actorEntityType = CASE(
+    actorEntityType IS NOT NULL,
+    actorEntityType,
+    NULL
+  )
+| EVAL targetEntityType = CASE(
+    targetEntityType IS NOT NULL,
+    targetEntityType,
+    NULL
+  )
 | STATS badge = COUNT(*),
+  actorEntityType = VALUES(actorEntityType),
+  targetEntityType = VALUES(targetEntityType),
+  actorLabel = VALUES(actorLabel),
+  targetLabel = VALUES(targetLabel),
+  hostIps = MV_DEDUPE(VALUES(host.ip)),
+  hostCountryCodes = MV_DEDUPE(VALUES(host.geo.country_iso_code)),
+  sourceIps = MV_DEDUPE(VALUES(source.ip)),
+  sourceCountryCodes = MV_DEDUPE(VALUES(source.geo.country_iso_code)),
   docs = VALUES(docData),
   actorsDocData = VALUES(actorDocData),
   targetsDocData = VALUES(targetDocData),
-  isAlert = MV_MAX(VALUES(isAlert))
-    BY actorIds = actor.entity.id,
+  isAlert = MV_MAX(VALUES(isAlert)),
+  // Count unique events and alerts based on event.id within each group
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
+  // Collect all individual entity IDs within each group
+  actorIds = VALUES(actor.entity.id),
+  targetIds = VALUES(target.entity.id),
+  // Count unique entities based on entity.id
+  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
+  targetIdsCount = COUNT_DISTINCT(target.entity.id),
+  // Count unique entities (combining both actor and target entity IDs)
+  uniqueEntitiesCount = MV_COUNT(MV_DEDUPE(MV_APPEND(VALUES(actor.entity.id), VALUES(target.entity.id))))
+    BY actorEntityGroup,
       action = event.action,
-      targetIds = target.entity.id,
+      targetEntityGroup,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT isOrigin DESC, action, actorIds`;
+| SORT isOrigin DESC, action, actorEntityGroup`;
 
   return query;
 };

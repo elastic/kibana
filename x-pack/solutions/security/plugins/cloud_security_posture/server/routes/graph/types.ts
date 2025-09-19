@@ -16,6 +16,10 @@ export interface OriginEventId {
 
 export interface GraphEdge {
   badge: number;
+  uniqueEventsCount: number;
+  uniqueAlertsCount: number;
+  actorIdsCount: number;
+  targetIdsCount: number;
   docs: string[] | string;
   actorIds: string[] | string;
   action: string;
@@ -25,4 +29,14 @@ export interface GraphEdge {
   isAlert: boolean;
   actorsDocData?: Array<string | null> | string;
   targetsDocData?: Array<string | null> | string;
+  actorEntityGroup?: string;
+  targetEntityGroup?: string;
+  actorEntityType?: string | null;
+  targetEntityType?: string | null;
+  actorLabel: string;
+  targetLabel: string;
+  hostIps: string[] | string;
+  hostCountryCodes: string[] | string;
+  sourceIps: string[] | string;
+  sourceCountryCodes: string[] | string;
 }

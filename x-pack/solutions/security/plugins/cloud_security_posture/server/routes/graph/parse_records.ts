@@ -99,17 +99,38 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     const {
       docs,
       actorIds,
+      actorIdsCount,
       action,
       targetIds,
+      targetIdsCount,
       isOrigin,
       isOriginAlert,
       actorsDocData,
       targetsDocData,
       isAlert,
+      badge,
+      uniqueEventsCount,
+      uniqueAlertsCount,
+      actorEntityGroup,
+      targetEntityGroup,
+      actorEntityType,
+      targetEntityType,
+      actorLabel,
+      targetLabel,
+      hostIps,
+      hostCountryCodes,
+      sourceIps,
+      sourceCountryCodes,
     } = record;
 
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
+
+    const hostIpsArray = hostIps ? castArray(hostIps) : [];
+    const hostCountryCodesArray = hostCountryCodes ? castArray(hostCountryCodes) : [];
+
+    const sourceIpsArray = sourceIps ? castArray(sourceIps) : [];
+    const sourceCountryCodesArray = sourceCountryCodes ? castArray(sourceCountryCodes) : [];
 
     const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
       ? castArray(actorsDocData)
@@ -137,42 +158,111 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       }
     });
 
-    // Create entity nodes
-    [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
-      if (nodesMap[id] === undefined) {
-        nodesMap[id] = {
-          id,
-          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: 'primary',
-          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
-        };
-      }
-    });
+    // Create nodes - use entity groups if available, otherwise fall back to individual entities
+    if (actorEntityGroup && targetEntityGroup) {
+      [actorEntityGroup, targetEntityGroup].forEach((entityGroup, index) => {
+        const isActorGroup = index === 0;
+        const groupIds = isActorGroup ? actorIdsArray : targetIdsArraySafe;
+        const groupDocData = isActorGroup ? actorsDocDataArray : targetsDocDataArray;
+        const groupLabel = isActorGroup ? actorLabel : targetLabel;
+        const groupType = isActorGroup ? actorEntityType : targetEntityType;
+        const groupCount = isActorGroup ? actorIdsCount : targetIdsCount;
 
-    // Create label nodes
-    for (const actorId of actorIdsArray) {
-      for (const targetId of targetIdsArraySafe) {
-        const edgeId = `a(${actorId})-b(${targetId})`;
-
-        if (edgeLabelsNodes[edgeId] === undefined) {
-          edgeLabelsNodes[edgeId] = [];
+        if (nodesMap[entityGroup] === undefined) {
+          nodesMap[entityGroup] = {
+            id: entityGroup,
+            label: groupLabel,
+            color: 'primary',
+            ...determineEntityGroupVisualProps(groupType, groupDocData, groupIds),
+            ...(groupCount > 1 ? { count: groupCount } : {}),
+            ...(hostIpsArray.length > 0 ? { ips: hostIpsArray } : {}),
+            ...(hostCountryCodesArray.length > 0 ? { countryCodes: hostCountryCodesArray } : {}),
+          };
         }
+      });
+    } else {
+      // TODO Do we even have this case??
+      // Fall back to original individual entity approach
+      [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
+        if (nodesMap[id] === undefined) {
+          nodesMap[id] = {
+            id,
+            label: unknownTargets.includes(id) ? 'Unknown' : undefined,
+            color: 'primary',
+            ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
+            ...(hostIpsArray.length > 0 ? { ips: hostIpsArray } : {}),
+            ...(hostCountryCodesArray.length > 0 ? { countryCodes: hostCountryCodesArray } : {}),
+          };
+        }
+      });
+    }
 
-        const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
-          label: action,
-          color: isOriginAlert || isAlert ? 'danger' : 'primary',
-          shape: 'label',
-          documentsData: parseDocumentsData(docs),
-        };
+    // Create label nodes - use entity groups if available, otherwise individual IDs
+    if (actorEntityGroup && targetEntityGroup) {
+      // Use entity grouping approach
+      const edgeId = `a(${actorEntityGroup})-b(${targetEntityGroup})`;
 
-        nodesMap[labelNode.id] = labelNode;
-        edgeLabelsNodes[edgeId].push(labelNode.id);
-        labelEdges[labelNode.id] = {
-          source: actorId,
-          target: targetId,
-          edgeType: 'solid',
-        };
+      if (edgeLabelsNodes[edgeId] === undefined) {
+        edgeLabelsNodes[edgeId] = [];
+      }
+
+      const labelNode: LabelNodeDataModel = {
+        id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
+        label: action,
+        color:
+          uniqueAlertsCount >= 1 && uniqueEventsCount === 0 && (isOriginAlert || isAlert)
+            ? 'danger'
+            : 'primary',
+        shape: 'label',
+        documentsData: parseDocumentsData(docs),
+        ips: sourceIpsArray,
+        countryCodes: sourceCountryCodesArray,
+        count: badge,
+        uniqueEventsCount,
+        uniqueAlertsCount,
+      };
+
+      nodesMap[labelNode.id] = labelNode;
+      edgeLabelsNodes[edgeId].push(labelNode.id);
+      labelEdges[labelNode.id] = {
+        source: actorEntityGroup,
+        target: targetEntityGroup,
+        edgeType: 'solid',
+      };
+    } else {
+      // Fall back to original individual entity approach
+      for (const actorId of actorIdsArray) {
+        for (const targetId of targetIdsArraySafe) {
+          const edgeId = `a(${actorId})-b(${targetId})`;
+
+          if (edgeLabelsNodes[edgeId] === undefined) {
+            edgeLabelsNodes[edgeId] = [];
+          }
+
+          const labelNode: LabelNodeDataModel = {
+            id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
+            label: action,
+            color:
+              uniqueAlertsCount >= 1 && uniqueEventsCount === 0 && (isOriginAlert || isAlert)
+                ? 'danger'
+                : 'primary',
+            shape: 'label',
+            documentsData: parseDocumentsData(docs),
+            ips: sourceIpsArray,
+            countryCodes: sourceCountryCodesArray,
+            count: badge,
+            uniqueEventsCount,
+            uniqueAlertsCount,
+          };
+
+          nodesMap[labelNode.id] = labelNode;
+          edgeLabelsNodes[edgeId].push(labelNode.id);
+          labelEdges[labelNode.id] = {
+            source: actorId,
+            target: targetId,
+            edgeType: 'solid',
+          };
+        }
       }
     }
   }
@@ -206,6 +296,51 @@ const determineEntityNodeVisualProps = (
       ...(icon && { icon }),
       ...(shape && { shape }),
     };
+  }
+
+  return mappedProps as NodeVisualProps;
+};
+
+const determineEntityGroupVisualProps = (
+  entityType: string | null | undefined,
+  entitiesData: NodeDocumentDataModel[] = [],
+  entityIds: string[] = []
+): NodeVisualProps => {
+  // For entity groups, we use the first available entity data as representative
+  const representativeEntity = entitiesData.find((entity) => entityIds.includes(entity.id));
+
+  let mappedProps: Partial<NodeVisualProps> = {
+    shape: 'rectangle',
+  };
+
+  // If we have representative entity data, use it for visual properties
+  if (representativeEntity?.entity) {
+    const { icon, shape } = transformEntityTypeToIconAndShape(representativeEntity.entity);
+
+    mappedProps = {
+      ...mappedProps,
+      ...(icon && { icon }),
+      ...(shape && { shape }),
+    };
+
+    if (entityType) {
+      mappedProps.tag = entityType;
+    }
+  } else {
+    // TODO DO we even have this case??
+    // Try to determine visual properties based on entity type
+    const mockEntityData = { type: entityType || '', sub_type: '' };
+    const { icon, shape } = transformEntityTypeToIconAndShape(mockEntityData);
+
+    mappedProps = {
+      ...mappedProps,
+      ...(icon && { icon }),
+      ...(shape && { shape }),
+    };
+
+    if (entityType) {
+      mappedProps.tag = entityType;
+    }
   }
 
   return mappedProps as NodeVisualProps;
