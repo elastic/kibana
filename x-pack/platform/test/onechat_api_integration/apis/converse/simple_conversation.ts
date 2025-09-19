@@ -67,7 +67,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
         expect(conversation.title).to.eql(MOCKED_LLM_TITLE);
       });
 
-      it('persists the conversation with the LLM response', async () => {
+      it('persists the final LLM response in the conversation', async () => {
         const conversation = await oneChatApiClient.getConversation(body.conversation_id);
         expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE);
       });
