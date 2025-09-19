@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -39,8 +40,6 @@ import { AccessControlIndexSelector } from './components/access_control_index_se
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
-import './index_mappings.scss';
-
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
@@ -71,7 +70,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {shouldShowAccessControlSwitch && (
-              <EuiFlexItem grow={false} className="enterpriseSearchMappingsSelector">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  width: 100%;
+                `}
+              >
                 <AccessControlIndexSelector
                   fullWidth
                   onChange={setSelectedIndexType}
@@ -82,6 +86,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
             <EuiFlexItem grow>
               {isAccessControlIndexNotFound ? (
                 <EuiCallOut
+                  announceOnMount
                   size="m"
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex.title',
@@ -110,6 +115,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                     />
                   ) : (
                     <EuiCallOut
+                      announceOnMount
                       color="danger"
                       iconType="warn"
                       title={i18n.translate(

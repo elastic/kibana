@@ -26,6 +26,7 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiTourStep,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   PagingInfo,
@@ -62,6 +63,8 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
+import * as Styles from '../styles';
+
 import type { APICallData } from './api_call_flyout';
 import { APICallFlyout } from './api_call_flyout';
 
@@ -78,7 +81,6 @@ import {
   Sorting,
   SearchBar,
 } from './search_ui_components';
-import '../search_application_layout.scss';
 
 class InternalSearchApplicationTransporter implements Transporter {
   constructor(
@@ -195,6 +197,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 
             <EuiFlexItem>
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchConfigurationPopoverConfigurationButton"
                 color="primary"
                 iconType="arrowDown"
                 iconSide="right"
@@ -349,6 +352,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   );
 };
 export const SearchApplicationDocsExplorer: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { http } = useValues(HttpLogic);
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
@@ -394,7 +398,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
       isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
-        className: 'searchApplicationHeaderBackgroundColor',
+        css: Styles.searchApplicationHeaderBackgroundColor(euiTheme),
         pageTitle: searchApplicationName,
         rightSideItems: [
           <>
@@ -420,6 +424,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
                     additionalInputProps={getInputProps({
                       append: (
                         <EuiButtonEmpty
+                          data-test-subj="enterpriseSearchSearchApplicationDocsExplorerViewApiCallButton"
                           color="primary"
                           iconType="eye"
                           onClick={() => setShowAPICallFlyout(true)}
