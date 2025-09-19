@@ -112,28 +112,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           },
           {
             title: AGENTS_TITLE,
-            renderAs: 'accordion',
-            children: [
-              {
-                link: 'agent_builder:conversations',
-              },
-              {
-                link: 'agent_builder:agents',
-              },
-              {
-                link: 'agent_builder:tools',
-              },
-            ],
+            link: 'agent_builder',
             sideNavVersion: 'v1',
           },
           {
-            children: [
-              { link: 'agent_builder:conversations' },
-              { link: 'agent_builder:tools' },
-              { link: 'agent_builder:agents' },
-            ],
             iconV2: 'comment',
-            id: 'agent_builder',
+            link: 'agent_builder',
             renderAs: 'panelOpener',
             sideNavVersion: 'v2',
             title: AGENTS_TITLE,
