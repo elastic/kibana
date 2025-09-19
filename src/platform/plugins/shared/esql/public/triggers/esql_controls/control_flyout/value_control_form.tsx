@@ -42,6 +42,7 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
+  currentApp?: string;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -62,6 +63,7 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
+  currentApp,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
 
@@ -364,6 +366,9 @@ export function ValueControlForm({
         grow={grow}
         onMinimumSizeChange={onMinimumSizeChange}
         onGrowChange={onGrowChange}
+        // This property is not compatible with the unified search yet
+        // we will hide this possibility for now
+        hideFitToSpace={currentApp === 'discover'}
       />
     </>
   );
