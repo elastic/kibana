@@ -17,15 +17,18 @@ const createMockedTypeRegistry = ({
   isNamespaceAgnostic,
   isSingleNamespace,
   isMultiNamespace,
+  accessControlEnabled = true,
 }: {
   isNamespaceAgnostic: boolean;
   isSingleNamespace: boolean;
   isMultiNamespace: boolean;
+  accessControlEnabled?: boolean;
 }): ISavedObjectTypeRegistry => {
   const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
     isNamespaceAgnostic: jest.fn().mockReturnValue(isNamespaceAgnostic),
     isSingleNamespace: jest.fn().mockReturnValue(isSingleNamespace),
     isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
+    isAccessControlEnabled: jest.fn().mockReturnValue(accessControlEnabled),
   };
   return typeRegistry as ISavedObjectTypeRegistry;
 };
@@ -50,6 +53,14 @@ typeRegistry = typeRegistry = createMockedTypeRegistry({
   isMultiNamespace: true,
 });
 const multiNamespaceSerializer = new SavedObjectsSerializer(typeRegistry);
+
+typeRegistry = typeRegistry = createMockedTypeRegistry({
+  isNamespaceAgnostic: false,
+  isSingleNamespace: false,
+  isMultiNamespace: true,
+  accessControlEnabled: false,
+});
+const accessControlDisabledSerializer = new SavedObjectsSerializer(typeRegistry);
 
 const sampleTemplate = {
   _id: 'foo:bar',
@@ -704,6 +715,20 @@ describe('#rawToSavedObject', () => {
         _id: 'foo:bar',
         _source: {
           type: 'foo',
+        },
+      });
+      expect(actual).not.toHaveProperty('accessControl');
+    });
+
+    test('it strips the accessControl property if the feature is disabled', () => {
+      const actual = accessControlDisabledSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          accessControl: {
+            owner: 'my_user_id',
+            accessMode: 'read_only',
+          },
         },
       });
       expect(actual).not.toHaveProperty('accessControl');
