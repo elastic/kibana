@@ -62,7 +62,9 @@ export class ProductFeaturesService {
     this.productFeaturesRegistry.create('securityAssistant', [
       getAssistantFeature(experimentalFeatures),
     ]);
-    this.productFeaturesRegistry.create('attackDiscovery', [getAttackDiscoveryFeature()]);
+    this.productFeaturesRegistry.create('attackDiscovery', [
+      getAttackDiscoveryFeature(experimentalFeatures),
+    ]);
     this.productFeaturesRegistry.create('timeline', [
       getTimelineFeature({ ...securityFeatureParams, savedObjects: securityTimelineSavedObjects }),
     ]);
