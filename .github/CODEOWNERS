@@ -866,6 +866,7 @@ x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/private/rollup @elastic/kibana-management
 x-pack/platform/packages/private/security/authorization_core @elastic/kibana-security
 x-pack/platform/packages/private/security/authorization_core_common @elastic/kibana-security
+x-pack/platform/packages/private/security/kbn_uiam_dev_cli @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
@@ -987,6 +988,7 @@ x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
+x-pack/platform/plugins/shared/chat_data_registry @elastic/workchat-eng
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
@@ -1063,20 +1065,11 @@ x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_pl
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
-x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/test @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
@@ -1286,6 +1279,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_document_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/metrics_data_source_profile @elastic/obs-ux-infra_services-team
@@ -1489,6 +1483,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/infra @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team # Assigned to this team since it mostly uses infra/APM components
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-ux-infra_services-team
+/src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic @elastic/obs-ux-infra_services-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-ux-infra_services-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework @elastic/obs-ux-infra_services-team
 /src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-ux-infra_services-team
@@ -2102,7 +2097,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
-# security
+/scripts/uiam_dev.js
+
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/spaces @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/security @elastic/kibana-security
@@ -2452,12 +2448,12 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/kibana-cloud-security-posture
 
 ## Security Solution sub teams - Security Entity Store
-x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/entity-store
-x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/entity-store
-x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/entity-store
-x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/entity-store
-x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/entity-store
-x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/entity-store
+x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/core-analysis
+x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/core-analysis
+x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/core-analysis
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/core-analysis
+x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/core-analysis
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/core-analysis
 
 ## Security Solution sub teams - Threat Hunting
 
