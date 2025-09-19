@@ -204,7 +204,7 @@ describe('SharedLists', () => {
     });
   });
 
-  it('renders overflow card button button as disabled if list is "endpoint_list" and user cannot write Endpoint Exceptions', async () => {
+  it('disables the "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
     (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
 
     const wrapper = render(
