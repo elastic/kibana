@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter } from '@kbn/core/server';
 
+import Boom from '@hapi/boom';
+import type { RulesClient } from '../../../../rules_client';
+import type { RegistryRuleType } from '../../../../rule_type_registry';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -46,13 +49,21 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const alertingContext = await context.alerting;
+
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
+          const ruleTypes = alertingContext.listTypes();
 
           const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;
           const { filter, operations, ids } = bulkEditData;
 
           try {
+            await validateInternalRuleTypes({
+              req: bulkEditData,
+              ruleTypes,
+              rulesClient,
+            });
+
             validateRequiredGroupInDefaultActionsInOperations(
               operations ?? [],
               (connectorId: string) => actionsClient.isSystemAction(connectorId)
@@ -110,6 +121,37 @@ const validateRequiredGroupInDefaultActionsInOperations = (
         actions: operation.value,
         isSystemAction,
       });
+    }
+  }
+};
+
+const validateInternalRuleTypes = async ({
+  req,
+  ruleTypes,
+  rulesClient,
+}: {
+  req: BulkEditRulesRequestBodyV1;
+  ruleTypes: Map<string, RegistryRuleType>;
+  rulesClient: RulesClient;
+}) => {
+  const { filter, operations, ids } = req;
+
+  if (operations.every((op) => op.field === 'apiKey')) {
+    return;
+  }
+
+  const ruleTypesByQuery = await rulesClient.getRuleTypesByQuery({ filter, ids });
+  const ruleTypeIds = new Set(ruleTypesByQuery.ruleTypes);
+
+  for (const ruleTypeId of ruleTypeIds) {
+    const ruleType = ruleTypes.get(ruleTypeId);
+
+    if (!ruleType || ruleType.internallyManaged) {
+      throw Boom.badRequest(
+        `Cannot update rule of type "${
+          ruleType?.id ?? 'unknown'
+        }" because it is internally managed.`
+      );
     }
   }
 };
