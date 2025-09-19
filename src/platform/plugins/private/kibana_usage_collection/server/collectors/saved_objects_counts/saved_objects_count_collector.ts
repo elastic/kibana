@@ -21,6 +21,7 @@ interface SavedObjectsCountUsage {
   others: number;
   by_type: SavedObjectsCountUsageByType[];
   non_registered_types: string[];
+  by_access_control_type: SavedObjectsCountUsageByType[];
 }
 
 export function registerSavedObjectsCountUsageCollector(
@@ -43,6 +44,22 @@ export function registerSavedObjectsCountUsageCollector(
           type: 'array',
           items: {
             type: { type: 'keyword', _meta: { description: 'The SavedObjects type' } },
+            count: {
+              type: 'long',
+              _meta: {
+                description:
+                  'How many SavedObjects of that type are stored in the cluster across all Spaces',
+              },
+            },
+          },
+        },
+        by_access_control_type: {
+          type: 'array',
+          items: {
+            type: {
+              type: 'keyword',
+              _meta: { description: 'The SavedObjects types supporting access control' },
+            },
             count: {
               type: 'long',
               _meta: {
@@ -78,15 +95,21 @@ export function registerSavedObjectsCountUsageCollector(
           total,
           per_type: buckets,
           non_expected_types: nonRegisteredTypes,
+          by_access_control_type: accessControlBuckets,
           others,
         } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, {
           namespaces,
           exclusive: false,
         });
+
         return {
           total,
           by_type: buckets.map(({ key: type, doc_count: count }) => ({ type, count })),
           non_registered_types: nonRegisteredTypes,
+          by_access_control_type: accessControlBuckets.map(({ key: type, doc_count: count }) => ({
+            type,
+            count,
+          })),
           others,
         };
       },

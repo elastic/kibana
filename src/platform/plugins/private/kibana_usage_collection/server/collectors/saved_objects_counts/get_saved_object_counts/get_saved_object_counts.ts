@@ -33,6 +33,19 @@ export interface SavedObjectsCounts {
    * Typically, it should be 0, so it will highlight any unexpected documents if it's > 0.
    */
   others: number;
+  /**
+   * Break-down of documents per Saved Object Type supporting access control
+   */
+  by_access_control_type: Array<{ key: string; doc_count: number }>;
+}
+
+type BucketWithAccessControl = estypes.AggregationsStringTermsBucketKeys & {
+  access_control_count: estypes.AggregationsFilterAggregate;
+};
+
+interface TypesAgg {
+  buckets: BucketWithAccessControl[];
+  sum_other_doc_count?: number;
 }
 
 /**
@@ -56,7 +69,12 @@ export async function getSavedObjectsCounts(
 ): Promise<SavedObjectsCounts> {
   const { exclusive = false, namespaces = ['*'] } = options || {};
 
-  const body = await soClient.find<void, { types: estypes.AggregationsStringTermsAggregate }>({
+  const body = await soClient.find<
+    void,
+    {
+      types: TypesAgg;
+    }
+  >({
     type: soTypes,
     perPage: 0,
     namespaces,
@@ -70,12 +88,16 @@ export async function getSavedObjectsCounts(
             ? { size: soTypes.length }
             : { missing: MISSING_TYPE_KEY, size: soTypes.length + 1 }),
         },
+        aggs: {
+          access_control_count: {
+            filter: { exists: { field: 'accessControl' } },
+          },
+        },
       },
     },
   });
 
-  const buckets =
-    (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
+  const buckets = body.aggregations?.types?.buckets || [];
 
   const nonExpectedTypes: string[] = [];
 
@@ -89,11 +111,18 @@ export async function getSavedObjectsCounts(
     return { key: perTypeEntry.key, doc_count: perTypeEntry.doc_count };
   });
 
+  const accessControlPerType =
+    buckets.map((b) => ({
+      key: b.key as string,
+      doc_count: b?.access_control_count?.doc_count ?? 0,
+    })) ?? [];
+
   return {
     total: body.total,
     // @ts-expect-error `FieldValue` types now claim that bucket keys can be `null`
     per_type: perType,
     non_expected_types: nonExpectedTypes,
     others: body.aggregations?.types?.sum_other_doc_count ?? 0,
+    by_access_control_type: accessControlPerType,
   };
 }
