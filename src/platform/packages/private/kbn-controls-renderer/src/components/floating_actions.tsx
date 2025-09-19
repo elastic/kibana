@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import type { FC, ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
+import { v4 } from 'uuid';
 
-import type { HasUniqueId, ViewMode } from '@kbn/presentation-publishing';
-import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
+import type { EmbeddableApiContext, HasUniqueId, ViewMode } from '@kbn/presentation-publishing';
+import type { Action, ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { omit } from 'lodash';
 
 export interface FloatingActionsProps {
   children: ReactElement;
@@ -32,13 +33,24 @@ export interface FloatingActionsProps {
   uiActions: UiActionsStart;
 }
 
-export type FloatingActionItem = AnyApiAction & {
-  MenuItem: React.FC<{ context: unknown }>;
+export type FloatingActionItem = Omit<AnyApiAction, 'MenuItem'> & {
+  MenuItem: ReactElement;
 };
 
-const getFloatingActionItem = (uuid: string, action: Action, context: any): FloatingActionItem => ({
-  ...action,
-  MenuItem: () => (
+const getFloatingActionItem = (
+  uuid: string,
+  action: Action,
+  context: ActionExecutionContext<EmbeddableApiContext>
+): FloatingActionItem => ({
+  ...omit(action, 'MenuItem'),
+  MenuItem: action.MenuItem ? (
+    <>
+      {React.createElement(action.MenuItem, {
+        key: action.id,
+        context,
+      })}
+    </>
+  ) : (
     <EuiToolTip
       key={`control-action-${uuid}-${action.id}`}
       content={action.getDisplayNameTooltip?.(context) ?? action.getDisplayName(context)}
@@ -158,14 +170,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           )}
           css={styles.floatingActions}
         >
-          <>
-            {floatingActions.map((action) =>
-              React.createElement(action.MenuItem, {
-                key: action.id,
-                context: { embeddable: api },
-              })
-            )}
-          </>
+          <>{floatingActions.map((action) => action.MenuItem)}</>
         </div>
       )}
     </div>
